@@ -1,0 +1,178 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+const Sidebar = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [activeLink, setActiveLink] = useState(location.pathname);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const menuElement = menuRef.current;
+    const links = menuElement.querySelectorAll(".left-sidenav a");
+
+    links.forEach(link => {
+      const linkPathname = new URL(link.href).pathname;
+      if (linkPathname === activeLink) {
+        link.classList.add("active");
+        link.parentElement.classList.add("active");
+        if (link.closest("ul")) link.closest("ul").classList.add("in", "mm-show");
+        if (link.closest("ul") && link.closest("ul").parentElement) {
+          link.closest("ul").parentElement.classList.add("mm-active", "active");
+          if (link.closest("ul").parentElement.closest("ul")) {
+            link.closest("ul").parentElement.closest("ul").classList.add("mm-show");
+            if (link.closest("ul").parentElement.closest("ul").parentElement) {
+              link.closest("ul").parentElement.closest("ul").parentElement.classList.add("mm-active");
+            }
+          }
+        }
+      } else {
+        link.classList.remove("active");
+        link.parentElement.classList.remove("active");
+      }
+    });
+  }, [activeLink]);
+
+  const handleLinkClick = (e, linkPathname) => {
+    e.preventDefault();
+    setActiveLink(linkPathname);
+    navigate(linkPathname);
+  };
+
+  return (
+    <div ref={menuRef}>
+      <div className="left-sidenav">
+        {/* LOGO */}
+        <div className="brand">
+          <a href="/dashboard/crm-index.html" className="logo">
+            <span>
+              <img
+                src="/assets/images/logo.png"
+                alt="logo-large"
+                className="logo-lg logo-light"
+              />
+            </span>
+          </a>
+        </div>
+        {/* End Logo */}
+        <div className="menu-content h-100 mm-active" data-simplebar="init">
+          <div className="simplebar-wrapper">
+            <div className="simplebar-height-auto-observer-wrapper">
+              <div className="simplebar-height-auto-observer" />
+            </div>
+            <div className="simplebar-mask">
+              <div className="simplebar-offset" style={{ right: 0, bottom: 0 }}>
+                <div className="simplebar-content-wrapper" style={{ height: "100%", overflow: "hidden scroll" }}>
+                  <div className="simplebar-content" style={{ padding: "0px 0px 70px" }}>
+                    <ul className="metismenu left-sidenav-menu mm-show">
+                      <li className={activeLink === '/dashboard' ? 'active' : ''}>
+                        <a
+                          href="/dashboard"
+                          aria-expanded="false"
+                          className={activeLink === '/dashboard' ? 'active' : ''}
+                          onClick={(e) => handleLinkClick(e, '/dashboard')}
+                        >
+                          <span className="sidebar-icons">
+                            <img src="/assets/images/sidebar-icons/dashboard.png" alt="Dashboard" />
+                          </span>
+                          <span>Dashboard</span>
+                        </a>
+                      </li>
+                      <li className={activeLink === '/customer' ? 'active' : ''}>
+                        <a
+                          href="/customer"
+                          aria-expanded="false"
+                          className={activeLink === '/customer' ? 'active' : ''}
+                          onClick={(e) => handleLinkClick(e, '/customer')}
+                        >
+                          <span className="sidebar-icons">
+                            <img src="/assets/images/sidebar-icons/customers.png" alt="Customer" />
+                          </span>
+                          <span>Customer</span>
+                        </a>
+                      </li>
+                      <li className={activeLink === '/status' ? 'active' : ''}>
+                        <a
+                          href="/status"
+                          aria-expanded="false"
+                          className={activeLink === '/status' ? 'active' : ''}
+                          onClick={(e) => handleLinkClick(e, '/status')}
+                        >
+                          <span className="sidebar-icons">
+                            <img src="/assets/images/sidebar-icons/status.png" alt="Status" />
+                          </span>
+                          <span>Status</span>
+                        </a>
+                      </li>
+                      <li className={activeLink === '/staff.html' ? 'active' : ''}>
+                        <a
+                          href="/staff"
+                          aria-expanded="false"
+                          className={activeLink === '/staff' ? 'active' : ''}
+                          onClick={(e) => handleLinkClick(e, '/staff')}
+                        >
+                          <span className="sidebar-icons">
+                            <img src="/assets/images/sidebar-icons/staff.png" alt="Staff" />
+                          </span>
+                          <span>Staff</span>
+                        </a>
+                      </li>
+                      <li className={activeLink === '/access.html' ? 'active' : ''}>
+                        <a
+                          href="/access.html"
+                          aria-expanded="false"
+                          className={activeLink === '/access.html' ? 'active' : ''}
+                          onClick={(e) => handleLinkClick(e, '/access.html')}
+                        >
+                          <span className="sidebar-icons">
+                            <img src="/assets/images/sidebar-icons/access.png" alt="Access" />
+                          </span>
+                          <span>Access</span>
+                        </a>
+                      </li>
+                      <li className={activeLink === '/reports' ? 'active' : ''}>
+                        <a
+                          href="/reports"
+                          aria-expanded="false"
+                          className={activeLink === '/reports' ? 'active' : ''}
+                          onClick={(e) => handleLinkClick(e, '/reports')}
+                        >
+                          <span className="sidebar-icons">
+                            <img src="/assets/images/sidebar-icons/reports.png" alt="Report" />
+                          </span>
+                          <span>Report</span>
+                        </a>
+                      </li>
+                      <li className={activeLink === '/settings.html' ? 'active' : ''}>
+                        <a
+                          href="/settings.html"
+                          aria-expanded="false"
+                          className={activeLink === '/settings.html' ? 'active' : ''}
+                          onClick={(e) => handleLinkClick(e, '/settings.html')}
+                        >
+                          <span className="sidebar-icons">
+                            <img src="/assets/images/sidebar-icons/setting.png" alt="Setting" />
+                          </span>
+                          <span>Setting</span>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="simplebar-placeholder" style={{ width: "auto", height: 735 }} />
+          </div>
+          <div className="simplebar-track simplebar-horizontal" style={{ visibility: "hidden" }}>
+            <div className="simplebar-scrollbar" style={{ width: 0, display: "none" }} />
+          </div>
+          <div className="simplebar-track simplebar-vertical" style={{ visibility: "visible" }}>
+            <div className="simplebar-scrollbar" style={{ height: 151, transform: "translate3d(0px, 0px, 0px)", display: "block" }} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Sidebar;
