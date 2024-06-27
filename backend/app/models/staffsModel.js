@@ -1,8 +1,6 @@
 const pool = require('../config/database');
 
-
 const createStaff = async (staff) => {
-    console.log("staff ", staff);
     const { role_id, first_name, last_name, email, phone, password, status } = staff;
 
     const query = `
@@ -11,12 +9,40 @@ const createStaff = async (staff) => {
     `;
 
     try {
-        // Execute the query with the actual values
         const [result] = await pool.execute(query, [role_id, first_name, last_name, email, phone, password, status]);
-        // Return the insertId
         return result.insertId;
     } catch (err) {
         console.error('Error inserting data:', err);
+        throw err;
+    }
+};
+
+const deleteStaff = async (staffId) => {
+    const query = `
+    DELETE FROM staffs WHERE id = ?
+    `;
+
+    try {
+        await pool.execute(query, [staffId]);
+    } catch (err) {
+        console.error('Error deleting data:', err);
+        throw err;
+    }
+};
+
+const updateStaff = async (staff) => {
+    const { id, role_id, first_name, last_name, email, phone, password, status } = staff;
+
+    const query = `
+    UPDATE staffs
+    SET role_id = ?, first_name = ?, last_name = ?, email = ?, phone = ?, password = ?, status = ?
+    WHERE id = ?
+    `;
+
+    try {
+        await pool.execute(query, [role_id, first_name, last_name, email, phone, password, status, id]);
+    } catch (err) {
+        console.error('Error updating data:', err);
         throw err;
     }
 };
@@ -28,5 +54,7 @@ const getStaffByEmail = async (email) => {
 
 module.exports = {
     createStaff,
+    deleteStaff,
+    updateStaff,
     getStaffByEmail
 };

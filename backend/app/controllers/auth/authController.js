@@ -1,12 +1,28 @@
 const authService = require('../../services/auth/authService');
 
-const addStaff = async (req, res) => {
- //console.log("addStaff  = ",req.body)
+const handleStaff = async (req, res) => {
+  const { action, ...staff } = req.body;
+
   try {
-    const userId = await authService.addStaff(req.body);
-    res.status(201).json({ userId });
+      let result;
+      switch (action) {
+          case 'add':
+              result = await authService.addStaff(staff);
+              res.status(201).json({ userId: result });
+              break;
+          case 'delete':
+              await authService.removeStaff(staff.id);
+              res.status(200).json({ message: 'Staff deleted successfully' });
+              break;
+          case 'update':
+              await authService.modifyStaff(staff);
+              res.status(200).json({ message: 'Staff updated successfully' });
+              break;
+          default:
+              res.status(400).json({ message: 'Invalid action' });
+      }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+      res.status(500).json({ message: error.message });
   }
 };
 
@@ -23,6 +39,6 @@ const login = async (req, res) => {
 
 
 module.exports = {
-    addStaff,
+    handleStaff,
     login
 };
