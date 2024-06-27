@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-import { SignIn } from '../../ReduxStore/Slice/Auth/authSlice'
+import { SignIn ,LoginAuthToken } from '../../ReduxStore/Slice/Auth/authSlice'
 import { useDispatch } from "react-redux";
 
 
@@ -39,22 +39,24 @@ const Login = () => {
 
     const req = { email: Email, password: password }
 
-
-    
-    
     await dispatch(SignIn(req))
     .unwrap()
     .then(async (response) => {
-     // console.log("response", response.data.staffDetails);
-      //console.log("token", response.data.token);
-        
+      // console.log("response", response.data.staffDetails.id);
+      // console.log("token", response.data.token);
         if(response.status){
           localStorage.setItem("staffDetails", JSON.stringify(response.data.staffDetails));
           localStorage.setItem("token", JSON.stringify(response.data.token));
           localStorage.setItem("role", JSON.stringify(response.data.staffDetails.role));
+             
+          //Update Auth Token
+             const req_auth_token = { id: response.data.staffDetails.id, login_auth_token: response.data.token }
+              await dispatch(LoginAuthToken(req_auth_token)).unwrap() .then(async(response) => {
+             }).catch((error) => {console.log("Error", error);});
+
           navigate('/admin/dashboard');
         }else{
-          setErrorPassword(response.msg)
+          setErrorPassword(response.message)
         }
       //continue....
       })
