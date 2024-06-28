@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const Sidebar = () => {
   const location = useLocation();
@@ -66,95 +67,96 @@ const Sidebar = () => {
                   <div className="simplebar-content" style={{ padding: "0px 0px 70px" }}>
                     <ul className="metismenu left-sidenav-menu mm-show">
                       <li className={activeLink === '/dashboard' ? 'active' : ''}>
-                        <a
-                          href="/dashboard"
+                        <Link
+                         to="/admin/dashboard"
                           aria-expanded="false"
-                          className={activeLink === '/dashboard' ? 'active' : ''}
-                          onClick={(e) => handleLinkClick(e, '/dashboard')}
+                          className={activeLink === '/admin/dashboard' ? 'active' : ''}
+                          onClick={(e) => handleLinkClick(e, '/admin/dashboard')}
                         >
                           <span className="sidebar-icons">
                             <img src="/assets/images/sidebar-icons/dashboard.png" alt="Dashboard" />
                           </span>
                           <span>Dashboard</span>
-                        </a>
+                        </Link>
                       </li>
-                      <li className={activeLink === '/customer' ? 'active' : ''}>
-                        <a
-                          href="/customer"
+                      <li className={activeLink === '/admin/customer' ? 'active' : ''}>
+                      <Link
+                          to="/admin/customer"
                           aria-expanded="false"
-                          className={activeLink === '/customer' ? 'active' : ''}
-                          onClick={(e) => handleLinkClick(e, '/customer')}
+                          className={activeLink === '/admin/customer' ? 'active' : ''}
+                          onClick={(e) => handleLinkClick(e, '/admin/customer')}
                         >
                           <span className="sidebar-icons">
                             <img src="/assets/images/sidebar-icons/customers.png" alt="Customer" />
                           </span>
                           <span>Customer</span>
-                        </a>
+                          </Link>
                       </li>
-                      <li className={activeLink === '/status' ? 'active' : ''}>
-                        <a
-                          href="/status"
+                      <li className={activeLink === '/admin/status' ? 'active' : ''}>
+                        <Link
+                          to="/admin/status"
                           aria-expanded="false"
-                          className={activeLink === '/status' ? 'active' : ''}
-                          onClick={(e) => handleLinkClick(e, '/status')}
+                          className={activeLink === '/admin/status' ? 'active' : ''}
+                          onClick={(e) => handleLinkClick(e, '/admin/status')}
                         >
                           <span className="sidebar-icons">
                             <img src="/assets/images/sidebar-icons/status.png" alt="Status" />
                           </span>
                           <span>Status</span>
-                        </a>
+                          
+                          </Link>
                       </li>
-                      <li className={activeLink === '/staff.html' ? 'active' : ''}>
-                        <a
-                          href="/staff"
+                      <li className={activeLink === '/admin/staff' ? 'active' : ''}>
+                      <Link
+                         to="/admin/staff"
                           aria-expanded="false"
-                          className={activeLink === '/staff' ? 'active' : ''}
-                          onClick={(e) => handleLinkClick(e, '/staff')}
+                          className={activeLink === '/admin/staff' ? 'active' : ''}
+                          onClick={(e) => handleLinkClick(e, '/admin/staff')}
                         >
                           <span className="sidebar-icons">
                             <img src="/assets/images/sidebar-icons/staff.png" alt="Staff" />
                           </span>
                           <span>Staff</span>
-                        </a>
+                          </Link>
                       </li>
-                      <li className={activeLink === '/access.html' ? 'active' : ''}>
-                        <a
-                          href="/access.html"
+                      <li className={activeLink === '/admin/access' ? 'active' : ''}>
+                      <Link
+                          to="/admin/access"
                           aria-expanded="false"
-                          className={activeLink === '/access.html' ? 'active' : ''}
-                          onClick={(e) => handleLinkClick(e, '/access.html')}
+                          className={activeLink === '/admin/access' ? 'active' : ''}
+                          onClick={(e) => handleLinkClick(e, '/admin/access')}
                         >
                           <span className="sidebar-icons">
                             <img src="/assets/images/sidebar-icons/access.png" alt="Access" />
                           </span>
                           <span>Access</span>
-                        </a>
+                        </Link>
                       </li>
-                      <li className={activeLink === '/reports' ? 'active' : ''}>
-                        <a
-                          href="/reports"
+                      <li className={activeLink === '/admin/reports' ? 'active' : ''}>
+                      <Link
+                          to="/admin/reports"
                           aria-expanded="false"
-                          className={activeLink === '/reports' ? 'active' : ''}
-                          onClick={(e) => handleLinkClick(e, '/reports')}
+                          className={activeLink === '/admin/reports' ? 'active' : ''}
+                          onClick={(e) => handleLinkClick(e, '/admin/reports')}
                         >
                           <span className="sidebar-icons">
                             <img src="/assets/images/sidebar-icons/reports.png" alt="Report" />
                           </span>
                           <span>Report</span>
-                        </a>
+                          </Link>
                       </li>
-                      <li className={activeLink === '/settings.html' ? 'active' : ''}>
-                        <a
-                          href="/settings.html"
+                      <li className={activeLink === '/admin/settings' ? 'active' : ''}>
+                      <Link
+                          to="/admin/settings"
                           aria-expanded="false"
-                          className={activeLink === '/settings.html' ? 'active' : ''}
-                          onClick={(e) => handleLinkClick(e, '/settings.html')}
+                          className={activeLink === '/admin/settings' ? 'active' : ''}
+                          onClick={(e) => handleLinkClick(e, '/admin/settings')}
                         >
                           <span className="sidebar-icons">
                             <img src="/assets/images/sidebar-icons/setting.png" alt="Setting" />
                           </span>
                           <span>Setting</span>
-                        </a>
+                        </Link>
                       </li>
                     </ul>
                   </div>
