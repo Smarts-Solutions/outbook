@@ -14,10 +14,16 @@ const removeStaff = async (staffId) => {
   return staffModel.deleteStaff(staffId);
 };
 
+
+
 const modifyStaff = async (staff) => {
-  const { id, role_id, first_name, last_name, email, phone, password, status } = staff;
-  const hashedPassword = await bcrypt.hash(password, 10);
-  return staffModel.updateStaff({ id, role_id, first_name, last_name, email, phone, status, password: hashedPassword });
+  const { id, password, ...otherFields } = staff;
+  const fieldsToUpdate = { ...otherFields };
+  if (password) {
+      fieldsToUpdate.password = await bcrypt.hash(password, 10);
+  }
+  // Pass the fields to be updated to the updateStaff function
+  return staffModel.updateStaff({ id, ...fieldsToUpdate });
 };
 
 
@@ -38,10 +44,16 @@ const login = async (credentials) => {
   };
 
 
+const isLoginAuthTokenCheck = async (staff) => {
+  return staffModel.isLoginAuthTokenCheckmodel(staff);
+};
+
+
 
 module.exports = {
     addStaff,
     removeStaff,
     modifyStaff,
-    login
+    login,
+    isLoginAuthTokenCheck
 };

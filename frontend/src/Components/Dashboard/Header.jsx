@@ -6,11 +6,14 @@ const Header = () => {
     const navigate= useNavigate();
     const [isMenuEnlarged, setIsMenuEnlarged] = useState(false);
 
+
     const toggleMenu = () => {
       setIsMenuEnlarged(prevState => !prevState);
     };
     
     useEffect(() => {
+    
+    
       if (isMenuEnlarged) {
         document.body.classList.add('enlarge-menu');
       } else {
@@ -30,7 +33,6 @@ const Header = () => {
         localStorage.removeItem("role");
         navigate("/login");
     };
-
 
     return (
         <div>
@@ -282,7 +284,7 @@ const Header = () => {
                                 </div>
                                 {/* All*/}{" "}
                                 <a
-                                    href="javascript:void(0);"
+                                    href="#"
                                     className="dropdown-item text-center text-primary"
                                 >
                                     View all <i className="fi-arrow-right" />

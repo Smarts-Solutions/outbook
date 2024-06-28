@@ -1,12 +1,22 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { SIGN_IN_STAFF } from "../../../Services/Auth/authService";
+import { SIGN_IN_STAFF , LOGIN_AUTH_TOKEN } from "../../../Services/Auth/authService";
 
 
 
 export const SignIn = createAsyncThunk("login", async (data) => {
   try {
     const res = await SIGN_IN_STAFF(data);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
+
+
+export const LoginAuthToken = createAsyncThunk("loginAuthToken", async (data) => {
+  try {
+    const res = await LOGIN_AUTH_TOKEN(data);
     return await res;
   } catch (err) {
     return err;
