@@ -30,6 +30,19 @@ export async function LOGIN_AUTH_TOKEN(data) {
     }
 }
 
+// IS LOGIN AUTH TOKEN CHECK
+export async function IS_LOGIN_AUTH_TOKEN_CHECK(data) {
+    try {
+        const res = await axios.post(`${Config.base_url}isLoginAuthTokenCheck`, data, {
+            data: {},
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
  
 
 

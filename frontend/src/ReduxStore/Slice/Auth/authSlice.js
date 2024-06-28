@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { SIGN_IN_STAFF , LOGIN_AUTH_TOKEN } from "../../../Services/Auth/authService";
+import { SIGN_IN_STAFF , LOGIN_AUTH_TOKEN , IS_LOGIN_AUTH_TOKEN_CHECK } from "../../../Services/Auth/authService";
 
 
 
@@ -22,6 +22,18 @@ export const LoginAuthToken = createAsyncThunk("loginAuthToken", async (data) =>
     return err;
   }
 });
+
+export const isLoginAuthCheckToken = createAsyncThunk("isLoginAuthTokenCheck", async (data) => {
+  try {
+    const res = await IS_LOGIN_AUTH_TOKEN_CHECK(data);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
+
+
+
 
 
 

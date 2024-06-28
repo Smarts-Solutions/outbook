@@ -10,13 +10,11 @@ const Main_Route = () => {
     const role = JSON.parse(localStorage.getItem("role"));
     const token = JSON.parse(localStorage.getItem("token"));
 
-    console.log("staffDetails", staffDetails);
-    console.log("role", role);
-    console.log("token", token);
+    // console.log("staffDetails", staffDetails);
+    // console.log("role", role);
+    // console.log("token", token);
 
   useEffect(() => {
-
-     
     // Check if Staff details exist
     if (role==null||token == null||staffDetails==null) {
       navigate("/login");

@@ -1,18 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { isLoginAuthCheckToken } from '../../ReduxStore/Slice/Auth/authSlice'
 
 
 const Header = () => {
     const navigate= useNavigate();
-    const [isMenuEnlarged, setIsMenuEnlarged] = useState(false);
+    const dispatch = useDispatch();
+    const staffDetails = JSON.parse(localStorage.getItem('staffDetails'));
+    const role = JSON.parse(localStorage.getItem("role"));
+    const token = JSON.parse(localStorage.getItem("token"));
 
+    const [isMenuEnlarged, setIsMenuEnlarged] = useState(false);
 
     const toggleMenu = () => {
       setIsMenuEnlarged(prevState => !prevState);
     };
+
+    const isLoginAuthCheck = async (e) => {
+        const req = { id: staffDetails.id, login_auth_token: token }
+        await dispatch(isLoginAuthCheckToken(req))
+            .unwrap()
+            .then(async (response) => {
+                //console.log("response", response);
+                if (response.status==false) {
+                    LogoutUser()
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    };
     
     useEffect(() => {
-    
+      
+        isLoginAuthCheck();
     
       if (isMenuEnlarged) {
         document.body.classList.add('enlarge-menu');
@@ -33,6 +55,8 @@ const Header = () => {
         localStorage.removeItem("role");
         navigate("/login");
     };
+
+
 
     return (
         <div>

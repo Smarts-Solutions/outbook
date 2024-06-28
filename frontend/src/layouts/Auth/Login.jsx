@@ -15,13 +15,8 @@ const Login = () => {
   const [errorEmail, setErrorEmail] = useState('')
   const [errorPassword, setErrorPassword] = useState('')
 
-
-
-
   const handleSubmitLogin = async () => {
 
-
-  
     if (Email == '') {
       setErrorEmail(EMPTY_EMAIL_ERROR)
       return
