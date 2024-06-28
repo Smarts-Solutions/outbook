@@ -29,7 +29,8 @@ const handleStaff = async (req, res) => {
 const login = async (req, res) => {
     try {
       const data = await authService.login(req.body);
-      delete data.staffDetails.password
+      // delete the password property from the data object
+      delete data.password
       return res.send({ status:true, data : data , message: "Login Successfully.."});
     } catch (error) {
       return res.send({ status:false, message: error.message});
@@ -37,16 +38,28 @@ const login = async (req, res) => {
     }
   };
 
-  const loginAuthToken = async (req, res) => {
-
-    console.log("Okkkkk",req.body)
+   const loginAuthToken = async (req, res) => {
     try {
     const { ...staff } = req.body;
       const data = await authService.modifyStaff(staff);
       return res.send({ status:true, message: "Success.."});
     } catch (error) {
       return res.send({ status:false, message: error.message});
-     
+    }
+  };
+
+
+  const isLoginAuthTokenCheck = async (req, res) => {
+    try {
+      const { ...staff } = req.body;
+      const data = await authService.isLoginAuthTokenCheck(staff);
+       if(data != undefined){
+        return res.send({ status:true, message: "success.."});
+       }else{
+        return res.send({ status:false, message: "token not match"});
+       }
+    } catch (error) {
+      return res.send({ status:false, message: error.message});
     }
   };
 
@@ -54,5 +67,6 @@ const login = async (req, res) => {
 module.exports = {
     handleStaff,
     login,
-    loginAuthToken
+    loginAuthToken,
+    isLoginAuthTokenCheck
 };

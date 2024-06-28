@@ -44,10 +44,16 @@ const login = async (credentials) => {
   };
 
 
+const isLoginAuthTokenCheck = async (staff) => {
+  return staffModel.isLoginAuthTokenCheckmodel(staff);
+};
+
+
 
 module.exports = {
     addStaff,
     removeStaff,
     modifyStaff,
-    login
+    login,
+    isLoginAuthTokenCheck
 };

@@ -1,4 +1,4 @@
-const pool = require('../../config/database');
+const pool = require('../../app/config/database');
 
 const createStaff = async (staff) => {
     const { role_id, first_name, last_name, email, phone, password, status } = staff;
@@ -63,8 +63,15 @@ const getStaffByEmail = async (email) => {
 };
 
 const getStaffById = async (id) => {
-    const [rows] = await pool.query('SELECT id , login_auth_token FROM staffs  WHERE staffs.id = ?', [id]);
+    const [rows] = await pool.query('SELECT id , login_auth_token FROM staffs  WHERE  id = ?', [id]);
     return rows[0];
+};
+
+const isLoginAuthTokenCheckmodel = async (staff) => {
+    console.log("staff",staff)
+    const { id, login_auth_token } = staff;
+     const [rows] = await pool.query('SELECT id , login_auth_token FROM staffs WHERE id = ? AND login_auth_token = ?', [id , login_auth_token]);
+     return rows[0];
 };
 
 module.exports = {
@@ -72,5 +79,6 @@ module.exports = {
     deleteStaff,
     updateStaff,
     getStaffByEmail,
-    getStaffById
+    getStaffById,
+    isLoginAuthTokenCheckmodel
 };
