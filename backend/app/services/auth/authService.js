@@ -9,6 +9,9 @@ const addStaff = async (staff) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   return staffModel.createStaff({ role_id, first_name, last_name, email, phone, status, password: hashedPassword });
 };
+const getStaff = async () => {
+  return staffModel.getStaff();
+}
 
 const removeStaff = async (staffId) => {
   return staffModel.deleteStaff(staffId);
@@ -22,6 +25,8 @@ const modifyStaff = async (staff) => {
   if (password) {
       fieldsToUpdate.password = await bcrypt.hash(password, 10);
   }
+
+  console.log(fieldsToUpdate);
   // Pass the fields to be updated to the updateStaff function
   return staffModel.updateStaff({ id, ...fieldsToUpdate });
 };
@@ -40,6 +45,9 @@ const login = async (credentials) => {
     }
   
     const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '1h' });
+    const fieldsToUpdate = { login_auth_token: token };
+    const id = user.id;
+    staffModel.updateStaff({ id, ...fieldsToUpdate });
     return {token:token , staffDetails:user};
   };
 
@@ -52,6 +60,7 @@ const isLoginAuthTokenCheck = async (staff) => {
 
 module.exports = {
     addStaff,
+    getStaff,
     removeStaff,
     modifyStaff,
     login,

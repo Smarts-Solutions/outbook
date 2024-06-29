@@ -1,4 +1,4 @@
-const jobTypeService = require('../../services/systemTypes/jobTypeService');
+const jobTypeTaskService = require('../../services/jobTypeTask/jobTypeTaskService');
 
 const handleJobType = async (req, res) => {
   const { action, ...JobType } = req.body;
@@ -7,19 +7,19 @@ const handleJobType = async (req, res) => {
       let result;
       switch (action) {
           case 'add':
-              result = await jobTypeService.addJobType(JobType);
+              result = await jobTypeTaskService.addJobType(JobType);
               res.status(201).json({ status:true, userId: result ,message: 'JobType created successfully' });
               break;
           case 'get':
-              result = await jobTypeService.getJobType();
+              result = await jobTypeTaskService.getJobType();
               res.status(200).json({ status:true, data: result });
               break;   
           case 'delete':
-              await jobTypeService.removeJobType(JobType.id);
+              await jobTypeTaskService.removeJobType(JobType.id);
               res.status(200).json({ status:true,message: 'JobType deleted successfully' });
               break;
           case 'update':
-              await jobTypeService.modifyJobType(JobType);
+              await jobTypeTaskService.modifyJobType(JobType);
               res.status(200).json({ status:true, message: 'JobType updated successfully' });
               break;
           default:

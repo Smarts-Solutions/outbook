@@ -10,6 +10,10 @@ const handleStaff = async (req, res) => {
               result = await authService.addStaff(staff);
               res.status(201).json({ status:true, userId: result ,message: 'Staff created successfully' });
               break;
+          case 'get':
+              result = await authService.getStaff();
+              res.status(200).json({ status:true, data: result });
+              break;    
           case 'delete':
               await authService.removeStaff(staff.id);
               res.status(200).json({ status:true,message: 'Staff deleted successfully' });
@@ -25,6 +29,8 @@ const handleStaff = async (req, res) => {
       res.status(500).json({status:false, message: error.message });
   }
 };
+
+
 
 const login = async (req, res) => {
     try {

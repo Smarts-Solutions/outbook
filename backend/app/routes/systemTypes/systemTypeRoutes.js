@@ -1,17 +1,18 @@
 const express = require('express');
-const statusTypeController = require('../../controllers/systemTypes/statusTypeController');
-const jobTypeController = require('../../controllers/systemTypes/jobTypeController');
-const clientIndustryController = require('../../controllers/systemTypes/clientIndustryController');
+const controllers = require('../../controllers/systemTypes');
+
 const { verifyToken } = require('../../middlewares/authMiddleware');
 
 const router = express.Router();
 // Status Type
-router.post('/statusType',verifyToken, statusTypeController.handleStatusType);
-
-// Job Type
-router.post('/jobType',verifyToken, jobTypeController.handleJobType);
+router.post('/statusType',verifyToken, controllers.statusTypeController.handleStatusType);
 
 //Client Industry
-router.post('/clientIndustry',verifyToken, clientIndustryController.handleClientIndustry);
+router.post('/clientIndustry',verifyToken, controllers.clientIndustryController.handleClientIndustry);
 
+// Country 
+router.post('/country',verifyToken, controllers.countryController.handleCountry);
+
+// Customer Contact Person Role
+router.post('/customerContactPersonRole',verifyToken, controllers.customerContactPersonRoleController.handleCustomerContactPersonRole);
 module.exports = router;

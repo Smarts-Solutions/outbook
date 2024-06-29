@@ -1,15 +1,15 @@
 const pool = require('../config/database');
 
-const createJobType = async (JobType) => {
-    const { type} = JobType;
+const createServices = async (Services) => {
+    const {name} = Services;
 
     const query = `
-    INSERT INTO job_types (type)
+    INSERT INTO services (name)
     VALUES (?)
     `;
 
     try {
-        const [result] = await pool.execute(query, [type]);
+        const [result] = await pool.execute(query, [name]);
         return result.insertId;
     } catch (err) {
         console.error('Error inserting data:', err);
@@ -17,9 +17,9 @@ const createJobType = async (JobType) => {
     }
 };
 
-const getJobType = async () => { 
+const getServices = async () => { 
     const query = `
-    SELECT * FROM job_types WHERE status = "1"
+    SELECT * FROM services WHERE status = "1"
     `;
 
     try {
@@ -31,13 +31,13 @@ const getJobType = async () => {
     }
 }
 
-const deleteJobType = async (JobTypeId) => {
+const deleteServices = async (ServicesId) => {
     const query = `
-    DELETE FROM job_types WHERE id = ?
+    DELETE FROM services WHERE id = ?
     `;
 
     try {
-        await pool.execute(query, [JobTypeId]);
+        await pool.execute(query, [ServicesId]);
     } catch (err) {
         console.error('Error deleting data:', err);
         throw err;
@@ -45,8 +45,8 @@ const deleteJobType = async (JobTypeId) => {
 };
 
 
-const updateJobType = async (JobType) => {
-    const { id, ...fields } = JobType;
+const updateServices = async (Services) => {
+    const { id, ...fields } = Services;
     // Create an array to hold the set clauses
     const setClauses = [];
     const values = [];
@@ -59,7 +59,7 @@ const updateJobType = async (JobType) => {
     values.push(id);
     // Construct the final SQL query
     const query = `
-    UPDATE job_types
+    UPDATE services
     SET ${setClauses.join(', ')}
     WHERE id = ?
     `;
@@ -73,9 +73,9 @@ const updateJobType = async (JobType) => {
 
 
 module.exports = {
-    createJobType,
-    deleteJobType,
-    updateJobType,
-    getJobType
+    createServices,
+    deleteServices,
+    updateServices,
+    getServices
   
 };
