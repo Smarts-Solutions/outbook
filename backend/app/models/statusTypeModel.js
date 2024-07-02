@@ -1,13 +1,12 @@
 const pool = require('../config/database');
 
 const createStatusType = async (StatusType) => {
-    const { type} = StatusType;
+    const {type} = StatusType;
 
     const query = `
     INSERT INTO status_types (type)
     VALUES (?)
     `;
-
     try {
         const [result] = await pool.execute(query, [type]);
         return result.insertId;
@@ -19,7 +18,7 @@ const createStatusType = async (StatusType) => {
 
 const getStatusType = async () => { 
     const query = `
-    SELECT * FROM status_types WHERE status = "1"
+    SELECT * FROM status_types WHERE type = "1"
     `;
 
     try {

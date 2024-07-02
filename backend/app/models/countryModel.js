@@ -7,7 +7,6 @@ const createCountry = async (Country) => {
     INSERT INTO countries (name,code,currency)
     VALUES (?,?,?)
     `;
-
     try {
         const [result] = await pool.execute(query, [name,code,currency]);
         return result.insertId;

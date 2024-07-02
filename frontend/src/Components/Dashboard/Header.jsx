@@ -18,6 +18,7 @@ const Header = () => {
     };
 
     const isLoginAuthCheck = async (e) => {
+       
         const req = { id: staffDetails.id, login_auth_token: token }
         await dispatch(isLoginAuthCheckToken(req))
             .unwrap()
@@ -33,9 +34,7 @@ const Header = () => {
     };
     
     useEffect(() => {
-      
         isLoginAuthCheck();
-    
       if (isMenuEnlarged) {
         document.body.classList.add('enlarge-menu');
       } else {
