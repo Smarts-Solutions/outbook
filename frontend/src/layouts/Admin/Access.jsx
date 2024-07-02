@@ -1,5 +1,6 @@
 import React from 'react'
 import Datatable from '../../Components/ExtraComponents/Datatable';
+
 const Access = () => {
     const data = [
         { TradingName: 'Processor', },
@@ -93,410 +94,378 @@ const Access = () => {
                                                 <div className="row">
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Customer
                                                         </h4>
                                                         <div className="row">
-                                                            <div className="col-md-7">
-                                                                <div className="row">
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                                defaultChecked=""
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can Insert
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                                defaultChecked=""
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can Update
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can Delete
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                                defaultChecked=""
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can view
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    {/* <div class="mb-3">
-                                                                              <div
-                                                                                  class="form-check form-check-outline form-check-dark">
-                                                                                  <input class="form-check-input"
-                                                                                      type="checkbox"
-                                                                                      id="formCheck1" checked="">
-                                                                                  <label
-                                                                                      class="form-check-label new_checkbox"
-                                                                                      for="formCheck1">
-                                                                                      Can Update Business Setup
 
-                                                                                  </label>
-                                                                              </div>
-                                                                          </div> */}
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                        defaultChecked=""
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can Insert
+                                                                    </label>
                                                                 </div>
                                                             </div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                        defaultChecked=""
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can Update
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can Delete
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                        defaultChecked=""
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can view
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+
+
                                                         </div>
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Status
                                                         </h4>
                                                         <div className="row">
-                                                            <div className="col-md-7">
-                                                                <div className="row">
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                                defaultChecked=""
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can Insert
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                                defaultChecked=""
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can Update
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can Delete
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                                defaultChecked=""
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can view
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
+
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                        defaultChecked=""
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can Insert
+                                                                    </label>
                                                                 </div>
                                                             </div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                        defaultChecked=""
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can Update
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can Delete
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                        defaultChecked=""
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can view
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <hr />
                                                 <div className="row">
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Staff
                                                         </h4>
                                                         <div className="row">
-                                                            <div className="col-md-7">
-                                                                <div className="row">
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                                defaultChecked=""
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can Insert
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                                defaultChecked=""
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can Update
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can Delete
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                                defaultChecked=""
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can view
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
+
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                        defaultChecked=""
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can Insert
+                                                                    </label>
                                                                 </div>
                                                             </div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                        defaultChecked=""
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can Update
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can Delete
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                        defaultChecked=""
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can view
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+
                                                         </div>
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Client
                                                         </h4>
                                                         <div className="row">
-                                                            <div className="col-md-7">
-                                                                <div className="row">
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can Insert
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can Update
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can Delete
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can view
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    {/* <div class="mb-3">
-                                                                              <div
-                                                                                  class="form-check form-check-outline form-check-dark">
-                                                                                  <input class="form-check-input"
-                                                                                      type="checkbox"
-                                                                                      id="formCheck1" checked="">
-                                                                                  <label
-                                                                                      class="form-check-label new_checkbox"
-                                                                                      for="formCheck1">
-                                                                                      Can Update Business Setup
 
-                                                                                  </label>
-                                                                              </div>
-                                                                          </div> */}
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can Insert
+                                                                    </label>
                                                                 </div>
                                                             </div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can Update
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can Delete
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can view
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+
                                                         </div>
                                                     </div>
+                                                </div>
+                                                <hr />
+                                                <div className="row">
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Job
                                                         </h4>
                                                         <div className="row">
-                                                            <div className="col-md-7">
-                                                                <div className="row">
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can Insert
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can Update
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can Delete
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can view
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    {/* <div class="mb-3">
+
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can Insert
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can Update
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can Delete
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can view
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            {/* <div class="mb-3">
                                                                               <div
                                                                                   class="form-check form-check-outline form-check-dark">
                                                                                   <input class="form-check-input"
@@ -510,89 +479,88 @@ const Access = () => {
                                                                                   </label>
                                                                               </div>
                                                                           </div> */}
-                                                                </div>
-                                                            </div>
                                                         </div>
+
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Setting
                                                         </h4>
                                                         <div className="row">
-                                                            <div className="col-md-7">
-                                                                <div className="row">
-                                                                    <div className="mb-3"></div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can Insert
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can Update
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can Delete
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="mb-3">
-                                                                        <div className="form-check form-check-outline form-check-dark">
-                                                                            <input
-                                                                                className="form-check-input"
-                                                                                type="checkbox"
-                                                                                id="formCheck1"
-                                                                            />
-                                                                            <label
-                                                                                className="form-check-label new_checkbox"
-                                                                                htmlFor="formCheck1"
-                                                                            >
-                                                                                Can view
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
+
+                                                            <div className="mb-3"></div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can Insert
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can Update
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can Delete
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div className="mb-3">
+                                                                <div className="form-check form-check-outline form-check-dark">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="formCheck1"
+                                                                    />
+                                                                    <label
+                                                                        className="form-check-label new_checkbox"
+                                                                        htmlFor="formCheck1"
+                                                                    >
+                                                                        Can view
+                                                                    </label>
                                                                 </div>
                                                             </div>
                                                         </div>
+
                                                     </div>
                                                 </div>
+
                                             </div>
                                         </div>
                                     </div>
+
                                     <div className="accordion-item mt-2">
                                         <h2 className="accordion-header" id="headingTwo">
                                             <button
@@ -617,7 +585,7 @@ const Access = () => {
                                                 <div className="row">
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Customer
@@ -708,7 +676,7 @@ const Access = () => {
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Status
@@ -781,10 +749,11 @@ const Access = () => {
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <hr />
                                                 <div className="row">
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Staff
@@ -858,7 +827,7 @@ const Access = () => {
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Client
@@ -947,9 +916,12 @@ const Access = () => {
                                                             </div>
                                                         </div>
                                                     </div>
+                                                </div>
+                                                <hr />
+                                                <div className="row">
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Job
@@ -1040,7 +1012,7 @@ const Access = () => {
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Setting
@@ -1120,6 +1092,7 @@ const Access = () => {
                                             </div>
                                         </div>
                                     </div>
+
                                     <div className="accordion-item mt-2">
                                         <h2 className="accordion-header" id="headingThree">
                                             <button
@@ -1143,7 +1116,7 @@ const Access = () => {
                                                 <div className="row">
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Customer
@@ -1231,7 +1204,7 @@ const Access = () => {
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Status
@@ -1310,7 +1283,7 @@ const Access = () => {
                                                 <div className="row">
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Staff
@@ -1387,7 +1360,7 @@ const Access = () => {
                                                     </div>{" "}
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Client
@@ -1478,7 +1451,7 @@ const Access = () => {
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Job
@@ -1569,7 +1542,7 @@ const Access = () => {
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Setting
@@ -1646,6 +1619,7 @@ const Access = () => {
                                             </div>
                                         </div>
                                     </div>
+
                                     <div className="accordion-item mt-2">
                                         <h2 className="accordion-header" id="headingFive">
                                             <button
@@ -1670,7 +1644,7 @@ const Access = () => {
                                                 <div className="row">
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Customer
@@ -1761,7 +1735,7 @@ const Access = () => {
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Status
@@ -1840,7 +1814,7 @@ const Access = () => {
                                                 <div className="row">
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Staff
@@ -1917,7 +1891,7 @@ const Access = () => {
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Client
@@ -2008,7 +1982,7 @@ const Access = () => {
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Job
@@ -2096,7 +2070,7 @@ const Access = () => {
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Setting
@@ -2176,6 +2150,7 @@ const Access = () => {
                                             </div>
                                         </div>
                                     </div>
+
                                     <div className="accordion-item mt-2">
                                         <h2 className="accordion-header" id="headingFour">
                                             <button
@@ -2199,7 +2174,7 @@ const Access = () => {
                                                 <div className="row">
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Customer
@@ -2290,7 +2265,7 @@ const Access = () => {
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Status
@@ -2369,7 +2344,7 @@ const Access = () => {
                                                 <div className="row">
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Staff
@@ -2446,7 +2421,7 @@ const Access = () => {
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Client
@@ -2534,7 +2509,7 @@ const Access = () => {
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Job
@@ -2625,7 +2600,7 @@ const Access = () => {
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Setting
@@ -2705,6 +2680,7 @@ const Access = () => {
                                             </div>
                                         </div>
                                     </div>
+
                                     <div className="accordion-item mt-2">
                                         <h2 className="accordion-header" id="headingFive">
                                             <button
@@ -2728,7 +2704,7 @@ const Access = () => {
                                                 <div className="row">
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Customer
@@ -2820,7 +2796,7 @@ const Access = () => {
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Status
@@ -2900,7 +2876,7 @@ const Access = () => {
                                                 <div className="row">
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Staff
@@ -2974,7 +2950,7 @@ const Access = () => {
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Client
@@ -3066,7 +3042,7 @@ const Access = () => {
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Job
@@ -3158,7 +3134,7 @@ const Access = () => {
                                                     </div>
                                                     <div className="col-md-6">
                                                         <h4
-                                                            className="card-title mb-0 flex-grow-1"
+                                                            className="card-title mb-3 flex-grow-1"
                                                             style={{ marginBottom: "20px !important" }}
                                                         >
                                                             Setting

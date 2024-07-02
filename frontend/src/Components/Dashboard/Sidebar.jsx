@@ -145,12 +145,12 @@ const Sidebar = () => {
                           <span>Report</span>
                           </Link>
                       </li>
-                      <li className={activeLink === '/admin/settings' ? 'active' : ''}>
+                      <li className={activeLink === '/admin/setting' ? 'active' : ''}>
                       <Link
-                          to="/admin/settings"
+                          to="/admin/setting"
                           aria-expanded="false"
-                          className={activeLink === '/admin/settings' ? 'active' : ''}
-                          onClick={(e) => handleLinkClick(e, '/admin/settings')}
+                          className={activeLink === '/admin/setting' ? 'active' : ''}
+                          onClick={(e) => handleLinkClick(e, '/admin/setting')}
                         >
                           <span className="sidebar-icons">
                             <img src="/assets/images/sidebar-icons/setting.png" alt="Setting" />
