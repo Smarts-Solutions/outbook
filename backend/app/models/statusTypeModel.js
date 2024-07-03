@@ -18,7 +18,7 @@ const createStatusType = async (StatusType) => {
 
 const getStatusType = async () => { 
     const query = `
-    SELECT * FROM status_types WHERE type = "1"
+    SELECT * FROM status_types WHERE status = "1"
     `;
 
     try {

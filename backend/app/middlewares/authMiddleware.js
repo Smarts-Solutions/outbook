@@ -21,8 +21,9 @@ const verifyToken = (req, res, next) => {
         }
 
         try {
-            const user = await staffModel.getStaffById(decoded.userId);
-            // console.log("user ",user)
+         
+            const user = await staffModel.isLoginAuthTokenCheckmodel({id:decoded.userId , login_auth_token: token});
+            console.log("user ",user)
             if (!user || user.login_auth_token !== token) {
                 return res.status(401).json({
                     status:false,
@@ -33,7 +34,7 @@ const verifyToken = (req, res, next) => {
             next();
         } catch (error) {
             return res.status(500).json({
-                message: "Internal server error"
+                message: "Internal server error dddd"
             });
         }
     });

@@ -25,7 +25,8 @@ const Setting = () => {
 
 
     const roleData = async (req) => {
-        console.log("req final", req);
+        console.log("req", req.action);
+
         await dispatch(Role({ req: req, authToken: token }))
             .unwrap()
             .then(async (response) => {
@@ -86,8 +87,9 @@ const Setting = () => {
     };
 
     useEffect(() => {
+        ;
         fetchApiData(tabStatus.current);
-    }, [tabStatus.current]);
+    }, []);
 
     const handleTabChange = (newStatus) => {
         tabStatus.current = newStatus;
@@ -120,8 +122,8 @@ const Setting = () => {
             name: 'Actions',
             cell: row => (
                 <div>
-                    <button className='edit-icon' onClick={() => handleEdit(row ,1)}> <i className="ti-pencil" /></button>
-                    <button className='delete-icon' onClick={() => handleDelete(row,1)}> <i className="ti-trash" /></button>
+                    <button className='edit-icon' onClick={() => handleEdit(row)}> <i className="ti-pencil" /></button>
+                    <button className='delete-icon' onClick={() => handleDelete(row)}> <i className="ti-trash" /></button>
                 </div>
             ),
             ignoreRowClick: true,
@@ -136,9 +138,9 @@ const Setting = () => {
             name: 'Actions',
             cell: row => (
                 <div >
-                    <button className='edit-icon' onClick={() => handleEdit(row ,2)}> <i className="ti-pencil" /></button>
-                    <button className='delete-icon' onClick={() => handleDelete(row ,2)}> <i className="ti-trash" /></button>
-                    <button className='edit-icon' onClick={() => handleDelete(row ,2)}><i className="ti-plus" /></button>
+                    <button className='edit-icon' onClick={() => handleEdit(row)}> <i className="ti-pencil" /></button>
+                    <button className='delete-icon' onClick={() => handleDelete(row)}> <i className="ti-trash" /></button>
+                    <button className='edit-icon' onClick={() => handleDelete(row)}><i className="ti-plus" /></button>
                 </div>
             ),
             ignoreRowClick: true,
@@ -153,9 +155,9 @@ const Setting = () => {
             name: 'Actions',
             cell: row => (
                 <div >
-                    <button className='edit-icon' onClick={() => handleEdit(row,3)}> <i className="ti-pencil" /></button>
-                    <button className='delete-icon' onClick={() => handleDelete(row,3)}> <i className="ti-trash" /></button>
-                    <button className='edit-icon' onClick={() => handleDelete(row,3)}><i className="ti-plus" /></button>
+                    <button className='edit-icon' onClick={() => handleEdit(row)}> <i className="ti-pencil" /></button>
+                    <button className='delete-icon' onClick={() => handleDelete(row)}> <i className="ti-trash" /></button>
+                    <button className='edit-icon' onClick={() => handleDelete(row)}><i className="ti-plus" /></button>
                 </div>
             ),
             ignoreRowClick: true,
@@ -227,64 +229,27 @@ const Setting = () => {
     //     console.log('Deleting row:', row);
     // }
 
-    const handleModalChange = (e) => {
-        setModalData({ ...modalData, value: e.target.value });
-    };
-
-    const handleAdd = (e, tabStatus) => {
-        if (tabStatus === 1) {
-            setModalData({ ...modalData, type: "text", name: "role_name", label: "Role Name", placeholder: "Role Name", title: "Staff Role", tabStatus: tabStatus });
-        }
-        else if (tabStatus === 2) {
-            setModalData({ ...modalData, type: "text", name: "type", label: "Status", placeholder: "Status", title: "Status Type", tabStatus: tabStatus });
-        }
-        else if (tabStatus === 3) {
-            setModalData({ ...modalData, type: "text", name: "name", label: "Service Name", placeholder: "Service Name", title: "Service", tabStatus: tabStatus });
-        }
-        // setModalData({});
+    const handleAdd = (e,tabStatus) => {
+        setModalData({});
         setIsEdit(false);
         setIsModalOpen(true);
     };
 
-    const handleEdit = (data , tabStatus) => {
-        //console.log("data", data);
-        if (tabStatus === 1) {
-            setModalData({ ...modalData, type: "text", name: "role_name", label: "Role Name", placeholder: "Role Name", title: "Staff Role", tabStatus: tabStatus, value: data.role_name, id: data.id ,status: data.status});
-        }
-        else if (tabStatus === 2) {
-            setModalData({ ...modalData, type: "text", name: "type", label: "Status", placeholder: "Status", title: "Status Type", tabStatus: tabStatus, value: data.type, id: data.id ,status: data.status});
-        }
-        else if (tabStatus === 3) {
-            setModalData({ ...modalData, type: "text", name: "name", label: "Service Name", placeholder: "Service Name", title: "Service", tabStatus: tabStatus, value: data.name, id: data.id ,status: data.status});
-        }
-        
-        //setModalData(data);
+    const handleEdit = (data) => {
+        setModalData(data);
         setIsEdit(true);
         setIsModalOpen(true);
     };
 
-
-
     const handleSave = (e) => {
-        if (modalData.value == "" || modalData.value == undefined) {
-            alert("Please enter " + modalData.title);
-            return;
-        }
-        console.log("e ", modalData.value);
         e.preventDefault();
+        const formData = new FormData(e.target);
+        const req = { action: isEdit ? 'edit' : 'add' };
+        formData.forEach((value, key) => {
+            req[key] = value;
+        });
 
-        const req = { action: isEdit ? 'update' : 'add' };
-        // isEdit ? (
-        //     req.id = modalData.id,
-        //     req[modalData.name] = modalData.value,
-        //     req[modalData.status] = modalData.status
-        //   ) : (
-        //     req[modalData.name] = modalData.value
-        //   );
-         console.log("req", req);
-        
-         return;
-        switch (modalData.tabStatus) {
+        switch (tabStatus.current) {
             case 1:
                 roleData(req);
                 break;
@@ -298,8 +263,6 @@ const Setting = () => {
                 break;
         }
         setIsModalOpen(false);
-
-
     };
 
     const handleDelete = (data) => {
@@ -398,7 +361,7 @@ const Setting = () => {
                                     <h3 className='mt-0'>Staff Role</h3>
                                 </div>
                                 <div>
-                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, 1)}> <i className="fa fa-plus" /> Add Staff Role</button>
+                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e)=>handleAdd(e,1)}> <i className="fa fa-plus" /> Add Staff Role</button>
                                 </div>
                             </div>
                             <div className='datatable-wrapper'>
@@ -425,7 +388,7 @@ const Setting = () => {
                                     <h3 className='mt-0'>Status Type</h3>
                                 </div>
                                 <div>
-                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, 2)}> <i className="fa fa-plus" /> Add Status</button>
+                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e)=>handleAdd(e,2)}> <i className="fa fa-plus" /> Add Status</button>
                                 </div>
                             </div>
                             <div className='datatable-wrapper'>
@@ -452,7 +415,7 @@ const Setting = () => {
                                     <h3 className='mt-0'>Services</h3>
                                 </div>
                                 <div>
-                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, 3)}> <i className="fa fa-plus" /> Add Service</button>
+                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e)=>handleAdd(e,3)}> <i className="fa fa-plus" /> Add Service</button>
                                 </div>
                             </div>
                             <div className='datatable-wrapper'>
@@ -478,16 +441,124 @@ const Setting = () => {
                 {isModalOpen && (
                     <CommonModal
                         modalId="exampleModal3"
-                        title={isEdit ? 'Edit ' + modalData.title : 'Add ' + modalData.title}
+                        title={isEdit ? 'Edit Service' : 'Add Service'}
                         fields={[
-                            { type: modalData.type, name: modalData.name, label: modalData.label, placeholder: modalData.placeholder, value: modalData.value }
+                            { type: 'text', name: 'name', label: 'Service Name', placeholder: 'Service Name', value: modalData.name }
                         ]}
                         onClose={() => setIsModalOpen(false)}
                         onSave={handleSave}
-                        onChange={handleModalChange}
+                    //   onChange={handleModalChange}
                     />
                 )}
             </>
+            {/* {/ Add staff Modal end /} */}
+
+            {/* {/ status Modal start /} */}
+            <>
+
+
+                {/* {/ Modal1 /} */}
+                <div
+                    className="modal fade"
+                    id="exampleModal2"
+                    tabIndex={-1}
+                    aria-labelledby="exampleModalLabel"
+                    aria-hidden="true"
+                >
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="exampleModalLabel">
+                                    Add Status
+                                </h5>
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close"
+                                />
+                            </div>
+                            <div className="modal-body"><div className="data-table-extensions-filter">
+                                <label htmlFor="filterDataTable" className="icon mb-2" >Status</label>
+                                <input
+                                    type="text"
+                                    name="type"
+                                    className="filter-text form-control"
+                                    placeholder="Enter Status"
+                                    onChange={(e) => OnchangeSelectvalue(e, 2)}
+                                />
+                            </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    data-bs-dismiss="modal"
+                                >
+                                    Cancel
+                                </button>
+                                <button type="button" className="btn btn-info text-white" style={{ borderRadius: "4px" }} onClick={(e) => handleAdd(e, 2)}>
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </>
+            {/* {/ status Modal end /} */}
+            {/* {/ status Modal end /} */}
+
+            {/* {/ Services Modal start /} */}
+            <>
+                <div
+                    className="modal fade"
+                    id="exampleModal3"
+                    tabIndex={-1}
+                    aria-labelledby="exampleModalLabel"
+                    aria-hidden="true"
+                >
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="exampleModalLabel">
+                                    Add Service
+                                </h5>
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close"
+                                />
+                            </div>
+                            <div className="modal-body"><div className="data-table-extensions-filter">
+                                <label htmlFor="filterDataTable" className="icon mb-2" >Service Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    className="filter-text form-control"
+                                    placeholder="Service Name"
+                                    onChange={(e) => OnchangeSelectvalue(e, 3)}
+                                />
+                            </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    data-bs-dismiss="modal"
+                                >
+                                    Cancel
+                                </button>
+                                <button type="button" className="btn btn-info text-white" style={{ borderRadius: "4px" }} onClick={(e) => handleAdd(e, 3)}>
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </>
+
+
         </div>
 
 

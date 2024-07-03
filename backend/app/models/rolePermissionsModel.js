@@ -19,7 +19,7 @@ const createRole = async (Role) => {
 
 const getRole = async () => {
     const query = `
-    SELECT * FROM roles status = "1"
+    SELECT * FROM roles WHERE status = "1"
     `;
 
     try {
@@ -40,6 +40,19 @@ const deleteRole = async (roleId) => {
         await pool.execute(query, [roleId]);
     } catch (err) {
         console.error('Error deleting data:', err);
+        throw err;
+    }
+};
+
+const getRoleById = async (roleId) => {
+    const query = `
+    SELECT * FROM roles WHERE id = ?
+    `;
+    try {
+        const [result] = await pool.execute(query, [roleId]);
+        return result[0];
+    } catch (err) {
+        console.error('Error selecting data:', err);
         throw err;
     }
 };
@@ -70,6 +83,7 @@ const updateRole = async (Role) => {
 module.exports = {
     createRole,
     deleteRole,
+    getRoleById,
     updateRole,
     getRole
 
