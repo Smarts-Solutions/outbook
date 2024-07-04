@@ -19,7 +19,7 @@ const createClientIndustry = async (ClientIndustry) => {
 
 const getClientIndustry = async () => { 
     const query = `
-    SELECT * FROM client_industry_types WHERE status = "1"
+    SELECT * FROM client_industry_types
     `;
 
     try {

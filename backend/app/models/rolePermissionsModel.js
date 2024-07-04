@@ -19,8 +19,7 @@ const createRole = async (Role) => {
 
 const getRole = async () => {
     const query = `
-    SELECT * FROM roles WHERE status = "1"
-    `;
+    SELECT * FROM roles `;
 
     try {
         const [result] = await pool.execute(query);

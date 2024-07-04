@@ -19,7 +19,7 @@ const createCustomerContactPersonRole = async (CustomerContactPersonRole) => {
 
 const getCustomerContactPersonRole = async () => { 
     const query = `
-    SELECT * FROM customer_contact_person_role WHERE status = "1"
+    SELECT * FROM customer_contact_person_role 
     `;
 
     try {

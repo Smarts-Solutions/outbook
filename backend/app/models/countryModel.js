@@ -18,7 +18,7 @@ const createCountry = async (Country) => {
 
 const getCountry = async () => { 
     const query = `
-    SELECT * FROM countries WHERE status = "1"
+    SELECT * FROM countries
     `;
 
     try {

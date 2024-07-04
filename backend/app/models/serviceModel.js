@@ -19,7 +19,7 @@ const createServices = async (Services) => {
 
 const getServices = async () => { 
     const query = `
-    SELECT * FROM services WHERE status = "1"
+    SELECT * FROM services 
     `;
 
     try {

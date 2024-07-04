@@ -25,8 +25,7 @@ const Setting = () => {
 
 
     const roleData = async (req) => {
-        console.log("req", req.action);
-
+        console.log("req final", req);
         await dispatch(Role({ req: req, authToken: token }))
             .unwrap()
             .then(async (response) => {
@@ -54,11 +53,13 @@ const Setting = () => {
             .unwrap()
             .then(async (response) => {
                 console.log("response", response);
+                if (req.action == "get") {
                 if (response.status) {
                     setStatusTypeDataAll({ loading: false, data: response.data });
                 } else {
                     setStatusTypeDataAll({ loading: false, data: [] });
                 }
+             }
 
 
             })
@@ -73,11 +74,13 @@ const Setting = () => {
             .unwrap()
             .then(async (response) => {
                 console.log("response", response);
+                if (req.action == "get") {
                 if (response.status) {
                     setServiceDataAll({ loading: false, data: response.data });
                 } else {
                     setServiceDataAll({ loading: false, data: [] });
                 }
+            }
 
 
             })
@@ -87,9 +90,8 @@ const Setting = () => {
     };
 
     useEffect(() => {
-        ;
         fetchApiData(tabStatus.current);
-    }, []);
+    }, [tabStatus.current]);
 
     const handleTabChange = (newStatus) => {
         tabStatus.current = newStatus;
@@ -122,8 +124,8 @@ const Setting = () => {
             name: 'Actions',
             cell: row => (
                 <div>
-                    <button className='edit-icon' onClick={() => handleEdit(row)}> <i className="ti-pencil" /></button>
-                    <button className='delete-icon' onClick={() => handleDelete(row)}> <i className="ti-trash" /></button>
+                    <button className='edit-icon' onClick={() => handleEdit(row ,1)}> <i className="ti-pencil" /></button>
+                    <button className='delete-icon' onClick={() => handleDelete(row,1)}> <i className="ti-trash" /></button>
                 </div>
             ),
             ignoreRowClick: true,
@@ -138,9 +140,9 @@ const Setting = () => {
             name: 'Actions',
             cell: row => (
                 <div >
-                    <button className='edit-icon' onClick={() => handleEdit(row)}> <i className="ti-pencil" /></button>
-                    <button className='delete-icon' onClick={() => handleDelete(row)}> <i className="ti-trash" /></button>
-                    <button className='edit-icon' onClick={() => handleDelete(row)}><i className="ti-plus" /></button>
+                    <button className='edit-icon' onClick={() => handleEdit(row ,2)}> <i className="ti-pencil" /></button>
+                    <button className='delete-icon' onClick={() => handleDelete(row ,2)}> <i className="ti-trash" /></button>
+                    <button className='edit-icon' ><i className="ti-plus" /></button>
                 </div>
             ),
             ignoreRowClick: true,
@@ -155,9 +157,9 @@ const Setting = () => {
             name: 'Actions',
             cell: row => (
                 <div >
-                    <button className='edit-icon' onClick={() => handleEdit(row)}> <i className="ti-pencil" /></button>
-                    <button className='delete-icon' onClick={() => handleDelete(row)}> <i className="ti-trash" /></button>
-                    <button className='edit-icon' onClick={() => handleDelete(row)}><i className="ti-plus" /></button>
+                    <button className='edit-icon' onClick={() => handleEdit(row,3)}> <i className="ti-pencil" /></button>
+                    <button className='delete-icon' onClick={() => handleDelete(row,3)}> <i className="ti-trash" /></button>
+                    <button className='edit-icon' ><i className="ti-plus" /></button>
                 </div>
             ),
             ignoreRowClick: true,
@@ -166,90 +168,170 @@ const Setting = () => {
         },
     ];
 
-    function OnchangeSelectvalue(e, tabStatus) {
+   
+
+    const handleModalChange = (e) => {
+        // setModalData({ ...modalData, value: e.target.value });
+        const { name, value } = e.target;
+    setModalData(prevModalData => ({
+        ...prevModalData,
+        fields: prevModalData.fields.map(field =>
+            field.name === name ? { ...field, value: value } : field
+        )
+    }));
+    };
+
+    const handleAdd = (e, tabStatus) => {
         if (tabStatus === 1) {
-            if (e.target.name === "role_name") {
-                setAddRoleName(e.target.value);
-            }
+            setModalData({
+                ...modalData,
+                fields: [
+                    { type: "text", name: "role_name", label: "Role Name", placeholder: "Role Name" }
+                ],
+                title: "Staff Role",
+                tabStatus: tabStatus,
+            });
         }
         else if (tabStatus === 2) {
-            if (e.target.name === "type") {
-                setAddStatusType(e.target.value);
-            }
+            setModalData({
+                ...modalData,
+                fields: [
+                    {type: "text", name: "type", label: "Status", placeholder: "Status Type" }
+                ],
+                title: "Status Type",
+                tabStatus: tabStatus,
+            });
         }
         else if (tabStatus === 3) {
-            if (e.target.name === "name") {
-                setAddService(e.target.value);
-            }
+            setModalData({
+                ...modalData,
+                fields: [
+                    {type: "text", name: "name", label: "Service Name", placeholder: "Service Name" }
+                ],
+                title: "Service",
+                tabStatus: tabStatus,
+            });
         }
-    }
-
-    // function handleAdd(e, tabStatus) {
-    //     if (tabStatus === 1) {
-    //         if (addRoleName === "") {
-    //             alert("Please enter Role Name");
-    //             return;
-    //         }
-    //         const req = {
-    //             "action": "add",
-    //             "role_name": addRoleName
-    //         }
-    //         roleData(req);
-    //     }
-    //     else if (tabStatus === 2) {
-    //         if (addStatusType === "") {
-    //             alert("Please enter Status");
-    //             return;
-    //         }
-    //         const req = {
-    //             "action": "add",
-    //             "type": addStatusType
-    //         }
-    //         statusTypeData(req);
-
-    //     }
-    //     else if (tabStatus === 3) {
-    //         if (addService === "") {
-    //             alert("Please enter Service Name");
-    //             return;
-    //         }
-    //         const req = {
-    //             "action": "add",
-    //             "name": addService
-    //         }
-    //         serviceData(req);
-    //     }
-    // }
-
-    // function handleEdit(row) {
-    //     console.log('Editing row:', row);
-    // }
-
-    // function handleDelete(row) {
-    //     console.log('Deleting row:', row);
-    // }
-
-    const handleAdd = (e,tabStatus) => {
-        setModalData({});
+        // setModalData({});
         setIsEdit(false);
         setIsModalOpen(true);
     };
 
-    const handleEdit = (data) => {
-        setModalData(data);
+    const handleEdit = (data , tabStatus) => {
+        //console.log("data", data);
+        if (tabStatus === 1) {
+            setModalData({
+                ...modalData,
+                fields: [
+                    { 
+                        type: "text", 
+                        name: "role_name", 
+                        label: "Role Name", 
+                        placeholder: "Role Name", 
+                        value: data.role_name 
+                    },
+                    { 
+                        type: "select", 
+                        name: "status", 
+                        label: "Status", 
+                        placeholder: "Select Status", 
+                        value: data.status === "1" ? "1" : "0",
+                        options: [
+                            { label: "Active", value: "1" },
+                            { label: "Deactive", value: "0" }
+                        ]
+                    }
+                ],
+                title: "Staff Role",
+                tabStatus: tabStatus,
+                id: data.id
+            });
+            
+        }
+        else if (tabStatus === 2) {
+            setModalData({
+                ...modalData,
+                fields: [
+                    { 
+                        type: "text", 
+                        name: "type", 
+                        label: "Status", 
+                        placeholder: "Status Type", 
+                        value: data.type 
+                    },
+                    { 
+                        type: "select", 
+                        name: "status", 
+                        label: "Status", 
+                        placeholder: "Select Status", 
+                        value: data.status === "1" ? "1" : "0",
+                        options: [
+                            { label: "Active", value: "1" },
+                            { label: "Deactive", value: "0" }
+                        ]
+                    }
+                ],
+                title: "Status Type",
+                tabStatus: tabStatus,
+                id: data.id
+            });
+        }
+        else if (tabStatus === 3) {
+            setModalData({
+                ...modalData,
+                fields: [
+                    { 
+                        type: "text", 
+                        name: "name", 
+                        label: "Service Name", 
+                        placeholder: "Service Name", 
+                        value: data.name 
+                    },
+                    { 
+                        type: "select", 
+                        name: "status", 
+                        label: "Status", 
+                        placeholder: "Select Status", 
+                        value: data.status === "1" ? "1" : "0",
+                        options: [
+                            { label: "Active", value: "1" },
+                            { label: "Deactive", value: "0" }
+                        ]
+                    }
+                ],
+                title: "Service",
+                tabStatus: tabStatus,
+                id: data.id
+            });
+        }
+        
+        //setModalData(data);
         setIsEdit(true);
         setIsModalOpen(true);
     };
 
+
+
     const handleSave = (e) => {
         e.preventDefault();
-        const formData = new FormData(e.target);
-        const req = { action: isEdit ? 'edit' : 'add' };
-        formData.forEach((value, key) => {
-            req[key] = value;
+        if (modalData.fields[0].value == "" || modalData.fields[0].value == undefined) {
+            alert("Please enter " + modalData.fields[0].label);
+            return;
+         }
+        const req = { action: isEdit ? 'update' : 'add' };
+        if (isEdit) {
+            req.id = modalData.id;
+        }
+        modalData.fields.map((field) => {
+            req[field.name] = field.value;
+            if (field.name == "status") {
+                req.status = field.value;
+            }
         });
-
-        switch (tabStatus.current) {
+         
+        // console.log("req", req);
+        // console.log("modalData.status", modalData.tabStatus);
+        switch (modalData.tabStatus) {
             case 1:
                 roleData(req);
                 break;
@@ -262,12 +344,43 @@ const Setting = () => {
             default:
                 break;
         }
+        setModalData({});
         setIsModalOpen(false);
+
+
     };
 
-    const handleDelete = (data) => {
-        // Implement delete functionality here
+    const handleDelete = (data, tabStatus) => {
+        console.log("data", data);
+        console.log("tabStatus", tabStatus);
+    
+        // Confirm deletion with the user
+        if (window.confirm("Are you sure you want to delete this item?")) {
+            const req = {
+                action: 'delete',
+                id: data.id // Assuming 'data' contains the ID of the item to delete
+            };
+    
+            // Execute deletion based on tabStatus
+            switch (tabStatus) {
+                case 1:
+                    roleData(req);
+                    break;
+                case 2:
+                    statusTypeData(req); 
+                    break;
+                case 3:
+                    serviceData(req); 
+                    break;
+                default:
+                    console.log("Invalid tabStatus"); 
+                    break;
+            }
+        } else {
+            console.log("Deletion cancelled"); 
+        }
     };
+    
 
 
 
@@ -361,7 +474,7 @@ const Setting = () => {
                                     <h3 className='mt-0'>Staff Role</h3>
                                 </div>
                                 <div>
-                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e)=>handleAdd(e,1)}> <i className="fa fa-plus" /> Add Staff Role</button>
+                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, 1)}> <i className="fa fa-plus" /> Add Staff Role</button>
                                 </div>
                             </div>
                             <div className='datatable-wrapper'>
@@ -388,7 +501,7 @@ const Setting = () => {
                                     <h3 className='mt-0'>Status Type</h3>
                                 </div>
                                 <div>
-                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e)=>handleAdd(e,2)}> <i className="fa fa-plus" /> Add Status</button>
+                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, 2)}> <i className="fa fa-plus" /> Add Status</button>
                                 </div>
                             </div>
                             <div className='datatable-wrapper'>
@@ -415,7 +528,7 @@ const Setting = () => {
                                     <h3 className='mt-0'>Services</h3>
                                 </div>
                                 <div>
-                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e)=>handleAdd(e,3)}> <i className="fa fa-plus" /> Add Service</button>
+                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, 3)}> <i className="fa fa-plus" /> Add Service</button>
                                 </div>
                             </div>
                             <div className='datatable-wrapper'>
@@ -441,124 +554,21 @@ const Setting = () => {
                 {isModalOpen && (
                     <CommonModal
                         modalId="exampleModal3"
-                        title={isEdit ? 'Edit Service' : 'Add Service'}
-                        fields={[
-                            { type: 'text', name: 'name', label: 'Service Name', placeholder: 'Service Name', value: modalData.name }
-                        ]}
-                        onClose={() => setIsModalOpen(false)}
+                        title={isEdit ? 'Edit ' + modalData.title : 'Add ' + modalData.title}
+                        // fields={[
+                        //     { type: modalData.type, name: modalData.name, label: modalData.label, placeholder: modalData.placeholder, value: modalData.value }
+                        // ]}
+                        fields={modalData.fields}
+                        onClose={() => {
+                            setIsModalOpen(false);
+                            setModalData({});
+                        }}
                         onSave={handleSave}
-                    //   onChange={handleModalChange}
+                        onChange={handleModalChange}
+                        buttonName={isEdit ? 'Update' : 'Save'}
                     />
                 )}
             </>
-            {/* {/ Add staff Modal end /} */}
-
-            {/* {/ status Modal start /} */}
-            <>
-
-
-                {/* {/ Modal1 /} */}
-                <div
-                    className="modal fade"
-                    id="exampleModal2"
-                    tabIndex={-1}
-                    aria-labelledby="exampleModalLabel"
-                    aria-hidden="true"
-                >
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title" id="exampleModalLabel">
-                                    Add Status
-                                </h5>
-                                <button
-                                    type="button"
-                                    className="btn-close"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close"
-                                />
-                            </div>
-                            <div className="modal-body"><div className="data-table-extensions-filter">
-                                <label htmlFor="filterDataTable" className="icon mb-2" >Status</label>
-                                <input
-                                    type="text"
-                                    name="type"
-                                    className="filter-text form-control"
-                                    placeholder="Enter Status"
-                                    onChange={(e) => OnchangeSelectvalue(e, 2)}
-                                />
-                            </div>
-                            </div>
-                            <div className="modal-footer">
-                                <button
-                                    type="button"
-                                    className="btn btn-secondary"
-                                    data-bs-dismiss="modal"
-                                >
-                                    Cancel
-                                </button>
-                                <button type="button" className="btn btn-info text-white" style={{ borderRadius: "4px" }} onClick={(e) => handleAdd(e, 2)}>
-                                    Save
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </>
-            {/* {/ status Modal end /} */}
-            {/* {/ status Modal end /} */}
-
-            {/* {/ Services Modal start /} */}
-            <>
-                <div
-                    className="modal fade"
-                    id="exampleModal3"
-                    tabIndex={-1}
-                    aria-labelledby="exampleModalLabel"
-                    aria-hidden="true"
-                >
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title" id="exampleModalLabel">
-                                    Add Service
-                                </h5>
-                                <button
-                                    type="button"
-                                    className="btn-close"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close"
-                                />
-                            </div>
-                            <div className="modal-body"><div className="data-table-extensions-filter">
-                                <label htmlFor="filterDataTable" className="icon mb-2" >Service Name</label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    className="filter-text form-control"
-                                    placeholder="Service Name"
-                                    onChange={(e) => OnchangeSelectvalue(e, 3)}
-                                />
-                            </div>
-                            </div>
-                            <div className="modal-footer">
-                                <button
-                                    type="button"
-                                    className="btn btn-secondary"
-                                    data-bs-dismiss="modal"
-                                >
-                                    Cancel
-                                </button>
-                                <button type="button" className="btn btn-info text-white" style={{ borderRadius: "4px" }} onClick={(e) => handleAdd(e, 3)}>
-                                    Save
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </>
-
-
         </div>
 
 

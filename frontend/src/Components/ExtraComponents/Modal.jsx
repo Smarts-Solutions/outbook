@@ -1,6 +1,9 @@
 import React from 'react';
 
-const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange }) => {
+const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange ,buttonName }) => {
+
+  const columnClass = fields.length === 1 ? 'col-12' : 'col-md-6';
+
   return (
     <div
       className={`modal ${modalId}`}
@@ -17,20 +20,37 @@ const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange }) => {
               onClick={onClose}
             />
           </div>
-          <div className="modal-body">
-            {fields && fields.map((field, index) => (
-              <div className="data-table-extensions-filter" key={index}>
+          <div className="modal-body row">
+          {fields.map((field, index) => (
+              <div className={`data-table-extensions-filter ${columnClass}`} key={index}>
                 <label htmlFor={field.name} className="icon mb-2">{field.label}</label>
-                <input
-                  type={field.type}
-                  name={field.name}
-                  className="filter-text form-control"
-                  placeholder={field.placeholder}
-                  value={field.value}
-                  onChange={(e) => onChange(e, index)}
-                />
+                {field.type === 'text' ? (
+                  <input
+                    type="text"
+                    name={field.name}
+                    className="filter-text form-control"
+                    placeholder={field.placeholder}
+                    value={field.value}
+                    onChange={(e) => onChange(e, index)}
+                  />
+                ) : field.type === 'select' ? (
+                  <select
+                    name={field.name}
+                    className="filter-select form-control"
+                    value={field.value}
+                    onChange={(e) => onChange(e, index)}
+                  >
+                    {field.options.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : null}
               </div>
             ))}
+       
+           
           </div>
           <div className="modal-footer">
             <button
@@ -46,7 +66,7 @@ const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange }) => {
               style={{ borderRadius: '4px' }}
               onClick={onSave}
             >
-              Save
+              {buttonName}
             </button>
           </div>
         </div>
