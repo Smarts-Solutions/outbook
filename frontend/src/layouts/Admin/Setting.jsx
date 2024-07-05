@@ -135,25 +135,6 @@ const Setting = () => {
                         });
                     }
                 }
-            }else{
-                if(response.status){
-                    sweatalert.fire({
-                        title: response.message,
-                        icon: 'success',
-                        timer: 2000,
-    
-                    });
-                    setTimeout(() => {
-                        serviceData({ action: "get" });
-                    }, 2000); 
-                }else{
-                    sweatalert.fire({
-                        title: response.message,
-                        icon: 'error',
-                        timer: 2000,
-                    });
-                }
-             }
 
 
             })
