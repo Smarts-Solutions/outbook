@@ -8225,3 +8225,8 @@ text-align: left;
 .accordion-header .accordion-button:focus {
   box-shadow: none !important;
 }
+
+.rdt_TableCell{
+
+    white-space: nowrap !important;
+}
