@@ -369,7 +369,13 @@ const Setting = () => {
     const handleSave = (e) => {
         e.preventDefault();
         if (modalData.fields[0].value == "" || modalData.fields[0].value == undefined) {
-            alert("Please enter " + modalData.fields[0].label);
+
+            sweatalert.fire({
+                title: "Please enter " + modalData.fields[0].label,
+                icon: 'warning',
+                timer: 2000,
+            });
+           // alert("Please enter " + modalData.fields[0].label);
             return;
         }
         const req = { action: isEdit ? 'update' : 'add' };

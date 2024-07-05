@@ -101,7 +101,7 @@ const StaffPage = () => {
                             <h3 className='mt-0'>Manage Staff</h3>
                         </div>
                         <div>
-                            <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" className='btn btn-info text-white float-end'>
+                            <button type="button" data-bs-target="#exampleModal" className='btn btn-info text-white float-end'>
                                 <i className="fa fa-plus" /> Add Staff
                             </button>
                         </div>

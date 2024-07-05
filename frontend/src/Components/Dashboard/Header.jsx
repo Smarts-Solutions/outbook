@@ -5,6 +5,44 @@ import { isLoginAuthCheckToken } from '../../ReduxStore/Slice/Auth/authSlice'
 
 
 const Header = () => {
+
+    const currentDate = new Date();
+
+// Get the current time in "10:35 AM" format
+const options = {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+};
+const currentTime = currentDate.toLocaleTimeString('en-US', options);
+
+
+// Extract the time part
+const hours = currentDate.getHours();
+const minutes = String(currentDate.getMinutes()).padStart(2, '0');
+const seconds = String(currentDate.getSeconds()).padStart(2, '0');
+
+let greeting;
+if (hours < 12) {
+    greeting = "Good Morning!";
+} else if (hours < 18) {
+    greeting = "Good Afternoon!";
+} else {
+    greeting = "Good Evening!";
+}
+
+
+
+// Array of month names
+const monthNames = [
+  "January", "February", "March", "April", "May", "June", 
+  "July", "August", "September", "October", "November", "December"
+];
+
+const day = String(currentDate.getDate()).padStart(2, '0');
+const month = monthNames[currentDate.getMonth()]; // Get month name
+const year = currentDate.getFullYear();
+const formattedDate = `${day} ${month} ${year}`;
     const navigate= useNavigate();
     const dispatch = useDispatch();
     const staffDetails = JSON.parse(localStorage.getItem('staffDetails'));
@@ -391,8 +429,8 @@ const Header = () => {
                     {/*end topbar-nav*/}
                     <ul className="list-unstyled topbar-nav mb-0">
                         <li>
-                  <p className="mb-0 page-subtitle">11:00 AM</p>
-                  <h2 className='header-page-title mt-1 mb-0'>23 May 2024</h2>
+                  <p className="mb-0 page-subtitle">{currentTime}</p>
+                  <h2 className='header-page-title mt-1 mb-0'>{formattedDate}</h2>
 
                 </li>
                         <li>
