@@ -1,6 +1,49 @@
 import React from 'react'
 
 const Dashboard = () => {
+
+const staffDetails = JSON.parse(localStorage.getItem('staffDetails'));
+
+const currentDate = new Date();
+
+// Get the current time in "10:35 AM" format
+const options = {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+};
+const currentTime = currentDate.toLocaleTimeString('en-US', options);
+
+
+// Extract the time part
+const hours = currentDate.getHours();
+const minutes = String(currentDate.getMinutes()).padStart(2, '0');
+const seconds = String(currentDate.getSeconds()).padStart(2, '0');
+
+let greeting;
+if (hours < 12) {
+    greeting = "Good Morning!";
+} else if (hours < 18) {
+    greeting = "Good Afternoon!";
+} else {
+    greeting = "Good Evening!";
+}
+
+
+
+// Array of month names
+const monthNames = [
+  "January", "February", "March", "April", "May", "June", 
+  "July", "August", "September", "October", "November", "December"
+];
+
+const day = String(currentDate.getDate()).padStart(2, '0');
+const month = monthNames[currentDate.getMonth()]; // Get month name
+const year = currentDate.getFullYear();
+const formattedDate = `${day} ${month} ${year}`;
+
+
+
   return (
     <div>
 
@@ -11,14 +54,14 @@ const Dashboard = () => {
             <div className="page-title-box">
               <div className="row">
                 <div className="col">
-                  <p className="mb-0 page-subtitle">Good Morning!</p>
-                  <h2 className='page-title mt-1'>Ajeet Aggarwal</h2>
+                  <p className="mb-0 page-subtitle">{greeting}</p>
+                  <h2 className='page-title mt-1'>{staffDetails.role_name}</h2>
 
                 </div>
 
                 <div className="col-auto align-self-center">
-                <p className="mb-0 page-subtitle text-end">11:00 AM</p>
-                <h2 className='page-title mt-1'>23 May 2024</h2>
+                <p className="mb-0 page-subtitle text-end">{currentTime}</p>
+                <h2 className='page-title mt-1'>{formattedDate}</h2>
                 </div>
 
               </div>
