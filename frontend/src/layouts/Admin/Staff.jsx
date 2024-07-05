@@ -1,6 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { Staff } from '../../ReduxStore/Slice/Staff/staffSlice';
 import Datatable from '../../Components/ExtraComponents/Datatable';
-const Staff = () => {
+import CommonModal from '../../Components/ExtraComponents/Modal';
+import sweatalert from 'sweetalert2';
+
+
+const StaffPage = () => {
+
+    const token = JSON.parse(localStorage.getItem("token"));
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
+
+    const staffData = async () => {
+        await dispatch(Staff({ req: { "action": "get" }, authToken: token }))
+            .unwrap()
+            .then(async (response) => {
+
+                if (response.status) {
+                    setStaffDataAll({ loading: false, data: response.data });
+                } else {
+                    setStaffDataAll({ loading: false, data: [] });
+                }
+
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    };
+
+
+    useEffect(() => {
+        staffData()
+    }, []);
+
+
     const tabs = [
         { id: 'this-week', label: 'This week' },
         { id: 'last-week', label: 'Last week' },
@@ -11,41 +48,44 @@ const Staff = () => {
         { id: 'this-year', label: 'This year' },
         { id: 'last-year', label: 'Last year' },
         { id: 'custom', label: 'Custom' },
-      ];
-    
-      const thisWeekData = [
-        // { TradingName: 'W120', Code: '012_BlaK_T_1772', CustomerName: 'The Black T', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Admin/Support Tasks', JobType: 'Year End' },
-        // { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-        // { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-        // { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-        // { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-        // { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-        // { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-      ];
-    
-      const thisWeekColumns = [
-        { name: 'Trading Name', selector: row => row.TradingName, sortable: true },
-        { name: 'Customer Code', selector: row => row.Code, sortable: true },
-        { name: 'Customer Name', selector: row => row.CustomerName, sortable: true },
-        { name: 'Company Number', selector: row => row.AccountManager, sortable: true },
-        { name: 'Service Type', selector: row => row.ServiceType, sortable: true },
-        { name: 'Account Manager', selector: row => row.JobType, sortable: true },
+    ];
+
+    const thisWeekData = [
+        { TradingName: 'W120', Code: '012_BlaK_T_1772', CustomerName: 'The Black T', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Admin/Support Tasks', JobType: 'Year End' },
+        { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
+        { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
+        { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
+        { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
+        { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
+        { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
+    ];
+
+    const thisWeekColumns = [
+        { name: 'First Name', selector: row => row.first_name, sortable: true },
+        { name: 'Last Name', selector: row => row.last_name, last_name: true },
+        { name: 'Email Address', selector: row => row.email, sortable: true },
+        { name: 'Phone', selector: row => row.phone, sortable: true },
+        { name: 'Role', selector: row => row.role, sortable: true },
         {
-          name: 'Actions',
-          cell: row => (
-            <div>
-              <button className='edit-icon' onClick={() => handleEdit(row)}> <i className="ti-pencil" /></button>
-              <button className='delete-icon' onClick={() => handleDelete(row)}> <i className="ti-trash" /></button>
-            </div>
-          ),
-          ignoreRowClick: true,
-          allowOverflow: true,
-          button: true,
+            name: 'Status', cell: row => (<div><span className={`badge ${row.status === '1' ? 'bg-success' : 'bg-danger'}`}>{row.status === '1' ? 'Active' : 'Deactive'}</span></div>),
         },
-      ];
-    
-      const tabData = {
-        'this-week': { data: thisWeekData, columns: thisWeekColumns },
+        {
+            name: 'Actions',
+            cell: row => (
+                <div >
+                    <button className='edit-icon' onClick={() => handleEdit(row, 3)}> <i className="ti-pencil" /></button>
+                    <button className='delete-icon' onClick={() => handleDelete(row, 3)}> <i className="ti-trash" /></button>
+                    <button className='edit-icon' ><i className="ti-plus" /></button>
+                </div>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+        },
+    ];
+
+    const tabData = {
+        'this-week': { data: staffDataAll && staffDataAll.data, columns: thisWeekColumns },
         'last-week': { data: [], columns: [] },
         'last-month': { data: [], columns: [] },
         'last-quarter': { data: [], columns: [] },
@@ -54,23 +94,23 @@ const Staff = () => {
         'this-year': { data: [], columns: [] },
         'last-year': { data: [], columns: [] },
         'custom': { data: [], columns: [] },
-      };
-    
-      const TabContent = ({ contentType }) => {
+    };
+
+    const TabContent = ({ contentType }) => {
         const { data, columns } = tabData[contentType];
         return <Datatable columns={columns} data={data} filter={false} />;
-      };
-    
-      const [activeTab, setActiveTab] = useState('this-week');
-    
-      function handleEdit(row) {
+    };
+
+    const [activeTab, setActiveTab] = useState('this-week');
+
+    function handleEdit(row) {
         console.log('Editing row:', row);
-      }
-    
-      function handleDelete(row) {
+    }
+
+    function handleDelete(row) {
         console.log('Deleting row:', row);
-      }
-    
+    }
+
 
     return (
         <div>
@@ -92,25 +132,25 @@ const Staff = () => {
                             <div className="row align-items-start">
                                 <div className="col-md-8">
                                     <>
-                                    <ul className="nav nav-pills rounded-tabs" id="pills-tab" role="tablist">
-                  {tabs.map((tab) => (
-                    <li className="nav-item" role="presentation" key={tab.id}>
-                      <button
-                        className={`nav-link ${activeTab === tab.id ? 'active' : ''}`}
-                        id={`${tab.id}-tab`}
-                        data-bs-toggle="pill"
-                        data-bs-target={`#${tab.id}`}
-                        type="button"
-                        role="tab"
-                        aria-controls={tab.id}
-                        aria-selected={activeTab === tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                      >
-                        {tab.label}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+                                        <ul className="nav nav-pills rounded-tabs" id="pills-tab" role="tablist">
+                                            {tabs.map((tab) => (
+                                                <li className="nav-item" role="presentation" key={tab.id}>
+                                                    <button
+                                                        className={`nav-link ${activeTab === tab.id ? 'active' : ''}`}
+                                                        id={`${tab.id}-tab`}
+                                                        data-bs-toggle="pill"
+                                                        data-bs-target={`#${tab.id}`}
+                                                        type="button"
+                                                        role="tab"
+                                                        aria-controls={tab.id}
+                                                        aria-selected={activeTab === tab.id}
+                                                        onClick={() => setActiveTab(tab.id)}
+                                                    >
+                                                        {tab.label}
+                                                    </button>
+                                                </li>
+                                            ))}
+                                        </ul>
 
                                     </>
 
@@ -124,18 +164,18 @@ const Staff = () => {
 
                     </div>
                     <div className="tab-content" id="pills-tabContent">
-        {tabs.map((tab) => (
-          <div
-            key={tab.id}
-            className={`tab-pane fade ${activeTab === tab.id ? 'show active' : ''}`}
-            id={tab.id}
-            role="tabpanel"
-            aria-labelledby={`${tab.id}-tab`}
-          >
-            <TabContent contentType={tab.id} />
-          </div>
-        ))}
-      </div>
+                        {tabs.map((tab) => (
+                            <div
+                                key={tab.id}
+                                className={`tab-pane fade ${activeTab === tab.id ? 'show active' : ''}`}
+                                id={tab.id}
+                                role="tabpanel"
+                                aria-labelledby={`${tab.id}-tab`}
+                            >
+                                <TabContent contentType={tab.id} />
+                            </div>
+                        ))}
+                    </div>
 
                 </div>
                 {/* <!-- Button trigger modal --> */}
@@ -277,4 +317,4 @@ const Staff = () => {
     )
 }
 
-export default Staff
+export default StaffPage
