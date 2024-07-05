@@ -19,18 +19,7 @@ const Access = () => {
 
 
 
-        // {
-        //     name: 'Actions',
-        //     cell: row => (
-        //         <div>
-        //             <button className='edit-icon' onClick={() => handleEdit(row)}> <i className="ti-pencil" /></button>
-        //             <button className='delete-icon' onClick={() => handleDelete(row)}> <i className="ti-trash" /></button>
-        //         </div>
-        //     ),
-        //     ignoreRowClick: true,
-        //     allowOverflow: true,
-        //     button: true,
-        // },
+ 
     ];
     return (
 

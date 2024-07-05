@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Role, StatusType, Service } from '../../ReduxStore/Slice/Settings/settingSlice'
 import Datatable from '../../Components/ExtraComponents/Datatable';
-import CommonModal from '../../Components/ExtraComponents/Modal';
+import CommonModal from '../../Components/ExtraComponents/Modals/Modal';
 import sweatalert from 'sweetalert2';
 
 
@@ -26,36 +26,35 @@ const Setting = () => {
 
 
     const roleData = async (req) => {
-        console.log("req final", req);
         await dispatch(Role({ req: req, authToken: token }))
             .unwrap()
             .then(async (response) => {
-               // console.log("response", response);
+                // console.log("response", response);
                 if (req.action == "get") {
                     if (response.status) {
                         setRoleDataAll({ loading: false, data: response.data });
                     } else {
                         setRoleDataAll({ loading: false, data: [] });
                     }
-                }else{
-                    if(response.status){
+                } else {
+                    if (response.status) {
                         sweatalert.fire({
                             title: response.message,
                             icon: 'success',
                             timer: 2000,
-    
+
                         });
                         setTimeout(() => {
                             roleData({ action: "get" });
-                        }, 2000); 
-                    }else{
+                        }, 2000);
+                    } else {
                         sweatalert.fire({
                             title: response.message,
                             icon: 'error',
                             timer: 2000,
                         });
                     }
-                   
+
 
                 }
 
@@ -74,30 +73,30 @@ const Setting = () => {
             .then(async (response) => {
                 //console.log("response", response);
                 if (req.action == "get") {
-                if (response.status) {
-                    setStatusTypeDataAll({ loading: false, data: response.data });
+                    if (response.status) {
+                        setStatusTypeDataAll({ loading: false, data: response.data });
+                    } else {
+                        setStatusTypeDataAll({ loading: false, data: [] });
+                    }
                 } else {
-                    setStatusTypeDataAll({ loading: false, data: [] });
+                    if (response.status) {
+                        sweatalert.fire({
+                            title: response.message,
+                            icon: 'success',
+                            timer: 2000,
+
+                        });
+                        setTimeout(() => {
+                            statusTypeData({ action: "get" });
+                        }, 2000);
+                    } else {
+                        sweatalert.fire({
+                            title: response.message,
+                            icon: 'error',
+                            timer: 2000,
+                        });
+                    }
                 }
-              }else{
-                if(response.status){
-                    sweatalert.fire({
-                        title: response.message,
-                        icon: 'success',
-                        timer: 2000,
-    
-                    });
-                    setTimeout(() => {
-                        statusTypeData({ action: "get" });
-                    }, 2000); 
-                }else{
-                    sweatalert.fire({
-                        title: response.message,
-                        icon: 'error',
-                        timer: 2000,
-                    });
-                }
-              }
 
             })
             .catch((error) => {
@@ -111,11 +110,30 @@ const Setting = () => {
             .unwrap()
             .then(async (response) => {
                 //console.log("response", response);
-            if (req.action == "get") {
-                if (response.status) {
-                    setServiceDataAll({ loading: false, data: response.data });
+                if (req.action == "get") {
+                    if (response.status) {
+                        setServiceDataAll({ loading: false, data: response.data });
+                    } else {
+                        setServiceDataAll({ loading: false, data: [] });
+                    }
                 } else {
-                    setServiceDataAll({ loading: false, data: [] });
+                    if (response.status) {
+                        sweatalert.fire({
+                            title: response.message,
+                            icon: 'success',
+                            timer: 2000,
+
+                        });
+                        setTimeout(() => {
+                            serviceData({ action: "get" });
+                        }, 2000);
+                    } else {
+                        sweatalert.fire({
+                            title: response.message,
+                            icon: 'error',
+                            timer: 2000,
+                        });
+                    }
                 }
             }else{
                 if(response.status){
@@ -179,8 +197,8 @@ const Setting = () => {
             name: 'Actions',
             cell: row => (
                 <div>
-                    <button className='edit-icon' onClick={() => handleEdit(row ,1)}> <i className="ti-pencil" /></button>
-                    <button className='delete-icon' onClick={() => handleDelete(row,1)}> <i className="ti-trash" /></button>
+                    <button className='edit-icon' onClick={() => handleEdit(row, 1)}> <i className="ti-pencil" /></button>
+                    <button className='delete-icon' onClick={() => handleDelete(row, 1)}> <i className="ti-trash" /></button>
                 </div>
             ),
             ignoreRowClick: true,
@@ -195,8 +213,8 @@ const Setting = () => {
             name: 'Actions',
             cell: row => (
                 <div >
-                    <button className='edit-icon' onClick={() => handleEdit(row ,2)}> <i className="ti-pencil" /></button>
-                    <button className='delete-icon' onClick={() => handleDelete(row ,2)}> <i className="ti-trash" /></button>
+                    <button className='edit-icon' onClick={() => handleEdit(row, 2)}> <i className="ti-pencil" /></button>
+                    <button className='delete-icon' onClick={() => handleDelete(row, 2)}> <i className="ti-trash" /></button>
                     <button className='edit-icon' ><i className="ti-plus" /></button>
                 </div>
             ),
@@ -212,8 +230,8 @@ const Setting = () => {
             name: 'Actions',
             cell: row => (
                 <div >
-                    <button className='edit-icon' onClick={() => handleEdit(row,3)}> <i className="ti-pencil" /></button>
-                    <button className='delete-icon' onClick={() => handleDelete(row,3)}> <i className="ti-trash" /></button>
+                    <button className='edit-icon' onClick={() => handleEdit(row, 3)}> <i className="ti-pencil" /></button>
+                    <button className='delete-icon' onClick={() => handleDelete(row, 3)}> <i className="ti-trash" /></button>
                     <button className='edit-icon' ><i className="ti-plus" /></button>
                 </div>
             ),
@@ -223,17 +241,17 @@ const Setting = () => {
         },
     ];
 
-   
+
 
     const handleModalChange = (e) => {
         // setModalData({ ...modalData, value: e.target.value });
         const { name, value } = e.target;
-    setModalData(prevModalData => ({
-        ...prevModalData,
-        fields: prevModalData.fields.map(field =>
-            field.name === name ? { ...field, value: value } : field
-        )
-    }));
+        setModalData(prevModalData => ({
+            ...prevModalData,
+            fields: prevModalData.fields.map(field =>
+                field.name === name ? { ...field, value: value } : field
+            )
+        }));
     };
 
     const handleAdd = (e, tabStatus) => {
@@ -251,7 +269,7 @@ const Setting = () => {
             setModalData({
                 ...modalData,
                 fields: [
-                    {type: "text", name: "type", label: "Status", placeholder: "Status Type" }
+                    { type: "text", name: "type", label: "Status", placeholder: "Status Type" }
                 ],
                 title: "Status Type",
                 tabStatus: tabStatus,
@@ -261,7 +279,7 @@ const Setting = () => {
             setModalData({
                 ...modalData,
                 fields: [
-                    {type: "text", name: "name", label: "Service Name", placeholder: "Service Name" }
+                    { type: "text", name: "name", label: "Service Name", placeholder: "Service Name" }
                 ],
                 title: "Service",
                 tabStatus: tabStatus,
@@ -272,24 +290,24 @@ const Setting = () => {
         setIsModalOpen(true);
     };
 
-    const handleEdit = (data , tabStatus) => {
+    const handleEdit = (data, tabStatus) => {
         console.log("data", data);
         if (tabStatus === 1) {
             setModalData({
                 ...modalData,
                 fields: [
-                    { 
-                        type: "text", 
-                        name: "role_name", 
-                        label: "Role Name", 
-                        placeholder: "Role Name", 
-                        value: data.role_name 
+                    {
+                        type: "text",
+                        name: "role_name",
+                        label: "Role Name",
+                        placeholder: "Role Name",
+                        value: data.role_name
                     },
-                    { 
-                        type: "select", 
-                        name: "status", 
-                        label: "Status", 
-                        placeholder: "Select Status", 
+                    {
+                        type: "select",
+                        name: "status",
+                        label: "Status",
+                        placeholder: "Select Status",
                         value: data.status === "1" ? "1" : "0",
                         options: [
                             { label: "Active", value: "1" },
@@ -301,24 +319,24 @@ const Setting = () => {
                 tabStatus: tabStatus,
                 id: data.id
             });
-            
+
         }
         else if (tabStatus === 2) {
             setModalData({
                 ...modalData,
                 fields: [
-                    { 
-                        type: "text", 
-                        name: "type", 
-                        label: "Status", 
-                        placeholder: "Status Type", 
-                        value: data.type 
+                    {
+                        type: "text",
+                        name: "type",
+                        label: "Status",
+                        placeholder: "Status Type",
+                        value: data.type
                     },
-                    { 
-                        type: "select", 
-                        name: "status", 
-                        label: "Status", 
-                        placeholder: "Select Status", 
+                    {
+                        type: "select",
+                        name: "status",
+                        label: "Status",
+                        placeholder: "Select Status",
                         value: data.status === "1" ? "1" : "0",
                         options: [
                             { label: "Active", value: "1" },
@@ -335,18 +353,18 @@ const Setting = () => {
             setModalData({
                 ...modalData,
                 fields: [
-                    { 
-                        type: "text", 
-                        name: "name", 
-                        label: "Service Name", 
-                        placeholder: "Service Name", 
-                        value: data.name 
+                    {
+                        type: "text",
+                        name: "name",
+                        label: "Service Name",
+                        placeholder: "Service Name",
+                        value: data.name
                     },
-                    { 
-                        type: "select", 
-                        name: "status", 
-                        label: "Status", 
-                        placeholder: "Select Status", 
+                    {
+                        type: "select",
+                        name: "status",
+                        label: "Status",
+                        placeholder: "Select Status",
                         value: data.status === "1" ? "1" : "0",
                         options: [
                             { label: "Active", value: "1" },
@@ -359,7 +377,7 @@ const Setting = () => {
                 id: data.id
             });
         }
-        
+
         //setModalData(data);
         setIsEdit(true);
         setIsModalOpen(true);
@@ -372,7 +390,7 @@ const Setting = () => {
         if (modalData.fields[0].value == "" || modalData.fields[0].value == undefined) {
             alert("Please enter " + modalData.fields[0].label);
             return;
-         }
+        }
         const req = { action: isEdit ? 'update' : 'add' };
         if (isEdit) {
             req.id = modalData.id;
@@ -383,7 +401,7 @@ const Setting = () => {
                 req.status = field.value;
             }
         });
-         
+
         // console.log("req", req);
         // console.log("modalData.status", modalData.tabStatus);
         switch (modalData.tabStatus) {
@@ -408,34 +426,76 @@ const Setting = () => {
     const handleDelete = (data, tabStatus) => {
         console.log("data", data);
         console.log("tabStatus", tabStatus);
-        const itemName = tabStatus ==1? data.role_name:tabStatus == 2?data.type: data.name;
+        const itemName = tabStatus == 1 ? data.role_name : tabStatus == 2 ? data.type : data.name;
         // Confirm deletion with the user
-        if (window.confirm(`Are you sure you want to delete " ${itemName} "?`)) {
-            const req = {
-                action: 'delete',
-                id: data.id // Assuming 'data' contains the ID of the item to delete
-            };
-    
-            // Execute deletion based on tabStatus
-            switch (tabStatus) {
-                case 1:
-                    roleData(req);
-                    break;
-                case 2:
-                    statusTypeData(req); 
-                    break;
-                case 3:
-                    serviceData(req); 
-                    break;
-                default:
-                    console.log("Invalid tabStatus"); 
-                    break;
+
+
+        sweatalert.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const req = {
+                    action: 'delete',
+                    id: data.id 
+                };
+
+                switch (tabStatus) {
+                    case 1:
+                        roleData(req);
+                        break;
+                    case 2:
+                        statusTypeData(req);
+                        break;
+                    case 3:
+                        serviceData(req);
+                        break;
+                    default:
+                        console.log("Invalid tabStatus");
+                        break;
+                }
+
+                sweatalert.fire({
+                    title: "Deleted!",
+                    text: "Your file has been deleted.",
+                    icon: "success"
+                });
             }
-        } else {
-            console.log("Deletion cancelled"); 
-        }
+        });
+
+
+
+        // if (window.confirm(`Are you sure you want to delete " ${itemName} "?`)) {
+        //     const req = {
+        //         action: 'delete',
+        //         id: data.id // Assuming 'data' contains the ID of the item to delete
+        //     };
+
+        //     // Execute deletion based on tabStatus
+        //     switch (tabStatus) {
+        //         case 1:
+        //             roleData(req);
+        //             break;
+        //         case 2:
+        //             statusTypeData(req); 
+        //             break;
+        //         case 3:
+        //             serviceData(req); 
+        //             break;
+        //         default:
+        //             console.log("Invalid tabStatus"); 
+        //             break;
+        //     }
+        // } else {
+        //     console.log("Deletion cancelled"); 
+        // }
     };
-    
+
 
 
 

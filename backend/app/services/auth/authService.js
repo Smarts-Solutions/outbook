@@ -44,7 +44,7 @@ const login = async (credentials) => {
       throw new Error('Invalid email or password');
     }
   
-    const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '10h' });
     const fieldsToUpdate = { login_auth_token: token };
     const id = user.id;
     staffModel.updateStaff({ id, ...fieldsToUpdate });
