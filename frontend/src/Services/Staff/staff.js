@@ -18,3 +18,19 @@ export async function STAFF(data, token) {
         return await err;
     }
 }
+
+
+
+// Service Action API Add, Edit, Delete
+export async function SERVICE(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}service`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}

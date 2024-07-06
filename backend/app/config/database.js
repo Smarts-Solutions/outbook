@@ -2,10 +2,10 @@ const mysql = require('mysql2');
 
 const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
 
-console.log('DB_HOST', DB_HOST);  
-console.log('DB_USER', DB_USER);
-console.log('DB_PASSWORD', DB_PASSWORD);
-console.log('DB_NAME', DB_NAME);
+// console.log('DB_HOST', DB_HOST);  
+// console.log('DB_USER', DB_USER);
+// console.log('DB_PASSWORD', DB_PASSWORD);
+// console.log('DB_NAME', DB_NAME);
 const pool = mysql.createPool({
   host: DB_HOST,
   user: DB_USER,
