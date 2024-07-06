@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Role, StatusType, Service } from '../../ReduxStore/Slice/Settings/settingSlice'
 import Datatable from '../../Components/ExtraComponents/Datatable';
-import CommonModal from '../../Components/ExtraComponents/Modals/Modal';
+import Modal from '../../Components/ExtraComponents/Modals/Modal';
 import sweatalert from 'sweetalert2';
 
 
@@ -648,7 +648,7 @@ const Setting = () => {
 
                 {/* {/ Modal1 /} */}
                 {isModalOpen && (
-                    <CommonModal
+                    <Modal
                         modalId="exampleModal3"
                         title={isEdit ? 'Edit ' + modalData.title : 'Add ' + modalData.title}
                         // fields={[

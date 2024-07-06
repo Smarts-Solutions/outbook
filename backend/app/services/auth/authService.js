@@ -26,7 +26,7 @@ const modifyStaff = async (staff) => {
       fieldsToUpdate.password = await bcrypt.hash(password, 10);
   }
 
-  console.log(fieldsToUpdate);
+  // console.log(fieldsToUpdate);
   // Pass the fields to be updated to the updateStaff function
   return staffModel.updateStaff({ id, ...fieldsToUpdate });
 };

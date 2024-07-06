@@ -25,12 +25,11 @@ const Setting = () => {
 
 
     const roleData = async (req) => {
-        console.log("req final", req);
+
         await dispatch(Role({ req: req, authToken: token }))
             .unwrap()
             .then(async (response) => {
-                console.log("response", response);
-
+        
                 if (req.action == "get") {
                     if (response.status) {
                         setRoleDataAll({ loading: false, data: response.data });

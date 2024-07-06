@@ -5,16 +5,17 @@ import { isLoginAuthCheckToken } from '../../ReduxStore/Slice/Auth/authSlice'
 
 
 const Header = () => {
-    const navigate= useNavigate();
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     const staffDetails = JSON.parse(localStorage.getItem('staffDetails'));
     const role = JSON.parse(localStorage.getItem("role"));
     const token = JSON.parse(localStorage.getItem("token"));
 
     const [isMenuEnlarged, setIsMenuEnlarged] = useState(false);
+    const [currentTime, setCurrentTime] = useState(new Date());
 
     const toggleMenu = () => {
-      setIsMenuEnlarged(prevState => !prevState);
+        setIsMenuEnlarged(prevState => !prevState);
     };
 
     const isLoginAuthCheck = async (e) => {
@@ -23,7 +24,7 @@ const Header = () => {
             .unwrap()
             .then(async (response) => {
                 //console.log("response", response);
-                if (response.status==false) {
+                if (response.status == false) {
                     LogoutUser()
                 }
             })
@@ -31,19 +32,19 @@ const Header = () => {
                 console.log("Error", error);
             });
     };
-    
+
     useEffect(() => {
         isLoginAuthCheck();
-      if (isMenuEnlarged) {
-        document.body.classList.add('enlarge-menu');
-      } else {
-        document.body.classList.remove('enlarge-menu');
-      }
-      
-      // Cleanup function to remove the class when the component unmounts
-      return () => {
-        document.body.classList.remove('enlarge-menu');
-      };
+        if (isMenuEnlarged) {
+            document.body.classList.add('enlarge-menu');
+        } else {
+            document.body.classList.remove('enlarge-menu');
+        }
+
+        // Cleanup function to remove the class when the component unmounts
+        return () => {
+            document.body.classList.remove('enlarge-menu');
+        };
     }, [isMenuEnlarged]);
 
 
@@ -56,28 +57,54 @@ const Header = () => {
 
 
 
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000); // Update every second
+
+        return () => clearInterval(intervalId); // Clean up the interval on component unmount
+    }, []);
+
+    const formatTime = (date) => {
+        let hours = date.getHours();
+        let minutes = date.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        return `${hours}:${minutes} ${ampm}`;
+    };
+
+    const formatDate = (date) => {
+        const day = date.getDate();
+        const month = date.toLocaleString('default', { month: 'long' });
+        const year = date.getFullYear();
+        return `${day} ${month} ${year}`;
+    };
+
     return (
         <div>
             <div className="topbar">
                 {/* Navbar */}
-             
+
                 <nav className="navbar-custom">
                     <ul className="list-unstyled topbar-nav float-right mb-0">
                         <li className="dropdown hide-phone">
-                        <div className="app-search-topbar">
-                                    <form action="#" method="get">
-                                        <input
-                                            type="search"
-                                            name="search"
-                                            className="from-control top-search mb-0"
-                                            placeholder="Search anything here..."
-                                        />{" "}
-                                        <button type="submit">
-                                            <i className="ti-search" />
-                                        </button>
-                                    </form>
-                                </div>
-                          
+                            <div className="app-search-topbar">
+                                <form action="#" method="get">
+                                    <input
+                                        type="search"
+                                        name="search"
+                                        className="from-control top-search mb-0"
+                                        placeholder="Search anything here..."
+                                    />{" "}
+                                    <button type="submit">
+                                        <i className="ti-search" />
+                                    </button>
+                                </form>
+                            </div>
+
                         </li>
                         <li className="dropdown notification-list">
                             <a
@@ -391,13 +418,13 @@ const Header = () => {
                     {/*end topbar-nav*/}
                     <ul className="list-unstyled topbar-nav mb-0">
                         <li>
-                  <p className="mb-0 page-subtitle">11:00 AM</p>
-                  <h2 className='header-page-title mt-1 mb-0'>23 May 2024</h2>
+                            <p className="mb-0 page-subtitle">{formatTime(currentTime)}</p>
+                            <h2 className='header-page-title mt-1 mb-0'>{formatDate(currentTime)}</h2>
 
-                </li>
+                        </li>
                         <li>
                             <button className='nav-link button-menu-mobile' onClick={toggleMenu}>
-                            {isMenuEnlarged ? ' ' : ' '} 
+                                {isMenuEnlarged ? ' ' : ' '}
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     width={24}
@@ -416,7 +443,7 @@ const Header = () => {
                                 </svg>
                             </button>
                         </li>
-                      
+
                     </ul>
                 </nav>
                 {/* end navbar*/}

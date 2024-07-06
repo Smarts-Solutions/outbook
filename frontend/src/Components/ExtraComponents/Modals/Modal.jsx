@@ -1,6 +1,6 @@
 import React from 'react';
 
-const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange ,buttonName }) => {
+const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange, buttonName }) => {
 
   const columnClass = fields.length === 1 ? 'col-12' : 'col-md-6';
 
@@ -21,10 +21,28 @@ const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange ,button
             />
           </div>
           <div className="modal-body row">
-          {fields.map((field, index) => (
+            {fields.map((field, index) => (
               <div className={`data-table-extensions-filter ${columnClass}`} key={index}>
                 <label htmlFor={field.name} className="icon mb-2">{field.label}</label>
                 {field.type === 'text' ? (
+                  <input
+                    type="text"
+                    name={field.name}
+                    className="filter-text form-control"
+                    placeholder={field.placeholder}
+                    value={field.value}
+                    onChange={(e) => onChange(e, index)}
+                  />
+                ) : field.type === 'email' ? (
+                  <input
+                    type="text"
+                    name={field.name}
+                    className="filter-text form-control"
+                    placeholder={field.placeholder}
+                    value={field.value}
+                    onChange={(e) => onChange(e, index)}
+                  />
+                ) : field.type === 'password' ? (
                   <input
                     type="text"
                     name={field.name}
@@ -49,8 +67,8 @@ const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange ,button
                 ) : null}
               </div>
             ))}
-       
-           
+
+
           </div>
           <div className="modal-footer">
             <button

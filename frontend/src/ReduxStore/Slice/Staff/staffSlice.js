@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { STAFF } from "../../../Services/Staff/staff";
-
+import { STAFF ,SERVICE} from "../../../Services/Staff/staff";
 
 
 export const Staff = createAsyncThunk("staff", async (data) => {
@@ -14,6 +13,15 @@ export const Staff = createAsyncThunk("staff", async (data) => {
   }
 });
 
+export const Service = createAsyncThunk("service", async (data) => {
+  try {
+    const { req , authToken } = data
+    const res = await SERVICE( req , authToken);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
 
 
 
@@ -24,6 +32,7 @@ const StaffSlice = createSlice({
     isLoading: false,
     isError: false,
     Staff : [],
+    Service:[]
  
   },
 
@@ -38,6 +47,18 @@ const StaffSlice = createSlice({
         state.Staff = action.payload;
       })
       .addCase(Staff.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+
+      .addCase(Service.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(Service.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.Service = action.payload;
+      })
+      .addCase(Service.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
       })
