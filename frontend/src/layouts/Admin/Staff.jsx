@@ -19,7 +19,7 @@ const StaffPage = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    // const [isModalOpen, setIsModalOpen] = useState(false);
     const [addStaff, setAddStaff] = useState(false);
     const [portfolio, setPortfolio] = useState(false);
     const [editStaff, setEditStaff] = useState(false);
@@ -33,7 +33,7 @@ const StaffPage = () => {
     const [serviceDataAll, setServiceDataAll] = useState({ loading: true, data: [] });
     const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
 
-    const closeModal = () => setIsModalOpen(false);
+    // const closeModal = () => setIsModalOpen(false);
 
     const staffData = async () => {
         await dispatch(Staff({ req: { "action": "get" }, authToken: token }))
@@ -106,12 +106,12 @@ const StaffPage = () => {
             name: 'Actions',
             cell: row => (
                 <div>
-                    <button className='edit-icon' onClick={() => setIsModalOpen(true)}> <i className="ti-user" /></button>
+                    {/* <button className='edit-icon' onClick={() => setIsModalOpen(true)}> <i className="ti-user" /></button> */}
                     <button className='delete-icon' onClick={() => setPortfolio(true)}> <i className="ti-briefcase" /></button>
                     <button className='edit-icon' onClick={(e) => { setEditStaff(true); setEditStaffData(row); }}> <i className="ti-pencil" /></button>
                     <button className='delete-icon' onClick={(e) => SetCompetancy(true)}>Add Competency</button>
                     <button className='delete-icon'>Log Logs</button>
-                    <button className='delete-icon'> <i className="ti-trash" /></button>
+                    <button className='delete-icon' onClick={(e) => DeleteStaff(row)}> <i className="ti-trash" /></button>
                 </div>
             ),
             ignoreRowClick: true,
@@ -140,7 +140,7 @@ const StaffPage = () => {
             role: Yup.string().required(Validation_Message.RoleValidation),
             status: Yup.string().required(Validation_Message.StatusValidation)
         }),
-        
+
         onSubmit: async (values) => {
             let req = {
                 "first_name": values.first_name,
@@ -212,6 +212,44 @@ const StaffPage = () => {
             ]
         }
     ];
+
+
+    const DeleteStaff = async (row) => {
+        sweatalert.fire({
+            title: 'Are you sure?',
+            text: 'You will not be able to recover this record!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'No, keep it'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                await dispatch(Staff({ req: { "action": "delete", "id": row.id }, authToken: token }))
+                    .unwrap()
+                    .then(async (response) => {
+                        if (response.status) {
+                            sweatalert.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message,
+                                timer: 2000,
+                            })
+                            SetRefresh(!refresh);
+                        } else {
+                            sweatalert.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: response.message,
+                            })
+                        }
+                    })
+                    .catch((error) => {
+                        console.log("Error", error);
+                    });
+            }
+        })
+    }
+
 
 
     useEffect(() => {
@@ -305,13 +343,92 @@ const StaffPage = () => {
             {/* Manage Portfolio */}
             <CommanModal
                 isOpen={portfolio}
-                backdrop="static"
-                size="ms-5"
+                cancel_btn="cancel"
+                hideBtn={false}
+                btn_name="Save"
                 title="Manage Portfolio"
-                hideBtn={true}
+
                 handleClose={() => setPortfolio(false)}
             >
-                <h1>Working...</h1>
+                <div className="modal-body">
+                    <div className="row">
+                        <div className="col-10">
+                            <div className="search-box ms-2">
+                                <i className="ri-search-line search-icon" />
+                                <input
+                                    type="text"
+                                    className="form-control search"
+                                    placeholder="Search Customer..."
+                                />
+                            </div>
+                        </div>
+                        <div className="col-2">
+                            <div>
+                                <button
+                                    type="button"
+                                    className="btn btn-success add-btn"
+                                    data-bs-toggle="modal"
+                                    id="create-btn"
+                                    data-bs-target="#showModal123"
+                                >
+                                    Add
+                                </button>
+                            </div>
+                        </div>
+                        <div className="col-md-6" />
+                        <div className="table-responsive  mt-3 mb-1">
+                            <table className="table align-middle table-nowrap" id="customerTable">
+                                <thead className="table-light">
+                                    <tr>
+                                        <th className="" data-="customer_name">
+                                            Company Name
+                                        </th>
+                                        {/* <th class="" data-="customer_name">Access</th> */}
+                                        <th className="tabel_left" data-="action">
+                                            Action
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="list form-check-all">
+                                    <tr className="tabel_new">
+                                        {/* <td class="id" style="display:none;"><a href="javascript:void(0);" class="fw-medium link-primary">#VZ2101</a></td> */}
+                                        <td>Outbooks Outsourcing Pvt Ltd</td>
+                                        {/* <td>VAT Return</td> */}
+                                        <td className="tabel_left">
+                                            <div className=" gap-2">
+                                                <div className="remove">
+                                                    <a
+                                                        onclick="deleteRecordModalshow()"
+                                                        className="btn btn-sm btn-danger remove-item-btn"
+                                                    >
+                                                        Remove
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                            <div className="noresult" style={{ display: "none" }}>
+                                <div className="text-center">
+                                    <lord-icon
+                                        src="https://cdn.lordicon.com/msoeawqm.json"
+                                        trigger="loop"
+                                        colors="primary:#121331,secondary:#08a88a"
+                                        style={{ width: 75, height: 75 }}
+                                    />
+                                    <h5 className="mt-2">Sorry! No Result Found</h5>
+                                    <p className="text-muted mb-0">
+                                        We've searched more than 150+ Orders We did not find any orders for
+                                        you search.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </CommanModal>
             {/* CLOSE Manage Portfolio */}
 
@@ -349,9 +466,9 @@ const StaffPage = () => {
 
 
             {/* SET ACCESS */}
-            {isModalOpen && (
+            {/* {isModalOpen && (
                 <SetAccessModal isOpen={isModalOpen} onClose={closeModal} />
-            )}
+            )} */}
             {/* CLOSE SET ACCESS */}
 
 
