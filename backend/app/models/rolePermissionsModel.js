@@ -89,32 +89,6 @@ const updateRole = async (Role) => {
 };
 
 
-// const accessRolePermissions = async (data) => {
-//     const { role_id } = data;
-//     const query = `
-//     SELECT 
-//         permissions.id, permissions.permission_name, permissions.type 
-//         CASE 
-//             WHEN role_permissions.permission_id IS NOT NULL THEN TRUE 
-//             ELSE FALSE 
-//         END AS is_assigned
-//     FROM 
-//         permissions
-//     LEFT JOIN 
-//         role_permissions ON permissions.id = role_permissions.permission_id AND role_permissions.role_id = ?
-//     LEFT JOIN 
-//         roles ON role_permissions.role_id = roles.id;
-//     `;
-    
-//     try {
-//         const [rows] = await pool.execute(query, [role_id]);
-//         return rows;
-//     } catch (err) {
-//         console.error('Error fetching data:', err);
-//         throw err;
-//     }
-    
-// };
 
 const accessRolePermissions = async (data) => {
     const { role_id } = data;
