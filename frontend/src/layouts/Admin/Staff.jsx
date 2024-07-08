@@ -105,13 +105,16 @@ const StaffPage = () => {
         {
             name: 'Actions',
             cell: row => (
+
                 <div>
+                    {console.log("row", row.role)}
+
                     {/* <button className='edit-icon' onClick={() => setIsModalOpen(true)}> <i className="ti-user" /></button> */}
                     <button className='delete-icon' onClick={() => setPortfolio(true)}> <i className="ti-briefcase" /></button>
                     <button className='edit-icon' onClick={(e) => { setEditStaff(true); setEditStaffData(row); }}> <i className="ti-pencil" /></button>
                     <button className='delete-icon' onClick={(e) => SetCompetancy(true)}>Add Competency</button>
                     <button className='delete-icon'>Log Logs</button>
-                    <button className='delete-icon' onClick={(e) => DeleteStaff(row)}> <i className="ti-trash" /></button>
+                    {row.role == "ADMIN" || row.role ==  "SUPERADMIN" ? null : <button className='delete-icon' onClick={(e) => DeleteStaff(row)}> <i className="ti-trash" /></button>}
                 </div>
             ),
             ignoreRowClick: true,
