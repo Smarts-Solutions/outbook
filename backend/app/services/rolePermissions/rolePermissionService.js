@@ -9,6 +9,9 @@ const addRole = async (Role) => {
 const getRole = async () => {
   return rolePermissionsModel.getRole();
 }
+const staffRole = async () => {
+  return rolePermissionsModel.staffRole();
+}
 
 const removeRole = async (RoleId) => {
   return rolePermissionsModel.deleteRole(RoleId);
@@ -27,5 +30,6 @@ module.exports = {
     removeRole,
     getRoleById,
     modifyRole,
-    getRole
+    getRole,
+    staffRole
 };

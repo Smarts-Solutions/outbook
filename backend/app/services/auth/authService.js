@@ -35,6 +35,7 @@ const modifyStaff = async (staff) => {
 const login = async (credentials) => {
     const { email, password } = credentials;
     const user = await staffModel.getStaffByEmail(email);
+    console.log("user",user)
     if (!user) {
       throw new Error('Invalid email');
     }

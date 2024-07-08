@@ -30,6 +30,18 @@ const getRole = async () => {
     }
 };
 
+const staffRole = async () => {
+    const query = `SELECT * FROM roles WHERE role NOT IN ('ADMIN','SUPERADMIN');`;
+
+    try {
+        const [result] = await pool.execute(query);
+        return result;
+    } catch (err) {
+        console.error('Error selecting data:', err);
+        throw err;
+    }
+};
+
 const deleteRole = async (roleId) => {
     const query = `
     DELETE FROM roles WHERE id = ?
@@ -84,6 +96,7 @@ module.exports = {
     deleteRole,
     getRoleById,
     updateRole,
-    getRole
+    getRole,
+    staffRole
 
 };
