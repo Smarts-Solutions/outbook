@@ -24,6 +24,10 @@ const modifyRole = async (Role) => {
   return rolePermissionsModel.updateRole(Role);
 };
 
+const accessRolePermissions = async (data) => {
+  return rolePermissionsModel.accessRolePermissions(data);
+}
+
 
 module.exports = {
     addRole,
@@ -31,5 +35,6 @@ module.exports = {
     getRoleById,
     modifyRole,
     getRole,
-    staffRole
+    staffRole,
+    accessRolePermissions
 };
