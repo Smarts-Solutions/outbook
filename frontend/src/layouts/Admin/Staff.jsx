@@ -67,7 +67,7 @@ const StaffPage = () => {
     };
 
     const roleData = async (req) => {
-        await dispatch(Role({ req: { "action": "get" }, authToken: token }))
+        await dispatch(Role({ req: { "action": "staffRole" }, authToken: token }))
             .unwrap()
             .then(async (response) => {
 

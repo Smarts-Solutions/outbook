@@ -14,6 +14,10 @@ const handleRole = async (req, res) => {
                 result = await rolePermissionService.getRole();
                 res.status(200).json({ status: true, data: result });
                 break;
+            case 'staffRole':
+                result = await rolePermissionService.staffRole();
+                res.status(200).json({ status: true, data: result });
+                break;
             case 'getById':
                 result = await rolePermissionService.getRoleById(Role.id);
                 res.status(200).json({ status: true, data: result });

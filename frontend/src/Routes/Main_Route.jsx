@@ -10,10 +10,6 @@ const Main_Route = () => {
     const role = JSON.parse(localStorage.getItem("role"));
     const token = JSON.parse(localStorage.getItem("token"));
 
-    // console.log("staffDetails", staffDetails);
-    // console.log("role", role);
-    // console.log("token", token);
-
   useEffect(() => {
     // Check if Staff details exist
     if (role==null||token == null||staffDetails==null) {
@@ -36,8 +32,6 @@ const Main_Route = () => {
       return;
     }
 
-
-
      // Redirect based on user role and route prefix
      switch (role) {
       case "ADMIN":
@@ -46,13 +40,13 @@ const Main_Route = () => {
           }
           break;
       default:
-        if (location.pathname === "/login" || location.pathname === "/" || !location.pathname.startsWith("/staff")) {
-          navigate("/staff/dashboard");
+        if (location.pathname === "/login" || location.pathname === "/" || !location.pathname.startsWith("/admin")) {
+          // navigate("/staff/dashboard");
+          navigate("/admin/dashboard");
+
           }
           break;
   }
-
-  
 
   }, [navigate, location.pathname ,role ,staffDetails]);
 
@@ -61,9 +55,8 @@ const Main_Route = () => {
   return (
     <div>
       <Routes>
-        
-      <Route path="/admin/*" element={(role === "ADMIN") ? <Admin_Route /> : <Login />} />
-      {/* <Route path="/admin/*" element={(role === "Admin") ? <Admin_Route /> : <Login />} /> */}
+      <Route path="/admin/*" element={(role) ? <Admin_Route /> : <Login />} />
+      {/* <Route path="/admin/*" element={(role) ? <Admin_Route /> : <Login />} /> */}
         {/* Add other routes here */}
         <Route path="/login" element={<Login />} />
         {
