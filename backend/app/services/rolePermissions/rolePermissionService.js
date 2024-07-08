@@ -25,7 +25,22 @@ const modifyRole = async (Role) => {
 };
 
 const accessRolePermissions = async (data) => {
-  return rolePermissionsModel.accessRolePermissions(data);
+  const rowData = await rolePermissionsModel.accessRolePermissions(data);
+  if (!rowData.length) {
+    return [];
+  }
+  const result = rowData.reduce((acc, curr) => {
+    const { permission_name, type, is_assigned } = curr;
+    let permission = acc.find(p => p.permission_name === permission_name);
+    if (!permission) {
+        permission = { permission_name, items: [] };
+        acc.push(permission);
+    }
+    permission.items.push({ type, is_assigned });
+    return acc;
+}, []);
+
+return result;
 }
 
 
