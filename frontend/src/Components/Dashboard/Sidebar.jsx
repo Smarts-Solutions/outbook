@@ -1,12 +1,53 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [activeLink, setActiveLink] = useState(location.pathname);
   const menuRef = useRef(null);
+
+
+  const accessData = useSelector((state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data);
+
+  const [showSettingTab, setShowSettingTab] = useState(false);
+  const [showCustomerTab, setShowCustomerTab] = useState(false);
+  const [showStaffTab, setShowStaffTab] = useState(false);
+
+
+
+
+  useEffect(() => {
+    if (accessData) {
+      accessData && accessData.map((item) => {
+
+        if (item.permission_name === "setting") {
+          const settingView = item.items.find((item) => item.type === "view");
+          setShowSettingTab(settingView && settingView.is_assigned);
+        }
+
+        if (item.permission_name === "customer") {
+          const customerView = item.items.find((item) => item.type === "view");
+          setShowCustomerTab(customerView && customerView.is_assigned);
+        }
+
+        if (item.permission_name === "staff") {
+          const staffView = item.items.find((item) => item.type === "view");
+          setShowStaffTab(staffView && staffView.is_assigned);
+        }
+
+      });
+    }
+  }, [accessData]);
+
+
+
+
+
+
+
 
   useEffect(() => {
     const menuElement = menuRef.current;
@@ -66,9 +107,10 @@ const Sidebar = () => {
                 <div className="simplebar-content-wrapper" style={{ height: "100%", overflow: "hidden scroll" }}>
                   <div className="simplebar-content" style={{ padding: "0px 0px 70px" }}>
                     <ul className="metismenu left-sidenav-menu mm-show">
+
                       <li className={activeLink === '/dashboard' ? 'active' : ''}>
                         <Link
-                         to="/admin/dashboard"
+                          to="/admin/dashboard"
                           aria-expanded="false"
                           className={activeLink === '/admin/dashboard' ? 'active' : ''}
                           onClick={(e) => handleLinkClick(e, '/admin/dashboard')}
@@ -79,8 +121,9 @@ const Sidebar = () => {
                           <span>Dashboard</span>
                         </Link>
                       </li>
-                      <li className={activeLink === '/admin/customer' ? 'active' : ''}>
-                      <Link
+
+                      {!showCustomerTab ? null : <li className={activeLink === '/admin/customer' ? 'active' : ''}>
+                        <Link
                           to="/admin/customer"
                           aria-expanded="false"
                           className={activeLink === '/admin/customer' ? 'active' : ''}
@@ -90,8 +133,9 @@ const Sidebar = () => {
                             <img src="/assets/images/sidebar-icons/customers.png" alt="Customer" />
                           </span>
                           <span>Customer</span>
-                          </Link>
-                      </li>
+                        </Link>
+                      </li>}
+
                       <li className={activeLink === '/admin/status' ? 'active' : ''}>
                         <Link
                           to="/admin/status"
@@ -103,12 +147,13 @@ const Sidebar = () => {
                             <img src="/assets/images/sidebar-icons/status.png" alt="Status" />
                           </span>
                           <span>Status</span>
-                          
-                          </Link>
+
+                        </Link>
                       </li>
-                      <li className={activeLink === '/admin/staff' ? 'active' : ''}>
-                      <Link
-                         to="/admin/staff"
+
+                      {!showStaffTab ? null : <li className={activeLink === '/admin/staff' ? 'active' : ''}>
+                        <Link
+                          to="/admin/staff"
                           aria-expanded="false"
                           className={activeLink === '/admin/staff' ? 'active' : ''}
                           onClick={(e) => handleLinkClick(e, '/admin/staff')}
@@ -117,10 +162,11 @@ const Sidebar = () => {
                             <img src="/assets/images/sidebar-icons/staff.png" alt="Staff" />
                           </span>
                           <span>Staff</span>
-                          </Link>
-                      </li>
+                        </Link>
+                      </li>}
+
                       <li className={activeLink === '/admin/access' ? 'active' : ''}>
-                      <Link
+                        <Link
                           to="/admin/access"
                           aria-expanded="false"
                           className={activeLink === '/admin/access' ? 'active' : ''}
@@ -132,8 +178,9 @@ const Sidebar = () => {
                           <span>Access</span>
                         </Link>
                       </li>
+
                       <li className={activeLink === '/admin/reports' ? 'active' : ''}>
-                      <Link
+                        <Link
                           to="/admin/reports"
                           aria-expanded="false"
                           className={activeLink === '/admin/reports' ? 'active' : ''}
@@ -143,10 +190,11 @@ const Sidebar = () => {
                             <img src="/assets/images/sidebar-icons/reports.png" alt="Report" />
                           </span>
                           <span>Report</span>
-                          </Link>
+                        </Link>
                       </li>
-                      <li className={activeLink === '/admin/setting' ? 'active' : ''}>
-                      <Link
+
+                      {!showSettingTab ? null : <li className={activeLink === '/admin/setting' ? 'active' : ''}>
+                        <Link
                           to="/admin/setting"
                           aria-expanded="false"
                           className={activeLink === '/admin/setting' ? 'active' : ''}
@@ -157,7 +205,9 @@ const Sidebar = () => {
                           </span>
                           <span>Setting</span>
                         </Link>
-                      </li>
+                      </li>}
+
+
                     </ul>
                   </div>
                 </div>

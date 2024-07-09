@@ -18,3 +18,17 @@ export async function GETACCESS(data, token) {
         return await err;
     }
 }
+
+// ROLE COMMAN ACCESS PERMISION
+export async function ROLEACCESS(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}accessRolePermissions`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}

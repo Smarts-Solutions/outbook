@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
 import { Role, StatusType, Service } from '../../ReduxStore/Slice/Settings/settingSlice'
 import Datatable from '../../Components/ExtraComponents/Datatable';
 import Modal from '../../Components/ExtraComponents/Modals/Modal';
 import sweatalert from 'sweetalert2';
+import { useDispatch, useSelector } from 'react-redux';
 
 
 const Setting = () => {
@@ -18,18 +18,16 @@ const Setting = () => {
     const [addStatusType, setAddStatusType] = useState("");
     const [serviceDataAll, setServiceDataAll] = useState({ loading: true, data: [] });
     const [addService, setAddService] = useState("");
-
     const [modalData, setModalData] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
 
-
+    
 
     const roleData = async (req) => {
         await dispatch(Role({ req: req, authToken: token }))
             .unwrap()
             .then(async (response) => {
-                // console.log("response", response);
                 if (req.action == "get") {
                     if (response.status) {
                         setRoleDataAll({ loading: false, data: response.data });
@@ -375,7 +373,7 @@ const Setting = () => {
                 icon: 'warning',
                 timer: 2000,
             });
-           // alert("Please enter " + modalData.fields[0].label);
+            // alert("Please enter " + modalData.fields[0].label);
             return;
         }
         const req = { action: isEdit ? 'update' : 'add' };
@@ -429,7 +427,7 @@ const Setting = () => {
             if (result.isConfirmed) {
                 const req = {
                     action: 'delete',
-                    id: data.id 
+                    id: data.id
                 };
 
                 switch (tabStatus) {

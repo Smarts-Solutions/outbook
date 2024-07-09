@@ -23,7 +23,6 @@ const Header = () => {
         await dispatch(isLoginAuthCheckToken(req))
             .unwrap()
             .then(async (response) => {
-                //console.log("response", response);
                 if (response.status == false) {
                     LogoutUser()
                 }
@@ -61,9 +60,9 @@ const Header = () => {
     useEffect(() => {
         const intervalId = setInterval(() => {
             setCurrentTime(new Date());
-        }, 1000); // Update every second
+        }, 1000);
 
-        return () => clearInterval(intervalId); // Clean up the interval on component unmount
+        return () => clearInterval(intervalId);
     }, []);
 
     const formatTime = (date) => {
@@ -116,9 +115,9 @@ const Header = () => {
                                 aria-expanded="false"
                             >
                                 <i className="fa-solid fa-bell"></i>
-                                <span className="badge  text-white text-bg-info badge-pill noti-icon-badge">
+                                {/* <span className="badge  text-white text-bg-info badge-pill noti-icon-badge">
                                     2
-                                </span>
+                                </span> */}
                             </a>
                             <div className="dropdown-menu dropdown-menu-right dropdown-lg pt-0">
                                 <h6 className="dropdown-item-text font-15 m-0 py-3 border-bottom d-flex justify-content-between align-items-center">

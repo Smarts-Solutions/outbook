@@ -4,20 +4,15 @@ import { useDispatch } from 'react-redux';
 import { Role } from '../../ReduxStore/Slice/Settings/settingSlice';
 import { GetAccess } from '../../ReduxStore/Slice/Access/AccessSlice';
 
-
 const Access = () => {
 
-    const token = JSON.parse(localStorage.getItem("token"));
     const dispatch = useDispatch();
-
+    const token = JSON.parse(localStorage.getItem("token"));
     const [checkboxState, setCheckboxState] = useState([]);
     const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
     const [accessData, setAccessData] = useState({ loading: true, data: [] });
 
 
-    const handleCheckboxChange = (data) => {
-        setCheckboxState(prevState => [...prevState, data]);
-    };
 
     const roleData = async () => {
         try {
@@ -33,87 +28,14 @@ const Access = () => {
         }
     };
 
-
-
-    const handleSaveChanges = () => {
-        console.log('Checkbox state:', checkboxState);
-    };
-
-
-
-    const sections = [
-        {
-            title: 'Customer',
-            items: [
-                { id: 'formCheckCustomerInsert', label: 'Can Insert', defaultChecked: false },
-                { id: 'formCheckCustomerUpdate', label: 'Can Update', defaultChecked: false },
-                { id: 'formCheckCustomerDelete', label: 'Can Delete', defaultChecked: false },
-                { id: 'formCheckCustomerView', label: 'Can View', defaultChecked: false },
-            ],
-        },
-        {
-            title: 'Status',
-            items: [
-                { id: 'formCheckStatusInsert', label: 'Can Insert', defaultChecked: false },
-                { id: 'formCheckStatusUpdate', label: 'Can Update', defaultChecked: false },
-                { id: 'formCheckStatusDelete', label: 'Can Delete', defaultChecked: false },
-                { id: 'formCheckStatusView', label: 'Can View', defaultChecked: false },
-            ],
-        },
-        {
-            title: 'Staff',
-            items: [
-                { id: 'formCheckStaffInsert', label: 'Can Insert', defaultChecked: false },
-                { id: 'formCheckStaffUpdate', label: 'Can Update', defaultChecked: false },
-                { id: 'formCheckStaffDelete', label: 'Can Delete', defaultChecked: false },
-                { id: 'formCheckStaffView', label: 'Can View', defaultChecked: false },
-            ],
-        },
-        {
-            title: 'Client',
-            items: [
-                { id: 'formCheckClientInsert', label: 'Can Insert', defaultChecked: false },
-                { id: 'formCheckClientUpdate', label: 'Can Update', defaultChecked: false },
-                { id: 'formCheckClientDelete', label: 'Can Delete', defaultChecked: false },
-                { id: 'formCheckClientView', label: 'Can View', defaultChecked: false },
-            ],
-        },
-        {
-            title: 'Job',
-            items: [
-                { id: 'formCheckJobInsert', label: 'Can Insert', defaultChecked: false },
-                { id: 'formCheckJobUpdate', label: 'Can Update', defaultChecked: false },
-                { id: 'formCheckJobDelete', label: 'Can Delete', defaultChecked: false },
-                { id: 'formCheckJobView', label: 'Can View', defaultChecked: false },
-            ],
-        },
-        {
-            title: 'Setting',
-            items: [
-                { id: 'formCheckSettingInsert', label: 'Can Insert', defaultChecked: false },
-                { id: 'formCheckSettingUpdate', label: 'Can Update', defaultChecked: false },
-                { id: 'formCheckSettingDelete', label: 'Can Delete', defaultChecked: false },
-                { id: 'formCheckSettingView', label: 'Can View', defaultChecked: false },
-            ],
-        },
-    ];
-
-    const columns = [
-        { name: 'Role Name', selector: row => row.role_name, sortable: true },
-    ];
-
-    const CheckboxItem = ({ id, label, title, TradingName }) => {
-        const isChecked = checkboxState.some(item => item.id === id && item.TradingName === TradingName && item.title === title && item.status);
+    const CheckboxItem = ({ id, label, roleId }) => {
 
         const handleChange = (event) => {
-            const isChecked = event.target.checked;
-
-            if (!isChecked) {
-                setCheckboxState(prevState => prevState.filter(item => !(item.id === id && item.TradingName === TradingName && item.title === title)));
-            } else {
-                setCheckboxState(prevState => [...prevState.filter(item => !(item.id === id && item.TradingName === TradingName && item.title === title)), { id: id, TradingName: TradingName, title: title, status: isChecked }]);
-            }
+            const checked = event.target.checked;
+            setCheckboxState(prevState => [...prevState.filter(item => !(item.id === id && item.roleId === roleId)), { id: id, roleId: roleId, is_assigned: checked }]);
         };
+
+        const isChecked = checkboxState.some(item => item.id === id && item.roleId === roleId && item.is_assigned);
 
         return (
             <div className="mb-3">
@@ -123,7 +45,7 @@ const Access = () => {
                         type="checkbox"
                         id={id}
                         checked={isChecked}
-                        onChange={handleChange}
+                        onChange={(e) => handleChange(e)}
                     />
                     <label className="form-check-label new_checkbox" htmlFor={id}>
                         {label}
@@ -135,10 +57,19 @@ const Access = () => {
 
 
     const OpenAccourdian = async (val) => {
-    
+
         try {
             const response = await dispatch(GetAccess({ req: { "role_id": val.id }, authToken: token })).unwrap();
             if (response.status) {
+                const assignedItems = response.data.filter((item) => {
+                    item.items.forEach((data) => {
+                        if (data.is_assigned === 1) {
+                            setCheckboxState(prevState => [...prevState, { id: data.id, roleId: val.id, is_assigned: data.is_assigned === 1 }]);
+                        }
+                    });
+                });
+
+
                 setAccessData({ loading: false, data: response.data });
             } else {
                 setAccessData({ loading: false, data: [] });
@@ -149,24 +80,22 @@ const Access = () => {
         }
     }
 
-
-
-    const AccordionItem = ({ section, TradingName }) => {
+    const AccordionItem = ({ section, TradingName, roleId }) => {
 
         return (
             <div>
                 <h4 className="card-title mb-3 flex-grow-1" style={{ marginBottom: '20px !important' }}>
-                    {section.title}
+                    {section.permission_name}
                 </h4>
                 <div className="row">
-                    {section.items.map(item => (
+                    {section.items.map((item, id) => (
                         <CheckboxItem
                             key={item.id}
                             id={item.id}
-                            label={item.label}
+                            label={item.type}
                             title={section.title}
                             TradingName={TradingName}
-                            checked={item.defaultChecked}
+                            roleId={roleId}
                         />
                     ))}
                 </div>
@@ -174,12 +103,16 @@ const Access = () => {
         );
     };
 
+
+
+    const handleSaveChanges = () => {
+        console.log('Checkbox state:', checkboxState);
+    };
+
+
     useEffect(() => {
         roleData()
     }, []);
-
-
-console.log("=>",accessData.data)
 
     return (
         <div>
@@ -200,7 +133,9 @@ console.log("=>",accessData.data)
                         </div>
                     </div>
                     <div className='datatable-wrapper'>
-                        <Datatable filter={true} columns={columns} data={roleDataAll.data} />
+                        <Datatable filter={true} columns={[
+                            { name: 'Role Name', selector: row => row.role_name, sortable: true },
+                        ]} data={roleDataAll.data} />
                     </div>
                 </div>
 
@@ -234,9 +169,9 @@ console.log("=>",accessData.data)
                                                 data-bs-parent="#default-accordion-example">
                                                 <div className="accordion-body">
                                                     <div className="row">
-                                                        {sections.map((section, index) => (
+                                                        {accessData && accessData.data.map((section, index) => (
                                                             <div key={index} className="col-lg-6">
-                                                                <AccordionItem section={section} TradingName={val.role_name} />
+                                                                <AccordionItem section={section} TradingName={val.role_name} roleId={val.id} />
                                                             </div>
                                                         ))}
                                                     </div>

@@ -96,6 +96,7 @@ const accessRolePermissions = async (data) => {
     SELECT 
         permissions.permission_name, 
         permissions.type,
+          permissions.id,
         CASE 
             WHEN role_permissions.permission_id IS NOT NULL THEN TRUE 
             ELSE FALSE 
