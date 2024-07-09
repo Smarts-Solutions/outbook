@@ -119,8 +119,6 @@ const accessRolePermissions = async (data) => {
 
 
 
-
-
 module.exports = {
     createRole,
     deleteRole,
@@ -129,6 +127,4 @@ module.exports = {
     getRole,
     staffRole,
     accessRolePermissions
-    
-
 };
