@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Datatable from '../../Components/ExtraComponents/Datatable';
 import { useDispatch } from 'react-redux';
 import { Role } from '../../ReduxStore/Slice/Settings/settingSlice';
+import { GetAccess } from '../../ReduxStore/Slice/Access/AccessSlice';
+
 
 const Access = () => {
 
@@ -10,6 +12,8 @@ const Access = () => {
 
     const [checkboxState, setCheckboxState] = useState([]);
     const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
+    const [accessData, setAccessData] = useState({ loading: true, data: [] });
+
 
     const handleCheckboxChange = (data) => {
         setCheckboxState(prevState => [...prevState, data]);
@@ -28,6 +32,8 @@ const Access = () => {
             setRoleDataAll({ loading: false, data: [] });
         }
     };
+
+
 
     const handleSaveChanges = () => {
         console.log('Checkbox state:', checkboxState);
@@ -128,8 +134,25 @@ const Access = () => {
     };
 
 
+    const OpenAccourdian = async (val) => {
+    
+        try {
+            const response = await dispatch(GetAccess({ req: { "role_id": val.id }, authToken: token })).unwrap();
+            if (response.status) {
+                setAccessData({ loading: false, data: response.data });
+            } else {
+                setAccessData({ loading: false, data: [] });
+            }
+        } catch (error) {
+            console.error("Error fetching role data:", error);
+            setAccessData({ loading: false, data: [] });
+        }
+    }
+
+
 
     const AccordionItem = ({ section, TradingName }) => {
+
         return (
             <div>
                 <h4 className="card-title mb-3 flex-grow-1" style={{ marginBottom: '20px !important' }}>
@@ -155,6 +178,8 @@ const Access = () => {
         roleData()
     }, []);
 
+
+console.log("=>",accessData.data)
 
     return (
         <div>
@@ -191,20 +216,20 @@ const Access = () => {
                                 <div className="accordion" id="default-accordion-example">
                                     {roleDataAll.data && roleDataAll.data.map((val, index) => (
                                         <div className="accordion-item mt-2" key={index}>
-                                            <h2 className="accordion-header" id={`heading${index}`}>
+                                            <h2 className="accordion-header" id={`heading${index}`} onClick={(e) => OpenAccourdian(val)} >
                                                 <button
                                                     className="accordion-button"
                                                     type="button"
                                                     data-bs-toggle="collapse"
                                                     data-bs-target={`#collapse${index}`}
-                                                    aria-expanded="true"
+                                                    aria-expanded="false"
                                                     aria-controls={`collapse${index}`}>
                                                     {val.role_name}
                                                 </button>
                                             </h2>
                                             <div
                                                 id={`collapse${index}`}
-                                                className="accordion-collapse collapse show"
+                                                className="accordion-collapse collapse"
                                                 aria-labelledby={`heading${index}`}
                                                 data-bs-parent="#default-accordion-example">
                                                 <div className="accordion-body">
