@@ -3,6 +3,7 @@ import Datatable from '../../Components/ExtraComponents/Datatable';
 import { useDispatch } from 'react-redux';
 import { Role } from '../../ReduxStore/Slice/Settings/settingSlice';
 import { GetAccess } from '../../ReduxStore/Slice/Access/AccessSlice';
+import Swal from 'sweetalert2';
 
 const Access = () => {
 
@@ -11,6 +12,7 @@ const Access = () => {
     const [checkboxState, setCheckboxState] = useState([]);
     const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
     const [accessData, setAccessData] = useState({ loading: true, data: [] });
+    const [modalOpen, setOpenModalOpen] = useState(false);
 
 
 
@@ -28,14 +30,14 @@ const Access = () => {
         }
     };
 
-    const CheckboxItem = ({ id, label, roleId }) => {
+    const CheckboxItem = ({ id, label, role_id }) => {
 
         const handleChange = (event) => {
             const checked = event.target.checked;
-            setCheckboxState(prevState => [...prevState.filter(item => !(item.id === id && item.roleId === roleId)), { id: id, roleId: roleId, is_assigned: checked }]);
+            setCheckboxState(prevState => [...prevState.filter(item => !(item.permission_id === id && item.role_id === role_id)), { permission_id: id, role_id: role_id, is_assigned: checked }]);
         };
 
-        const isChecked = checkboxState.some(item => item.id === id && item.roleId === roleId && item.is_assigned);
+        const isChecked = checkboxState.some(item => item.permission_id === id && item.role_id === role_id && item.is_assigned);
 
         return (
             <div className="mb-3">
@@ -59,12 +61,12 @@ const Access = () => {
     const OpenAccourdian = async (val) => {
 
         try {
-            const response = await dispatch(GetAccess({ req: { "role_id": val.id }, authToken: token })).unwrap();
+            const response = await dispatch(GetAccess({ req: { "action": "get", "role_id": val.id }, authToken: token })).unwrap();
             if (response.status) {
                 const assignedItems = response.data.filter((item) => {
                     item.items.forEach((data) => {
                         if (data.is_assigned === 1) {
-                            setCheckboxState(prevState => [...prevState, { id: data.id, roleId: val.id, is_assigned: data.is_assigned === 1 }]);
+                            setCheckboxState(prevState => [...prevState, { permission_id: data.id, role_id: val.id, is_assigned: data.is_assigned === 1 }]);
                         }
                     });
                 });
@@ -75,12 +77,12 @@ const Access = () => {
                 setAccessData({ loading: false, data: [] });
             }
         } catch (error) {
-            console.error("Error fetching role data:", error);
+            console.log("Error fetching role data:", error);
             setAccessData({ loading: false, data: [] });
         }
     }
 
-    const AccordionItem = ({ section, TradingName, roleId }) => {
+    const AccordionItem = ({ section, TradingName, role_id }) => {
 
         return (
             <div>
@@ -95,7 +97,7 @@ const Access = () => {
                             label={item.type}
                             title={section.title}
                             TradingName={TradingName}
-                            roleId={roleId}
+                            role_id={role_id}
                         />
                     ))}
                 </div>
@@ -105,14 +107,63 @@ const Access = () => {
 
 
 
-    const handleSaveChanges = () => {
-        console.log('Checkbox state:', checkboxState);
+    const handleSaveChanges = async () => {
+        try {
+            console.log('Checkbox state:', checkboxState);
+
+            const response = await dispatch(GetAccess({
+                req: {
+                    action: "update",
+                    permissions: checkboxState
+                },
+                authToken: token
+            })).unwrap();
+
+            if (response.status) {
+                console.log("Response:", response);
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Permissions updated successfully.',
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    timer: 1000
+                }).then(() => {
+                    setTimeout(() => {
+                        setOpenModalOpen(false);
+                        window.location.reload();
+                    }, 1000);
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to update permissions. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    timer: 1000
+                }).then(() => {
+                    setTimeout(() => {
+                        setOpenModalOpen(false);
+
+                    }, 1000);
+                });
+            }
+        } catch (error) {
+            console.error("Error updating permissions:", error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'An error occurred while updating permissions. Please try again later.',
+                icon: 'error',
+                confirmButtonText: 'OK',
+            });
+        }
     };
 
 
     useEffect(() => {
         roleData()
     }, []);
+
+
 
     return (
         <div>
@@ -127,6 +178,7 @@ const Access = () => {
                                 type="button"
                                 data-bs-toggle="modal"
                                 data-bs-target="#exampleModal"
+                                onClick={(e) => setOpenModalOpen(true)}
                                 className='btn btn-info text-white float-end'>
                                 <i className="fa fa-plus" /> Set Default Access
                             </button>
@@ -140,7 +192,7 @@ const Access = () => {
                 </div>
 
                 {/* Modal */}
-                <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div className={modalOpen ? "modal fade  show" : "modal"} id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div className="modal-dialog modal-lg modal-dialog-centered">
                         <div className="modal-content">
                             <div className="modal-header">
@@ -171,7 +223,7 @@ const Access = () => {
                                                     <div className="row">
                                                         {accessData && accessData.data.map((section, index) => (
                                                             <div key={index} className="col-lg-6">
-                                                                <AccordionItem section={section} TradingName={val.role_name} roleId={val.id} />
+                                                                <AccordionItem section={section} TradingName={val.role_name} role_id={val.id} />
                                                             </div>
                                                         ))}
                                                     </div>
