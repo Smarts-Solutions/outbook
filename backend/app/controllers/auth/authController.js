@@ -31,6 +31,22 @@ const handleStaff = async (req, res) => {
 };
 
 
+const staffCompetency = async (req, res) => {
+  try {
+     const { ...staffCompetency } = req.body;
+      const data = await authService.staffCompetency(staffCompetency);
+     // console.log("data",data)
+      if(data != undefined){
+        return res.send({ status:true,message: "Success..",data : data});
+      }else{
+        return res.send({ status:true, message: "Success.."});
+      }
+    } catch (error) {
+      return res.send({ status:false, message: error.message});
+    }
+}
+
+
 
 const login = async (req, res) => {
     try {
@@ -60,7 +76,7 @@ const login = async (req, res) => {
       const { ...staff } = req.body;
       const data = await authService.isLoginAuthTokenCheck(staff);
        if(data != undefined){
-        return res.send({ status:true, message: "success.."});
+        return res.send({ status:true,  message: "success.."});
        }else{
         return res.send({ status:false, message: "token not match"});
        }
@@ -72,6 +88,7 @@ const login = async (req, res) => {
 
 module.exports = {
     handleStaff,
+    staffCompetency,
     login,
     loginAuthToken,
     isLoginAuthTokenCheck
