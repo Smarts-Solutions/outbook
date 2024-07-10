@@ -6,36 +6,36 @@ import { useDispatch, useSelector } from 'react-redux';
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [activeLink, setActiveLink] = useState(location.pathname);
   const menuRef = useRef(null);
-
-
+  const role = JSON.parse(localStorage.getItem("role"));
+  
+  
   const accessData = useSelector((state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data);
+  
+  const [activeLink, setActiveLink] = useState(location.pathname);
+  const [showSettingTab, setShowSettingTab] = useState(true);
+  const [showCustomerTab, setShowCustomerTab] = useState(true);
+  const [showStaffTab, setShowStaffTab] = useState(true);
 
-  const [showSettingTab, setShowSettingTab] = useState(false);
-  const [showCustomerTab, setShowCustomerTab] = useState(false);
-  const [showStaffTab, setShowStaffTab] = useState(false);
-
-
-
+console.log("role"  ,role);
 
   useEffect(() => {
-    if (accessData) {
+    if (accessData && accessData.length > 0 && role !== "ADMIN" && role !== "SUPERADMIN") {
       accessData && accessData.map((item) => {
 
         if (item.permission_name === "setting") {
           const settingView = item.items.find((item) => item.type === "view");
-          setShowSettingTab(settingView && settingView.is_assigned);
+          setShowSettingTab(settingView && settingView.is_assigned == 1);
         }
 
         if (item.permission_name === "customer") {
           const customerView = item.items.find((item) => item.type === "view");
-          setShowCustomerTab(customerView && customerView.is_assigned);
+          setShowCustomerTab(customerView && customerView.is_assigned==1);
         }
 
         if (item.permission_name === "staff") {
           const staffView = item.items.find((item) => item.type === "view");
-          setShowStaffTab(staffView && staffView.is_assigned);
+          setShowStaffTab(staffView && staffView.is_assigned ==1);
         }
 
       });
@@ -45,7 +45,9 @@ const Sidebar = () => {
 
 
 
-
+console.log("showSettingTab",showSettingTab);
+console.log("showCustomerTab",showCustomerTab);
+console.log("showStaffTab",showStaffTab);
 
 
 
@@ -107,7 +109,7 @@ const Sidebar = () => {
                 <div className="simplebar-content-wrapper" style={{ height: "100%", overflow: "hidden scroll" }}>
                   <div className="simplebar-content" style={{ padding: "0px 0px 70px" }}>
                     <ul className="metismenu left-sidenav-menu mm-show">
-                      {/* 
+                      
                       <li className={activeLink === '/dashboard' ? 'active' : ''}>
                         <Link
                           to="/admin/dashboard"
@@ -205,11 +207,11 @@ const Sidebar = () => {
                           </span>
                           <span>Setting</span>
                         </Link>
-                      </li>} */}
+                      </li>}
 
 
 
-                      <li className={activeLink === '/dashboard' ? 'active' : ''}>
+                      {/* <li className={activeLink === '/dashboard' ? 'active' : ''}>
                         <Link
                           to="/admin/dashboard"
                           aria-expanded="false"
@@ -223,7 +225,7 @@ const Sidebar = () => {
                         </Link>
                       </li>
 
-                   <li className={activeLink === '/admin/customer' ? 'active' : ''}>
+                      <li className={activeLink === '/admin/customer' ? 'active' : ''}>
                         <Link
                           to="/admin/customer"
                           aria-expanded="false"
@@ -252,7 +254,7 @@ const Sidebar = () => {
                         </Link>
                       </li>
 
-                     <li className={activeLink === '/admin/staff' ? 'active' : ''}>
+                      <li className={activeLink === '/admin/staff' ? 'active' : ''}>
                         <Link
                           to="/admin/staff"
                           aria-expanded="false"
@@ -306,7 +308,7 @@ const Sidebar = () => {
                           </span>
                           <span>Setting</span>
                         </Link>
-                      </li>
+                      </li> */}
 
 
                     </ul>
