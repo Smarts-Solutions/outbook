@@ -31,6 +31,10 @@ const modifyStaff = async (staff) => {
   return staffModel.updateStaff({ id, ...fieldsToUpdate });
 };
 
+const staffCompetency = async (staffCompetency) => {
+  return staffModel.staffCompetency(staffCompetency);
+}
+
 
 const login = async (credentials) => {
     const { email, password } = credentials;
@@ -64,6 +68,7 @@ module.exports = {
     getStaff,
     removeStaff,
     modifyStaff,
+    staffCompetency,
     login,
     isLoginAuthTokenCheck
 };

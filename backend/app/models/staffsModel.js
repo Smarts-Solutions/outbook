@@ -61,6 +61,45 @@ const updateStaff = async (staff) => {
     }
 };
 
+const staffCompetency = async (staffCompetency) => {
+ const { staff_id,action, service } = staffCompetency;
+ if(action==="update"){
+    const addQuery = `
+    INSERT INTO staff_competencies (staff_id, service_id)
+    VALUES (?, ?)
+    ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP
+   `;
+   
+   const deleteQuery = `
+    DELETE FROM staff_competencies
+    WHERE staff_id = ? AND service_id = ?
+   `;
+   
+    try {
+        for (const serv of service) {
+            if (serv.status) {
+                // Insert service
+                await pool.execute(addQuery, [staff_id, serv.service_id]);
+            } else {
+                // Delete service
+                await pool.execute(deleteQuery, [staff_id, serv.service_id]);
+            }
+        }
+    } catch (err) {
+        console.error('Error updating data:', err);
+        throw err;
+    }
+ }else{
+    const query = `
+    SELECT services.id as service_id , services.name as service_name FROM staff_competencies JOIN services ON staff_competencies.service_id = services.id WHERE staff_competencies.staff_id = ${staff_id}
+    `;
+    const [rows] = await pool.query(query);
+    return rows;
+ }
+
+
+}
+
 const getStaffByEmail = async (email) => {
     const [rows] = await pool.query('SELECT staffs.id , staffs.email , staffs.password , staffs.role_id ,roles.role_name ,roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id  WHERE staffs.email = ?', [email]);
 
@@ -84,6 +123,7 @@ module.exports = {
     getStaff,
     deleteStaff,
     updateStaff,
+    staffCompetency,
     getStaffByEmail,
     getStaffById,
     isLoginAuthTokenCheckmodel

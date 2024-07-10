@@ -91,30 +91,61 @@ const updateRole = async (Role) => {
 
 
 const accessRolePermissions = async (data) => {
-    const { role_id } = data;
-    const query = `
-    SELECT 
-        permissions.permission_name, 
-        permissions.type,
-          permissions.id,
-        CASE 
-            WHEN role_permissions.permission_id IS NOT NULL THEN TRUE 
-            ELSE FALSE 
-        END AS is_assigned
-    FROM 
-        permissions
-    LEFT JOIN 
-        role_permissions ON permissions.id = role_permissions.permission_id AND role_permissions.role_id = ?
-    LEFT JOIN 
-        roles ON role_permissions.role_id = roles.id;
-    `;
-    
-    try {
-        const [rows] = await pool.execute(query, [role_id]);
-        return rows;
-    } catch (err) {
-        console.error('Error fetching data:', err);
-        throw err;
+    const { role_id ,action ,permissions} = data;
+    if(action==="get"){
+        const query = `
+        SELECT 
+            permissions.permission_name, 
+            permissions.type,
+              permissions.id,
+            CASE 
+                WHEN role_permissions.permission_id IS NOT NULL THEN TRUE 
+                ELSE FALSE 
+            END AS is_assigned
+        FROM 
+            permissions
+        LEFT JOIN 
+            role_permissions ON permissions.id = role_permissions.permission_id AND role_permissions.role_id = ?
+        LEFT JOIN 
+            roles ON role_permissions.role_id = roles.id;
+        `;
+        
+        try {
+            const [rows] = await pool.execute(query, [role_id]);
+            return rows;
+        } catch (err) {
+            console.error('Error fetching data:', err);
+            throw err;
+        }
+    }else if(action==="update"){
+
+       const addQuery = `
+       INSERT INTO role_permissions (role_id, permission_id)
+       VALUES (?, ?)
+       ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP
+      `;
+      
+      const deleteQuery = `
+       DELETE FROM role_permissions
+       WHERE role_id = ? AND permission_id = ?
+      `;
+      
+       try {
+          if(permissions.length>0){
+           for (const perm of permissions) {
+               if (perm.is_assigned) {
+                   // Insert permissions
+                   await pool.execute(addQuery, [perm.role_id, perm.permission_id]);
+               } else {
+                   // Delete permissions
+                   await pool.execute(deleteQuery, [perm.role_id, perm.permission_id]);
+               }
+           }
+          }
+       } catch (err) {
+           console.error('Error updating data:', err);
+           throw err;
+       }
     }
 };
 
