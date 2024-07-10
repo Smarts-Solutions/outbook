@@ -23,7 +23,7 @@ const Admin_Route = () => {
 
   const accessDataFetch = async () => {
     try {
-      const response = await dispatch(RoleAccess({ req: { "role_id": staffDetails.role_id }, authToken: token })).unwrap();
+      const response = await dispatch(RoleAccess({ req: { "role_id": staffDetails.role_id,"action": "get" }, authToken: token })).unwrap();
 
     } catch (error) {
       console.error("Error fetching access data:", error);
