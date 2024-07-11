@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { Staff, Service } from '../../ReduxStore/Slice/Staff/staffSlice';
+import { Staff, Service, Competency } from '../../ReduxStore/Slice/Staff/staffSlice';
 import { Role } from '../../ReduxStore/Slice/Settings/settingSlice';
+import { FormGroup, Label, Input,Row, Col } from 'reactstrap';
 
 import Datatable from '../../Components/ExtraComponents/Datatable';
 import CommanModal from '../../Components/ExtraComponents/Modals/CommanModal';
@@ -26,14 +27,12 @@ const StaffPage = () => {
     const [editStaffData, setEditStaffData] = useState(false);
     const [addCompetancy, SetCompetancy] = useState(false);
     const [refresh, SetRefresh] = useState(false);
-
     const [activeTab, setActiveTab] = useState('this-week');
     const [modalData, setModalData] = useState({ fields: [] });
     const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
     const [serviceDataAll, setServiceDataAll] = useState({ loading: true, data: [] });
     const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
 
-    // const closeModal = () => setIsModalOpen(false);
 
     const staffData = async () => {
         await dispatch(Staff({ req: { "action": "get" }, authToken: token }))
@@ -50,8 +49,10 @@ const StaffPage = () => {
             });
     };
 
-    const ServiceData = async () => {
-        await dispatch(Service({ req: { "action": "get" }, authToken: token }))
+
+    const ServiceData = async (row) => {
+ 
+        await dispatch(Competency({ req: { "action": "get", "staff_id": row.id }, authToken: token }))
             .unwrap()
             .then(async (response) => {
                 if (response.status) {
@@ -111,7 +112,7 @@ const StaffPage = () => {
                     {/* <button className='edit-icon' onClick={() => setIsModalOpen(true)}> <i className="ti-user" /></button> */}
                     <button className='delete-icon' onClick={() => setPortfolio(true)}> <i className="ti-briefcase" /></button>
                     <button className='edit-icon' onClick={(e) => { setEditStaff(true); setEditStaffData(row); }}> <i className="ti-pencil" /></button>
-                    <button className='delete-icon' onClick={(e) => SetCompetancy(true)}>Add Competency</button>
+                    <button className='delete-icon' onClick={(e) =>{ ServiceData(row); SetCompetancy(true)}}>Add Competency</button>
                     <button className='delete-icon'>Log Logs</button>
                     {row.role === "ADMIN" || row.role === "SUPERADMIN" ? (
                         <button className='delete-icon' disabled>
@@ -162,7 +163,7 @@ const StaffPage = () => {
                 "role_id": values.role,
                 "status": values.status
             }
-          
+
             if (editStaff) {
                 req.id = editStaffData && editStaffData.id
             }
@@ -263,9 +264,21 @@ const StaffPage = () => {
 
 
 
+    const handleCheckboxChange = (event, id) => {
+        const { checked } = event.target;
+        setServiceDataAll((prevState) => ({
+            ...prevState,
+            data: prevState.data.map((item) =>
+                item.id === id ? { ...item, isChecked: checked } : item
+            ),
+        }));
+    };
+
+
+
     useEffect(() => {
         staffData()
-        ServiceData()
+       
         roleData()
     }, [refresh]);
 
@@ -332,9 +345,6 @@ const StaffPage = () => {
                     </div>
                 </div>
             </div>
-
-
-
 
             {/* Add Staff */}
             <CommanModal
@@ -467,10 +477,26 @@ const StaffPage = () => {
                 hideBtn={true}
                 handleClose={() => SetCompetancy(false)}
             >
-                <Formicform fieldtype={serviceDataAll && serviceDataAll.data.map((data) => {
-                    return { type: "checkbox", name: data.id, label: data.name, label_size: 12, col_size: 6, disable: false }
-                })} formik={formik} btn_name="Update"
-                />
+              <FormGroup>
+                    <Row>
+                        {serviceDataAll.data.map((item, index) => (
+                            <Col key={item.id} md={index < 3 ? 4 : 6}>
+                                <div className="form-check">
+                                    <Label className="form-check-label">
+                                        <Input
+                                            type="checkbox"
+                                            name={item.service_name}
+                                            checked={item.isChecked}
+                                            onChange={(e) => handleCheckboxChange(e, item.id)}
+                                            className="form-check-input"
+                                        />
+                                        {item.service_name}
+                                    </Label>
+                                </div>
+                            </Col>
+                        ))}
+                    </Row>
+                </FormGroup>
             </CommanModal>
             {/* CLOSE Add Competancy */}
 

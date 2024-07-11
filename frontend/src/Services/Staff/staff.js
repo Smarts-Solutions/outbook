@@ -34,3 +34,17 @@ export async function SERVICE(data, token) {
         return await err;
     }
 }
+
+// Competency Action API Add, Edit, Delete
+export async function COMPETENCY(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}staffCompetency`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
