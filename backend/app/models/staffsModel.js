@@ -90,10 +90,26 @@ const staffCompetency = async (staffCompetency) => {
         throw err;
     }
  }else{
+    
     const query = `
-    SELECT services.id as service_id , services.name as service_name FROM staff_competencies JOIN services ON staff_competencies.service_id = services.id WHERE staff_competencies.staff_id = ${staff_id}
+        SELECT 
+            services.id as service_id, 
+            services.name as service_name, 
+            CASE 
+                WHEN staff_competencies.service_id IS NOT NULL THEN true 
+                ELSE false 
+            END as status 
+        FROM 
+            services 
+        LEFT JOIN 
+            staff_competencies 
+        ON 
+            services.id = staff_competencies.service_id 
+        AND 
+            staff_competencies.staff_id = ?
     `;
-    const [rows] = await pool.query(query);
+
+    const [rows] = await pool.query(query, [staff_id]);
     return rows;
  }
 
