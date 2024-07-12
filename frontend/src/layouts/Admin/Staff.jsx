@@ -178,6 +178,7 @@ const StaffPage = () => {
                         setEditStaff(false);
                         SetRefresh(!refresh);
                         formik.resetForm();
+                        window.location.reload();
                     } else {
                         sweatalert.fire({
                             icon: 'error',
