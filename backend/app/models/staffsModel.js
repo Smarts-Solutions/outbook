@@ -61,7 +61,6 @@ const updateStaff = async (staff) => {
     }
 };
 
-
 const staffCompetency = async (staffCompetency) => {
  const { staff_id,action, service } = staffCompetency;
  if(action==="update"){
@@ -118,10 +117,11 @@ const staffCompetency = async (staffCompetency) => {
 }
 
 const getStaffByEmail = async (email) => {
-    const [rows] = await pool.query('SELECT id , password FROM staffs WHERE email = ?', [email]);
-    return rows[0];
-}
+    const [rows] = await pool.query('SELECT staffs.id , staffs.email , staffs.password , staffs.role_id ,roles.role_name ,roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id  WHERE staffs.email = ?', [email]);
 
+    console.log("rows",rows)
+    return rows[0];
+};
 
 const getStaffById = async (id) => {
     const [rows] = await pool.query('SELECT id , login_auth_token FROM staffs  WHERE id = ?', [id]);
