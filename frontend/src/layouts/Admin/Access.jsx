@@ -109,7 +109,6 @@ const Access = () => {
 
     const handleSaveChanges = async () => {
         try {
-            console.log('Checkbox state:', checkboxState);
 
             const response = await dispatch(GetAccess({
                 req: {
@@ -120,7 +119,6 @@ const Access = () => {
             })).unwrap();
 
             if (response.status) {
-                console.log("Response:", response);
                 Swal.fire({
                     title: 'Success!',
                     text: 'Permissions updated successfully.',
