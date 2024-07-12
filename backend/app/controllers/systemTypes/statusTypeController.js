@@ -8,8 +8,13 @@ const handleStatusType = async (req, res) => {
         switch (action) {
             case 'add':
                 result = await statusTypeService.addStatusType(StatusType);
-                res.status(201).json({ status: true, userId: result, message: 'StatusType created successfully' });
-                break;
+                if(!result.status){
+                    res.status(200).json({ status: false, message: result.message });
+                    break;
+                }else{
+                    res.status(200).json({ status: true, message: result.message , userId: result.data});
+                    break;
+                }
             case 'get':
                 result = await statusTypeService.getStatusType();
                 res.status(200).json({ status: true, data: result });
@@ -19,9 +24,15 @@ const handleStatusType = async (req, res) => {
                 res.status(200).json({ status: true, message: 'StatusType deleted successfully' });
                 break;
             case 'update':
-                await statusTypeService.modifyStatusType(StatusType);
-                res.status(200).json({ status: true, message: 'StatusType updated successfully' });
-                break;
+                result = await statusTypeService.modifyStatusType(StatusType);
+                console.log("await pool.execute(query, values); ",result)
+                if(!result.status){
+                    res.status(200).json({ status: false, message: result.message });
+                    break;
+                }else{
+                    res.status(200).json({ status: true, message: result.message , userId: result.data});
+                    break;
+                }
             default:
                 res.status(400).json({ status: false, message: 'Invalid action' });
         }

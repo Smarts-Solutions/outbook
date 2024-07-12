@@ -2,15 +2,20 @@ const pool = require('../config/database');
 
 const createClientIndustry = async (ClientIndustry) => {
     const { business_type} = ClientIndustry;
-
+    const checkQuery = `SELECT 1 FROM client_industry_types WHERE business_type = ?`
     const query = `
     INSERT INTO client_industry_types (business_type)
     VALUES (?)
     `;
 
     try {
-        const [result] = await pool.execute(query, [business_type]);
-        return result.insertId;
+        const [check] = await pool.query(checkQuery, [business_type]);
+        if (check.length > 0) {
+            return {status: false , message: 'Client Industry already exists.'};
+        }
+        const [result] = await pool.query(query, [business_type]);
+        return {status: true ,message: 'Client Industry created successfully.' , data : result.insertId};
+        
     } catch (err) {
         console.error('Error inserting data:', err);
         throw err;
@@ -47,6 +52,7 @@ const deleteClientIndustry = async (ClientIndustryId) => {
 
 const updateClientIndustry = async (ClientIndustry) => {
     const { id, ...fields } = ClientIndustry;
+    const  business_type = ClientIndustry.business_type;
     // Create an array to hold the set clauses
     const setClauses = [];
     const values = [];
@@ -63,8 +69,16 @@ const updateClientIndustry = async (ClientIndustry) => {
     SET ${setClauses.join(', ')}
     WHERE id = ?
     `;
+
+    // Check if the record exists
+    const checkQuery = `SELECT 1 FROM client_industry_types WHERE business_type = ? AND id != ?`;
     try {
-        await pool.execute(query, values);
+        const [check] = await pool.execute(checkQuery, [business_type, id]);
+        if (check.length > 0) {
+            return {status: false , message: 'Client Industry already exists.'};
+        }
+        const[result]= await pool.execute(query, values);
+        return {status: true , message: 'Client Industry updated successfully.' , data : result.affectedRows};
     } catch (err) {
         console.error('Error updating data:', err);
         throw err;

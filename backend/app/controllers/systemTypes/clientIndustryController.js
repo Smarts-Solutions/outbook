@@ -8,8 +8,13 @@ const handleClientIndustry = async (req, res) => {
       switch (action) {
           case 'add':
               result = await clientIndustryService.addClientIndustry(ClientIndustry);
-              res.status(201).json({ status:true, userId: result ,message: 'ClientIndustry created successfully' });
-              break;
+              if(!result.status){
+                res.status(200).json({ status: false, message: result.message });
+                break;
+            }else{
+                res.status(200).json({ status: true, message: result.message , userId: result.data});
+                break;
+            }
           case 'get':
               result = await clientIndustryService.getClientIndustry();
               res.status(200).json({ status:true, data: result });
@@ -19,9 +24,14 @@ const handleClientIndustry = async (req, res) => {
               res.status(200).json({ status:true,message: 'ClientIndustry deleted successfully' });
               break;
           case 'update':
-              await clientIndustryService.modifyClientIndustry(ClientIndustry);
-              res.status(200).json({ status:true, message: 'ClientIndustry updated successfully' });
-              break;
+             result = await clientIndustryService.modifyClientIndustry(ClientIndustry);
+              if(!result.status){
+                res.status(200).json({ status: false, message: result.message });
+                break;
+            }else{
+                res.status(200).json({ status: true, message: result.message , userId: result.data});
+                break;
+            }
           default:
               res.status(400).json({ status:false, message: 'Invalid action' });
       }

@@ -2,14 +2,18 @@ const pool = require('../config/database');
 
 const createCountry = async (Country) => {
     const {name,code,currency} = Country;
-
+    const checkQuery = `SELECT 1 FROM countries WHERE name = ?`
     const query = `
     INSERT INTO countries (name,code,currency)
     VALUES (?,?,?)
     `;
     try {
+        const [check] = await pool.query(checkQuery, [name]);
+        if (check.length > 0) {
+            return {status: false, message: 'Country already exists.'};
+            }
         const [result] = await pool.execute(query, [name,code,currency]);
-        return result.insertId;
+        return {status: true, message: 'Country created successfully.' , data : result.insertId};
     } catch (err) {
         console.error('Error inserting data:', err);
         throw err;
@@ -46,6 +50,7 @@ const deleteCountry = async (CountryId) => {
 
 const updateCountry = async (Country) => {
     const { id, ...fields } = Country;
+    const name  = Country.name;
     // Create an array to hold the set clauses
     const setClauses = [];
     const values = [];
@@ -62,8 +67,14 @@ const updateCountry = async (Country) => {
     SET ${setClauses.join(', ')}
     WHERE id = ?
     `;
+    const checkQuery = `SELECT 1 FROM countries WHERE name = ? AND id != ?`;
     try {
-        await pool.execute(query, values);
+        const [check] = await pool.query(checkQuery, [name, id]);
+        if (check.length > 0) {
+            return {status: false, message: 'Country already exists.'};
+            }
+         const [result] = await pool.execute(query, values);
+         return {status: true, message: 'Country updated successfully.' , data : result.affectedRows};
     } catch (err) {
         console.error('Error updating data:', err);
         throw err;
