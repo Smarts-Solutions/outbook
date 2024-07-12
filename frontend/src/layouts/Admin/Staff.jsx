@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { Staff, Service, Competency } from '../../ReduxStore/Slice/Staff/staffSlice';
+import { Staff, Competency } from '../../ReduxStore/Slice/Staff/staffSlice';
 import { Role } from '../../ReduxStore/Slice/Settings/settingSlice';
-import { FormGroup, Label, Input,Row, Col } from 'reactstrap';
-
+import { FormGroup, Label, Input, Row, Col, Button } from 'reactstrap';
 import Datatable from '../../Components/ExtraComponents/Datatable';
 import CommanModal from '../../Components/ExtraComponents/Modals/CommanModal';
 import SetAccessModal from '../../Components/ExtraComponents/Modals/AccessModal';
@@ -17,10 +15,8 @@ import Validation_Message from '../../Utils/Validation_Message';
 
 const StaffPage = () => {
     const token = JSON.parse(localStorage.getItem("token"));
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
 
-    // const [isModalOpen, setIsModalOpen] = useState(false);
+    const dispatch = useDispatch();
     const [addStaff, setAddStaff] = useState(false);
     const [portfolio, setPortfolio] = useState(false);
     const [editStaff, setEditStaff] = useState(false);
@@ -30,7 +26,7 @@ const StaffPage = () => {
     const [activeTab, setActiveTab] = useState('this-week');
     const [modalData, setModalData] = useState({ fields: [] });
     const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
-    const [serviceDataAll, setServiceDataAll] = useState({ loading: true, data: [] });
+    const [serviceDataAll, setServiceDataAll] = useState({ loading: true, data: [], staff_id: "" });
     const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
 
 
@@ -49,21 +45,20 @@ const StaffPage = () => {
             });
     };
 
-
     const ServiceData = async (row) => {
- 
-        await dispatch(Competency({ req: { "action": "get", "staff_id": row.id }, authToken: token }))
-            .unwrap()
-            .then(async (response) => {
-                if (response.status) {
-                    setServiceDataAll({ loading: false, data: response.data });
-                } else {
-                    setServiceDataAll({ loading: false, data: [] });
-                }
-            })
-            .catch((error) => {
-                console.log("Error", error);
-            });
+        try {
+            const response = await dispatch(Competency({ req: { "action": "get", "staff_id": row.id }, authToken: token })).unwrap();
+            if (response.status) {
+                var data = response.data.map((item) => {
+                    return { ...item, status: item.status === 1 ? true : false }
+                })
+                setServiceDataAll({ loading: false, data: data, staff_id: row.id });
+            } else {
+                setServiceDataAll({ loading: false, data: [], staff_id: row.id });
+            }
+        } catch (error) {
+            console.log("Error", error);
+        }
 
     };
 
@@ -82,7 +77,6 @@ const StaffPage = () => {
                 console.log("Error", error);
             });
     };
-
 
     const tabs = [
         { id: 'this-week', label: 'This week' },
@@ -112,7 +106,7 @@ const StaffPage = () => {
                     {/* <button className='edit-icon' onClick={() => setIsModalOpen(true)}> <i className="ti-user" /></button> */}
                     <button className='delete-icon' onClick={() => setPortfolio(true)}> <i className="ti-briefcase" /></button>
                     <button className='edit-icon' onClick={(e) => { setEditStaff(true); setEditStaffData(row); }}> <i className="ti-pencil" /></button>
-                    <button className='delete-icon' onClick={(e) =>{ ServiceData(row); SetCompetancy(true)}}>Add Competency</button>
+                    <button className='delete-icon' onClick={(e) => { ServiceData(row); SetCompetancy(true) }}>Add Competency</button>
                     <button className='delete-icon'>Log Logs</button>
                     {row.role === "ADMIN" || row.role === "SUPERADMIN" ? (
                         <button className='delete-icon' disabled>
@@ -225,7 +219,6 @@ const StaffPage = () => {
         }
     ];
 
-
     const DeleteStaff = async (row) => {
         sweatalert.fire({
             title: 'Are you sure?',
@@ -262,23 +255,45 @@ const StaffPage = () => {
         })
     }
 
-
-
     const handleCheckboxChange = (event, id) => {
         const { checked } = event.target;
+
         setServiceDataAll((prevState) => ({
             ...prevState,
             data: prevState.data.map((item) =>
-                item.id === id ? { ...item, isChecked: checked } : item
+                item.service_id === id ? { ...item, status: checked } : item
             ),
         }));
     };
 
+    const handleUpdate = async () => {
+        try {
+            const response = await dispatch(Competency({ req: { "action": "update", "staff_id": serviceDataAll.staff_id, service: serviceDataAll.data }, authToken: token })).unwrap();
+            console.log("response", response)
+            if (response.status) {
 
+                sweatalert.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: response.message,
+                    timer: 2000,
+                })
+                SetCompetancy(false);
+                SetRefresh(!refresh);
+            } else {
+                sweatalert.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: response.message,
+                })
+            }
+        } catch (error) {
+            console.log("Error", error);
+        }
+    };
 
     useEffect(() => {
         staffData()
-       
         roleData()
     }, [refresh]);
 
@@ -477,7 +492,7 @@ const StaffPage = () => {
                 hideBtn={true}
                 handleClose={() => SetCompetancy(false)}
             >
-              <FormGroup>
+                <FormGroup>
                     <Row>
                         {serviceDataAll.data.map((item, index) => (
                             <Col key={item.id} md={index < 3 ? 4 : 6}>
@@ -486,8 +501,8 @@ const StaffPage = () => {
                                         <Input
                                             type="checkbox"
                                             name={item.service_name}
-                                            checked={item.isChecked}
-                                            onChange={(e) => handleCheckboxChange(e, item.id)}
+                                            defaultChecked={item.status}
+                                            onChange={(e) => handleCheckboxChange(e, item.service_id)}
                                             className="form-check-input"
                                         />
                                         {item.service_name}
@@ -497,6 +512,11 @@ const StaffPage = () => {
                         ))}
                     </Row>
                 </FormGroup>
+                <div className="d-flex justify-content-end">
+                    <Button color="primary" onClick={handleUpdate}>
+                        Update
+                    </Button>
+                </div>
             </CommanModal>
             {/* CLOSE Add Competancy */}
 

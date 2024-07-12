@@ -69,7 +69,6 @@ const Setting = () => {
         await dispatch(StatusType({ req: req, authToken: token }))
             .unwrap()
             .then(async (response) => {
-                //console.log("response", response);
                 if (req.action == "get") {
                     if (response.status) {
                         setStatusTypeDataAll({ loading: false, data: response.data });
@@ -107,7 +106,6 @@ const Setting = () => {
         await dispatch(Service({ req: req, authToken: token }))
             .unwrap()
             .then(async (response) => {
-                //console.log("response", response);
                 if (req.action == "get") {
                     if (response.status) {
                         setServiceDataAll({ loading: false, data: response.data });
@@ -270,7 +268,7 @@ const Setting = () => {
     };
 
     const handleEdit = (data, tabStatus) => {
-        console.log("data", data);
+      
         if (tabStatus === 1) {
             setModalData({
                 ...modalData,
@@ -387,8 +385,6 @@ const Setting = () => {
             }
         });
 
-        // console.log("req", req);
-        // console.log("modalData.status", modalData.tabStatus);
         switch (modalData.tabStatus) {
             case 1:
                 roleData(req);
@@ -409,8 +405,7 @@ const Setting = () => {
     };
 
     const handleDelete = (data, tabStatus) => {
-        console.log("data", data);
-        console.log("tabStatus", tabStatus);
+  
         const itemName = tabStatus == 1 ? data.role_name : tabStatus == 2 ? data.type : data.name;
         // Confirm deletion with the user
 

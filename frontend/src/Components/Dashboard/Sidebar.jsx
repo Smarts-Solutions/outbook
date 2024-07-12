@@ -17,7 +17,6 @@ const Sidebar = () => {
   const [showCustomerTab, setShowCustomerTab] = useState(true);
   const [showStaffTab, setShowStaffTab] = useState(true);
 
-console.log("role"  ,role);
 
   useEffect(() => {
     if (accessData && accessData.length > 0 && role !== "ADMIN" && role !== "SUPERADMIN") {
@@ -41,13 +40,6 @@ console.log("role"  ,role);
       });
     }
   }, [accessData]);
-
-
-
-
-console.log("showSettingTab",showSettingTab);
-console.log("showCustomerTab",showCustomerTab);
-console.log("showStaffTab",showStaffTab);
 
 
 
