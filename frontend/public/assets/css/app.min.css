@@ -78,11 +78,14 @@
   width: 100%;
   margin-top: 6px;
 }
-.left-sidenav-menu li .active,.left-sidenav-menu li:hover
+.left-sidenav-menu li.active,.left-sidenav-menu li:hover
 {
 background-color: #F5F5F5;
 }
-
+.left-sidenav-menu li.active a span,.left-sidenav-menu li:hover a span
+{
+color: #333547;
+}
 .left-sidenav-menu li > a {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -8117,14 +8120,34 @@ font-weight: 600;
   /* line-height: 24px; */
   border-radius: 3px;
 }
-button.btn.btn-info {
-  background: #00AFEF;
-  border: 0;
+button.btn.btn-info ,.blue-btn {
+  background: #00AFEF ;
+  border-color: #00AFEF !important;
+  border: 1px solid !important;
   border-radius: 0;
   padding: 10px 20px;
   font-weight: 900;
   font-size: 14px;
   line-height: 16.94px;
+  height: auto;
+}
+.blue-btn:hover
+{  color: #00AFEF !important;
+  border-color: #00AFEF !important;
+  border: 1px solid !important;
+  background: transparent !important;
+}
+.white-btn
+{
+  background: transparent !important;
+  border-color: 1px solid #333547 !important;
+  border-radius: 0;
+  color:#333547;
+  padding: 10px 20px;
+  font-weight: 900;
+  font-size: 14px;
+  line-height: 16.94px;
+  height: auto;
 }
 .btn-outline-info
 {
@@ -8226,7 +8249,35 @@ text-align: left;
   box-shadow: none !important;
 }
 
-.rdt_TableCell{
+.App {
+  padding: 50px;
+}
 
-    white-space: nowrap !important;
+main .details__wrapper {
+
+  margin: 5em auto;
+}
+
+main .form__item {
+  margin-bottom: 1.6em;
+}
+
+
+
+
+main .input__error input {
+  border-color: red;
+}
+
+main .error__feedback {
+  color: red;
+}
+
+
+.ant-steps-item-process>.ant-steps-item-container>.ant-steps-item-icon {
+  background: #00AFEF !important;
+}
+
+.btn-info {
+  border-radius: 1px !important;
 }

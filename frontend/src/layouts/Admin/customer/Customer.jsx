@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import Datatable from '../../Components/ExtraComponents/Datatable';
+import { Link } from 'react-router-dom';
+import Datatable from '../../../Components/ExtraComponents/Datatable';
 
 const Customer = () => {
   const tabs = [
@@ -100,9 +101,7 @@ const Customer = () => {
                 </ul>
               </div>
               <div className="col-md-4 col-auto">
-                <button className='btn btn-info text-white float-end'>
-                  <i className="fa fa-plus" /> Add Customer
-                </button>
+                <Link to="/admin/customer/customer_add_process/addcustomer" className='btn btn-info text-white float-end blue-btn'> <i className="fa fa-plus" /> Add Customer</Link>
               </div>
             </div>
           </div>
