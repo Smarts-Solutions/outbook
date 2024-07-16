@@ -487,7 +487,7 @@ const Setting = () => {
                     <div className="col-sm-12">
                         <div className="page-title-box">
                             <div className="row align-items-start">
-                                <div className="col-md-8">
+                                <div className="col-md-12">
                                     <>
                                         <ul className="nav nav-pills  rounded-tabs" id="pills-tab" role="tablist">
                                             <li className="nav-item" role="presentation">
@@ -503,6 +503,21 @@ const Setting = () => {
                                                     onClick={() => handleTabChange(1)}
                                                 >
                                                     Staff Role
+                                                </button>
+                                            </li>
+                                            <li className="nav-item" role="presentation">
+                                                <button
+                                                    className={`nav-link ${tabStatus.current === 4 ? 'active' : ''}`}
+                                                    id="current-month-tab"
+                                                    data-bs-toggle="pill"
+                                                    data-bs-target="#current-month"
+                                                    type="button"
+                                                    role="tab"
+                                                    aria-controls="current-month"
+                                                    aria-selected={tabStatus.current === 4}
+                                                    onClick={() => handleTabChange(4)}
+                                                >
+                                                    Customer Contact Person Role
                                                 </button>
                                             </li>
                                             <li className="nav-item" role="presentation">
@@ -533,6 +548,37 @@ const Setting = () => {
                                                     onClick={() => handleTabChange(3)}
                                                 >
                                                     Services
+                                                </button>
+                                            </li>
+                                            
+                                            <li className="nav-item" role="presentation">
+                                                <button
+                                                    className={`nav-link ${tabStatus.current === 5 ? 'active' : ''}`}
+                                                    id="current-month-tab"
+                                                    data-bs-toggle="pill"
+                                                    data-bs-target="#current-month"
+                                                    type="button"
+                                                    role="tab"
+                                                    aria-controls="current-month"
+                                                    aria-selected={tabStatus.current === 5}
+                                                    onClick={() => handleTabChange(5)}
+                                                >
+                                                    Client Industry
+                                                </button>
+                                            </li>
+                                            <li className="nav-item" role="presentation">
+                                                <button
+                                                    className={`nav-link ${tabStatus.current === 6 ? 'active' : ''}`}
+                                                    id="current-month-tab"
+                                                    data-bs-toggle="pill"
+                                                    data-bs-target="#current-month"
+                                                    type="button"
+                                                    role="tab"
+                                                    aria-controls="current-month"
+                                                    aria-selected={tabStatus.current === 6}
+                                                    onClick={() => handleTabChange(6)}
+                                                >
+                                                    Country
                                                 </button>
                                             </li>
 
