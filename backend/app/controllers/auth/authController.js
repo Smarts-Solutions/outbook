@@ -46,8 +46,6 @@ const staffCompetency = async (req, res) => {
     }
 }
 
-
-
 const login = async (req, res) => {
     try {
       const data = await authService.login(req.body);
@@ -62,7 +60,7 @@ const login = async (req, res) => {
 
    const loginAuthToken = async (req, res) => {
     try {
-    const { ...staff } = req.body;
+      const { ...staff } = req.body;
       const data = await authService.modifyStaff(staff);
       return res.send({ status:true, message: "Success.."});
     } catch (error) {

@@ -2,14 +2,18 @@ const pool = require('../config/database');
 
 const createStatusType = async (StatusType) => {
     const {type} = StatusType;
-
+    const checkQuery = `SELECT 1 FROM status_types WHERE type = ?`
     const query = `
     INSERT INTO status_types (type)
     VALUES (?)
     `;
     try {
+        const [check] = await pool.query(checkQuery, [type]);
+        if (check.length > 0) {
+            return {status: false, message: 'Status Type already exists.'};
+            }
         const [result] = await pool.execute(query, [type]);
-        return result.insertId;
+        return {status: true, message: 'Status Type created successfully.' , data : result.insertId};
     } catch (err) {
         console.error('Error inserting data:', err);
         throw err;
@@ -46,6 +50,7 @@ const deleteStatusType = async (StatusTypeId) => {
 
 const updateStatusType = async (StatusType) => {
     const { id, ...fields } = StatusType;
+    const type = StatusType.type;
     // Create an array to hold the set clauses
     const setClauses = [];
     const values = [];
@@ -62,8 +67,15 @@ const updateStatusType = async (StatusType) => {
     SET ${setClauses.join(', ')}
     WHERE id = ?
     `;
+      // Check if the record exists
+      const checkQuery = `SELECT 1 FROM status_types WHERE type = ? AND id != ?`;
     try {
-        await pool.execute(query, values);
+        const [check] = await pool.execute(checkQuery, [type, id]);
+        if (check.length > 0) {
+            return { status: false, message: 'Status Type already exists.' };
+        }
+        const [result] = await pool.execute(query, values);
+        return { status: true, message: 'Status Type updated successfully.', data: result.affectedRows };
     } catch (err) {
         console.error('Error updating data:', err);
         throw err;

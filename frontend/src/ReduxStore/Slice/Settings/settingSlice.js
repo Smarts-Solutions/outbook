@@ -1,34 +1,37 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { ROLE , STATUS_TYPE , SERVICE} from "../../../Services/Settings/settingService";
+import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE , CLIENTINDUSTRY ,COUNTRY } from "../../../Services/Settings/settingService";
 
 
 
+
+//Get Role
 export const Role = createAsyncThunk("role", async (data) => {
   try {
-    const { req , authToken } = data
-    const res = await ROLE( req , authToken);
+    const { req, authToken } = data
+    const res = await ROLE(req, authToken);
     return await res;
   } catch (err) {
     return err;
   }
 });
 
-
+//Get StatusType
 export const StatusType = createAsyncThunk("statusType", async (data) => {
   try {
-    const { req , authToken } = data
-    const res = await STATUS_TYPE( req , authToken);
+    const { req, authToken } = data
+    const res = await STATUS_TYPE(req, authToken);
     return await res;
   } catch (err) {
     return err;
   }
 });
 
+//Get Service
 export const Service = createAsyncThunk("service", async (data) => {
   try {
-    const { req , authToken } = data
-    const res = await SERVICE( req , authToken);
+    const { req, authToken } = data
+    const res = await SERVICE(req, authToken);
     return await res;
   } catch (err) {
     return err;
@@ -36,18 +39,55 @@ export const Service = createAsyncThunk("service", async (data) => {
 });
 
 
+//Get PersonRole
+export const PersonRole = createAsyncThunk("customerContactPersonRole", async (data) => {
+  try {
+    const { req, authToken } = data
+    const res = await PERSONROLE(req, authToken);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
 
+//Get ClientIndustry
+export const ClientIndustry = createAsyncThunk("clientIndustry", async (data) => {
+  try {
+    const { req, authToken } = data
+    const res = await CLIENTINDUSTRY(req, authToken);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
+
+//Get Country Data
+export const Country = createAsyncThunk("country", async (data) => {
+  try {
+    const { req, authToken } = data
+    const res = await COUNTRY(req, authToken);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
+
+
+//Setting Slice
 const SettingSlice = createSlice({
   name: "SettingSlice",
   initialState: {
     isLoading: false,
     isError: false,
-    Role : [],
-    StatusType : [],
-    Service : []
+    role: [],
+    statustype: [],
+    Service: [],
+    personrole: [],
+    clientIndustry: [],
+    country: []
   },
 
-  reducers: {},  
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(Role.pending, (state, action) => {
@@ -55,7 +95,7 @@ const SettingSlice = createSlice({
       })
       .addCase(Role.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.Role = action.payload;
+        state.role = action.payload;
       })
       .addCase(Role.rejected, (state, action) => {
         state.isLoading = false;
@@ -65,8 +105,9 @@ const SettingSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(StatusType.fulfilled, (state, action) => {
+        console.log(action.payload)
         state.isLoading = false;
-        state.StatusType = action.payload;
+        state.statustype = action.payload;
       })
       .addCase(StatusType.rejected, (state, action) => {
         state.isLoading = false;
@@ -83,10 +124,41 @@ const SettingSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
       })
-
-       
+      .addCase(PersonRole.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(PersonRole.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.personrole = action.payload;
+      })
+      .addCase(PersonRole.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(ClientIndustry.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(ClientIndustry.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.clientIndustry = action.payload;
+      })
+      .addCase(ClientIndustry.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(Country.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(Country.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.country = action.payload;
+      })
+      .addCase(Country.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      });
   },
-   
+
 });
 
 export default SettingSlice;

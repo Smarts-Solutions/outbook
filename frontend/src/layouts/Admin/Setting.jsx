@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Role, StatusType, Service } from '../../ReduxStore/Slice/Settings/settingSlice'
+import { Role, StatusType, Service, PersonRole, ClientIndustry, Country } from '../../ReduxStore/Slice/Settings/settingSlice'
 import Datatable from '../../Components/ExtraComponents/Datatable';
 import Modal from '../../Components/ExtraComponents/Modals/Modal';
 import sweatalert from 'sweetalert2';
@@ -11,8 +11,11 @@ const Setting = () => {
     const token = JSON.parse(localStorage.getItem("token"));
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const tabStatus = useRef(1);
+    const tabStatus = useRef('1');
     const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
+    const [personRoleDataAll, setPersonRoleDataAll] = useState({ loading: true, data: [] });
+    const [clientIndustryDataAll, setClientIndustryDataAll] = useState({ loading: true, data: [] });
+    const [countryDataAll, setCountryDataAll] = useState({ loading: true, data: [] });
     const [addRoleName, setAddRoleName] = useState("");
     const [statusTypeDataAll, setStatusTypeDataAll] = useState({ loading: true, data: [] });
     const [addStatusType, setAddStatusType] = useState("");
@@ -20,14 +23,18 @@ const Setting = () => {
     const [addService, setAddService] = useState("");
     const [modalData, setModalData] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [getShowTabId, setShowTabId] = useState("1");
+
     const [isEdit, setIsEdit] = useState(false);
 
-    
+
 
     const roleData = async (req) => {
-        await dispatch(Role({ req: req, authToken: token }))
+        const data = { req: req, authToken: token }
+        await dispatch(Role(data))
             .unwrap()
             .then(async (response) => {
+
                 if (req.action == "get") {
                     if (response.status) {
                         setRoleDataAll({ loading: false, data: response.data });
@@ -40,7 +47,6 @@ const Setting = () => {
                             title: response.message,
                             icon: 'success',
                             timer: 2000,
-
                         });
                         setTimeout(() => {
                             roleData({ action: "get" });
@@ -52,12 +58,7 @@ const Setting = () => {
                             timer: 2000,
                         });
                     }
-
-
                 }
-
-
-
             })
             .catch((error) => {
                 console.log("Error", error);
@@ -65,8 +66,8 @@ const Setting = () => {
     };
 
     const statusTypeData = async (req) => {
-
-        await dispatch(StatusType({ req: req, authToken: token }))
+        const data = { req: req, authToken: token }
+        await dispatch(StatusType(data))
             .unwrap()
             .then(async (response) => {
                 if (req.action == "get") {
@@ -138,12 +139,119 @@ const Setting = () => {
                 console.log("Error", error);
             });
     };
+    const PersonRoleData = async (req) => {
+        const data = { req: req, authToken: token }
+        await dispatch(PersonRole(data))
+            .unwrap()
+            .then(async (response) => {
+                if (req.action == "get") {
+                    if (response.status) {
+                        setPersonRoleDataAll({ loading: false, data: response.data });
+                    } else {
+                        setPersonRoleDataAll({ loading: false, data: [] });
+                    }
+                } else {
+                    if (response.status) {
+                        sweatalert.fire({
+                            title: response.message,
+                            icon: 'success',
+                            timer: 2000,
+                        });
+                        setTimeout(() => {
+                            PersonRoleData({ action: "get" });
+                        }, 2000);
+                    } else {
+                        sweatalert.fire({
+                            title: response.message,
+                            icon: 'error',
+                            timer: 2000,
+                        });
+                    }
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    }
+
+    const ClientIndustryData = async (req) => {
+        const data = { req: req, authToken: token }
+        await dispatch(ClientIndustry(data))
+            .unwrap()
+            .then(async (response) => {
+                if (req.action == "get") {
+                    if (response.status) {
+                        setClientIndustryDataAll({ loading: false, data: response.data });
+                    } else {
+                        setClientIndustryDataAll({ loading: false, data: [] });
+                    }
+                } else {
+                    if (response.status) {
+                        sweatalert.fire({
+                            title: response.message,
+                            icon: 'success',
+                            timer: 2000,
+                        });
+                        setTimeout(() => {
+                            ClientIndustryData({ action: "get" });
+                        }, 2000);
+                    } else {
+                        sweatalert.fire({
+                            title: response.message,
+                            icon: 'error',
+                            timer: 2000,
+                        });
+                    }
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    }
+
+    const CountryData = async (req) => {
+        const data = { req: req, authToken: token }
+        await dispatch(Country(data))
+            .unwrap()
+            .then(async (response) => {
+                if (req.action == "get") {
+                    if (response.status) {
+                        setCountryDataAll({ loading: false, data: response.data });
+                    } else {
+                        setCountryDataAll({ loading: false, data: [] });
+                    }
+                } else {
+                    if (response.status) {
+                        sweatalert.fire({
+                            title: response.message,
+                            icon: 'success',
+                            timer: 2000,
+                        });
+                        setTimeout(() => {
+                            CountryData({ action: "get" });
+                        }, 2000);
+                    } else {
+                        sweatalert.fire({
+                            title: response.message,
+                            icon: 'error',
+                            timer: 2000,
+                        });
+                    }
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    }
+
+
 
     useEffect(() => {
         fetchApiData(tabStatus.current);
     }, [tabStatus.current]);
 
     const handleTabChange = (newStatus) => {
+        setShowTabId(newStatus);
         tabStatus.current = newStatus;
         fetchApiData(newStatus);
     };
@@ -153,14 +261,23 @@ const Setting = () => {
             "action": "get"
         }
         switch (status) {
-            case 1:
+            case '1':
                 roleData(req);
                 break;
-            case 2:
+            case '2':
+                PersonRoleData(req);
+                break;
+            case '3':
                 statusTypeData(req);
                 break;
-            case 3:
+            case '4':
                 serviceData(req);
+                break;
+            case '5':
+                ClientIndustryData(req);
+                break;
+            case '6':
+                CountryData(req);
                 break;
             default:
                 break;
@@ -174,8 +291,8 @@ const Setting = () => {
             name: 'Actions',
             cell: row => (
                 <div>
-                    <button className='edit-icon' onClick={() => handleEdit(row, 1)}> <i className="ti-pencil" /></button>
-                    <button className='delete-icon' onClick={() => handleDelete(row, 1)}> <i className="ti-trash" /></button>
+                    <button className='edit-icon' onClick={() => handleEdit(row, '1')}> <i className="ti-pencil" /></button>
+                    <button className='delete-icon' onClick={() => handleDelete(row, '1')}> <i className="ti-trash" /></button>
                 </div>
             ),
             ignoreRowClick: true,
@@ -190,9 +307,9 @@ const Setting = () => {
             name: 'Actions',
             cell: row => (
                 <div >
-                    <button className='edit-icon' onClick={() => handleEdit(row, 2)}> <i className="ti-pencil" /></button>
-                    <button className='delete-icon' onClick={() => handleDelete(row, 2)}> <i className="ti-trash" /></button>
-                    <button className='edit-icon' ><i className="ti-plus" /></button>
+                    <button className='edit-icon' onClick={() => handleEdit(row, '3')}> <i className="ti-pencil" /></button>
+                    <button className='delete-icon' onClick={() => handleDelete(row, '3')}> <i className="ti-trash" /></button>
+
                 </div>
             ),
             ignoreRowClick: true,
@@ -206,10 +323,63 @@ const Setting = () => {
         {
             name: 'Actions',
             cell: row => (
+                <div>
+                    <button className='edit-icon' onClick={() => handleEdit(row, '4')}> <i className="ti-pencil" /></button>
+                    <button className='delete-icon' onClick={() => handleDelete(row, '4')}> <i className="ti-trash" /></button>
+                    <button className='btn btn-primary' >Add Job Type</button>
+                </div>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+        },
+    ];
+
+    const columnPersonRole = [
+        { name: 'Service Name', selector: row => row.name, sortable: true },
+        {
+            name: 'Actions',
+            cell: row => (
                 <div >
-                    <button className='edit-icon' onClick={() => handleEdit(row, 3)}> <i className="ti-pencil" /></button>
-                    <button className='delete-icon' onClick={() => handleDelete(row, 3)}> <i className="ti-trash" /></button>
-                    <button className='edit-icon' ><i className="ti-plus" /></button>
+                    <button className='edit-icon' onClick={() => handleEdit(row, '2')}> <i className="ti-pencil" /></button>
+                    <button className='delete-icon' onClick={() => handleDelete(row, '2')}> <i className="ti-trash" /></button>
+
+                </div>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+        },
+    ];
+
+    const columnClientIndustry = [
+        { name: 'Client Industry', selector: row => row.business_type, sortable: true },
+        {
+            name: 'Actions',
+            cell: row => (
+                <div >
+                    <button className='edit-icon' onClick={() => handleEdit(row, '5')}> <i className="ti-pencil" /></button>
+                    <button className='delete-icon' onClick={() => handleDelete(row, '5')}> <i className="ti-trash" /></button>
+
+                </div>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+        },
+    ];
+
+    const columnCountry = [
+        { name: 'Country Code', selector: row => '+' + row.code, sortable: true },
+        { name: 'Country Name', selector: row => row.name, sortable: true },
+        { name: 'Currency', selector: row => row.currency, sortable: true },
+        { name: 'Currency Status', selector: row => row.status == 1 ? "Yes" : "No", sortable: true },
+        {
+            name: 'Actions',
+            cell: row => (
+                <div >
+                    <button className='edit-icon' onClick={() => handleEdit(row, '6')}> <i className="ti-pencil" /></button>
+                    <button className='delete-icon' onClick={() => handleDelete(row, '6')}> <i className="ti-trash" /></button>
                 </div>
             ),
             ignoreRowClick: true,
@@ -219,9 +389,11 @@ const Setting = () => {
     ];
 
 
-
     const handleModalChange = (e) => {
         // setModalData({ ...modalData, value: e.target.value });
+
+
+
         const { name, value } = e.target;
         setModalData(prevModalData => ({
             ...prevModalData,
@@ -232,7 +404,7 @@ const Setting = () => {
     };
 
     const handleAdd = (e, tabStatus) => {
-        if (tabStatus === 1) {
+        if (tabStatus === '1') {
             setModalData({
                 ...modalData,
                 fields: [
@@ -242,17 +414,27 @@ const Setting = () => {
                 tabStatus: tabStatus,
             });
         }
-        else if (tabStatus === 2) {
+        else if (tabStatus === '2') {
             setModalData({
                 ...modalData,
                 fields: [
-                    { type: "text", name: "type", label: "Status", placeholder: "Status Type" }
+                    { type: "text", name: "name", label: "Role Name", placeholder: "Enter Contact Person Role" }
+                ],
+                title: " Contact Person Role",
+                tabStatus: tabStatus,
+            });
+        }
+        else if (tabStatus === '3') {
+            setModalData({
+                ...modalData,
+                fields: [
+                    { type: "text", name: "type", label: "Status Type", placeholder: "Enter Status Type" }
                 ],
                 title: "Status Type",
                 tabStatus: tabStatus,
             });
         }
-        else if (tabStatus === 3) {
+        else if (tabStatus === '4') {
             setModalData({
                 ...modalData,
                 fields: [
@@ -262,14 +444,38 @@ const Setting = () => {
                 tabStatus: tabStatus,
             });
         }
+
+        else if (tabStatus === '5') {
+            setModalData({
+                ...modalData,
+                fields: [
+                    { type: "text", name: "business_type", label: "Business Type", placeholder: "Enter Business Type" }
+                ],
+                title: " Business Type",
+                tabStatus: tabStatus,
+            });
+        }
+        else if (tabStatus === '6') {
+            setModalData({
+                ...modalData,
+                fields: [
+                    { type: "text", name: "name", label: "Country Name", placeholder: "Enter Country Name" },
+                    { type: "text", name: "code", label: "Country Code", placeholder: "Enter Country Code" },
+                    { type: "text", name: "currency", label: "Currency", placeholder: "Enter Currency" },
+                    { type: "select", name: "status", label: "Currency Status", placeholder: "Enter Currency Status", options: [{ label: "Active", value: "1" }, { label: "Deactive", value: "0" }] }
+                ],
+                title: " Country",
+                tabStatus: tabStatus,
+            });
+        }
         // setModalData({});
         setIsEdit(false);
         setIsModalOpen(true);
     };
 
     const handleEdit = (data, tabStatus) => {
-      
-        if (tabStatus === 1) {
+
+        if (tabStatus === '1') {
             setModalData({
                 ...modalData,
                 fields: [
@@ -298,14 +504,42 @@ const Setting = () => {
             });
 
         }
-        else if (tabStatus === 2) {
+        else if (tabStatus === '2') {
+            setModalData({
+                ...modalData,
+                fields: [
+                    {
+                        type: "text",
+                        name: "name",
+                        label: "Role Name",
+                        placeholder: "Service Name",
+                        value: data.name
+                    },
+                    {
+                        type: "select",
+                        name: "status",
+                        label: "Status",
+                        placeholder: "Select Status",
+                        value: data.status === "1" ? "1" : "0",
+                        options: [
+                            { label: "Active", value: "1" },
+                            { label: "Deactive", value: "0" }
+                        ]
+                    }
+                ],
+                title: " Contact Person Role",
+                tabStatus: tabStatus,
+                id: data.id
+            });
+        }
+        else if (tabStatus === '3') {
             setModalData({
                 ...modalData,
                 fields: [
                     {
                         type: "text",
                         name: "type",
-                        label: "Status",
+                        label: "Status Name",
                         placeholder: "Status Type",
                         value: data.type
                     },
@@ -326,7 +560,7 @@ const Setting = () => {
                 id: data.id
             });
         }
-        else if (tabStatus === 3) {
+        else if (tabStatus === '4') {
             setModalData({
                 ...modalData,
                 fields: [
@@ -337,6 +571,70 @@ const Setting = () => {
                         placeholder: "Service Name",
                         value: data.name
                     },
+                    {
+                        type: "select",
+                        name: "status",
+                        label: "Status",
+                        placeholder: "Select Status",
+                        value: data.status === "1" ? "1" : "0",
+                        options: [
+                            { label: "Active", value: "1" },
+                            { label: "Deactive", value: "0" }
+                        ]
+                    }
+                ],
+                title: "Service",
+                tabStatus: tabStatus,
+                id: data.id
+            });
+        }
+        else if (tabStatus === '5') {
+            setModalData({
+                ...modalData,
+                fields: [
+                    {
+                        type: "text",
+                        name: "business_type",
+                        label: "Business Type",
+                        placeholder: "Enter Business Type",
+                        value: data.business_type
+                    },
+                    {
+                        type: "select",
+                        name: "status",
+                        label: "Status",
+                        placeholder: "Enter Business Status",
+                        value: data.status === "1" ? "1" : "0",
+                        options: [
+                            { label: "Active", value: "1" },
+                            { label: "Deactive", value: "0" }
+                        ]
+                    }
+                ],
+                title: " Business Type",
+                tabStatus: tabStatus,
+                id: data.id
+            });
+        }
+        else if (tabStatus === '6') {
+            setModalData({
+                ...modalData,
+                fields: [
+                    {
+                        type: "text",
+                        name: "name",
+                        label: "Country",
+                        placeholder: "Enter Country",
+                        value: data.name
+                    },
+                    {
+                        type: "text",
+                        name: "name",
+                        label: "Country Code",
+                        placeholder: "Enter Country Code",
+                        value: data.code
+                    },
+                    
                     {
                         type: "select",
                         name: "status",
@@ -386,14 +684,23 @@ const Setting = () => {
         });
 
         switch (modalData.tabStatus) {
-            case 1:
+            case '1':
                 roleData(req);
                 break;
-            case 2:
+            case '2':
+                PersonRoleData(req);
+                break;
+            case '3':
                 statusTypeData(req);
                 break;
-            case 3:
+            case '4':
                 serviceData(req);
+                break;
+            case '5':
+                ClientIndustryData(req);
+                break;
+            case '6':
+                CountryData(req);
                 break;
             default:
                 break;
@@ -405,10 +712,9 @@ const Setting = () => {
     };
 
     const handleDelete = (data, tabStatus) => {
-  
-        const itemName = tabStatus == 1 ? data.role_name : tabStatus == 2 ? data.type : data.name;
-        // Confirm deletion with the user
 
+        const itemName = tabStatus == '1' ? data.role_name : tabStatus == '2' ? data.type : data.name;
+        // Confirm deletion with the user
 
         sweatalert.fire({
             title: "Are you sure?",
@@ -424,22 +730,29 @@ const Setting = () => {
                     action: 'delete',
                     id: data.id
                 };
-
                 switch (tabStatus) {
-                    case 1:
+                    case '1':
                         roleData(req);
                         break;
-                    case 2:
+                    case '2':
+                        PersonRoleData(req);
+                        break;
+                    case '3':
                         statusTypeData(req);
                         break;
-                    case 3:
+                    case '4':
                         serviceData(req);
+                        break;
+                    case '5':
+                        ClientIndustryData(req);
+                        break;
+                    case '6':
+                        CountryData(req);
                         break;
                     default:
                         console.log("Invalid tabStatus");
                         break;
                 }
-
                 sweatalert.fire({
                     title: "Deleted!",
                     text: "Your file has been deleted.",
@@ -447,37 +760,16 @@ const Setting = () => {
                 });
             }
         });
-
-
-
-        // if (window.confirm(`Are you sure you want to delete " ${itemName} "?`)) {
-        //     const req = {
-        //         action: 'delete',
-        //         id: data.id // Assuming 'data' contains the ID of the item to delete
-        //     };
-
-        //     // Execute deletion based on tabStatus
-        //     switch (tabStatus) {
-        //         case 1:
-        //             roleData(req);
-        //             break;
-        //         case 2:
-        //             statusTypeData(req); 
-        //             break;
-        //         case 3:
-        //             serviceData(req); 
-        //             break;
-        //         default:
-        //             console.log("Invalid tabStatus"); 
-        //             break;
-        //     }
-        // } else {
-        //     console.log("Deletion cancelled"); 
-        // }
     };
 
-
-
+    const tabsArr = [
+        { id: "1", label: "Staff Role" },
+        { id: "2", label: "Customer Contact Person Role" },
+        { id: "3", label: "Status Type" },
+        { id: "4", label: "Services" },
+        { id: "5", label: "Client Industry" },
+        { id: "6", label: "Country" }
+    ]
 
     return (
         <div>
@@ -486,61 +778,27 @@ const Setting = () => {
                     <div className="col-sm-12">
                         <div className="page-title-box">
                             <div className="row align-items-start">
-                                <div className="col-md-8">
+                                <div className="col-md-12">
                                     <>
                                         <ul className="nav nav-pills  rounded-tabs" id="pills-tab" role="tablist">
-                                            <li className="nav-item" role="presentation">
-                                                <button
-                                                    className={`nav-link ${tabStatus.current === 1 ? 'active' : ''}`}
-                                                    id="this-week-tab"
-                                                    data-bs-toggle="pill"
-                                                    data-bs-target="#this-week"
-                                                    type="button"
-                                                    role="tab"
-                                                    aria-controls="this-week"
-                                                    aria-selected={tabStatus.current === 1}
-                                                    onClick={() => handleTabChange(1)}
-                                                >
-                                                    Staff Role
-                                                </button>
-                                            </li>
-                                            <li className="nav-item" role="presentation">
-                                                <button
-                                                    className={`nav-link ${tabStatus.current === 2 ? 'active' : ''}`}
-                                                    id="last-week-tab"
-                                                    data-bs-toggle="pill"
-                                                    data-bs-target="#last-week"
-                                                    type="button"
-                                                    role="tab"
-                                                    aria-controls="last-week"
-                                                    aria-selected={tabStatus.current === 2}
-                                                    onClick={() => handleTabChange(2)}
-                                                >
-                                                    Status Type
-                                                </button>
-                                            </li>
-                                            <li className="nav-item" role="presentation">
-                                                <button
-                                                    className={`nav-link ${tabStatus.current === 3 ? 'active' : ''}`}
-                                                    id="current-month-tab"
-                                                    data-bs-toggle="pill"
-                                                    data-bs-target="#current-month"
-                                                    type="button"
-                                                    role="tab"
-                                                    aria-controls="current-month"
-                                                    aria-selected={tabStatus.current === 3}
-                                                    onClick={() => handleTabChange(3)}
-                                                >
-                                                    Services
-                                                </button>
-                                            </li>
-
+                                            {tabsArr.map((tab, index) => (
+                                                <li className="nav-item" role="presentation" key={index}>
+                                                    <button
+                                                        className={`nav-link ${tabStatus.current === tab.id ? 'active' : ''}`}
+                                                        id={tab.id}
+                                                        data-bs-toggle="pill"
+                                                        type="button"
+                                                        aria-controls={tab.id}
+                                                        aria-selected={tabStatus.current === tab.id}
+                                                        onClick={() => handleTabChange(tab.id)}
+                                                    >
+                                                        {tab.label}
+                                                    </button>
+                                                </li>
+                                            ))}
                                         </ul>
-
                                     </>
-
                                 </div>
-
                                 {/* <div className="col-md-4  col-auto ">
                                     <button type="button"
 
@@ -557,46 +815,60 @@ const Setting = () => {
                 </div>
                 <div className="tab-content" id="pills-tabContent">
                     {/* {/ Staff Role Start /} */}
-                    <div
-                        className="tab-pane fade show active"
-                        id="this-week"
-                        role="tabpanel"
-                        aria-labelledby="this-week-tab"
-                    >
+
+                    <div className={`tab-pane fade ${getShowTabId === '1' ? 'show active' : ''}`}>
                         <div className='report-data'>
                             <div className='d-flex justify-content-between align-items-center'>
                                 <div className='tab-title'>
                                     <h3 className='mt-0'>Staff Role</h3>
                                 </div>
                                 <div>
-                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, 1)}> <i className="fa fa-plus" /> Add Staff Role</button>
+                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '1')}> <i className="fa fa-plus" /> Add Staff Role</button>
                                 </div>
                             </div>
                             <div className='datatable-wrapper'>
-
-
                                 <Datatable
                                     filter={true}
-                                    columns={columnRoles} data={roleDataAll.data} />
+                                    columns={columnRoles}
+                                    data={roleDataAll.data} />
                             </div>
                         </div>
                     </div>
                     {/* {/ Staff Role end /} */}
 
+                    {/* {/ Customer Contact Person Role Start /} */}
+                    <div className={`tab-pane fade ${getShowTabId === '2' ? 'show active' : ''}`}  >
+                        <div className='report-data'>
+                            <div className='d-flex justify-content-between align-items-center'>
+                                <div className='tab-title'>
+                                    <h3 className='mt-0'>Customer Contact Person Role</h3>
+                                </div>
+                                <div>
+                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '2')}> <i className="fa fa-plus" /> Customer Contact Person Role</button>
+                                </div>
+                            </div>
+                            <div className='datatable-wrapper'>
+                                <Datatable
+                                    filter={true}
+                                    columns={columnPersonRole}
+                                    data={personRoleDataAll.data} />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* {/ Customer Contact Person Role end /} */}
+
+
+
                     {/* {/ Job Status start /} */}
-                    <div
-                        className="tab-pane fade"
-                        id="last-week"
-                        role="tabpanel"
-                        aria-labelledby="last-week-tab"
-                    >
+                    <div className={`tab-pane fade ${getShowTabId === '3' ? 'show active' : ''}`}>
                         <div className='report-data'>
                             <div className='d-flex justify-content-between align-items-center'>
                                 <div className='tab-title'>
                                     <h3 className='mt-0'>Status Type</h3>
                                 </div>
                                 <div>
-                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, 2)}> <i className="fa fa-plus" /> Add Status</button>
+                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '3')}> <i className="fa fa-plus" /> Add Status</button>
                                 </div>
                             </div>
                             <div className='datatable-wrapper'>
@@ -611,23 +883,17 @@ const Setting = () => {
                     {/* {/ Job Status end /} */}
 
                     {/* {/ Services Start /} */}
-                    <div
-                        className="tab-pane fade"
-                        id="current-month"
-                        role="tabpanel"
-                        aria-labelledby="current-month-tab"
-                    >
+                    <div className={`tab-pane fade ${getShowTabId === '4' ? 'show active' : ''}`} >
                         <div className='report-data'>
                             <div className='d-flex justify-content-between align-items-center'>
                                 <div className='tab-title'>
                                     <h3 className='mt-0'>Services</h3>
                                 </div>
                                 <div>
-                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, 3)}> <i className="fa fa-plus" /> Add Service</button>
+                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '4')}> <i className="fa fa-plus" /> Add Service</button>
                                 </div>
                             </div>
                             <div className='datatable-wrapper'>
-
 
                                 <Datatable
                                     filter={true}
@@ -637,6 +903,51 @@ const Setting = () => {
 
                     </div>
                     {/* {/ Services end /} */}
+
+
+                    {/* {/ Client Industry Start /} */}
+                    <div className={`tab-pane fade ${getShowTabId === '5' ? 'show active' : ''}`} >
+                        <div className='report-data'>
+                            <div className='d-flex justify-content-between align-items-center'>
+                                <div className='tab-title'>
+                                    <h3 className='mt-0'>Client Industry</h3>
+                                </div>
+                                <div>
+                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '5')}> <i className="fa fa-plus" /> Add Client Industry</button>
+                                </div>
+                            </div>
+                            <div className='datatable-wrapper'>
+                                <Datatable
+                                    filter={true}
+                                    columns={columnClientIndustry} data={clientIndustryDataAll.data} />
+                            </div>
+                        </div>
+                    </div>
+                    {/* {/ Client Industry end /} */}
+
+
+                    {/* {/ Country Start /} */}
+                    <div className={`tab-pane fade ${getShowTabId === '6' ? 'show active' : ''}`} >
+                        <div className='report-data'>
+                            <div className='d-flex justify-content-between align-items-center'>
+                                <div className='tab-title'>
+                                    <h3 className='mt-0'>Country</h3>
+                                </div>
+                                <div>
+                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '6')}> <i className="fa fa-plus" /> Add Country</button>
+                                </div>
+                            </div>
+                            <div className='datatable-wrapper'>
+
+
+                                <Datatable
+                                    filter={true}
+                                    columns={columnCountry} data={countryDataAll.data} />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* {/ Country end /} */}
                 </div>
 
 

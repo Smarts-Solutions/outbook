@@ -8,8 +8,13 @@ const handleRole = async (req, res) => {
         switch (action) {
             case 'add':
                 result = await rolePermissionService.addRole(Role);
-                res.status(201).json({ status: true, userId: result, message: 'Role created successfully' });
-                break;
+                if(!result.status){
+                    res.status(200).json({ status: false, message: result.message });
+                    break;
+                }else{
+                    res.status(200).json({ status: true, message: result.message , userId: result.data});
+                    break;
+                }
             case 'get':
                 result = await rolePermissionService.getRole();
                 res.status(200).json({ status: true, data: result });
@@ -27,9 +32,14 @@ const handleRole = async (req, res) => {
                 res.status(200).json({ status: true, message: 'Role deleted successfully' });
                 break;
             case 'update':
-                await rolePermissionService.modifyRole(Role);
-                res.status(200).json({ status: true, message: 'Role updated successfully' });
-                break;
+                result = await rolePermissionService.modifyRole(Role);
+                if(!result.status){
+                    res.status(200).json({ status: false, message: result.message });
+                    break;
+                }else{
+                    res.status(200).json({ status: true, message: result.message , userId: result.data});
+                    break;
+                }
             default:
                 res.status(400).json({ status: false, message: 'Invalid action' });
         }

@@ -8,8 +8,13 @@ const handleServices = async (req, res) => {
       switch (action) {
           case 'add':
               result = await serviceService.addServices(Services);
-              res.status(201).json({ status:true, userId: result ,message: 'Services created successfully' });
-              break;
+              if(!result.status){
+                res.status(200).json({ status: false, message: result.message });
+                break;
+            }else{
+                res.status(200).json({ status: true, message: result.message , userId: result.data});
+                break;
+            }
           case 'get':
               result = await serviceService.getServices();
               res.status(200).json({ status:true, data: result });
@@ -19,9 +24,15 @@ const handleServices = async (req, res) => {
               res.status(200).json({ status:true,message: 'Services deleted successfully' });
               break;
           case 'update':
-              await serviceService.modifyServices(Services);
-              res.status(200).json({ status:true, message: 'Services updated successfully' });
-              break;
+              result =await serviceService.modifyServices(Services);
+              if(!result.status){
+                res.status(200).json({ status: false, message: result.message });
+                break;
+            }else{
+                res.status(200).json({ status: true, message: result.message , userId: result.data});
+                break;
+            }
+           
           default:
               res.status(400).json({ status:false, message: 'Invalid action' });
       }
