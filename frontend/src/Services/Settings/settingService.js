@@ -49,6 +49,49 @@ export async function SERVICE(data, token) {
     }
 }
 
+// Service Action API Add, Edit, Delete
+export async function PERSONROLE(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}customerContactPersonRole`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+// Service Action API Add, Edit, Delete
+export async function CLIENTINDUSTRY(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}clientIndustry`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+// Service Action API Add, Edit, Delete
+export async function COUNTRY(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}country`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+
 
  
 

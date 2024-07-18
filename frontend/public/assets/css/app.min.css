@@ -8281,3 +8281,8 @@ main .error__feedback {
 .btn-info {
   border-radius: 1px !important;
 }
+.rdt_TableCell
+{
+  white-space: nowrap;
+
+}

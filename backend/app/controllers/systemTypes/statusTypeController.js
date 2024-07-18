@@ -25,7 +25,6 @@ const handleStatusType = async (req, res) => {
                 break;
             case 'update':
                 result = await statusTypeService.modifyStatusType(StatusType);
-                console.log("await pool.execute(query, values); ",result)
                 if(!result.status){
                     res.status(200).json({ status: false, message: result.message });
                     break;
