@@ -21,6 +21,11 @@ const getStaff = async () => {
     return rows;
 };
 
+const getManagerStaff = async () => {
+    const [rows] = await pool.query('SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email , staffs.phone , staffs.status , roles.role_name , roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id where staffs.role_id=14');
+    return rows;
+};
+
 const deleteStaff = async (staffId) => {
     const query = `
     DELETE FROM staffs WHERE id = ?
@@ -137,6 +142,7 @@ const isLoginAuthTokenCheckmodel = async (staff) => {
 module.exports = {
     createStaff,
     getStaff,
+    getManagerStaff,
     deleteStaff,
     updateStaff,
     staffCompetency,
