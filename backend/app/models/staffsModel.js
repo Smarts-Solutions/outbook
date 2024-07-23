@@ -134,6 +134,21 @@ const isLoginAuthTokenCheckmodel = async (staff) => {
      return rows[0];
 };
 
+const profile = async (staff) => {
+    const { id } = staff;
+    const query = `
+    SELECT id, first_name, last_name, email, phone, status FROM staffs WHERE id = ?
+    `;
+
+    try {
+        const [rows] = await pool.execute(query, [id]);
+        return rows[0];
+    } catch (err) {
+        console.error('Error updating data:', err);
+        throw err;
+    }
+}
+
 module.exports = {
     createStaff,
     getStaff,
@@ -142,5 +157,6 @@ module.exports = {
     staffCompetency,
     getStaffByEmail,
     getStaffById,
-    isLoginAuthTokenCheckmodel
+    isLoginAuthTokenCheckmodel,
+    profile
 };

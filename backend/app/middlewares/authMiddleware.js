@@ -4,7 +4,7 @@ const { jwtSecret } = require('../config/config');
 
 const verifyToken = (req, res, next) => {
     const token = req.header('Authorization');
-    // console.log("token ",token)
+    console.log("token ",token)
     if (!token) {
         return res.status(401).json({
             status:false,

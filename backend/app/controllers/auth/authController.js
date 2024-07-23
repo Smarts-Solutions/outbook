@@ -68,7 +68,6 @@ const login = async (req, res) => {
     }
   };
 
-
   const isLoginAuthTokenCheck = async (req, res) => {
     try {
       const { ...staff } = req.body;
@@ -83,11 +82,22 @@ const login = async (req, res) => {
     }
   };
 
+ const profile = async (req, res) => {
+    try {
+      const { ...staff } = req.body;
+      const data = await authService.profile(staff);
+      return res.send({ status:true, message: "Success.." , data});
+    } catch (error) {
+      return res.send({ status:false, message: error.message});
+    }
+  };
+
 
 module.exports = {
     handleStaff,
     staffCompetency,
     login,
     loginAuthToken,
-    isLoginAuthTokenCheck
+    isLoginAuthTokenCheck,
+    profile
 };

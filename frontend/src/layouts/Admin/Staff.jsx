@@ -195,7 +195,6 @@ const StaffPage = () => {
     });
 
     const fields = [
-
         { type: "text", name: "first_name", label: "First Name", label_size: 12, col_size: 6, disable: false, placeholder: "Enter First Name" },
         { type: "text", name: "last_name", label: "Last Name", label_size: 12, col_size: 6, disable: false, placeholder: "Enter Last Name" },
         { type: "email", name: "email", label: "Email", label_size: 12, col_size: 6, disable: false, placeholder: "Enter Email" },

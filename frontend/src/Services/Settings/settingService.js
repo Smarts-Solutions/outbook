@@ -91,7 +91,19 @@ export async function COUNTRY(data, token) {
     }
 }
 
-
+// Service Action API Add, Edit, Delete
+export async function JOBTYPE(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}JobType`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
 
  
 
