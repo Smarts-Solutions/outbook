@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-import { SignIn ,LoginAuthToken } from '../../ReduxStore/Slice/Auth/authSlice'
+import { SignIn ,LoginAuthToken ,SignInWithAzure } from '../../ReduxStore/Slice/Auth/authSlice'
 import { useDispatch } from "react-redux";
+
+import { azureLogin } from '../AuthWithAzure/AuthProvider';
 
 
 import { Email_regex, Mobile_regex } from '../../Utils/Common_regex'
@@ -34,7 +36,7 @@ const Login = () => {
 
     const req = { email: Email, password: password }
 
-    await dispatch(SignIn(req))
+     await dispatch(SignIn(req))
     .unwrap()
     .then(async (response) => {
       // console.log("response", response.data.staffDetails.id);
@@ -62,12 +64,43 @@ const Login = () => {
 
 
 
+  const handleAzureLogin = async () => {
+    const accounts = await azureLogin();
+    console.log('Logged in accounts:', accounts);
+    if(accounts.length > 0){
+      console.log("accounts ",accounts[0].username)
+      const req = { email: accounts[0].username}
 
+      await dispatch(SignInWithAzure(req))
+      .unwrap()
+      .then(async (response) => {
+          if(response.status){
 
+           // console.log("response", response.data.staffDetails.id);
+           // console.log("token", response.data.token);
 
+            localStorage.setItem("staffDetails", JSON.stringify(response.data.staffDetails));
+            localStorage.setItem("token", JSON.stringify(response.data.token));
+            localStorage.setItem("role", JSON.stringify(response.data.staffDetails.role));
+               
+            //Update Auth Token
+               const req_auth_token = { id: response.data.staffDetails.id, login_auth_token: response.data.token }
+                await dispatch(LoginAuthToken(req_auth_token)).unwrap() .then(async(response) => {
+               }).catch((error) => {console.log("Error", error);});
+  
+            navigate('/admin/dashboard');
+          }else{
+            setErrorPassword(response.message)
+          }
+        //continue....
+        })
+        .catch((error) => {
+          console.log("Error", error);
+        });
+     
 
-
-
+    }
+  }
 
   return (
    <div className="account-body accountbg">
@@ -129,8 +162,8 @@ const Login = () => {
                       <h6 className="my-4">OR </h6>
                     </div>
 
-                    <button type="button" className="btn d-block mx-auto btn-outline-info login-microsoft">
-                      <img src="/assets/images/brand-logo/Microsoft_365.webp" className='me-2' ></img> Login with Microsoft</button></div>
+                    <button type="button" className="btn d-block mx-auto btn-outline-info login-microsoft" onClick={()=>handleAzureLogin()}>
+                      <img src="/assets/images/brand-logo/Microsoft_365.webp" className='me-2'></img> Login with Microsoft</button></div>
               </div>
              
             </div>{/*end col*/}

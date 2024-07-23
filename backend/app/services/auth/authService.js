@@ -45,20 +45,36 @@ const login = async (credentials) => {
     const user = await staffModel.getStaffByEmail(email);
     console.log("user",user)
     if (!user) {
-      throw new Error('Invalid email');
+      return {status:false,message:"Invalid Email."}
     }
   
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new Error('Invalid email or password');
+      return {status:false,message:"Password Incorrect."}
     }
   
     const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '10h' });
     const fieldsToUpdate = { login_auth_token: token };
     const id = user.id;
     staffModel.updateStaff({ id, ...fieldsToUpdate });
-    return {token:token , staffDetails:user};
+    return {status:true,token:token , staffDetails:user};
   };
+
+  const loginWithAzure = async (credentials) => {
+    const { email } = credentials;
+    const user = await staffModel.getStaffByEmail(email);
+    console.log("user",user)
+    if (!user) {
+      return {status:false,message:"User not exist."}
+    }
+    const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '10h' });
+    const fieldsToUpdate = { login_auth_token: token };
+    const id = user.id;
+    staffModel.updateStaff({ id, ...fieldsToUpdate });
+    return {status:true, token:token , staffDetails:user};
+  };
+
+
 
 
 const isLoginAuthTokenCheck = async (staff) => {
@@ -75,5 +91,6 @@ module.exports = {
     modifyStaff,
     staffCompetency,
     login,
+    loginWithAzure,
     isLoginAuthTokenCheck
 };
