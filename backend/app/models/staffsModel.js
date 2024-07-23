@@ -16,6 +16,7 @@ const createStaff = async (staff) => {
         throw err;
     }
 };
+
 const getStaff = async () => {
     const [rows] = await pool.query('SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email , staffs.phone , staffs.status , roles.role_name , roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id');
     return rows;
@@ -38,7 +39,6 @@ const deleteStaff = async (staffId) => {
         throw err;
     }
 };
-
 
 const updateStaff = async (staff) => {
     const { id, ...fields } = staff;
