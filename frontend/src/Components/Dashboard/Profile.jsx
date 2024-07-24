@@ -1,6 +1,7 @@
 import React, { useEffect , useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { getProfile } from '../../ReduxStore/Slice/Staff/staffSlice';
+ 
 
 const Profile = () => {
     const dispatch = useDispatch();
@@ -26,6 +27,9 @@ const Profile = () => {
                 console.log("Error", error);
             });
     };
+
+    
+    
 
     useEffect(() => {
         Profile()
