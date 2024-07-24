@@ -216,6 +216,7 @@ CREATE TABLE customer_contact_details (
     alternate_email VARCHAR(100) DEFAULT NULL,
     phone VARCHAR(20) NOT NULL,
     alternate_phone VARCHAR(20) DEFAULT NULL,
+    residential_address TEXT DEFAULT NULL,
     authorised_signatory_status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: off, 1: on',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

@@ -5,6 +5,7 @@ const { verifyToken } = require('../../middlewares/authMiddleware');
 const router = express.Router();
 
 router.post('/login', authController.login);
+router.post('/loginWithAzure', authController.loginWithAzure);
 router.post('/loginAuthToken', authController.loginAuthToken);
 router.post('/isLoginAuthTokenCheck', authController.isLoginAuthTokenCheck);
 router.post('/staff',verifyToken, authController.handleStaff);

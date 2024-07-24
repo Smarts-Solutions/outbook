@@ -51,8 +51,8 @@ const Admin_Route = () => {
             <Route path="/reports" element={<Reports />} />
             <Route path="/add/jobtype" element={<JobType />} />
             <Route path="/setting" element={<Setting />} />
-            <Route path="/customer/customer_add_process/Addcustomer" element={<Addcustomer />} />
-            <Route path="/customer/customer" element={<Customer />} />
+            <Route path="/addcustomer" element={<Addcustomer />} />
+            <Route path="/customer" element={<Customer />} />
           </Routes>
         </div>
       </div>

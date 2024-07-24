@@ -3,6 +3,7 @@ const jobTypeTaskModel = require('../../models/jobTypeTaskModel');
 
 
 const addJobType = async (JobType) => {
+  
   return jobTypeTaskModel.createJobType(JobType);
 };
 

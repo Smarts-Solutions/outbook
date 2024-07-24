@@ -13,7 +13,11 @@ const handleStaff = async (req, res) => {
           case 'get':
               result = await authService.getStaff();
               res.status(200).json({ status:true, data: result });
-              break;    
+              break;   
+              case 'getmanager':
+                result = await authService.getManagerStaff();
+                res.status(200).json({ status:true, data: result });
+                break;   
           case 'delete':
               await authService.removeStaff(staff.id);
               res.status(200).json({ status:true,message: 'Staff deleted successfully' });
@@ -50,13 +54,37 @@ const login = async (req, res) => {
     try {
       const data = await authService.login(req.body);
       // delete the password property from the data object
-      delete data.password
-      return res.send({ status:true, data : data , message: "Login Successfully.."});
+      if(data.status == true){
+        // delete the password property from the data object
+       delete data.password
+       return res.status(200).json({ status:true, data : data , message: "Login Successfully.."});
+       }else{
+       return res.status(200).json({ status:false , message: data.message});
+       }
     } catch (error) {
       return res.send({ status:false, message: error.message});
      
     }
   };
+
+  const loginWithAzure = async (req, res) => {
+    try {
+      const data = await authService.loginWithAzure(req.body);
+      if(data.status == true){
+       // delete the password property from the data object
+      delete data.password
+      return res.status(200).json({ status:true, data : data , message: "Login Successfully.."});
+      }else{
+      return res.status(200).json({ status:false , message: data.message});
+      }
+      
+    } catch (error) {
+      return res.send({ status:false, message: error.message});
+     
+    }
+  };
+
+
 
    const loginAuthToken = async (req, res) => {
     try {
@@ -97,6 +125,7 @@ module.exports = {
     handleStaff,
     staffCompetency,
     login,
+    loginWithAzure,
     loginAuthToken,
     isLoginAuthTokenCheck,
     profile

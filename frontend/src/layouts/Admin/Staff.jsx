@@ -5,7 +5,6 @@ import { Role } from '../../ReduxStore/Slice/Settings/settingSlice';
 import { FormGroup, Label, Input, Row, Col, Button } from 'reactstrap';
 import Datatable from '../../Components/ExtraComponents/Datatable';
 import CommanModal from '../../Components/ExtraComponents/Modals/CommanModal';
-import SetAccessModal from '../../Components/ExtraComponents/Modals/AccessModal';
 import sweatalert from 'sweetalert2';
 import Formicform from '../../Components/ExtraComponents/Forms/Formicform';
 import { useFormik } from 'formik';

@@ -17,6 +17,19 @@ export async function SIGN_IN_STAFF(data) {
     }
 }
 
+// LOGIN-USER WITH AZURE
+export async function SIGN_IN_AZURE_SSO(data) {
+    try {
+        const res = await axios.post(`${Config.base_url}loginWithAzure`, data, {
+            data: {},
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
 // LOGIN-AUTH-TOKEN
 export async function LOGIN_AUTH_TOKEN(data) {
     try {
