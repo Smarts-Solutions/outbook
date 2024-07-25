@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from "react-router-dom";
 
 const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isSelected, fieldtype, formik, btn_name, forlogin, title, label_size, col_size, disable, check_box_true, row_size, additional_field, showImagePreview, placeholderdata, disabled, closeBtn }) => {
@@ -7,7 +7,15 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
     const location = useLocation()
     const [passwordVisible, setPasswordVisible] = useState({});
     const [previews, setPreviews] = useState([]);
+    const [selectSearchItem, setSelectSearchItem] = useState('')
 
+
+
+
+
+    useEffect(() => {
+        formik.setFieldValue("search_company_name", selectSearchItem)
+    }, [selectSearchItem])
 
     const handleFileChange = (event, index, name) => {
         if (event.target.files[0].size > 420000) {
@@ -35,6 +43,12 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
     }
 
 
+    useEffect(() => {
+
+        setSelectSearchItem((pre) => formik.values.search_company_name == "" ? "" : pre)
+
+    }, [formik.values.search_company_name])
+
     return (
 
         <form onSubmit={formik.handleSubmit}>
@@ -43,7 +57,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                     {fieldtype.map((field, index) => (
                         <>
                             {field.type === 'select' ? <>
-                                <div className={`col-lg-${title === "update_theme" ? 12 : 6}`}>
+                                <div className={`col-lg-${title === "update_theme" ? 12 : field.col_size}`}>
                                     <div className=" row">
                                         <label
                                             className={`col-lg-${field.label_size}`}
@@ -69,7 +83,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                                     </option>
                                                 ))}
                                             </select>
-                                            {formik.touched[field.name]  && formik.errors[field.name] &&
+                                            {formik.touched[field.name] && formik.errors[field.name] &&
                                                 <div style={{ color: 'red' }}>{formik.errors[field.name]}</div>}
                                         </div>
                                     </div>
@@ -180,7 +194,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                                                 [field.name]: !prevState[field.name],
                                                             }))}
                                                         ></i>
-                                                        { formik.touched[field.name] && formik.errors[field.name] && (
+                                                        {formik.touched[field.name] && formik.errors[field.name] && (
                                                             <div style={{ color: 'red' }}>{formik.errors[field.name]}</div>
                                                         )}
                                                     </div>
@@ -260,14 +274,13 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                                                     <div className="invalid-feedback">
                                                                         Please enter {field.label}
                                                                     </div>
-                                                                    {formik.touched[field.name]  && formik.errors[field.name] && <div style={{ color: 'red' }}>{formik.errors[field.name]}</div>}
+                                                                    {formik.touched[field.name] && formik.errors[field.name] && <div style={{ color: 'red' }}>{formik.errors[field.name]}</div>}
                                                                 </div>
                                                             </div>
                                                         </div>
 
                                                     </>
-                                                        :
-                                                        <>
+                                                        : field.type === "text" ? <>
                                                             <div className={`col-lg-${field.col_size}`}>
                                                                 <div className="mb-3 row flex-column">
                                                                     <label className={`col-lg-${field.label_size}`} htmlFor={field.name}>
@@ -291,11 +304,103 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                                                             Please enter {field.label}
                                                                         </div>
                                                                         {formik.touched[field.name] && formik.errors[field.name] && <div style={{ color: 'red' }}>{formik.errors[field.name]}
-                                                                            </div>}
+                                                                        </div>}
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </>
+                                                            : field.type === "number" ? <>
+                                                                <div className={`col-lg-${field.col_size}`}>
+                                                                    <div className="mb-3 row flex-column">
+                                                                        <label className={`col-lg-${field.label_size}`} htmlFor={field.name}>
+                                                                            {field.label}
+                                                                            <span className="text-danger">*</span>
+                                                                        </label>
+                                                                        <div>
+                                                                            <input
+                                                                                type="number"
+                                                                                className="form-control"
+                                                                                style={{ background: field.disable ? '#eeeeee' : "" }}
+                                                                                id={field.name}
+                                                                                placeholder={`Enter ${field.label}`}
+                                                                                {...formik.getFieldProps(field.name)}
+
+                                                                                defaultValue=""
+                                                                                readOnly={field.disable}
+                                                                                autoComplete="new-email"
+                                                                            />
+                                                                            <div className="invalid-feedback">
+                                                                                Please enter {field.label}
+                                                                            </div>
+                                                                            {formik.touched[field.name] && formik.errors[field.name] && <div style={{ color: 'red' }}>{formik.errors[field.name]}
+                                                                            </div>}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </>
+                                                                :
+                                                                field.type === "text1" ?
+                                                                    <>
+                                                                        <div className={`col-lg-${field.col_size}`}>
+                                                                            <div className="mb-3 row flex-column">
+                                                                                <label className={`col-lg-${field.label_size}`} htmlFor={field.name}>
+                                                                                    {field.label}
+                                                                                    <span className="text-danger">*</span>
+                                                                                </label>
+                                                                                <div className='position-relative'>
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        className="form-control"
+                                                                                        style={{ background: field.disable ? '#eeeeee' : "" }}
+                                                                                        id={field.name}
+                                                                                        value={selectSearchItem}
+                                                                                        placeholder={`Enter ${field.label}`}
+                                                                                        {...formik.getFieldProps(field.name)}
+
+                                                                                        defaultValue=""
+                                                                                        readOnly={field.disable}
+                                                                                        autoComplete="new-email"
+                                                                                    />
+
+                                                                                    {
+                                                                                        field.filteredCompanies.length > 0 && !selectSearchItem ?
+                                                                                            <div className='dropdown-list'  >
+                                                                                                {field.filteredCompanies && field.filteredCompanies.map((company, index) => (
+                                                                                                    <div key={index} onClick={() => setSelectSearchItem(company.title)}>
+
+                                                                                                        {console.log("company" , company)}
+                                                                                                        {company.title}
+                                                                                                    </div>
+
+                                                                                                ))}
+                                                                                            </div> : ""
+
+                                                                                    }
+
+                                                                                    <div className="invalid-feedback">
+                                                                                        Please enter {field.label}
+                                                                                    </div>
+                                                                                    {formik.touched[field.name] && formik.errors[field.name] && <div style={{ color: 'red' }}>{formik.errors[field.name]}
+                                                                                    </div>}
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </>
+                                                                    :
+                                                                    <>
+                                                                        <div className={`col-lg-${field.col_size}`}>
+                                                                            <div className="mb-3  mt-4 row flex-column">
+                                                                                <label className={`col-lg-${field.label_size}`} htmlFor={field.name}>
+                                                                                    {field.label}
+
+                                                                                </label>
+                                                                                <div>
+
+
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </>
 
 
                             }
@@ -305,19 +410,39 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                 </div >
                 {additional_field}
 
-                <div className="modal-footer">
-                    <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={closeBtn}
-                    >
-                        Cancel
-                    </button>
 
-                    <button className={`btn btn-primary ${location.pathname === 'resetpassword' ? 'col-md-11' : ''}`} type="submit" disabled={formik.isSubmitting}>
-                        {btn_name}
-                    </button>
-                </div>
+                {
+                    btn_name == "Next" ?
+                        <div className="modal-footer d-flex justify-content-between">
+                            <button
+                                type="button"
+                                className="btn btn-secondry border m-2"
+                                onClick={closeBtn}
+                            >
+                                Back
+                            </button>
+
+                            <button className={`btn btn-info text-white blue-btn`} type="submit" disabled={formik.isSubmitting}>
+                                {btn_name}
+                            </button>
+                        </div>
+
+                        :
+
+                        <div className="modal-footer">
+                            <button
+                                type="button"
+                                className="btn btn-secondary m-2"
+                                onClick={closeBtn}
+                            >
+                                Cancel
+                            </button>
+
+                            <button className={`btn btn-primary ${location.pathname === 'resetpassword' ? 'col-md-11' : ''}`} type="submit" disabled={formik.isSubmitting}>
+                                {btn_name}
+                            </button>
+                        </div>
+                }
             </div>
 
         </form >

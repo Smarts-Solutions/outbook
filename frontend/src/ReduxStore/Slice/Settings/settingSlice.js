@@ -117,7 +117,7 @@ const SettingSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(StatusType.fulfilled, (state, action) => {
-        console.log(action.payload)
+        
         state.isLoading = false;
         state.statustype = action.payload;
       })
