@@ -143,12 +143,12 @@ const Information = () => {
                     contactDetails: contacts
                 }
                 console.log("req", req)
-             
+
             }
 
-            else{
+            else {
                 console.log("contacts", contacts)
-               
+
             }
 
 
@@ -156,7 +156,7 @@ const Information = () => {
     });
 
     console.log("formik :", formik.values)
-     
+
 
     let filteredCompanies = [];
     if (getAllSearchCompany.items !== undefined) {
