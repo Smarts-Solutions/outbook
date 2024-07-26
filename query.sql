@@ -193,7 +193,7 @@ CREATE TABLE customer_company_information (
     customer_id INT NOT NULL,
     company_name VARCHAR(100) NOT NULL,
     entity_type VARCHAR(20) NOT NULL,
-    company_status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    company_status VARCHAR(50) DEFAULT NULL,
     company_number VARCHAR(50) DEFAULT NULL,
     registered_office_address LONGTEXT NOT NULL,
     incorporation_date DATE NOT NULL,

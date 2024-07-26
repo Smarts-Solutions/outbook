@@ -7,6 +7,7 @@ import Header from '../Components/Dashboard/Header';
 import Customer from '../layouts/Admin/customer/Customer';
 import Status from '../layouts/Admin/Status';
 import Reports from '../layouts/Admin/Reports';
+import Service from '../layouts/Admin/customer/customer_add_process/Service';
 import Footer from '../Components/Dashboard/Footer';
 import Access from '../layouts/Admin/Access';
 import Setting from '../layouts/Admin/Setting';
@@ -53,6 +54,8 @@ const Admin_Route = () => {
             <Route path="/setting" element={<Setting />} />
             <Route path="/addcustomer" element={<Addcustomer />} />
             <Route path="/customer" element={<Customer />} />
+           
+            <Route path="/service" element={<Service />} />
           </Routes>
         </div>
       </div>
