@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useDispatch } from 'react-redux';
 import { Formik, Field, Form, useFormik } from "formik";
-import AddFrom from '../../../../Components/ExtraComponents/Forms/Formicform'
+import AddFrom from '../../../../Components/ExtraComponents/Forms/Customer.form'
 import { Button } from "antd";
 import { Input } from "formik-antd";
 import { GetAllCompany, AddCustomer } from '../../../../ReduxStore/Slice/Customer/CustomerSlice'
@@ -701,6 +701,16 @@ const Information = () => {
     }, [CustomerType])
 
 
+    const ChangeCustomerType = (value) => {
+        if (value == 3) {
+
+            setContacts([
+                { firstName: '', lastName: '', role: '', phoneNumber: '', email: '' },
+                { firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }
+
+            ])
+        }
+    }
 
     return (
         <Formik
@@ -728,7 +738,8 @@ const Information = () => {
                                                 as="select"
                                                 name="customerType"
                                                 className="form-select mb-3"
-                                                onChange={(e) => setCustomerType(e.target.value)}
+                                                onChange={(e) => { setCustomerType(e.target.value); ChangeCustomerType(e.target.value); }}
+
                                                 value={CustomerType}
                                             >
                                                 <option value="1">Sole Trader</option>
@@ -959,13 +970,18 @@ const Information = () => {
                                                                                                                             id="customSwitchsizemd"
                                                                                                                             checked={contact.authorised_signatory_status}
                                                                                                                             onChange={(e) => handleChange(index, 'authorised_signatory_status', e.target.checked)}
+                                                                                                                            defaultChecked={index == 0 || index == 1}
+                                                                                                                            disabled={contacts.length == 2 ? index == 0 || index == 1 : false}
+                                                                                                                           
+
+
                                                                                                                         />
                                                                                                                         <label
                                                                                                                             class="form-check-label"
                                                                                                                             for="customSwitchsizemd">Authorised
                                                                                                                             Signatory</label>
                                                                                                                     </div>
-                                                                                                                    {index == 0 ? "" :
+                                                                                                                    {index == 0 || index == 1 ? "" :
                                                                                                                         <div>
 
                                                                                                                             <button
