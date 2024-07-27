@@ -447,11 +447,12 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
                 cost_per_job
             ]);
             customer_engagement_customised_pricing_id = result.insertId;
+          
         } else {
             customer_engagement_customised_pricing_id = exist4[0].id;
         }
      }
-    }
+     }
 
 
     }
