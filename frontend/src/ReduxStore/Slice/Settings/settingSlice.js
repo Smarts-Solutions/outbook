@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE , CLIENTINDUSTRY ,COUNTRY } from "../../../Services/Settings/settingService";
+import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE , CLIENTINDUSTRY ,COUNTRY , JOBTYPE } from "../../../Services/Settings/settingService";
 
 
 
@@ -72,6 +72,17 @@ export const Country = createAsyncThunk("country", async (data) => {
   }
 });
 
+//Get Country Data
+export const JobType = createAsyncThunk("jobType", async (data) => {
+  try {
+    const { req, authToken } = data
+    const res = await JOBTYPE(req, authToken);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
+
 
 //Setting Slice
 const SettingSlice = createSlice({
@@ -84,7 +95,8 @@ const SettingSlice = createSlice({
     Service: [],
     personrole: [],
     clientIndustry: [],
-    country: []
+    country: [],
+    jobtype:[]
   },
 
   reducers: {},
@@ -105,7 +117,7 @@ const SettingSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(StatusType.fulfilled, (state, action) => {
-        console.log(action.payload)
+        
         state.isLoading = false;
         state.statustype = action.payload;
       })
@@ -154,6 +166,17 @@ const SettingSlice = createSlice({
         state.country = action.payload;
       })
       .addCase(Country.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(JobType.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(JobType.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.jobtype = action.payload;
+      })
+      .addCase(JobType.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
       });

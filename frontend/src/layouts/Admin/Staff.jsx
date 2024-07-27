@@ -194,14 +194,13 @@ const StaffPage = () => {
     });
 
     const fields = [
-
         { type: "text", name: "first_name", label: "First Name", label_size: 12, col_size: 6, disable: false, placeholder: "Enter First Name" },
         { type: "text", name: "last_name", label: "Last Name", label_size: 12, col_size: 6, disable: false, placeholder: "Enter Last Name" },
         { type: "email", name: "email", label: "Email", label_size: 12, col_size: 6, disable: false, placeholder: "Enter Email" },
         { type: "text", name: "phone", label: "Phone", label_size: 12, col_size: 6, disable: false, placeholder: "Enter Phone Number" },
         { type: "password", name: "password", label: "Password", label_size: 12, col_size: 6, disable: false, placeholder: "Enter Password", showWhen: values => !editStaff },
         {
-            type: "select", name: "role", label: "Role", label_size: 12, col_size: 3, disable: false,
+            type: "select", name: "role", label: "Role", label_size: 12, col_size: 6, disable: false,
             options: roleDataAll && roleDataAll.data.map((data) => {
 
                 if (formik.values.role_id == data.id) {
@@ -212,7 +211,7 @@ const StaffPage = () => {
             }),
         },
         {
-            type: "select", name: "status", label: "Status", label_size: 12, col_size: 3, disable: false,
+            type: "select", name: "status", label: "Status", label_size: 12, col_size: 6, disable: false,
             options: [
                 { label: "Active", value: "1" },
                 { label: "Deactive", value: "0" }

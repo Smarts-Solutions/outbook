@@ -42,7 +42,8 @@ const AddCustomer = () => {
         }
     };
 
-    const next = () => {
+    const next = (data) => {
+        console.log("data",data)
         if (currentStep < 3) {
             setCurrentStep(currentStep + 1);
         } else {

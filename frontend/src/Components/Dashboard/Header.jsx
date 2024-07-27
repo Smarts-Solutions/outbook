@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { isLoginAuthCheckToken } from '../../ReduxStore/Slice/Auth/authSlice'
+import { Link } from 'react-router-dom';
 
 
 const Header = () => {
@@ -51,6 +52,7 @@ const Header = () => {
         localStorage.removeItem("staffDetails");
         localStorage.removeItem("token");
         localStorage.removeItem("role");
+        sessionStorage.clear();
         navigate("/login");
     };
 
@@ -356,7 +358,7 @@ const Header = () => {
                                 />
                             </a>
                             <div className="dropdown-menu dropdown-menu-right">
-                                <a className="dropdown-item" href="#">
+                                <Link className="dropdown-item" to={'/admin/profile'}>
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         width={24}
@@ -373,7 +375,7 @@ const Header = () => {
                                         <circle cx={12} cy={7} r={4} />
                                     </svg>{" "}
                                     Profile
-                                </a>{" "}
+                                </Link>{" "}
                                 <a className="dropdown-item" href="#">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"

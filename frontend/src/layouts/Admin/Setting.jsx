@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Role, StatusType, Service, PersonRole, ClientIndustry, Country } from '../../ReduxStore/Slice/Settings/settingSlice'
 import Datatable from '../../Components/ExtraComponents/Datatable';
 import Modal from '../../Components/ExtraComponents/Modals/Modal';
 import sweatalert from 'sweetalert2';
 import { useDispatch, useSelector } from 'react-redux';
+
 
 
 const Setting = () => {
@@ -326,7 +327,7 @@ const Setting = () => {
                 <div>
                     <button className='edit-icon' onClick={() => handleEdit(row, '4')}> <i className="ti-pencil" /></button>
                     <button className='delete-icon' onClick={() => handleDelete(row, '4')}> <i className="ti-trash" /></button>
-                    <button className='btn btn-primary' >Add Job Type</button>
+                    <button className='btn btn-info text-white' onClick={(e) => handleJobType(row)}>Add Job Type</button>
                 </div>
             ),
             ignoreRowClick: true,
@@ -370,7 +371,7 @@ const Setting = () => {
     ];
 
     const columnCountry = [
-        { name: 'Country Code', selector: row => '+' + row.code, sortable: true },
+        { name: 'Country Code', selector: row => row.code, sortable: true },
         { name: 'Country Name', selector: row => row.name, sortable: true },
         { name: 'Currency', selector: row => row.currency, sortable: true },
         { name: 'Currency Status', selector: row => row.status == 1 ? "Yes" : "No", sortable: true },
@@ -388,6 +389,10 @@ const Setting = () => {
         },
     ];
 
+
+    const handleJobType = (row) => {
+        navigate('/admin/add/jobtype', { state: { Id: row.id } })
+    }
 
     const handleModalChange = (e) => {
         // setModalData({ ...modalData, value: e.target.value });
@@ -629,12 +634,12 @@ const Setting = () => {
                     },
                     {
                         type: "text",
-                        name: "name",
+                        name: "code",
                         label: "Country Code",
                         placeholder: "Enter Country Code",
                         value: data.code
                     },
-                    
+
                     {
                         type: "select",
                         name: "status",

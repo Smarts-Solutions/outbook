@@ -74,6 +74,7 @@ const Customer = () => {
           <div className="page-title-box">
             <div className="row align-items-start">
               <div className="col-md-8">
+                 
                 <ul className="nav nav-pills rounded-tabs" id="pills-tab" role="tablist">
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
