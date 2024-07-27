@@ -130,8 +130,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                     }
 
 
-                                </>
-                                    :
+                                </> :
                                     field.type === "radio" ? <>
 
                                         <label
@@ -160,9 +159,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
 
 
 
-                                    </>
-                                    
-                                        :
+                                    </> :
                                         field.type === "password" ? <>
                                             <div className={`col-lg-${field.col_size}`}>
                                                 <div className="mb-3 row">
@@ -202,8 +199,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                                 </div>
                                             </div>
 
-                                        </>
-                                            :
+                                        </> :
                                             field.type === "date" ? <>
                                                 <div className="col-lg-3">
 
@@ -222,8 +218,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </>
-                                                :
+                                            </> :
                                                 field.type === "file" ? <>
                                                     <div className={`col-lg-${field.col_size}`}>
                                                         <div className="row d-flex">
@@ -252,8 +247,8 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                                         </div>
 
                                                     </div>
-                                                </>
-                                                    : field.type === "email" ? <>
+                                                </> :
+                                                    field.type === "email" ? <>
                                                         <div className={`col-lg-${field.col_size}`}>
                                                             <div className="mb-3 row flex-column">
                                                                 <label className={`col-lg-${field.label_size}`} htmlFor={field.name}>
@@ -280,8 +275,8 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                                             </div>
                                                         </div>
 
-                                                    </>
-                                                        : field.type === "text" ? <>
+                                                    </> :
+                                                        field.type === "text" ? <>
                                                             <div className={`col-lg-${field.col_size}`}>
                                                                 <div className="mb-3 row flex-column">
                                                                     <label className={`col-lg-${field.label_size}`} htmlFor={field.name}>
@@ -309,8 +304,8 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </>
-                                                            : field.type === "number" ? <>
+                                                        </> :
+                                                            field.type === "number" ? <>
                                                                 <div className={`col-lg-${field.col_size}`}>
                                                                     <div className="mb-3 row flex-column">
                                                                         <label className={`col-lg-${field.label_size}`} htmlFor={field.name}>
@@ -338,8 +333,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                            </>
-                                                                :
+                                                            </> :
                                                                 field.type === "text1" ?
                                                                     <>
                                                                         <div className={`col-lg-${field.col_size}`}>
@@ -369,7 +363,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                                                                                 {field.filteredCompanies && field.filteredCompanies.map((company, index) => (
                                                                                                     <div key={index} onClick={() => setSelectSearchItem(company.title)}>
 
-                                                                                                        {console.log("company" , company)}
+                                                                                                        {console.log("company", company)}
                                                                                                         {company.title}
                                                                                                     </div>
 

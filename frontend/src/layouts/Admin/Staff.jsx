@@ -6,7 +6,7 @@ import { FormGroup, Label, Input, Row, Col, Button } from 'reactstrap';
 import Datatable from '../../Components/ExtraComponents/Datatable';
 import CommanModal from '../../Components/ExtraComponents/Modals/CommanModal';
 import sweatalert from 'sweetalert2';
-import Formicform from '../../Components/ExtraComponents/Forms/Formicform';
+import Formicform from '../../Components/ExtraComponents/Forms/Comman.form';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import Validation_Message from '../../Utils/Validation_Message';
