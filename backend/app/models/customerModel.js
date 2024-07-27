@@ -453,6 +453,9 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
         }
      }
      }
+         
+    const updateQueryEngagementModel = `UPDATE customer_engagement_model SET customised_pricing = ? WHERE customer_id = ? `;
+    await pool.execute(updateQueryEngagementModel, [customised_pricing, customer_id]);
 
 
     }
