@@ -75,6 +75,7 @@ const updateStatusType = async (StatusType) => {
             return { status: false, message: 'Status Type already exists.' };
         }
         const [result] = await pool.execute(query, values);
+        return { status: true, message: 'Status Type updated successfully.', data: result.affectedRows };
     } catch (err) {
         console.error('Error updating data:', err);
         throw err;

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import Datatable from '../../Components/ExtraComponents/Datatable';
+import { Link } from 'react-router-dom';
+import Datatable from '../../../Components/ExtraComponents/Datatable';
 
 const Customer = () => {
   const tabs = [
@@ -16,12 +17,6 @@ const Customer = () => {
 
   const thisWeekData = [
     { TradingName: 'W120', Code: '012_BlaK_T_1772', CustomerName: 'The Black T', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Admin/Support Tasks', JobType: 'Year End' },
-    { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-    { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-    { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-    { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-    { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-    { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
   ];
 
   const thisWeekColumns = [
@@ -100,9 +95,7 @@ const Customer = () => {
                 </ul>
               </div>
               <div className="col-md-4 col-auto">
-                <button className='btn btn-info text-white float-end'>
-                  <i className="fa fa-plus" /> Add Customer
-                </button>
+                <Link to="/admin/addcustomer" className='btn btn-info text-white float-end blue-btn'> <i className="fa fa-plus" /> Add Customer</Link>
               </div>
             </div>
           </div>

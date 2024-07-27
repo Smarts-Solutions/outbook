@@ -13,6 +13,10 @@ const getStaff = async () => {
   return staffModel.getStaff();
 }
 
+const getManagerStaff = async () => {
+  return staffModel.getManagerStaff();
+}
+
 const removeStaff = async (staffId) => {
   return staffModel.deleteStaff(staffId);
 };
@@ -66,6 +70,7 @@ const isLoginAuthTokenCheck = async (staff) => {
 module.exports = {
     addStaff,
     getStaff,
+    getManagerStaff,
     removeStaff,
     modifyStaff,
     staffCompetency,

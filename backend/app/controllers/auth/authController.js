@@ -13,7 +13,11 @@ const handleStaff = async (req, res) => {
           case 'get':
               result = await authService.getStaff();
               res.status(200).json({ status:true, data: result });
-              break;    
+              break;   
+              case 'getmanager':
+                result = await authService.getManagerStaff();
+                res.status(200).json({ status:true, data: result });
+                break;   
           case 'delete':
               await authService.removeStaff(staff.id);
               res.status(200).json({ status:true,message: 'Staff deleted successfully' });
