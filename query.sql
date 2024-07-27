@@ -173,17 +173,25 @@ CREATE TABLE customer_services (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL,
     service_id INT NOT NULL,
-    account_manager_id INT NOT NULL COMMENT 'Only staff members who are account managers',
     status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id),
     FOREIGN KEY (service_id) REFERENCES services(id),
-    FOREIGN KEY (account_manager_id) REFERENCES staffs(id)
+    UNIQUE (customer_id,service_id)
 );
 
 /* Can a multiplayer account manager be allocated to one service? */
 
+CREATE TABLE `customer_service_account_managers` (
+    customer_service_id INT NOT NULL,
+    account_manager_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_service_id) REFERENCES customer_services(id),
+    FOREIGN KEY (account_manager_id) REFERENCES staffs(id),
+    UNIQUE (customer_service_id,account_manager_id)
+);
 
 
 
@@ -192,12 +200,12 @@ CREATE TABLE customer_company_information (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL,
     company_name VARCHAR(100) NOT NULL,
-    entity_type VARCHAR(20) NOT NULL,
-    company_status VARCHAR(50) DEFAULT NULL,
+    entity_type VARCHAR(100) NOT NULL,
+    company_status VARCHAR(100) DEFAULT NULL,
     company_number VARCHAR(50) DEFAULT NULL,
     registered_office_address LONGTEXT NOT NULL,
     incorporation_date DATE NOT NULL,
-    incorporation_in VARCHAR(50) NOT NULL,
+    incorporation_in LONGTEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id)

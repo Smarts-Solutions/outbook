@@ -27,8 +27,10 @@ const Information = () => {
     ]);
 
     const [contacts, setContacts] = useState([
-        { firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }
+        { authorised_signatory_status: false, firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }
     ]);
+
+    console.log("contacts ", contacts)
 
     const CustomerPersonRoleData = async () => {
         const req = {
@@ -50,7 +52,7 @@ const Information = () => {
     }
 
     const handleAddContact = () => {
-        setContacts([...contacts, { firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }]);
+        setContacts([...contacts, { authorised_signatory_status: false, firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }]);
         setErrors([...errors, { firstName: false, lastName: false, role: false, email: false }]);
     };
 
@@ -62,6 +64,10 @@ const Information = () => {
     };
 
     const handleChange = (index, field, value) => {
+        console.log("index", index)
+        console.log("field", field)
+        console.log("value", value)
+
         // Update the contacts state
         const newContacts = [...contacts];
         newContacts[index][field] = value;
@@ -71,6 +77,8 @@ const Information = () => {
         newErrors[index][field] = !value;
         setErrors(newErrors);
     };
+
+
 
     const validateContacts = () => {
         const newErrors = contacts.map(contact => ({
@@ -91,7 +99,7 @@ const Information = () => {
                 if (response.status) {
                     next(response.data)
                     console.log("response", response)
-                }else{
+                } else {
 
                 }
             })
@@ -106,8 +114,8 @@ const Information = () => {
             company_name: "",
             search_company_name: "",
             entity_type: "",
-            comapny_status: "",
-            comapny_number: "",
+            company_status: "",
+            company_number: "",
             Registered_Office_Addres: "",
             Incorporation_Date: "",
             Incorporation_in: "",
@@ -126,11 +134,11 @@ const Information = () => {
             if (!values.entity_type) {
                 errors.entity_type = "Please Enter Entity Type";
             }
-            if (!values.comapny_status) {
-                errors.comapny_status = "Please Enter Company Status";
+            if (!values.company_status) {
+                errors.company_status = "Please Enter Company Status";
             }
-            if (!values.comapny_number) {
-                errors.comapny_number = "Please Enter Company Number";
+            if (!values.company_number) {
+                errors.company_number = "Please Enter Company Number";
             }
             if (!values.Registered_Office_Addres) {
                 errors.Registered_Office_Addres = "Please Enter Registered Office Address";
@@ -168,8 +176,8 @@ const Information = () => {
                 let req = {
                     company_name: values.company_name,
                     entity_type: values.entity_type,
-                    comapny_status: values.comapny_status,
-                    comapny_number: values.comapny_number,
+                    company_status: values.company_status,
+                    company_number: values.company_number,
                     Registered_Office_Addres: values.Registered_Office_Addres,
                     Incorporation_Date: values.Incorporation_Date,
                     Incorporation_in: values.Incorporation_in,
@@ -313,7 +321,7 @@ const Information = () => {
                     VAT_Number: values.VAT_Number,
                     Website: values.Website,
                     PageStatus: "1",
-                    constactDetails: contacts,
+                    contactDetails: contacts,
                     CustomerType: CustomerType,
                     account_manager_id: getAccountMangerId,
                     staff_id: staffDetails.id
@@ -346,8 +354,8 @@ const Information = () => {
     useEffect(() => {
         formik.setFieldValue("company_name", getCompanyDetails[0]?.title)
         formik.setFieldValue("entity_type", getCompanyDetails[0]?.company_type)
-        formik.setFieldValue("comapny_status", getCompanyDetails[0]?.company_status)
-        formik.setFieldValue("comapny_number", getCompanyDetails[0]?.company_number)
+        formik.setFieldValue("company_status", getCompanyDetails[0]?.company_status)
+        formik.setFieldValue("company_number", getCompanyDetails[0]?.company_number)
         formik.setFieldValue("Registered_Office_Addres", getCompanyDetails[0]?.address_snippet)
         formik.setFieldValue("Incorporation_Date", getCompanyDetails[0]?.date_of_creation)
         formik.setFieldValue("Incorporation_in", getCompanyDetails[0]?.description)
@@ -377,18 +385,19 @@ const Information = () => {
 
             name: "VAT_Registered",
             label: "VAT Registered",
-            type: "text",
+            type: "select",
+            options: [{ value: "1", label: "Yes" }, { value: "0", label: "No" }],
             label_size: 12,
-            col_size: 4,
+            col_size: 3,
             disable: false,
         },
         {
 
             name: "VAT_Number",
             label: "VAT Number",
-            type: "text",
+            type: "number",
             label_size: 12,
-            col_size: 4,
+            col_size: 3,
             disable: false,
         },
         {
@@ -453,7 +462,6 @@ const Information = () => {
 
 
     ];
-
     const fields1 = [
         {
 
@@ -486,7 +494,7 @@ const Information = () => {
         },
         {
 
-            name: "comapny_status",
+            name: "comapany_status",
             label: "Company Status",
             type: "text",
             label_size: 12,
@@ -495,7 +503,7 @@ const Information = () => {
         },
         {
 
-            name: "comapny_number",
+            name: "comapany_number",
             label: "Company Number",
             type: "text",
             label_size: 12,
@@ -535,7 +543,7 @@ const Information = () => {
             name: "VAT_Registered",
             label: "VAT Registered",
             type: "select",
-            options: [{ value: "1", label: "Yes" }, { value: "2", label: "No" }],
+            options: [{ value: "1", label: "Yes" }, { value: "0", label: "No" }],
             label_size: 12,
             col_size: 3,
             disable: false,
@@ -603,18 +611,19 @@ const Information = () => {
 
             name: "VAT_Registered",
             label: "VAT Registered",
-            type: "text",
+            type: "select",
+            options: [{ value: "1", label: "Yes" }, { value: "0", label: "No" }],
             label_size: 12,
-            col_size: 4,
+            col_size: 3,
             disable: false,
         },
         {
 
             name: "VAT_Number",
             label: "VAT Number",
-            type: "text",
+            type: "number",
             label_size: 12,
-            col_size: 4,
+            col_size: 3,
             disable: false,
         },
         {
@@ -946,8 +955,11 @@ const Information = () => {
 
                                                                                                                         <input
                                                                                                                             type="checkbox"
-                                                                                                                            class="form-check-input"
-                                                                                                                            id="customSwitchsizemd" />
+                                                                                                                            className="form-check-input"
+                                                                                                                            id="customSwitchsizemd"
+                                                                                                                            checked={contact.authorised_signatory_status}
+                                                                                                                            onChange={(e) => handleChange(index, 'authorised_signatory_status', e.target.checked)}
+                                                                                                                        />
                                                                                                                         <label
                                                                                                                             class="form-check-label"
                                                                                                                             for="customSwitchsizemd">Authorised
@@ -1227,7 +1239,7 @@ const Information = () => {
                                                                                 type="text"
                                                                                 className="form-control "
                                                                                 placeholder="VAT
-                                                                  Number"
+                                                                                 Number"
                                                                                 id="firstNameinput"
                                                                             />
                                                                         </div>
