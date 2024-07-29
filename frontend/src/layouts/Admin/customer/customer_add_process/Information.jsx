@@ -736,7 +736,6 @@ const Information = () => {
                                                 name="customerType"
                                                 className="form-select mb-3"
                                                 onChange={(e) => { setCustomerType(e.target.value); ChangeCustomerType(e.target.value); }}
-
                                                 value={CustomerType}
                                             >
                                                 <option value="1">Sole Trader</option>
@@ -760,6 +759,9 @@ const Information = () => {
                                     <div className="row">
                                         <div className="col-lg-12">
                                             <Field as="select" name="accountManager" className="form-select mb-3" onChange={(e) => handleChangeValue(e)}>
+                                                <option value="" disabled selected>
+                                                    Please select
+                                                </option>
                                                 {staffDataAll.data.map((data) => (
                                                     <option key={data.id} value={data.id}>
                                                         {data.first_name}
@@ -969,7 +971,7 @@ const Information = () => {
                                                                                                                             onChange={(e) => handleChange(index, 'authorised_signatory_status', e.target.checked)}
                                                                                                                             defaultChecked={index == 0 || index == 1}
                                                                                                                             disabled={contacts.length == 2 ? index == 0 || index == 1 : false}
-                                                                                                                           
+
 
 
                                                                                                                         />

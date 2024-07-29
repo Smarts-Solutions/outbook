@@ -8298,3 +8298,8 @@ main .error__feedback {
   margin-top: 4px;
   position: absolute;
 }
+
+.label_bottom{
+
+  color: #A2A0A0 !important;
+}

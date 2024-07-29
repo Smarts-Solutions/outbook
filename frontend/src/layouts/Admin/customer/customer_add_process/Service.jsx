@@ -6,23 +6,26 @@ import MultiStepFormContext from "./MultiStepFormContext";
 import { useDispatch } from "react-redux";
 import CommanModal from '../../../../Components/ExtraComponents/Modals/CommanModal';
 import { Staff } from '../../../../ReduxStore/Slice/Staff/staffSlice';
+import { ADD_SERVICES_CUSTOMERS } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
+
 
 const Service = () => {
     const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
     const token = JSON.parse(localStorage.getItem("token"));
     const dispatch = useDispatch();
-    const [GetAllService, setAllService] = useState({
-        loading: true,
-        data: []
-    });
-    const [getModal, setModal] = useState(false);
+    const [GetAllService, setAllService] = useState({ loading: true, data: [] });
     const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
+    const [getModal, setModal] = useState(false);
+    const [searchValue, setSearchValue] = useState("");
+    const [filteredData, setFilteredData] = useState([]);
+    const [getManager, setManager] = useState([]);
     const [services, setServices] = useState([]);
+    const [tempServices, setTempServices] = useState("");
+
+
 
     const GetAllServiceData = async () => {
-        const req = {
-            action: "get"
-        };
+        const req = { action: "get" };
         const data = { req: req, authToken: token };
         await dispatch(Get_Service(data))
             .unwrap()
@@ -71,12 +74,11 @@ const Service = () => {
     }
 
     const handleCheckboxChange = (e, item, type) => {
-      if(e){
-          ServicesUpdate(item.id, type);
-      }else{
+        if (e) {
+            ServicesUpdate(item.id, type);
+        } else {
             setServices(prevServices => prevServices.filter(service => service !== item.id));
-      }
-
+        }
     };
 
     const handleSelectAllChange = (e) => {
@@ -92,15 +94,115 @@ const Service = () => {
         fetchStaffData();
     }, []);
 
-    // console.log(services)
+    useEffect(() => {
+        if (searchValue.trim() !== "") {
+            setFilteredData(
+                staffDataAll.data.filter(data =>
+                    data.first_name.toLowerCase().includes(searchValue.toLowerCase())
+                )
+            );
+        } else {
+            setFilteredData([]);
+        }
+    }, [searchValue, staffDataAll]);
+
+    const AddManager = () => {
+        const trimmedValue = searchValue.trim();
+        if (trimmedValue === "") {
+            return;
+        }
+
+        const matchingData = staffDataAll.data.find(data => data.first_name === trimmedValue);
+
+
+        if (matchingData) {
+            setManager(prevManager => {
+                const existingServiceIndex = prevManager.findIndex(manager => manager.service_id === tempServices);
+
+                if (existingServiceIndex > -1) {
+                    const updatedManagers = [...prevManager];
+                    const existingService = updatedManagers[existingServiceIndex];
+
+                    if (!existingService.account_manager_id.some(manager => manager.id === matchingData.id)) {
+                        existingService.account_manager_id.push(matchingData);
+                    }
+
+                    updatedManagers[existingServiceIndex] = existingService;
+                    return updatedManagers;
+                } else {
+                    return [...prevManager, { service_id: tempServices, account_manager_id: [matchingData] }];
+                }
+            });
+        }
+        setSearchValue("");
+    };
+
+    const removeManager = (id, serviceId) => {
+        setManager(prevManager =>
+            prevManager.map(manager => {
+                if (manager.service_id === serviceId) {
+                    return {
+                        ...manager,
+                        account_manager_id: manager.account_manager_id.filter(accountManager => accountManager.id !== id)
+                    };
+                }
+                return manager;
+            }).filter(manager => manager.account_manager_id.length > 0)
+        );
+    };
+
+    const AddServiceId = (id) => {
+        setTempServices(id);
+    }
+
+    const handleSubmit = async (values) => {
+        if (getManager.length === 0) {
+            alert("Please add at least one account manager.");
+            return;
+        }
+
+
+        const MatchData = getManager
+            .filter(item => services.includes(item.service_id))
+            .map(item => ({
+                service_id: item.service_id,
+                account_manager_id: item.account_manager_id.map(manager => manager.id),
+            }));
+
+        var req = {
+            "customer_id": address,
+            "pageStatus": "2",
+            services: MatchData
+        }
+
+
+        const data = { req: req, authToken: token }
+        await dispatch(ADD_SERVICES_CUSTOMERS(data))
+            .unwrap()
+            .then(async (response) => {
+                if (response.status) {
+                    console.log("response", response)
+                    next(response.data)
+                } else {
+
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+
+
+        // setAddress(values);
+        // next(); // Proceed to the next step
+    };
+
+
+
 
     return (
         <Formik
             initialValues={address}
-            onSubmit={(values) => {
-                setAddress(values);
-                next();
-            }}
+            onSubmit={handleSubmit}
         >
             {({ handleSubmit }) => (
                 <div className="details__wrapper">
@@ -119,7 +221,6 @@ const Service = () => {
                                                         className="form-check-input new_input"
                                                         type="checkbox"
                                                         id="checkAll"
-                                                        defaultValue="option"
                                                         onChange={handleSelectAllChange}
                                                         checked={services.length === GetAllService.data.length && GetAllService.data.length > 0}
                                                     />
@@ -138,7 +239,6 @@ const Service = () => {
                                                             <input
                                                                 className="form-check-input new_input"
                                                                 type="checkbox"
-                                                                defaultValue={`option${index + 1}`}
                                                                 onChange={(e) => handleCheckboxChange(e.target.checked, item, 2)}
                                                                 checked={services.includes(item.id)}
                                                             />
@@ -150,7 +250,7 @@ const Service = () => {
                                                             <div className="remove">
                                                                 <button
                                                                     className="btn btn-sm btn-success remove-item-btn"
-                                                                    onClick={() => setModal(true)}
+                                                                    onClick={() => { setModal(true); AddServiceId(item.id) }}
                                                                 >
                                                                     <i className="ti-user" />
                                                                 </button>
@@ -186,25 +286,40 @@ const Service = () => {
                                         <input
                                             type="text"
                                             className="form-control search"
-                                            placeholder="Search Customer..."
+                                            placeholder="Search Manager..."
+                                            value={searchValue}
+                                            onChange={(e) => setSearchValue(e.target.value)}
                                         />
                                     </div>
+                                    {filteredData.length > 0 && (
+                                        <div className="search-results">
+                                            {filteredData.map((data, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="search-result-item"
+                                                    onClick={() => setSearchValue(data.first_name)}
+                                                >
+                                                    {data.first_name}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
+
                                 <div className="col-2">
                                     <div>
                                         <button
                                             type="button"
                                             className="btn btn-success add-btn"
-                                            data-bs-toggle="modal"
                                             id="create-btn"
-                                            data-bs-target="#showModal123"
+                                            onClick={AddManager}
                                         >
                                             Add
                                         </button>
                                     </div>
                                 </div>
                                 <div className="col-md-6" />
-                                <div className="table-responsive  mt-3 mb-1">
+                                <div className="table-responsive mt-3 mb-1">
                                     <table className="table align-middle table-nowrap" id="customerTable">
                                         <thead className="table-light">
                                             <tr>
@@ -213,25 +328,28 @@ const Service = () => {
                                             </tr>
                                         </thead>
                                         <tbody className="list form-check-all">
-                                            {staffDataAll.data.length > 0 ? (
-                                                staffDataAll.data.map((data, index) => (
-                                                    <tr className="tabel_new" key={index}>
-                                                        <td>{data.first_name}</td>
-
-                                                        <td className="tabel_left">
-                                                            <div className="gap-6">
-                                                                <div className="remove">
-                                                                    <a
-                                                                        onClick={() => console.log('Remove item clicked')} // Add your handler here
-                                                                        className="btn btn-sm btn-danger remove-item-btn"
-                                                                    >
-                                                                        Remove
-                                                                    </a>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))
+                                            {getManager.length > 0 ? (
+                                                getManager
+                                                    .filter(manager => manager.service_id === tempServices)
+                                                    .map((manager, managerIndex) =>
+                                                        manager.account_manager_id.map((accountManager, accountManagerIndex) => (
+                                                            <tr className="tabel_new" key={`${managerIndex}-${accountManagerIndex}`}>
+                                                                <td>{accountManager.first_name}</td>
+                                                                <td className="tabel_left">
+                                                                    <div className="gap-6">
+                                                                        <div className="remove">
+                                                                            <a
+                                                                                onClick={() => removeManager(accountManager.id, manager.service_id)}
+                                                                                className="btn btn-sm btn-danger remove-item-btn"
+                                                                            >
+                                                                                Remove
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    )
                                             ) : (
                                                 <tr>
                                                     <td colSpan="2" className="text-center">No staff available</td>
@@ -240,6 +358,7 @@ const Service = () => {
                                         </tbody>
                                     </table>
                                 </div>
+
                             </div>
                         </div>
                     </CommanModal>
@@ -248,7 +367,7 @@ const Service = () => {
                         <Button className="white-btn" type="default" onClick={prev}>
                             Back
                         </Button>
-                        <Button className="btn btn-info text-white blue-btn" onClick={handleSubmit}>
+                        <Button className="btn btn-info text-white blue-btn" type="submit" onClick={handleSubmit}>
                             Next
                         </Button>
                     </div>
