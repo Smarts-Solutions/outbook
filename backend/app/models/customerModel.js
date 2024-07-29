@@ -1,4 +1,7 @@
 const pool = require('../config/database');
+const deleteUploadFile = require('../../app/middlewares/deleteUploadFile');
+
+//   deleteUploadFile('1722257591646-SSSSSSSS.jpg')
 
 const createCustomer = async (customer) => {
     console.log("customer model id", customer.CustomerType)
@@ -293,9 +296,9 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
 
     if (percentage_model === "1") {
 
-        const { customer_id,percentage_model,total_outsourcing,accountants,bookkeepers,payroll_experts,tax_experts,admin_staff} = customerProcessData;
+        const { customer_id, percentage_model, total_outsourcing, accountants, bookkeepers, payroll_experts, tax_experts, admin_staff } = customerProcessData;
         console.log("percentage_model", percentage_model);
-        
+
         const checkQuery2 = `SELECT id FROM customer_engagement_percentage WHERE customer_engagement_model_id  = ?`;
         const [exist2] = await pool.execute(checkQuery2, [customer_engagement_model_id]);
         let customer_engagement_percentage_id;
@@ -319,7 +322,7 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
                 bookkeepers,
                 payroll_experts,
                 tax_experts,
-                admin_staff  
+                admin_staff
             ]);
             customer_engagement_percentage_id = result.insertId;
 
@@ -356,8 +359,8 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
 
 
     if (adhoc_payg_hourly === "1") {
-          
-        const { customer_id, adhoc_payg_hourly,adhoc_accountants,adhoc_bookkeepers,adhoc_payroll_experts,adhoc_tax_experts,adhoc_admin_staff } = customerProcessData;
+
+        const { customer_id, adhoc_payg_hourly, adhoc_accountants, adhoc_bookkeepers, adhoc_payroll_experts, adhoc_tax_experts, adhoc_admin_staff } = customerProcessData;
 
         console.log("adhoc_payg_hourly", adhoc_payg_hourly);
         const checkQuery3 = `SELECT id FROM customer_engagement_adhoc_hourly WHERE customer_engagement_model_id  = ?`;
@@ -365,7 +368,7 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
         let customer_engagement_adhoc_hourly_id;
         if (exist3.length === 0) {
 
-             const insertQuery = `
+            const insertQuery = `
             INSERT INTO customer_engagement_adhoc_hourly (
                 customer_engagement_model_id,
                 adhoc_accountants,
@@ -377,14 +380,14 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
             ) VALUES (?, ?, ?, ?, ?, ?)
         `;
             const [result] = await pool.execute(insertQuery, [
-                customer_engagement_model_id, 
+                customer_engagement_model_id,
                 adhoc_accountants,
                 adhoc_bookkeepers,
                 adhoc_payroll_experts,
                 adhoc_tax_experts,
                 adhoc_admin_staff
             ]);
-            
+
             customer_engagement_adhoc_hourly_id = result.insertId;
 
             const updateQueryEngagementModel = `UPDATE customer_engagement_model SET adhoc_payg_hourly = ? WHERE customer_id = ? `;
@@ -417,22 +420,22 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
     }
 
     if (customised_pricing === "1") {
-        
-        const { customer_id, customised_pricing , customised_pricing_data} = customerProcessData;
-        
-     if(customised_pricing_data.length > 0){
-        for (const customisedVal of customised_pricing_data) {   
-        console.log("customised_pricing", customised_pricing);
-        let minimum_number_of_jobs = customisedVal.minimum_number_of_jobs
-        let job_type_id = customisedVal.job_type_id
-        let cost_per_job = customisedVal.cost_per_job
-        
-        const checkQuery4 = `SELECT id FROM customer_engagement_customised_pricing WHERE customer_engagement_model_id = ? AND minimum_number_of_jobs = ? AND job_type_id = ? AND cost_per_job = ?`;
-        const [exist4] = await pool.execute(checkQuery4, [customer_engagement_model_id ,minimum_number_of_jobs , job_type_id , cost_per_job]);
-        let customer_engagement_customised_pricing_id;
-        console.log("exist4",exist4[0])
-        if (exist4.length === 0) {
-              const insertQuery = `
+
+        const { customer_id, customised_pricing, customised_pricing_data } = customerProcessData;
+
+        if (customised_pricing_data.length > 0) {
+            for (const customisedVal of customised_pricing_data) {
+                console.log("customised_pricing", customised_pricing);
+                let minimum_number_of_jobs = customisedVal.minimum_number_of_jobs
+                let job_type_id = customisedVal.job_type_id
+                let cost_per_job = customisedVal.cost_per_job
+
+                const checkQuery4 = `SELECT id FROM customer_engagement_customised_pricing WHERE customer_engagement_model_id = ? AND minimum_number_of_jobs = ? AND job_type_id = ? AND cost_per_job = ?`;
+                const [exist4] = await pool.execute(checkQuery4, [customer_engagement_model_id, minimum_number_of_jobs, job_type_id, cost_per_job]);
+                let customer_engagement_customised_pricing_id;
+                console.log("exist4", exist4[0])
+                if (exist4.length === 0) {
+                    const insertQuery = `
             INSERT INTO customer_engagement_customised_pricing (
                 customer_engagement_model_id,
                 minimum_number_of_jobs,
@@ -440,22 +443,22 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
                 cost_per_job
             ) VALUES (?, ?, ?, ?)
         `;
-            const [result] = await pool.execute(insertQuery, [
-                customer_engagement_model_id,
-                minimum_number_of_jobs,
-                job_type_id,
-                cost_per_job
-            ]);
-            customer_engagement_customised_pricing_id = result.insertId;
-          
-        } else {
-            customer_engagement_customised_pricing_id = exist4[0].id;
+                    const [result] = await pool.execute(insertQuery, [
+                        customer_engagement_model_id,
+                        minimum_number_of_jobs,
+                        job_type_id,
+                        cost_per_job
+                    ]);
+                    customer_engagement_customised_pricing_id = result.insertId;
+
+                } else {
+                    customer_engagement_customised_pricing_id = exist4[0].id;
+                }
+            }
         }
-     }
-     }
-         
-    const updateQueryEngagementModel = `UPDATE customer_engagement_model SET customised_pricing = ? WHERE customer_id = ? `;
-    await pool.execute(updateQueryEngagementModel, [customised_pricing, customer_id]);
+
+        const updateQueryEngagementModel = `UPDATE customer_engagement_model SET customised_pricing = ? WHERE customer_id = ? `;
+        await pool.execute(updateQueryEngagementModel, [customised_pricing, customer_id]);
 
 
     }
@@ -477,7 +480,7 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
             await pool.execute(updateQueryEngagementModel, [fte_dedicated_staffing, customer_id]);
         }
 
-        if(percentage_model === "0"){
+        if (percentage_model === "0") {
             const query = `
             DELETE FROM customer_engagement_percentage WHERE customer_engagement_model_id = ? `;
             try {
@@ -491,7 +494,7 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
             await pool.execute(updateQueryEngagementModel, [percentage_model, customer_id]);
         }
 
-        if(adhoc_payg_hourly === "0"){
+        if (adhoc_payg_hourly === "0") {
             const query = `
             DELETE FROM customer_engagement_adhoc_hourly WHERE customer_engagement_model_id = ? `;
             try {
@@ -505,7 +508,7 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
             await pool.execute(updateQueryEngagementModel, [adhoc_payg_hourly, customer_id]);
         }
 
-        if(customised_pricing === "0"){
+        if (customised_pricing === "0") {
             const query = `
             DELETE FROM customer_engagement_customised_pricing WHERE customer_engagement_model_id = ? `;
             try {
@@ -525,6 +528,42 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
     return customer_id;
 }
 
+const updateProcessCustomerFile = async (customerProcessDataFiles, customer_id) => {
+    console.log("customerProcessDataFiles", customerProcessDataFiles);
+    console.log("customer_id", customer_id);
+    if (customerProcessDataFiles.length > 0) {
+        
+        for (let file of customerProcessDataFiles) {
+            const file_name = file.filename; 
+            const original_name = file.originalname; 
+            const file_type = file.mimetype;
+            const file_size = file.size; 
+
+    
+            const insertQuery = `
+                INSERT INTO customer_paper_work (
+                    customer_id, file_name, original_name, file_type, file_size
+                ) VALUES (?, ?, ?, ?, ?)
+            `;
+    
+            try {
+                const [result] = await pool.execute(insertQuery, [
+                    customer_id,
+                    file_name,
+                    original_name,
+                    file_type,
+                    file_size
+                ]);
+    
+                console.log(`File inserted with ID: ${result.insertId}`);
+            } catch (error) {
+                console.error('Error inserting file:', error);
+            }
+        }
+    }
+    return customer_id
+}
+
 
 
 
@@ -532,5 +571,6 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
 module.exports = {
     createCustomer,
     updateProcessCustomerServices,
-    updateProcessCustomerEngagementModel
+    updateProcessCustomerEngagementModel,
+    updateProcessCustomerFile
 };

@@ -24,9 +24,14 @@ const updateProcessCustomer = async (customerProcessData) => {
 
 };
 
+const updateProcessCustomerFile = async (customerProcessDataFiles , customer_id) => {
+  return customerModel.updateProcessCustomerFile(customerProcessDataFiles , customer_id);
+};
+
 
 
 module.exports = {
   addCustomer,
-  updateProcessCustomer
+  updateProcessCustomer,
+  updateProcessCustomerFile
 };
