@@ -2,8 +2,6 @@ import React, { useState, useEffect, useContext } from "react";
 import { useDispatch } from 'react-redux';
 import { Formik, Field, Form, useFormik } from "formik";
 import AddFrom from '../../../../Components/ExtraComponents/Forms/Customer.form'
-import { Button } from "antd";
-import { Input } from "formik-antd";
 import { GetAllCompany, AddCustomer } from '../../../../ReduxStore/Slice/Customer/CustomerSlice'
 import { Email_regex, Mobile_regex } from '../../../../Utils/Common_regex'
 import MultiStepFormContext from "./MultiStepFormContext";
@@ -30,7 +28,6 @@ const Information = () => {
         { authorised_signatory_status: false, firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }
     ]);
 
-    console.log("contacts ", contacts)
 
     const CustomerPersonRoleData = async () => {
         const req = {
@@ -438,7 +435,7 @@ const Information = () => {
 
             name: "Phone",
             label: "Phone",
-            type: "text",
+            type: "number",
             label_size: 12,
             col_size: 4,
             disable: false,
