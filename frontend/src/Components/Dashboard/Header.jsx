@@ -3,12 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { isLoginAuthCheckToken } from '../../ReduxStore/Slice/Auth/authSlice'
 import { Link } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+
 
 
 const Header = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const staffDetails = JSON.parse(localStorage.getItem('staffDetails'));
+   
+
     const role = JSON.parse(localStorage.getItem("role"));
     const token = JSON.parse(localStorage.getItem("token"));
 
@@ -83,6 +87,31 @@ const Header = () => {
         const year = date.getFullYear();
         return `${day} ${month} ${year}`;
     };
+
+
+
+
+    const ClearSession = async () => {
+        var decoded = jwtDecode(token);
+
+        if (decoded.exp * 1000 < new Date().getTime()) {
+
+            localStorage.removeItem("user_role");
+            localStorage.removeItem("user_details");
+            localStorage.clear();
+            setTimeout(() => {
+                navigate("/");
+            }, 1000);
+
+
+        }
+    };
+
+    useEffect(() => {
+        ClearSession();
+    }, []);
+
+
 
     return (
         <div>

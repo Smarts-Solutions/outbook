@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Formik } from "formik";
 import { Button } from "antd";
-import { Input } from "formik-antd";
 import { Get_Service } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import MultiStepFormContext from "./MultiStepFormContext";
 import { useDispatch } from "react-redux";
@@ -18,6 +17,7 @@ const Service = () => {
     });
     const [getModal, setModal] = useState(false);
     const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
+    const [services, setServices] = useState([]);
 
     const GetAllServiceData = async () => {
         const req = {
@@ -53,10 +53,46 @@ const Service = () => {
         }
     };
 
+    const ServicesUpdate = (value, type) => {
+        if (type === 2) {
+            setServices(prevServices => {
+                if (!prevServices.includes(value)) {
+                    return [...prevServices, value];
+                }
+                return prevServices;
+            });
+        } else if (type === 1) {
+            if (value.length === 0) {
+                setServices([]);
+            } else {
+                setServices(GetAllService.data.map(item => item.id));
+            }
+        }
+    }
+
+    const handleCheckboxChange = (e, item, type) => {
+      if(e){
+          ServicesUpdate(item.id, type);
+      }else{
+            setServices(prevServices => prevServices.filter(service => service !== item.id));
+      }
+
+    };
+
+    const handleSelectAllChange = (e) => {
+        if (e.target.checked) {
+            ServicesUpdate(GetAllService.data, 1);
+        } else {
+            ServicesUpdate([], 1);
+        }
+    };
+
     useEffect(() => {
         GetAllServiceData();
         fetchStaffData();
     }, []);
+
+    // console.log(services)
 
     return (
         <Formik
@@ -84,6 +120,8 @@ const Service = () => {
                                                         type="checkbox"
                                                         id="checkAll"
                                                         defaultValue="option"
+                                                        onChange={handleSelectAllChange}
+                                                        checked={services.length === GetAllService.data.length && GetAllService.data.length > 0}
                                                     />
                                                 </div>
                                             </th>
@@ -101,6 +139,8 @@ const Service = () => {
                                                                 className="form-check-input new_input"
                                                                 type="checkbox"
                                                                 defaultValue={`option${index + 1}`}
+                                                                onChange={(e) => handleCheckboxChange(e.target.checked, item, 2)}
+                                                                checked={services.includes(item.id)}
                                                             />
                                                         </div>
                                                     </th>
@@ -177,7 +217,7 @@ const Service = () => {
                                                 staffDataAll.data.map((data, index) => (
                                                     <tr className="tabel_new" key={index}>
                                                         <td>{data.first_name}</td>
-                                                      
+
                                                         <td className="tabel_left">
                                                             <div className="gap-6">
                                                                 <div className="remove">

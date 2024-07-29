@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useDispatch } from 'react-redux';
 import { Formik, Field, Form, useFormik } from "formik";
-import AddFrom from '../../../../Components/ExtraComponents/Forms/Formicform'
-import { Button } from "antd";
-import { Input } from "formik-antd";
+import AddFrom from '../../../../Components/ExtraComponents/Forms/Customer.form'
 import { GetAllCompany, AddCustomer } from '../../../../ReduxStore/Slice/Customer/CustomerSlice'
 import { Email_regex, Mobile_regex } from '../../../../Utils/Common_regex'
 import MultiStepFormContext from "./MultiStepFormContext";
@@ -30,7 +28,6 @@ const Information = () => {
         { authorised_signatory_status: false, firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }
     ]);
 
-    console.log("contacts ", contacts)
 
     const CustomerPersonRoleData = async () => {
         const req = {
@@ -438,7 +435,7 @@ const Information = () => {
 
             name: "Phone",
             label: "Phone",
-            type: "text",
+            type: "number",
             label_size: 12,
             col_size: 4,
             disable: false,
@@ -701,6 +698,16 @@ const Information = () => {
     }, [CustomerType])
 
 
+    const ChangeCustomerType = (value) => {
+        if (value == 3) {
+
+            setContacts([
+                { firstName: '', lastName: '', role: '', phoneNumber: '', email: '' },
+                { firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }
+
+            ])
+        }
+    }
 
     return (
         <Formik
@@ -728,7 +735,8 @@ const Information = () => {
                                                 as="select"
                                                 name="customerType"
                                                 className="form-select mb-3"
-                                                onChange={(e) => setCustomerType(e.target.value)}
+                                                onChange={(e) => { setCustomerType(e.target.value); ChangeCustomerType(e.target.value); }}
+
                                                 value={CustomerType}
                                             >
                                                 <option value="1">Sole Trader</option>
@@ -959,13 +967,18 @@ const Information = () => {
                                                                                                                             id="customSwitchsizemd"
                                                                                                                             checked={contact.authorised_signatory_status}
                                                                                                                             onChange={(e) => handleChange(index, 'authorised_signatory_status', e.target.checked)}
+                                                                                                                            defaultChecked={index == 0 || index == 1}
+                                                                                                                            disabled={contacts.length == 2 ? index == 0 || index == 1 : false}
+                                                                                                                           
+
+
                                                                                                                         />
                                                                                                                         <label
                                                                                                                             class="form-check-label"
                                                                                                                             for="customSwitchsizemd">Authorised
                                                                                                                             Signatory</label>
                                                                                                                     </div>
-                                                                                                                    {index == 0 ? "" :
+                                                                                                                    {index == 0 || index == 1 ? "" :
                                                                                                                         <div>
 
                                                                                                                             <button
@@ -1310,5 +1323,3 @@ const Information = () => {
 };
 
 export default Information;
-
-
