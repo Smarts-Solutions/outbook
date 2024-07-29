@@ -564,6 +564,26 @@ const updateProcessCustomerFile = async (customerProcessDataFiles, customer_id) 
     return customer_id
 }
 
+const updateProcessCustomerFileGet = async (customerProcessData) => {
+    const { customer_id } = customerProcessData;
+    console.log("customer_id", customer_id);
+    try {
+        const query = `SELECT * FROM customer_paper_work WHERE customer_id = ?`
+        const [result] = await pool.execute(query, [customer_id]);
+        return result;
+    } catch (err) {
+        //console.error('Error selecting data:', err);
+        return [];
+    }
+
+}
+
+
+const updateProcessCustomerFileDelete = async (customerProcessData) => {
+    const { customer_id } = customerProcessData;
+    console.log("customer_id", customer_id);
+    return customer_id
+}
 
 
 
@@ -572,5 +592,8 @@ module.exports = {
     createCustomer,
     updateProcessCustomerServices,
     updateProcessCustomerEngagementModel,
-    updateProcessCustomerFile
+    updateProcessCustomerFile,
+    updateProcessCustomerFileGet,
+    updateProcessCustomerFileDelete
+
 };

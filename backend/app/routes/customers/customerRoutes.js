@@ -10,6 +10,7 @@ const router = express.Router();
 router.post('/addCustomer',verifyToken, customerController.addCustomer);
 router.post('/updateProcessCustomer',verifyToken, customerController.updateProcessCustomer);
 router.post('/updateProcessCustomerFile',verifyToken, uploadMultiple, customerController.updateProcessCustomerFile);
+router.post('/updateProcessCustomerFileAction',verifyToken, customerController.updateProcessCustomerFileAction);
 
 
 module.exports = router;

@@ -28,10 +28,22 @@ const updateProcessCustomerFile = async (customerProcessDataFiles , customer_id)
   return customerModel.updateProcessCustomerFile(customerProcessDataFiles , customer_id);
 };
 
+const updateProcessCustomerFileAction = async (customerProcessData) => {
+  const {action} = customerProcessData
+  if(action === "get"){
+    return customerModel.updateProcessCustomerFileGet(customerProcessData);
+  }else if(action === "delete"){
+    return customerModel.updateProcessCustomerFileDelete(customerProcessData);
+  }else{
+   return
+  }
+};
+
 
 
 module.exports = {
   addCustomer,
   updateProcessCustomer,
-  updateProcessCustomerFile
+  updateProcessCustomerFile,
+  updateProcessCustomerFileAction
 };
