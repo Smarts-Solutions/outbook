@@ -53,6 +53,10 @@ const Login = () => {
 
           navigate('/admin/dashboard');
         }else{
+          localStorage.removeItem("staffDetails");
+          localStorage.removeItem("token");
+          localStorage.removeItem("role");
+          sessionStorage.clear();
           setErrorPassword(response.message)
         }
       //continue....
@@ -90,6 +94,10 @@ const Login = () => {
   
             navigate('/admin/dashboard');
           }else{
+            localStorage.removeItem("staffDetails");
+            localStorage.removeItem("token");
+            localStorage.removeItem("role");
+            sessionStorage.clear();
             setErrorPassword(response.message)
           }
         //continue....
