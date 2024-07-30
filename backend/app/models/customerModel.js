@@ -1,6 +1,5 @@
 const pool = require('../config/database');
 const deleteUploadFile = require('../../app/middlewares/deleteUploadFile');
-
 //   deleteUploadFile('1722257591646-SSSSSSSS.jpg')
 
 const createCustomer = async (customer) => {
@@ -125,6 +124,36 @@ const createCustomer = async (customer) => {
     }
 
 };
+
+const getCustomer = async (customer) => {
+    const query = `
+    SELECT * FROM customers 
+    `;
+
+    try {
+        const [result] = await pool.execute(query);
+        return result;
+    } catch (err) {
+       // console.error('Error selecting data:', err);
+        return [];
+    }
+
+}
+
+const deleteCustomer = async (customer) => {
+    // const { id } = customer;
+    // console.log("customer_id", id);
+    // const query = `
+    // DELETE FROM customers WHERE id = ?`;
+
+    // try {
+    //     await pool.execute(query, [id]);
+    // } catch (err) {
+    //     console.error('Error deleting data:', err);
+    //     throw err;
+    // }
+
+}
 
 const updateProcessCustomerServices = async (customerProcessData) => {
     //console.log("customerProcessData",customerProcessData)
@@ -578,18 +607,27 @@ const updateProcessCustomerFileGet = async (customerProcessData) => {
 
 }
 
-
 const updateProcessCustomerFileDelete = async (customerProcessData) => {
-    const { customer_id } = customerProcessData;
+    const { id , file_name} = customerProcessData;
     console.log("customer_id", customer_id);
-    return customer_id
+    const query = `
+    DELETE FROM customer_paper_work WHERE id = ?`;
+
+    try {
+        await pool.execute(query, [id]);
+        deleteUploadFile(file_name)
+    } catch (err) {
+        console.error('Error deleting data:', err);
+        throw err;
+    }
+
 }
-
-
 
 
 module.exports = {
     createCustomer,
+    getCustomer,
+    deleteCustomer,
     updateProcessCustomerServices,
     updateProcessCustomerEngagementModel,
     updateProcessCustomerFile,

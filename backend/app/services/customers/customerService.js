@@ -5,6 +5,17 @@ const addCustomer = async (customer) => {
   return customerModel.createCustomer(customer);
 };
 
+const customerAction = async (customer) => {
+  const {action} = customer
+  if(action === "get"){
+    return customerModel.getCustomer(customer);
+  }else if(action === "delete"){
+    return customerModel.deleteCustomer(customer);
+  }else{
+   return
+  }
+};
+
 const updateProcessCustomer = async (customerProcessData) => {
   const { pageStatus } = customerProcessData;
   if (pageStatus === "2") {
@@ -43,6 +54,7 @@ const updateProcessCustomerFileAction = async (customerProcessData) => {
 
 module.exports = {
   addCustomer,
+  customerAction,
   updateProcessCustomer,
   updateProcessCustomerFile,
   updateProcessCustomerFileAction
