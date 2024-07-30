@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { GETALLCOMPANY ,ADD_CUSTOMER, GET_SERVICE,ADD_SERVICES} from "../../../Services/Customer/CustomerService";
+import { GETALLCOMPANY, ADD_CUSTOMER, GET_SERVICE, ADD_SERVICES, ADD_PEPPER_WORK } from "../../../Services/Customer/CustomerService";
 
 
 export const GetAllCompany = createAsyncThunk("seachCompany", async (data) => {
@@ -41,15 +41,28 @@ export const ADD_SERVICES_CUSTOMERS = createAsyncThunk("updateProcessCustomer", 
   }
 });
 
+export const ADD_PEPPER_WORKS = createAsyncThunk("updateProcessCustomerFile", async (data) => {
+  try {
+    const { req, authToken } = data
+    const res = await ADD_PEPPER_WORK(req, authToken);
+    console.log("res",res)
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
 const CustomerSlice = createSlice({
   name: "CustomerSlice",
   initialState: {
     isLoading: false,
     isError: false,
     getallcompany: [],
-    addcustomer:[],
-    get_service:[],
-    addcustomerservices:[],
+    addcustomer: [],
+    get_service: [],
+    addcustomerservices: [],
+    pepperwork: [],
+
 
   },
   reducers: {},
@@ -68,7 +81,7 @@ const CustomerSlice = createSlice({
       })
       .addCase(AddCustomer.pending, (state) => {
         state.isLoading = true;
-      })  
+      })
       .addCase(AddCustomer.fulfilled, (state, action) => {
         state.isLoading = false;
         state.addcustomer = action.payload;
@@ -79,7 +92,7 @@ const CustomerSlice = createSlice({
       })
       .addCase(Get_Service.pending, (state) => {
         state.isLoading = true;
-      })  
+      })
       .addCase(Get_Service.fulfilled, (state, action) => {
         state.isLoading = false;
         state.get_service = action.payload;
@@ -90,7 +103,7 @@ const CustomerSlice = createSlice({
       })
       .addCase(ADD_SERVICES_CUSTOMERS.pending, (state) => {
         state.isLoading = true;
-      })  
+      })
       .addCase(ADD_SERVICES_CUSTOMERS.fulfilled, (state, action) => {
         state.isLoading = false;
         state.addcustomerservices = action.payload;
@@ -98,8 +111,19 @@ const CustomerSlice = createSlice({
       .addCase(ADD_SERVICES_CUSTOMERS.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
+      })
+      .addCase(ADD_PEPPER_WORKS.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(ADD_PEPPER_WORKS.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.pepperwork = action.payload;
+      })
+      .addCase(ADD_PEPPER_WORKS.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
       });
- 
+
   },
 });
 

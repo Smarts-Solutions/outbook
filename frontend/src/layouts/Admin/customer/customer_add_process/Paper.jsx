@@ -2,12 +2,18 @@ import React, { useContext, useRef, useState } from "react";
 import { Formik, Field, Form } from "formik";
 import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
-import axios from "axios"; // Ensure axios is installed and imported
+import { ADD_PEPPER_WORKS } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import sweatalert from 'sweetalert2';
+
 
 const Paper = () => {
     const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
     const fileInputRef = useRef(null);
     const token = JSON.parse(localStorage.getItem("token"));
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const [fileState, setFileState] = useState([]);
 
@@ -22,30 +28,39 @@ const Paper = () => {
     };
 
     const handleSubmit = async () => {
-        const bodyFormData = new FormData();
+        let data = new FormData();
 
         if (fileState && typeof fileState[Symbol.iterator] === 'function') {
             Array.from(fileState).forEach((file, index) => {
-                bodyFormData.append("img", file);
+                data.append("files", file);
             });
         } else {
             console.error("fileState is not iterable or not correctly set.");
-            return;  // Early exit if fileState is not correctly set
+            return;
         }
 
-        bodyFormData.append('customer_id', 21);
-        bodyFormData.append('pageStatus', "4");
+        data.append('customer_id', 21);
 
-        try {
-            const response = await axios.post('http://localhost:2222/updateProcessCustomerFile', bodyFormData, {
-                headers: {
-                    'Authorization': token
+        const data1 = { req: data, authToken: token }
+        await dispatch(ADD_PEPPER_WORKS(data1))
+            .unwrap()
+            .then(async (response) => {
+                if (response.status) {
+                    sweatalert.fire({
+                        title: response.message,
+                        icon: 'success',
+                        timer: 3000,
+                    }).then(() => {
+                        navigate('/admin/customer');
+                    })
                 }
+            })
+            .catch((error) => {
+                console.log("Error", error);
             });
-            console.log(response.data);
-        } catch (error) {
-            console.error("Error submitting form data:", error);
-        }
+
+
+
     };
 
 
