@@ -66,6 +66,30 @@ export async function ADD_SERVICES(data, token) {
 }
 
 
+// // Create New Customer For Update Pepper Work
+export async function ADD_PEPPER_WORK(data, token) {
+  try {
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${Config.base_url}updateProcessCustomerFile`,
+      headers: {
+        'Authorization': token,
+        ...data
+      },
+      data: data
+    };
+
+    const res = await axios.request(config);
+    console.log("res", res.data)
+
+    return await res?.data;
+  }
+  catch (err) {
+    return await err;
+  }
+}
+
 
 
 
