@@ -34,8 +34,7 @@ const Sidebar = () => {
 
         if (item.permission_name === "staff") {
           const staffView = item.items.find((item) => item.type === "view");
-          setShowStaffTab(staffView && staffView.is_assigned ==1);
-          
+          setShowStaffTab(staffView && staffView.is_assigned ==1); 
         }
 
       });
