@@ -7,23 +7,28 @@ import Paper from "./Paper";
 import Information from "./Information";
 
 
-const detailsInitialState = {
+let detailsInitialState = {
     name: "",
     age: "",
-    profession: ""
+    profession: "",
+    status: 1
 };
 
-const addressInitialState = {
+let addressInitialState = {
     customer: "",
     address2: "",
-    city: ""
+    city: "",
+    coustomerId: 0
+
 };
 
 const AddCustomer = () => {
 
     const [details, setDetails] = useState(detailsInitialState);
     const [address, setAddress] = useState(addressInitialState);
-    const [currentStep, setCurrentStep] = useState(0);
+    const [currentStep, setCurrentStep] = useState(3);
+    const [coustomerId, setCoustomerId] = useState("");
+
 
     const { Step } = Steps;
 
@@ -43,7 +48,8 @@ const AddCustomer = () => {
     };
 
     const next = (data) => {
-        console.log("data",data)
+
+        setCoustomerId(data)
         if (currentStep < 3) {
             setCurrentStep(currentStep + 1);
         } else {
@@ -59,7 +65,10 @@ const AddCustomer = () => {
         }
     };
 
-  
+    useEffect(() => {
+        addressInitialState.coustomerId = coustomerId;
+        setAddress(coustomerId)
+    }, [currentStep]);
 
     return (
         <div className='report-data mt-4'>
