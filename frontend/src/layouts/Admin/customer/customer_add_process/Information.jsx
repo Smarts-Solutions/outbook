@@ -61,9 +61,7 @@ const Information = () => {
     };
 
     const handleChange = (index, field, value) => {
-        console.log("index", index)
-        console.log("field", field)
-        console.log("value", value)
+
 
         // Update the contacts state
         const newContacts = [...contacts];

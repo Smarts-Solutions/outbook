@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import Datatable from '../../../Components/ExtraComponents/Datatable';
+import { GET_ALL_CUSTOMERS } from '../../../ReduxStore/Slice/Customer/CustomerSlice';
 
 const Customer = () => {
+
+  const token = JSON.parse(localStorage.getItem("token"));
+  const [customerData, setCustomerData] = useState([]);
+
   const tabs = [
     { id: 'this-week', label: 'This week' },
     { id: 'last-week', label: 'Last week' },
@@ -15,16 +21,12 @@ const Customer = () => {
     { id: 'custom', label: 'Custom' },
   ];
 
-  const thisWeekData = [
-    { TradingName: 'W120', Code: '012_BlaK_T_1772', CustomerName: 'The Black T', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Admin/Support Tasks', JobType: 'Year End' },
-  ];
-
-  const thisWeekColumns = [
-    { name: 'Trading Name', selector: row => row.TradingName, sortable: true },
-    { name: 'Customer Code', selector: row => row.Code, sortable: true },
-    { name: 'Customer Name', selector: row => row.CustomerName, sortable: true },
+  const columns = [
+    { name: 'Trading Name', selector: row => row.trading_name, sortable: true },
+    { name: 'Customer Code(cust+CustName+UniqueNo)', selector: row => row.Code, sortable: true },
+    { name: 'Company Name', selector: row => row.CustomerName, sortable: true },
     { name: 'Company Number', selector: row => row.AccountManager, sortable: true },
-    { name: 'Service Type', selector: row => row.ServiceType, sortable: true },
+    { name: 'Type', selector: row => row.customer_type == 1 ? "Sole Trader" : row.customer_type == 2 ? "	Company" : row.customer_type == 3 ? "Partnership" : "-", sortable: true },
     { name: 'Account Manager', selector: row => row.JobType, sortable: true },
     {
       name: 'Actions',
@@ -40,24 +42,10 @@ const Customer = () => {
     },
   ];
 
-  const tabData = {
-    'this-week': { data: thisWeekData, columns: thisWeekColumns },
-    'last-week': { data: [], columns: [] },
-    'last-month': { data: [], columns: [] },
-    'last-quarter': { data: [], columns: [] },
-    'this-6-months': { data: [], columns: [] },
-    'last-6-months': { data: [], columns: [] },
-    'this-year': { data: [], columns: [] },
-    'last-year': { data: [], columns: [] },
-    'custom': { data: [], columns: [] },
-  };
-
-  const TabContent = ({ contentType }) => {
-    const { data, columns } = tabData[contentType];
-    return <Datatable columns={columns} data={data} filter={false} />;
-  };
-
   const [activeTab, setActiveTab] = useState('this-week');
+  const dispatch = useDispatch();
+
+
 
   function handleEdit(row) {
     console.log('Editing row:', row);
@@ -67,6 +55,32 @@ const Customer = () => {
     console.log('Deleting row:', row);
   }
 
+
+
+  const GetAllServiceData = async () => {
+    const req = { action: "get" };
+    const data = { req: req, authToken: token };
+    await dispatch(GET_ALL_CUSTOMERS(data))
+      .unwrap()
+      .then(async (response) => {
+        console.log("response", response.data)
+        if (response.status) {
+          setCustomerData(response.data)
+        } else {
+          setCustomerData(response.data)
+
+        }
+      })
+      .catch((error) => {
+        console.log("Error", error);
+
+      });
+  }
+
+  useEffect(() => {
+    GetAllServiceData()
+  }, []);
+
   return (
     <div className='container-fluid'>
       <div className="row ">
@@ -74,7 +88,6 @@ const Customer = () => {
           <div className="page-title-box">
             <div className="row align-items-start">
               <div className="col-md-8">
-                 
                 <ul className="nav nav-pills rounded-tabs" id="pills-tab" role="tablist">
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
@@ -111,12 +124,15 @@ const Customer = () => {
             role="tabpanel"
             aria-labelledby={`${tab.id}-tab`}
           >
-            <TabContent contentType={tab.id} />
+
+            {customerData && customerData && (
+              <Datatable columns={columns} data={customerData} filter={false} />
+            )}
           </div>
         ))}
       </div>
     </div>
   );
-}
+};
 
 export default Customer;
