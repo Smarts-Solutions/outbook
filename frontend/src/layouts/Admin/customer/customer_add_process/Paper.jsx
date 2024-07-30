@@ -39,7 +39,7 @@ const Paper = () => {
             return;
         }
 
-        data.append('customer_id', 21);
+        data.append('customer_id', address);
 
         const data1 = { req: data, authToken: token }
         await dispatch(ADD_PEPPER_WORKS(data1))
