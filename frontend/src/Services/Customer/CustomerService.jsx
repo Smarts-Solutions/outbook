@@ -90,7 +90,31 @@ export async function ADD_PEPPER_WORK(data, token) {
   }
 }
 
+// Get All Customer KE LITE
+export async function GET_ALL_CUSTOMER(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerAction`, data, {
+      headers: header(token),
+      data: {}
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
 
+// Get All Customer KE EK FUNCTION BNA KE
+export async function GET_CUSTOMER(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomer`, data, {
+      headers: header(token),
+      data: {}
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
 
 
 
