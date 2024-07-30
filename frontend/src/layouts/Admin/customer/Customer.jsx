@@ -23,11 +23,11 @@ const Customer = () => {
 
   const columns = [
     { name: 'Trading Name', selector: row => row.trading_name, sortable: true },
-    { name: 'Customer Code(cust+CustName+UniqueNo)', selector: row => row.Code, sortable: true },
-    { name: 'Company Name', selector: row => row.CustomerName, sortable: true },
-    { name: 'Company Number', selector: row => row.AccountManager, sortable: true },
+    { name: 'Customer Code(cust+CustName+UniqueNo)', selector: row => row.customer_code, sortable: true },
+    { name: 'Company Name', selector: row => row.company_name==null?"":row.company_name, sortable: true },
+    { name: 'Company Number', selector: row => row.company_number==null?"":row.company_number, sortable: true },
     { name: 'Type', selector: row => row.customer_type == 1 ? "Sole Trader" : row.customer_type == 2 ? "	Company" : row.customer_type == 3 ? "Partnership" : "-", sortable: true },
-    { name: 'Account Manager', selector: row => row.JobType, sortable: true },
+    { name: 'Account Manager', selector: row => row.staff_firstname+' '+row.staff_lastname, sortable: true },
     {
       name: 'Actions',
       cell: row => (

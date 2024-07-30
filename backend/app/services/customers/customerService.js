@@ -16,6 +16,10 @@ const customerAction = async (customer) => {
   }
 };
 
+const getSingleCustomer = async (customer) => {
+    return customerModel.getSingleCustomer(customer);
+};
+
 const updateProcessCustomer = async (customerProcessData) => {
   const { pageStatus } = customerProcessData;
   if (pageStatus === "2") {
@@ -55,6 +59,7 @@ const updateProcessCustomerFileAction = async (customerProcessData) => {
 module.exports = {
   addCustomer,
   customerAction,
+  getSingleCustomer,
   updateProcessCustomer,
   updateProcessCustomerFile,
   updateProcessCustomerFileAction
