@@ -48,7 +48,7 @@ const Engagement = () => {
         adhoc_admin_staff: "",
     });
     const [jobEntries, setJobEntries] = useState([
-        {  minimum_number_of_jobs: '', job_type_id: '', costPerJob: '' }
+        { minimum_number_of_jobs: '', job_type_id: '', cost_per_job: '' }
     ]);
 
     const [jobType, setJobType] = useState([])
@@ -90,7 +90,7 @@ const Engagement = () => {
     };
 
     const handleAddJob = () => {
-        setJobEntries([...jobEntries, { minimum_number_of_jobs: '', job_type_id: '', costPerJob: '' }]);
+        setJobEntries([...jobEntries, { minimum_number_of_jobs: '', job_type_id: '', cost_per_job: '' }]);
     };
 
     const handleRemoveJob = (id) => {
@@ -104,6 +104,10 @@ const Engagement = () => {
 
     const handleChange4 = (index, e) => {
         const { name, value } = e.target;
+        console.log("name", name)
+        console.log("value", value)
+
+
         const newJobEntries = [...jobEntries];
         newJobEntries[index][name] = value;
         setJobEntries(newJobEntries);
@@ -172,10 +176,10 @@ const Engagement = () => {
                 entryErrors.job_type_id = 'Required';
             }
 
-            if (!entry.costPerJob) {
-                entryErrors.costPerJob = 'Required';
-            } else if (isNaN(entry.costPerJob) || parseFloat(entry.costPerJob) < 0 || parseFloat(entry.costPerJob) > 100) {
-                entryErrors.costPerJob = 'Must be a number between 0 and 100';
+            if (!entry.cost_per_job) {
+                entryErrors.cost_per_job = 'Required';
+            } else if (isNaN(entry.cost_per_job) || parseFloat(entry.cost_per_job) < 0 || parseFloat(entry.cost_per_job) > 100) {
+                entryErrors.cost_per_job = 'Must be a number between 0 and 100';
             }
 
             newErrors[index] = entryErrors;
@@ -203,7 +207,7 @@ const Engagement = () => {
 
 
 
-    const handleSubmit = async() => {
+    const handleSubmit = async () => {
         if (!checkboxStates.some(state => state === 1)) {
             alert("Please select at least one option.");
             return;
@@ -217,13 +221,13 @@ const Engagement = () => {
         let req = {
             "customer_id": address,
             "pageStatus": "3",
-            "fte_dedicated_staffing": checkboxStates[0],
-            "percentage_model": checkboxStates[1],
-            "adhoc_payg_hourly": checkboxStates[2],
-            "customised_pricing": checkboxStates[3],
+            "fte_dedicated_staffing": checkboxStates[0].toString(),
+            "percentage_model": checkboxStates[1].toString(),
+            "adhoc_payg_hourly": checkboxStates[2].toString(),
+            "customised_pricing": checkboxStates[3].toString(),
         };
 
-      
+
 
 
         if (checkboxStates[0] === 1) {
@@ -258,10 +262,10 @@ const Engagement = () => {
         if (checkboxStates[2] === 1) {
             req = {
                 ...req,
-                "adhoc_accountants":formValues3.adhoc_accountants,
+                "adhoc_accountants": formValues3.adhoc_accountants,
                 "adhoc_bookkeepers": formValues3.adhoc_bookkeepers,
                 "adhoc_payroll_experts": formValues3.adhoc_payroll_experts,
-                "adhoc_tax_experts":formValues3.adhoc_tax_experts,
+                "adhoc_tax_experts": formValues3.adhoc_tax_experts,
                 "adhoc_admin_staff": formValues3.adhoc_admin_staff,
             };
         }
@@ -269,7 +273,7 @@ const Engagement = () => {
         if (checkboxStates[3] === 1) {
             req = {
                 ...req,
-                customised_pricing_data:jobEntries
+                customised_pricing_data: jobEntries
             };
         }
 
@@ -279,7 +283,7 @@ const Engagement = () => {
             .then(async (response) => {
                 if (response.status) {
                     console.log("response", response)
-                    // next(response.data)
+                    next(response.data)
                 } else {
 
                 }
@@ -292,7 +296,6 @@ const Engagement = () => {
 
 
     useEffect(() => {
-
         GetJobTypeApi()
     }, []);
 
@@ -469,7 +472,7 @@ const Engagement = () => {
                                                                     {errors3[field.name] && (
                                                                         <div className="text-danger">{errors3[field.name]}</div>
                                                                     )}
-                                                                 
+
                                                                 </div>
                                                             </div>
                                                         ))}
@@ -508,7 +511,7 @@ const Engagement = () => {
                                                                             onChange={(e) => handleChange4(index, e)}
                                                                         />
                                                                         {errors4[index] && (
-                                                                            <div className="text-danger">{errors4[index].costPerJob}</div>
+                                                                            <div className="text-danger">{errors4[index].cost_per_job}</div>
                                                                         )}
                                                                     </div>
                                                                 </div>
@@ -525,7 +528,7 @@ const Engagement = () => {
                                                                     >
                                                                         <option value="">Select Job Type</option>
                                                                         {jobType && jobType.map((data) => (
-                                                                            <option key={data.type} value={data.type}>{data.type}</option>
+                                                                            <option key={data.type} value={data.id}>{data.type}</option>
                                                                         ))}
                                                                     </select>
                                                                     {errors4[index] && (
@@ -544,13 +547,13 @@ const Engagement = () => {
                                                                         <input
                                                                             type="text"
                                                                             className="form-control"
-                                                                            name="costPerJob"
+                                                                            name="cost_per_job"
                                                                             id={`costPerJob_${index}`}
-                                                                            value={job.costPerJob}
+                                                                            value={job.cost_per_job}
                                                                             onChange={(e) => handleChange4(index, e)}
                                                                         />
                                                                         {errors4[index] && (
-                                                                            <div className="text-danger">{errors4[index].costPerJob}</div>
+                                                                            <div className="text-danger">{errors4[index].cost_per_job}</div>
                                                                         )}
                                                                     </div>
                                                                 </div>
