@@ -2,19 +2,39 @@ const pool = require('../config/database');
 const deleteUploadFile = require('../../app/middlewares/deleteUploadFile');
 //   deleteUploadFile('1722257591646-SSSSSSSS.jpg')
 
+async function generateNextUniqueCode() {
+    const [rows] = await pool.execute('SELECT customer_code FROM customers ORDER BY id DESC LIMIT 1');
+    let newCode = '00001'; // Default code if table is empty
+    if (rows.length > 0) {
+        const inputString = rows[0].customer_code;
+        const parts = inputString.split('_');
+        const lastPart = parts[parts.length - 1];
+        const lastCode = lastPart;
+        const nextCode = parseInt(lastCode, 10) + 1;
+        console.log("nextCode",nextCode);
+        newCode = "0000"+nextCode
+       // newCode = nextCode.toString().padStart(5, '0');
+    }
+
+    return newCode;
+}
+
 const createCustomer = async (customer) => {
-    console.log("customer model id", customer.CustomerType)
+    // Customer Code(cust+CustName+UniqueNo)
+   let UniqueNo =  await generateNextUniqueCode()
+
     if (customer.CustomerType == "1") {
         // console.log("customer model", customer)
         const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, First_Name, Last_Name, Phone, Email, Residential_Address } = customer;
-
+        const firstThreeLetters = Trading_Name.substring(0, 3)
+        const customer_code =  "cust_"+firstThreeLetters+"_"+UniqueNo;
         const query = `
-    INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,trading_address,vat_registered,vat_number,website,form_process)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
         try {
-            const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus]);
+            const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name,customer_code,Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus]);
             const customer_id = result.insertId;
 
             const query2 = `
@@ -32,14 +52,16 @@ const createCustomer = async (customer) => {
     else if (customer.CustomerType == "2") {
         //console.log("customer model", customer)
         const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, company_name, entity_type, company_status, company_number, Registered_Office_Addres, Incorporation_Date, Incorporation_in, contactDetails } = customer;
-
+       
+        const firstThreeLetters = Trading_Name.substring(0, 3)
+        const customer_code =  "cust_"+firstThreeLetters+"_"+UniqueNo;
         const query = `
-    INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,trading_address,vat_registered,vat_number,website,form_process)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
         try {
-            const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus]);
+            const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name,customer_code,Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus]);
             const customer_id = result.insertId;
 
             const query2 = `
@@ -82,13 +104,16 @@ const createCustomer = async (customer) => {
         //console.log("customer model", customer)
         const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, contactDetails } = customer;
 
+        const firstThreeLetters = Trading_Name.substring(0, 3)
+        const customer_code =  "cust_"+firstThreeLetters+"_"+UniqueNo;
+
         const query = `
-    INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,trading_address,vat_registered,vat_number,website,form_process)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
         try {
-            const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus]);
+            const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name,customer_code,Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus]);
             const customer_id = result.insertId;
 
 
@@ -134,7 +159,7 @@ const getCustomer = async (customer) => {
         const [result] = await pool.execute(query);
         return result;
     } catch (err) {
-       // console.error('Error selecting data:', err);
+        // console.error('Error selecting data:', err);
         return [];
     }
 
@@ -561,20 +586,20 @@ const updateProcessCustomerFile = async (customerProcessDataFiles, customer_id) 
     console.log("customerProcessDataFiles", customerProcessDataFiles);
     console.log("customer_id", customer_id);
     if (customerProcessDataFiles.length > 0) {
-        
-        for (let file of customerProcessDataFiles) {
-            const file_name = file.filename; 
-            const original_name = file.originalname; 
-            const file_type = file.mimetype;
-            const file_size = file.size; 
 
-    
+        for (let file of customerProcessDataFiles) {
+            const file_name = file.filename;
+            const original_name = file.originalname;
+            const file_type = file.mimetype;
+            const file_size = file.size;
+
+
             const insertQuery = `
                 INSERT INTO customer_paper_work (
                     customer_id, file_name, original_name, file_type, file_size
                 ) VALUES (?, ?, ?, ?, ?)
             `;
-    
+
             try {
                 const [result] = await pool.execute(insertQuery, [
                     customer_id,
@@ -583,7 +608,7 @@ const updateProcessCustomerFile = async (customerProcessDataFiles, customer_id) 
                     file_type,
                     file_size
                 ]);
-    
+
                 console.log(`File inserted with ID: ${result.insertId}`);
             } catch (error) {
                 console.error('Error inserting file:', error);
@@ -608,7 +633,7 @@ const updateProcessCustomerFileGet = async (customerProcessData) => {
 }
 
 const updateProcessCustomerFileDelete = async (customerProcessData) => {
-    const { id , file_name} = customerProcessData;
+    const { id, file_name } = customerProcessData;
     console.log("customer_id", customer_id);
     const query = `
     DELETE FROM customer_paper_work WHERE id = ?`;

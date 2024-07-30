@@ -155,6 +155,7 @@ CREATE TABLE customers (
     staff_id INT NOT NULL,
     account_manager_id INT NOT NULL COMMENT 'Only staff members who are account managers',
     trading_name VARCHAR(100) NOT NULL,
+    customer_code VARCHAR(100) NOT NULL,
     trading_address VARCHAR(100) NOT NULL,
     vat_registered ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: No, 1: yes',
     vat_number VARCHAR(50) NOT NULL,
