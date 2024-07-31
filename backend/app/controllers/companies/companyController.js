@@ -3,7 +3,6 @@ const axios = require('axios');
 const seachCompany = async (req, res) => {
   try {
 
-    console.log("data", req.body.search);
     if (req.body.search != "") {
 
       let config = {
@@ -17,7 +16,6 @@ const seachCompany = async (req, res) => {
 
       await axios.request(config)
         .then((response) => {
-          console.log("ress", response.data);
           return res.status(200).json({ status: true,data:response.data, message: "success.." });
         })
         .catch((error) => {

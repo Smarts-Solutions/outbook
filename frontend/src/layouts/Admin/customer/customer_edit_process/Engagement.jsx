@@ -94,7 +94,7 @@ const Engagement = () => {
     };
 
     const handleRemoveJob = (id) => {
-        console.log("id", id)
+      
         if (jobEntries.length === 1) {
             return;
         }
@@ -104,9 +104,6 @@ const Engagement = () => {
 
     const handleChange4 = (index, e) => {
         const { name, value } = e.target;
-        console.log("name", name)
-        console.log("value", value)
-
 
         const newJobEntries = [...jobEntries];
         newJobEntries[index][name] = value;
@@ -165,7 +162,6 @@ const Engagement = () => {
         jobEntries.forEach((entry, index) => {
             const entryErrors = {};
 
-            console.log("entry", entry)
             if (!entry.minimum_number_of_jobs) {
                 entryErrors.minimum_number_of_jobs = 'Required';
             } else if (isNaN(entry.minimum_number_of_jobs) || parseFloat(entry.minimum_number_of_jobs) < 0 || parseFloat(entry.minimum_number_of_jobs) > 100) {
@@ -282,7 +278,6 @@ const Engagement = () => {
             .unwrap()
             .then(async (response) => {
                 if (response.status) {
-                    console.log("response", response)
                     next(response.data)
                 } else {
 

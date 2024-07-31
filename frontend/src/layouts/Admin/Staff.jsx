@@ -27,7 +27,6 @@ const StaffPage = () => {
             accessData && accessData.map((item) => {
 
                 if (item.permission_name === "staff") {
-                    // console.log("item.items", item.items)
                     const staffInsert = item.items.find((item) => item.type === "insert");
                     setShowStaffInsertTab(staffInsert && staffInsert.is_assigned == 1);
 
@@ -308,7 +307,7 @@ const StaffPage = () => {
     const handleUpdate = async () => {
         try {
             const response = await dispatch(Competency({ req: { "action": "update", "staff_id": serviceDataAll.staff_id, service: serviceDataAll.data }, authToken: token })).unwrap();
-            console.log("response", response)
+     
             if (response.status) {
 
                 sweatalert.fire({

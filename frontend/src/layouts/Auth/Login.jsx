@@ -39,8 +39,7 @@ const Login = () => {
      await dispatch(SignIn(req))
     .unwrap()
     .then(async (response) => {
-      // console.log("response", response.data.staffDetails.id);
-      // console.log("token", response.data.token);
+
         if(response.status){
           localStorage.setItem("staffDetails", JSON.stringify(response.data.staffDetails));
           localStorage.setItem("token", JSON.stringify(response.data.token));
@@ -70,9 +69,7 @@ const Login = () => {
 
   const handleAzureLogin = async () => {
     const accounts = await azureLogin();
-    console.log('Logged in accounts:', accounts);
     if(accounts.length > 0){
-      console.log("accounts ",accounts[0].username)
       const req = { email: accounts[0].username}
 
       await dispatch(SignInWithAzure(req))
@@ -80,8 +77,6 @@ const Login = () => {
       .then(async (response) => {
           if(response.status){
 
-           // console.log("response", response.data.staffDetails.id);
-           // console.log("token", response.data.token);
 
             localStorage.setItem("staffDetails", JSON.stringify(response.data.staffDetails));
             localStorage.setItem("token", JSON.stringify(response.data.token));

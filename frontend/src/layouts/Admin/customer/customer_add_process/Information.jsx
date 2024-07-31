@@ -19,11 +19,9 @@ const Information = () => {
     const [CustomerType, setCustomerType] = useState('1');
     const [getNextStatus, setNextStatus] = useState('0');
     const [personRoleDataAll, setPersonRoleDataAll] = useState({ loading: true, data: [] });
-
     const [getAllSearchCompany, setGetAllSearchCompany] = useState([]);
     const [errors, setErrors] = useState([{ firstName: false, lastName: false, role: false, phoneCode: false, phoneNumber: false, email: false }
     ]);
-
     const [contacts, setContacts] = useState([
         { authorised_signatory_status: false, firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }
     ]);
@@ -62,8 +60,6 @@ const Information = () => {
 
     const handleChange = (index, field, value) => {
 
-
-        // Update the contacts state
         const newContacts = [...contacts];
         newContacts[index][field] = value;
         setContacts(newContacts);
@@ -93,7 +89,6 @@ const Information = () => {
             .then(async (response) => {
                 if (response.status) {
                     next(response.data)
-                    console.log("response", response)
                 } else {
 
                 }
@@ -187,14 +182,12 @@ const Information = () => {
                     account_manager_id: getAccountMangerId,
                     staff_id: staffDetails.id
                 }
-                console.log("req", req)
                 await AddCustomerFun(req)
 
 
             }
 
             else {
-                //  console.log("contacts", contacts)
 
             }
 
@@ -271,7 +264,6 @@ const Information = () => {
                 staff_id: staffDetails.id
 
             }
-            console.log("req", req)
             await AddCustomerFun(req)
         }
     });
@@ -321,7 +313,6 @@ const Information = () => {
                     account_manager_id: getAccountMangerId,
                     staff_id: staffDetails.id
                 }
-                console.log("req", req)
                 await AddCustomerFun(req)
             }
             else {
@@ -700,10 +691,13 @@ const Information = () => {
         if (value == 3) {
 
             setContacts([
-                { firstName: '', lastName: '', role: '', phoneNumber: '', email: '' },
-                { firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }
+                { authorised_signatory_status: true, firstName: '', lastName: '', role: '', phoneNumber: '', email: '' },
+                { authorised_signatory_status: true, firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }
 
             ])
+
+            setErrors([{ firstName: false, lastName: false, role: false, email: false }, { firstName: false, lastName: false, role: false, email: false }]);
+
         }
     }
 
@@ -711,7 +705,6 @@ const Information = () => {
         <Formik
             initialValues={address}
             onSubmit={(values) => {
-                console.log(values)
                 setAddress(values);
                 next();
             }}

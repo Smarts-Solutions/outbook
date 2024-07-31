@@ -63,7 +63,6 @@ const Customer = () => {
     await dispatch(GET_ALL_CUSTOMERS(data))
       .unwrap()
       .then(async (response) => {
-        console.log("response", response.data)
         if (response.status) {
           setCustomerData(response.data)
         } else {

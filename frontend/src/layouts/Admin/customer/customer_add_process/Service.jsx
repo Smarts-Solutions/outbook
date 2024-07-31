@@ -181,7 +181,6 @@ const Service = () => {
             .unwrap()
             .then(async (response) => {
                 if (response.status) {
-                    console.log("response", response)
                     next(response.data)
                 } else {
 

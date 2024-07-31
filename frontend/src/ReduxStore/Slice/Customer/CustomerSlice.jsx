@@ -45,7 +45,7 @@ export const ADD_PEPPER_WORKS = createAsyncThunk("updateProcessCustomerFile", as
   try {
     const { req, authToken } = data
     const res = await ADD_PEPPER_WORK(req, authToken);
-    console.log("res",res)
+   
     return await res;
   } catch (err) {
     throw err;
@@ -57,7 +57,7 @@ export const GET_ALL_CUSTOMERS = createAsyncThunk("customerAction", async (data)
   try {
     const { req, authToken } = data
     const res = await GET_ALL_CUSTOMER(req, authToken);
-    console.log("res",res)
+
     return await res;
   } catch (err) {
     throw err;

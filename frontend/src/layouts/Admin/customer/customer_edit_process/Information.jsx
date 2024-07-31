@@ -41,7 +41,6 @@ const Information = () => {
         }));
     };
 
-    console.log("customerData=>", customerData)
 
     return (
         <Formik

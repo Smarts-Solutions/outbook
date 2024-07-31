@@ -121,34 +121,7 @@ const Setting = () => {
 
             
 
-            // return
-            // await dispatch(Staff({ req: { "action": editStaff ? "update" : "add", ...req }, authToken: token }))
-            //     .unwrap()
-            //     .then(async (response) => {
-            //         sweatalert.fire({
-            //             icon: 'success',
-            //             title: 'Success',
-            //             text: response.message,
-            //             timer: 2000,
-            //         }).then(() => {
-            //             if (response.status) {
-            //                 setAddStaff(false);
-            //                 setEditStaff(false);
-            //                 SetRefresh(!refresh);
-            //                 formik.resetForm();
-            //                 window.location.reload();
-            //             } else {
-            //                 sweatalert.fire({
-            //                     icon: 'error',
-            //                     title: 'Oops...',
-            //                     text: response.message,
-            //                 });
-            //             }
-            //         });
-            //     })
-            //     .catch((error) => {
-            //         console.log("Error", error);
-            //     });
+        
         }
     });
 

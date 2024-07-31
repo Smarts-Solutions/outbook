@@ -81,7 +81,7 @@ export async function ADD_PEPPER_WORK(data, token) {
     };
 
     const res = await axios.request(config);
-    console.log("res", res.data)
+
 
     return await res?.data;
   }
