@@ -662,10 +662,8 @@ const updateProcessCustomerFileDelete = async (customerProcessData) => {
 const getSingleCustomer = async (customer) => {
     let customerDetals = {}
     const { customer_id, pageStatus } = customer;
-    console.log("customer_id", customer_id);
     const [ExistCustomer] = await pool.execute('SELECT customer_type FROM `customers` WHERE id =' + customer_id);
-    console.log("pageStatus", pageStatus);
-    console.log("ExistCustomer", ExistCustomer[0].customer_type);
+    
     const customer_type = ExistCustomer[0].customer_type;
 
     // Page Status 1 
@@ -1055,14 +1053,55 @@ const getSingleCustomer = async (customer) => {
         }
     }
 
+    //  Page Status 4 Paper Work Part
+    else if (pageStatus === "4") {
+        const query = `
+        SELECT 
+            customers.*, 
+            customer_paper_work.*
+        FROM 
+            customers
+        JOIN 
+            customer_paper_work ON customers.id = customer_paper_work.customer_id
+        WHERE 
+            customers.id = ?
+        `;
+
+        const [rows] = await pool.execute(query, [customer_id]);
+        if (rows.length > 0) {
+            const customerData = {
+                id: rows[0].id,
+                staff_id: rows[0].staff_id,
+                account_manager_id: rows[0].account_manager_id,
+                trading_name: rows[0].trading_name,
+                customer_code: rows[0].customer_code,
+                trading_address: rows[0].trading_address,
+                vat_registered: rows[0].vat_registered,
+                vat_number: rows[0].vat_number,
+                website: rows[0].website,
+                form_process: rows[0].form_process,
+                status: rows[0].status,
+            };
+
+            const customer_paper_work = rows.map(row => ({
+                file_name : row.file_name,
+                original_name : row.original_name,
+                file_type : row.file_type,
+                file_size : row.file_size
+             }));
 
 
+            
+            const result = {
+                customer: customerData,
+                customer_paper_work: customer_paper_work
+            };
 
-
-
-
-
-
+            return result;
+        } else {
+            return [];
+        }
+    }
 
 
 }
