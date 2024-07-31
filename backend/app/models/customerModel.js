@@ -806,7 +806,6 @@ const getSingleCustomer = async (customer) => {
             }
             ;
         }
-
         // Partnership Details
         else if (customer_type == "3") {
             const query = `

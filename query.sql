@@ -349,10 +349,11 @@ CREATE TABLE customer_paper_work (
 /*--TABLE:- CLIENTS   */
 CREATE TABLE clients (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    customer_type ENUM('1', '2' , '3' , '4') NOT NULL DEFAULT '1' COMMENT '1: SoleTrader, 2: Company , 3:Partnership , 4 : Individual',
+    client_type ENUM('1', '2' , '3' , '4') NOT NULL DEFAULT '1' COMMENT '1: SoleTrader, 2: Company , 3:Partnership , 4 : Individual',
     customer_id INT NOT NULL,
     client_industry_id INT NOT NULL,
     trading_name VARCHAR(100) NOT NULL,
+    client_code VARCHAR(100) NOT NULL,
     trading_address VARCHAR(100) NOT NULL,
     vat_registered ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: No, 1: Yes',
     vat_number VARCHAR(50) NOT NULL,
@@ -388,7 +389,7 @@ CREATE TABLE client_company_information (
 CREATE TABLE client_contact_details (
     id INT AUTO_INCREMENT PRIMARY KEY,
     client_id INT NOT NULL,
-    role VARCHAR(100) NOT NULL,
+    role INT NOT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
@@ -396,9 +397,11 @@ CREATE TABLE client_contact_details (
     phone VARCHAR(20) NOT NULL,
     alternate_phone VARCHAR(20) DEFAULT NULL,
     residential_address TEXT DEFAULT NULL,
+    authorised_signatory_status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: off, 1: on',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (client_id) REFERENCES clients(id)
+    FOREIGN KEY (role) REFERENCES customer_contact_person_role(id)
 );
 
 
