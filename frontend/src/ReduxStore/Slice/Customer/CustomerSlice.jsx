@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { GETALLCOMPANY, ADD_CUSTOMER, GET_SERVICE, ADD_SERVICES, ADD_PEPPER_WORK,GET_ALL_CUSTOMER } from "../../../Services/Customer/CustomerService";
+import { GETALLCOMPANY, ADD_CUSTOMER, GET_SERVICE, ADD_SERVICES, ADD_PEPPER_WORK,GET_ALL_CUSTOMER,GET_CUSTOMER } from "../../../Services/Customer/CustomerService";
 
 
 export const GetAllCompany = createAsyncThunk("seachCompany", async (data) => {
@@ -64,6 +64,18 @@ export const GET_ALL_CUSTOMERS = createAsyncThunk("customerAction", async (data)
   }
 });
 
+
+export const GET_CUSTOMER_DATA = createAsyncThunk("getSingleCustomer", async (data) => {
+  try {
+    const { req, authToken } = data
+    const res = await GET_CUSTOMER(req, authToken);
+
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
 const CustomerSlice = createSlice({
   name: "CustomerSlice",
   initialState: {
@@ -74,9 +86,8 @@ const CustomerSlice = createSlice({
     get_service: [],
     addcustomerservices: [],
     pepperwork: [],
-    getallcustomers:[]
-
-
+    getallcustomers:[],
+    getcustomer:[],
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -144,6 +155,17 @@ const CustomerSlice = createSlice({
         state.getallcustomers = action.payload;
       })
       .addCase(GET_ALL_CUSTOMERS.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(GET_CUSTOMER_DATA.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(GET_CUSTOMER_DATA.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.getcustomer = action.payload;
+      })
+      .addCase(GET_CUSTOMER_DATA.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       });

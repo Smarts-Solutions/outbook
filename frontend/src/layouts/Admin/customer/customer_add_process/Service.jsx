@@ -156,10 +156,10 @@ const Service = () => {
     }
 
     const handleSubmit = async (values) => {
-        if (getManager.length === 0) {
-            alert("Please add at least one account manager.");
-            return;
-        }
+        // if (getManager.length === 0) {
+        //     alert("Please add at least one account manager.");
+        //     return;
+        // }
 
 
         const MatchData = getManager
