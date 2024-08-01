@@ -671,8 +671,18 @@ const getSingleCustomer = async (customer) => {
         //Solo Traders Details
         if (customer_type == "1") {
             const query = `
-    SELECT 
-        customers.*, 
+        SELECT 
+        customers.id AS customer_id,
+        customers.staff_id AS staff_id,
+        customers.account_manager_id AS account_manager_id,
+        customers.trading_name AS trading_name,
+        customers.customer_code AS customer_code,
+        customers.trading_address AS trading_address,
+        customers.vat_registered AS vat_registered,
+        customers.vat_number AS vat_number,
+        customers.website AS website,
+        customers.form_process AS form_process,
+        customers.status AS status,
         customer_contact_details.*,
         customer_contact_person_role.name AS customer_role_contact_name,
         customer_contact_person_role.id AS customer_role_contact_id
@@ -691,7 +701,7 @@ const getSingleCustomer = async (customer) => {
             if (rows.length > 0) {
 
                 const customerData = {
-                    id: rows[0].id,
+                    id: rows[0].customer_id,
                     staff_id: rows[0].staff_id,
                     account_manager_id: rows[0].account_manager_id,
                     trading_name: rows[0].trading_name,
@@ -731,11 +741,22 @@ const getSingleCustomer = async (customer) => {
             }
             ;
         }
+        
         // Company Details
         else if (customer_type == "2") {
             const query = `
-            SELECT 
-                customers.*, 
+            SELECT
+            customers.id AS customer_id,
+            customers.staff_id AS staff_id,
+            customers.account_manager_id AS account_manager_id,
+            customers.trading_name AS trading_name,
+            customers.customer_code AS customer_code,
+            customers.trading_address AS trading_address,
+            customers.vat_registered AS vat_registered,
+            customers.vat_number AS vat_number,
+            customers.website AS website,
+            customers.form_process AS form_process,
+            customers.status AS status, 
                 customer_contact_details.*,
                 customer_company_information.*,
                 customer_contact_person_role.name AS customer_role_contact_name,
@@ -757,7 +778,7 @@ const getSingleCustomer = async (customer) => {
             if (rows.length > 0) {
 
                 const customerData = {
-                    id: rows[0].id,
+                    id: rows[0].customer_id,
                     staff_id: rows[0].staff_id,
                     account_manager_id: rows[0].account_manager_id,
                     trading_name: rows[0].trading_name,
@@ -806,11 +827,22 @@ const getSingleCustomer = async (customer) => {
             }
             ;
         }
+
         // Partnership Details
         else if (customer_type == "3") {
             const query = `
             SELECT 
-                customers.*, 
+            customers.id AS customer_id,
+            customers.staff_id AS staff_id,
+            customers.account_manager_id AS account_manager_id,
+            customers.trading_name AS trading_name,
+            customers.customer_code AS customer_code,
+            customers.trading_address AS trading_address,
+            customers.vat_registered AS vat_registered,
+            customers.vat_number AS vat_number,
+            customers.website AS website,
+            customers.form_process AS form_process,
+            customers.status AS status,
                 customer_contact_details.*,
                 customer_contact_person_role.name AS customer_role_contact_name,
                 customer_contact_person_role.id AS customer_role_contact_id
@@ -829,7 +861,7 @@ const getSingleCustomer = async (customer) => {
             if (rows.length > 0) {
 
                 const customerData = {
-                    id: rows[0].id,
+                    id: rows[0].customer_id,
                     staff_id: rows[0].staff_id,
                     account_manager_id: rows[0].account_manager_id,
                     trading_name: rows[0].trading_name,
@@ -876,16 +908,17 @@ const getSingleCustomer = async (customer) => {
     else if (pageStatus === "2") {
         const query = `
         SELECT 
-            customers.id,
-            customers.staff_id,
-            customers.trading_name,
-            customers.customer_code,
-            customers.trading_address,
-            customers.vat_registered,
-            customers.vat_number,
-            customers.website,
-            customers.form_process,
-            customers.status,
+            customers.id AS customer_id,
+            customers.staff_id AS staff_id,
+            customers.account_manager_id AS account_manager_id,
+            customers.trading_name AS trading_name,
+            customers.customer_code AS customer_code,
+            customers.trading_address AS trading_address,
+            customers.vat_registered AS vat_registered,
+            customers.vat_number AS vat_number,
+            customers.website AS website,
+            customers.form_process AS form_process,
+            customers.status AS status,
             customer_services.id as customer_service_id,
             customer_services.service_id,
             GROUP_CONCAT(customer_service_account_managers.account_manager_id) AS account_manager_ids
@@ -904,7 +937,7 @@ const getSingleCustomer = async (customer) => {
         const [rows] = await pool.execute(query, [customer_id]);
         if (rows.length > 0) {
             const customerData = {
-                id: rows[0].id,
+                id: rows[0].customer_id,
                 staff_id: rows[0].staff_id,
                 trading_name: rows[0].trading_name,
                 customer_code: rows[0].customer_code,
@@ -939,7 +972,17 @@ const getSingleCustomer = async (customer) => {
     else if (pageStatus === "3") {
         const query = `
         SELECT 
-            customers.*, 
+            customers.id AS customer_id,
+            customers.staff_id AS staff_id,
+            customers.account_manager_id AS account_manager_id,
+            customers.trading_name AS trading_name,
+            customers.customer_code AS customer_code,
+            customers.trading_address AS trading_address,
+            customers.vat_registered AS vat_registered,
+            customers.vat_number AS vat_number,
+            customers.website AS website,
+            customers.form_process AS form_process,
+            customers.status AS status,
             customer_engagement_model.*, 
             customer_engagement_fte.*, 
             customer_engagement_percentage.*, 
@@ -964,7 +1007,7 @@ const getSingleCustomer = async (customer) => {
         const [rows] = await pool.execute(query, [customer_id]);
         if (rows.length > 0) {
             const customerData = {
-                id: rows[0].id,
+                id: rows[0].customer_id,
                 staff_id: rows[0].staff_id,
                 account_manager_id: rows[0].account_manager_id,
                 trading_name: rows[0].trading_name,
@@ -1056,7 +1099,17 @@ const getSingleCustomer = async (customer) => {
     else if (pageStatus === "4") {
         const query = `
         SELECT 
-            customers.*, 
+            customers.id AS customer_id,
+            customers.staff_id AS staff_id,
+            customers.account_manager_id AS account_manager_id,
+            customers.trading_name AS trading_name,
+            customers.customer_code AS customer_code,
+            customers.trading_address AS trading_address,
+            customers.vat_registered AS vat_registered,
+            customers.vat_number AS vat_number,
+            customers.website AS website,
+            customers.form_process AS form_process,
+            customers.status AS status,
             customer_paper_work.*
         FROM 
             customers
@@ -1069,7 +1122,7 @@ const getSingleCustomer = async (customer) => {
         const [rows] = await pool.execute(query, [customer_id]);
         if (rows.length > 0) {
             const customerData = {
-                id: rows[0].id,
+                id: rows[0].customer_id,
                 staff_id: rows[0].staff_id,
                 account_manager_id: rows[0].account_manager_id,
                 trading_name: rows[0].trading_name,
