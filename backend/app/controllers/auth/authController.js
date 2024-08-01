@@ -39,7 +39,7 @@ const staffCompetency = async (req, res) => {
   try {
      const { ...staffCompetency } = req.body;
       const data = await authService.staffCompetency(staffCompetency);
-     // console.log("data",data)
+   
       if(data != undefined){
         return res.send({ status:true,message: "Success..",data : data});
       }else{

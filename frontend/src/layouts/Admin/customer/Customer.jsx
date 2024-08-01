@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import Datatable from '../../../Components/ExtraComponents/Datatable';
 import { GET_ALL_CUSTOMERS } from '../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { useNavigate } from 'react-router-dom';
 
 const Customer = () => {
+  const navigate = useNavigate();
 
   const token = JSON.parse(localStorage.getItem("token"));
   const [customerData, setCustomerData] = useState([]);
@@ -24,10 +26,10 @@ const Customer = () => {
   const columns = [
     { name: 'Trading Name', selector: row => row.trading_name, sortable: true },
     { name: 'Customer Code(cust+CustName+UniqueNo)', selector: row => row.customer_code, sortable: true },
-    { name: 'Company Name', selector: row => row.company_name==null?"":row.company_name, sortable: true },
-    { name: 'Company Number', selector: row => row.company_number==null?"":row.company_number, sortable: true },
+    { name: 'Company Name', selector: row => row.company_name == null ? "" : row.company_name, sortable: true },
+    { name: 'Company Number', selector: row => row.company_number == null ? "" : row.company_number, sortable: true },
     { name: 'Type', selector: row => row.customer_type == 1 ? "Sole Trader" : row.customer_type == 2 ? "	Company" : row.customer_type == 3 ? "Partnership" : "-", sortable: true },
-    { name: 'Account Manager', selector: row => row.staff_firstname+' '+row.staff_lastname, sortable: true },
+    { name: 'Account Manager', selector: row => row.staff_firstname + ' ' + row.staff_lastname, sortable: true },
     {
       name: 'Actions',
       cell: row => (
@@ -48,7 +50,8 @@ const Customer = () => {
 
 
   function handleEdit(row) {
-    console.log('Editing row:', row);
+    console.log('Editing row:', row.id);
+    navigate('/admin/editcustomer', { state: row });
   }
 
   function handleDelete(row) {
@@ -63,7 +66,6 @@ const Customer = () => {
     await dispatch(GET_ALL_CUSTOMERS(data))
       .unwrap()
       .then(async (response) => {
-        console.log("response", response.data)
         if (response.status) {
           setCustomerData(response.data)
         } else {

@@ -5,7 +5,7 @@ import Service from "./Service";
 import Engagement from "./Engagement";
 import Paper from "./Paper";
 import Information from "./Information";
-
+import { useLocation } from "react-router-dom";
 
 let detailsInitialState = {
     name: "",
@@ -26,8 +26,10 @@ const AddCustomer = () => {
 
     const [details, setDetails] = useState(detailsInitialState);
     const [address, setAddress] = useState(addressInitialState);
-    const [currentStep, setCurrentStep] = useState(3);
+    const [currentStep, setCurrentStep] = useState(0);
     const [coustomerId, setCoustomerId] = useState("");
+
+    const location = useLocation();
 
 
     const { Step } = Steps;
@@ -66,15 +68,15 @@ const AddCustomer = () => {
     };
 
     useEffect(() => {
-        addressInitialState.coustomerId = coustomerId;
-        setAddress(coustomerId)
+        addressInitialState.coustomerId = location.state.id;
+        setAddress(location.state.id)
     }, [currentStep]);
 
     return (
         <div className='report-data mt-4'>
             <div className='d-flex justify-content-between align-items-center'>
                 <div className='tab-title'>
-                    <h3 className='mt-0'>Create New Customer</h3>
+                    <h3 className='mt-0'>Update Customer</h3>
                 </div>
             </div>
             <div className="col-sm-12">

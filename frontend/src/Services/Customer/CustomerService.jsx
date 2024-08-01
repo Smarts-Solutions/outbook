@@ -81,7 +81,7 @@ export async function ADD_PEPPER_WORK(data, token) {
     };
 
     const res = await axios.request(config);
-    console.log("res", res.data)
+
 
     return await res?.data;
   }
@@ -106,7 +106,7 @@ export async function GET_ALL_CUSTOMER(data, token) {
 // Get All Customer KE EK FUNCTION BNA KE
 export async function GET_CUSTOMER(data, token) {
   try {
-    const res = await axios.post(`${Config.base_url}getCustomer`, data, {
+    const res = await axios.post(`${Config.base_url}getSingleCustomer`, data, {
       headers: header(token),
       data: {}
     });

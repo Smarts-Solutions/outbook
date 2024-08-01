@@ -22,7 +22,6 @@ const Setting = () => {
             accessData && accessData.map((item) => {
 
                 if (item.permission_name === "setting") {
-                    // console.log("item.items", item.items)
                     const settingInsert = item.items.find((item) => item.type === "insert");
                     setShowSettingInsertTab(settingInsert && settingInsert.is_assigned == 1);
 

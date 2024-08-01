@@ -13,6 +13,8 @@ import Access from '../layouts/Admin/Access';
 import Setting from '../layouts/Admin/Setting';
 import Staff from '../layouts/Admin/Staff';
 import Addcustomer from '../layouts/Admin/customer/customer_add_process/Addcustomer';
+import Editcustomer from '../layouts/Admin/customer/customer_edit_process/Editcustomer';
+
 import JobType from '../layouts/Admin/JobType'
 import Profile from '../Components/Dashboard/Profile'
 import { RoleAccess } from '../ReduxStore/Slice/Access/AccessSlice';
@@ -54,8 +56,9 @@ const Admin_Route = () => {
             <Route path="/setting" element={<Setting />} />
             <Route path="/addcustomer" element={<Addcustomer />} />
             <Route path="/customer" element={<Customer />} />
-           
             <Route path="/service" element={<Service />} />
+            <Route path="/editcustomer" element={<Editcustomer />} />
+
           </Routes>
         </div>
       </div>

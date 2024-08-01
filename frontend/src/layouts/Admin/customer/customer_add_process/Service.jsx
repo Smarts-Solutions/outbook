@@ -156,10 +156,10 @@ const Service = () => {
     }
 
     const handleSubmit = async (values) => {
-        if (getManager.length === 0) {
-            alert("Please add at least one account manager.");
-            return;
-        }
+        // if (getManager.length === 0) {
+        //     alert("Please add at least one account manager.");
+        //     return;
+        // }
 
 
         const MatchData = getManager
@@ -181,7 +181,6 @@ const Service = () => {
             .unwrap()
             .then(async (response) => {
                 if (response.status) {
-                    console.log("response", response)
                     next(response.data)
                 } else {
 
