@@ -29,7 +29,7 @@ const Customer = () => {
     { name: 'Company Name', selector: row => row.company_name == null ? "" : row.company_name, sortable: true },
     { name: 'Company Number', selector: row => row.company_number == null ? "" : row.company_number, sortable: true },
     { name: 'Type', selector: row => row.customer_type == 1 ? "Sole Trader" : row.customer_type == 2 ? "	Company" : row.customer_type == 3 ? "Partnership" : "-", sortable: true },
-    { name: 'Account Manager', selector: row => row.staff_firstname + ' ' + row.staff_lastname, sortable: true },
+    { name: 'Account Manager', selector: row => row.account_manager_firstname + ' ' + row.account_manager_lastname, sortable: true },
     {
       name: 'Actions',
       cell: row => (
