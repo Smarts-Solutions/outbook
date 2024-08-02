@@ -13,7 +13,7 @@ const ClientList = () => {
   const [customerData, setCustomerData] = useState([]);
   const [activeTab, setActiveTab] = useState('client');
 
-console.log('location:',location.state.id)
+console.log('location:',location.state)
  
    
   const tabs = [

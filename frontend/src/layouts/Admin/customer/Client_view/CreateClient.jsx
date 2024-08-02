@@ -104,7 +104,7 @@ const CreateClient = () => {
                             timer: 1500
                         })
                         setTimeout(() => {
-                            navigate('/admin/customerlist')
+                            navigate('/admin/customerlist', { state: {id:location.state.id} })
                         }, 1500)
                     } else {
                         Swal.fire({
@@ -153,19 +153,19 @@ const CreateClient = () => {
         console.log("field :", field);
         console.log("value -:", !value);
 
-      
+
         // Update contacts state
         const newContacts = [...contacts];
         newContacts[index][field] = value;
         setContacts(newContacts);
-      
+
         // Update errors state
         const newErrors = [...errors];
         newErrors[index][field] = value ? true : false;
         console.log("newErrors :", newErrors);
         setCompanyContactError(newErrors);
-      };
-      
+    };
+
 
 
 
@@ -364,8 +364,8 @@ const CreateClient = () => {
                                                                                             value={getSoleTraderDetails.vatRegistered}
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                         >
-                                                                                            <option selected="">Yes</option>
-                                                                                            <option value={1}>No</option>
+                                                                                            <option selected={1}>Yes</option>
+                                                                                            <option value={0}>No</option>
                                                                                         </select>
                                                                                         {errors1['vatRegistered'] && (
                                                                                             <div style={{ 'color': 'red' }}>{errors1['vatRegistered']}</div>
@@ -577,8 +577,8 @@ const CreateClient = () => {
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  >VAT Registered</label>
                                                                                                 <select className="form-select mb-3" name="VATRegistered" onChange={(e) => handleChange2(e)} value={getCompanyDetails.VATRegistered}>
-                                                                                                    <option selected="">Yes</option>
-                                                                                                    <option value={1}>No</option>
+                                                                                                    <option selected={1}>Yes</option>
+                                                                                                    <option value={0}>No</option>
                                                                                                 </select>
                                                                                                 {errors2['VATRegistered'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['VATRegistered']}</div>
@@ -689,9 +689,9 @@ const CreateClient = () => {
                                                                                                                                         className="form-check-input"
                                                                                                                                         id="customSwitchsizemd"
                                                                                                                                         checked={contact.authorised_signatory_status}
-                                                                                                                                    onChange={(e) => handleChange(index, 'authorised_signatory_status', e.target.checked)}
-                                                                                                                                    defaultChecked={index == 0 || index == 1}
-                                                                                                                                    disabled={contacts.length == 2 ? index == 0 || index == 1 : false}
+                                                                                                                                        onChange={(e) => handleChange(index, 'authorised_signatory_status', e.target.checked)}
+                                                                                                                                        defaultChecked={index == 0 || index == 1}
+                                                                                                                                        disabled={contacts.length == 2 ? index == 0 || index == 1 : false}
                                                                                                                                     />
                                                                                                                                     <label
                                                                                                                                         class="form-check-label"
@@ -740,8 +740,8 @@ const CreateClient = () => {
                                                                                                                                     className="form-control"
                                                                                                                                     placeholder="Last Name"
                                                                                                                                     id={`lastName-${index}`}
-                                                                                                                                value={contact.lastName}
-                                                                                                                                onChange={(e) => handleChange(index, 'lastName', e.target.value)}
+                                                                                                                                    value={contact.lastName}
+                                                                                                                                    onChange={(e) => handleChange(index, 'lastName', e.target.value)}
                                                                                                                                 />
                                                                                                                                 {/* {contact.lastName == "" && <div style={{ color: 'red' }}>Last Name is required</div>} */}
                                                                                                                             </div>
@@ -754,14 +754,14 @@ const CreateClient = () => {
                                                                                                                                 <select
                                                                                                                                     className="form-select"
                                                                                                                                     id={`role-${index}`}
-                                                                                                                                value={contact.role}
-                                                                                                                                onChange={(e) => handleChange(index, 'role', e.target.value)}
+                                                                                                                                    value={contact.role}
+                                                                                                                                    onChange={(e) => handleChange(index, 'role', e.target.value)}
                                                                                                                                 >
                                                                                                                                     <option value="">Select Role</option>
-                                                                                                                                  {/* {personRoleDataAll && personRoleDataAll.data.map((item, index) => { 
+                                                                                                                                    {/* {personRoleDataAll && personRoleDataAll.data.map((item, index) => { 
                                                                                                                                     return <option value={item.id}>{item.name}</option>  */}
                                                                                                                                     {/* }) */}
-                                                                                                                                {/* } */}
+                                                                                                                                    {/* } */}
                                                                                                                                 </select>
                                                                                                                                 {/* {contact.role == "" && <div style={{ color: 'red' }}>Role is required</div>} */}
 
@@ -780,8 +780,8 @@ const CreateClient = () => {
                                                                                                                                         className="form-control"
                                                                                                                                         placeholder="Phone Number"
                                                                                                                                         id={`phoneNumber-${index}`}
-                                                                                                                                    value={contact.phoneNumber}
-                                                                                                                                    onChange={(e) => handleChange(index, 'phoneNumber', e.target.value)}
+                                                                                                                                        value={contact.phoneNumber}
+                                                                                                                                        onChange={(e) => handleChange(index, 'phoneNumber', e.target.value)}
                                                                                                                                     />
                                                                                                                                     {/* {contact.phoneNumber == "" && <div style={{ color: 'red' }}>Phone Number is required</div>} */}
                                                                                                                                 </div>
@@ -798,8 +798,8 @@ const CreateClient = () => {
                                                                                                                                     className="form-control"
                                                                                                                                     placeholder="Email"
                                                                                                                                     id={`email-${index}`}
-                                                                                                                                value={contact.email}
-                                                                                                                                onChange={(e) => handleChange(index, 'email', e.target.value)}
+                                                                                                                                    value={contact.email}
+                                                                                                                                    onChange={(e) => handleChange(index, 'email', e.target.value)}
                                                                                                                                 />
                                                                                                                                 {/* {contact.email == "" && <div style={{ color: 'red' }}>Email is required</div>} */}
                                                                                                                             </div>
