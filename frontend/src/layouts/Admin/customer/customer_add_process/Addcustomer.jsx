@@ -79,6 +79,7 @@ const AddCustomer = () => {
             </div>
             <div className="col-sm-12">
                 <div className="page-title-box">
+               
                     <Provider value={{ details, setDetails, next, prev, address, setAddress }}>
                         <Steps current={currentStep}>
                             <Step title="Customer Information" />

@@ -1,44 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import Datatable from '../../../Components/ExtraComponents/Datatable';
-import { GET_ALL_CUSTOMERS } from '../../../ReduxStore/Slice/Customer/CustomerSlice';
-import { useNavigate } from 'react-router-dom';
+import Datatable from '../../../../Components/ExtraComponents/Datatable';
+import { GET_ALL_CUSTOMERS } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { useNavigate , useLocation } from 'react-router-dom';
 
-const Customer = () => {
+const ClientList = () => {
   const navigate = useNavigate();
-
+  const location  = useLocation();
+  const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const [customerData, setCustomerData] = useState([]);
+  const [activeTab, setActiveTab] = useState('client');
+
+
 
   const tabs = [
-    { id: 'this-week', label: 'This week' },
-    { id: 'last-week', label: 'Last week' },
-    { id: 'last-month', label: 'Last month' },
-    { id: 'last-quarter', label: 'Last quarter' },
-    { id: 'this-6-months', label: 'This 6 months' },
-    { id: 'last-6-months', label: 'Last 6 months' },
-    { id: 'this-year', label: 'This year' },
-    { id: 'last-year', label: 'Last year' },
-    { id: 'custom', label: 'Custom' },
+    { id: 'client', label: 'Client' },
+    { id: 'job', label: 'Job' },
+    { id: 'documents', label: 'Documents' },
   ];
 
   const columns = [
-    {
-      name: 'Trading Name',
-      cell: row => (
-        <div>
-        <a onClick={() => HandleClientView(row)} style={{ cursor: 'pointer', color: '#26bdf0' }}>{row.trading_name}</a>
-      </div>
-      ),
-      selector: row => row.trading_name,
-      sortable: true
-    },
-    { name: 'Customer Code(cust+CustName+UniqueNo)', selector: row => row.customer_code, sortable: true },
-    { name: 'Company Name', selector: row => row.company_name == null ? "" : row.company_name, sortable: true },
-    { name: 'Company Number', selector: row => row.company_number == null ? "" : row.company_number, sortable: true },
-    { name: 'Type', selector: row => row.customer_type == 1 ? "Sole Trader" : row.customer_type == 2 ? "	Company" : row.customer_type == 3 ? "Partnership" : "-", sortable: true },
-    { name: 'Account Manager', selector: row => row.staff_firstname + ' ' + row.staff_lastname, sortable: true },
+    { name: 'Client Name', selector: row => row.trading_name, sortable: true },
+    { name: 'Client Code (cli+CustName+ClientName+UniqueNo)', selector: row => row.customer_code, sortable: true },
+    { name: 'Client Type', selector: row => row.company_name == null ? "" : row.company_name, sortable: true },
+    { name: 'Client Account Manager', selector: row => row.company_number == null ? "" : row.company_number, sortable: true },
+    { name: 'Email Address', selector: row => row.customer_type == 1 ? "Sole Trader" : row.customer_type == 2 ? "	Company" : row.customer_type == 3 ? "Partnership" : "-", sortable: true },
+    { name: 'Phone', selector: row => row.staff_firstname + ' ' + row.staff_lastname, sortable: true },
+    { name: 'Status', selector: row => row.staff_firstname + ' ' + row.staff_lastname, sortable: true },
     {
       name: 'Actions',
       cell: row => (
@@ -54,13 +44,6 @@ const Customer = () => {
   ];
 
 
-
-  const HandleClientView = (row) => {
-    navigate('/admin/customerlist', { state: row });
-
-  }
-  const [activeTab, setActiveTab] = useState('this-week');
-  const dispatch = useDispatch();
 
 
 
@@ -106,6 +89,7 @@ const Customer = () => {
             <div className="row align-items-start">
               <div className="col-md-8">
                 <ul className="nav nav-pills rounded-tabs" id="pills-tab" role="tablist">
+                
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
                       <button
@@ -126,7 +110,7 @@ const Customer = () => {
                 </ul>
               </div>
               <div className="col-md-4 col-auto">
-                <Link to="/admin/addcustomer" className='btn btn-info text-white float-end blue-btn'> <i className="fa fa-plus" /> Add Customer</Link>
+                <Link to="/admin/addclient" className='btn btn-info text-white float-end blue-btn'> <i className="fa fa-plus" />Add Client</Link>
               </div>
             </div>
           </div>
@@ -152,4 +136,4 @@ const Customer = () => {
   );
 };
 
-export default Customer;
+export default ClientList;

@@ -213,7 +213,9 @@ const Engagement = () => {
         if (checkboxStates[1] === 1) validate2();
         if (checkboxStates[2] === 1) validate3();
         if (checkboxStates[3] === 1) validate4();
+ 
 
+ 
         let req = {
             "customer_id": address,
             "pageStatus": "3",
