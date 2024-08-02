@@ -12,8 +12,19 @@ const Engagement = () => {
     const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
     const dispatch = useDispatch();
     const token = JSON.parse(localStorage.getItem("token"));
-
-    const [errors1, setErrors1] = useState({});
+    const [errors1, setErrors1] = useState({
+        accountants: "Required",
+        bookkeepers: "Required",
+        feePerAccountant: "Required",
+        feePerAdmin: "Required",
+        feePerBookkeeper: "Required",
+        feePerPayrollExpert: "Required",
+        feePerTaxExpert: "Required",
+        numberOfAdmin: "Required",
+        payrollExperts: "Required",
+        taxExperts: "Required"
+    });
+    
     const [errors2, setErrors2] = useState({});
     const [errors3, setErrors3] = useState({});
     const [errors4, setErrors4] = useState([]);
@@ -104,7 +115,7 @@ const Engagement = () => {
 
     const handleChange4 = (index, e) => {
         const { name, value } = e.target;
-   
+
         const newJobEntries = [...jobEntries];
         newJobEntries[index][name] = value;
         setJobEntries(newJobEntries);
@@ -118,6 +129,8 @@ const Engagement = () => {
                 newErrors[key] = 'Required';
             } else if (isNaN(formValues1[key]) || parseFloat(formValues1[key]) < 0) {
                 newErrors[key] = 'Must be a positive number';
+            }else{
+                newErrors[key] = true;
             }
         }
         setErrors1(newErrors)
@@ -213,9 +226,59 @@ const Engagement = () => {
         if (checkboxStates[1] === 1) validate2();
         if (checkboxStates[2] === 1) validate3();
         if (checkboxStates[3] === 1) validate4();
- 
 
- 
+
+        if (checkboxStates[0] === 1) {
+
+            console.log("errors1", errors1)
+            if (Object.keys(errors1).length === 0) {
+                return;
+            }
+
+            if (errors1.accountants == "Required" && errors1.feePerAccountant === "Required" && errors1.bookkeepers === "Required" && errors1.feePerBookkeeper === "Required" && errors1.payrollExperts === "Required" && errors1.feePerPayrollExpert === "Required" && errors1.taxExperts === "Required" && errors1.feePerTaxExpert === "Required" && errors1.numberOfAdmin === "Required" && errors1.feePerAdmin) {
+                return
+            }
+        }
+
+
+        if (checkboxStates[1] === 1) {
+            console.log("errors2", errors2)
+            if (Object.keys(errors2).length === 0) {
+                return;
+            }
+            if (errors2.total_outsourcing === "Required" && errors2.accountants === "Required" && errors2.bookkeepers === "Required" && errors2.payroll_experts === "Required" && errors2.tax_experts === "Required" && errors2.admin_staff === "Required") {
+                return
+            }
+
+        }
+        if (checkboxStates[2] === 1) {
+            if (Object.keys(errors3).length === 0) {
+                return;
+            }
+
+            if (errors3.adhoc_accountants === "Required" && errors3.adhoc_bookkeepers === "Required" && errors3.adhoc_payroll_experts === "Required" && errors3.adhoc_tax_experts === "Required" && errors3.adhoc_admin_staff === "Required") {
+                return
+            }
+
+
+
+
+        }
+        if (checkboxStates[3] === 1) {
+            if (Object.keys(errors4).length === 0) {
+                return
+            }
+
+            if (errors4.length > 0) {
+                return
+            }
+
+        }
+
+
+
+        // return
+
         let req = {
             "customer_id": address,
             "pageStatus": "3",

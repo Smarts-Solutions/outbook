@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch } from 'react-redux';
-import { GetClientIndustry } from '../../../../ReduxStore/Slice/Client/ClientSlice';
+import { GetClientIndustry, Add_Client } from '../../../../ReduxStore/Slice/Client/ClientSlice';
 import { Email_regex } from '../../../../Utils/Common_regex'
-
-
+import { useLocation, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2'
 const CreateClient = () => {
     const dispatch = useDispatch();
+    const location = useLocation();
+    const navigate = useNavigate();
     const token = JSON.parse(localStorage.getItem("token"));
     const [clientIndustry, setClientIndustry] = useState([])
     const [selectClientType, setSelectClientType] = useState(1)
@@ -22,6 +24,9 @@ const CreateClient = () => {
         email: "",
         residentialAddress: ""
     })
+
+
+
 
     const [getCompanyDetails, setCompanyDetails] = useState({
         CompanyName: '',
@@ -44,30 +49,79 @@ const CreateClient = () => {
     ]);
     const [errors, setErrors] = useState([{ firstName: false, lastName: false, role: false, phoneCode: false, phoneNumber: false, email: false }
     ]);
+
+    const [companyContacterrors, setCompanyContactError] = useState([{ firstName: false, lastName: false, role: false, phoneCode: false, phoneNumber: false, email: false }
+    ]);
+
+
+    console.log("companyContacterrors :", companyContacterrors)
+
+
     const handleAddContact = () => {
         setContacts([...contacts, { authorised_signatory_status: false, firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }]);
         setErrors([...errors, { firstName: false, lastName: false, role: false, email: false }]);
     };
-   
+
 
     const [errors1, setErrors1] = useState({});
     const [errors2, setErrors2] = useState({});
 
-     
 
-    const handleSubmit = () => {
+
+
+    const handleSubmit = async () => {
         if (selectClientType == 1) validate1()
         if (selectClientType == 2) validate2()
-        
-         
+
+
         if (selectClientType == 1) {
-            const data = { getSoleTraderDetails }
-            console.log("data :", data)
+            const req = {
+                client_type: "1",
+                customer_id: location.state.id,
+                client_industry_id: getSoleTraderDetails.IndustryType,
+                trading_name: getSoleTraderDetails.tradingName,
+                trading_address: getSoleTraderDetails.tradingAddress,
+                vat_registered: getSoleTraderDetails.vatRegistered,
+                vat_number: getSoleTraderDetails.vatNumber,
+                website: getSoleTraderDetails.website,
+                first_name: getSoleTraderDetails.firstName,
+                last_name: getSoleTraderDetails.lastName,
+                phone: getSoleTraderDetails.phone,
+                email: getSoleTraderDetails.email,
+                residential_address: getSoleTraderDetails.residentialAddress,
+                client_code: location.state.id
+            }
+
+
+            await dispatch(Add_Client(req))
+                .unwrap()
+                .then((response) => {
+                    if (response.status) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Client Added Successfully',
+                            timerProgressBar: true,
+                            timer: 1500
+                        })
+                        setTimeout(() => {
+                            navigate('/admin/customerlist')
+                        }, 1500)
+                    } else {
+                        Swal.fire({
+                            icon: 'success',
+                            title: response.msg,
+                            timerProgressBar: true,
+                            timer: 1500
+                        })
+                    }
+                })
+
         }
         else if (selectClientType === 2) {
         }
         else {
         }
+
     }
 
 
@@ -94,8 +148,24 @@ const CreateClient = () => {
         setCompanyDetails({ ...getCompanyDetails, [name]: value });
     };
 
+    const handleChange = (index, field, value) => {
+        console.log("index :", index);
+        console.log("field :", field);
+        console.log("value -:", !value);
 
-
+      
+        // Update contacts state
+        const newContacts = [...contacts];
+        newContacts[index][field] = value;
+        setContacts(newContacts);
+      
+        // Update errors state
+        const newErrors = [...errors];
+        newErrors[index][field] = value ? true : false;
+        console.log("newErrors :", newErrors);
+        setCompanyContactError(newErrors);
+      };
+      
 
 
 
@@ -148,8 +218,8 @@ const CreateClient = () => {
         return newErrors;
     };
 
-     
- 
+
+
 
 
     const getClientIndustry = async () => {
@@ -176,7 +246,7 @@ const CreateClient = () => {
 
 
 
-    
+
     return (
         <div>
             <div className="container-fluid mt-4">
@@ -619,12 +689,9 @@ const CreateClient = () => {
                                                                                                                                         className="form-check-input"
                                                                                                                                         id="customSwitchsizemd"
                                                                                                                                         checked={contact.authorised_signatory_status}
-                                                                                                                                        // onChange={(e) => handleChange(index, 'authorised_signatory_status', e.target.checked)}
-                                                                                                                                        // defaultChecked={index == 0 || index == 1}
-                                                                                                                                        // disabled={contacts.length == 2 ? index == 0 || index == 1 : false}
-
-
-
+                                                                                                                                    onChange={(e) => handleChange(index, 'authorised_signatory_status', e.target.checked)}
+                                                                                                                                    defaultChecked={index == 0 || index == 1}
+                                                                                                                                    disabled={contacts.length == 2 ? index == 0 || index == 1 : false}
                                                                                                                                     />
                                                                                                                                     <label
                                                                                                                                         class="form-check-label"
@@ -636,8 +703,8 @@ const CreateClient = () => {
 
                                                                                                                                         <button
                                                                                                                                             className="btn btn-danger"
-                                                                                                                                            // onClick={() => handleDeleteContact(index)}
-                                                                                                                                            // disabled={contacts.length === 1}
+                                                                                                                                        // onClick={() => handleDeleteContact(index)}
+                                                                                                                                        // disabled={contacts.length === 1}
                                                                                                                                         >
                                                                                                                                             Delete
                                                                                                                                         </button>
@@ -657,8 +724,8 @@ const CreateClient = () => {
                                                                                                                                     className="form-control"
                                                                                                                                     placeholder="First Name"
                                                                                                                                     id={`firstName-${index}`}
-                                                                                                                                    // value={contact.firstName}
-                                                                                                                                    // onChange={(e) => handleChange(index, 'firstName', e.target.value)}
+                                                                                                                                    value={contact.firstName}
+                                                                                                                                    onChange={(e) => handleChange(index, 'firstName', e.target.value)}
                                                                                                                                 />
                                                                                                                                 {/* {contact.firstName == "" && <div style={{ color: 'red' }}>First Name is required</div>} */}
                                                                                                                             </div>
@@ -673,8 +740,8 @@ const CreateClient = () => {
                                                                                                                                     className="form-control"
                                                                                                                                     placeholder="Last Name"
                                                                                                                                     id={`lastName-${index}`}
-                                                                                                                                    // value={contact.lastName}
-                                                                                                                                    // onChange={(e) => handleChange(index, 'lastName', e.target.value)}
+                                                                                                                                value={contact.lastName}
+                                                                                                                                onChange={(e) => handleChange(index, 'lastName', e.target.value)}
                                                                                                                                 />
                                                                                                                                 {/* {contact.lastName == "" && <div style={{ color: 'red' }}>Last Name is required</div>} */}
                                                                                                                             </div>
@@ -687,13 +754,14 @@ const CreateClient = () => {
                                                                                                                                 <select
                                                                                                                                     className="form-select"
                                                                                                                                     id={`role-${index}`}
-                                                                                                                                    // value={contact.role}
-                                                                                                                                    // onChange={(e) => handleChange(index, 'role', e.target.value)}
+                                                                                                                                value={contact.role}
+                                                                                                                                onChange={(e) => handleChange(index, 'role', e.target.value)}
                                                                                                                                 >
                                                                                                                                     <option value="">Select Role</option>
-                                                                                                                                    {/* {personRoleDataAll && personRoleDataAll.data.map((item, index) => { */}
-                                                                                                                                        {/* return <option value={item.id}>{item.name}</option> */}
-                                                                                                                                    {/* })} */}
+                                                                                                                                  {/* {personRoleDataAll && personRoleDataAll.data.map((item, index) => { 
+                                                                                                                                    return <option value={item.id}>{item.name}</option>  */}
+                                                                                                                                    {/* }) */}
+                                                                                                                                {/* } */}
                                                                                                                                 </select>
                                                                                                                                 {/* {contact.role == "" && <div style={{ color: 'red' }}>Role is required</div>} */}
 
@@ -712,8 +780,8 @@ const CreateClient = () => {
                                                                                                                                         className="form-control"
                                                                                                                                         placeholder="Phone Number"
                                                                                                                                         id={`phoneNumber-${index}`}
-                                                                                                                                        // value={contact.phoneNumber}
-                                                                                                                                        // onChange={(e) => handleChange(index, 'phoneNumber', e.target.value)}
+                                                                                                                                    value={contact.phoneNumber}
+                                                                                                                                    onChange={(e) => handleChange(index, 'phoneNumber', e.target.value)}
                                                                                                                                     />
                                                                                                                                     {/* {contact.phoneNumber == "" && <div style={{ color: 'red' }}>Phone Number is required</div>} */}
                                                                                                                                 </div>
@@ -730,8 +798,8 @@ const CreateClient = () => {
                                                                                                                                     className="form-control"
                                                                                                                                     placeholder="Email"
                                                                                                                                     id={`email-${index}`}
-                                                                                                                                    // value={contact.email}
-                                                                                                                                    // onChange={(e) => handleChange(index, 'email', e.target.value)}
+                                                                                                                                value={contact.email}
+                                                                                                                                onChange={(e) => handleChange(index, 'email', e.target.value)}
                                                                                                                                 />
                                                                                                                                 {/* {contact.email == "" && <div style={{ color: 'red' }}>Email is required</div>} */}
                                                                                                                             </div>
@@ -746,8 +814,8 @@ const CreateClient = () => {
                                                                                                         <div className="card-header d-flex align-items-center">
                                                                                                             <h5 className="card-title mb-0 flex-grow-1"></h5>
                                                                                                             <div>
-                                                                                                                <button className="btn btn-info text-white blue-btn" 
-                                                                                                                onClick={handleAddContact}
+                                                                                                                <button className="btn btn-info text-white blue-btn"
+                                                                                                                    onClick={handleAddContact}
                                                                                                                 >
                                                                                                                     Add Officer
                                                                                                                 </button>
@@ -760,7 +828,7 @@ const CreateClient = () => {
 
                                                                                             </div>
                                                                                         </div>
-                                                                                        
+
                                                                                     </div>
                                                                                 </div>
                                                                             </div>

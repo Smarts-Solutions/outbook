@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import Datatable from '../../../../Components/ExtraComponents/Datatable';
-import { GET_ALL_CUSTOMERS } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import {Get_All_Client } from '../../../../ReduxStore/Slice/Client/ClientSlice';
 import { useNavigate , useLocation } from 'react-router-dom';
 
 const ClientList = () => {
@@ -14,7 +14,8 @@ const ClientList = () => {
   const [activeTab, setActiveTab] = useState('client');
 
 
-
+ 
+   
   const tabs = [
     { id: 'client', label: 'Client' },
     { id: 'job', label: 'Job' },
@@ -22,13 +23,13 @@ const ClientList = () => {
   ];
 
   const columns = [
-    { name: 'Client Name', selector: row => row.trading_name, sortable: true },
-    { name: 'Client Code (cli+CustName+ClientName+UniqueNo)', selector: row => row.customer_code, sortable: true },
-    { name: 'Client Type', selector: row => row.company_name == null ? "" : row.company_name, sortable: true },
+    { name: 'Client Name', selector: row => row.client_name, sortable: true },
+    { name: 'Client Code (cli+CustName+ClientName+UniqueNo)', selector: row => row.client_code, sortable: true },
+    { name: 'Client Type', selector: row => row.client_type_name == null ? "" : row.client_type_name, sortable: true },
     { name: 'Client Account Manager', selector: row => row.company_number == null ? "" : row.company_number, sortable: true },
-    { name: 'Email Address', selector: row => row.customer_type == 1 ? "Sole Trader" : row.customer_type == 2 ? "	Company" : row.customer_type == 3 ? "Partnership" : "-", sortable: true },
-    { name: 'Phone', selector: row => row.staff_firstname + ' ' + row.staff_lastname, sortable: true },
-    { name: 'Status', selector: row => row.staff_firstname + ' ' + row.staff_lastname, sortable: true },
+    { name: 'Email Address', selector: row => row.email, sortable: true },
+    { name: 'Phone', selector: row => row.phone , sortable: true },
+    { name: 'Status', selector: row => row.status=='1' ? "Active" : "Deactive" , sortable: true },
     {
       name: 'Actions',
       cell: row => (
@@ -61,7 +62,7 @@ const ClientList = () => {
   const GetAllServiceData = async () => {
     const req = { action: "get" };
     const data = { req: req, authToken: token };
-    await dispatch(GET_ALL_CUSTOMERS(data))
+    await dispatch(Get_All_Client(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
@@ -80,6 +81,11 @@ const ClientList = () => {
   useEffect(() => {
     GetAllServiceData()
   }, []);
+
+
+  const handleAddClient = () => {
+    navigate('/admin/addclient' , {state : {id : location.state.id}});
+  }
 
   return (
     <div className='container-fluid'>
@@ -110,7 +116,7 @@ const ClientList = () => {
                 </ul>
               </div>
               <div className="col-md-4 col-auto">
-                <Link to="/admin/addclient" className='btn btn-info text-white float-end blue-btn'> <i className="fa fa-plus" />Add Client</Link>
+                <div  className='btn btn-info text-white float-end blue-btn' onClick={handleAddClient}> <i className="fa fa-plus" />Add Client</div>
               </div>
             </div>
           </div>
