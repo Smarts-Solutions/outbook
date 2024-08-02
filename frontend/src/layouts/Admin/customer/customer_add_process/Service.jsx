@@ -156,43 +156,46 @@ const Service = () => {
     }
 
     const handleSubmit = async (values) => {
-        // if (getManager.length === 0) {
-        //     alert("Please add at least one account manager.");
-        //     return;
-        // }
-
-
-        const MatchData = getManager
-            .filter(item => services.includes(item.service_id))
-            .map(item => ({
-                service_id: item.service_id,
-                account_manager_id: item.account_manager_id.map(manager => manager.id),
-            }));
-
-        var req = {
-            "customer_id": address,
-            "pageStatus": "2",
-            services: MatchData
+        // Check if services are selected
+        if (services.length === 0) {
+            alert("Please select services");
+            return;
         }
-
-
-        const data = { req: req, authToken: token }
+    
+        // Create MatchData
+        let MatchData = services.map(service_id => {
+            let managerData = getManager.find(item => item.service_id === service_id);
+            return {
+                service_id: service_id,
+                account_manager_id: managerData ? managerData.account_manager_id.map(manager => manager.id) : []
+            };
+        });
+    
+        // Create request object
+        var req = {
+            customer_id: address,
+            pageStatus: "2",
+            services: MatchData
+        };
+    
+        console.log("req", req);
+    
+        // Send request
+        const data = { req: req, authToken: token };
         await dispatch(ADD_SERVICES_CUSTOMERS(data))
             .unwrap()
             .then(async (response) => {
                 if (response.status) {
-                    next(response.data)
+                    next(response.data);
                 } else {
-
+                    // Handle error if needed
                 }
             })
             .catch((error) => {
                 console.log("Error", error);
             });
-
-
     };
-
+    
 
 
 

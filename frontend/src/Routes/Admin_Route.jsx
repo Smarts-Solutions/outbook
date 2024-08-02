@@ -14,11 +14,11 @@ import Setting from '../layouts/Admin/Setting';
 import Staff from '../layouts/Admin/Staff';
 import Addcustomer from '../layouts/Admin/customer/customer_add_process/Addcustomer';
 import Editcustomer from '../layouts/Admin/customer/customer_edit_process/Editcustomer';
-
+import AddNewClient from '../layouts/Admin/customer/Client_view/CreateClient'
 import JobType from '../layouts/Admin/JobType'
 import Profile from '../Components/Dashboard/Profile'
 import { RoleAccess } from '../ReduxStore/Slice/Access/AccessSlice';
-
+import CustomerList from '../layouts/Admin/customer/Client_view/Client_list'
 
 const Admin_Route = () => {
   const dispatch = useDispatch();
@@ -57,6 +57,8 @@ const Admin_Route = () => {
             <Route path="/addcustomer" element={<Addcustomer />} />
             <Route path="/customer" element={<Customer />} />
             <Route path="/service" element={<Service />} />
+            <Route path="/addclient" element={<AddNewClient />} />
+            <Route path="/customerlist" element={<CustomerList />} />
             <Route path="/editcustomer" element={<Editcustomer />} />
 
           </Routes>

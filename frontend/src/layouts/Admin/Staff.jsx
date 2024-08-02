@@ -25,19 +25,14 @@ const StaffPage = () => {
     useEffect(() => {
         if (accessData && accessData.length > 0 && role !== "ADMIN" && role !== "SUPERADMIN") {
             accessData && accessData.map((item) => {
-
                 if (item.permission_name === "staff") {
                     const staffInsert = item.items.find((item) => item.type === "insert");
                     setShowStaffInsertTab(staffInsert && staffInsert.is_assigned == 1);
-
                     const staffUpdate = item.items.find((item) => item.type === "update");
                     setShowStaffUpdateTab(staffUpdate && staffUpdate.is_assigned == 1);
-
                     const staffDelete = item.items.find((item) => item.type === "delete");
                     setStaffDeleteTab(staffDelete && staffDelete.is_assigned == 1);
                 }
-
-
             });
         }
     }, [accessData]);
