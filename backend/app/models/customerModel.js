@@ -154,14 +154,18 @@ const getCustomer = async (customer) => {
     const query = `
     SELECT 
     customers.*, 
-    staffs.first_name AS staff_firstname, 
-    staffs.last_name AS staff_lastname,
+    staff1.first_name AS staff_firstname, 
+    staff1.last_name AS staff_lastname,
+    staff2.first_name AS account_manager_firstname, 
+    staff2.last_name AS account_manager_lastname,
     customer_company_information.company_name AS company_name,
     customer_company_information.company_number AS company_number
 FROM 
     customers
 JOIN 
-    staffs ON customers.staff_id = staffs.id
+    staffs AS staff1 ON customers.staff_id = staff1.id
+JOIN 
+    staffs AS staff2 ON customers.account_manager_id = staff2.id
 LEFT JOIN 
     customer_company_information ON customers.id = customer_company_information.customer_id;
     `;
@@ -663,7 +667,7 @@ const getSingleCustomer = async (customer) => {
     let customerDetals = {}
     const { customer_id, pageStatus } = customer;
     const [ExistCustomer] = await pool.execute('SELECT customer_type FROM `customers` WHERE id =' + customer_id);
-    
+
     const customer_type = ExistCustomer[0].customer_type;
 
     // Page Status 1 
@@ -741,7 +745,7 @@ const getSingleCustomer = async (customer) => {
             }
             ;
         }
-        
+
         // Company Details
         else if (customer_type == "2") {
             const query = `
@@ -1030,56 +1034,56 @@ const getSingleCustomer = async (customer) => {
 
             let fte_dedicated_staffing = {}
             if (rows[0].fte_dedicated_staffing == "1") {
-            fte_dedicated_staffing = {
-                    number_of_accountants:rows[0].number_of_accountants,
-                    fee_per_accountant:rows[0].fee_per_accountant,
-                    number_of_bookkeepers:rows[0].number_of_bookkeepers,
-                    fee_per_bookkeeper:rows[0].fee_per_bookkeeper,
-                    number_of_payroll_experts:rows[0].number_of_payroll_experts,
-                    fee_per_payroll_expert:rows[0].fee_per_payroll_expert,
-                    number_of_tax_experts:rows[0].number_of_tax_experts,
-                    fee_per_tax_expert:rows[0].fee_per_tax_expert,
-                    number_of_admin_staff:rows[0].number_of_admin_staff,
-                    fee_per_admin_staff:rows[0].fee_per_admin_staff
+                fte_dedicated_staffing = {
+                    number_of_accountants: rows[0].number_of_accountants,
+                    fee_per_accountant: rows[0].fee_per_accountant,
+                    number_of_bookkeepers: rows[0].number_of_bookkeepers,
+                    fee_per_bookkeeper: rows[0].fee_per_bookkeeper,
+                    number_of_payroll_experts: rows[0].number_of_payroll_experts,
+                    fee_per_payroll_expert: rows[0].fee_per_payroll_expert,
+                    number_of_tax_experts: rows[0].number_of_tax_experts,
+                    fee_per_tax_expert: rows[0].fee_per_tax_expert,
+                    number_of_admin_staff: rows[0].number_of_admin_staff,
+                    fee_per_admin_staff: rows[0].fee_per_admin_staff
                 };
             }
 
 
             let percentage_model = {}
             if (rows[0].percentage_model == "1") {
-            percentage_model = {
-                total_outsourcing : rows[0].total_outsourcing,
-                accountants : rows[0].accountants,
-                bookkeepers : rows[0].bookkeepers,
-                payroll_experts : rows[0].payroll_experts,
-                tax_experts : rows[0].tax_experts,
-                admin_staff : rows[0].admin_staff
+                percentage_model = {
+                    total_outsourcing: rows[0].total_outsourcing,
+                    accountants: rows[0].accountants,
+                    bookkeepers: rows[0].bookkeepers,
+                    payroll_experts: rows[0].payroll_experts,
+                    tax_experts: rows[0].tax_experts,
+                    admin_staff: rows[0].admin_staff
                 };
             }
 
             let adhoc_payg_hourly = {}
             if (rows[0].adhoc_payg_hourly == "1") {
-            adhoc_payg_hourly = {
-                adhoc_accountants:rows[0].adhoc_accountants,
-                adhoc_bookkeepers:rows[0].adhoc_bookkeepers,
-                adhoc_payroll_experts:rows[0].adhoc_payroll_experts,
-                adhoc_tax_experts:rows[0].adhoc_tax_experts,
-                adhoc_admin_staff:rows[0].adhoc_admin_staff
+                adhoc_payg_hourly = {
+                    adhoc_accountants: rows[0].adhoc_accountants,
+                    adhoc_bookkeepers: rows[0].adhoc_bookkeepers,
+                    adhoc_payroll_experts: rows[0].adhoc_payroll_experts,
+                    adhoc_tax_experts: rows[0].adhoc_tax_experts,
+                    adhoc_admin_staff: rows[0].adhoc_admin_staff
                 };
             }
 
 
             let customised_pricing = {}
             if (rows[0].customised_pricing == "1") {
-            customised_pricing = rows.map(row => ({
-                minimum_number_of_jobs : row.minimum_number_of_jobs,
-                job_type_id : row.job_type_id,
-                cost_per_job : row.cost_per_job
-             }));
+                customised_pricing = rows.map(row => ({
+                    minimum_number_of_jobs: row.minimum_number_of_jobs,
+                    job_type_id: row.job_type_id,
+                    cost_per_job: row.cost_per_job
+                }));
             }
 
 
-            
+
             const result = {
                 customer: customerData,
                 customer_engagement_model_status: customer_engagement_model_status,
@@ -1136,14 +1140,14 @@ const getSingleCustomer = async (customer) => {
             };
 
             const customer_paper_work = rows.map(row => ({
-                file_name : row.file_name,
-                original_name : row.original_name,
-                file_type : row.file_type,
-                file_size : row.file_size
-             }));
+                file_name: row.file_name,
+                original_name: row.original_name,
+                file_type: row.file_type,
+                file_size: row.file_size
+            }));
 
 
-            
+
             const result = {
                 customer: customerData,
                 customer_paper_work: customer_paper_work

@@ -13,7 +13,7 @@ const ClientList = () => {
   const [customerData, setCustomerData] = useState([]);
   const [activeTab, setActiveTab] = useState('client');
 
-
+console.log('location:',location.state)
  
    
   const tabs = [
@@ -59,7 +59,7 @@ const ClientList = () => {
 
 
   const GetAllServiceData = async () => {
-    const req = { action: "get" };
+    const req = { action: "get" ,cutomer_id:location.state.id};
     const data = { req: req, authToken: token };
     await dispatch(Get_All_Client(data))
       .unwrap()

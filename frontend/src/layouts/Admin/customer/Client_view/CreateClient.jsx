@@ -46,7 +46,7 @@ const CreateClient = () => {
     })
 
     const [errors1, setErrors1] = useState({})
-    const [errors2, setErrors2] = useState({})  
+    const [errors2, setErrors2] = useState({})
 
 
     console.log("errors1 :", errors1)
@@ -65,7 +65,7 @@ const CreateClient = () => {
     };
 
 
- 
+
 
 
     const handleSubmit = async () => {
@@ -109,7 +109,7 @@ const CreateClient = () => {
                     }
                 })
         }
-        if (selectClientType == 2 &&  validate2()){
+        if (selectClientType == 2 && validate2()) {
             const req = {
                 client_type: "2",
                 customer_id: location.state.id,
@@ -139,7 +139,7 @@ const CreateClient = () => {
                             timer: 1500
                         })
                         setTimeout(() => {
-                            navigate('/admin/customerlist')
+                            navigate('/admin/customerlist', { state: { id: location.state.id } })
                         }, 1500)
                     } else {
                         Swal.fire({
@@ -200,6 +200,9 @@ const CreateClient = () => {
         console.log("newErrors :", newErrors);
         setCompanyContactError(newErrors);
     };
+
+
+
 
     const validate1 = () => {
         const newErrors = {};
@@ -270,7 +273,7 @@ const CreateClient = () => {
     }, [])
 
     const Get_Company = async () => {
-        const data = { search: getCompanyDetails.SearchCompany}
+        const data = { search: getCompanyDetails.SearchCompany }
         await dispatch(GetAllCompany(data))
             .unwrap()
             .then((res) => {
@@ -410,9 +413,10 @@ const CreateClient = () => {
                                                                                             name="vatRegistered"
                                                                                             value={getSoleTraderDetails.vatRegistered}
                                                                                             onChange={(e) => handleChange1(e)}
-                                                                                        >
-                                                                                            <option selected="">Please Select VAT Registered</option>
+                                                                                        >                                                                              
+                                                                                        <option selected="">Please Select VAT Registered</option>
                                                                                             <option value={1}>Yes</option>
+                                                                                            <option selected={1}>Yes</option>
                                                                                             <option value={0}>No</option>
                                                                                         </select>
                                                                                         {errors1['vatRegistered'] && (
@@ -542,7 +546,7 @@ const CreateClient = () => {
                                                                                                 <label className="form-label">Search Company</label>
                                                                                                 <input type="text" className="form-control" placeholder="Outbooks Quality & Certainty"
                                                                                                     name="SearchCompany" onChange={(e) => handleChange2(e)} value={getCompanyDetails.SearchCompany}
-                                                                                                 />
+                                                                                                />
                                                                                             </div>
                                                                                         </div>
                                                                                         <div className="col-lg-3">
@@ -627,8 +631,8 @@ const CreateClient = () => {
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  >VAT Registered</label>
                                                                                                 <select className="form-select mb-3" name="VATRegistered" onChange={(e) => handleChange2(e)} value={getCompanyDetails.VATRegistered}>
-                                                                                                    <option selected="">Yes</option>
-                                                                                                    <option value={1}>No</option>
+                                                                                                    <option selected={1}>Yes</option>
+                                                                                                    <option value={0}>No</option>
                                                                                                 </select>
                                                                                                 {errors2['VATRegistered'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['VATRegistered']}</div>

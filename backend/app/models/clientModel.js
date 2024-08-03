@@ -132,34 +132,38 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 };
 
 const getClient = async (client) => {
+const {cutomer_id} = client;
+console.log("cutomer_id",cutomer_id)
+const query = `
+    SELECT  
+        clients.id AS id,
+        clients.trading_name AS client_name,
+        clients.client_code AS client_code,
+        clients.status AS status,
+        client_types.type AS client_type_name,
+        client_contact_details.email AS email,
+        client_contact_details.phone AS phone
+    FROM 
+        clients
+    JOIN 
+        client_types ON client_types.id = clients.client_type
+    LEFT JOIN 
+        client_contact_details ON client_contact_details.id = (
+            SELECT MIN(cd.id)
+            FROM client_contact_details cd
+            WHERE cd.client_id = clients.id
+        )
+    WHERE clients.customer_id = ?
+`;
 
-const query = `SELECT  
-    clients.id AS id,
-    clients.trading_name AS client_name,
-    clients.client_code AS client_code,
-    clients.status AS status,
-    client_types.type AS client_type_name,
-    client_contact_details.email AS email,
-    client_contact_details.phone AS phone
-FROM 
-    clients
-JOIN 
-    client_types ON client_types.id = clients.client_type
-LEFT JOIN 
-    client_contact_details ON client_contact_details.id = (
-        SELECT MIN(cd.id)
-        FROM client_contact_details cd
-        WHERE cd.client_id = clients.id
-    );
-`
+try {
+    const [result] = await pool.execute(query, [cutomer_id]);
+    return result;
+} catch (err) {
+    console.error('Error selecting data:', err);
+    return [];
+}
 
-    try {
-        const [rows] = await pool.execute(query);
-        return rows;
-    } catch (err) {
-        // console.error('Error selecting data:', err);
-        return [];
-    }
 
 }
 
