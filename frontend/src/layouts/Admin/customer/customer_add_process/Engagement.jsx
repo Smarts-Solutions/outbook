@@ -12,23 +12,10 @@ const Engagement = () => {
     const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
     const dispatch = useDispatch();
     const token = JSON.parse(localStorage.getItem("token"));
-    const [errors1, setErrors1] = useState({
-        accountants: "Required",
-        bookkeepers: "Required",
-        feePerAccountant: "Required",
-        feePerAdmin: "Required",
-        feePerBookkeeper: "Required",
-        feePerPayrollExpert: "Required",
-        feePerTaxExpert: "Required",
-        numberOfAdmin: "Required",
-        payrollExperts: "Required",
-        taxExperts: "Required"
-    });
-    
+    const [errors1, setErrors1] = useState({});
     const [errors2, setErrors2] = useState({});
     const [errors3, setErrors3] = useState({});
     const [errors4, setErrors4] = useState([]);
-
 
     const [formValues1, setFormValues1] = useState({
         accountants: '',
@@ -83,21 +70,35 @@ const Engagement = () => {
 
 
 
-
-
     const handleChange1 = (e) => {
         const { name, value } = e.target;
+        if (!/^[0-9+]*$/.test(value)) {
+            return;
+        }
+
+        validate1()
+
         setFormValues1({ ...formValues1, [name]: value });
     };
 
     const handleChange2 = (e) => {
         const { name, value } = e.target;
-        setFormValues2({ ...formValues2, [name]: value });
+        if (value === '' || (/^[0-9]*$/.test(value) && value <= 100)) {
+            validate2()
+            setFormValues2({ ...formValues2, [name]: value });
+        }
     };
 
     const handleChange3 = (e) => {
         const { name, value } = e.target;
+        if (!/^[0-9+]*$/.test(value)) {
+            return;
+        }
+
+        validate3()
         setFormValues3({ ...formValues3, [name]: value });
+
+
     };
 
     const handleAddJob = () => {
@@ -118,6 +119,7 @@ const Engagement = () => {
 
         const newJobEntries = [...jobEntries];
         newJobEntries[index][name] = value;
+        validate4()
         setJobEntries(newJobEntries);
     };
 
@@ -126,29 +128,38 @@ const Engagement = () => {
         const newErrors = {};
         for (const key in formValues1) {
             if (!formValues1[key]) {
-                newErrors[key] = 'Required';
-            } else if (isNaN(formValues1[key]) || parseFloat(formValues1[key]) < 0) {
-                newErrors[key] = 'Must be a positive number';
-            }else{
-                newErrors[key] = true;
+                if (key == 'accountants') newErrors[key] = "Please Enter Number of Accountants";
+                else if (key == 'feePerAccountant') newErrors[key] = "Please Enter Fee Per Accountant";
+                else if (key == 'bookkeepers') newErrors[key] = "Please Enter Number of Bookkeepers";
+                else if (key == 'feePerBookkeeper') newErrors[key] = "Please Enter Fee Per Bookkeeper";
+                else if (key == 'payrollExperts') newErrors[key] = "Please Enter Number of Payroll Experts";
+                else if (key == 'feePerPayrollExpert') newErrors[key] = "Please Enter Fee Per Payroll Expert";
+                else if (key == 'taxExperts') newErrors[key] = "Please Enter Number of Tax Experts";
+                else if (key == 'feePerTaxExpert') newErrors[key] = "Please Enter Fee Per Tax Expert";
+                else if (key == 'numberOfAdmin') newErrors[key] = "Please Enter Number of Admin/Other Staff";
+                else if (key == 'feePerAdmin') newErrors[key] = "Please Enter Fee Per Admin/Other Staff";
             }
         }
         setErrors1(newErrors)
-        return newErrors;
+        console.log("newErrors :", newErrors)
+        return Object.keys(newErrors).length === 0 ? true : false;;
     };
 
     const validate2 = () => {
         const newErrors = {};
         for (const key in formValues2) {
             if (!formValues2[key]) {
-                newErrors[key] = 'Required';
-            } else if (isNaN(formValues2[key]) || parseFloat(formValues2[key]) < 0) {
-                newErrors[key] = 'Must be a positive number';
+                if (key == 'total_outsourcing') newErrors[key] = "Please Enter Total Outsourcing";
+                else if (key == 'accountants') newErrors[key] = "Please Enter Accountants";
+                else if (key == 'bookkeepers') newErrors[key] = "Please Enter Bookkeepers";
+                else if (key == 'payroll_experts') newErrors[key] = "Please Enter Payroll Experts";
+                else if (key == 'tax_experts') newErrors[key] = "Please Enter Tax Experts";
+                else if (key == 'admin_staff') newErrors[key] = "Please Enter Admin/Other Staff";
             }
         }
         setErrors2(newErrors)
 
-        return newErrors;
+        return Object.keys(newErrors).length === 0 ? true : false;;
     };
 
 
@@ -156,14 +167,15 @@ const Engagement = () => {
         const newErrors = {};
         for (const key in formValues3) {
             if (!formValues3[key]) {
-                newErrors[key] = 'Required';
-            } else if (isNaN(formValues3[key]) || parseFloat(formValues3[key]) < 0 || parseFloat(formValues3[key]) > 100) {
-                newErrors[key] = 'Must be a number between 0 and 100';
+                if (key == 'adhoc_accountants') newErrors[key] = "Please Enter Accountants Fee Per Hour";
+                else if (key == 'adhoc_bookkeepers') newErrors[key] = 'Please Enter Bookkeepers Fee Per Hour';
+                else if (key == 'adhoc_payroll_experts') newErrors[key] = "Please Enter Payroll Experts Fee Per Hour";
+                else if (key == 'adhoc_tax_experts') newErrors[key] = "Please Enter Tax Experts Fee Per Hour";
+                else if (key == 'adhoc_admin_staff') newErrors[key] = "Please Enter Admin/Other Staff Fee Per Hour";
             }
         }
         setErrors3(newErrors)
-
-        return newErrors;
+        return Object.keys(newErrors).length === 0 ? true : false;
     };
 
 
@@ -176,17 +188,17 @@ const Engagement = () => {
             const entryErrors = {};
 
             if (!entry.minimum_number_of_jobs) {
-                entryErrors.minimum_number_of_jobs = 'Required';
+                entryErrors.minimum_number_of_jobs = 'Please Enter Minimum number of Jobs';
             } else if (isNaN(entry.minimum_number_of_jobs) || parseFloat(entry.minimum_number_of_jobs) < 0 || parseFloat(entry.minimum_number_of_jobs) > 100) {
                 entryErrors.minimum_number_of_jobs = 'Must be a number between 0 and 100';
             }
 
             if (!entry.job_type_id) {
-                entryErrors.job_type_id = 'Required';
+                entryErrors.job_type_id = 'Please select a job type';
             }
 
             if (!entry.cost_per_job) {
-                entryErrors.cost_per_job = 'Required';
+                entryErrors.cost_per_job = 'Please Enter Cost Per Job';
             } else if (isNaN(entry.cost_per_job) || parseFloat(entry.cost_per_job) < 0 || parseFloat(entry.cost_per_job) > 100) {
                 entryErrors.cost_per_job = 'Must be a number between 0 and 100';
             }
@@ -195,7 +207,7 @@ const Engagement = () => {
         });
 
         setErrors4(newErrors);
-        return newErrors;
+        return Object.keys(newErrors).length === 0 ? true : false;
     };
 
     const GetJobTypeApi = async () => {
@@ -214,66 +226,69 @@ const Engagement = () => {
             });
     }
 
-
-
     const handleSubmit = async () => {
         if (!checkboxStates.some(state => state === 1)) {
             alert("Please select at least one option.");
             return;
         }
+        const validations = [validate1, validate2, validate3, validate4];
 
-        if (checkboxStates[0] === 1) validate1();
-        if (checkboxStates[1] === 1) validate2();
-        if (checkboxStates[2] === 1) validate3();
-        if (checkboxStates[3] === 1) validate4();
-
-
-        if (checkboxStates[0] === 1) {
-
-            console.log("errors1", errors1)
-            if (Object.keys(errors1).length === 0) {
+        for (let i = 0; i < checkboxStates.length; i++) {
+            if (checkboxStates[i] === 1 && !validations[i]()) {
+                console.log("i", i)
                 return;
             }
-
-            if (errors1.accountants == "Required" && errors1.feePerAccountant === "Required" && errors1.bookkeepers === "Required" && errors1.feePerBookkeeper === "Required" && errors1.payrollExperts === "Required" && errors1.feePerPayrollExpert === "Required" && errors1.taxExperts === "Required" && errors1.feePerTaxExpert === "Required" && errors1.numberOfAdmin === "Required" && errors1.feePerAdmin) {
-                return
-            }
         }
 
-
-        if (checkboxStates[1] === 1) {
-            console.log("errors2", errors2)
-            if (Object.keys(errors2).length === 0) {
-                return;
-            }
-            if (errors2.total_outsourcing === "Required" && errors2.accountants === "Required" && errors2.bookkeepers === "Required" && errors2.payroll_experts === "Required" && errors2.tax_experts === "Required" && errors2.admin_staff === "Required") {
-                return
-            }
-
-        }
-        if (checkboxStates[2] === 1) {
-            if (Object.keys(errors3).length === 0) {
-                return;
-            }
-
-            if (errors3.adhoc_accountants === "Required" && errors3.adhoc_bookkeepers === "Required" && errors3.adhoc_payroll_experts === "Required" && errors3.adhoc_tax_experts === "Required" && errors3.adhoc_admin_staff === "Required") {
-                return
-            }
+ 
 
 
+        // if (checkboxStates[0] === 1) {
 
 
-        }
-        if (checkboxStates[3] === 1) {
-            if (Object.keys(errors4).length === 0) {
-                return
-            }
+        //     if (Object.keys(errors1).length === 0) {
+        //         return;
+        //     }
 
-            if (errors4.length > 0) {
-                return
-            }
+        //     if (errors1.accountants == "Required" && errors1.feePerAccountant === "Required" && errors1.bookkeepers === "Required" && errors1.feePerBookkeeper === "Required" && errors1.payrollExperts === "Required" && errors1.feePerPayrollExpert === "Required" && errors1.taxExperts === "Required" && errors1.feePerTaxExpert === "Required" && errors1.numberOfAdmin === "Required" && errors1.feePerAdmin) {
+        //         return
+        //     }
+        // }
 
-        }
+
+        // if (checkboxStates[1] === 1) {
+
+        //     if (Object.keys(errors2).length === 0) {
+        //         return;
+        //     }
+        //     if (errors2.total_outsourcing === "Required" && errors2.accountants === "Required" && errors2.bookkeepers === "Required" && errors2.payroll_experts === "Required" && errors2.tax_experts === "Required" && errors2.admin_staff === "Required") {
+        //         return
+        //     }
+
+        // }
+        // if (checkboxStates[2] === 1) {
+        //     if (Object.keys(errors3).length === 0) {
+        //         return;
+        //     }
+
+        //     if (errors3.adhoc_accountants === "Required" && errors3.adhoc_bookkeepers === "Required" && errors3.adhoc_payroll_experts === "Required" && errors3.adhoc_tax_experts === "Required" && errors3.adhoc_admin_staff === "Required") {
+        //         return
+        //     }
+
+
+
+
+        // }
+        // if (checkboxStates[3] === 1) {
+        //     if (Object.keys(errors4).length === 0) {
+        //         return
+        //     }
+
+        //     if (errors4.length > 0) {
+        //         return
+        //     }
+
+        // }
 
 
 
@@ -353,6 +368,20 @@ const Engagement = () => {
             });
     };
 
+
+
+    useEffect(() => {
+
+        if (checkboxStates[0] === 0)
+            setErrors1({})
+        if (checkboxStates[1] === 0)
+            setErrors2({})
+        if (checkboxStates[2] === 0)
+            setErrors3({})
+        if (checkboxStates[3] === 0)
+            setErrors4({})
+
+    }, [checkboxStates])
 
 
     useEffect(() => {

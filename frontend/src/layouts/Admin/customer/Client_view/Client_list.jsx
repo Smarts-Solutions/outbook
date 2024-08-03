@@ -26,7 +26,6 @@ console.log('location:',location.state)
     { name: 'Client Name', selector: row => row.client_name, sortable: true },
     { name: 'Client Code (cli+CustName+ClientName+UniqueNo)', selector: row => row.client_code, sortable: true },
     { name: 'Client Type', selector: row => row.client_type_name == null ? "" : row.client_type_name, sortable: true },
-    { name: 'Client Account Manager', selector: row => row.company_number == null ? "" : row.company_number, sortable: true },
     { name: 'Email Address', selector: row => row.email, sortable: true },
     { name: 'Phone', selector: row => row.phone , sortable: true },
     { name: 'Status', selector: row => row.status=='1' ? "Active" : "Deactive" , sortable: true },

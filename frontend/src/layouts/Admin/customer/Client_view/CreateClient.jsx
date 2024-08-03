@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch } from 'react-redux';
 import { GetClientIndustry, Add_Client } from '../../../../ReduxStore/Slice/Client/ClientSlice';
+import { GetAllCompany } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import { Email_regex } from '../../../../Utils/Common_regex'
 import { useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2'
+import Search from 'antd/es/transfer/search';
 const CreateClient = () => {
     const dispatch = useDispatch();
     const location = useLocation();
     const navigate = useNavigate();
     const token = JSON.parse(localStorage.getItem("token"));
     const [clientIndustry, setClientIndustry] = useState([])
+    const [getAllSearchCompany, setGetAllSearchCompany] = useState([]);
     const [selectClientType, setSelectClientType] = useState(1)
     const [getSoleTraderDetails, setSoleTraderDetails] = useState({
         IndustryType: '',
@@ -25,10 +28,8 @@ const CreateClient = () => {
         residentialAddress: ""
     })
 
-
-
-
     const [getCompanyDetails, setCompanyDetails] = useState({
+        SearchCompany: '',
         CompanyName: '',
         EntityType: '',
         CompanyStatus: '',
@@ -44,6 +45,11 @@ const CreateClient = () => {
         TradingAddress: ''
     })
 
+    const [errors1, setErrors1] = useState({})
+    const [errors2, setErrors2] = useState({})  
+
+
+    console.log("errors1 :", errors1)
     const [contacts, setContacts] = useState([
         { authorised_signatory_status: false, firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }
     ]);
@@ -53,28 +59,17 @@ const CreateClient = () => {
     const [companyContacterrors, setCompanyContactError] = useState([{ firstName: false, lastName: false, role: false, phoneCode: false, phoneNumber: false, email: false }
     ]);
 
-
-    console.log("companyContacterrors :", companyContacterrors)
-
-
     const handleAddContact = () => {
         setContacts([...contacts, { authorised_signatory_status: false, firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }]);
         setErrors([...errors, { firstName: false, lastName: false, role: false, email: false }]);
     };
 
 
-    const [errors1, setErrors1] = useState({});
-    const [errors2, setErrors2] = useState({});
-
-
+ 
 
 
     const handleSubmit = async () => {
-        if (selectClientType == 1) validate1()
-        if (selectClientType == 2) validate2()
-
-
-        if (selectClientType == 1) {
+        if (selectClientType == 1 && validate1()) {
             const req = {
                 client_type: "1",
                 customer_id: location.state.id,
@@ -91,8 +86,48 @@ const CreateClient = () => {
                 residential_address: getSoleTraderDetails.residentialAddress,
                 client_code: location.state.id
             }
-
-
+            await dispatch(Add_Client(req))
+                .unwrap()
+                .then((response) => {
+                    if (response.status) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Client Added Successfully',
+                            timerProgressBar: true,
+                            timer: 1500
+                        })
+                        setTimeout(() => {
+                            navigate('/admin/customerlist')
+                        }, 1500)
+                    } else {
+                        Swal.fire({
+                            icon: 'success',
+                            title: response.msg,
+                            timerProgressBar: true,
+                            timer: 1500
+                        })
+                    }
+                })
+        }
+        if (selectClientType == 2 &&  validate2()){
+            const req = {
+                client_type: "2",
+                customer_id: location.state.id,
+                company_name: getCompanyDetails.CompanyName,
+                entity_type: getCompanyDetails.EntityType,
+                company_status: getCompanyDetails.CompanyStatus,
+                company_number: getCompanyDetails.CompanyNumber,
+                registered_office_address: getCompanyDetails.RegisteredOfficeAddress,
+                incorporation_date: getCompanyDetails.IncorporationDate,
+                incorporation_in: getCompanyDetails.IncorporationIn,
+                vat_registered: getCompanyDetails.VATRegistered,
+                vat_number: getCompanyDetails.VATNumber,
+                website: getCompanyDetails.Website,
+                client_industry: getCompanyDetails.ClientIndustry,
+                trading_name: getCompanyDetails.TradingName,
+                trading_address: getCompanyDetails.TradingAddress,
+                officer_details: contacts
+            }
             await dispatch(Add_Client(req))
                 .unwrap()
                 .then((response) => {
@@ -164,8 +199,8 @@ const CreateClient = () => {
         newErrors[index][field] = value ? true : false;
         console.log("newErrors :", newErrors);
         setCompanyContactError(newErrors);
-    };
-
+      };
+      
 
 
 
@@ -190,9 +225,8 @@ const CreateClient = () => {
             }
         }
         setErrors1(newErrors)
-        return newErrors;
+        return Object.keys(newErrors).length === 0 ? true : false;
     };
-
 
     const validate2 = () => {
         const newErrors = {};
@@ -211,16 +245,11 @@ const CreateClient = () => {
                 else if (key == 'ClientIndustry') newErrors[key] = 'Please Enter Client Industry';
                 else if (key == 'TradingName') newErrors[key] = 'Please Enter Trading Name';
                 else if (key == 'TradingAddress') newErrors[key] = 'Please Enter Trading Address';
-
             }
         }
         setErrors2(newErrors)
-        return newErrors;
+        return Object.keys(newErrors).length === 0 ? true : false;
     };
-
-
-
-
 
     const getClientIndustry = async () => {
         const req = { action: "get" }
@@ -239,9 +268,30 @@ const CreateClient = () => {
             })
     }
 
-
     useEffect(() => {
         getClientIndustry()
+    }, [])
+
+    const Get_Company = async () => {
+        const data = { search: getCompanyDetails.SearchCompany}
+        await dispatch(GetAllCompany(data))
+            .unwrap()
+            .then((res) => {
+                if (res.status) {
+                    setGetAllSearchCompany(res.data)
+                }
+                else {
+                    setGetAllSearchCompany([])
+                }
+
+            })
+            .catch((err) => {
+                console.log("Error", err)
+            })
+    }
+
+    useEffect(() => {
+        Get_Company()
     }, [])
 
 
@@ -364,8 +414,8 @@ const CreateClient = () => {
                                                                                             value={getSoleTraderDetails.vatRegistered}
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                         >
-                                                                                            <option selected={1}>Yes</option>
-                                                                                            <option value={0}>No</option>
+                                                                                            <option selected="">Yes</option>
+                                                                                            <option value={1}>No</option>
                                                                                         </select>
                                                                                         {errors1['vatRegistered'] && (
                                                                                             <div style={{ 'color': 'red' }}>{errors1['vatRegistered']}</div>
@@ -492,7 +542,9 @@ const CreateClient = () => {
                                                                                         <div className="col-lg-3">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Search Company</label>
-                                                                                                <input type="text" className="form-control" placeholder="Outbooks Quality & Certainty" />
+                                                                                                <input type="text" className="form-control" placeholder="Outbooks Quality & Certainty"
+                                                                                                    name="SearchCompany" onChange={(e) => handleChange2(e)} value={getCompanyDetails.SearchCompany}
+                                                                                                 />
                                                                                             </div>
                                                                                         </div>
                                                                                         <div className="col-lg-3">
