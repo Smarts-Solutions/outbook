@@ -167,7 +167,9 @@ JOIN
 JOIN 
     staffs AS staff2 ON customers.account_manager_id = staff2.id
 LEFT JOIN 
-    customer_company_information ON customers.id = customer_company_information.customer_id;
+    customer_company_information ON customers.id = customer_company_information.customer_id
+ORDER BY 
+    customers.id DESC;
     `;
 
     try {

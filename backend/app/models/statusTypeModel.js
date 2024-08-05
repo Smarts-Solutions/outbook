@@ -22,7 +22,7 @@ const createStatusType = async (StatusType) => {
 
 const getStatusType = async () => { 
     const query = `
-    SELECT * FROM status_types
+    SELECT * FROM status_types ORDER BY id DESC
     `;
 
     try {

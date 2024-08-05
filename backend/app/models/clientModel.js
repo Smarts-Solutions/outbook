@@ -133,7 +133,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 
 const getClient = async (client) => {
 const {cutomer_id} = client;
-console.log("cutomer_id",cutomer_id)
+// console.log("cutomer_id",cutomer_id)
 const query = `
     SELECT  
         clients.id AS id,
@@ -154,6 +154,8 @@ const query = `
             WHERE cd.client_id = clients.id
         )
     WHERE clients.customer_id = ?
+ ORDER BY 
+    clients.id DESC;
 `;
 
 try {

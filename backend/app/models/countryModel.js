@@ -23,6 +23,7 @@ const createCountry = async (Country) => {
 const getCountry = async () => { 
     const query = `
     SELECT * FROM countries
+    ORDER BY id DESC
     `;
 
     try {

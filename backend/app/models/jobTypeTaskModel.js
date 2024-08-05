@@ -20,6 +20,7 @@ const createJobType = async (JobType) => {
 const getJobType = async () => { 
     const query = `
     SELECT job_types.id, job_types.type , job_types.status ,services.name as service_name FROM job_types JOIN services ON job_types.service_id = services.id
+    ORDER BY job_types.id DESC
     `;
 
     try {

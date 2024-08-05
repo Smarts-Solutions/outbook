@@ -4,7 +4,7 @@ const { jwtSecret } = require('../config/config');
 
 const verifyToken = (req, res, next) => {
     const token = req.header('Authorization');
-     
+    // console.log("token",token)
     if (!token) {
         return res.status(401).json({
             status:false,
@@ -23,7 +23,7 @@ const verifyToken = (req, res, next) => {
         try {
          
             const user = await staffModel.isLoginAuthTokenCheckmodel({id:decoded.userId , login_auth_token: token});
-            // console.log("user ",user)
+
             if (!user || user.login_auth_token !== token) {
                 return res.status(401).json({
                     status:false,
