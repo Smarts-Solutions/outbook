@@ -56,7 +56,7 @@ const Customer = () => {
 
 
   const HandleClientView = (row) => {
-    navigate('/admin/customerlist', { state: row });
+    navigate('/admin/Clientlist', { state: row });
 
   }
   const [activeTab, setActiveTab] = useState('this-week');

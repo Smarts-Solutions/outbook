@@ -79,7 +79,7 @@ const CreateClient = () => {
 
     const [errors, setErrors] = useState([{ first_name: false, last_name: false, role: false, phoneCode: false, phone: false, email: false }
     ]);
-    
+
 
     const handleAddContact = () => {
         setContacts([...contacts, { authorised_signatory_status: false, first_name: '', last_name: '', role: '', phone: '', email: '' }]);
@@ -157,8 +157,9 @@ const CreateClient = () => {
                             timer: 1500
                         })
                         setTimeout(() => {
-                            navigate('/admin/customerlist')
+                            navigate('/admin/Clientlist', { state: location.state });
                         }, 1500)
+                        
                     } else {
                         Swal.fire({
                             icon: 'success',
@@ -217,15 +218,16 @@ const CreateClient = () => {
                                 timer: 1500
                             })
                             setTimeout(() => {
-                                navigate('/admin/customerlist', { state: { id: location.state.id } })
+                                navigate('/admin/Clientlist', { state: location.state });
                             }, 1500)
                         } else {
                             Swal.fire({
                                 icon: 'success',
-                                title: response.msg,
+                                title: response.message,
                                 timerProgressBar: true,
                                 timer: 1500
                             })
+
                         }
                     })
 
@@ -267,7 +269,7 @@ const CreateClient = () => {
 
                 }
 
-                
+
                 await dispatch(Add_Client(req))
                     .unwrap()
                     .then((response) => {
@@ -279,7 +281,7 @@ const CreateClient = () => {
                                 timer: 1500
                             })
                             setTimeout(() => {
-                                navigate('/admin/customerlist')
+                                navigate('/admin/Clientlist', { state: { id: location.state.id } })
                             }, 1500)
                         } else {
                             Swal.fire({
@@ -319,7 +321,7 @@ const CreateClient = () => {
         setCompanyDetails({ ...getCompanyDetails, [name]: value });
     };
 
- 
+
     const handleChange3 = (e) => {
         const { name, value } = e.target;
         if (name === "VATNumber") {
@@ -330,7 +332,7 @@ const CreateClient = () => {
         validate3()
         setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
     };
- 
+
     // const handleChange = (index, field, value) => {
     //     console.log("index :", index);
     //     console.log("field :", field);
@@ -348,10 +350,10 @@ const CreateClient = () => {
     //     console.log("newErrors :", newErrors);
     //     setCompanyContactError(newErrors);
     //   };
-      
 
 
- 
+
+
 
     const validate1 = () => {
         const newErrors = {};
@@ -511,7 +513,7 @@ const CreateClient = () => {
     const validateField1 = (index, field, value) => {
         const newErrors = [...contactsErrors];
 
-        
+
         switch (field) {
             case 'first_name':
                 newErrors[index].first_name = value ? '' : 'First Name is required';
@@ -580,7 +582,7 @@ const CreateClient = () => {
         FilterSearchDetails()
     }, [searchItem])
 
- 
+
     return (
         <div>
             <div className="container-fluid mt-4">
@@ -697,12 +699,12 @@ const CreateClient = () => {
                                                                                             value={getSoleTraderDetails.vatRegistered}
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                         >
- 
+
                                                                                             <option selected="">Please Select VAT Registered</option>
-                                                                                            <option value=''>Yes</option>
+
                                                                                             <option value={1}>Yes</option>
                                                                                             <option value={0}>No</option>
- 
+
 
                                                                                         </select>
                                                                                         {errors1['vatRegistered'] && (
@@ -978,8 +980,13 @@ const CreateClient = () => {
                                                                                             <label className="form-label">Client Industry<span style={{ color: "red" }}>*</span></label>
                                                                                             <select className="form-select mb-3"
                                                                                                 name="ClientIndustry" onChange={(e) => handleChange2(e)} value={getCompanyDetails.ClientIndustry}>
-                                                                                                <option value={1}>Select Client Industry</option>
-                                                                                                <option value={2}>Ltd</option>
+                                                                                                <option value=''>Select Client Industry</option>
+                                                                                                {
+                                                                                                    clientIndustry.map((data, index) => {
+                                                                                                        return <option value={data.id} key={data.id}>{data.business_type}</option>
+                                                                                                    })
+                                                                                                }
+
                                                                                             </select>
                                                                                             {errors2['ClientIndustry'] && (
                                                                                                 <div style={{ 'color': 'red' }}>{errors2['ClientIndustry']}</div>
