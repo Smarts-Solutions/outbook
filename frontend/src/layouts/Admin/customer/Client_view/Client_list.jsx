@@ -29,18 +29,18 @@ console.log('location:',location.state)
     { name: 'Email Address', selector: row => row.email, sortable: true },
     { name: 'Phone', selector: row => row.phone , sortable: true },
     { name: 'Status', selector: row => row.status=='1' ? "Active" : "Deactive" , sortable: true },
-    {
-      name: 'Actions',
-      cell: row => (
-        <div>
-          <button className='edit-icon' onClick={() => handleEdit(row)}> <i className="ti-pencil" /></button>
-          <button className='delete-icon' onClick={() => handleDelete(row)}> <i className="ti-trash" /></button>
-        </div>
-      ),
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-    },
+    // {
+    //   name: 'Actions',
+    //   cell: row => (
+    //     <div>
+    //       <button className='edit-icon' onClick={() => handleEdit(row)}> <i className="ti-pencil" /></button>
+    //       <button className='delete-icon' onClick={() => handleDelete(row)}> <i className="ti-trash" /></button>
+    //     </div>
+    //   ),
+    //   ignoreRowClick: true,
+    //   allowOverflow: true,
+    //   button: true,
+    // },
   ];
 
 
