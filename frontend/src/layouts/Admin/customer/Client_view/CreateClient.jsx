@@ -319,6 +319,7 @@ const CreateClient = () => {
         setCompanyDetails({ ...getCompanyDetails, [name]: value });
     };
 
+ 
     const handleChange3 = (e) => {
         const { name, value } = e.target;
         if (name === "VATNumber") {
@@ -329,6 +330,28 @@ const CreateClient = () => {
         validate3()
         setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
     };
+ 
+    // const handleChange = (index, field, value) => {
+    //     console.log("index :", index);
+    //     console.log("field :", field);
+    //     console.log("value -:", !value);
+
+
+    //     // Update contacts state
+    //     const newContacts = [...contacts];
+    //     newContacts[index][field] = value;
+    //     setContacts(newContacts);
+
+    //     // Update errors state
+    //     const newErrors = [...errors];
+    //     newErrors[index][field] = value ? true : false;
+    //     console.log("newErrors :", newErrors);
+    //     setCompanyContactError(newErrors);
+    //   };
+      
+
+
+ 
 
     const validate1 = () => {
         const newErrors = {};
@@ -674,10 +697,13 @@ const CreateClient = () => {
                                                                                             value={getSoleTraderDetails.vatRegistered}
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                         >
+ 
                                                                                             <option selected="">Please Select VAT Registered</option>
+                                                                                            <option value=''>Yes</option>
                                                                                             <option value={1}>Yes</option>
-                                                                                            <option selected={1}>Yes</option>
                                                                                             <option value={0}>No</option>
+ 
+
                                                                                         </select>
                                                                                         {errors1['vatRegistered'] && (
                                                                                             <div style={{ 'color': 'red' }}>{errors1['vatRegistered']}</div>
