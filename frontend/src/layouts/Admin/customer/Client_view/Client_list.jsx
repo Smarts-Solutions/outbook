@@ -44,9 +44,6 @@ console.log('location:',location.state)
   ];
 
 
-
-
-
   function handleEdit(row) {
     console.log('Editing row:', row.id);
     navigate('/admin/editcustomer', { state: row });
@@ -55,7 +52,6 @@ console.log('location:',location.state)
   function handleDelete(row) {
     console.log('Deleting row:', row);
   }
-
 
 
   const GetAllServiceData = async () => {
@@ -85,6 +81,9 @@ console.log('location:',location.state)
   const handleAddClient = () => {
     navigate('/admin/addclient' , {state : {id : location.state.id}});
   }
+
+
+  console.log(" { state: row } :", location.state );
 
   return (
     <div className='container-fluid'>

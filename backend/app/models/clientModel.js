@@ -103,7 +103,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         try {
         const query2 = `
         INSERT INTO client_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone,alternate_phone,authorised_signatory_status)
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
            
         for (const detail of contactDetails) {
