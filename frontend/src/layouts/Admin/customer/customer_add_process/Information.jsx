@@ -703,15 +703,11 @@ const Information = () => {
 
     const ChangeCustomerType = (value) => {
         if (value == 3) {
-
             setContacts([
                 { authorised_signatory_status: true, firstName: '', lastName: '', role: '', phoneNumber: '', email: '' },
                 { authorised_signatory_status: true, firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }
-
             ])
-
             setErrors([{ firstName: false, lastName: false, role: false, email: false }, { firstName: false, lastName: false, role: false, email: false }]);
-
         }
     }
 
