@@ -58,7 +58,7 @@ const Admin_Route = () => {
             <Route path="/customer" element={<Customer />} />
             <Route path="/service" element={<Service />} />
             <Route path="/addclient" element={<AddNewClient />} />
-            <Route path="/customerlist" element={<CustomerList />} />
+            <Route path="/Clientlist" element={<CustomerList />} />
             <Route path="/editcustomer" element={<Editcustomer />} />
 
           </Routes>
