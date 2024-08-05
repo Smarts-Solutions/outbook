@@ -273,7 +273,8 @@ WHERE
     client_contact_details.phone AS phone,
     client_contact_details.residential_address AS residential_address,
     customer_contact_person_role.name AS customer_role_contact_name,
-    customer_contact_person_role.id AS customer_role_contact_id
+    customer_contact_person_role.id AS customer_role_contact_id,
+    client_company_information.*
 FROM 
     clients
 JOIN 
@@ -330,6 +331,88 @@ WHERE
             const result = {
                 client: clientData,
                 company_details: companyData,
+                contact_details: contactDetails
+            };
+
+            return result
+            // Return or further process `result` as needed
+        } else {
+            // console.log("No customer found with the given ID.");
+            return []
+        }
+        ;
+    }
+    else if(client_type == "3"){
+        const query = `
+ SELECT 
+    clients.id AS client_id, 
+    clients.client_type AS client_type, 
+    clients.customer_id AS customer_id, 
+    clients.client_industry_id AS client_industry_id, 
+    clients.trading_name AS trading_name, 
+    clients.client_code AS client_code, 
+    clients.trading_address AS trading_address, 
+    clients.vat_registered AS vat_registered, 
+    clients.vat_number AS vat_number, 
+    clients.website AS website, 
+    clients.status AS status, 
+    client_contact_details.id AS contact_id,
+    client_contact_details.first_name AS first_name,
+    client_contact_details.last_name AS last_name,
+    client_contact_details.email AS email,
+    client_contact_details.alternate_email AS alternate_email,
+    client_contact_details.phone AS phone,
+    client_contact_details.alternate_phone AS alternate_phone,
+    client_contact_details.authorised_signatory_status AS authorised_signatory_status,
+    customer_contact_person_role.name AS customer_role_contact_name,
+    customer_contact_person_role.id AS customer_role_contact_id
+FROM 
+    clients
+JOIN 
+    client_contact_details ON clients.id = client_contact_details.client_id
+LEFT JOIN 
+    customer_contact_person_role ON customer_contact_person_role.id = client_contact_details.role 
+WHERE 
+    clients.id = ?
+`;
+
+        const [rows] = await pool.execute(query, [client_id]);
+        if (rows.length > 0) {
+
+            const clientData = {
+                id: rows[0].client_id,
+                client_type: rows[0].client_type,
+                customer_id: rows[0].customer_id,
+                client_industry_id: rows[0].client_industry_id,
+                trading_name: rows[0].trading_name,
+                client_code: rows[0].client_code,
+                trading_address: rows[0].trading_address,
+                vat_registered: rows[0].vat_registered,
+                vat_number: rows[0].vat_number,
+                website: rows[0].website,
+                status: rows[0].status,
+
+
+            };
+
+           
+
+            const contactDetails = rows.map(row => ({
+                contact_id: row.contact_id,
+                customer_contact_person_role_id: row.customer_role_contact_id,
+                customer_contact_person_role_name: row.customer_role_contact_name,
+                first_name:row.first_name,
+                last_name:row.last_name,
+                email:row.email,
+                alternate_email:row.alternate_email,
+                phone:row.phone,
+                alternate_phone:row.alternate_phone,
+                authorised_signatory_status:row.authorised_signatory_status
+                // Add other contact detail fields as needed
+            }));
+
+            const result = {
+                client: clientData,
                 contact_details: contactDetails
             };
 

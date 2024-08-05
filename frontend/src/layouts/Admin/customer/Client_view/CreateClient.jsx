@@ -1203,8 +1203,8 @@ const CreateClient = () => {
                                                                                                         name="VATRegistered" value={getPartnershipDetails.VATRegistered} onChange={(e) => handleChange3(e)}
                                                                                                     >
                                                                                                         <option value="">Select VAT Registered</option>
-                                                                                                        <option value={0}>No</option>
                                                                                                         <option value={1}>Yes</option>
+                                                                                                        <option value={0}>No</option>
                                                                                                     </select>
                                                                                                     {errors3['VATRegistered'] && (
                                                                                                         <div style={{ 'color': 'red' }}>{errors3['VATRegistered']}</div>)}
@@ -1308,9 +1308,19 @@ const CreateClient = () => {
                                                                                                             <div className="col-lg-3">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label">Role<span style={{ color: "red" }}>*</span></label>
-                                                                                                                    <input type="text" className="form-control" placeholder="Role"
-                                                                                                                        name="role" value={contacts1.role} onChange={(e) => handleChange4(index, 'role', e.target.value)}
-                                                                                                                    />
+     
+    <select
+                                                                                                                        className="form-select"
+                                                                                                                        id={`role-${index}`}
+                                                                                                                        value={contacts1.role}
+                                                                                                                        onChange={(e) => handleChange4(index, 'role', e.target.value)}
+                                                                                                                    >
+                                                                                                                        <option value="">Select Role</option>
+                                                                                                                        {personRoleDataAll &&
+                                                                                                                            personRoleDataAll.data.map((item, i) => (
+                                                                                                                                <option value={item.id} key={i}>{item.name}</option>
+                                                                                                                            ))}
+                                                                                                                    </select>
                                                                                                                     {contactsErrors[index].role && (
                                                                                                                         <div style={{ 'color': 'red' }}>{contactsErrors[index].role}</div>
                                                                                                                     )}
