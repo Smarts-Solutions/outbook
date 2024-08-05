@@ -31,9 +31,24 @@ const clientAction = async (req, res) => {
     }
 }
 
+const clientUpdate = async (req, res) => {
+  try {
+      const { ...client } = req.body;
+      const data = await clientService.clientUpdate(client);
+      if(data != undefined){
+       return res.status(200).json({ status:true,message: "Success..",data : data});
+      }else{
+       return res.status(400).json({ status:false, message: "Invalid..."});
+      }
+    } catch (error) {
+      res.status(500).json({ status:false, message: error.message});
+    }
+}
+
 
 
 module.exports = {
   addClient,
-  clientAction
+  clientAction,
+  clientUpdate
 };

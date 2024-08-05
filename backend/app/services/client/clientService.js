@@ -20,8 +20,12 @@ const clientAction = async (client) => {
    return
   }
 };
+const clientUpdate = async (client) => {
+  return clientModel.clientUpdate(client);
+}; 
 
 module.exports = {
   addClient,
-  clientAction
+  clientAction,
+  clientUpdate
 };

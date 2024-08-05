@@ -9,6 +9,7 @@ const router = express.Router();
 
 router.post('/addClient',verifyToken, clientController.addClient);
 router.post('/clientAction',verifyToken, clientController.clientAction);
+router.post('/clientUpdate',verifyToken, clientController.clientUpdate);
 
 
 
