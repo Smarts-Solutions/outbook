@@ -54,6 +54,10 @@ const updateProcessCustomerFileAction = async (customerProcessData) => {
   }
 };
 
+const customerUpdate = async (customer) => {
+  return customerModel.customerUpdate(customer);
+};
+
 
 
 module.exports = {
@@ -62,5 +66,6 @@ module.exports = {
   getSingleCustomer,
   updateProcessCustomer,
   updateProcessCustomerFile,
-  updateProcessCustomerFileAction
+  updateProcessCustomerFileAction,
+  customerUpdate
 };

@@ -28,6 +28,17 @@ const createCustomer = async (customer) => {
         const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, First_Name, Last_Name, Phone, Email, Residential_Address } = customer;
         const firstThreeLetters = Trading_Name.substring(0, 3)
         const customer_code = "cust_" + firstThreeLetters + "_" + UniqueNo;
+
+
+        const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
+
+        const [check] = await pool.execute(checkQuery, [Trading_Name]);
+        if (check.length > 0) {
+            return { status: false, message: 'Customer Trading Name Already Exists.' };
+        }
+
+
+
         const query = `
     INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -42,7 +53,7 @@ const createCustomer = async (customer) => {
         VALUES (?, ?, ?, ?, ?, ?)
         `;
             const [result2] = await pool.execute(query2, [customer_id, First_Name, Last_Name, Phone, Email, Residential_Address]);
-            return customer_id;
+            return { status: true, message: 'customer add successfully.', data: customer_id };
         } catch (err) {
             console.error('Error inserting data:', err);
             throw err;
@@ -92,7 +103,7 @@ const createCustomer = async (customer) => {
 
             }
 
-            return customer_id;
+            return { status: true, message: 'customer add successfully.', data: customer_id };
 
         } catch (err) {
             console.error('Error inserting data:', err);
@@ -140,7 +151,7 @@ const createCustomer = async (customer) => {
 
             }
 
-            return customer_id;
+            return { status: true, message: 'customer add successfully.', data: customer_id };
 
         } catch (err) {
             console.error('Error inserting data:', err);
@@ -679,6 +690,7 @@ const getSingleCustomer = async (customer) => {
             const query = `
         SELECT 
         customers.id AS customer_id,
+        customers.customer_type AS customer_type,
         customers.staff_id AS staff_id,
         customers.account_manager_id AS account_manager_id,
         customers.trading_name AS trading_name,
@@ -689,7 +701,12 @@ const getSingleCustomer = async (customer) => {
         customers.website AS website,
         customers.form_process AS form_process,
         customers.status AS status,
-        customer_contact_details.*,
+        customer_contact_details.id AS contact_id,
+        customer_contact_details.first_name AS first_name,
+        customer_contact_details.last_name AS last_name,
+        customer_contact_details.email AS email,
+        customer_contact_details.phone AS phone,
+        customer_contact_details.residential_address AS residential_address,
         customer_contact_person_role.name AS customer_role_contact_name,
         customer_contact_person_role.id AS customer_role_contact_id
     FROM 
@@ -707,7 +724,8 @@ const getSingleCustomer = async (customer) => {
             if (rows.length > 0) {
 
                 const customerData = {
-                    id: rows[0].customer_id,
+                    customer_id: rows[0].customer_id,
+                    customer_type: rows[0].customer_type,
                     staff_id: rows[0].staff_id,
                     account_manager_id: rows[0].account_manager_id,
                     trading_name: rows[0].trading_name,
@@ -723,6 +741,7 @@ const getSingleCustomer = async (customer) => {
                 };
 
                 const contactDetails = rows.map(row => ({
+                    contact_id: row.contact_id,
                     customer_contact_person_role_id: row.customer_role_contact_id,
                     customer_contact_person_role_name: row.customer_role_contact_name,
                     first_name: row.first_name,
@@ -753,6 +772,7 @@ const getSingleCustomer = async (customer) => {
             const query = `
             SELECT
             customers.id AS customer_id,
+            customers.customer_type AS customer_type,
             customers.staff_id AS staff_id,
             customers.account_manager_id AS account_manager_id,
             customers.trading_name AS trading_name,
@@ -763,10 +783,15 @@ const getSingleCustomer = async (customer) => {
             customers.website AS website,
             customers.form_process AS form_process,
             customers.status AS status, 
-                customer_contact_details.*,
-                customer_company_information.*,
-                customer_contact_person_role.name AS customer_role_contact_name,
-                customer_contact_person_role.id AS customer_role_contact_id
+            customer_contact_details.id AS contact_id,
+            customer_contact_details.first_name AS first_name,
+            customer_contact_details.last_name AS last_name,
+            customer_contact_details.email AS email,
+            customer_contact_details.phone AS phone,
+            customer_contact_details.residential_address AS residential_address,
+            customer_company_information.*,
+            customer_contact_person_role.name AS customer_role_contact_name,
+            customer_contact_person_role.id AS customer_role_contact_id
             FROM 
                 customers
             JOIN 
@@ -784,7 +809,8 @@ const getSingleCustomer = async (customer) => {
             if (rows.length > 0) {
 
                 const customerData = {
-                    id: rows[0].customer_id,
+                    customer_id: rows[0].customer_id,
+                    customer_type: rows[0].customer_type,
                     staff_id: rows[0].staff_id,
                     account_manager_id: rows[0].account_manager_id,
                     trading_name: rows[0].trading_name,
@@ -808,6 +834,7 @@ const getSingleCustomer = async (customer) => {
                 };
 
                 const contactDetails = rows.map(row => ({
+                    contact_id: row.contact_id,
                     customer_contact_person_role_id: row.customer_role_contact_id,
                     customer_contact_person_role_name: row.customer_role_contact_name,
                     first_name: row.first_name,
@@ -839,6 +866,7 @@ const getSingleCustomer = async (customer) => {
             const query = `
             SELECT 
             customers.id AS customer_id,
+            customers.customer_type AS customer_type,
             customers.staff_id AS staff_id,
             customers.account_manager_id AS account_manager_id,
             customers.trading_name AS trading_name,
@@ -849,7 +877,13 @@ const getSingleCustomer = async (customer) => {
             customers.website AS website,
             customers.form_process AS form_process,
             customers.status AS status,
-                customer_contact_details.*,
+            customer_contact_details.id AS contact_id,
+            customer_contact_details.first_name AS first_name,
+            customer_contact_details.last_name AS last_name,
+            customer_contact_details.email AS email,
+            customer_contact_details.phone AS phone,
+            customer_contact_details.residential_address AS residential_address,
+            customer_contact_details.authorised_signatory_status AS authorised_signatory_status,
                 customer_contact_person_role.name AS customer_role_contact_name,
                 customer_contact_person_role.id AS customer_role_contact_id
             FROM 
@@ -867,7 +901,8 @@ const getSingleCustomer = async (customer) => {
             if (rows.length > 0) {
 
                 const customerData = {
-                    id: rows[0].customer_id,
+                    customer_id: rows[0].customer_id,
+                    customer_type: rows[0].customer_type,
                     staff_id: rows[0].staff_id,
                     account_manager_id: rows[0].account_manager_id,
                     trading_name: rows[0].trading_name,
@@ -882,6 +917,7 @@ const getSingleCustomer = async (customer) => {
 
 
                 const contactDetails = rows.map(row => ({
+                    contact_id: row.contact_id,
                     customer_contact_person_role_id: row.customer_role_contact_id,
                     customer_contact_person_role_name: row.customer_role_contact_name,
                     first_name: row.first_name,
@@ -915,6 +951,7 @@ const getSingleCustomer = async (customer) => {
         const query = `
         SELECT 
             customers.id AS customer_id,
+            customers.customer_type AS customer_type,
             customers.staff_id AS staff_id,
             customers.account_manager_id AS account_manager_id,
             customers.trading_name AS trading_name,
@@ -943,7 +980,8 @@ const getSingleCustomer = async (customer) => {
         const [rows] = await pool.execute(query, [customer_id]);
         if (rows.length > 0) {
             const customerData = {
-                id: rows[0].customer_id,
+                customer_id: rows[0].customer_id,
+                customer_type: rows[0].customer_type,
                 staff_id: rows[0].staff_id,
                 trading_name: rows[0].trading_name,
                 customer_code: rows[0].customer_code,
@@ -979,6 +1017,7 @@ const getSingleCustomer = async (customer) => {
         const query = `
         SELECT 
             customers.id AS customer_id,
+            customers.customer_type AS customer_type,
             customers.staff_id AS staff_id,
             customers.account_manager_id AS account_manager_id,
             customers.trading_name AS trading_name,
@@ -1013,7 +1052,8 @@ const getSingleCustomer = async (customer) => {
         const [rows] = await pool.execute(query, [customer_id]);
         if (rows.length > 0) {
             const customerData = {
-                id: rows[0].customer_id,
+                customer_id: rows[0].customer_id,
+                customer_type: rows[0].customer_type,
                 staff_id: rows[0].staff_id,
                 account_manager_id: rows[0].account_manager_id,
                 trading_name: rows[0].trading_name,
@@ -1106,6 +1146,7 @@ const getSingleCustomer = async (customer) => {
         const query = `
         SELECT 
             customers.id AS customer_id,
+            customers.customer_type AS customer_type,
             customers.staff_id AS staff_id,
             customers.account_manager_id AS account_manager_id,
             customers.trading_name AS trading_name,
@@ -1128,7 +1169,8 @@ const getSingleCustomer = async (customer) => {
         const [rows] = await pool.execute(query, [customer_id]);
         if (rows.length > 0) {
             const customerData = {
-                id: rows[0].customer_id,
+                customer_id: rows[0].customer_id,
+                customer_type: rows[0].customer_type,
                 staff_id: rows[0].staff_id,
                 account_manager_id: rows[0].account_manager_id,
                 trading_name: rows[0].trading_name,
@@ -1164,6 +1206,419 @@ const getSingleCustomer = async (customer) => {
 
 }
 
+const customerUpdate = async (customer) => {
+
+    const { customer_id, pageStatus } = customer;
+    const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code FROM `customers` WHERE id =' + customer_id);
+    const customer_type = ExistCustomer[0].customer_type;
+    const lastCode = ExistCustomer[0].customer_code.slice(ExistCustomer[0].customer_code.lastIndexOf('_') + 1);
+
+    // Page Status 1 
+    if (pageStatus === "1") {
+
+        console.log("customer", customer)
+        const { customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website, contactDetails } = customer;
+
+
+        const firstThreeLetters = trading_name.substring(0, 3);
+        const customer_code = "cust_" + firstThreeLetters + "_" + lastCode;
+
+        const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ? AND id != ?`;
+        const [check] = await pool.execute(checkQuery, [trading_name, customer_id]);
+
+        if (check.length > 0) {
+            return { status: false, message: 'Customers Trading Name Already Exists.' };
+        }
+
+        const query = `
+        UPDATE customers
+        SET customer_type = ?, staff_id = ?, account_manager_id = ?, trading_name = ?, customer_code = ?, trading_address = ?, vat_registered = ?, vat_number = ?, website = ?
+        WHERE id = ?
+        `;
+
+        const [result] = await pool.execute(query, [customer_type, staff_id, account_manager_id, trading_name, customer_code, trading_address, vat_registered, vat_number, website, customer_id]);
+
+        //Solo Traders Details
+        if (customer_type == "1") {
+
+            let contact_id = contactDetails[0].contact_id;
+            let first_name = contactDetails[0].first_name;
+            let last_name = contactDetails[0].last_name;
+            let email = contactDetails[0].email;
+            let phone = contactDetails[0].phone;
+            let residential_address = contactDetails[0].residential_address;
+
+            const query2 = `
+        UPDATE customer_contact_details
+        SET first_name = ?, last_name = ?, phone = ?, email = ?, residential_address = ?
+        WHERE customer_id = ? AND id = ?
+         `;
+
+            try {
+                const [result2] = await pool.execute(query2, [first_name, last_name, phone, email, residential_address, customer_id , contact_id]);
+                return { status: true, message: 'Customer updated successfully.', data: customer_id };
+            } catch (err) {
+                return { status: false, message: 'Update Error Customer Type 1' };
+            }
+
+
+        }
+
+        // Company Details
+        else if (customer_type == "2") {
+            const { company_name, entity_type, company_status, company_number, Registered_Office_Addres, Incorporation_Date, Incorporation_in } = customer;
+            try {
+                // Update customer_company_information
+                const query2 = `
+                    UPDATE customer_company_information
+                    SET company_name = ?, entity_type = ?, company_status = ?, company_number = ?, registered_office_address = ?, incorporation_date = ?, incorporation_in = ?
+                    WHERE customer_id = ?
+                `;
+                const [result2] = await pool.execute(query2, [company_name, entity_type, company_status, company_number, Registered_Office_Addres, Incorporation_Date, Incorporation_in, customer_id]);
+            
+                // Update customer_contact_details
+                const query3 = `
+                    UPDATE customer_contact_details
+                    SET contact_person_role_id = ?, first_name = ?, last_name = ?, phone = ?, email = ? ,residential_address = ?
+                    WHERE customer_id = ? AND id = ?
+                `;
+            
+                for (const detail of contactDetails) {
+                
+                    let contact_id = detail.contact_id;
+                    let customer_contact_person_role_id = detail.customer_contact_person_role_id;
+                    let first_name = detail.first_name;
+                    let last_name = detail.last_name;
+                    let email = detail.email;
+                    let phone = detail.phone;
+                    let residential_address = detail.residential_address;
+            
+                    const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone, email,residential_address, customer_id, contact_id]);
+                }
+            
+                return { status: true, message: 'Customer updated successfully.', data: customer_id };
+            
+            } catch (err) {
+                return { status: false, message: 'Update Error Customer Type 2' };
+            }
+            
+
+        }
+
+        // Partnership Details
+        else if (customer_type == "3") {
+
+           
+
+            try {
+
+                const query3 = `
+                UPDATE customer_contact_details
+                SET contact_person_role_id = ?, first_name = ?, last_name = ?, phone = ?, email = ? ,residential_address = ? ,authorised_signatory_status = ?
+                WHERE customer_id = ? AND id = ?
+               `;
+
+
+
+                for (const detail of contactDetails) {
+                
+                    let contact_id = detail.contact_id;
+                    let customer_contact_person_role_id = detail.customer_contact_person_role_id;
+                    let first_name = detail.first_name;
+                    let last_name = detail.last_name;
+                    let email = detail.email;
+                    let phone = detail.phone;
+                    let residential_address = detail.residential_address;
+                    let authorised_signatory_status = detail.authorised_signatory_status;
+            
+                    const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone, email,residential_address,authorised_signatory_status, customer_id, contact_id]);
+                }
+            
+                return { status: true, message: 'Customer updated successfully.', data: customer_id };
+            
+            } catch (err) {
+                return { status: false, message: 'Update Error Customer Type 3' };
+            }
+
+        }
+
+    }
+
+    //  Page Status 2 Service Part
+    else if (pageStatus === "2") {
+          
+        console.log("customer 111",customer)
+        return 1
+
+        for (const serVal of services) {
+            let service_id = serVal.service_id;
+            let account_manager_id = serVal.account_manager_id;
+        
+            try {
+                // Process 1 table
+                const checkQuery = `
+                    SELECT id FROM customer_services WHERE customer_id = ? AND service_id = ?
+                `;
+                const [existing] = await pool.execute(checkQuery, [customer_id, service_id]);
+        
+                let customer_service_id;
+        
+                if (existing.length === 0) {
+                    // If not exists, insert into customer_services
+                    const insertQuery = `
+                        INSERT INTO customer_services (customer_id, service_id)
+                        VALUES (?, ?)
+                    `;
+                    const [result] = await pool.execute(insertQuery, [customer_id, service_id]);
+                    customer_service_id = result.insertId;
+                } else {
+                    // If exists, update customer_services (assuming you want to update some columns if needed)
+                    customer_service_id = existing[0].id;
+                    const updateQuery = `
+                        UPDATE customer_services
+                        SET customer_id = ?, service_id = ?
+                        WHERE id = ?
+                    `;
+                    await pool.execute(updateQuery, [customer_id, service_id, customer_service_id]);
+                }
+        
+                // Process 2 table
+                const checkQuery2 = `
+                    SELECT customer_service_id, account_manager_id FROM customer_service_account_managers WHERE customer_service_id = ? AND account_manager_id = ?
+                `;
+        
+                if (account_manager_id.length > 0) {
+                    for (const ac_id of account_manager_id) {
+                        const [existing2] = await pool.execute(checkQuery2, [customer_service_id, ac_id]);
+        
+                        if (existing2.length === 0) {
+                            // If not exists, insert into customer_service_account_managers
+                            const insertManagerQuery = `
+                                INSERT INTO customer_service_account_managers (customer_service_id, account_manager_id)
+                                VALUES (?, ?)
+                            `;
+                            await pool.execute(insertManagerQuery, [customer_service_id, ac_id]);
+                        } else {
+                            // If exists, update customer_service_account_managers (assuming you want to update some columns if needed)
+                            const updateManagerQuery = `
+                                UPDATE customer_service_account_managers
+                                SET customer_service_id = ?, account_manager_id = ?
+                                WHERE customer_service_id = ? AND account_manager_id = ?
+                            `;
+                            await pool.execute(updateManagerQuery, [customer_service_id, ac_id, customer_service_id, ac_id]);
+                        }
+                    }
+                }
+        
+            } catch (err) {
+                console.error('Error updating data:', err);
+                throw err;
+            }
+        }
+        return customer_id;
+        
+
+
+    }
+
+    //  Page Status 3 Customer engagement model Part
+    else if (pageStatus === "3") {
+        const query = `
+        SELECT 
+            customers.id AS customer_id,
+            customers.customer_type AS customer_type,
+            customers.staff_id AS staff_id,
+            customers.account_manager_id AS account_manager_id,
+            customers.trading_name AS trading_name,
+            customers.customer_code AS customer_code,
+            customers.trading_address AS trading_address,
+            customers.vat_registered AS vat_registered,
+            customers.vat_number AS vat_number,
+            customers.website AS website,
+            customers.form_process AS form_process,
+            customers.status AS status,
+            customer_engagement_model.*, 
+            customer_engagement_fte.*, 
+            customer_engagement_percentage.*, 
+            customer_engagement_adhoc_hourly.*, 
+            customer_engagement_customised_pricing.*
+        FROM 
+            customers
+        JOIN 
+            customer_engagement_model ON customers.id = customer_engagement_model.customer_id
+        LEFT JOIN 
+            customer_engagement_fte ON customer_engagement_model.id = customer_engagement_fte.customer_engagement_model_id 
+        LEFT JOIN 
+            customer_engagement_percentage ON customer_engagement_model.id = customer_engagement_percentage.customer_engagement_model_id
+        LEFT JOIN 
+            customer_engagement_adhoc_hourly ON customer_engagement_model.id = customer_engagement_adhoc_hourly.customer_engagement_model_id
+        LEFT JOIN 
+            customer_engagement_customised_pricing ON customer_engagement_model.id = customer_engagement_customised_pricing.customer_engagement_model_id
+        WHERE 
+            customers.id = ?
+        `;
+
+        const [rows] = await pool.execute(query, [customer_id]);
+        if (rows.length > 0) {
+            const customerData = {
+                id: rows[0].customer_id,
+                customer_type: rows[0].customer_type,
+                staff_id: rows[0].staff_id,
+                account_manager_id: rows[0].account_manager_id,
+                trading_name: rows[0].trading_name,
+                customer_code: rows[0].customer_code,
+                trading_address: rows[0].trading_address,
+                vat_registered: rows[0].vat_registered,
+                vat_number: rows[0].vat_number,
+                website: rows[0].website,
+                form_process: rows[0].form_process,
+                status: rows[0].status,
+            };
+
+            const customer_engagement_model_status = {
+                fte_dedicated_staffing: rows[0].fte_dedicated_staffing, // replace with actual field name
+                percentage_model: rows[0].percentage_model, // replace with actual field name
+                adhoc_payg_hourly: rows[0].adhoc_payg_hourly, // replace with actual field name
+                customised_pricing: rows[0].customised_pricing, // replace with actual field name
+                // Add other fields as necessary
+            };
+
+            let fte_dedicated_staffing = {}
+            if (rows[0].fte_dedicated_staffing == "1") {
+                fte_dedicated_staffing = {
+                    number_of_accountants: rows[0].number_of_accountants,
+                    fee_per_accountant: rows[0].fee_per_accountant,
+                    number_of_bookkeepers: rows[0].number_of_bookkeepers,
+                    fee_per_bookkeeper: rows[0].fee_per_bookkeeper,
+                    number_of_payroll_experts: rows[0].number_of_payroll_experts,
+                    fee_per_payroll_expert: rows[0].fee_per_payroll_expert,
+                    number_of_tax_experts: rows[0].number_of_tax_experts,
+                    fee_per_tax_expert: rows[0].fee_per_tax_expert,
+                    number_of_admin_staff: rows[0].number_of_admin_staff,
+                    fee_per_admin_staff: rows[0].fee_per_admin_staff
+                };
+            }
+
+
+            let percentage_model = {}
+            if (rows[0].percentage_model == "1") {
+                percentage_model = {
+                    total_outsourcing: rows[0].total_outsourcing,
+                    accountants: rows[0].accountants,
+                    bookkeepers: rows[0].bookkeepers,
+                    payroll_experts: rows[0].payroll_experts,
+                    tax_experts: rows[0].tax_experts,
+                    admin_staff: rows[0].admin_staff
+                };
+            }
+
+            let adhoc_payg_hourly = {}
+            if (rows[0].adhoc_payg_hourly == "1") {
+                adhoc_payg_hourly = {
+                    adhoc_accountants: rows[0].adhoc_accountants,
+                    adhoc_bookkeepers: rows[0].adhoc_bookkeepers,
+                    adhoc_payroll_experts: rows[0].adhoc_payroll_experts,
+                    adhoc_tax_experts: rows[0].adhoc_tax_experts,
+                    adhoc_admin_staff: rows[0].adhoc_admin_staff
+                };
+            }
+
+
+            let customised_pricing = {}
+            if (rows[0].customised_pricing == "1") {
+                customised_pricing = rows.map(row => ({
+                    minimum_number_of_jobs: row.minimum_number_of_jobs,
+                    job_type_id: row.job_type_id,
+                    cost_per_job: row.cost_per_job
+                }));
+            }
+
+
+
+            const result = {
+                customer: customerData,
+                customer_engagement_model_status: customer_engagement_model_status,
+                fte_dedicated_staffing: fte_dedicated_staffing,
+                percentage_model: percentage_model,
+                adhoc_payg_hourly: adhoc_payg_hourly,
+                customised_pricing: customised_pricing,
+            };
+
+            return result;
+        } else {
+            return [];
+        }
+    }
+
+    //  Page Status 4 Paper Work Part
+    else if (pageStatus === "4") {
+        const query = `
+        SELECT 
+            customers.id AS customer_id,
+            customers.customer_type AS customer_type,
+            customers.staff_id AS staff_id,
+            customers.account_manager_id AS account_manager_id,
+            customers.trading_name AS trading_name,
+            customers.customer_code AS customer_code,
+            customers.trading_address AS trading_address,
+            customers.vat_registered AS vat_registered,
+            customers.vat_number AS vat_number,
+            customers.website AS website,
+            customers.form_process AS form_process,
+            customers.status AS status,
+            customer_paper_work.*
+        FROM 
+            customers
+        JOIN 
+            customer_paper_work ON customers.id = customer_paper_work.customer_id
+        WHERE 
+            customers.id = ?
+        `;
+
+        const [rows] = await pool.execute(query, [customer_id]);
+        if (rows.length > 0) {
+            const customerData = {
+                id: rows[0].customer_id,
+                customer_type: rows[0].customer_type,
+                staff_id: rows[0].staff_id,
+                account_manager_id: rows[0].account_manager_id,
+                trading_name: rows[0].trading_name,
+                customer_code: rows[0].customer_code,
+                trading_address: rows[0].trading_address,
+                vat_registered: rows[0].vat_registered,
+                vat_number: rows[0].vat_number,
+                website: rows[0].website,
+                form_process: rows[0].form_process,
+                status: rows[0].status,
+            };
+
+            const customer_paper_work = rows.map(row => ({
+                file_name: row.file_name,
+                original_name: row.original_name,
+                file_type: row.file_type,
+                file_size: row.file_size
+            }));
+
+
+
+            const result = {
+                customer: customerData,
+                customer_paper_work: customer_paper_work
+            };
+
+            return result;
+        } else {
+            return [];
+        }
+    }
+
+    return { status: true, message: 'customers updated successfully.', data: customer_id };
+}
+
+
+
+
+
 
 module.exports = {
     createCustomer,
@@ -1174,6 +1629,7 @@ module.exports = {
     updateProcessCustomerFile,
     updateProcessCustomerFileGet,
     updateProcessCustomerFileDelete,
-    getSingleCustomer
+    getSingleCustomer,
+    customerUpdate
 
 };

@@ -30,6 +30,19 @@ const createClient = async (client) => {
     const firstThreeLettersexistCustomerName = existCustomerName.substring(0, 3)
     const firstThreeLettersClientName = trading_name.substring(0, 3)
     const client_code = "cli_" + firstThreeLettersexistCustomerName + "_" + firstThreeLettersClientName + "_" + UniqueNo;
+
+
+    const checkQuery = `SELECT 1 FROM clients WHERE trading_name = ?`;
+
+    const [check] = await pool.execute(checkQuery, [trading_name]);
+    if (check.length > 0) {
+        return { status: false, message: 'Client Trading Name Already Exists.' };
+    }
+
+
+
+
+
     const query = `
 INSERT INTO clients (client_type,customer_id,client_industry_id,trading_name,client_code,trading_address,vat_registered,vat_number,website)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -126,8 +139,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         }
     }
 
+    return { status: true, message: 'client add successfully.', data: client_id };
 
-    return client_id
 
 };
 
@@ -251,8 +264,8 @@ WHERE
             return []
         }
         ;
-    } 
-    else if(client_type == "2"){
+    }
+    else if (client_type == "2") {
         const query = `
  SELECT 
     clients.id AS client_id, 
@@ -342,7 +355,7 @@ WHERE
         }
         ;
     }
-    else if(client_type == "3"){
+    else if (client_type == "3") {
         const query = `
  SELECT 
     clients.id AS client_id, 
@@ -395,19 +408,19 @@ WHERE
 
             };
 
-           
+
 
             const contactDetails = rows.map(row => ({
                 contact_id: row.contact_id,
                 customer_contact_person_role_id: row.customer_role_contact_id,
                 customer_contact_person_role_name: row.customer_role_contact_name,
-                first_name:row.first_name,
-                last_name:row.last_name,
-                email:row.email,
-                alternate_email:row.alternate_email,
-                phone:row.phone,
-                alternate_phone:row.alternate_phone,
-                authorised_signatory_status:row.authorised_signatory_status
+                first_name: row.first_name,
+                last_name: row.last_name,
+                email: row.email,
+                alternate_email: row.alternate_email,
+                phone: row.phone,
+                alternate_phone: row.alternate_phone,
+                authorised_signatory_status: row.authorised_signatory_status
                 // Add other contact detail fields as needed
             }));
 
@@ -461,6 +474,16 @@ const clientUpdate = async (client) => {
     const firstThreeLettersClientName = trading_name.substring(0, 3);
     const client_code = "cli_" + firstThreeLettersexistCustomerName + "_" + firstThreeLettersClientName + "_" + lastCode;
 
+
+    const checkQuery = `SELECT 1 FROM clients WHERE trading_name = ? AND id != ?`;
+
+    const [check] = await pool.execute(checkQuery, [trading_name, client_id]);
+    if (check.length > 0) {
+        return { status: false, message: 'Client Trading Name Already Exists.' };
+    }
+
+
+
     const query = `
    UPDATE clients
    SET 
@@ -513,54 +536,51 @@ const clientUpdate = async (client) => {
     }
 
     else if (client_type == "2") {
+
         const { company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date, incorporation_in, contactDetails } = client;
 
         try {
             const query1 = `
-        INSERT INTO client_company_information (client_id,company_name,entity_type,company_status,company_number,registered_office_address,incorporation_date,incorporation_in)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-            const [result1] = await pool.execute(query1, [client_id, company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date, incorporation_in]);
+    UPDATE client_company_information
+    SET company_name = ?, entity_type = ?, company_status = ?, company_number = ?, registered_office_address = ?, incorporation_date = ?, incorporation_in = ?
+    WHERE client_id = ?
+    `;
+            const [result1] = await pool.execute(query1, [company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date, incorporation_in, client_id]);
         } catch (err) {
-            console.error('Error inserting data:', err);
+            console.error('Error updating data:', err);
             throw err;
         }
-
 
         try {
             const query2 = `
-        INSERT INTO client_contact_details (client_id,role,first_name,last_name,phone,email)
-        VALUES (?, ?, ?, ?, ?, ?)
-        `;
+    UPDATE client_contact_details
+    SET role = ?, first_name = ?, last_name = ?, phone = ?, email = ?
+    WHERE client_id = ? AND id = ?
+    `;
 
             for (const detail of contactDetails) {
-                // console.log("detail",detail)
-                let role = detail.role;
-                let first_name = detail.first_name;
-                let last_name = detail.last_name;
-                let phone = detail.phone;
-                let email = detail.email;
-                const [result2] = await pool.execute(query2, [client_id, role, first_name, last_name, phone, email]);
-
+                let { customer_contact_person_role_id, first_name, last_name, phone, email, contact_id } = detail; // Assuming each contactDetail has an id
+                const [result2] = await pool.execute(query2, [customer_contact_person_role_id, first_name, last_name, phone, email, client_id, contact_id]);
             }
-
         } catch (err) {
-            console.error('Error inserting data:', err);
+            console.error('Error updating data:', err);
             throw err;
         }
+
     }
 
     else if (client_type == "3") {
         const { contactDetails } = client;
+
         try {
             const query2 = `
-        INSERT INTO client_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone,alternate_phone,authorised_signatory_status)
-        VALUES (?, ?, ?, ?, ?, ?)
-        `;
+    UPDATE client_contact_details
+    SET role = ?, first_name = ?, last_name = ?, email = ?, alternate_email = ?, phone = ?, alternate_phone = ?, authorised_signatory_status = ?
+    WHERE client_id = ? AND id = ?
+    `;
 
             for (const detail of contactDetails) {
-                // console.log("detail",detail)
-                let role = detail.role;
+                let customer_contact_person_role_id = detail.customer_contact_person_role_id;
                 let first_name = detail.first_name;
                 let last_name = detail.last_name;
                 let email = detail.email;
@@ -568,18 +588,19 @@ const clientUpdate = async (client) => {
                 let phone = detail.phone;
                 let alternate_phone = detail.alternate_phone;
                 let authorised_signatory_status = detail.authorised_signatory_status;
-                const [result2] = await pool.execute(query2, [client_id, role, first_name, last_name, email, alternate_email, phone, alternate_phone, authorised_signatory_status]);
+                let contact_id = detail.contact_id; // Assuming each contactDetail has an id
 
+                const [result2] = await pool.execute(query2, [customer_contact_person_role_id, first_name, last_name, email, alternate_email, phone, alternate_phone, authorised_signatory_status, client_id, contact_id]);
             }
 
         } catch (err) {
-            console.error('Error inserting data:', err);
+            console.error('Error updating data:', err);
             throw err;
         }
+
     }
 
-
-    return client_id
+    return { status: true, message: 'client updated successfully.', data: client_id };
 
 };
 
