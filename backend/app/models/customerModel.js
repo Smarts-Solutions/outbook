@@ -1209,7 +1209,8 @@ const getSingleCustomer = async (customer) => {
 const customerUpdate = async (customer) => {
 
     const { customer_id, pageStatus } = customer;
-    const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code FROM `customers` WHERE id =' + customer_id);
+    const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
+    const account_manager_id = ExistCustomer[0].account_manager_id;
     const customer_type = ExistCustomer[0].customer_type;
     const lastCode = ExistCustomer[0].customer_code.slice(ExistCustomer[0].customer_code.lastIndexOf('_') + 1);
 
@@ -1346,10 +1347,9 @@ const customerUpdate = async (customer) => {
 
     //  Page Status 2 Service Part
     else if (pageStatus === "2") {
-          
+           
         console.log("customer 111",customer)
-        return 1
-
+   
         for (const serVal of services) {
             let service_id = serVal.service_id;
             let account_manager_id = serVal.account_manager_id;

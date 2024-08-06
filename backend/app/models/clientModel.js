@@ -420,7 +420,7 @@ WHERE
                 alternate_email: row.alternate_email,
                 phone: row.phone,
                 alternate_phone: row.alternate_phone,
-                authorised_signatory_status: row.authorised_signatory_status
+                authorised_signatory_status: row.authorised_signatory_status=="1"?true:false
                 // Add other contact detail fields as needed
             }));
 
@@ -552,6 +552,12 @@ const clientUpdate = async (client) => {
         }
 
         try {
+
+           const [existIdResult] = await pool.execute('SELECT id FROM client_contact_details WHERE client_id = ?', [client_id]);
+          const idArray = await existIdResult.map(item => item.id);
+          console.log(idArray); // Output: [17, 18]
+          let arrayInterId = []
+       
             const query2 = `
     UPDATE client_contact_details
     SET role = ?, first_name = ?, last_name = ?, phone = ?, email = ?
@@ -559,9 +565,14 @@ const clientUpdate = async (client) => {
     `;
 
             for (const detail of contactDetails) {
+               
                 let { customer_contact_person_role_id, first_name, last_name, phone, email, contact_id } = detail; // Assuming each contactDetail has an id
+                arrayInterId.push(contact_id)
                 const [result2] = await pool.execute(query2, [customer_contact_person_role_id, first_name, last_name, phone, email, client_id, contact_id]);
             }
+
+            console.log("arrayInterId",arrayInterId)
+            console.log("idArray",idArray)
         } catch (err) {
             console.error('Error updating data:', err);
             throw err;
