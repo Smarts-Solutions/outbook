@@ -564,8 +564,13 @@ const clientUpdate = async (client) => {
            for (const detail of contactDetails) {
                
                 let { customer_contact_person_role_id, first_name, last_name, phone, email, contact_id } = detail; // Assuming each contactDetail has an id
+
+                if(contact_id=="" || contact_id==undefined || contact_id==null){
+                    const [result2] = await pool.execute('INSERT INTO client_contact_details (client_id,role,first_name,last_name,phone,email) VALUES (?, ?, ?, ?, ?, ?)', [client_id, customer_contact_person_role_id, first_name, last_name, phone, email]);
+                }else{
                 arrayInterId.push(contact_id)
                 const [result2] = await pool.execute(query2, [customer_contact_person_role_id, first_name, last_name, phone, email, client_id, contact_id]);
+                }
             }
 
         
@@ -615,12 +620,17 @@ const clientUpdate = async (client) => {
                 let alternate_phone = detail.alternate_phone;
                 let authorised_signatory_status = detail.authorised_signatory_status;
                 let contact_id = detail.contact_id; // Assuming each contactDetail has an id
-
+                if(contact_id == "" || contact_id == undefined || contact_id==null){
+                    const [result2] = await pool.execute('INSERT INTO client_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone,alternate_phone,authorised_signatory_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [client_id, customer_contact_person_role_id, first_name, last_name, email, alternate_email, phone, alternate_phone, authorised_signatory_status]);
+               
+                }else{
                 arrayInterId.push(contact_id)
-
                 const [result2] = await pool.execute(query2, [customer_contact_person_role_id, first_name, last_name, email, alternate_email, phone, alternate_phone, authorised_signatory_status, client_id, contact_id]);
+                }
 
-                let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
+            }
+
+            let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
                 if(deleteIdArray.length > 0){
                     for (const id of deleteIdArray) {
                         const query3 = `
@@ -629,9 +639,6 @@ const clientUpdate = async (client) => {
                         const [result3] = await pool.execute(query3, [id]);
                     }
                 }
-
-
-            }
 
         } catch (err) {
             return { status: false, message: 'client update Err Client Type 3' };
