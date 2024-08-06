@@ -25,8 +25,8 @@ const ClientEdit = () => {
     const [getClientDetails, setClientDetails] = useState({ loading: true, data: [] })
 
 
-    console.log('getClientDetails', getClientDetails)
-    
+
+
 
     const [getSoleTraderDetails, setSoleTraderDetails] = useState({
         IndustryType: '',
@@ -67,22 +67,18 @@ const ClientEdit = () => {
     })
 
 
-  
-
 
     const [contacts, setContacts] = useState([
         { authorised_signatory_status: false, first_name: '', last_name: '', customer_contact_person_role_name: '', phone: '', email: '' }
     ]);
 
- 
+
 
     const [contacts1, setContacts1] = useState([
-        { authorised_signatory_status: true, first_name: '', last_name: '', customer_contact_person_role_name: '', phone: '', alternate_phone: '', email: '', alternate_email: '' }, { authorised_signatory_status: true, first_name: '', last_name: '', customer_contact_person_role_name: '', phone: '', alternate_phone: '', email: '', alternate_email: '' }
     ]);
     const [contactsErrors, setContactsErrors] = useState([
         { first_name: '', last_name: '', customer_contact_person_role_name: '', phone: '', alternate_phone: '', email: '', alternate_email: '' },
         { first_name: '', last_name: '', customer_contact_person_role_name: '', phone: '', alternate_phone: '', email: '', alternate_email: '' }
-
     ]);
 
 
@@ -94,7 +90,7 @@ const ClientEdit = () => {
 
 
     const GetClientDetails = async () => {
-        const req = { action: "getByid", client_id:  location.state.row.id }
+        const req = { action: "getByid", client_id: location.state.row.id }
         const data = { req: req, authToken: token }
         await dispatch(Get_All_Client(data))
             .unwrap()
@@ -121,10 +117,10 @@ const ClientEdit = () => {
     }, [])
 
 
-   const handleAddContact = () => {
-    setContacts([...contacts, { authorised_signatory_status: false, first_name: '', last_name: '', customer_contact_person_role_name: '', phone: '', email: '' }]);
-    setErrors([...errors, { first_name: '', last_name: '', customer_contact_person_role_name: '', phone: '', email: '' }]);
-};
+    const handleAddContact = () => {
+        setContacts([...contacts, { authorised_signatory_status: false, first_name: '', last_name: '', customer_contact_person_role_name: '', phone: '', email: '' }]);
+        setErrors([...errors, { first_name: '', last_name: '', customer_contact_person_role_name: '', phone: '', email: '' }]);
+    };
 
 
     const handleAddContact1 = () => {
@@ -171,14 +167,14 @@ const ClientEdit = () => {
 
 
 
+
      
-    console.log("location.state", location)
     const handleSubmit = async () => {
         if (selectClientType == 1 && validate1()) {
-            
             const req = {
                 client_type: "1",
-                customer_id: location.state.row.id,
+                client_id: location.state.row.id,
+                customer_id: location.state.id,
                 client_industry_id: getSoleTraderDetails.IndustryType,
                 trading_name: getSoleTraderDetails.tradingName,
                 trading_address: getSoleTraderDetails.tradingAddress,
@@ -190,7 +186,7 @@ const ClientEdit = () => {
                 phone: getSoleTraderDetails.phone,
                 email: getSoleTraderDetails.email,
                 residential_address: getSoleTraderDetails.residentialAddress,
-                client_code:  location.state.row.id
+                client_code: location.state.row.id
             }
             await dispatch(Edit_Client(req))
                 .unwrap()
@@ -198,17 +194,17 @@ const ClientEdit = () => {
                     if (response.status) {
                         Swal.fire({
                             icon: 'success',
-                            title: 'Client Added Successfully',
+                            title: 'Client Updated Successfully',
                             timerProgressBar: true,
                             timer: 1500
                         })
                         setTimeout(() => {
-                            navigate('/admin/Clientlist', { state: location.state.row });
+                            navigate('/admin/Clientlist', { state: { id: location.state.id } });
                         }, 1500)
 
                     } else {
                         Swal.fire({
-                            icon: 'success',
+                            icon: 'error',
                             title: response.msg,
                             timerProgressBar: true,
                             timer: 1500
@@ -217,8 +213,7 @@ const ClientEdit = () => {
                 })
         }
         if (selectClientType == 2 && validate2()) {
-
-            console.log("selectClientType yyy:", selectClientType)
+ 
             let formIsValid = true;
             const newErrors = contacts.map((contact, index) => {
                 const error = {
@@ -238,7 +233,7 @@ const ClientEdit = () => {
             if (formIsValid) {
                 const req = {
                     client_type: "2",
-                    client_id:  location.state.row.id,
+                    client_id: location.state.row.id,
                     customer_id: location.state.id,
                     company_name: getCompanyDetails.CompanyName,
                     entity_type: getCompanyDetails.EntityType,
@@ -255,26 +250,24 @@ const ClientEdit = () => {
                     trading_address: getCompanyDetails.TradingAddress,
                     contactDetails: contacts
                 }
- 
-                console.log("req", req)
 
-                // return 
+                 
                 await dispatch(Edit_Client(req))
                     .unwrap()
                     .then((response) => {
                         if (response.status) {
                             Swal.fire({
                                 icon: 'success',
-                                title: 'Client Added Successfully',
+                                title: 'Client Updated Successfully',
                                 timerProgressBar: true,
                                 timer: 1500
                             })
                             setTimeout(() => {
-                                navigate('/admin/Clientlist', { state: location.state.row });
+                                navigate('/admin/Clientlist', { state: { id: location.state.id } });
                             }, 1500)
                         } else {
                             Swal.fire({
-                                icon: 'success',
+                                icon: 'error',
                                 title: response.message,
                                 timerProgressBar: true,
                                 timer: 1500
@@ -308,9 +301,39 @@ const ClientEdit = () => {
             });
             setContactsErrors(newErrors);
             if (formIsValid) {
+
+                // {    "client_id":16,
+                //     "client_type": "3",
+                //     "customer_id": 2,
+                //     "client_industry_id": 1,
+                //     "trading_name": "hhhhhhh",
+                //     "trading_address": "SHK adress",
+                //     "vat_registered": "1",
+                //     "vat_number": "2551",
+                //     "website": "SHK websit",
+                    
+                //     "contactDetails" : [
+                //      {
+                //         "contact_id": 15,
+                //      "role":2,
+                // "first_name":"sdf",
+                // "last_name":"dd",
+                // "email":"dgvsdg",
+                // "alternate_email":"dgvsdg",
+                // "phone":"dgvsdg",
+                // "alternate_phone":"dgvsdg",
+                // "authorised_signatory_status":"1"
+                //      },
+                 
+                
+                //     ]
+                    
+                // }
                 const req = {
                     client_type: "3",
-                    customer_id:  location.state.row.id,
+                    client_id: location.state.row.id,
+                    customer_id: location.state.id,
+                   
                     client_industry_id: getPartnershipDetails.ClientIndustry,
                     trading_name: getPartnershipDetails.TradingName,
                     trading_address: getPartnershipDetails.TradingAddress,
@@ -332,9 +355,9 @@ const ClientEdit = () => {
                                 timerProgressBar: true,
                                 timer: 1500
                             })
-                            // setTimeout(() => {
-                                navigate('/admin/Clientlist', { state: { id:  location.state.row.id } })
-                            // }, 1500)
+                            setTimeout(() => {
+                                navigate('/admin/Clientlist', { state: { id: location.state.id } });
+                            }, 1500)
                         } else {
                             Swal.fire({
                                 icon: 'success',
@@ -364,7 +387,7 @@ const ClientEdit = () => {
 
     const handleChange2 = (e) => {
         const { name, value } = e.target;
-        if ( name === "VATNumber") {
+        if (name === "VATNumber") {
             if (!/^[0-9+]*$/.test(value)) {
                 return;
             }
@@ -437,7 +460,7 @@ const ClientEdit = () => {
         const newErrors = {};
         for (const key in getPartnershipDetails) {
             if (!getPartnershipDetails[key]) {
-                console.log("key", key)
+                
 
                 if (key === 'ClientIndustry') newErrors[key] = 'Please Select Client Industry';
                 else if (key === 'TradingName') newErrors[key] = 'Please Enter Trading Name';
@@ -497,12 +520,12 @@ const ClientEdit = () => {
     }, [searchItem])
 
     const handleChange = (index, field, value) => {
-        console.log("index", index, field, value); 
+      
         const newContacts = contacts.map((contact, i) =>
             i === index ? { ...contact, [field]: value } : contact
         );
 
-        console.log("newContacts", newContacts[index][field]);
+   
         setContacts(newContacts);
 
         validateField(index, field, value);
@@ -547,7 +570,7 @@ const ClientEdit = () => {
         }
         setErrors(newErrors);
     };
-    
+
 
     const validateField1 = (index, field, value) => {
         const newErrors = [...contactsErrors];
@@ -593,6 +616,7 @@ const ClientEdit = () => {
         setContactsErrors(newErrors);
     };
 
+    console.log('getClientDetails', getClientDetails)
 
     useEffect(() => {
         setSelectClientType(location.state.row.client_type_name == 'SoleTrader' ? 1 : location.state.row.client_type_name == 'Company' ? 2 : 3)
@@ -644,7 +668,15 @@ const ClientEdit = () => {
                 VATRegistered: !getClientDetails.loading && getClientDetails.data.client.vat_registered,
                 VATNumber: !getClientDetails.loading && getClientDetails.data.client.vat_number,
                 Website: !getClientDetails.loading && getClientDetails.data.client.website,
+
             }))
+
+            console.log("contacts1 :" , contacts1)
+
+            console.log("!getClientDetails.loading:" , !getClientDetails.loading && getClientDetails.data.contact_details)
+
+            setContacts1(getClientDetails.data && getClientDetails.data.contact_details)
+
         }
 
     }, [getClientDetails])
@@ -682,6 +714,8 @@ const ClientEdit = () => {
         FilterSearchDetails()
     }, [searchItem])
 
+
+    console.log("contacts1 :" , contacts1)
 
     return (
         <div>
@@ -928,7 +962,7 @@ const ClientEdit = () => {
                                                                             {/* end card header */}
                                                                             <div className="card-body">
                                                                                 <div className="row">
-                                                                                  
+
                                                                                     <div className="row">
                                                                                         <div className="col-lg-3">
                                                                                             <div className="mb-3">
@@ -968,7 +1002,7 @@ const ClientEdit = () => {
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Entity Type<span style={{ color: "red" }}>*</span>   </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="LTD"
-                                                                                                    name="EntityType" onChange={(e) => handleChange2(e)} value={getCompanyDetails.EntityType}  disabled />
+                                                                                                    name="EntityType" onChange={(e) => handleChange2(e)} value={getCompanyDetails.EntityType} disabled />
                                                                                                 {errors2['EntityType'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['EntityType']}</div>
                                                                                                 )}
@@ -978,7 +1012,7 @@ const ClientEdit = () => {
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  >Company Status<span style={{ color: "red" }}>*</span> </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Active"
-                                                                                                    name="CompanyStatus" onChange={(e) => handleChange2(e)} value={getCompanyDetails.CompanyStatus} disabled/>
+                                                                                                    name="CompanyStatus" onChange={(e) => handleChange2(e)} value={getCompanyDetails.CompanyStatus} disabled />
                                                                                                 {errors2['CompanyStatus'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['CompanyStatus']}</div>)}
                                                                                             </div>
@@ -987,7 +1021,7 @@ const ClientEdit = () => {
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Company Number<span style={{ color: "red" }}>*</span></label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Company Number"
-                                                                                                    name="CompanyNumber" onChange={(e) => handleChange2(e)} value={getCompanyDetails.CompanyNumber}  disabled
+                                                                                                    name="CompanyNumber" onChange={(e) => handleChange2(e)} value={getCompanyDetails.CompanyNumber} disabled
                                                                                                 />
                                                                                                 {errors2['CompanyNumber'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['CompanyNumber']}</div>
@@ -998,7 +1032,7 @@ const ClientEdit = () => {
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Registered Office Address<span style={{ color: "red" }}>*</span>  </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Suite Winsor & Netwon Building, White Fridrs Avenue, England,HA3 5RN"
-                                                                                                    name="RegisteredOfficeAddress" onChange={(e) => handleChange2(e)} value={getCompanyDetails.RegisteredOfficeAddress}  disabled
+                                                                                                    name="RegisteredOfficeAddress" onChange={(e) => handleChange2(e)} value={getCompanyDetails.RegisteredOfficeAddress} disabled
                                                                                                 />
                                                                                                 {errors2['RegisteredOfficeAddress'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['RegisteredOfficeAddress']}</div>
@@ -1009,7 +1043,7 @@ const ClientEdit = () => {
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Incorporation Date</label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="07-01-2023"
-                                                                                                    name="IncorporationDate" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationDate}  disabled
+                                                                                                    name="IncorporationDate" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationDate} disabled
                                                                                                 />
                                                                                                 {errors2['IncorporationDate'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['IncorporationDate']}</div>
@@ -1020,7 +1054,7 @@ const ClientEdit = () => {
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  > Incorporation in  <span style={{ color: "red" }}>*</span> </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Please Enter Incorporation In"
-                                                                                                    name="IncorporationIn" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationIn}  disabled
+                                                                                                    name="IncorporationIn" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationIn} disabled
                                                                                                 />
 
                                                                                                 {errors2['IncorporationIn'] && (
@@ -1361,7 +1395,7 @@ const ClientEdit = () => {
                                                                                     </div>
                                                                                     <div className="card-body">
                                                                                         <div className="row">
-                                                                                            {contacts1.map((contact, index) => (
+                                                                                            {contacts1 && contacts1.map((contact, index) => (
                                                                                                 <div className="col-xxl-12 col-lg-12">
                                                                                                     <div className="card pricing-box p-4 m-2 mt-0">
                                                                                                         <div className="row">
@@ -1372,10 +1406,10 @@ const ClientEdit = () => {
                                                                                                                             type="checkbox"
                                                                                                                             className="form-check-input"
                                                                                                                             id={`customSwitchsizemd-${index}`}
-                                                                                                                            checked={contacts1.authorised_signatory_status}
+                                                                                                                            checked={contact.authorised_signatory_status}
                                                                                                                             onChange={(e) => handleChange4(index, 'authorised_signatory_status', e.target.checked)}
                                                                                                                             defaultChecked={index === 0 || index === 1}
-                                                                                                                            disabled={contacts1.length === 2 ? index === 0 || index === 1 : false}
+                                                                                                                            disabled={contact.length === 2 ? index === 0 || index === 1 : false}
                                                                                                                         />
                                                                                                                         <label className="form-check-label">Authorised Signatory</label>
                                                                                                                     </div>
@@ -1385,7 +1419,7 @@ const ClientEdit = () => {
                                                                                                                                 className="btn btn-danger"
                                                                                                                                 type="button"
                                                                                                                                 onClick={() => handleDeleteContact1(index)}
-                                                                                                                                disabled={contacts1.length === 1}
+                                                                                                                                disabled={contact.length === 1}
                                                                                                                             >
                                                                                                                                 Delete
                                                                                                                             </button>
@@ -1397,7 +1431,7 @@ const ClientEdit = () => {
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label">First Name<span style={{ color: "red" }}>*</span></label>
                                                                                                                     <input type="text" className="form-control" placeholder="First Name"
-                                                                                                                        name="first_name" value={contacts1.first_name} onChange={(e) => handleChange4(index, 'first_name', e.target.value)}
+                                                                                                                        name="first_name" value={contact.first_name} onChange={(e) => handleChange4(index, 'first_name', e.target.value)}
                                                                                                                     />
                                                                                                                     {contactsErrors[index].first_name && (
                                                                                                                         <div style={{ 'color': 'red' }}>{contactsErrors[index].first_name}</div>
@@ -1408,7 +1442,7 @@ const ClientEdit = () => {
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label"> Last Name<span style={{ color: "red" }}>*</span></label>
                                                                                                                     <input type="text" className="form-control" placeholder=" Last Name"
-                                                                                                                        name="last_name" value={contacts1.last_name} onChange={(e) => handleChange4(index, 'last_name', e.target.value)}
+                                                                                                                        name="last_name" value={contact.last_name} onChange={(e) => handleChange4(index, 'last_name', e.target.value)}
                                                                                                                     />
                                                                                                                     {contactsErrors[index].last_name && (
                                                                                                                         <div style={{ 'color': 'red' }}>{contactsErrors[index].last_name}</div>
@@ -1422,13 +1456,13 @@ const ClientEdit = () => {
                                                                                                                     <select
                                                                                                                         className="form-select"
                                                                                                                         id={`customer_contact_person_role_name-${index}`}
-                                                                                                                        value={contacts1.customer_contact_person_role_name}
+                                                                                                                        value={contact.customer_contact_person_role_name}
                                                                                                                         onChange={(e) => handleChange4(index, 'customer_contact_person_role_name', e.target.value)}
                                                                                                                     >
                                                                                                                         <option value="">Select Role</option>
                                                                                                                         {personRoleDataAll &&
                                                                                                                             personRoleDataAll.data.map((item, i) => (
-                                                                                                                                <option value={item.id} key={i}>{item.name}</option>
+                                                                                                                                <option value={item.customer_contact_person_role_id} key={i}>{item.name}</option>
                                                                                                                             ))}
                                                                                                                     </select>
                                                                                                                     {contactsErrors[index].customer_contact_person_role_name && (
@@ -1441,7 +1475,7 @@ const ClientEdit = () => {
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label">Phone<span style={{ color: "red" }}>*</span></label>
                                                                                                                     <input type="number" className="form-control" placeholder="Phone"
-                                                                                                                        name="phone" value={contacts1.phone} onChange={(e) => handleChange4(index, 'phone', e.target.value)}
+                                                                                                                        name="phone" value={contact.phone} onChange={(e) => handleChange4(index, 'phone', e.target.value)}
 
                                                                                                                     />
                                                                                                                     {contactsErrors[index].phone && (
@@ -1454,7 +1488,7 @@ const ClientEdit = () => {
                                                                                                                     <label className="form-label"> Alternate Phone<span style={{ color: "red" }}>*</span></label>
                                                                                                                     <input type="number" className="form-control" placeholder=" Alternate Phone"
 
-                                                                                                                        name="alternate_phone" value={contacts1.alternate_phone} onChange={(e) => handleChange4(index, 'alternate_phone', e.target.value)}
+                                                                                                                        name="alternate_phone" value={contact.alternate_phone} onChange={(e) => handleChange4(index, 'alternate_phone', e.target.value)}
                                                                                                                     />
                                                                                                                     {contactsErrors[index].alternate_phone && (
                                                                                                                         <div style={{ 'color': 'red' }}>{contactsErrors[index].alternate_phone}</div>
@@ -1465,7 +1499,7 @@ const ClientEdit = () => {
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label">Email<span style={{ color: "red" }}>*</span></label>
                                                                                                                     <input type="text" className="form-control" placeholder="Enter Email"
-                                                                                                                        name="email" value={contacts1.email} onChange={(e) => handleChange4(index, 'email', e.target.value)}
+                                                                                                                        name="email" value={contact.email} onChange={(e) => handleChange4(index, 'email', e.target.value)}
 
                                                                                                                     />
                                                                                                                     {contactsErrors[index].email && (
@@ -1477,7 +1511,7 @@ const ClientEdit = () => {
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label"> Alternate Email<span style={{ color: "red" }}>*</span></label>
                                                                                                                     <input type="text" className="form-control" placeholder="Enter Alternate Email"
-                                                                                                                        name="alternate_email" value={contacts1.alternate_email} onChange={(e) => handleChange4(index, 'alternate_email', e.target.value)}
+                                                                                                                        name="alternate_email" value={contact.alternate_email} onChange={(e) => handleChange4(index, 'alternate_email', e.target.value)}
                                                                                                                     />
                                                                                                                     {contactsErrors[index].alternate_email && (
                                                                                                                         <div style={{ 'color': 'red' }}>{contactsErrors[index].alternate_email}</div>

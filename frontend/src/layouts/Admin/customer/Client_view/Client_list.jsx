@@ -54,6 +54,8 @@ const ClientList = () => {
   }
 
 
+  console.log("location.state.id :" , location.state)
+
   const GetAllServiceData = async () => {
     const req = { action: "get" ,cutomer_id:location.state.id};
     const data = { req: req, authToken: token };
