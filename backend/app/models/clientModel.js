@@ -513,8 +513,7 @@ const clientUpdate = async (client) => {
         ]);
         console.log('Record updated successfully');
     } catch (err) {
-        console.error('Error updating data:', err);
-        throw err;
+        return { status: false, message: 'client update Err' };
     }
 
     if (client_type == "1") {
@@ -529,8 +528,7 @@ const clientUpdate = async (client) => {
             `;
             const [result2] = await pool.execute(query2, [first_name, last_name, phone, email, residential_address, client_id]);
         } catch (err) {
-            console.error('Error updating data:', err);
-            throw err;
+            return { status: false, message: 'client update Err Client Type 1' };
         }
 
     }
@@ -547,15 +545,14 @@ const clientUpdate = async (client) => {
     `;
             const [result1] = await pool.execute(query1, [company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date, incorporation_in, client_id]);
         } catch (err) {
-            console.error('Error updating data:', err);
-            throw err;
+            return { status: false, message: 'client update Err Client Type 1' };
+          
         }
 
         try {
 
            const [existIdResult] = await pool.execute('SELECT id FROM client_contact_details WHERE client_id = ?', [client_id]);
           const idArray = await existIdResult.map(item => item.id);
-          console.log(idArray); // Output: [17, 18]
           let arrayInterId = []
        
             const query2 = `
@@ -563,19 +560,30 @@ const clientUpdate = async (client) => {
     SET role = ?, first_name = ?, last_name = ?, phone = ?, email = ?
     WHERE client_id = ? AND id = ?
     `;
-
-            for (const detail of contactDetails) {
+           if(contactDetails.length > 0){
+           for (const detail of contactDetails) {
                
                 let { customer_contact_person_role_id, first_name, last_name, phone, email, contact_id } = detail; // Assuming each contactDetail has an id
                 arrayInterId.push(contact_id)
                 const [result2] = await pool.execute(query2, [customer_contact_person_role_id, first_name, last_name, phone, email, client_id, contact_id]);
             }
 
-            console.log("arrayInterId",arrayInterId)
-            console.log("idArray",idArray)
+        
+            let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
+            if(deleteIdArray.length > 0){
+                for (const id of deleteIdArray) {
+                    const query3 = `
+                    DELETE FROM client_contact_details WHERE id = ?
+                    `;
+                    const [result3] = await pool.execute(query3, [id]);
+                }
+            }
+           }
+
+
+
         } catch (err) {
-            console.error('Error updating data:', err);
-            throw err;
+            return { status: false, message: 'client update Err Client Type 2' };
         }
 
     }
@@ -584,6 +592,13 @@ const clientUpdate = async (client) => {
         const { contactDetails } = client;
 
         try {
+
+
+            const [existIdResult] = await pool.execute('SELECT id FROM client_contact_details WHERE client_id = ?', [client_id]);
+            const idArray = await existIdResult.map(item => item.id);
+            let arrayInterId = []
+
+
             const query2 = `
     UPDATE client_contact_details
     SET role = ?, first_name = ?, last_name = ?, email = ?, alternate_email = ?, phone = ?, alternate_phone = ?, authorised_signatory_status = ?
@@ -601,12 +616,25 @@ const clientUpdate = async (client) => {
                 let authorised_signatory_status = detail.authorised_signatory_status;
                 let contact_id = detail.contact_id; // Assuming each contactDetail has an id
 
+                arrayInterId.push(contact_id)
+
                 const [result2] = await pool.execute(query2, [customer_contact_person_role_id, first_name, last_name, email, alternate_email, phone, alternate_phone, authorised_signatory_status, client_id, contact_id]);
+
+                let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
+                if(deleteIdArray.length > 0){
+                    for (const id of deleteIdArray) {
+                        const query3 = `
+                        DELETE FROM client_contact_details WHERE id = ?
+                        `;
+                        const [result3] = await pool.execute(query3, [id]);
+                    }
+                }
+
+
             }
 
         } catch (err) {
-            console.error('Error updating data:', err);
-            throw err;
+            return { status: false, message: 'client update Err Client Type 3' };
         }
 
     }
