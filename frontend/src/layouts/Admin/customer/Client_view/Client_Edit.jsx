@@ -69,7 +69,7 @@ const ClientEdit = () => {
 
 
     const [contacts, setContacts] = useState([
-        { authorised_signatory_status: false, first_name: '', last_name: '', customer_contact_person_role_name: '', phone: '', email: '' }
+        { authorised_signatory_status: false, contact_id: "", first_name: '', last_name: '', customer_contact_person_role_name: '', phone: '', email: '' }
     ]);
 
 
@@ -118,14 +118,17 @@ const ClientEdit = () => {
 
 
     const handleAddContact = () => {
-        setContacts([...contacts, { authorised_signatory_status: false, first_name: '', last_name: '', customer_contact_person_role_name: '', phone: '', email: '' }]);
+        setContacts([...contacts, { authorised_signatory_status: false, contact_id: "", first_name: '', last_name: '', customer_contact_person_role_name: '', phone: '', email: '' }]);
         setErrors([...errors, { first_name: '', last_name: '', customer_contact_person_role_name: '', phone: '', email: '' }]);
     };
 
 
+
+    
+
     const handleAddContact1 = () => {
 
-        setContacts1([...contacts1, { authorised_signatory_status: true, first_name: '', last_name: '', customer_contact_person_role_name: '', phone: '', alternate_phone: '', email: '', alternate_email: '' }])
+        setContacts1([...contacts1, { authorised_signatory_status: true, contact_id: "", first_name: '', last_name: '', customer_contact_person_role_name: '', phone: '', alternate_phone: '', email: '', alternate_email: '' }])
         setContactsErrors([...contactsErrors, { first_name: '', last_name: '', customer_contact_person_role_name: '', phone: '', alternate_phone: '', email: '', alternate_email: '' }]);
     };
     const handleDeleteContact = (index) => {
@@ -168,7 +171,7 @@ const ClientEdit = () => {
 
 
 
-     
+
     const handleSubmit = async () => {
         if (selectClientType == 1 && validate1()) {
             const req = {
@@ -213,7 +216,7 @@ const ClientEdit = () => {
                 })
         }
         if (selectClientType == 2 && validate2()) {
- 
+
             let formIsValid = true;
             const newErrors = contacts.map((contact, index) => {
                 const error = {
@@ -251,7 +254,7 @@ const ClientEdit = () => {
                     contactDetails: contacts
                 }
 
-                 
+
                 await dispatch(Edit_Client(req))
                     .unwrap()
                     .then((response) => {
@@ -301,39 +304,11 @@ const ClientEdit = () => {
             });
             setContactsErrors(newErrors);
             if (formIsValid) {
-
-                // {    "client_id":16,
-                //     "client_type": "3",
-                //     "customer_id": 2,
-                //     "client_industry_id": 1,
-                //     "trading_name": "hhhhhhh",
-                //     "trading_address": "SHK adress",
-                //     "vat_registered": "1",
-                //     "vat_number": "2551",
-                //     "website": "SHK websit",
-                    
-                //     "contactDetails" : [
-                //      {
-                //         "contact_id": 15,
-                //      "role":2,
-                // "first_name":"sdf",
-                // "last_name":"dd",
-                // "email":"dgvsdg",
-                // "alternate_email":"dgvsdg",
-                // "phone":"dgvsdg",
-                // "alternate_phone":"dgvsdg",
-                // "authorised_signatory_status":"1"
-                //      },
-                 
-                
-                //     ]
-                    
-                // }
                 const req = {
                     client_type: "3",
                     client_id: location.state.row.id,
                     customer_id: location.state.id,
-                   
+
                     client_industry_id: getPartnershipDetails.ClientIndustry,
                     trading_name: getPartnershipDetails.TradingName,
                     trading_address: getPartnershipDetails.TradingAddress,
@@ -344,6 +319,17 @@ const ClientEdit = () => {
 
                 }
 
+                //      {
+                //         "contact_id": 16,
+                //   "customer_contact_person_role_id":2,
+                // "first_name":"sdd",
+                // "last_name":"ddd",
+                // "email":"dgvsdg",
+                // "alternate_email":"dgvsdg",
+                // "phone":"dgvsdg",
+                // "alternate_phone":"dgvsdg",
+                // "authorised_signatory_status":"1"
+                //      }
 
                 await dispatch(Edit_Client(req))
                     .unwrap()
@@ -360,7 +346,7 @@ const ClientEdit = () => {
                             }, 1500)
                         } else {
                             Swal.fire({
-                                icon: 'success',
+                                icon: 'error',
                                 title: response.msg,
                                 timerProgressBar: true,
                                 timer: 1500
@@ -460,7 +446,7 @@ const ClientEdit = () => {
         const newErrors = {};
         for (const key in getPartnershipDetails) {
             if (!getPartnershipDetails[key]) {
-                
+
 
                 if (key === 'ClientIndustry') newErrors[key] = 'Please Select Client Industry';
                 else if (key === 'TradingName') newErrors[key] = 'Please Enter Trading Name';
@@ -520,12 +506,12 @@ const ClientEdit = () => {
     }, [searchItem])
 
     const handleChange = (index, field, value) => {
-      
+
         const newContacts = contacts.map((contact, i) =>
             i === index ? { ...contact, [field]: value } : contact
         );
 
-   
+
         setContacts(newContacts);
 
         validateField(index, field, value);
@@ -671,9 +657,9 @@ const ClientEdit = () => {
 
             }))
 
-            console.log("contacts1 :" , contacts1)
+            console.log("contacts1 :", contacts1)
 
-            console.log("!getClientDetails.loading:" , !getClientDetails.loading && getClientDetails.data.contact_details)
+            console.log("!getClientDetails.loading:", !getClientDetails.loading && getClientDetails.data.contact_details)
 
             setContacts1(getClientDetails.data && getClientDetails.data.contact_details)
 
@@ -715,7 +701,7 @@ const ClientEdit = () => {
     }, [searchItem])
 
 
-    console.log("contacts1 :" , contacts1)
+    console.log("contacts1 :", contacts1)
 
     return (
         <div>
