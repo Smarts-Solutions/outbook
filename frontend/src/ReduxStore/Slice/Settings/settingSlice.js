@@ -84,6 +84,9 @@ export const JobType = createAsyncThunk("jobType", async (data) => {
 });
 
 
+
+
+
 //Setting Slice
 const SettingSlice = createSlice({
   name: "SettingSlice",
