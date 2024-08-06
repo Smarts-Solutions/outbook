@@ -1387,6 +1387,10 @@ const customerUpdate = async (customer) => {
     else if (pageStatus === "2") {
            
         console.log("customer 111",customer)
+        const [ExistServiceids] = await pool.execute('SELECT service_id  FROM `customer_services` WHERE customer_id =' + customer_id);
+
+        console.log("ExistServiceids",ExistServiceids)
+       
         
         for (const serVal of services) {
             let service_id = serVal.service_id;
