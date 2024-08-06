@@ -1299,10 +1299,18 @@ const customerUpdate = async (customer) => {
                     let email = detail.email;
                     let phone = detail.phone;
                     let residential_address = detail.residential_address;
+                    if(contact_id == "" || contact_id == undefined || contact_id==null){
+                        const query4 = `
+                        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone,email,residential_address)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                        `;
+                        const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone, email,residential_address]);
 
+                    }
+                     else{
                     arrayInterId.push(contact_id)
-
                     const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone, email,residential_address, customer_id, contact_id]);
+                     }
                 }
 
                 let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
