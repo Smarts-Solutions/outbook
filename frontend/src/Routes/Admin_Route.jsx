@@ -18,7 +18,8 @@ import AddNewClient from '../layouts/Admin/customer/Client_view/CreateClient'
 import JobType from '../layouts/Admin/JobType'
 import Profile from '../Components/Dashboard/Profile'
 import { RoleAccess } from '../ReduxStore/Slice/Access/AccessSlice';
-import CustomerList from '../layouts/Admin/customer/Client_view/Client_list'
+import ClientList from '../layouts/Admin/customer/Client_view/Client_list'
+import ClientEdit from '../layouts/Admin/customer/Client_view/Client_Edit' 
 
 const Admin_Route = () => {
   const dispatch = useDispatch();
@@ -58,7 +59,8 @@ const Admin_Route = () => {
             <Route path="/customer" element={<Customer />} />
             <Route path="/service" element={<Service />} />
             <Route path="/addclient" element={<AddNewClient />} />
-            <Route path="/Clientlist" element={<CustomerList />} />
+            <Route path="/Clientlist" element={<ClientList />} />
+            <Route path="/client/edit" element={<ClientEdit />} />
             <Route path="/editcustomer" element={<Editcustomer />} />
 
           </Routes>
