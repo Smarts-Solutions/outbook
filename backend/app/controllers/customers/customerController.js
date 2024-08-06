@@ -5,12 +5,12 @@ const addCustomer = async (req, res) => {
   try {
      const { ...customer } = req.body;
     //  console.log("customer",customer)
-      const data = await customerService.addCustomer(customer);
-      if(data != undefined){
-       return res.status(200).json({ status:true,message: "Success..",data : data});
-      }else{
-       return res.status(400).json({ status:false, message: "Invalid..."});
-      }
+      const result = await customerService.addCustomer(customer);
+      if(!result.status){
+        return  res.status(400).json({ status: false, message: result.message });  
+        }else{
+        return  res.status(200).json({ status: true, message: result.message , data : result.data});
+        }
     } catch (error) {
       res.status(500).json({ status:false, message: error.message});
     }
@@ -92,6 +92,22 @@ const updateProcessCustomerFileAction = async (req, res) => {
 }
 
 
+const customerUpdate = async (req, res) => {
+  try {
+     const { ...customer } = req.body;
+    //  console.log("customer",customer)
+      const result = await customerService.customerUpdate(customer);
+      if(!result.status){
+        return  res.status(400).json({ status: false, message: result.message });  
+        }else{
+        return  res.status(200).json({ status: true, message: result.message , data : result.data});
+        }
+    } catch (error) {
+      res.status(500).json({ status:false, message: error.message});
+    }
+}
+
+
 
 
 module.exports = {
@@ -100,5 +116,6 @@ module.exports = {
   getSingleCustomer,
   updateProcessCustomer,
   updateProcessCustomerFile,
-  updateProcessCustomerFileAction
+  updateProcessCustomerFileAction,
+  customerUpdate
 };

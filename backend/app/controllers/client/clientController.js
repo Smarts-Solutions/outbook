@@ -5,12 +5,14 @@ const addClient = async (req, res) => {
   try {
      const { ...client } = req.body;
     //  console.log("client",client)
-      const data = await clientService.addClient(client);
-      if(data != undefined){
-       return res.status(200).json({ status:true,message: "Success..",data : data});
-      }else{
-       return res.status(400).json({ status:false, message: "Invalid..."});
-      }
+      const result = await clientService.addClient(client);
+
+      if(!result.status){
+        return  res.status(400).json({ status: false, message: result.message });  
+        }else{
+        return  res.status(200).json({ status: true, message: result.message , data : result.data});
+        }
+    
     } catch (error) {
       res.status(500).json({ status:false, message: error.message});
     }
@@ -34,11 +36,11 @@ const clientAction = async (req, res) => {
 const clientUpdate = async (req, res) => {
   try {
       const { ...client } = req.body;
-      const data = await clientService.clientUpdate(client);
-      if(data != undefined){
-       return res.status(200).json({ status:true,message: "Success..",data : data});
+      const result = await clientService.clientUpdate(client);
+      if(!result.status){
+      return  res.status(400).json({ status: false, message: result.message });  
       }else{
-       return res.status(400).json({ status:false, message: "Invalid..."});
+      return  res.status(200).json({ status: true, message: result.message , data : result.data});
       }
     } catch (error) {
       res.status(500).json({ status:false, message: error.message});

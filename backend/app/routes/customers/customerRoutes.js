@@ -13,6 +13,7 @@ router.post('/getSingleCustomer',verifyToken, customerController.getSingleCustom
 router.post('/updateProcessCustomer',verifyToken, customerController.updateProcessCustomer);
 router.post('/updateProcessCustomerFile',verifyToken, uploadMultiple, customerController.updateProcessCustomerFile);
 router.post('/updateProcessCustomerFileAction',verifyToken, customerController.updateProcessCustomerFileAction);
+router.post('/customerUpdate',verifyToken, customerController.customerUpdate);
 
 
 module.exports = router;
