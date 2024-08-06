@@ -333,28 +333,7 @@ const CreateClient = () => {
         setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
     };
 
-    // const handleChange = (index, field, value) => {
-    //     console.log("index :", index);
-    //     console.log("field :", field);
-    //     console.log("value -:", !value);
-
-
-    //     // Update contacts state
-    //     const newContacts = [...contacts];
-    //     newContacts[index][field] = value;
-    //     setContacts(newContacts);
-
-    //     // Update errors state
-    //     const newErrors = [...errors];
-    //     newErrors[index][field] = value ? true : false;
-    //     console.log("newErrors :", newErrors);
-    //     setCompanyContactError(newErrors);
-    //   };
-
-
-
-
-
+    
     const validate1 = () => {
         const newErrors = {};
         for (const key in getSoleTraderDetails) {
@@ -565,6 +544,7 @@ const CreateClient = () => {
                 RegisteredOfficeAddress: getSearchDetails[0].address_snippet,
                 IncorporationDate: getSearchDetails[0].date_of_creation,
                 IncorporationIn: getSearchDetails[0].description,
+
             }));
         }
     }, [getSearchDetails]);
@@ -917,12 +897,10 @@ const CreateClient = () => {
                                                                                         <div className="col-lg-3">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  > Incorporation in  <span style={{ color: "red" }}>*</span> </label>
-                                                                                                <select className="form-select mb-3" name="IncorporationIn" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationIn}>
-                                                                                                    <option selected="">England and Wales(EW) </option>
-                                                                                                    <option value={1}>England and Wales(EW) </option>
-                                                                                                    <option value={2}>England and Wales(EW) </option>
-                                                                                                    <option value={3}>England and Wales(EW) </option>
-                                                                                                </select>
+                                                                                                <input type="text" className="form-control input_bg" placeholder="Please Enter Incorporation In"
+                                                                                                    name="IncorporationIn" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationIn}
+                                                                                                />
+                                                                                                 
                                                                                                 {errors2['IncorporationIn'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['IncorporationIn']}</div>
                                                                                                 )}
