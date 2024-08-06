@@ -27,7 +27,7 @@ export async function GET_CLIENT_INDUSTRY(data ,token) {
 // Get All Client List
 export async function GET_ALL_CLIENT(data) {
   const token =  JSON.parse(localStorage.getItem("token"));
-  console.log(token)
+   
    
   try {
     const res = await axios.post(`${Config.base_url}clientAction`, data, {
@@ -46,10 +46,29 @@ export async function GET_ALL_CLIENT(data) {
 // Get Client List
 export async function ADD_CLIENT(data) {
   const token =  JSON.parse(localStorage.getItem("token"));
-  console.log(token)
+ 
    
   try {
     const res = await axios.post(`${Config.base_url}addClient`, data, {
+      headers: header(token),
+      data: {}
+    })
+    return await res?.data;
+  }
+  catch (err) {
+    return await err;
+  }
+
+}
+
+
+// Get Client List
+export async function EDIT_CLIENT(data) {
+  const token =  JSON.parse(localStorage.getItem("token"));
+ 
+   
+  try {
+    const res = await axios.post(`${Config.base_url}clientUpdate`, data, {
       headers: header(token),
       data: {}
     })

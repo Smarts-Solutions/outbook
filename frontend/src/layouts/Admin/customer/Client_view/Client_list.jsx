@@ -46,8 +46,8 @@ const ClientList = () => {
 
   function handleEdit(row) {
     console.log('Editing row:', row); 
-    navigate('/admin/client/edit', { state: row });
-  }
+    navigate('/admin/client/edit', { state: { row, id: location.state.id } });
+}
 
   function handleDelete(row) {
     console.log('Deleting row:', row);

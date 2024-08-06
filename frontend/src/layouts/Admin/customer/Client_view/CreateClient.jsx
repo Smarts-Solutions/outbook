@@ -128,6 +128,9 @@ const CreateClient = () => {
 
     }, []);
 
+
+
+  
     const handleSubmit = async () => {
         if (selectClientType == 1 && validate1()) {
             const req = {
@@ -532,7 +535,7 @@ const CreateClient = () => {
         }
         setContactsErrors(newErrors);
     };
-
+ 
     useEffect(() => {
         if (getSearchDetails.length > 0) {
             setCompanyDetails(prevState => ({
