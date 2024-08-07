@@ -124,6 +124,8 @@ const Information = () => {
                 errors.Trading_Address = "Please Enter Trading Address";
             }
 
+    
+
             return errors;
         },
         onSubmit: async (values) => {
@@ -368,7 +370,6 @@ const Information = () => {
 
     const fields = [
         {
-
             name: "Trading_Name",
             label: "Trading Name ",
             type: "text",
@@ -377,7 +378,6 @@ const Information = () => {
             disable: false,
         },
         {
-
             name: "Trading_Address",
             label: "Trading Address",
             type: "text",
@@ -386,7 +386,6 @@ const Information = () => {
             disable: false,
         },
         {
-
             name: "VAT_Registered",
             label: "VAT Registered",
             type: "select",
@@ -498,7 +497,7 @@ const Information = () => {
         },
         {
 
-            name: "comapany_status",
+            name: "company_status",
             label: "Company Status",
             type: "text",
             label_size: 12,
@@ -507,7 +506,7 @@ const Information = () => {
         },
         {
 
-            name: "comapany_number",
+            name: "company_number",
             label: "Company Number",
             type: "number",
             label_size: 12,

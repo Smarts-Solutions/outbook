@@ -7,11 +7,14 @@ import { useDispatch } from "react-redux";
 import CommanModal from '../../../../Components/ExtraComponents/Modals/CommanModal';
 import { Staff } from '../../../../ReduxStore/Slice/Staff/staffSlice';
 import { ADD_SERVICES_CUSTOMERS } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { useLocation } from "react-router-dom";
 
 
 const Service = () => {
     const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
     const token = JSON.parse(localStorage.getItem("token"));
+    const location = useLocation();
+    console.log("CPPP", location.state);
     const dispatch = useDispatch();
     const [GetAllService, setAllService] = useState({ loading: true, data: [] });
     const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
@@ -23,6 +26,7 @@ const Service = () => {
     const [tempServices, setTempServices] = useState("");
 
 
+    console.log("tempServices", tempServices);
 
     const GetAllServiceData = async () => {
         const req = { action: "get" };
@@ -194,6 +198,7 @@ const Service = () => {
     };
 
 
+     
 
 
     return (

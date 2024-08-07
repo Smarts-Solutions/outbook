@@ -1281,21 +1281,30 @@ const customerUpdate = async (customer) => {
 
         // Company Details
         else if (customer_type == "2") {
-            const { company_name, entity_type, company_status, company_number, Registered_Office_Addres, Incorporation_Date, Incorporation_in } = customer;
+            const { company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date, incorporation_in } = customer;
             try {
                 // Update customer_company_information
+                 
+                console.log("registered_office_address" , registered_office_address)
+                console.log("incorporation_date" , incorporation_date)
+                console.log("incorporation_in" , incorporation_in)
+                console.log('customer' , customer)
+
                 const query2 = `
                     UPDATE customer_company_information
                     SET company_name = ?, entity_type = ?, company_status = ?, company_number = ?, registered_office_address = ?, incorporation_date = ?, incorporation_in = ?
                     WHERE customer_id = ?
                 `;
-                const [result2] = await pool.execute(query2, [company_name, entity_type, company_status, company_number, Registered_Office_Addres, Incorporation_Date, Incorporation_in, customer_id]);
+                const [result2] = await pool.execute(query2, [company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date, incorporation_in, customer_id]);
 
+
+                console.log("CP 2")
 
                 const [existIdResult] = await pool.execute('SELECT id FROM customer_contact_details WHERE customer_id = ?', [customer_id]);
                 const idArray = await existIdResult.map(item => item.id);
                 let arrayInterId = []
 
+                console.log("CP 3")
 
                 // Update customer_contact_details
                 const query3 = `
@@ -1314,6 +1323,8 @@ const customerUpdate = async (customer) => {
                     let phone = detail.phone;
                     let residential_address = detail.residential_address;
                     if (contact_id == "" || contact_id == undefined || contact_id == null) {
+                console.log("CP 4")
+
                         const query4 = `
                         INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone,email,residential_address)
                         VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -1322,14 +1333,18 @@ const customerUpdate = async (customer) => {
 
                     }
                     else {
+                        console.log("CP 5")
                         arrayInterId.push(contact_id)
                         const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone, email, residential_address, customer_id, contact_id]);
                     }
                 }
 
                 let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
+                console.log("CP 6")
+                
                 if (deleteIdArray.length > 0) {
                     for (const id of deleteIdArray) {
+
                         const query3 = `
                         DELETE FROM customer_contact_details WHERE id = ?
                         `;
@@ -1923,6 +1938,9 @@ const customerUpdate = async (customer) => {
         } else {
             return [];
         }
+    }
+    else {
+        return { status: false, message: 'Error in page status.' };
     }
 
     return { status: true, message: 'customers updated successfully.', data: customer_id };
