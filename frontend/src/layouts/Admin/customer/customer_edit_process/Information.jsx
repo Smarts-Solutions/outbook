@@ -10,7 +10,7 @@ import { Email_regex } from '../../../../Utils/Common_regex'
 import Swal from 'sweetalert2'
 import { useNavigate } from "react-router-dom";
 import { PersonRole } from '../../../../ReduxStore/Slice/Settings/settingSlice'
-
+import { GetAllCompany } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
 
 const Information = ({ id, pageStatus }) => {
     const dispatch = useDispatch();
@@ -95,6 +95,22 @@ const Information = ({ id, pageStatus }) => {
         setErrors(newErrors);
     };
 
+
+    useEffect(() => {
+        if (getSearchDetails.length > 0) {
+            setCompanyDetails(prevState => ({
+                ...prevState,
+                CompanyName: getSearchDetails[0].title,
+                EntityType: getSearchDetails[0].company_type,
+                CompanyStatus: getSearchDetails[0].company_status,
+                CompanyNumber: getSearchDetails[0].company_number,
+                RegisteredOfficeAddress: getSearchDetails[0].address_snippet,
+                IncorporationDate: getSearchDetails[0].date_of_creation,
+                IncorporationIn: getSearchDetails[0].description,
+
+            }));
+        }
+    }, [getSearchDetails]);
 
 
     //  For Partnership
@@ -574,6 +590,29 @@ const Information = ({ id, pageStatus }) => {
         FilterSearchDetails()
     }, [searchItem])
 
+
+
+    const Get_Company = async () => {
+        const data = { search: searchItem }
+        await dispatch(GetAllCompany(data))
+            .unwrap()
+            .then((res) => {
+                if (res.status) {
+                    setGetAllSearchCompany(res.data.items)
+                }
+                else {
+                    setGetAllSearchCompany([])
+                }
+
+            })
+            .catch((err) => {
+                console.log("Error", err)
+            })
+    }
+
+    useEffect(() => {
+        Get_Company()
+    }, [searchItem])
 
 
 

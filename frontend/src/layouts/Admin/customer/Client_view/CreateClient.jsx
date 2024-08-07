@@ -233,10 +233,7 @@ const CreateClient = () => {
 
                         }
                     })
-
             }
-
-
         }
         if (selectClientType == 3 && validate3()) {
 

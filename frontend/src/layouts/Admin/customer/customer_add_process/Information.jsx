@@ -357,11 +357,14 @@ const Information = () => {
         getCompanyDetails = getAllSearchCompany && getAllSearchCompany.items.filter(company => company.title == formik.values.search_company_name)
     }
 
+
+
+    console.log("Error", getCompanyDetails)
     useEffect(() => {
         formik.setFieldValue("company_name", getCompanyDetails[0]?.title)
         formik.setFieldValue("entity_type", getCompanyDetails[0]?.company_type)
-        formik.setFieldValue("comapany_status", getCompanyDetails[0]?.company_status)
-        formik.setFieldValue("comapany_number", getCompanyDetails[0]?.company_number)
+        formik.setFieldValue("company_status", getCompanyDetails[0]?.company_status)
+        formik.setFieldValue("company_number", getCompanyDetails[0]?.company_number)
         formik.setFieldValue("Registered_Office_Addres", getCompanyDetails[0]?.address_snippet)
         formik.setFieldValue("Incorporation_Date", getCompanyDetails[0]?.date_of_creation)
         formik.setFieldValue("Incorporation_in", getCompanyDetails[0]?.description)
