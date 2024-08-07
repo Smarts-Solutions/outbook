@@ -1361,6 +1361,7 @@ const customerUpdate = async (customer) => {
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
+                console.log("err ",err)
                 return { status: false, message: 'Update Error Customer Type 2' };
             }
 
