@@ -263,12 +263,17 @@ const updateProcessCustomerServices = async (customerProcessData) => {
 
 
                 }
+                const insertManagerQuery = `
+                INSERT INTO customer_service_account_managers (customer_service_id, account_manager_id)
+                VALUES (?, ?)
+                `;
+                await pool.execute(insertManagerQuery, [customer_service_id, account_manager_id]);
             }
             else {
                 const insertManagerQuery = `
                 INSERT INTO customer_service_account_managers (customer_service_id, account_manager_id)
                 VALUES (?, ?)
-            `;
+                `;
                 await pool.execute(insertManagerQuery, [customer_service_id, account_manager_id]);
             }
 
@@ -1457,6 +1462,11 @@ const customerUpdate = async (customer) => {
                             `;
                         await pool.execute(insertManagerQuery, [customer_service_id, ac_id]);
                     }
+                    const insertManagerQuery = `
+                                INSERT INTO customer_service_account_managers (customer_service_id, account_manager_id)
+                                VALUES (?, ?)
+                            `;
+                    await pool.execute(insertManagerQuery, [customer_service_id, account_manager_id]);
                 } else {
                     const insertManagerQuery = `
                                 INSERT INTO customer_service_account_managers (customer_service_id, account_manager_id)
@@ -1865,64 +1875,12 @@ const customerUpdate = async (customer) => {
 
     //  Page Status 4 Paper Work Part
     else if (pageStatus === "4") {
-        const query = `
-        SELECT 
-            customers.id AS customer_id,
-            customers.customer_type AS customer_type,
-            customers.staff_id AS staff_id,
-            customers.account_manager_id AS account_manager_id,
-            customers.trading_name AS trading_name,
-            customers.customer_code AS customer_code,
-            customers.trading_address AS trading_address,
-            customers.vat_registered AS vat_registered,
-            customers.vat_number AS vat_number,
-            customers.website AS website,
-            customers.form_process AS form_process,
-            customers.status AS status,
-            customer_paper_work.*
-        FROM 
-            customers
-        JOIN 
-            customer_paper_work ON customers.id = customer_paper_work.customer_id
-        WHERE 
-            customers.id = ?
-        `;
+        console.log("Done")
+        const { customer_id, customer_paper_work } = customer;
+        console.log("customer_id", customer_id);
+        console.log("customer_paper_work", customer_paper_work);
 
-        const [rows] = await pool.execute(query, [customer_id]);
-        if (rows.length > 0) {
-            const customerData = {
-                id: rows[0].customer_id,
-                customer_type: rows[0].customer_type,
-                staff_id: rows[0].staff_id,
-                account_manager_id: rows[0].account_manager_id,
-                trading_name: rows[0].trading_name,
-                customer_code: rows[0].customer_code,
-                trading_address: rows[0].trading_address,
-                vat_registered: rows[0].vat_registered,
-                vat_number: rows[0].vat_number,
-                website: rows[0].website,
-                form_process: rows[0].form_process,
-                status: rows[0].status,
-            };
-
-            const customer_paper_work = rows.map(row => ({
-                file_name: row.file_name,
-                original_name: row.original_name,
-                file_type: row.file_type,
-                file_size: row.file_size
-            }));
-
-
-
-            const result = {
-                customer: customerData,
-                customer_paper_work: customer_paper_work
-            };
-
-            return result;
-        } else {
-            return [];
-        }
+        
     }
 
     return { status: true, message: 'customers updated successfully.', data: customer_id };
