@@ -487,7 +487,7 @@ const Information = () => {
             type: "text",
             label_size: 12,
             col_size: 3,
-            disable: false,
+            disable: true,
         },
         {
 
@@ -496,7 +496,7 @@ const Information = () => {
             type: "text",
             label_size: 12,
             col_size: 3,
-            disable: false,
+            disable: true,
         },
         {
 
@@ -505,7 +505,7 @@ const Information = () => {
             type: "text",
             label_size: 12,
             col_size: 3,
-            disable: false,
+            disable: true,
         },
         {
 
@@ -514,7 +514,7 @@ const Information = () => {
             type: "number",
             label_size: 12,
             col_size: 3,
-            disable: false,
+            disable: true,
         },
         {
 
@@ -523,7 +523,7 @@ const Information = () => {
             type: "text",
             label_size: 12,
             col_size: 3,
-            disable: false,
+            disable: true,
         },
         {
 
@@ -532,7 +532,7 @@ const Information = () => {
             type: "text",
             label_size: 12,
             col_size: 3,
-            disable: false,
+            disable: true,
         },
 
         {
@@ -542,7 +542,7 @@ const Information = () => {
             type: "text",
             label_size: 12,
             col_size: 3,
-            disable: false,
+            disable: true,
         },
         {
 
