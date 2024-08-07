@@ -1295,12 +1295,17 @@ const customerUpdate = async (customer) => {
                 console.log("incorporation_in" , incorporation_in)
                 console.log('customer' , customer)
 
+                
+                 const [incorporation_date_s] = incorporation_date.split('T');
+
+
+
                 const query2 = `
                     UPDATE customer_company_information
                     SET company_name = ?, entity_type = ?, company_status = ?, company_number = ?, registered_office_address = ?, incorporation_date = ?, incorporation_in = ?
                     WHERE customer_id = ?
                 `;
-                const [result2] = await pool.execute(query2, [company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date, incorporation_in, customer_id]);
+                const [result2] = await pool.execute(query2, [company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date_s, incorporation_in, customer_id]);
 
 
                 console.log("CP 2")
