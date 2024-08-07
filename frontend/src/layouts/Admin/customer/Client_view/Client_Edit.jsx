@@ -104,7 +104,7 @@ const ClientEdit = () => {
     
     const handleDeleteContact = (index) => {
         const newContacts = contacts.filter((_, i) => i !== index);
-        const newErrors = contactsErrors.filter((_, i) => i !== index);
+        const newErrors = errors.filter((_, i) => i !== index);
         setContacts(newContacts);
         setErrors(newErrors);
     };
@@ -634,11 +634,6 @@ const ClientEdit = () => {
                 Website: !getClientDetails.loading && getClientDetails.data.client.website,
 
             }))
-
-            console.log("contacts1 :", contacts1)
-
-            console.log("!getClientDetails.loading:", !getClientDetails.loading && getClientDetails.data.contact_details)
-
             setContacts1(getClientDetails.data && getClientDetails.data.contact_details)
 
         }

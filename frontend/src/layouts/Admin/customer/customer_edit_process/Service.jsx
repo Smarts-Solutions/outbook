@@ -1,17 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Formik } from "formik";
 import { Button } from "antd";
-import { Get_Service } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
-import MultiStepFormContext from "./MultiStepFormContext";
 import { useDispatch } from "react-redux";
+import { Get_Service, GET_CUSTOMER_DATA, Edit_Customer, ADD_SERVICES_CUSTOMERS } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import MultiStepFormContext from "./MultiStepFormContext";
 import CommanModal from '../../../../Components/ExtraComponents/Modals/CommanModal';
 import { Staff } from '../../../../ReduxStore/Slice/Staff/staffSlice';
-import { ADD_SERVICES_CUSTOMERS } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
-
+import { useLocation } from "react-router-dom";
 
 const Service = () => {
     const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
     const token = JSON.parse(localStorage.getItem("token"));
+    const location = useLocation();
     const dispatch = useDispatch();
     const [GetAllService, setAllService] = useState({ loading: true, data: [] });
     const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
@@ -21,61 +21,66 @@ const Service = () => {
     const [getManager, setManager] = useState([]);
     const [services, setServices] = useState([]);
     const [tempServices, setTempServices] = useState("");
+    const [getCustomerService, setCustomerService] = useState({ loading: true, data: [] });
 
-
-
-    const GetAllServiceData = async () => {
-        const req = { action: "get" };
-        const data = { req: req, authToken: token };
-        await dispatch(Get_Service(data))
-            .unwrap()
-            .then(async (response) => {
-                if (response.status) {
-                    setAllService({ loading: false, data: response.data });
-                } else {
-                    setAllService({ loading: false, data: [] });
-                }
-            })
-            .catch((error) => {
-                console.log("Error", error);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                await Promise.all([
+                    dispatch(GET_CUSTOMER_DATA({ req: { customer_id: location.state.id, pageStatus: "2" }, authToken: token })).unwrap()
+                        .then(response => setCustomerService({ loading: false, data: response.data })),
+                    dispatch(Get_Service({ req: { action: "get" }, authToken: token })).unwrap()
+                        .then(response => setAllService({ loading: false, data: response.data })),
+                    dispatch(Staff({ req: { action: "getmanager" }, authToken: token })).unwrap()
+                        .then(response => setStaffDataAll({ loading: false, data: response.data }))
+                ]);
+            } catch (error) {
+                console.error("Error fetching data", error);
                 setAllService({ loading: false, data: [] });
-            });
-    }
-
-    const fetchStaffData = async () => {
-        try {
-            const response = await dispatch(Staff({ req: { action: "getmanager" }, authToken: token })).unwrap();
-            if (response.status) {
-                setStaffDataAll({ loading: false, data: response.data });
-            } else {
                 setStaffDataAll({ loading: false, data: [] });
             }
-        } catch (error) {
-            console.error("Error fetching staff data", error);
-            setStaffDataAll({ loading: false, data: [] });
+        };
+
+        fetchData();
+    }, [dispatch, location.state.id, token]);
+
+    useEffect(() => {
+        if (getCustomerService.data.services) {
+            setServices(getCustomerService.data.services.map(service => service.service_id));
+
+            setManager(getCustomerService.data.services.map(service => ({
+                service_id: service.service_id,
+                account_manager_ids: service.account_manager_ids
+                    ? service.account_manager_ids.map(id => staffDataAll.data.find(staff => staff.id === id))
+                    : []
+            })));
         }
-    };
+    }, [getCustomerService.data, staffDataAll.data]);
+
+    useEffect(() => {
+        if (searchValue.trim()) {
+            setFilteredData(staffDataAll.data.filter(data =>
+                data.first_name.toLowerCase().includes(searchValue.toLowerCase())
+            ));
+        } else {
+            setFilteredData([]);
+        }
+    }, [searchValue, staffDataAll.data]);
 
     const ServicesUpdate = (value, type) => {
         if (type === 2) {
-            setServices(prevServices => {
-                if (!prevServices.includes(value)) {
-                    return [...prevServices, value];
-                }
-                return prevServices;
-            });
+            setServices(prevServices => !prevServices.includes(value) ? [...prevServices, value] : prevServices);
         } else if (type === 1) {
-            if (value.length === 0) {
-                setServices([]);
-            } else {
-                setServices(GetAllService.data.map(item => item.id));
-            }
+            setServices(value.length === 0 ? [] : GetAllService.data.map(item => item.id));
         }
-    }
+    };
 
-    const handleCheckboxChange = (e, item, type) => {
-        if (e) {
-            ServicesUpdate(item.id, type);
+    const handleCheckboxChange = (e, item) => {
+        if (e.target.checked) {
+            setServices(prevServices => !prevServices.includes(item.id)
+                ? [...prevServices, item.id]
+                : prevServices
+            );
         } else {
             setServices(prevServices => prevServices.filter(service => service !== item.id));
         }
@@ -83,37 +88,17 @@ const Service = () => {
 
     const handleSelectAllChange = (e) => {
         if (e.target.checked) {
-            ServicesUpdate(GetAllService.data, 1);
+            setServices(GetAllService.data.map(item => item.id));
         } else {
-            ServicesUpdate([], 1);
+            setServices([]);
         }
     };
 
-    useEffect(() => {
-        GetAllServiceData();
-        fetchStaffData();
-    }, []);
-
-    useEffect(() => {
-        if (searchValue.trim() !== "") {
-            setFilteredData(
-                staffDataAll.data.filter(data =>
-                    data.first_name.toLowerCase().includes(searchValue.toLowerCase())
-                )
-            );
-        } else {
-            setFilteredData([]);
-        }
-    }, [searchValue, staffDataAll]);
-
     const AddManager = () => {
         const trimmedValue = searchValue.trim();
-        if (trimmedValue === "") {
-            return;
-        }
+        if (!trimmedValue) return;
 
         const matchingData = staffDataAll.data.find(data => data.first_name === trimmedValue);
-
 
         if (matchingData) {
             setManager(prevManager => {
@@ -123,78 +108,68 @@ const Service = () => {
                     const updatedManagers = [...prevManager];
                     const existingService = updatedManagers[existingServiceIndex];
 
-                    if (!existingService.account_manager_id.some(manager => manager.id === matchingData.id)) {
-                        existingService.account_manager_id.push(matchingData);
+                    if (!existingService.account_manager_ids.some(manager => manager.id === matchingData.id)) {
+                        existingService.account_manager_ids.push(matchingData);
                     }
 
                     updatedManagers[existingServiceIndex] = existingService;
                     return updatedManagers;
                 } else {
-                    return [...prevManager, { service_id: tempServices, account_manager_id: [matchingData] }];
+                    return [...prevManager, { service_id: tempServices, account_manager_ids: [matchingData] }];
                 }
             });
         }
+
         setSearchValue("");
     };
 
     const removeManager = (id, serviceId) => {
-        setManager(prevManager =>
-            prevManager.map(manager => {
-                if (manager.service_id === serviceId) {
-                    return {
-                        ...manager,
-                        account_manager_id: manager.account_manager_id.filter(accountManager => accountManager.id !== id)
-                    };
-                }
-                return manager;
-            }).filter(manager => manager.account_manager_id.length > 0)
+        setManager(prevManager => prevManager
+            .map(manager => manager.service_id === serviceId ? {
+                ...manager,
+                account_manager_ids: manager.account_manager_ids.filter(accountManager => accountManager.id !== id)
+            } : manager)
+            .filter(manager => manager.account_manager_ids.length > 0)
         );
     };
 
-    const AddServiceId = (id) => {
-        setTempServices(id);
-    }
-
     const handleSubmit = async (values) => {
-        if (getManager.length === 0) {
-            alert("Please add at least one account manager.");
+        if (services.length === 0) {
+            alert("Please add at least one Service.");
             return;
         }
 
+        // Prepare the MatchData array
+        const MatchData = GetAllService.data.map(service => {
+            const managerData = getManager.find(item => item.service_id === service.id);
 
-        const MatchData = getManager
-            .filter(item => services.includes(item.service_id))
-            .map(item => ({
-                service_id: item.service_id,
-                account_manager_id: item.account_manager_id.map(manager => manager.id),
-            }));
+            return {
+                service_id: service.id,
+                account_manager_ids: managerData
+                    ? managerData.account_manager_ids.map(manager => manager.id)
+                    : []
+            };
+        });
 
-        var req = {
-            "customer_id": address,
-            "pageStatus": "2",
-            services: MatchData
+        // Filter out services that are not selected
+        const filteredMatchData = MatchData.filter(item => services.includes(item.service_id));
+
+        const req = {
+            customer_id: address,
+            pageStatus: "2",
+            services: filteredMatchData
+        };
+        console.log("req", req);
+
+        try {
+            const response = await dispatch(Edit_Customer({ req, authToken: token })).unwrap();
+            if (response.status) {
+                next(response.data);
+            }
+        } catch (error) {
+            console.error("Error updating services", error);
         }
-
-
-        const data = { req: req, authToken: token }
-        await dispatch(ADD_SERVICES_CUSTOMERS(data))
-            .unwrap()
-            .then(async (response) => {
-                if (response.status) {
-                    next(response.data)
-                } else {
-
-                }
-            })
-            .catch((error) => {
-                console.log("Error", error);
-            });
-
-
     };
-
-
-
 
     return (
         <Formik
@@ -204,12 +179,10 @@ const Service = () => {
             {({ handleSubmit }) => (
                 <div className="details__wrapper">
                     <div className="card pricing-box p-4 m-2 mt-0">
-                        <h4 className="card-title mb-0" style={{ marginBottom: "20px !important" }}>
-                            Select Services
-                        </h4>
+                        <h4 className="card-title mb-0">Select Services</h4>
                         <div className="row">
                             <div className="table-responsive table-card mt-3 mb-1">
-                                <table className="table align-middle table-nowrap" id="customerTable">
+                                <table className="table align-middle table-nowrap">
                                     <thead className="table-light">
                                         <tr>
                                             <th scope="col" style={{ width: 50 }}>
@@ -227,7 +200,7 @@ const Service = () => {
                                             <th>Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="list form-check-all">
+                                    <tbody>
                                         {GetAllService.data.length > 0 ? (
                                             GetAllService.data.map((item, index) => (
                                                 <tr key={index}>
@@ -236,7 +209,7 @@ const Service = () => {
                                                             <input
                                                                 className="form-check-input new_input"
                                                                 type="checkbox"
-                                                                onChange={(e) => handleCheckboxChange(e.target.checked, item, 2)}
+                                                                onChange={(e) => handleCheckboxChange(e, item)}
                                                                 checked={services.includes(item.id)}
                                                             />
                                                         </div>
@@ -244,14 +217,12 @@ const Service = () => {
                                                     <td className="customer_name">{item.name}</td>
                                                     <td>
                                                         <div className="d-flex">
-                                                            <div className="remove">
-                                                                <button
-                                                                    className="btn btn-sm btn-success remove-item-btn"
-                                                                    onClick={() => { setModal(true); AddServiceId(item.id) }}
-                                                                >
-                                                                    <i className="ti-user" />
-                                                                </button>
-                                                            </div>
+                                                            <button
+                                                                className="btn btn-sm btn-success remove-item-btn"
+                                                                onClick={() => { setModal(true); setTempServices(item.id); }}
+                                                            >
+                                                                <i className="ti-user" />
+                                                            </button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -304,45 +275,38 @@ const Service = () => {
                                 </div>
 
                                 <div className="col-2">
-                                    <div>
-                                        <button
-                                            type="button"
-                                            className="btn btn-success add-btn"
-                                            id="create-btn"
-                                            onClick={AddManager}
-                                        >
-                                            Add
-                                        </button>
-                                    </div>
+                                    <button
+                                        type="button"
+                                        className="btn btn-success add-btn"
+                                        onClick={AddManager}
+                                    >
+                                        Add
+                                    </button>
                                 </div>
-                                <div className="col-md-6" />
+
                                 <div className="table-responsive mt-3 mb-1">
-                                    <table className="table align-middle table-nowrap" id="customerTable">
+                                    <table className="table align-middle table-nowrap">
                                         <thead className="table-light">
                                             <tr>
                                                 <th>Account Name</th>
-                                                <th className="tabel_left text-align-right">Action</th>
+                                                <th className="text-align-right">Action</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="list form-check-all">
+                                        <tbody>
                                             {getManager.length > 0 ? (
                                                 getManager
                                                     .filter(manager => manager.service_id === tempServices)
-                                                    .map((manager, managerIndex) =>
-                                                        manager.account_manager_id.map((accountManager, accountManagerIndex) => (
-                                                            <tr className="tabel_new" key={`${managerIndex}-${accountManagerIndex}`}>
+                                                    .flatMap((manager, managerIndex) =>
+                                                        manager.account_manager_ids.map((accountManager, accountManagerIndex) => (
+                                                            <tr key={`${managerIndex}-${accountManagerIndex}`}>
                                                                 <td>{accountManager.first_name}</td>
-                                                                <td className="tabel_left">
-                                                                    <div className="gap-6">
-                                                                        <div className="remove">
-                                                                            <a
-                                                                                onClick={() => removeManager(accountManager.id, manager.service_id)}
-                                                                                className="btn btn-sm btn-danger remove-item-btn"
-                                                                            >
-                                                                                Remove
-                                                                            </a>
-                                                                        </div>
-                                                                    </div>
+                                                                <td className="text-align-right">
+                                                                    <button
+                                                                        onClick={() => removeManager(accountManager.id, manager.service_id)}
+                                                                        className="btn btn-sm btn-danger remove-item-btn"
+                                                                    >
+                                                                        Remove
+                                                                    </button>
                                                                 </td>
                                                             </tr>
                                                         ))
@@ -355,7 +319,6 @@ const Service = () => {
                                         </tbody>
                                     </table>
                                 </div>
-
                             </div>
                         </div>
                     </CommanModal>

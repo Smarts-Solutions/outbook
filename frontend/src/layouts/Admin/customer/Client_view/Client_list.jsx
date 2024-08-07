@@ -45,7 +45,7 @@ const ClientList = () => {
 
 
   function handleEdit(row) {
-    console.log('Editing row:', row); 
+   
     navigate('/admin/client/edit', { state: { row, id: location.state.id } });
 }
 
@@ -54,7 +54,7 @@ const ClientList = () => {
   }
 
 
-  console.log("location.state.id :" , location.state)
+ 
 
   const GetAllServiceData = async () => {
     const req = { action: "get" ,cutomer_id:location.state.id};

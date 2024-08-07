@@ -98,7 +98,7 @@ const customerUpdate = async (req, res) => {
     //  console.log("customer",customer)
       const result = await customerService.customerUpdate(customer);
       if(!result.status){
-        return  res.status(400).json({ status: false, message: result.message });  
+        return  res.status(200).json({ status: false, message: result.message });  
         }else{
         return  res.status(200).json({ status: true, message: result.message , data : result.data});
         }

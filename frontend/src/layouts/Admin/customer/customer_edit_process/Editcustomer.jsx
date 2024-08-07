@@ -32,12 +32,13 @@ const AddCustomer = () => {
     const location = useLocation();
 
 
+
     const { Step } = Steps;
 
     const renderStep = (step) => {
         switch (step) {
             case 0:
-                return <Information />;
+                return <Information id={location.state} pageStatus={"1"}/>;
             case 1:
                 return <Service />;
             case 2:
@@ -48,7 +49,6 @@ const AddCustomer = () => {
                 return null;
         }
     };
-
     const next = (data) => {
 
         setCoustomerId(data)
@@ -67,6 +67,7 @@ const AddCustomer = () => {
         }
     };
 
+    
     useEffect(() => {
         addressInitialState.coustomerId = location.state.id;
         setAddress(location.state.id)
@@ -88,7 +89,9 @@ const AddCustomer = () => {
                             <Step title="Engagement Model" />
                             <Step title="Paper Work" />
                         </Steps>
+                       
                         <main>{renderStep(currentStep)}</main>
+                       
                     </Provider>
                 </div>
             </div>
