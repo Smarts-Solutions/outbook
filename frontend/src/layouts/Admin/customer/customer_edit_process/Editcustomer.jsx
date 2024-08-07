@@ -67,6 +67,7 @@ const AddCustomer = () => {
         }
     };
 
+    console.log("CPP" , location.state.id)  
     useEffect(() => {
         addressInitialState.coustomerId = location.state.id;
         setAddress(location.state.id)
