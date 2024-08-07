@@ -53,7 +53,7 @@ const Information = ({ id, pageStatus }) => {
 
 
 
-     
+
 
 
     const [getCompanyDetails, setCompanyDetails] = useState({
@@ -116,7 +116,7 @@ const Information = ({ id, pageStatus }) => {
         setContacts1(newContacts);
         setContactsErrors(newErrors);
     };
-   
+
 
     const fetchStaffData = async () => {
         try {
@@ -176,7 +176,7 @@ const Information = ({ id, pageStatus }) => {
         CustomerPersonRoleData()
     }, []);
 
-    
+
 
     const handleChangeValue = (e) => {
 
@@ -260,18 +260,7 @@ const Information = ({ id, pageStatus }) => {
                 .unwrap()
                 .then((response) => {
                     if (response.status) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Client Updated Successfully',
-                            timerProgressBar: true,
-                            timer: 1500
-                        })
-                        setTimeout(() => {
-
-                            next(id.id)
-                        }, 1500)
-
-
+                        next(id.id)
                     } else {
 
                         Swal.fire({
@@ -327,15 +316,7 @@ const Information = ({ id, pageStatus }) => {
                     .unwrap()
                     .then((response) => {
                         if (response.status) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Client Updated Successfully',
-                                timerProgressBar: true,
-                                timer: 1500
-                            })
-                            setTimeout(() => {
-                                next(id.id)
-                            }, 1500)
+                            next(id.id) 
                         } else {
                             Swal.fire({
                                 icon: 'error',
@@ -386,16 +367,8 @@ const Information = ({ id, pageStatus }) => {
                     .unwrap()
                     .then((response) => {
                         if (response.status) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Client Added Successfully',
-                                timerProgressBar: true,
-                                timer: 1500
-                            })
-                            setTimeout(() => {
                                 next(id.id)
-
-                            }, 1500)
+                                
                         } else {
                             Swal.fire({
                                 icon: 'error',
@@ -603,7 +576,7 @@ const Information = ({ id, pageStatus }) => {
 
 
 
-    
+
     useEffect(() => {
         setCustomerType(id.customer_type)
         setManagerType(id.account_manager_id)
