@@ -213,7 +213,7 @@ const updateProcessCustomerServices = async (customerProcessData) => {
     const { customer_id, services } = customerProcessData;
     const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
 
-    var account_manager_id = ExistCustomer[0].account_manager_id;
+    var account_manager_id_exit = ExistCustomer[0].account_manager_id;
     // console.log("customer_id",customer_id);
     // console.log("services",services);
     for (const serVal of services) {
@@ -263,18 +263,46 @@ const updateProcessCustomerServices = async (customerProcessData) => {
 
 
                 }
-                const insertManagerQuery = `
+
+
+                const selectManagerQuery = `
+                        SELECT COUNT(*) as count 
+                        FROM customer_service_account_managers 
+                        WHERE customer_service_id = ? AND account_manager_id = ?
+                    `;
+
+                    const [rows] = await pool.execute(selectManagerQuery, [customer_service_id, account_manager_id_exit]);
+                    const exists = rows[0].count > 0;
+
+                    if (!exists) {
+
+                const insertManagerQuery1 = `
                 INSERT INTO customer_service_account_managers (customer_service_id, account_manager_id)
                 VALUES (?, ?)
                 `;
-                await pool.execute(insertManagerQuery, [customer_service_id, account_manager_id]);
+                await pool.execute(insertManagerQuery1, [customer_service_id, account_manager_id_exit]);
+                    }
             }
             else {
-                const insertManagerQuery = `
+
+
+                const selectManagerQuery = `
+                        SELECT COUNT(*) as count 
+                        FROM customer_service_account_managers 
+                        WHERE customer_service_id = ? AND account_manager_id = ?
+                    `;
+
+                    const [rows] = await pool.execute(selectManagerQuery, [customer_service_id, account_manager_id_exit]);
+                    const exists = rows[0].count > 0;
+
+                    if (!exists) {
+
+                const insertManagerQuery2 = `
                 INSERT INTO customer_service_account_managers (customer_service_id, account_manager_id)
                 VALUES (?, ?)
                 `;
-                await pool.execute(insertManagerQuery, [customer_service_id, account_manager_id]);
+                await pool.execute(insertManagerQuery2, [customer_service_id, account_manager_id_exit]);
+                    }
             }
 
         } catch (err) {
@@ -1294,14 +1322,14 @@ const customerUpdate = async (customer) => {
             const { company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date, incorporation_in } = customer;
             try {
                 // Update customer_company_information
-                 
-                console.log("registered_office_address" , registered_office_address)
-                console.log("incorporation_date" , incorporation_date)
-                console.log("incorporation_in" , incorporation_in)
-                console.log('customer' , customer)
 
-                
-                 const [incorporation_date_s] = incorporation_date.split('T');
+                console.log("registered_office_address", registered_office_address)
+                console.log("incorporation_date", incorporation_date)
+                console.log("incorporation_in", incorporation_in)
+                console.log('customer', customer)
+
+
+                const [incorporation_date_s] = incorporation_date.split('T');
 
 
 
@@ -1338,7 +1366,7 @@ const customerUpdate = async (customer) => {
                     let phone = detail.phone;
                     let residential_address = detail.residential_address;
                     if (contact_id == "" || contact_id == undefined || contact_id == null) {
-                console.log("CP 4")
+                        console.log("CP 4")
 
                         const query4 = `
                         INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone,email,residential_address)
@@ -1356,7 +1384,7 @@ const customerUpdate = async (customer) => {
 
                 let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
                 console.log("CP 6")
-                
+
                 if (deleteIdArray.length > 0) {
                     for (const id of deleteIdArray) {
 
@@ -1371,7 +1399,7 @@ const customerUpdate = async (customer) => {
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
-                console.log("err ",err)
+                console.log("err ", err)
                 return { status: false, message: 'Update Error Customer Type 2' };
             }
 
@@ -1446,6 +1474,8 @@ const customerUpdate = async (customer) => {
         const { services } = customer;
 
         const [ExistServiceids] = await pool.execute('SELECT service_id  FROM `customer_services` WHERE customer_id =' + customer_id);
+        const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
+        var account_manager_id = ExistCustomer[0].account_manager_id;
 
         const idArray = await ExistServiceids.map(item => item.service_id);
         let arrayInterId = []
@@ -1488,20 +1518,44 @@ const customerUpdate = async (customer) => {
                             `;
                         await pool.execute(insertManagerQuery, [customer_service_id, ac_id]);
                     }
-                    const insertManagerQuery = `
-                                INSERT INTO customer_service_account_managers (customer_service_id, account_manager_id)
-                                VALUES (?, ?)
-                            `;
-                    await pool.execute(insertManagerQuery, [customer_service_id, account_manager_id]);
+                    const selectManagerQuery = `
+                    SELECT COUNT(*) as count 
+                    FROM customer_service_account_managers 
+                    WHERE customer_service_id = ? AND account_manager_id = ?
+                `;
+
+                const [rows] = await pool.execute(selectManagerQuery, [customer_service_id, account_manager_id]);
+                const exists = rows[0].count > 0;
+
+                   if (!exists) {
+                    const insertManagerQuery2 = `
+                        INSERT INTO customer_service_account_managers (customer_service_id, account_manager_id)
+                        VALUES (?, ?)
+                    `;
+                    await pool.execute(insertManagerQuery2, [customer_service_id, account_manager_id]);
+                  } 
                 } else {
-                    const insertManagerQuery = `
-                                INSERT INTO customer_service_account_managers (customer_service_id, account_manager_id)
-                                VALUES (?, ?)
-                            `;
-                    await pool.execute(insertManagerQuery, [customer_service_id, account_manager_id]);
+
+                    const selectManagerQuery = `
+                        SELECT COUNT(*) as count 
+                        FROM customer_service_account_managers 
+                        WHERE customer_service_id = ? AND account_manager_id = ?
+                    `;
+
+                    const [rows] = await pool.execute(selectManagerQuery, [customer_service_id, account_manager_id]);
+                    const exists = rows[0].count > 0;
+
+                    if (!exists) {
+                        const insertManagerQuery2 = `
+                            INSERT INTO customer_service_account_managers (customer_service_id, account_manager_id)
+                            VALUES (?, ?)
+                        `;
+                        await pool.execute(insertManagerQuery2, [customer_service_id, account_manager_id]);
+                    } 
                 }
 
             } catch (err) {
+                console.log("err", err)
                 return { status: false, message: 'Customer Services Err update.' };
             }
         }
@@ -1768,12 +1822,12 @@ const customerUpdate = async (customer) => {
             const { customer_id, customised_pricing, customised_pricing_data } = customer;
 
             const [existPricingData] = await pool.execute('SELECT id FROM customer_engagement_customised_pricing WHERE customer_engagement_model_id = ?', [customer_engagement_model_id]);
-            
+
             console.log("existPricingData", existPricingData);
-            
+
             const idArray = existPricingData.map(item => item.id);
             let arrayInterId = [];
-            
+
             if (customised_pricing_data.length > 0) {
                 for (const customisedVal of customised_pricing_data) {
                     console.log("customised_pricing", customised_pricing);
@@ -1781,7 +1835,7 @@ const customerUpdate = async (customer) => {
                     let minimum_number_of_jobs = customisedVal.minimum_number_of_jobs;
                     let job_type_id = customisedVal.job_type_id;
                     let cost_per_job = customisedVal.cost_per_job;
-            
+
                     if (customised_pricing_id == "" || customised_pricing_id == undefined || customised_pricing_id == null) {
                         const insertQuery = `
                             INSERT INTO customer_engagement_customised_pricing (
@@ -1800,7 +1854,7 @@ const customerUpdate = async (customer) => {
                         customer_engagement_customised_pricing_id = result.insertId;
                     } else {
                         arrayInterId.push(customised_pricing_id);
-            
+
                         const updateQuery = `
                             UPDATE customer_engagement_customised_pricing SET
                                 minimum_number_of_jobs = ?, job_type_id = ?, cost_per_job = ?
@@ -1814,7 +1868,7 @@ const customerUpdate = async (customer) => {
                         ]);
                     }
                 }
-            
+
                 let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
                 if (deleteIdArray.length > 0) {
                     for (const id of deleteIdArray) {
@@ -1825,10 +1879,10 @@ const customerUpdate = async (customer) => {
                     }
                 }
             }
-            
+
             const updateQueryEngagementModel = `UPDATE customer_engagement_model SET customised_pricing = ? WHERE customer_id = ? `;
             await pool.execute(updateQueryEngagementModel, [customised_pricing, customer_id]);
-            
+
 
 
         }
@@ -1906,68 +1960,12 @@ const customerUpdate = async (customer) => {
 
         const [ExistPaperWorkIds] = await pool.execute('SELECT id  FROM `customer_paper_work` WHERE customer_id =' + customer_id);
         console.log("customer_id", customer_id);
-        console.log("customer_paper_work", ExistPaperWorkIds);
+        console.log("customer_paper_work", customer_paper_work);
       
-        const idArray = ExistPaperWorkIds.map(item => item.id);
-        let arrayInterId = [];
 
 
 
-        if(customer_paper_work.length > 0){
-            for (const paperVal of customer_paper_work) {
-                let paper_id = paperVal.customer_paper_work_id;
-                let file_name = paperVal.file_name;
-                let original_name = paperVal.original_name;
-                let file_type = paperVal.file_type;
-                let file_size = paperVal.file_size;
-                if (paper_id == "" || paper_id == undefined || paper_id == null) {
-                    const insertQuery = `
-                        INSERT INTO customer_paper_work (
-                            customer_id,
-                            file_name,
-                            original_name,
-                            file_type,
-                            file_size
-                        ) VALUES (?, ?, ?, ?, ?)
-                    `;
-                    const [result] = await pool.execute(insertQuery, [
-                        customer_id,
-                        file_name,
-                        original_name,
-                        file_type,
-                        file_size
-                    ]);
-                    customer_paper_work_id = result.insertId;
-                } else {
-                    arrayInterId.push(paper_id);
         
-                    const updateQuery = `
-                        UPDATE customer_paper_work SET
-                            file_name = ?, original_name = ?, file_type = ?, file_size = ?
-                        WHERE id = ?
-                    `;
-                    await pool.execute(updateQuery, [
-                        file_name,
-                        original_name,
-                        file_type,
-                        file_size,
-                        paper_id
-                    ]);
-                }
-            }
-        
-            let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
-            if (deleteIdArray.length > 0) {
-                for (const id of deleteIdArray) {
-                    const query3 = `
-                        DELETE FROM customer_paper_work WHERE id = ?
-                    `;
-                    await pool.execute(query3, [id]);
-                }
-            }
-
-        }
-
     }
     else {
         return { status: false, message: 'Error in page status.' };

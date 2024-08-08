@@ -4,7 +4,7 @@ import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
 import { JobType } from '../../../../ReduxStore/Slice/Settings/settingSlice'
 import { useDispatch } from 'react-redux';
-import { Edit_Customer } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { ADD_SERVICES_CUSTOMERS } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
 
 
 
@@ -12,12 +12,13 @@ const Engagement = () => {
     const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
     const dispatch = useDispatch();
     const token = JSON.parse(localStorage.getItem("token"));
+
     const [errors1, setErrors1] = useState({});
     const [errors2, setErrors2] = useState({});
     const [errors3, setErrors3] = useState({});
     const [errors4, setErrors4] = useState([]);
 
-   
+
     const [formValues1, setFormValues1] = useState({
         accountants: '',
         feePerAccountant: '',
@@ -71,35 +72,21 @@ const Engagement = () => {
 
 
 
+
+
     const handleChange1 = (e) => {
         const { name, value } = e.target;
-        if (!/^[0-9+]*$/.test(value)) {
-            return;
-        }
-
-        validate1()
-
         setFormValues1({ ...formValues1, [name]: value });
     };
 
     const handleChange2 = (e) => {
         const { name, value } = e.target;
-        if (value === '' || (/^[0-9]*$/.test(value) && value <= 100)) {
-            validate2()
-            setFormValues2({ ...formValues2, [name]: value });
-        }
+        setFormValues2({ ...formValues2, [name]: value });
     };
 
     const handleChange3 = (e) => {
         const { name, value } = e.target;
-        if (!/^[0-9+]*$/.test(value)) {
-            return;
-        }
-
-        validate3()
         setFormValues3({ ...formValues3, [name]: value });
-
-
     };
 
     const handleAddJob = () => {
@@ -107,7 +94,7 @@ const Engagement = () => {
     };
 
     const handleRemoveJob = (id) => {
-
+      
         if (jobEntries.length === 1) {
             return;
         }
@@ -115,59 +102,40 @@ const Engagement = () => {
         setJobEntries(newJobEntries);
     };
 
- 
-    
     const handleChange4 = (index, e) => {
         const { name, value } = e.target;
-        
-        if (!/^[0-9+]*$/.test(value)) {
-            return;
-        }
 
         const newJobEntries = [...jobEntries];
         newJobEntries[index][name] = value;
-        validate4()
         setJobEntries(newJobEntries);
     };
-
 
 
     const validate1 = () => {
         const newErrors = {};
         for (const key in formValues1) {
             if (!formValues1[key]) {
-                if (key == 'accountants') newErrors[key] = "Please Enter Number of Accountants";
-                else if (key == 'feePerAccountant') newErrors[key] = "Please Enter Fee Per Accountant";
-                else if (key == 'bookkeepers') newErrors[key] = "Please Enter Number of Bookkeepers";
-                else if (key == 'feePerBookkeeper') newErrors[key] = "Please Enter Fee Per Bookkeeper";
-                else if (key == 'payrollExperts') newErrors[key] = "Please Enter Number of Payroll Experts";
-                else if (key == 'feePerPayrollExpert') newErrors[key] = "Please Enter Fee Per Payroll Expert";
-                else if (key == 'taxExperts') newErrors[key] = "Please Enter Number of Tax Experts";
-                else if (key == 'feePerTaxExpert') newErrors[key] = "Please Enter Fee Per Tax Expert";
-                else if (key == 'numberOfAdmin') newErrors[key] = "Please Enter Number of Admin/Other Staff";
-                else if (key == 'feePerAdmin') newErrors[key] = "Please Enter Fee Per Admin/Other Staff";
+                newErrors[key] = 'Required';
+            } else if (isNaN(formValues1[key]) || parseFloat(formValues1[key]) < 0) {
+                newErrors[key] = 'Must be a positive number';
             }
         }
         setErrors1(newErrors)
-       
-        return Object.keys(newErrors).length === 0 ? true : false;;
+        return newErrors;
     };
 
     const validate2 = () => {
         const newErrors = {};
         for (const key in formValues2) {
             if (!formValues2[key]) {
-                if (key == 'total_outsourcing') newErrors[key] = "Please Enter Total Outsourcing";
-                else if (key == 'accountants') newErrors[key] = "Please Enter Accountants";
-                else if (key == 'bookkeepers') newErrors[key] = "Please Enter Bookkeepers";
-                else if (key == 'payroll_experts') newErrors[key] = "Please Enter Payroll Experts";
-                else if (key == 'tax_experts') newErrors[key] = "Please Enter Tax Experts";
-                else if (key == 'admin_staff') newErrors[key] = "Please Enter Admin/Other Staff";
+                newErrors[key] = 'Required';
+            } else if (isNaN(formValues2[key]) || parseFloat(formValues2[key]) < 0) {
+                newErrors[key] = 'Must be a positive number';
             }
         }
         setErrors2(newErrors)
 
-        return Object.keys(newErrors).length === 0 ? true : false;;
+        return newErrors;
     };
 
 
@@ -175,42 +143,47 @@ const Engagement = () => {
         const newErrors = {};
         for (const key in formValues3) {
             if (!formValues3[key]) {
-                if (key == 'adhoc_accountants') newErrors[key] = "Please Enter Accountants Fee Per Hour";
-                else if (key == 'adhoc_bookkeepers') newErrors[key] = 'Please Enter Bookkeepers Fee Per Hour';
-                else if (key == 'adhoc_payroll_experts') newErrors[key] = "Please Enter Payroll Experts Fee Per Hour";
-                else if (key == 'adhoc_tax_experts') newErrors[key] = "Please Enter Tax Experts Fee Per Hour";
-                else if (key == 'adhoc_admin_staff') newErrors[key] = "Please Enter Admin/Other Staff Fee Per Hour";
+                newErrors[key] = 'Required';
+            } else if (isNaN(formValues3[key]) || parseFloat(formValues3[key]) < 0 || parseFloat(formValues3[key]) > 100) {
+                newErrors[key] = 'Must be a number between 0 and 100';
             }
         }
         setErrors3(newErrors)
-        return Object.keys(newErrors).length === 0 ? true : false;
+
+        return newErrors;
     };
 
 
     const validate4 = () => {
+
+
         const newErrors = [];
-    
+
         jobEntries.forEach((entry, index) => {
             const entryErrors = {};
-    
-            if (!entry.minimum_number_of_jobs) {
-                entryErrors.minimum_number_of_jobs = 'Please Enter Minimum number of Jobs';
-            }  
-    
-            if (!entry.job_type_id) {
-                entryErrors.job_type_id = 'Please select a job type';
-            }
-            if (!entry.cost_per_job) {
-                entryErrors.cost_per_job = 'Please Enter Cost Per Job';
-            } 
-            if(Object.keys(entryErrors).length !== 0)
-                newErrors[index] = entryErrors;
-        });
- 
-        setErrors4(newErrors);
-        return newErrors.length > 0 ? false : true;
-    };
 
+            if (!entry.minimum_number_of_jobs) {
+                entryErrors.minimum_number_of_jobs = 'Required';
+            } else if (isNaN(entry.minimum_number_of_jobs) || parseFloat(entry.minimum_number_of_jobs) < 0 || parseFloat(entry.minimum_number_of_jobs) > 100) {
+                entryErrors.minimum_number_of_jobs = 'Must be a number between 0 and 100';
+            }
+
+            if (!entry.job_type_id) {
+                entryErrors.job_type_id = 'Required';
+            }
+
+            if (!entry.cost_per_job) {
+                entryErrors.cost_per_job = 'Required';
+            } else if (isNaN(entry.cost_per_job) || parseFloat(entry.cost_per_job) < 0 || parseFloat(entry.cost_per_job) > 100) {
+                entryErrors.cost_per_job = 'Must be a number between 0 and 100';
+            }
+
+            newErrors[index] = entryErrors;
+        });
+
+        setErrors4(newErrors);
+        return newErrors;
+    };
 
     const GetJobTypeApi = async () => {
         const req = { action: "get" };
@@ -228,19 +201,18 @@ const Engagement = () => {
             });
     }
 
+
+
     const handleSubmit = async () => {
         if (!checkboxStates.some(state => state === 1)) {
             alert("Please select at least one option.");
             return;
         }
-        const validations = [validate1, validate2, validate3, validate4];
 
-        for (let i = 0; i < checkboxStates.length; i++) {
-            if (checkboxStates[i] === 1 && !validations[i]()) {
-                
-                return;
-            }
-        }
+        if (checkboxStates[0] === 1) validate1();
+        if (checkboxStates[1] === 1) validate2();
+        if (checkboxStates[2] === 1) validate3();
+        if (checkboxStates[3] === 1) validate4();
 
         let req = {
             "customer_id": address,
@@ -250,6 +222,9 @@ const Engagement = () => {
             "adhoc_payg_hourly": checkboxStates[2].toString(),
             "customised_pricing": checkboxStates[3].toString(),
         };
+
+
+
 
         if (checkboxStates[0] === 1) {
             req = {
@@ -291,18 +266,15 @@ const Engagement = () => {
             };
         }
 
-
-
         if (checkboxStates[3] === 1) {
             req = {
                 ...req,
                 customised_pricing_data: jobEntries
             };
         }
- 
 
         const data = { req: req, authToken: token }
-        await dispatch(Edit_Customer(data))
+        await dispatch(ADD_SERVICES_CUSTOMERS(data))
             .unwrap()
             .then(async (response) => {
                 if (response.status) {
@@ -316,19 +288,6 @@ const Engagement = () => {
             });
     };
 
-
-
-    useEffect(() => {
-        if (checkboxStates[0] === 0)
-            setErrors1({})
-        if (checkboxStates[1] === 0)
-            setErrors2({})
-        if (checkboxStates[2] === 0)
-            setErrors3({})
-        if (checkboxStates[3] === 0)
-            setErrors4({})
-
-    }, [checkboxStates])
 
 
     useEffect(() => {
@@ -547,7 +506,7 @@ const Engagement = () => {
                                                                             onChange={(e) => handleChange4(index, e)}
                                                                         />
                                                                         {errors4[index] && (
-                                                                            <div className="text-danger">{errors4[index].minimum_number_of_jobs}</div>
+                                                                            <div className="text-danger">{errors4[index].cost_per_job}</div>
                                                                         )}
                                                                     </div>
                                                                 </div>
