@@ -7,7 +7,7 @@ const addCustomer = async (req, res) => {
     //  console.log("customer",customer)
       const result = await customerService.addCustomer(customer);
       if(!result.status){
-        return  res.status(400).json({ status: false, message: result.message });  
+        return  res.status(200).json({ status: false, message: result.message });  
         }else{
         return  res.status(200).json({ status: true, message: result.message , data : result.data});
         }
@@ -20,12 +20,12 @@ const customerAction = async (req, res) => {
   try {
      const { ...customer } = req.body;
     //  console.log("customer",customer)
-      const data = await customerService.customerAction(customer);
-      if(data != undefined){
-       return res.status(200).json({ status:true,message: "Success..",data : data});
-      }else{
-       return res.status(400).json({ status:false, message: "Invalid..."});
-      }
+      const result = await customerService.customerAction(customer);
+      if(!result.status){
+        return  res.status(200).json({ status: false, message: result.message });  
+        }else{
+        return  res.status(200).json({ status: true, message: result.message , data : result.data});
+        }
     } catch (error) {
       res.status(500).json({ status:false, message: error.message});
     }
@@ -76,6 +76,7 @@ const updateProcessCustomerFile = async (req, res) => {
       res.status(500).json({ status:false, message: error.message});
     }
 }
+
 
 const updateProcessCustomerFileAction = async (req, res) => {
   try {
