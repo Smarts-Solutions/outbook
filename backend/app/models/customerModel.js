@@ -710,9 +710,9 @@ const updateProcessCustomerFileDelete = async (customerProcessData) => {
     try {
         await pool.execute(query, [id]);
         deleteUploadFile(file_name)
+        return { status: true, message: 'File deleted successfully.' };
     } catch (err) {
-        console.error('Error deleting data:', err);
-        throw err;
+        return { status: false, message: 'Err file Delete' };
     }
 
 }
