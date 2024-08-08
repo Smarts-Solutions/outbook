@@ -1176,7 +1176,11 @@ const getSingleCustomer = async (customer) => {
             customers.website AS website,
             customers.form_process AS form_process,
             customers.status AS status,
-            customer_paper_work.*
+            customer_paper_work.id AS customer_paper_work_id,
+            customer_paper_work.file_name AS file_name,
+            customer_paper_work.original_name AS original_name,
+            customer_paper_work.file_type AS file_type,
+            customer_paper_work.file_size AS file_size
         FROM 
             customers
         JOIN 
@@ -1203,6 +1207,7 @@ const getSingleCustomer = async (customer) => {
             };
 
             const customer_paper_work = rows.map(row => ({
+                customer_paper_work_id: row.customer_paper_work_id,
                 file_name: row.file_name,
                 original_name: row.original_name,
                 file_type: row.file_type,
@@ -1900,6 +1905,9 @@ const customerUpdate = async (customer) => {
         const { customer_id, customer_paper_work } = customer;
         console.log("customer_id", customer_id);
         console.log("customer_paper_work", customer_paper_work);
+      
+
+
 
         
     }
