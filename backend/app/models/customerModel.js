@@ -284,8 +284,6 @@ const updateProcessCustomerServices = async (customerProcessData) => {
                     }
             }
             else {
-
-
                 const selectManagerQuery = `
                         SELECT COUNT(*) as count 
                         FROM customer_service_account_managers 

@@ -130,6 +130,20 @@ export async function EDIT_CUSTOMER(data, token) {
   }
 }
 
+// Edit customer
+export async function Delete_Customer_File(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}updateProcessCustomerFileAction`, data, {
+      headers: header(token),
+      data: {}
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+
 
 
 

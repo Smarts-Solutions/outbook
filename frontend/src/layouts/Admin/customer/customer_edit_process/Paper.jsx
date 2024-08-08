@@ -1,21 +1,26 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useRef, useState, useEffect } from "react";
 import { Formik, Field, Form } from "formik";
 import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
 import { ADD_PEPPER_WORKS } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import sweatalert from 'sweetalert2';
-
+import { GET_CUSTOMER_DATA , DELETE_CUSTOMER_FILE } from '../../../../ReduxStore/Slice/Customer/CustomerSlice'
 
 const Paper = () => {
     const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
     const fileInputRef = useRef(null);
+    const location = useLocation();
     const token = JSON.parse(localStorage.getItem("token"));
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const [fileState, setFileState] = useState([]);
+    const [customerDetails, setCustomerDetails] = useState({
+        loading: true,
+        data: [],
+    });
 
     const handleUploadClick = () => {
         if (fileInputRef.current) {
@@ -26,6 +31,34 @@ const Paper = () => {
     const handleFileChange = (event) => {
         setFileState(event.currentTarget.files);
     };
+
+    const GetCustomerData = async () => {
+        const req = { customer_id: location.state.id, pageStatus: "4" }
+        const data = { req: req, authToken: token }
+        await dispatch(GET_CUSTOMER_DATA(data))
+            .unwrap()
+            .then(async (response) => {
+                if (response.status) {
+                    setCustomerDetails({
+                        loading: false,
+                        data: response.data
+                    });
+                }
+                else {
+                    setCustomerDetails({
+                        loading: false,
+                        data: []
+                    });
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    }
+
+    useEffect(() => {
+        GetCustomerData();
+    }, []);
 
     const handleSubmit = async () => {
         let data = new FormData();
@@ -58,11 +91,40 @@ const Paper = () => {
             .catch((error) => {
                 console.log("Error", error);
             });
-
-
-
     };
 
+
+    // "action":"delete", 
+    // "customer_id": 12,
+    // "id" :1,
+    // "file_name": "1722337175144-002.png"
+
+    const removeItem = async (id) => {
+        const req = { action: "delete", customer_id: location.state.id, id: id.customer_paper_work_id, file_name: id.file_name }
+        const data = { req: req, authToken: token }
+
+    
+        console.log("data", req);
+    
+
+        await dispatch(DELETE_CUSTOMER_FILE(data))
+            .unwrap()
+            .then(async (response) => {
+                if (response.status) {
+                    sweatalert.fire({
+                        title: response.message,
+                        icon: 'success',
+                        timer: 3000,
+                    }).then(() => {
+                        GetCustomerData();
+                    })
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+
+            });
+    }
 
 
     return (
@@ -103,7 +165,7 @@ const Paper = () => {
                                                     <button
                                                         type="button"
                                                         id="btn1"
-                                                        className="btn btn-outline-primary"
+                                                        className="btn-info text-white text-center blue-btn rounded"
                                                         style={{
                                                             border: "1px solid #0E6E91",
                                                             display: "flex",
@@ -168,52 +230,46 @@ const Paper = () => {
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody className="list form-check-all">
-                                                                        <Field name="files">
-                                                                            {({ field, form }) => {
-                                                                                const { files } = form.values;
-                                                                                return files.length > 0 ? (
-                                                                                    Array.from(files).map((file, index) => (
-                                                                                        <tr key={index}>
-                                                                                            <th scope="row">
-                                                                                                <div className="form-check">
-                                                                                                    <input
-                                                                                                        className="form-check-input new_input"
-                                                                                                        type="checkbox"
-                                                                                                        name="chk_child"
-                                                                                                        defaultValue={`option${index + 1}`}
-                                                                                                    />
-                                                                                                </div>
-                                                                                            </th>
-                                                                                            <td className="file_name">{file.name}</td>
-                                                                                            <td className="file_type">{file.type}</td>
-                                                                                            <td className="size">{(file.size / (1024 * 1024)).toFixed(2)} MB</td>
-                                                                                            <td className="action">
-                                                                                                <div className="d-flex gap-2">
-                                                                                                    <div className="remove">
-                                                                                                        <button
-                                                                                                            className="btn btn-sm btn-danger remove-item-btn"
-                                                                                                            onClick={() => {
-                                                                                                                const newFiles = Array.from(files);
-                                                                                                                newFiles.splice(index, 1);
-                                                                                                                form.setFieldValue("files", newFiles);
-                                                                                                            }}
-                                                                                                        >
-                                                                                                            <i className="ti-trash" />
-                                                                                                        </button>
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                    ))
-                                                                                ) : (
-                                                                                    <tr>
-                                                                                        <td colSpan="5" className="text-center">
-                                                                                            No files selected
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                );
-                                                                            }}
-                                                                        </Field>
+                                                                        {customerDetails.data.customer_paper_work && customerDetails.data.customer_paper_work.length > 0 ? (
+                                                                            customerDetails.data.customer_paper_work.map((file, index) => (
+                                                                                <tr key={file.customer_paper_work_id}>
+                                                                                    <th scope="row">
+                                                                                        <div className="form-check">
+                                                                                            <input
+                                                                                                className="form-check-input new_input"
+                                                                                                type="checkbox"
+                                                                                                name="chk_child"
+                                                                                                defaultValue={`option${index + 1}`}
+                                                                                            />
+                                                                                        </div>
+                                                                                    </th>
+                                                                                    <td className="file_name">{file.original_name}</td>
+                                                                                    <td className="file_type">{file.file_type}</td>
+                                                                                    <td className="size">{(file.file_size / (1024)).toFixed(2)} KB</td>
+                                                                                    <td className="">
+                                                                                        <div className="d-flex gap-2">
+                                                                                            <div className="remove">
+                                                                                                <button
+                                                                                                    type="button"
+                                                                                                    className="btn btn-sm btn-danger remove-item-btn"
+                                                                                                    onClick={() => {
+                                                                                                         removeItem(file);
+                                                                                                    }}
+                                                                                                >
+                                                                                                    <i className="ti-trash" />
+                                                                                                </button>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            ))
+                                                                        ) : (
+                                                                            <tr>
+                                                                                <td colSpan="5" className="text-center">
+                                                                                    No files found
+                                                                                </td>
+                                                                            </tr>
+                                                                        )}
                                                                     </tbody>
                                                                 </table>
                                                             </div>

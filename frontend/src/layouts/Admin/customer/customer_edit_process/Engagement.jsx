@@ -62,7 +62,7 @@ const Engagement = () => {
         { minimum_number_of_jobs: '', job_type_id: '', cost_per_job: '' , customised_pricing_id: '' }
     ]);
     
-    console.log("formValues1", jobEntries)
+ 
     const [jobType, setJobType] = useState([])
 
     const GetCustomerData = async () => {
@@ -150,14 +150,14 @@ const Engagement = () => {
                 });
             }
 
-            console.log("customerDetails.data.customised_pricing_data :", customerDetails.data.customised_pricing)
+          
             if(customer_engagement_model_status.customised_pricing === "1") {
                 setJobEntries(customerDetails.data.customised_pricing);
             }
         }
     }, [customerDetails]);
 
-    console.log("customerDetails", customerDetails)
+  
 
 
     const handleCheckboxChange = (index) => {

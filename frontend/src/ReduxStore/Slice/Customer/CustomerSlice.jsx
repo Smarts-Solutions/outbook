@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { GETALLCOMPANY, ADD_CUSTOMER, GET_SERVICE, ADD_SERVICES, ADD_PEPPER_WORK,GET_ALL_CUSTOMER,GET_CUSTOMER , EDIT_CUSTOMER } from "../../../Services/Customer/CustomerService";
+import { GETALLCOMPANY, ADD_CUSTOMER, GET_SERVICE, ADD_SERVICES, ADD_PEPPER_WORK,GET_ALL_CUSTOMER,GET_CUSTOMER , EDIT_CUSTOMER , Delete_Customer_File } from "../../../Services/Customer/CustomerService";
 
 
 export const GetAllCompany = createAsyncThunk("seachCompany", async (data) => {
@@ -87,6 +87,20 @@ export const Edit_Customer = createAsyncThunk("customerUpdate", async (data) => 
     throw err;
   }
 });
+
+export const DELETE_CUSTOMER_FILE = createAsyncThunk("updateProcessCustomerFileAction", async (data) => {
+  try {
+    const { req, authToken } = data
+    
+    const res = await Delete_Customer_File(req, authToken);
+
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+
  
 
 const CustomerSlice = createSlice({
@@ -102,6 +116,7 @@ const CustomerSlice = createSlice({
     getallcustomers:[],
     getcustomer:[],
     editcustomer:[],
+    deletecustomerfile:[]
      
   },
   reducers: {},
@@ -194,7 +209,19 @@ const CustomerSlice = createSlice({
       .addCase(Edit_Customer.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
-      });
+      })
+      .addCase(DELETE_CUSTOMER_FILE.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(DELETE_CUSTOMER_FILE.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.deletecustomerfile = action.payload;
+      })
+      .addCase(DELETE_CUSTOMER_FILE.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+
 
        
   },
