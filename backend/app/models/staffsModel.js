@@ -16,8 +16,9 @@ const createStaff = async (staff) => {
         throw err;
     }
 };
+
 const getStaff = async () => {
-    const [rows] = await pool.query('SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email , staffs.phone , staffs.status , roles.role_name , roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id');
+    const [rows] = await pool.query('SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email , staffs.phone , staffs.status , roles.role_name , roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id ORDER BY staffs.id DESC');
     return rows;
 };
 
@@ -38,7 +39,6 @@ const deleteStaff = async (staffId) => {
         throw err;
     }
 };
-
 
 const updateStaff = async (staff) => {
     const { id, ...fields } = staff;
@@ -139,6 +139,21 @@ const isLoginAuthTokenCheckmodel = async (staff) => {
      return rows[0];
 };
 
+const profile = async (staff) => {
+    const { id } = staff;
+    const query = `
+    SELECT id, first_name, last_name, email, phone, status FROM staffs WHERE id = ?
+    `;
+
+    try {
+        const [rows] = await pool.execute(query, [id]);
+        return rows[0];
+    } catch (err) {
+        console.error('Error updating data:', err);
+        throw err;
+    }
+}
+
 module.exports = {
     createStaff,
     getStaff,
@@ -148,5 +163,6 @@ module.exports = {
     staffCompetency,
     getStaffByEmail,
     getStaffById,
-    isLoginAuthTokenCheckmodel
+    isLoginAuthTokenCheckmodel,
+    profile
 };

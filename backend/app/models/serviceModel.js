@@ -23,7 +23,8 @@ const createServices = async (Services) => {
 
 const getServices = async () => { 
     const query = `
-    SELECT * FROM services 
+    SELECT * FROM services
+    ORDER BY id DESC 
     `;
 
     try {

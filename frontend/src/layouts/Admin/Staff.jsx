@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch ,useSelector   } from 'react-redux';
 import { Staff, Competency } from '../../ReduxStore/Slice/Staff/staffSlice';
 import { Role } from '../../ReduxStore/Slice/Settings/settingSlice';
 import { FormGroup, Label, Input, Row, Col, Button } from 'reactstrap';
 import Datatable from '../../Components/ExtraComponents/Datatable';
 import CommanModal from '../../Components/ExtraComponents/Modals/CommanModal';
 import sweatalert from 'sweetalert2';
-import Formicform from '../../Components/ExtraComponents/Forms/Formicform';
+import Formicform from '../../Components/ExtraComponents/Forms/Comman.form';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import Validation_Message from '../../Utils/Validation_Message';
@@ -14,6 +14,29 @@ import Validation_Message from '../../Utils/Validation_Message';
 
 const StaffPage = () => {
     const token = JSON.parse(localStorage.getItem("token"));
+
+    const role = JSON.parse(localStorage.getItem("role"));
+    const accessData = useSelector((state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data);
+
+    const [showStaffInsertTab, setShowStaffInsertTab] = useState(true);
+    const [showStaffUpdateTab, setShowStaffUpdateTab] = useState(true);
+    const [showStaffDeleteTab, setStaffDeleteTab] = useState(true);
+
+    useEffect(() => {
+        if (accessData && accessData.length > 0 && role !== "ADMIN" && role !== "SUPERADMIN") {
+            accessData && accessData.map((item) => {
+                if (item.permission_name === "staff") {
+                    const staffInsert = item.items.find((item) => item.type === "insert");
+                    setShowStaffInsertTab(staffInsert && staffInsert.is_assigned == 1);
+                    const staffUpdate = item.items.find((item) => item.type === "update");
+                    setShowStaffUpdateTab(staffUpdate && staffUpdate.is_assigned == 1);
+                    const staffDelete = item.items.find((item) => item.type === "delete");
+                    setStaffDeleteTab(staffDelete && staffDelete.is_assigned == 1);
+                }
+            });
+        }
+    }, [accessData]);
+
 
     const dispatch = useDispatch();
     const [addStaff, setAddStaff] = useState(false);
@@ -104,17 +127,27 @@ const StaffPage = () => {
 
                     {/* <button className='edit-icon' onClick={() => setIsModalOpen(true)}> <i className="ti-user" /></button> */}
                     <button className='delete-icon' onClick={() => setPortfolio(true)}> <i className="ti-briefcase" /></button>
+                    {showStaffUpdateTab && (
                     <button className='edit-icon' onClick={(e) => { setEditStaff(true); setEditStaffData(row); }}> <i className="ti-pencil" /></button>
+                    )}
+                    {showStaffInsertTab && (
                     <button className='delete-icon' onClick={(e) => { ServiceData(row); SetCompetancy(true) }}>Add Competency</button>
+                    )}
+                 
                     <button className='delete-icon'>Log Logs</button>
+                    
                     {row.role === "ADMIN" || row.role === "SUPERADMIN" ? (
+                        showStaffDeleteTab && (
                         <button className='delete-icon' disabled>
                             <i className="ti-trash" />
                         </button>
+                        )
                     ) : (
+                        showStaffDeleteTab && (
                         <button className='delete-icon' onClick={(e) => DeleteStaff(row)}>
                             <i className="ti-trash" />
                         </button>
+                        )
                     )}
 
                 </div>
@@ -194,14 +227,13 @@ const StaffPage = () => {
     });
 
     const fields = [
-
         { type: "text", name: "first_name", label: "First Name", label_size: 12, col_size: 6, disable: false, placeholder: "Enter First Name" },
         { type: "text", name: "last_name", label: "Last Name", label_size: 12, col_size: 6, disable: false, placeholder: "Enter Last Name" },
         { type: "email", name: "email", label: "Email", label_size: 12, col_size: 6, disable: false, placeholder: "Enter Email" },
         { type: "text", name: "phone", label: "Phone", label_size: 12, col_size: 6, disable: false, placeholder: "Enter Phone Number" },
         { type: "password", name: "password", label: "Password", label_size: 12, col_size: 6, disable: false, placeholder: "Enter Password", showWhen: values => !editStaff },
         {
-            type: "select", name: "role", label: "Role", label_size: 12, col_size: 3, disable: false,
+            type: "select", name: "role", label: "Role", label_size: 12, col_size: 6, disable: false,
             options: roleDataAll && roleDataAll.data.map((data) => {
 
                 if (formik.values.role_id == data.id) {
@@ -212,7 +244,7 @@ const StaffPage = () => {
             }),
         },
         {
-            type: "select", name: "status", label: "Status", label_size: 12, col_size: 3, disable: false,
+            type: "select", name: "status", label: "Status", label_size: 12, col_size: 6, disable: false,
             options: [
                 { label: "Active", value: "1" },
                 { label: "Deactive", value: "0" }
@@ -270,7 +302,7 @@ const StaffPage = () => {
     const handleUpdate = async () => {
         try {
             const response = await dispatch(Competency({ req: { "action": "update", "staff_id": serviceDataAll.staff_id, service: serviceDataAll.data }, authToken: token })).unwrap();
-            console.log("response", response)
+     
             if (response.status) {
 
                 sweatalert.fire({
@@ -322,9 +354,14 @@ const StaffPage = () => {
                             <h3 className='mt-0'>Manage Staff</h3>
                         </div>
                         <div>
-                            <button type="button" className='btn btn-info text-white float-end' onClick={() => setAddStaff(true)}>
-                                <i className="fa fa-plus" /> Add Staff
-                            </button>
+                            {
+                                showStaffInsertTab && (
+                                    <button type="button" className='btn btn-info text-white float-end' onClick={() => setAddStaff(true)}>
+                                        <i className="fa fa-plus" /> Add Staff
+                                    </button>
+                                )
+                            }
+                           
                         </div>
                     </div>
                     <div className="col-sm-12">

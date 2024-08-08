@@ -23,6 +23,7 @@ const createCountry = async (Country) => {
 const getCountry = async () => { 
     const query = `
     SELECT * FROM countries
+    ORDER BY id DESC
     `;
 
     try {
@@ -38,7 +39,6 @@ const deleteCountry = async (CountryId) => {
     const query = `
     DELETE FROM countries WHERE id = ?
     `;
-
     try {
         await pool.execute(query, [CountryId]);
     } catch (err) {

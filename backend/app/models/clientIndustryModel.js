@@ -25,6 +25,7 @@ const createClientIndustry = async (ClientIndustry) => {
 const getClientIndustry = async () => { 
     const query = `
     SELECT * FROM client_industry_types
+    ORDER BY id DESC
     `;
 
     try {

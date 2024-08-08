@@ -48,3 +48,20 @@ export async function COMPETENCY(data, token) {
         return await err;
     }
 }
+
+// Competency Action API Add, Edit, Delete
+export async function GETPROFILE(data) {
+    const token = JSON.parse(localStorage.getItem("token"));
+    try {
+        
+
+        const res = await axios.post(`${Config.base_url}profile`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}

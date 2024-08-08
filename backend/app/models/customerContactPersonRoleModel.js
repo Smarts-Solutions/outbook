@@ -23,7 +23,8 @@ const createCustomerContactPersonRole = async (CustomerContactPersonRole) => {
 
 const getCustomerContactPersonRole = async () => { 
     const query = `
-    SELECT * FROM customer_contact_person_role 
+    SELECT * FROM customer_contact_person_role
+    ORDER BY id DESC 
     `;
 
     try {

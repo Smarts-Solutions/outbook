@@ -154,7 +154,8 @@ CREATE TABLE customers (
     customer_type ENUM('1', '2' , '3') NOT NULL DEFAULT '1' COMMENT '1: SoleTrader, 2: Company , 3:Partnership',
     staff_id INT NOT NULL,
     account_manager_id INT NOT NULL COMMENT 'Only staff members who are account managers',
-    trading_name VARCHAR(100) NOT NULL,
+    trading_name VARCHAR(100) NOT NULL UNIQUE,
+    customer_code VARCHAR(100) NOT NULL UNIQUE,
     trading_address VARCHAR(100) NOT NULL,
     vat_registered ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: No, 1: yes',
     vat_number VARCHAR(50) NOT NULL,
@@ -173,17 +174,25 @@ CREATE TABLE customer_services (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL,
     service_id INT NOT NULL,
-    account_manager_id INT NOT NULL COMMENT 'Only staff members who are account managers',
     status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id),
     FOREIGN KEY (service_id) REFERENCES services(id),
-    FOREIGN KEY (account_manager_id) REFERENCES staffs(id)
+    UNIQUE (customer_id,service_id)
 );
 
 /* Can a multiplayer account manager be allocated to one service? */
 
+CREATE TABLE `customer_service_account_managers` (
+    customer_service_id INT NOT NULL,
+    account_manager_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_service_id) REFERENCES customer_services(id),
+    FOREIGN KEY (account_manager_id) REFERENCES staffs(id),
+    UNIQUE (customer_service_id,account_manager_id)
+);
 
 
 
@@ -192,12 +201,12 @@ CREATE TABLE customer_company_information (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL,
     company_name VARCHAR(100) NOT NULL,
-    entity_type VARCHAR(20) NOT NULL,
-    company_status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    entity_type VARCHAR(100) NOT NULL,
+    company_status VARCHAR(100) DEFAULT NULL,
     company_number VARCHAR(50) DEFAULT NULL,
     registered_office_address LONGTEXT NOT NULL,
     incorporation_date DATE NOT NULL,
-    incorporation_in VARCHAR(50) NOT NULL,
+    incorporation_in LONGTEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id)
@@ -312,6 +321,7 @@ CREATE TABLE customer_paper_work (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL,
     file_name VARCHAR(255) NOT NULL,
+    original_name VARCHAR(255) NOT NULL,
     file_type VARCHAR(50) NOT NULL,
     file_size INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -326,6 +336,7 @@ CREATE TABLE customer_paper_work (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL,
     file_name VARCHAR(255) NOT NULL,
+    original_name VARCHAR(255) NOT NULL,
     file_type VARCHAR(50) NOT NULL,
     file_size INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -338,10 +349,11 @@ CREATE TABLE customer_paper_work (
 /*--TABLE:- CLIENTS   */
 CREATE TABLE clients (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    customer_type ENUM('1', '2' , '3' , '4') NOT NULL DEFAULT '1' COMMENT '1: SoleTrader, 2: Company , 3:Partnership , 4 : Individual',
+    client_type ENUM('1', '2' , '3' , '4') NOT NULL DEFAULT '1' COMMENT '1: SoleTrader, 2: Company , 3:Partnership , 4 : Individual',
     customer_id INT NOT NULL,
     client_industry_id INT NOT NULL,
-    trading_name VARCHAR(100) NOT NULL,
+    trading_name VARCHAR(100) NOT NULL UNIQUE,
+    client_code VARCHAR(100) NOT NULL UNIQUE,
     trading_address VARCHAR(100) NOT NULL,
     vat_registered ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: No, 1: Yes',
     vat_number VARCHAR(50) NOT NULL,
@@ -377,7 +389,7 @@ CREATE TABLE client_company_information (
 CREATE TABLE client_contact_details (
     id INT AUTO_INCREMENT PRIMARY KEY,
     client_id INT NOT NULL,
-    role VARCHAR(100) NOT NULL,
+    role INT NOT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
@@ -385,9 +397,11 @@ CREATE TABLE client_contact_details (
     phone VARCHAR(20) NOT NULL,
     alternate_phone VARCHAR(20) DEFAULT NULL,
     residential_address TEXT DEFAULT NULL,
+    authorised_signatory_status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: off, 1: on',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (client_id) REFERENCES clients(id)
+    FOREIGN KEY (role) REFERENCES customer_contact_person_role(id)
 );
 
 
@@ -396,6 +410,7 @@ CREATE TABLE client_contact_details (
     id INT AUTO_INCREMENT PRIMARY KEY,
     client_id INT NOT NULL,
     file_name VARCHAR(255) NOT NULL,
+    original_name VARCHAR(255) NOT NULL,
     file_type VARCHAR(50) NOT NULL,
     file_size INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

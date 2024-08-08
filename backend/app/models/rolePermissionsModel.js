@@ -24,7 +24,7 @@ const createRole = async (Role) => {
 
 const getRole = async () => {
     const query = `
-    SELECT * FROM roles `;
+    SELECT * FROM roles ORDER BY id DESC `;
 
     try {
         const [result] = await pool.execute(query);

@@ -1,13 +1,43 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Role, StatusType, Service, PersonRole, ClientIndustry, Country } from '../../ReduxStore/Slice/Settings/settingSlice'
 import Datatable from '../../Components/ExtraComponents/Datatable';
 import Modal from '../../Components/ExtraComponents/Modals/Modal';
 import sweatalert from 'sweetalert2';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch ,useSelector } from 'react-redux';
+
 
 
 const Setting = () => {
+    const role = JSON.parse(localStorage.getItem("role"));
+    const accessData = useSelector((state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data);
+
+    const [showSettingInsertTab, setShowSettingInsertTab] = useState(true);
+    const [showSettingUpdateTab, setShowSettingUpdateTab] = useState(true);
+    const [showSettingDeleteTab, setSettingDeleteTab] = useState(true);
+
+
+    useEffect(() => {
+        if (accessData && accessData.length > 0 && role !== "ADMIN" && role !== "SUPERADMIN") {
+            accessData && accessData.map((item) => {
+
+                if (item.permission_name === "setting") {
+                    const settingInsert = item.items.find((item) => item.type === "insert");
+                    setShowSettingInsertTab(settingInsert && settingInsert.is_assigned == 1);
+
+                    const settingUpdate = item.items.find((item) => item.type === "update");
+                    setShowSettingUpdateTab(settingUpdate && settingUpdate.is_assigned == 1);
+
+                    const settingDelete = item.items.find((item) => item.type === "delete");
+                    setSettingDeleteTab(settingDelete && settingDelete.is_assigned == 1);
+                }
+
+
+            });
+        }
+    }, [accessData]);
+
+
     const token = JSON.parse(localStorage.getItem("token"));
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -285,109 +315,141 @@ const Setting = () => {
 
     }
 
+   
+
     const columnRoles = [
         { name: 'Role Name', selector: row => row.role_name, sortable: true },
-        {
+        ...(showSettingUpdateTab || showSettingDeleteTab ? [{
             name: 'Actions',
             cell: row => (
                 <div>
-                    <button className='edit-icon' onClick={() => handleEdit(row, '1')}> <i className="ti-pencil" /></button>
-                    <button className='delete-icon' onClick={() => handleDelete(row, '1')}> <i className="ti-trash" /></button>
+                    {showSettingUpdateTab &&
+                        <button className='edit-icon' onClick={() => handleEdit(row, '1')}> <i className="ti-pencil" /></button>
+                    }
+                    {showSettingDeleteTab &&
+                        <button className='delete-icon' onClick={() => handleDelete(row, '1')}> <i className="ti-trash" /></button>
+                    }
                 </div>
             ),
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
-        },
+        }] : [])
     ];
 
     const columnStatusType = [
         { name: 'Status', selector: row => row.type, sortable: true },
-        {
+        ...(showSettingUpdateTab || showSettingDeleteTab ? [{
             name: 'Actions',
             cell: row => (
                 <div >
+                    {showSettingUpdateTab &&
                     <button className='edit-icon' onClick={() => handleEdit(row, '3')}> <i className="ti-pencil" /></button>
+                    }
+                    {showSettingDeleteTab &&
                     <button className='delete-icon' onClick={() => handleDelete(row, '3')}> <i className="ti-trash" /></button>
+                    }
 
                 </div>
             ),
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
-        },
+        }] : [])
     ];
 
     const columnService = [
         { name: 'Service Name', selector: row => row.name, sortable: true },
-        {
+        ...(showSettingUpdateTab || showSettingDeleteTab || showSettingInsertTab ? [{
             name: 'Actions',
             cell: row => (
                 <div>
+                    {showSettingUpdateTab &&
                     <button className='edit-icon' onClick={() => handleEdit(row, '4')}> <i className="ti-pencil" /></button>
+                    }
+                    {showSettingDeleteTab &&
                     <button className='delete-icon' onClick={() => handleDelete(row, '4')}> <i className="ti-trash" /></button>
-                    <button className='btn btn-primary' >Add Job Type</button>
+                    }
+                    {showSettingInsertTab &&
+                    <button className='btn btn-info text-white' onClick={(e) => handleJobType(row)}>Add Job Type</button>
+                    }
                 </div>
             ),
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
-        },
+        }] : [])
     ];
 
     const columnPersonRole = [
         { name: 'Service Name', selector: row => row.name, sortable: true },
-        {
+        ...(showSettingUpdateTab || showSettingDeleteTab ? [{
             name: 'Actions',
             cell: row => (
                 <div >
+                    {showSettingUpdateTab &&
                     <button className='edit-icon' onClick={() => handleEdit(row, '2')}> <i className="ti-pencil" /></button>
+                    }
+                    {showSettingDeleteTab &&
                     <button className='delete-icon' onClick={() => handleDelete(row, '2')}> <i className="ti-trash" /></button>
+                    }
 
                 </div>
             ),
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
-        },
+        }] : [])
     ];
 
     const columnClientIndustry = [
         { name: 'Client Industry', selector: row => row.business_type, sortable: true },
-        {
+        ...(showSettingUpdateTab || showSettingDeleteTab ? [{
             name: 'Actions',
             cell: row => (
                 <div >
+                    {showSettingUpdateTab &&
                     <button className='edit-icon' onClick={() => handleEdit(row, '5')}> <i className="ti-pencil" /></button>
+                    }
+                    {showSettingDeleteTab &&
                     <button className='delete-icon' onClick={() => handleDelete(row, '5')}> <i className="ti-trash" /></button>
+                    }
 
                 </div>
             ),
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
-        },
+        }] : [])
     ];
 
     const columnCountry = [
-        { name: 'Country Code', selector: row => '+' + row.code, sortable: true },
+        { name: 'Country Code', selector: row => row.code, sortable: true },
         { name: 'Country Name', selector: row => row.name, sortable: true },
         { name: 'Currency', selector: row => row.currency, sortable: true },
         { name: 'Currency Status', selector: row => row.status == 1 ? "Yes" : "No", sortable: true },
-        {
+        ...(showSettingUpdateTab || showSettingDeleteTab ? [{
             name: 'Actions',
             cell: row => (
                 <div >
+                    {showSettingUpdateTab &&
                     <button className='edit-icon' onClick={() => handleEdit(row, '6')}> <i className="ti-pencil" /></button>
+                    }
+                    {showSettingDeleteTab &&
                     <button className='delete-icon' onClick={() => handleDelete(row, '6')}> <i className="ti-trash" /></button>
+                    }
                 </div>
             ),
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
-        },
+        }] : [])
     ];
 
+
+    const handleJobType = (row) => {
+        navigate('/admin/add/jobtype', { state: { Id: row.id } })
+    }
 
     const handleModalChange = (e) => {
         // setModalData({ ...modalData, value: e.target.value });
@@ -629,12 +691,12 @@ const Setting = () => {
                     },
                     {
                         type: "text",
-                        name: "name",
+                        name: "code",
                         label: "Country Code",
                         placeholder: "Enter Country Code",
                         value: data.code
                     },
-                    
+
                     {
                         type: "select",
                         name: "status",
@@ -822,9 +884,14 @@ const Setting = () => {
                                 <div className='tab-title'>
                                     <h3 className='mt-0'>Staff Role</h3>
                                 </div>
-                                <div>
-                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '1')}> <i className="fa fa-plus" /> Add Staff Role</button>
-                                </div>
+                                {
+                                    !showSettingInsertTab ? null :
+                                        <div>
+
+                                            <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '1')}> <i className="fa fa-plus" /> Add Staff Role</button>
+                                        </div>
+                                }
+
                             </div>
                             <div className='datatable-wrapper'>
                                 <Datatable
@@ -843,9 +910,16 @@ const Setting = () => {
                                 <div className='tab-title'>
                                     <h3 className='mt-0'>Customer Contact Person Role</h3>
                                 </div>
-                                <div>
-                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '2')}> <i className="fa fa-plus" /> Customer Contact Person Role</button>
-                                </div>
+
+
+                                {
+                                    !showSettingInsertTab ? null :
+                                        <div>
+                                            <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '2')}> <i className="fa fa-plus" /> Customer Contact Person Role</button>
+                                        </div>
+                                }
+
+
                             </div>
                             <div className='datatable-wrapper'>
                                 <Datatable
@@ -867,9 +941,14 @@ const Setting = () => {
                                 <div className='tab-title'>
                                     <h3 className='mt-0'>Status Type</h3>
                                 </div>
-                                <div>
-                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '3')}> <i className="fa fa-plus" /> Add Status</button>
-                                </div>
+
+                                {
+                                    !showSettingInsertTab ? null :
+                                        <div>
+                                            <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '3')}> <i className="fa fa-plus" /> Add Status</button>
+                                        </div>
+                                }
+
                             </div>
                             <div className='datatable-wrapper'>
 
@@ -889,9 +968,13 @@ const Setting = () => {
                                 <div className='tab-title'>
                                     <h3 className='mt-0'>Services</h3>
                                 </div>
-                                <div>
-                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '4')}> <i className="fa fa-plus" /> Add Service</button>
-                                </div>
+                                {
+                                    !showSettingInsertTab ? null :
+                                        <div>
+                                            <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '4')}> <i className="fa fa-plus" /> Add Service</button>
+                                        </div>
+                                }
+
                             </div>
                             <div className='datatable-wrapper'>
 
@@ -912,9 +995,13 @@ const Setting = () => {
                                 <div className='tab-title'>
                                     <h3 className='mt-0'>Client Industry</h3>
                                 </div>
-                                <div>
-                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '5')}> <i className="fa fa-plus" /> Add Client Industry</button>
-                                </div>
+                                {
+                                    !showSettingInsertTab ? null :
+                                        <div>
+                                            <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '5')}> <i className="fa fa-plus" /> Add Client Industry</button>
+                                        </div>
+                                }
+
                             </div>
                             <div className='datatable-wrapper'>
                                 <Datatable
@@ -933,9 +1020,13 @@ const Setting = () => {
                                 <div className='tab-title'>
                                     <h3 className='mt-0'>Country</h3>
                                 </div>
-                                <div>
-                                    <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '6')}> <i className="fa fa-plus" /> Add Country</button>
-                                </div>
+                                {
+                                    !showSettingInsertTab ? null :
+                                        <div>
+                                            <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '6')}> <i className="fa fa-plus" /> Add Country</button>
+                                        </div>
+                                }
+
                             </div>
                             <div className='datatable-wrapper'>
 
