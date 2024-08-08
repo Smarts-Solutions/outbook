@@ -1903,13 +1903,71 @@ const customerUpdate = async (customer) => {
     else if (pageStatus === "4") {
         console.log("Done")
         const { customer_id, customer_paper_work } = customer;
+
+        const [ExistPaperWorkIds] = await pool.execute('SELECT id  FROM `customer_paper_work` WHERE customer_id =' + customer_id);
         console.log("customer_id", customer_id);
-        console.log("customer_paper_work", customer_paper_work);
+        console.log("customer_paper_work", ExistPaperWorkIds);
       
+        const idArray = ExistPaperWorkIds.map(item => item.id);
+        let arrayInterId = [];
 
 
 
+        if(customer_paper_work.length > 0){
+            for (const paperVal of customer_paper_work) {
+                let paper_id = paperVal.customer_paper_work_id;
+                let file_name = paperVal.file_name;
+                let original_name = paperVal.original_name;
+                let file_type = paperVal.file_type;
+                let file_size = paperVal.file_size;
+                if (paper_id == "" || paper_id == undefined || paper_id == null) {
+                    const insertQuery = `
+                        INSERT INTO customer_paper_work (
+                            customer_id,
+                            file_name,
+                            original_name,
+                            file_type,
+                            file_size
+                        ) VALUES (?, ?, ?, ?, ?)
+                    `;
+                    const [result] = await pool.execute(insertQuery, [
+                        customer_id,
+                        file_name,
+                        original_name,
+                        file_type,
+                        file_size
+                    ]);
+                    customer_paper_work_id = result.insertId;
+                } else {
+                    arrayInterId.push(paper_id);
         
+                    const updateQuery = `
+                        UPDATE customer_paper_work SET
+                            file_name = ?, original_name = ?, file_type = ?, file_size = ?
+                        WHERE id = ?
+                    `;
+                    await pool.execute(updateQuery, [
+                        file_name,
+                        original_name,
+                        file_type,
+                        file_size,
+                        paper_id
+                    ]);
+                }
+            }
+        
+            let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
+            if (deleteIdArray.length > 0) {
+                for (const id of deleteIdArray) {
+                    const query3 = `
+                        DELETE FROM customer_paper_work WHERE id = ?
+                    `;
+                    await pool.execute(query3, [id]);
+                }
+            }
+
+        }
+
     }
     else {
         return { status: false, message: 'Error in page status.' };
