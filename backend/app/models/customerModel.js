@@ -185,22 +185,21 @@ ORDER BY
 
     try {
         const [result] = await pool.execute(query);
-        return result;
+        return { status: true, message: 'Success..', data: result };
+
     } catch (err) {
         // console.error('Error selecting data:', err);
-        return [];
+      return { status: true, message: 'Error selecting data', data: err };
     }
 
 }
 
 const deleteCustomer = async (customer) => {
-    // const { id } = customer;
-    // console.log("customer_id", id);
-    // const query = `
-    // DELETE FROM customers WHERE id = ?`;
-
+    // const { customer_id } = customer;
+    // console.log("customer_id", customer_id);
     // try {
-    //     await pool.execute(query, [id]);
+    //     await pool.execute('DELETE FROM customers WHERE id = ?', [customer_id]);
+    //     await pool.execute('DELETE FROM customer_company_information WHERE customer_id = ?', [customer_id]);
     // } catch (err) {
     //     console.error('Error deleting data:', err);
     //     throw err;
@@ -1954,19 +1953,19 @@ const customerUpdate = async (customer) => {
     }
 
     //  Page Status 4 Paper Work Part
-    else if (pageStatus === "4") {
-        console.log("Done")
-        const { customer_id, customer_paper_work } = customer;
+    // else if (pageStatus === "4") {
+    //     console.log("Done")
+    //     const { customer_id, customer_paper_work } = customer;
 
-        const [ExistPaperWorkIds] = await pool.execute('SELECT id  FROM `customer_paper_work` WHERE customer_id =' + customer_id);
-        console.log("customer_id", customer_id);
-        console.log("customer_paper_work", customer_paper_work);
+    //     const [ExistPaperWorkIds] = await pool.execute('SELECT id  FROM `customer_paper_work` WHERE customer_id =' + customer_id);
+    //     console.log("customer_id", customer_id);
+    //     console.log("customer_paper_work", customer_paper_work);
       
 
 
 
         
-    }
+    // }
     else {
         return { status: false, message: 'Error in page status.' };
     }

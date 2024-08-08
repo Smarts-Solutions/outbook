@@ -447,14 +447,14 @@ WHERE
 const deleteClient = async (client) => {
     const { client_id } = client;
     console.log("client_id", client_id);
-    const query = `
-    DELETE FROM clients WHERE id = ?`;
-
     try {
-        await pool.execute(query, [client_id]);
+        await pool.execute('DELETE FROM clients WHERE id = ?', [client_id]);
+        await pool.execute('DELETE FROM client_company_information WHERE client_id = ?', [client_id]);
+        await pool.execute('DELETE FROM client_contact_details WHERE client_id = ?', [client_id]);
+        await pool.execute('DELETE FROM client_documents WHERE client_id = ?', [client_id]);
+        return { status: true, message: 'Client deleted successfully.' };
     } catch (err) {
-        console.error('Error deleting data:', err);
-        throw err;
+        return { status: false, message: 'Err Client Delete' };
     }
 
 }
