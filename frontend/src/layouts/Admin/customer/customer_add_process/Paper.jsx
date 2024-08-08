@@ -60,11 +60,7 @@ const Paper = () => {
                 console.log("Error", error);
             });
 
-
-
     };
-
-
 
     return (
         <Formik
