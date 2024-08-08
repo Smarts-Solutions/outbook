@@ -52,13 +52,12 @@ const ClientList = () => {
   function handleDelete(row) {
     console.log('Deleting row:', row);
   }
-
-  console.log("location", location.state.id)
+ 
 
  
 
   const GetAllServiceData = async () => {
-    const req = { action: "get" ,cutomer_id:location.state.id};
+    const req = { action: "get" ,customer_id:location.state.id};
     const data = { req: req, authToken: token };
     await dispatch(Get_All_Client(data))
       .unwrap()
@@ -124,14 +123,18 @@ const ClientList = () => {
         </div>
       </div>
       <div className="tab-content" id="pills-tabContent">
+
+        {console.log("activeTab", activeTab)}
         {tabs.map((tab) => (
           <div
             key={tab.id}
-            className={`tab-pane fade ${activeTab === tab.id ? 'show active' : ''}`}
+            className={`tab-pane fade ${activeTab == tab.id ? 'show active' : ''}`}
             id={tab.id}
             role="tabpanel"
             aria-labelledby={`${tab.id}-tab`}
           >
+
+
 
             {customerData && customerData && (
               <Datatable columns={columns} data={customerData} filter={false} />

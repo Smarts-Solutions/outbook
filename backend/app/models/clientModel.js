@@ -145,8 +145,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 };
 
 const getClient = async (client) => {
-    const { cutomer_id } = client;
-    // console.log("cutomer_id",cutomer_id)
+    const { customer_id } = client;
+    console.log("cutomer_id",customer_id)
     const query = `
     SELECT  
         clients.id AS id,
@@ -172,11 +172,12 @@ const getClient = async (client) => {
 `;
 
     try {
-        const [result] = await pool.execute(query, [cutomer_id]);
-        return result;
+        const [result] = await pool.execute(query, [customer_id]);
+        return { status: true, message: 'success.', data: result };
+       
     } catch (err) {
-        console.error('Error selecting data:', err);
-        return [];
+        return { status: false, message: 'Err Client Get' };
+     
     }
 
 
@@ -257,11 +258,11 @@ WHERE
                 contact_details: contactDetails
             };
 
-            return result
+            return { status: true, message: 'success.', data: result };
             // Return or further process `result` as needed
         } else {
             // console.log("No customer found with the given ID.");
-            return []
+            return { status: false, message: 'No customer found with the given ID.' };
         }
         ;
     }
@@ -347,11 +348,11 @@ WHERE
                 contact_details: contactDetails
             };
 
-            return result
+            return { status: true, message: 'success.', data: result };
             // Return or further process `result` as needed
         } else {
             // console.log("No customer found with the given ID.");
-            return []
+            return { status: false, message: 'No customer found with the given ID.' };
         }
         ;
     }
@@ -429,16 +430,17 @@ WHERE
                 contact_details: contactDetails
             };
 
-            return result
+            return { status: true, message: 'success.', data: result };
             // Return or further process `result` as needed
         } else {
             // console.log("No customer found with the given ID.");
-            return []
+            return { status: false, message: 'No customer found with the given ID.' };
+            
         }
         ;
     }
     else {
-        return []
+        return { status: false, message: 'No customer found with the given ID.' };
     }
 
 
