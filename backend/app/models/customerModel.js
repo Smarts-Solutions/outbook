@@ -702,7 +702,8 @@ const updateProcessCustomerFileGet = async (customerProcessData) => {
 
 const updateProcessCustomerFileDelete = async (customerProcessData) => {
     const { id, file_name } = customerProcessData;
-    console.log("customer_id", customer_id);
+    
+
     const query = `
     DELETE FROM customer_paper_work WHERE id = ?`;
 
