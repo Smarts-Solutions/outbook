@@ -17,8 +17,8 @@ const ClientList = () => {
  
    
   const tabs = [
-    { id: 'client', label: 'Client' },
-    { id: 'job', label: 'Job' },
+    { id: 'viewclient', label: 'View Client' },
+    { id: 'NoOfJobs', label: 'Job' },
     { id: 'documents', label: 'Documents' },
   ];
 
