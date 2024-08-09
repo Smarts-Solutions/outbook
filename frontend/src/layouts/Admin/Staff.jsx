@@ -348,24 +348,21 @@ const StaffPage = () => {
     return (
         <div>
             <div className='container-fluid'>
-                <div className='report-data mt-4'>
-                    <div className='d-flex justify-content-between align-items-center'>
-                        <div className='tab-title'>
+                <div className='content-title'>
+                <div className='tab-title'>
                             <h3 className='mt-0'>Manage Staff</h3>
                         </div>
+                </div>
+                <div className='report-data mt-4'>
+                    <div className='d-flex justify-content-between align-items-center'>
+                       
                         <div>
-                            {
-                                showStaffInsertTab && (
-                                    <button type="button" className='btn btn-info text-white float-end' onClick={() => setAddStaff(true)}>
-                                        <i className="fa fa-plus" /> Add Staff
-                                    </button>
-                                )
-                            }
+                           
                            
                         </div>
                     </div>
                     <div className="col-sm-12">
-                        <div className="page-title-box">
+                        <div className="page-title-box pt-0">
                             <div className="row align-items-start">
                                 <div className="col-md-8">
                                     <>
@@ -389,6 +386,15 @@ const StaffPage = () => {
                                             ))}
                                         </ul>
                                     </>
+                                </div>
+                                <div className='col-md-4'>
+                                {
+                                showStaffInsertTab && (
+                                    <button type="button" className='btn btn-info text-white float-end' onClick={() => setAddStaff(true)}>
+                                        <i className="fa fa-plus" /> Add Staff
+                                    </button>
+                                )
+                            }
                                 </div>
                             </div>
                         </div>

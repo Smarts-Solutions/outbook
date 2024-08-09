@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css?family=Inter:400,500,600,700&amp;display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
 .left-sidenav {
   min-width: 250px;
   max-width: 250px;
@@ -980,7 +980,7 @@ hr.hr-dashed {
 }
 .card .card-header {
   background-color: #fff;
-  border-bottom: 1px solid #eceff5;
+  border-bottom: 1px solid #b7b6b6;
 }
 .card .card-header:first-child {
   border-radius: calc(0.5rem - 1px) calc(0.5rem - 1px) 0 0;
@@ -4169,7 +4169,7 @@ pre[class*="lang-html"] {
 .page-title-box {
   padding: 24px 0;
 }
-.page-title-box .page-title {
+.page-title-box .page-title ,.content-title .tab-title h3{
   font-size: 24px;
   margin: 0;
   color: #333547;
@@ -6200,7 +6200,7 @@ hr.thick {
   position: relative;
   max-width: 128px;
   max-height: 128px;
-  margin-right: 18px;
+  margin-right: 10px;
 }
 .dastyle-profile
   .dastyle-profile-main
@@ -6209,9 +6209,9 @@ hr.thick {
   cursor: pointer;
   background-color: #1761fd;
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  position: absolute;
+  width: 50px;
+  height: 50px;
+  
   bottom: 4px;
   right: 4px;
   display: -webkit-box;
@@ -6235,10 +6235,10 @@ hr.thick {
   .dastyle-profile-main-pic
   .dastyle-profile_main-pic-change
   i {
-  -webkit-transition: all 0.3s;
-  transition: all 0.3s;
-  color: #fff;
-  font-size: 12px;
+    -webkit-transition: all 0.3s;
+    transition: all 0.3s;
+    color: #fff;
+    font-size: 26px;
 }
 .dastyle-profile
   .dastyle-profile-main
@@ -7982,7 +7982,7 @@ ul.steppedprogress li:first-child:after {
 .faq-qa li h6 {
   font-size: 14px;
   color: #333547;
-  font-weight: 500;
+  font-weight: 600;
 }
 #accordionExample-faq .card-header {
   background-color: #f1f5fa;
@@ -8046,10 +8046,11 @@ span.sidebar-icons {
   font-weight: 400;
   line-height: 19.36px;
 }
-.card.report-card,.activity-card {
+.card.report-card, .activity-card {
   box-shadow: none;
   border: none;
-  border-radius: 0;
+  border-radius: 6px;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 }
 .activity-info-text p {
   font-size: 12px;
@@ -8120,8 +8121,8 @@ font-weight: 600;
   /* line-height: 24px; */
   border-radius: 3px;
 }
-button.btn.btn-info ,.blue-btn {
-  background: #00AFEF ;
+button.btn.btn-info, .blue-btn {
+  background: #00AFEF;
   border-color: #00AFEF !important;
   border: 1px solid !important;
   border-radius: 0;
@@ -8130,8 +8131,27 @@ button.btn.btn-info ,.blue-btn {
   font-size: 14px;
   line-height: 16.94px;
   height: auto;
+  position: relative;
+  z-index: 1;
 }
-.blue-btn:hover
+.btn-danger{
+  background-color: #dc3545;
+  border: 1px solid !important;
+  border-radius: 0;
+  padding: 10px 20px;
+  font-weight: 900;
+  font-size: 14px;
+  line-height: 16.94px;
+  height: auto;
+}
+.btn-danger:hover{
+  
+  color:  #dc3545 !important;
+  border-color:  #dc3545 !important;
+  border: 1px solid !important;
+  background: transparent !important;
+}
+.blue-btn:hover,.btn-info:hover
 {  color: #00AFEF !important;
   border-color: #00AFEF !important;
   border: 1px solid !important;
@@ -8158,8 +8178,18 @@ button.btn.btn-info ,.blue-btn {
   background: #00AFEF !important;
 }
 .report-data {
-  border: 1px solid #9E9E9E;
-  padding: 15px;
+  /* border: 1px solid #9E9E9E; */
+  padding: 20px;
+  border-radius: 6px;
+  background-color: #fff;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+}
+.content-title {
+  margin-top: 25px;
+  background-color: #fff;
+  padding: 20px;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+  border-radius: 6px;
 }
 .datatable-wrapper
 {
@@ -8235,6 +8265,7 @@ font-size: 20px;
 font-weight: 600;
 line-height: 24.2px;
 text-align: left;
+margin-bottom: 0px;
 }
 .accordion-header {
   margin-top: 0;
@@ -8300,6 +8331,25 @@ main .error__feedback {
 }
 
 .label_bottom{
-
   color: #A2A0A0 !important;
+}
+
+.datatable-container div{
+  scrollbar-width: thin;
+}
+.trading-details, .trading-details p, .personal-detail
+{
+  font-size: 14px;
+}
+.mt-minus {
+  margin-top: -45px;
+}
+.job-filter-btn
+{
+  margin-left: 360px;
+  margin-top: 10px;
+}
+
+.job-filter-btn button {
+  top: 4px;
 }

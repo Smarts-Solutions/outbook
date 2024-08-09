@@ -100,9 +100,15 @@ const Customer = () => {
 
   return (
     <div className='container-fluid'>
-      <div className="row ">
+    
+      <div className='content-title'>
+                <div className='tab-title'>
+                            <h3 className='mt-0'>Customers</h3>
+                        </div>
+                </div>
+                <div className='report-data mt-4'>     
         <div className="col-sm-12">
-          <div className="page-title-box">
+          <div className="page-title-box pt-0">
             <div className="row align-items-start">
               <div className="col-md-8">
                 <ul className="nav nav-pills rounded-tabs" id="pills-tab" role="tablist">
@@ -131,7 +137,9 @@ const Customer = () => {
             </div>
           </div>
         </div>
-      </div>
+       
+      
+     
       <div className="tab-content" id="pills-tabContent">
         {tabs.map((tab) => (
           <div
@@ -148,6 +156,8 @@ const Customer = () => {
           </div>
         ))}
       </div>
+    </div>
+   
     </div>
   );
 };
