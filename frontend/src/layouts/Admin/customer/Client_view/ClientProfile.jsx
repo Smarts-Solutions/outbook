@@ -18,7 +18,7 @@ const ClientList = () => {
    
   const tabs = [
     { id: 'viewclient', label: 'View Client' },
-    { id: 'NoOfJobs', label: 'Job' },
+    { id: 'NoOfJobs', label: 'No.Of Jobs' },
     { id: 'documents', label: 'Documents' },
   ];
 
@@ -129,9 +129,13 @@ const ClientList = () => {
                   ))}
                 </ul>
               </div>
+              {
+                activeTab == 'NoOfJobs' &&
               <div className="col-md-4 col-auto">
-                <div  className='btn btn-info text-white float-end blue-btn' onClick={handleAddClient}> <i className="fa fa-plus" />Add Client</div>
+                <div  className='btn btn-info text-white float-end blue-btn' onClick={handleAddClient}> <i className="fa fa-plus" /> Create Job</div>
               </div>
+
+              }
             </div>
           </div>
         </div>
