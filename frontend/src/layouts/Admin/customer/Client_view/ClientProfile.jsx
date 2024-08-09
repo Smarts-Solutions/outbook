@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import Datatable from '../../../../Components/ExtraComponents/Datatable';
 import {Get_All_Client } from '../../../../ReduxStore/Slice/Client/ClientSlice';
 import { useNavigate , useLocation } from 'react-router-dom';
+import CreateJob from '../Client_view/ClientJobs/CreateJob';
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -66,6 +67,7 @@ const ClientList = () => {
     console.log('Deleting row:', row);
   }
  
+  console.log("location",location.state); 
 
  
 
@@ -93,13 +95,10 @@ const ClientList = () => {
   }, []);
 
 
-  const handleAddClient = () => {
-    navigate('/admin/addclient' , {state : {id : location.state.id}});
+  const handleCreateJob = () => {
+    navigate('/admin/createjob' , {state : {details : location.state}});
   }
 
-
- 
-  console.log("activeTab", activeTab);
 
   return (
     <div className='container-fluid'>
@@ -132,7 +131,7 @@ const ClientList = () => {
               {
                 activeTab == 'NoOfJobs' &&
               <div className="col-md-4 col-auto">
-                <div  className='btn btn-info text-white float-end blue-btn' onClick={handleAddClient}> <i className="fa fa-plus" /> Create Job</div>
+                <div  className='btn btn-info text-white float-end blue-btn' onClick={handleCreateJob}> <i className="fa fa-plus" /> Create Job</div>
               </div>
 
               }

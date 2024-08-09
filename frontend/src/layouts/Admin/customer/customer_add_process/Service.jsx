@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Formik } from "formik";
 import { Button } from "antd";
-import { Get_Service } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
+
 import MultiStepFormContext from "./MultiStepFormContext";
 import { useDispatch } from "react-redux";
 import CommanModal from '../../../../Components/ExtraComponents/Modals/CommanModal';
 import { Staff } from '../../../../ReduxStore/Slice/Staff/staffSlice';
-import { ADD_SERVICES_CUSTOMERS } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { ADD_SERVICES_CUSTOMERS , Get_Service } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
 
 
 const Service = () => {

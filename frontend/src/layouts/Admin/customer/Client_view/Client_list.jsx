@@ -10,10 +10,10 @@ const ClientList = () => {
   const location  = useLocation();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
-  const [customerData, setCustomerData] = useState([]);
+  const [ClientData, setClientData] = useState([]);
   const [activeTab, setActiveTab] = useState('client');
 
- 
+ console.log("location cpp",location.state);
  
    
   const tabs = [
@@ -54,7 +54,7 @@ const ClientList = () => {
   ];
 
   const HandleClientView = (row) => {
-    navigate('/admin/client/profile', { state: row });
+    navigate('/admin/client/profile', { state: {row ,customer_id : location.state}});
   }
 
   function handleEdit(row) {
@@ -76,9 +76,9 @@ const ClientList = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setCustomerData(response.data)
+          setClientData(response.data)
         } else {
-          setCustomerData(response.data)
+          setClientData(response.data)
 
         }
       })
@@ -147,8 +147,8 @@ const ClientList = () => {
             role="tabpanel"
             aria-labelledby={`${tab.id}-tab`}
           >
-            {customerData && customerData && (
-              <Datatable columns={columns} data={customerData} filter={false} />
+            {ClientData && ClientData && (
+              <Datatable columns={columns} data={ClientData} filter={false} />
             )}
           </div>
         ))}

@@ -66,6 +66,15 @@ const createCustomer = async (customer) => {
 
         const firstThreeLetters = Trading_Name.substring(0, 3)
         const customer_code = "cust_" + firstThreeLetters + "_" + UniqueNo;
+
+        const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
+
+        const [check] = await pool.execute(checkQuery, [Trading_Name]);
+        if (check.length > 0) {
+            return { status: false, message: 'Customer Trading Name Already Exists.' };
+        }
+
+
         const query = `
     INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -117,6 +126,16 @@ const createCustomer = async (customer) => {
 
         const firstThreeLetters = Trading_Name.substring(0, 3)
         const customer_code = "cust_" + firstThreeLetters + "_" + UniqueNo;
+
+
+        const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
+
+        const [check] = await pool.execute(checkQuery, [Trading_Name]);
+        if (check.length > 0) {
+            return { status: false, message: 'Customer Trading Name Already Exists.' };
+        }
+
+
 
         const query = `
     INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process)

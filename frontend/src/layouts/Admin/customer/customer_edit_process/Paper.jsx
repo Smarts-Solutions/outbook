@@ -1,10 +1,9 @@
-import React, { useContext, useRef, useState , useEffect } from "react";
+import React, { useContext, useRef, useState, useEffect } from "react";
 import { Formik, Field, Form } from "formik";
 import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
- 
 import { useDispatch } from 'react-redux';
-import { useNavigate  , useLocation} from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import sweatalert from 'sweetalert2';
 import { ADD_PEPPER_WORKS, GET_CUSTOMER_DATA, DELETE_CUSTOMER_FILE } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
 
@@ -15,18 +14,11 @@ const Paper = () => {
     const token = JSON.parse(localStorage.getItem("token"));
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const [customerDetails, setCustomerDetails] = useState({
-        loading: true,
-        data: [],
-    });
-
-
-    console.log("customerDetails", customerDetails);
+    const [customerDetails, setCustomerDetails] = useState({ loading: true, data: [] });
     const [fileState, setFileState] = useState([]);
 
     const handleUploadClick = () => {
         if (fileInputRef.current) {
-            
             fileInputRef.current.click();
         }
     };
@@ -35,11 +27,13 @@ const Paper = () => {
         setFileState(event.currentTarget.files);
     };
 
+    let data = new FormData();
 
     const GetCustomerData = async () => {
-        const req = { customer_id: location.state.id, pageStatus: "4" }
-        const data = { req: req, authToken: token }
-        await dispatch(GET_CUSTOMER_DATA(data))
+        const req = { customer_id: location.state.id, pageStatus: "4" };
+        const data1 = { req: req, authToken: token };
+
+        await dispatch(GET_CUSTOMER_DATA(data1))
             .unwrap()
             .then((response) => {
                 if (response.status) {
@@ -47,6 +41,16 @@ const Paper = () => {
                         loading: false,
                         data: response.data
                     });
+
+                    // Clear the FormData before appending new files
+                    data = new FormData();
+
+                    // Append files to FormData
+                    Array.from(response.data.customer_paper_work).forEach((file, index) => {
+                        data.append("files", file);
+                    });
+
+                    console.log("FormData after appending files:", data.getAll("files"));
                 } else {
                     setCustomerDetails({
                         loading: false,
@@ -59,15 +63,18 @@ const Paper = () => {
             });
     }
 
+
     useEffect(() => {
         GetCustomerData();
     }, []);
 
     const handleSubmit = async () => {
-        let data = new FormData();
+        data = new FormData();
 
         if (fileState && typeof fileState[Symbol.iterator] === 'function') {
             Array.from(fileState).forEach((file, index) => {
+                console.log("file", file)
+
                 data.append("files", file);
             });
         } else {
@@ -76,6 +83,7 @@ const Paper = () => {
         }
 
         data.append('customer_id', address);
+
 
         const data1 = { req: data, authToken: token }
         await dispatch(ADD_PEPPER_WORKS(data1))
@@ -96,6 +104,9 @@ const Paper = () => {
             });
 
     };
+
+
+    console.log("---", data.getAll("files"));
 
     return (
         <Formik
