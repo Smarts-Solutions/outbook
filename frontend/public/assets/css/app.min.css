@@ -4169,7 +4169,7 @@ pre[class*="lang-html"] {
 .page-title-box {
   padding: 24px 0;
 }
-.page-title-box .page-title {
+.page-title-box .page-title ,.content-title .tab-title h3{
   font-size: 24px;
   margin: 0;
   color: #333547;
@@ -8046,10 +8046,11 @@ span.sidebar-icons {
   font-weight: 400;
   line-height: 19.36px;
 }
-.card.report-card,.activity-card {
+.card.report-card, .activity-card {
   box-shadow: none;
   border: none;
-  border-radius: 0;
+  border-radius: 6px;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 }
 .activity-info-text p {
   font-size: 12px;
@@ -8337,4 +8338,7 @@ main .error__feedback {
 .trading-details, .trading-details p, .personal-detail
 {
   font-size: 14px;
+}
+.mt-minus {
+  margin-top: -45px;
 }

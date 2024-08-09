@@ -80,7 +80,7 @@ const formattedDate = `${day} ${month} ${year}`;
           <div className="col-lg-8 col-md-8">
 
             <>
-              <ul className="nav nav-pills mb-3 mt-3 rounded-tabs" id="pills-tab" role="tablist">
+              <ul className="nav nav-pills mb-3 rounded-tabs" id="pills-tab" role="tablist">
                 <li className="nav-item" role="presentation">
                   <button
                     className="nav-link active"
@@ -265,8 +265,8 @@ const formattedDate = `${day} ${month} ${year}`;
 
                     </div>
 
-                    <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                    <div className="col-md-6 col-lg-4 ">
+                      <div className="card report-card mt-2" >
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col">

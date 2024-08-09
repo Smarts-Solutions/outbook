@@ -108,7 +108,7 @@ const Customer = () => {
                 </div>
                 <div className='report-data mt-4'>     
         <div className="col-sm-12">
-          <div className="page-title-box">
+          <div className="page-title-box pt-0">
             <div className="row align-items-start">
               <div className="col-md-8">
                 <ul className="nav nav-pills rounded-tabs" id="pills-tab" role="tablist">
