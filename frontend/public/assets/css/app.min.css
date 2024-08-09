@@ -8132,10 +8132,11 @@ button.btn.btn-info ,.blue-btn {
   height: auto;
 }
 .blue-btn:hover
-{  color: #00AFEF !important;
+{ 
+   /* color: #00AFEF !important;
   border-color: #00AFEF !important;
   border: 1px solid !important;
-  background: transparent !important;
+  background: transparent !important; */
 }
 .white-btn
 {
@@ -8158,8 +8159,11 @@ button.btn.btn-info ,.blue-btn {
   background: #00AFEF !important;
 }
 .report-data {
-  border: 1px solid #9E9E9E;
-  padding: 15px;
+	/* border: 1px solid #9E9E9E; */
+	padding: 30px;
+	background: #fff;
+	
+	box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 }
 .datatable-wrapper
 {
@@ -8235,6 +8239,7 @@ font-size: 20px;
 font-weight: 600;
 line-height: 24.2px;
 text-align: left;
+margin-bottom: 0px;
 }
 .accordion-header {
   margin-top: 0;
@@ -8302,4 +8307,32 @@ main .error__feedback {
 .label_bottom{
 
   color: #A2A0A0 !important;
+}
+.forget-btn:hover
+{
+text-decoration: underline;
+}
+.forget-btn
+{
+text-decoration: none;
+}
+
+button.btn.btn-info:hover, .blue-btn:hover {
+  background: #333547;
+  border-color: #333547 !important;
+  
+}
+span.error-text {
+  background: #e70303;
+  width: 100%;
+  display: block;
+  color: #fff;
+  padding: 2px 5px;
+}
+
+.content-title {
+	box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+	background: #fff;
+	margin-top: 20px;
+	padding: 20px 10px;
 }
