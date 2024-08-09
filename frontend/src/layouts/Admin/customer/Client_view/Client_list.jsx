@@ -86,6 +86,7 @@ const ClientList = () => {
 
 
  
+  console.log("activeTab", activeTab);
 
   return (
     <div className='container-fluid'>
@@ -133,9 +134,6 @@ const ClientList = () => {
             role="tabpanel"
             aria-labelledby={`${tab.id}-tab`}
           >
-
-
-
             {customerData && customerData && (
               <Datatable columns={columns} data={customerData} filter={false} />
             )}
