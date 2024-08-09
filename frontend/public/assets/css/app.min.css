@@ -8121,8 +8121,8 @@ font-weight: 600;
   /* line-height: 24px; */
   border-radius: 3px;
 }
-button.btn.btn-info ,.blue-btn {
-  background: #00AFEF ;
+button.btn.btn-info, .blue-btn {
+  background: #00AFEF;
   border-color: #00AFEF !important;
   border: 1px solid !important;
   border-radius: 0;
@@ -8131,6 +8131,8 @@ button.btn.btn-info ,.blue-btn {
   font-size: 14px;
   line-height: 16.94px;
   height: auto;
+  position: relative;
+  z-index: 1;
 }
 .btn-danger{
   background-color: #dc3545;
@@ -8341,4 +8343,13 @@ main .error__feedback {
 }
 .mt-minus {
   margin-top: -45px;
+}
+.job-filter-btn
+{
+  margin-left: 360px;
+  margin-top: 10px;
+}
+
+.job-filter-btn button {
+  top: 4px;
 }
