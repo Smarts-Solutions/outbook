@@ -95,6 +95,7 @@ const ClientList = () => {
   }, []);
 
 
+  console.log("location.state :", location.state)
   const handleCreateJob = () => {
     navigate('/admin/createjob' , {state : {details : location.state}});
   }

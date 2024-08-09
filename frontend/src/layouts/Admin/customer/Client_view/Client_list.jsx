@@ -12,10 +12,7 @@ const ClientList = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const [ClientData, setClientData] = useState([]);
   const [activeTab, setActiveTab] = useState('client');
-
- console.log("location cpp",location.state);
  
-   
   const tabs = [
     { id: 'client', label: 'Client' },
     { id: 'job', label: 'Job' },

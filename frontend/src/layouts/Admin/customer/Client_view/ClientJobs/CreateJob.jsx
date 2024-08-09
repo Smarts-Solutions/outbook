@@ -63,7 +63,7 @@ const CreateJob = () => {
         InvoiceRemark: "",
     });
 
-    // console.log("location", jobData)
+    console.log("location", location.state)
     useEffect(() => {
         setJobData(prevState => ({
             ...prevState,

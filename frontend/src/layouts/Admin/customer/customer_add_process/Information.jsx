@@ -22,6 +22,9 @@ const Information = () => {
     const [contacts, setContacts] = useState([{authorised_signatory_status: false, firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }]);
     const [errors, setErrors] = useState([{ firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }]);
 
+    const [erorrMan , setErrorsMan] = useState({})
+
+    console.log("Error---", erorrMan)
     const handleAddContact = () => {
         setContacts([...contacts, {authorised_signatory_status: false, firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }]);
         setErrors([...errors, { firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }]);
@@ -147,7 +150,7 @@ const Information = () => {
 
 
             setErrors(newErrors);
-            if (formIsValid) {
+            if (formIsValid ) {
                 let req = {
                     company_name: values.company_name,
                     entity_type: values.entity_type,
@@ -358,8 +361,6 @@ const Information = () => {
     }
 
 
-
-    console.log("Error", getCompanyDetails)
     useEffect(() => {
         formik.setFieldValue("company_name", getCompanyDetails[0]?.title)
         formik.setFieldValue("entity_type", getCompanyDetails[0]?.company_type)
@@ -688,6 +689,7 @@ const Information = () => {
     }, []);
 
     const handleChangeValue = (e) => {
+        // validateAccountManager();
         setAccountMangerId(e.target.value)
     };
 
@@ -751,6 +753,17 @@ const Information = () => {
         setErrors(newErrors);
     };
 
+    const validateAccountManager = () => {
+        const errors = {};
+
+        if (!getAccountMangerId) {
+
+            errors.accountManager = 'Please select an account manager';
+        }
+        
+        setErrorsMan(errors); 
+    }
+
     return (
         <Formik
             initialValues={address}
@@ -800,7 +813,7 @@ const Information = () => {
                                     <div className="row">
                                         <div className="col-lg-12">
                                             <Field as="select" name="accountManager" className="form-select mb-3" onChange={(e) => handleChangeValue(e)}>
-                                                <option value="" disabled selected>
+                                                <option value="" disabled>
                                                     Please select
                                                 </option>
                                                 {staffDataAll.data.map((data) => (
@@ -808,6 +821,7 @@ const Information = () => {
                                                         {data.first_name}
                                                     </option>
                                                 ))}
+                                                 {/* {erorrMan && <div style={{ color: 'red' }}>{erorrMan}</div>} */}
                                             </Field>
                                         </div>
                                     </div>
