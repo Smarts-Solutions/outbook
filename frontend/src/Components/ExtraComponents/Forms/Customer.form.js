@@ -14,10 +14,6 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
         formik.setFieldValue("search_company_name", selectSearchItem)
     }, [selectSearchItem])
 
-
-
-
-
     useEffect(() => {
         setSelectSearchItem((pre) => formik.values.search_company_name == "" ? "" : pre)
     }, [formik.values.search_company_name])
@@ -326,20 +322,71 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                                                     </div>
                                                                 </>
                                                                 :
-                                                                <>
-                                                                    <div className={`col-lg-${field.col_size}`}>
-                                                                        <div className="mb-3  mt-4 row flex-column">
-                                                                            <label className={`col-lg-${field.label_size}`} htmlFor={field.name}>
-                                                                                {field.label}
+                                                                field.type === "text2" ?
+                                                                    <>
+                                                                        <div className={`col-lg-${field.col_size}`}>
+                                                                            <div className="mb-3 row flex-column">
+                                                                                <label className={`col-lg-${field.label_size}`} htmlFor={field.name}>
+                                                                                    {field.label}
+                                                                                    <span className="text-danger">*</span>
+                                                                                </label>
+                                                                                <div className='position-relative'>
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        className="form-control"
+                                                                                        style={{ background: field.disable ? '#eeeeee' : "" ,  cursor: "pointer" }}
+                                                                                        id={field.name}
+                                                                                        value={selectSearchItem}
+                                                                                        placeholder={`Enter ${field.label}`}
+                                                                                        {...formik.getFieldProps(field.name)}
+                                                                                         
 
-                                                                            </label>
-                                                                            <div>
+                                                                                        defaultValue=""
+                                                                                        readOnly={field.disable}
+                                                                                        autoComplete="new-email"
+                                                                                    />
 
+                                                                                    {
+                                                                                        field.filteredCompanies.length > 0 && !selectSearchItem ?
+                                                                                            <div className='dropdown-list'  >
+                                                                                                {field.filteredCompanies && field.filteredCompanies.map((company, index) => (
+                                                                                                    <div key={index} onClick={() => setSelectSearchItem(company.title)}
+                                                                                                    style={{ cursor: "pointer", padding: "8px 0" }}
+                                                                                                    >
 
+                                                                                                        
+                                                                                                        {company.title}
+                                                                                                    </div>
+
+                                                                                                ))}
+                                                                                            </div> : ""
+
+                                                                                    }
+
+                                                                                    <div className="invalid-feedback">
+                                                                                        Please enter {field.label}
+                                                                                    </div>
+                                                                                    {formik.touched[field.name] && formik.errors[field.name] && <div style={{ color: 'red' }}>{formik.errors[field.name]}
+                                                                                    </div>}
+                                                                                </div>
                                                                             </div>
                                                                         </div>
-                                                                    </div>
-                                                                </>
+                                                                    </>
+                                                                    :
+                                                                    <>
+                                                                        <div className={`col-lg-${field.col_size}`}>
+                                                                            <div className="mb-3  mt-4 row flex-column">
+                                                                                <label className={`col-lg-${field.label_size}`} htmlFor={field.name}>
+                                                                                    {field.label}
+
+                                                                                </label>
+                                                                                <div>
+
+
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </>
 
 
                             }

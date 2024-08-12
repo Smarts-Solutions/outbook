@@ -21,10 +21,7 @@ const Information = () => {
     const [getAllSearchCompany, setGetAllSearchCompany] = useState([]);
     const [contacts, setContacts] = useState([{authorised_signatory_status: false, firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }]);
     const [errors, setErrors] = useState([{ firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }]);
-
-    const [erorrMan , setErrorsMan] = useState({})
-
-    console.log("Error---", erorrMan)
+ 
     const handleAddContact = () => {
         setContacts([...contacts, {authorised_signatory_status: false, firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }]);
         setErrors([...errors, { firstName: '', lastName: '', role: '', phoneNumber: '', email: '' }]);
@@ -361,6 +358,7 @@ const Information = () => {
     }
 
 
+
     useEffect(() => {
         formik.setFieldValue("company_name", getCompanyDetails[0]?.title)
         formik.setFieldValue("entity_type", getCompanyDetails[0]?.company_type)
@@ -474,7 +472,7 @@ const Information = () => {
 
             name: "search_company_name",
             label: "Search Company",
-            type: "text1",
+            type: "text2",
             filteredCompanies: filteredCompanies && filteredCompanies,
             label_size: 12,
             col_size: 3,
@@ -689,7 +687,6 @@ const Information = () => {
     }, []);
 
     const handleChangeValue = (e) => {
-        // validateAccountManager();
         setAccountMangerId(e.target.value)
     };
 
@@ -753,16 +750,7 @@ const Information = () => {
         setErrors(newErrors);
     };
 
-    const validateAccountManager = () => {
-        const errors = {};
-
-        if (!getAccountMangerId) {
-
-            errors.accountManager = 'Please select an account manager';
-        }
-        
-        setErrorsMan(errors); 
-    }
+   
 
     return (
         <Formik
@@ -838,7 +826,7 @@ const Information = () => {
 
                                 <div className="card card_shadow">
                                     <div className="card-header align-items-center d-flex">
-                                        <h4 className="card-title mb-0 flex-grow-1">Company Information</h4>
+                                        <h4 className="card-title mb-0 flex-grow-1">{CustomerType=="1" ? "Sole Trader" : CustomerType=="2" ? "Company" :  "Partnership"  }</h4>
                                     </div>
                                     <div className="card-body">
                                         <div className="row">

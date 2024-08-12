@@ -144,6 +144,21 @@ export async function Delete_Customer_File(data, token) {
 }
 
 
+// Get All Job Data
+export async function GET_ALL_JOB_DATA(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getAddJobData`, data, {
+      headers: header(token),
+      data: {}
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+
+
 
 
 

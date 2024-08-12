@@ -740,7 +740,7 @@ const ClientEdit = () => {
                                                                     <div className="card card_shadow ">
                                                                         <div className="card-header align-items-center d-flex">
                                                                             <h4 className="card-title mb-0 flex-grow-1">
-                                                                                Company Information
+                                                                            Sole Trader
                                                                             </h4>
                                                                         </div>
                                                                         {/* end card header */}
@@ -920,7 +920,7 @@ const ClientEdit = () => {
                                                                     <div className="col-lg-12">
                                                                         <div className="card card_shadow ">
                                                                             <div className="card-header align-items-center d-flex">
-                                                                                <h4 className="card-title mb-0 flex-grow-1">Company Information</h4>
+                                                                                <h4 className="card-title mb-0 flex-grow-1">Company</h4>
                                                                             </div>
                                                                             {/* end card header */}
                                                                             <div className="card-body">
@@ -934,13 +934,17 @@ const ClientEdit = () => {
                                                                                                     <input type="text" className="form-control" placeholder="Outbooks Quality & Certainty"
                                                                                                         name="SearchCompany" onChange={(e) => setSearchItem(e.target.value)} value={searchItem}
                                                                                                         onClick={() => setShowDropdown(true)}
+                                                                                                        style={{ cursor: "pointer" }} 
                                                                                                     />
                                                                                                     {
                                                                                                         getAllSearchCompany.length > 0 && showDropdown ?
                                                                                                             <div className='dropdown-list'  >
                                                                                                                 {getAllSearchCompany && getAllSearchCompany.map((company, index) => (
-                                                                                                                    <div key={index} onClick={() => { setSearchItem(company.title); setShowDropdown(false) }} >
+                                                                                                                    <div key={index} onClick={() => { setSearchItem(company.title); setShowDropdown(false) }} 
+                                                                                                                    style={{ cursor: "pointer", padding: "8px 0" }}
+                                                                                                                    >
                                                                                                                         {company.title}
+
                                                                                                                     </div>
                                                                                                                 ))}
                                                                                                             </div> : ""
@@ -1265,6 +1269,9 @@ const ClientEdit = () => {
                                                                     <div className="row " >
                                                                         <div className="col-lg-12">
                                                                             <div className="card card_shadow ">
+                                                                            <div className="card-header align-items-center d-flex">
+                                                                                <h4 className="card-title mb-0 flex-grow-1">Partnership</h4>
+                                                                            </div>
                                                                                 {/* end card header */}
                                                                                 <div className="card-body">
                                                                                     <div className="row">

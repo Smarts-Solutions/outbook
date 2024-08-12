@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { Get_All_Client } from '../../../../../ReduxStore/Slice/Client/ClientSlice';
 import { useDispatch } from 'react-redux';
-import { Get_Service } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { Get_Service  , GetAllJabData} from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import { JobType } from '../../../../../ReduxStore/Slice/Settings/settingSlice';
 import { Staff } from '../../../../../ReduxStore/Slice/Staff/staffSlice';
+ 
 const CreateJob = () => {
     const location = useLocation()
     const token = JSON.parse(localStorage.getItem("token"));
@@ -14,9 +15,9 @@ const CreateJob = () => {
     const [AllService, setAllService] = useState({ loading: false, data: [] });
     const [JobTypeData, setJobTypeData] = useState({ loading: false, data: [] });
     const [StaffData, setStaffData] = useState({ loading: false, data: [] });
+    const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
 
-
-    console.log("JobTypeData , ", JobTypeData)
+ 
     const [jobData, setJobData] = useState({
         AccountManager: "",
         Customer: "",
@@ -141,6 +142,31 @@ const CreateJob = () => {
 
     }
 
+    const GetJobData = async () => {
+        const req = { customer_id: 2}
+        const data = { req: req, authToken: token }
+        await dispatch(GetAllJabData(data))
+        .unwrap()
+        .then(async (response) => {
+            if (response.status) {
+                setAllJobData({
+                    loading: true,
+                    data: response.data
+                })
+            } else {
+                setAllJobData({
+                    loading: true,
+                    data: []
+                })
+            }
+        })
+        .catch((error) => {
+            console.log("Error", error);
+        });
+
+    }
+    
+
     const GetStaffDetails = async () => {
         const req = { action: "get" }
         const data = { req: req, authToken: token }
@@ -173,6 +199,7 @@ const CreateJob = () => {
         GetAllServiceData()
         GetJobType()
         GetStaffDetails()
+        GetJobData()
 
     }, []);
 
