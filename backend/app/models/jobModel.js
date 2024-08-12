@@ -228,8 +228,30 @@ const getAddJobData = async (job) => {
 
 
 
+const jobAdd = async (job) => {
+  console.log("job -",job)
+  const {customer_id} = job;
+
+   
+  // customer Client
+  try {
+   
+  return { status: true, message: 'success.', data: "Success" };
+     
+
+
+}
+catch (err) {
+  console.log("err",err)
+  return { status: false, message: 'Err job Add' };
+
+}
+}
+
+
 
 
 module.exports = {
-    getAddJobData
+    getAddJobData,
+    jobAdd
 };
