@@ -64,7 +64,7 @@ const CreateJob = () => {
         InvoiceRemark: "",
     });
 
-    console.log("location", location.state)
+    console.log("location", location.state.details.customer_id.id)
     useEffect(() => {
         setJobData(prevState => ({
             ...prevState,
@@ -143,7 +143,7 @@ const CreateJob = () => {
     }
 
     const GetJobData = async () => {
-        const req = { customer_id: 2}
+        const req = { customer_id: location.state.details.customer_id.id}
         const data = { req: req, authToken: token }
         await dispatch(GetAllJabData(data))
         .unwrap()
