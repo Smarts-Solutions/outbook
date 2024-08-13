@@ -361,7 +361,7 @@ const Engagement = () => {
 
                                 <div className="row">
                                     {checkboxOptions.map((option, index) => (
-                                        <div className="col-lg-3" key={option.id}>
+                                        <div className="col-lg-4" key={option.id}>
                                             <div className="mb-3">
                                                 <div className="form-check form-check-outline form-check-dark">
                                                     <input
@@ -408,7 +408,7 @@ const Engagement = () => {
                                                             { label: 'Number of Admin', name: 'numberOfAdmin', feeName: "Number of Admin/Other Staff" },
                                                             { label: '', name: 'feePerAdmin', feeName: "Fee Per Admin/Other Staff" },
                                                         ].map((field, index) => (
-                                                            <div className="col-lg-3" key={index}>
+                                                            <div className="col-lg-4" key={index}>
                                                                 <div className="mb-3">
                                                                     <label className="form-label">{field.label}</label>
                                                                     <br />
@@ -452,7 +452,7 @@ const Engagement = () => {
                                                             { label: 'Admin/Other Staff', name: 'admin_staff', feeName: 'Fee Percentage' },
 
                                                         ].map((field, index) => (
-                                                            <div className="col-lg-3" key={index}>
+                                                            <div className="col-lg-4" key={index}>
                                                                 <div className="mb-3">
                                                                     <label className="form-label">{field.label}</label> <br />
                                                                     <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label>
@@ -494,7 +494,7 @@ const Engagement = () => {
                                                             { label: 'Tax Experts', name: 'adhoc_tax_experts', feeName: 'Fee Per Hour' },
                                                             { label: 'Admin/Other Staff', name: 'adhoc_admin_staff', feeName: 'Fee Per Hour' },
                                                         ].map((field, index) => (
-                                                            <div className="col-lg-3" key={index}>
+                                                            <div className="col-lg-4" key={index}>
                                                                 <div className="mb-3">
                                                                     <label className="form-label">{field.label}</label><br />
                                                                     <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label>
@@ -532,7 +532,7 @@ const Engagement = () => {
                                                     <div id="custprize">
                                                         {jobEntries.map((job, index) => (
                                                             <div className="row" key={index}>
-                                                                <div className="col-lg-3">
+                                                                <div className="col-lg-4">
                                                                     <div className="mb-3">
                                                                         <label htmlFor={`minimumJobs_${index}`} className="form-label">
                                                                             Minimum number of Jobs
@@ -551,7 +551,7 @@ const Engagement = () => {
                                                                         )}
                                                                     </div>
                                                                 </div>
-                                                                <div className="col-lg-3">
+                                                                <div className="col-lg-4">
                                                                     <label htmlFor={`jobType_${index}`} className="form-label">
                                                                         Types Of Job
                                                                     </label>
@@ -575,7 +575,7 @@ const Engagement = () => {
                                                                 </div>
 
 
-                                                                <div className="col-lg-3">
+                                                                <div className="col-lg-4">
                                                                     <div className="mb-3">
                                                                         <label htmlFor={`costPerJob_${index}`} className="form-label">
                                                                             Cost Per Job

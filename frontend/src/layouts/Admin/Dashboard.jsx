@@ -109,6 +109,20 @@ const formattedDate = `${day} ${month} ${year}`;
                     Last week
                   </button>
                 </li>
+                 <li className="nav-item" role="presentation">
+                  <button
+                    className="nav-link"
+                    id="this-month-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#this-month"
+                    type="button"
+                    role="tab"
+                    aria-controls="this-month"
+                    aria-selected="false"
+                  >
+                    This Month
+                  </button>
+                </li>
                 <li className="nav-item" role="presentation">
                   <button
                     className="nav-link"
@@ -423,6 +437,14 @@ const formattedDate = `${day} ${month} ${year}`;
                 </div>
                 <div
                   className="tab-pane fade"
+                  id="this-month"
+                  role="tabpanel"
+                  aria-labelledby="this-month-tab"
+                >
+                  This month's content...
+                </div>
+                <div
+                  className="tab-pane fade"
                   id="last-month"
                   role="tabpanel"
                   aria-labelledby="last-month-tab"
@@ -485,7 +507,7 @@ const formattedDate = `${day} ${month} ${year}`;
 
 
           </div>
-          <div className="col-lg-4 col-md-4">
+          <div className="col-lg-4 col-md-4 mt-2">
             <div className="card activity-card">
               <div className="card-header border-bottom-0">
                 <div className="row align-items-center">
