@@ -232,7 +232,7 @@ const CreateJob = () => {
                                                                             <option value="">Select Client</option>
                                                                             {AllJobData.loading &&
                                                                                 AllJobData.data.client.map((client) => (
-                                                                                    <option value={client.id} key={client.client_id}>{client.client_trading_name}</option>
+                                                                                    <option value={client.client_id} key={client.client_id}>{client.client_trading_name}</option>
                                                                                 ))
                                                                             }
                                                                         </select>
