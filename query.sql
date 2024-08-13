@@ -423,6 +423,7 @@ CREATE TABLE client_contact_details (
 /*--TABLE:- CREATE JOB   */
 CREATE TABLE jobs (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    job_id VARCHAR(100) NOT NULL UNIQUE,
     account_manager_id INT NOT NULL COMMENT 'Only staff members who are account managers',
     customer_id INT NOT NULL,
     client_id INT NOT NULL,
