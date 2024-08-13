@@ -20,6 +20,10 @@ const Setting = () => {
     const [showAddTask, setShowAddTask] = useState(false);
 
     const [isEdit, setIsEdit] = useState(false);
+    const [taskInput, setTaskInput] = useState(''); // State to store the input value
+    const [tasks, setTasks] = useState([]); // State to store the list of tasks
+
+
 
     const JobTypeData = async (req) => {
 
@@ -105,7 +109,7 @@ const Setting = () => {
             role: "",
             status: ""
         },
-        validation:{
+        validation: {
 
         },
         onSubmit: async (values) => {
@@ -119,9 +123,9 @@ const Setting = () => {
                 "status": values.status
             }
 
-            
 
-        
+
+
         }
     });
 
@@ -130,11 +134,11 @@ const Setting = () => {
         { type: "text", name: "last_name", label: "Last Name", label_size: 12, col_size: 6, disable: false, placeholder: "Enter Last Name" },
         { type: "email", name: "email", label: "Email", label_size: 12, col_size: 6, disable: false, placeholder: "Enter Email" },
         { type: "text", name: "phone", label: "Phone", label_size: 12, col_size: 6, disable: false, placeholder: "Enter Phone Number" },
-         
+
     ];
 
     const handleModalChange = (e) => {
-       
+
         const { name, value } = e.target;
         setModalData(prevModalData => ({
             ...prevModalData,
@@ -252,6 +256,17 @@ const Setting = () => {
         });
     };
 
+    const handleInputChange = (e) => {
+        setTaskInput(e.target.value);
+    };
+
+    // Function to handle adding a task
+    const handleAddTask = () => {
+        if (taskInput.trim() !== '') {
+            setTasks([...tasks, taskInput]); // Add the new task to the tasks array
+            setTaskInput(''); // Clear the input field after adding
+        }
+    };
 
 
     return (
@@ -285,29 +300,25 @@ const Setting = () => {
 
 
             </div>
-            {/* {/ Add staff Modal start /} */}
-            <>
 
+            {isModalOpen && (
+                <Modal
+                    modalId="exampleModal3"
+                    title={isEdit ? 'Edit ' + modalData.title : 'Add ' + modalData.title}
+                    // fields={[
+                    //     { type: modalData.type, name: modalData.name, label: modalData.label, placeholder: modalData.placeholder, value: modalData.value }
+                    // ]}
+                    fields={modalData.fields}
+                    onClose={() => {
+                        setIsModalOpen(false);
+                        setModalData({});
+                    }}
+                    onSave={handleSave}
+                    onChange={handleModalChange}
+                    buttonName={isEdit ? 'Update' : 'Save'}
+                />
+            )}
 
-                {/* {/ Modal1 /} */}
-                {isModalOpen && (
-                    <Modal
-                        modalId="exampleModal3"
-                        title={isEdit ? 'Edit ' + modalData.title : 'Add ' + modalData.title}
-                        // fields={[
-                        //     { type: modalData.type, name: modalData.name, label: modalData.label, placeholder: modalData.placeholder, value: modalData.value }
-                        // ]}
-                        fields={modalData.fields}
-                        onClose={() => {
-                            setIsModalOpen(false);
-                            setModalData({});
-                        }}
-                        onSave={handleSave}
-                        onChange={handleModalChange}
-                        buttonName={isEdit ? 'Update' : 'Save'}
-                    />
-                )}
-            </>
 
             <CommanModal
                 isOpen={showAddTask}
@@ -317,10 +328,101 @@ const Setting = () => {
                 hideBtn={true}
                 handleClose={() => { setShowAddTask(false); formik.resetForm(); }}
             >
-                <Formicform fieldtype={fields.filter(field => !field.showWhen || field.showWhen(formik.values))} formik={formik} btn_name="Add"
-                />
-            </CommanModal>
-        </div>
+                {/* <Formicform fieldtype={fields.filter(field => !field.showWhen || field.showWhen(formik.values))} formik={formik} btn_name="Add"
+                /> */}
+
+
+                <div className="modal-body">
+                    <div className="mb-3" id="modal-id" style={{ display: 'none' }}>
+                        <label htmlFor="id-field" className="form-label">ID</label>
+                        <input type="text" id="id-field" className="form-control" placeholder="ID" readOnly />
+                    </div>
+                    <div>
+                        <div className="row ">
+                            <div className="col-lg-10">
+                                <div className="mb-3">
+                                    <input
+                                        type="text"
+                                        style={{ height: '2rem' }}
+                                        className="form-control"
+                                        placeholder="Enter Task"
+                                        id="firstNameinput"
+                                        value={taskInput} // Bind input to state
+                                        onChange={handleInputChange} // Handle input change
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-lg-1 ">
+                                <div className="remove">
+                                    <a
+                                        className="btn btn-sm add-btn-job_type add-btn-new"
+                                        onClick={handleAddTask} // Call handleAddTask when clicked
+                                    >
+                                        ADD
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <h6 style={{ textAlign: 'center' }}>OR</h6>
+                        <div className="mb-3 col-lg-12">
+                            <label htmlFor="firstNameinput" className="form-label">Import Excel</label>
+                            <input type="file" className="form-control" placeholder="Job Name" id="firstNameinput" />
+                        </div>
+                        <div className="col-lg-12">
+                            <div className="remove" style={{ float: 'right' }}>
+                                <a className="btn btn-sm add-btn-job_type add-btn-new">
+                                    UPLOAD
+                                </a>
+                            </div>
+                        </div>
+                        <br />
+                        <div style={{ border: '2px hidden black', margin: '5px' }} className="table-responsive table-card mt-3 mb-1">
+                            <table className="table align-middle table-nowrap" id="customerTable">
+                                <thead className="table-light">
+                                    <tr>
+                                        <th className="">Task</th>
+                                        <th className="">&nbsp;&nbsp;</th>
+                                        <th className="">&nbsp;&nbsp;</th>
+                                        <th className="">&nbsp;&nbsp;</th>
+                                        <th className="">&nbsp;&nbsp;</th>
+                                        <th className="tabel_left">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="list form-check-all">
+                                    {tasks.map((task, index) => (
+                                        <tr className="tabel_new" key={index}>
+                                            <td>{task}</td>
+                                            <td>&nbsp;&nbsp;</td>
+                                            <td>&nbsp;&nbsp;</td>
+                                            <td>&nbsp;&nbsp;</td>
+                                            <td>&nbsp;&nbsp;</td>
+                                            <td className="tabel_left">
+                                                <div className="d-flex gap-2">
+                                                    <div className="remove">
+                                                        <a
+                                                            style={{ backgroundColor: 'rgb(75, 175, 75)', color: 'white', width: '60px' }}
+                                                            className="btn btn-sm"
+                                                        >
+                                                            Enable
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+
+            </CommanModal >
+        </div >
 
 
 

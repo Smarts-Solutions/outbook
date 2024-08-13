@@ -164,17 +164,17 @@ const Access = () => {
 
 
     return (
-        <div>
-            <div className='container-fluid'>
-                <div className='report-data mt-4'>
-                    <div className='d-flex justify-content-between align-items-center'>
-                        <div className='tab-title'>
-                            <h3 className='mt-0'>Access</h3>
-                        </div>
+
+        <div className='container-fluid'>
+            <div className='report-data mt-4'>
+                <div className='d-flex justify-content-between align-items-center'>
+                    <div className='tab-title'>
+                        <h3 className='mt-0'>Access</h3>
+                    </div>
                 </div>
                 <div className='report-data mt-4'>
                     <div className='d-flex justify-content-end align-items-center'>
-                    
+
                         <div>
                             <button
                                 type="button"
@@ -244,7 +244,7 @@ const Access = () => {
                 </div>
             </div>
         </div>
-        </div>
+
     );
 };
 

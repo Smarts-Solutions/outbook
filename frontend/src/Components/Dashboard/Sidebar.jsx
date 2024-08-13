@@ -18,7 +18,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div ref={menuRef}>
+   
       <div className="left-sidenav">
         {/* LOGO */}
         <div className="brand">
@@ -119,7 +119,7 @@ const Sidebar = () => {
           </li>
         </ul>
       </div>
-      </div>
+      
       );
 };
 
