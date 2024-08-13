@@ -64,6 +64,20 @@ function Reports() {
                 <li className="nav-item" role="presentation">
                   <button
                     className="nav-link"
+                    id="this-month-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#this-month"
+                    type="button"
+                    role="tab"
+                    aria-controls="this-month"
+                    aria-selected="false"
+                  >
+                    This month
+                  </button>
+                </li>
+                <li className="nav-item" role="presentation">
+                  <button
+                    className="nav-link"
                     id="last-month-tab"
                     data-bs-toggle="pill"
                     data-bs-target="#last-month"

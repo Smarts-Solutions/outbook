@@ -378,10 +378,10 @@ color: #333547;
 }
 .app-search-topbar input {
   width: 100%;
-  height: 30px;
+  height: 35px;
   border: none;
   font-size: 12px;
-  border-radius: 0px;
+  border-radius: 3px;
   padding-left: 27px;
   font-weight: 400;
   color: #C0C0C0 !important;
@@ -8028,7 +8028,7 @@ span.sidebar-icons {
 .notification-list i
 {
   font-size: 28px;
-  line-height: 74px;
+  line-height: 71px;
   color: #333547;
   max-height: 74px;
 }
@@ -8352,4 +8352,33 @@ main .error__feedback {
 
 .job-filter-btn button {
   top: 4px;
+}
+.card-header.step-card-header {
+  /* background: #EBF4F7; */
+}
+.card-header.step-header-blue 
+{
+  background: #00AFEF;
+  
+}
+.card-header.step-header-blue  .card-title
+{
+color: #fff;
+}
+.card-header.step-card-header .card-title {
+  font-size: 16px;
+  margin-top: 0px;
+}
+.details__wrapper .form-control, .details__wrapper .form-select{
+  font-size: 14px;
+  /* color: #a4a5a9 !important; */
+}
+.details__wrapper .flex-column label
+{
+  display: none;
+}
+.bg-blue-light {
+  background: #ebf4f7;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+
 }
