@@ -573,6 +573,15 @@ const Information = () => {
         },
         {
 
+            name: "Website",
+            label: "",
+            type: "heading",
+            label_size: 12,
+            col_size: 12,
+            disable: false,
+        },
+
+        {
             name: "Trading_Name",
             label: "Trading Name",
             type: "text",
@@ -587,6 +596,14 @@ const Information = () => {
             type: "text",
             label_size: 12,
             col_size: 3,
+            disable: false,
+        },
+        {
+            name: "Website",
+            label: "",
+            type: "heading",
+            label_size: 12,
+            col_size: 12,
             disable: false,
         },
 

@@ -334,12 +334,12 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                                                                     <input
                                                                                         type="text"
                                                                                         className="form-control"
-                                                                                        style={{ background: field.disable ? '#eeeeee' : "" ,  cursor: "pointer" }}
+                                                                                        style={{ background: field.disable ? '#eeeeee' : "", cursor: "pointer" }}
                                                                                         id={field.name}
                                                                                         value={selectSearchItem}
                                                                                         placeholder={`Enter ${field.label}`}
                                                                                         {...formik.getFieldProps(field.name)}
-                                                                                         
+
 
                                                                                         defaultValue=""
                                                                                         readOnly={field.disable}
@@ -351,10 +351,10 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                                                                             <div className='dropdown-list'  >
                                                                                                 {field.filteredCompanies && field.filteredCompanies.map((company, index) => (
                                                                                                     <div key={index} onClick={() => setSelectSearchItem(company.title)}
-                                                                                                    style={{ cursor: "pointer", padding: "8px 0" }}
+                                                                                                        style={{ cursor: "pointer", padding: "8px 0" }}
                                                                                                     >
 
-                                                                                                        
+
                                                                                                         {company.title}
                                                                                                     </div>
 
@@ -373,20 +373,37 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                                                         </div>
                                                                     </>
                                                                     :
-                                                                    <>
-                                                                        <div className={`col-lg-${field.col_size}`}>
-                                                                            <div className="mb-3  mt-4 row flex-column">
-                                                                                <label className={`col-lg-${field.label_size}`} htmlFor={field.name}>
-                                                                                    {field.label}
+                                                                    field.type === "heading2" ?
+                                                                        <>
+                                                                            <div className={`col-lg-${field.col_size}`}>
+                                                                                <div className="mb-3  mt-4 row flex-column card">
+                                                                                    <div className='card-body'>
+                                                                                        <input type="text"/>
+                                                                                        <input type="text"/>
 
-                                                                                </label>
-                                                                                <div>
 
-
+                                                                                    </div>
+                                                                                    
+                                                                                    <div>
+                                                                                    </div>
                                                                                 </div>
                                                                             </div>
-                                                                        </div>
-                                                                    </>
+                                                                        </>
+                                                                        :
+                                                                        <>
+                                                                            <div className={`col-lg-${field.col_size}`}>
+                                                                                <div className="mb-3  mt-4 row flex-column">
+                                                                                    <label className={`col-lg-${field.label_size}`} htmlFor={field.name}>
+                                                                                        {field.label}
+
+                                                                                    </label>
+                                                                                    <div>
+
+
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </>
 
 
                             }

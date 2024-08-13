@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { GETALLCOMPANY, ADD_CUSTOMER, GET_SERVICE, ADD_SERVICES, ADD_PEPPER_WORK,GET_ALL_CUSTOMER,GET_CUSTOMER , EDIT_CUSTOMER , Delete_Customer_File , GET_ALL_JOB_DATA } from "../../../Services/Customer/CustomerService";
+import { GETALLCOMPANY, ADD_CUSTOMER, GET_SERVICE, ADD_SERVICES, ADD_PEPPER_WORK,GET_ALL_CUSTOMER,GET_CUSTOMER , EDIT_CUSTOMER , Delete_Customer_File , GET_ALL_JOB_DATA , Add_Job_Type } from "../../../Services/Customer/CustomerService";
 
 
 export const GetAllCompany = createAsyncThunk("seachCompany", async (data) => {
@@ -112,6 +112,20 @@ export const GetAllJabData = createAsyncThunk("getAddJobData", async (data) => {
   }
 });
 
+export const AddAllJobType = createAsyncThunk("jobAdd", async (data) => {
+  try {
+    const { req, authToken } = data
+    
+    const res = await Add_Job_Type(req, authToken);
+
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+ 
+
 
  
 
@@ -129,8 +143,9 @@ const CustomerSlice = createSlice({
     getcustomer:[],
     editcustomer:[],
     deletecustomerfile:[],
-    getalljobdata:[]
-     
+    getalljobdata:[],
+    addjobtype:[]
+    
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -244,7 +259,20 @@ const CustomerSlice = createSlice({
       .addCase(GetAllJabData.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
+      })
+      .addCase(AddAllJobType.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(AddAllJobType.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.addjobtype = action.payload;
+      })
+      .addCase(AddAllJobType.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
       });
+     
+      
 
 
 
