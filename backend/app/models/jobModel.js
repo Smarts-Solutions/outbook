@@ -226,87 +226,26 @@ const getAddJobData = async (job) => {
 
 }
 
-
+async function generateNextUniqueCode() {
+     
+     const [rows] = await pool.execute('SELECT job_id FROM jobs ORDER BY id DESC LIMIT 1');
+     let newCode = '00001'; // Default code if table is empty
+     if (rows.length > 0) {
+         const inputString = rows[0].job_id;
+         const parts = inputString.split('_');
+         const lastPart = parts[parts.length - 1];
+         const lastCode = lastPart;
+         const nextCode = parseInt(lastCode, 10) + 1;
+         console.log("nextCode", nextCode);
+         newCode = "0000" + nextCode
+         // newCode = nextCode.toString().padStart(5, '0');
+     }
+ 
+     return newCode;
+ }
 
 const jobAdd = async (job) => {
-  console.log("job -",job)
-
-  // INSERT INTO `jobs` (`id`, `account_manager_id`, `customer_id`, `client_id`, `client_job_code`, `customer_contact_details_id`, `service_id`, `job_type_id`, `budgeted_hours`, `reviewer`, `allocated_to`, `allocated_on`, `date_received_on`, `year_end`, `total_preparation_time`, `review_time`, `feedback_incorporation_time`, `total_time`, `engagement_model`, `expected_delivery_date`, `due_on`, `submission_deadline`, `customer_deadline_date`, `sla_deadline_date`, `internal_deadline_date`, `filing_Companies_required`, `filing_Companies_date`, `filing_hmrc_required`, `filing_hmrc_date`, `opening_balance_required`, `opening_balance_date`, `number_of_transaction`, `number_of_balance_items`, `turnover`, `number_of_employees`, `vat_reconciliation`, `bookkeeping`, `processing_type`, `invoiced`, `currency`, `invoice_value`, `invoice_date`, `invoice_hours`, `invoice_remark`, `created_at`, `updated_at`) VALUES (NULL, '4', '2', '2', '2', '2', '2', '2', '42', '2', '2', '2024-08-12', '2024-08-12', '23 ui', 'pip', 'poip', 'ipi;', 'kl;k;', 'hmhmhg,h,h', '2024-08-12', '2024-08-12', '2024-08-12', '2024-08-12', '2024-08-12', '2024-08-12', '1', '2024-08-12', '1', '2024-08-12', '1', '2024-08-12', '4204204', '23', '420420', '04', '1', '1', '1', '1', '2', '4242', '2024-08-12', '4242', '424242ilu', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-
-
-//   const query = `
-//   INSERT INTO jobs (
-//     account_manager_id, customer_id, client_id, client_job_code, 
-//     customer_contact_details_id, service_id, job_type_id, budgeted_hours, 
-//     reviewer, allocated_to, allocated_on, date_received_on, year_end, 
-//     total_preparation_time, review_time, feedback_incorporation_time, 
-//     total_time, engagement_model, expected_delivery_date, due_on, 
-//     submission_deadline, customer_deadline_date, sla_deadline_date, 
-//     internal_deadline_date, filing_Companies_required, filing_Companies_date, 
-//     filing_hmrc_required, filing_hmrc_date, opening_balance_required, 
-//     opening_balance_date, number_of_transaction, number_of_balance_items, 
-//     turnover, number_of_employees, vat_reconciliation, bookkeeping, 
-//     processing_type, invoiced, currency, invoice_value, invoice_date, 
-//     invoice_hours, invoice_remark
-//   ) 
-//   VALUES (
-//     ?, ?, ?, ?, 
-//     ?, ?, ?, ?, 
-//     ?, ?, ?, ?, ?, 
-//     ?, ?, ?, ?, 
-//     ?, ?, ?, ?, 
-//     ?, ?, ?, ?, 
-//     ?, ?, ?, ?, 
-//     ?, ?, ?, ?, 
-//     ?, ?, ?, ?, 
-//     ?, ?, ?, ?, ?
-//   );
-// `;
-
-// const values = [
-//   4, 2, 2, 2, 
-//   2, 2, 2, 42, 
-//   2, 2, '2024-08-12', '2024-08-12', 
-//   '23 ui', 'pip', 'poip', 'ipi;', 
-//   'klk','hmhmhg,h,h', '2024-08-12', '2024-08-12', 
-//   '2024-08-12', '2024-08-12', '2024-08-12', '2024-08-12', 
-//   1, '2024-08-12', 1, '2024-08-12', 
-//   1, '2024-08-12', 4204204, 23, 
-//   420420, 4, 1, 1, 
-//   1, 1, 2, 4242, 
-//   '2024-08-12', 4242, '424242ilu'
-// ];
-
-// try {
-//   const [result] = await pool.execute(query, values);
-//   console.log("Result:", result);
-//   return { status: true, message: 'Success.', data: result.insertId };
-// } catch (err) {
-//   console.error("Error:", err);
-//   return { status: false, message: 'Error in adding job.' };
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ // console.log("job -",job)
   const {
     account_manager_id,
     customer_id,
@@ -352,25 +291,28 @@ const jobAdd = async (job) => {
     invoice_hours,
     invoice_remark
   } = job;
-  
-  // Customer Client
+
+
+  let UniqueNo = await generateNextUniqueCode()
+  //console.log("UniqueNo ",UniqueNo)
+  // Exist Customer name
+  const [ExistCustomer] = await pool.execute('SELECT trading_name FROM customers WHERE id =' + customer_id);
+  const existCustomerName = ExistCustomer[0].trading_name
+  const firstThreeLettersexistCustomerName = existCustomerName.substring(0, 3);
+
+   // Exist Client name
+   const [ExistClient] = await pool.execute('SELECT trading_name FROM Clients WHERE id =' + client_id);
+   const existClientName = ExistClient[0].trading_name
+   const firstThreeLettersexistClientName = existClientName.substring(0, 3);
+
+   const job_id = firstThreeLettersexistCustomerName+"_"+firstThreeLettersexistClientName+"_"+UniqueNo;
   try {
-    const query = `
-    INSERT INTO customers (account_manager_id, customer_id, client_id, client_job_code, 
-      customer_contact_details_id, service_id, job_type_id, budgeted_hours, 
-      reviewer, allocated_to, allocated_on, date_received_on, year_end, 
-      total_preparation_time, review_time, feedback_incorporation_time, 
-      total_time, engagement_model, expected_delivery_date, due_on, 
-      submission_deadline, customer_deadline_date, sla_deadline_date, 
-      internal_deadline_date, filing_Companies_required, filing_Companies_date, 
-      filing_hmrc_required, filing_hmrc_date, opening_balance_required, 
-      opening_balance_date, number_of_transaction, number_of_balance_items, 
-      turnover, number_of_employees, vat_reconciliation, bookkeeping, 
-      processing_type, invoiced, currency, invoice_value, invoice_date, 
-      invoice_hours, invoice_remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-  
-  const result = await pool.execute(query, [account_manager_id, customer_id, client_id, client_job_code,customer_contact_details_id, service_id, job_type_id, budgeted_hours,reviewer, allocated_to, allocated_on,date_received_on, year_end,total_preparation_time, review_time, feedback_incorporation_time,total_time,engagement_model, expected_delivery_date, due_on,submission_deadline, customer_deadline_date,sla_deadline_date,internal_deadline_date, filing_Companies_required, filing_Companies_date,filing_hmrc_required, filing_hmrc_date, opening_balance_required,opening_balance_date,number_of_transaction, number_of_balance_items,turnover, number_of_employees, vat_reconciliation,bookkeeping,processing_type,invoiced, currency, invoice_value, invoice_date,invoice_hours, invoice_remark]);
+
+const query = `
+INSERT INTO jobs (job_id,account_manager_id,customer_id,client_id,client_job_code,customer_contact_details_id, service_id,job_type_id, budgeted_hours,reviewer, allocated_to,allocated_on,date_received_on,year_end,total_preparation_time, review_time, feedback_incorporation_time,total_time, engagement_model, expected_delivery_date,due_on,submission_deadline, customer_deadline_date, sla_deadline_date,internal_deadline_date, filing_Companies_required, filing_Companies_date,filing_hmrc_required, filing_hmrc_date, opening_balance_required,opening_balance_date, number_of_transaction, number_of_balance_items,turnover, number_of_employees, vat_reconciliation, bookkeeping,processing_type, invoiced, currency, invoice_value, invoice_date,invoice_hours, invoice_remark)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`;
+    const [result] = await pool.execute(query, [job_id,account_manager_id,customer_id,client_id,client_job_code,customer_contact_details_id, service_id,job_type_id, budgeted_hours,reviewer, allocated_to,allocated_on,date_received_on,year_end,total_preparation_time, review_time, feedback_incorporation_time,total_time, engagement_model, expected_delivery_date,due_on,submission_deadline, customer_deadline_date, sla_deadline_date,internal_deadline_date, filing_Companies_required, filing_Companies_date,filing_hmrc_required, filing_hmrc_date, opening_balance_required,opening_balance_date, number_of_transaction, number_of_balance_items,turnover, number_of_employees, vat_reconciliation, bookkeeping,processing_type, invoiced, currency, invoice_value, invoice_date,invoice_hours, invoice_remark]);
   
     return { status: true, message: 'Success.', data: result.insertId };
   } catch (err) {
