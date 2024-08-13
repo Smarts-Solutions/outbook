@@ -18,9 +18,10 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="left-sidenav">
-       {/* LOGO */}
-       <div className="brand">
+    <div ref={menuRef}>
+      <div className="left-sidenav">
+        {/* LOGO */}
+        <div className="brand">
           <a href="/dashboard/crm-index.html" className="logo">
             <span>
               <img
