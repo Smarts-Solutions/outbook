@@ -45,7 +45,6 @@ const deleteJobType = async (JobTypeId) => {
     }
 };
 
-
 const updateJobType = async (JobType) => {
     const { id, ...fields } = JobType;
     // Create an array to hold the set clauses
@@ -72,6 +71,7 @@ const updateJobType = async (JobType) => {
     }
 };
 
+// Task Module
 const addTask = async (task) => {
     // console.log("task -",task)
      const {name,service_id,job_type_id} = task;
