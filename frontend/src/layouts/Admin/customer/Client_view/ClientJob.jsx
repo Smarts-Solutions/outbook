@@ -13,8 +13,8 @@ const ClientList = () => {
   const [customerData, setCustomerData] = useState([]);
   const [activeTab, setActiveTab] = useState("viewclient");
 
-  console.log("location", location.state.row.id);
    
+
 
   const tabs = [
     { id: "viewclient", label: "View Client" },
@@ -24,14 +24,14 @@ const ClientList = () => {
 
   const columns = [
     {
-      name: "Client Name",
+      name: "Job ID (CustName+ClientName+UniqueNo)",
       cell: (row) => (
         <div>
           <a
             onClick={() => HandleClientView(row)}
             style={{ cursor: "pointer", color: "#26bdf0" }}
           >
-            {row.client_name}
+            {row.job_code_id}
           </a>
         </div>
       ),
@@ -40,29 +40,24 @@ const ClientList = () => {
     },
 
     {
-      name: "Client Code (cli+CustName+ClientName+UniqueNo)",
-      selector: (row) => row.client_code,
+      name: "Job Type",
+      selector: (row) => row.job_type_name,
       sortable: true,
     },
     {
-      name: "Client Type",
-      selector: (row) =>
-        row.client_type_name == null ? "" : row.client_type_name,
+      name: "Account Manager",
+      selector: (row) => row.account_manager_officer_first_name + " " + row.account_manager_officer_last_name,
       sortable: true,
     },
-    { name: "Email Address", selector: (row) => row.email, sortable: true },
-    { name: "Phone", selector: (row) => row.phone, sortable: true },
-    {
-      name: "Status",
-      selector: (row) => (row.status == "1" ? "Active" : "Deactive"),
-      sortable: true,
-    },
+    { name: "Client Job Code", selector: (row) => row.client_job_code, sortable: true },
+    { name: "Outbooks Acount Manager", selector: (row) => row.outbooks_acount_manager_first_name + " " + row.outbooks_acount_manager_last_name, sortable: true },
+    { name: "Allocated To", selector: (row) => row.allocated_first_name + " " + row.allocated_last_name, sortable: true },
+    
     {
       name: "Actions",
       cell: (row) => (
         <div>
           <button className="edit-icon" onClick={() => handleEdit(row)}>
-
             <i className="ti-pencil" />
           </button>
           <button className="delete-icon" onClick={() => handleDelete(row)}>
@@ -82,14 +77,16 @@ const ClientList = () => {
   };
 
   function handleEdit(row) {
-    navigate("/admin/client/edit", { state: { row, id: location.state.id } });
+    navigate("/admin/job/edit", { state: {details: location.state , row : row } });
   }
 
   function handleDelete(row) {
     console.log("Deleting row:", row);
   }
 
-  
+
+
+  console.log("setCustomerData :", customerData)
   const GetAllJobList = async () => {
     const req = { action: "getByClient", client_id: location.state.row.id };
     const data = { req: req, authToken: token };
@@ -160,31 +157,21 @@ const ClientList = () => {
                     <i className="fa fa-plus" /> Create Job
                   </div>
                 </div>
-
-                {tabs.map((tab) => (
-                  <div
-                    key={tab.id}
-                    className={`tab-pane fade ${activeTab == tab.id ? "show active" : ""
-                      }`}
-                    id={tab.id}
-                    role="tabpanel"
-                    aria-labelledby={`${tab.id}-tab`}
-                  >
-                    {customerData && customerData && (
-                      <Datatable columns={columns} data={customerData} filter={false} />
-                    )}
-                  </div>
-                ))}
-
-
               </>
-
-
             )}
           </div>
         </div>
       </div>
 
+
+      {activeTab == 'NoOfJobs' &&
+        <div className={`tab-pane fade ${activeTab == 'NoOfJobs' ? "show active" : ""}`}
+          id={'NoOfJobs'} role="tabpanel" aria-labelledby={`NoOfJobs-tab`}>
+          {customerData && customerData && (
+            <Datatable columns={columns} data={customerData} filter={false} />
+          )}
+        </div>
+      }
 
       {
         activeTab == "viewclient" && <div className="tab-content" id="pills-tabContent">

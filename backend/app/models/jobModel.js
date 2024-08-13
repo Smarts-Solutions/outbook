@@ -434,6 +434,7 @@ const getJobByClient = async (job) => {
 
 const getJobById = async (job) => {
      const {job_id} = job;
+     console.log("job_id",job_id)
      try {
      const query = `
     SELECT 

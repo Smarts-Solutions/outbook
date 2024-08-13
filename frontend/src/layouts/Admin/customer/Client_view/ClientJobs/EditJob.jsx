@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { useLocation , useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
 import { GetAllJabData, AddAllJobType } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import sweatalert from 'sweetalert2';
+import { Get_All_Job_List } from "../../../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 const CreateJob = () => {
     const location = useLocation()
@@ -11,10 +12,37 @@ const CreateJob = () => {
     const dispatch = useDispatch();
 
     const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
+    const [getJobDetails, setGetJobDetails] = useState({ loading: false, data: [] });
     const [errors, setErrors] = useState({})
 
-console.log("location :", location.state)
    
+
+    const JobDetails = async () => {
+        const req = {action: "getByJobId", job_id: location.state.row.job_id }
+        const data = { req: req, authToken: token }
+        await dispatch(Get_All_Job_List(data))
+            .unwrap()
+            .then(async (response) => {
+                if (response.status) {
+                    setGetJobDetails({
+                        loading: true,
+                        data: response.data
+                    })
+                }
+                else {
+                    setGetJobDetails({
+                        loading: true,
+                        data: []
+                    })
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    }
+    useEffect(() => {
+        JobDetails()
+    }, []);
 
     const [jobData, setJobData] = useState({
         AccountManager: "",
@@ -62,18 +90,18 @@ console.log("location :", location.state)
         InvoiceRemark: "",
     });
 
-    useEffect(() => {
-        setJobData(prevState => ({
-            ...prevState,
-            AccountManager: location.state.details.customer_id.account_manager_firstname,
-            Customer: location.state.details.customer_id.trading_name,
-            Client: location.state.details.row.client_name
-        }));
-    }, [AllJobData]);
+    // useEffect(() => {
+    //     setJobData(prevState => ({
+    //         ...prevState,
+    //         AccountManager: location.state.details.customer_id.account_manager_firstname,
+    //         Customer: location.state.details.customer_id.trading_name,
+    //         Client: location.state.details.row.client_name
+    //     }));
+    // }, [AllJobData]);
 
 
     const GetJobData = async () => {
-        const req = { customer_id: location.state.details.customer_id.id }
+        const req = { customer_id: "" }
         const data = { req: req, authToken: token }
         await dispatch(GetAllJabData(data))
             .unwrap()
@@ -163,13 +191,13 @@ console.log("location :", location.state)
     };
 
 
- 
+
 
     const handleSubmit = async () => {
         const req = {
-            account_manager_id: location.state.details.customer_id.account_manager_id,
-            customer_id: location.state.details.customer_id.id,
-            client_id: location.state.details.row.id,
+            // account_manager_id: location.state.details.customer_id.account_manager_id,
+            // customer_id: location.state.details.customer_id.id,
+            // client_id: location.state.details.row.id,
             client_job_code: jobData.ClientJobCode,
             customer_contact_details_id: jobData.CustomerAccountManager,
             service_id: jobData.Service,
@@ -224,10 +252,10 @@ console.log("location :", location.state)
                             timerProgressBar: true,
                             showConfirmButton: true,
                             timer: 1500
-                          })
-                          setTimeout(() => {
-                            navigate('/admin/client/profile' , {state :  location.state });
-                            }, 1500);
+                        })
+                        setTimeout(() => {
+                            navigate('/admin/client/profile', { state: location.state });
+                        }, 1500);
                     } else {
                         console.log("response", response)
                     }
@@ -260,7 +288,7 @@ console.log("location :", location.state)
                     <div className="col-xl-12">
                         <div className="card">
                             <div className="card-header">
-                                <h4 className="card-title mb-0">Create New Job</h4>
+                                <h4 className="card-title mb-0">Update Job</h4>
                             </div>
 
                             <div className="card-body form-steps">
@@ -313,11 +341,11 @@ console.log("location :", location.state)
                                                                     <div className="col-lg-3">
                                                                         <label className="form-label">Client</label>
                                                                         <input type="text" className="form-control" placeholder="Client Job Code"
-                                                                            name="Client" onChange={HandleChange} value={jobData.Client} disabled/>
+                                                                            name="Client" onChange={HandleChange} value={jobData.Client} disabled />
 
-                                                                            {errors['Client'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['Client']}</div>
-                                                                            )}
+                                                                        {errors['Client'] && (
+                                                                            <div style={{ 'color': 'red' }}>{errors['Client']}</div>
+                                                                        )}
 
                                                                     </div>
 
