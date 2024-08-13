@@ -72,11 +72,51 @@ const updateJobType = async (JobType) => {
     }
 };
 
+const addTask = async (task) => {
+    console.log("task -",task)
+     const {name,service_id,job_type_id} = task;
+   
+     try {
+   
+     const query = `
+     INSERT INTO task (name,service_id,job_type_id)
+     VALUES (?, ?, ?)
+     `;
+     for (const valName of name) {
+       const [result] = await pool.execute(query, [valName,service_id,job_type_id]);
+      }
+     
+      return { status: true, message: 'task add successfully.', data: [] };
+     } catch (err) {
+       console.log("Error:", err);
+       return { status: false, message: 'Error adding task.' };
+     }
+     
+   }
+
+const getTask = async (task) => {
+    const {service_id} = task;
+    const query = `
+    SELECT id,name,service_id,job_type_id FROM task WHERE service_id = ?
+    ORDER BY id DESC
+    `;
+    try {
+    const [result] = await pool.execute(query, [service_id]);
+    return { status: true, message: 'task get successfully.', data: result };
+    }
+    catch (err) {
+     return { status: false, message: 'Error get task.' };
+    }
+}
+
+
 
 module.exports = {
     createJobType,
     deleteJobType,
     updateJobType,
-    getJobType
+    getJobType,
+    addTask,
+    getTask
   
 };
