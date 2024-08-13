@@ -196,6 +196,8 @@ CREATE TABLE customer_services (
     UNIQUE (customer_id,service_id)
 );
 
+
+/* Customer Service Task */
 CREATE TABLE customer_service_task (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL,

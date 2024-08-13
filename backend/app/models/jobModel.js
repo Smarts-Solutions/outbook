@@ -512,7 +512,7 @@ const getJobById = async (job) => {
      staffs AS staffs2 ON jobs.reviewer = staffs2.id
      JOIN 
      staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-     JOIN 
+     LEFT JOIN 
      countries ON jobs.currency = countries.id
      WHERE 
      jobs.id = ?
