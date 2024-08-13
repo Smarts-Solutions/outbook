@@ -244,6 +244,7 @@ const Access = () => {
                 </div>
             </div>
         </div>
+        </div>
     );
 };
 
