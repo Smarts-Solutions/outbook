@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Datatable from "../../../../Components/ExtraComponents/Datatable";
-import { Get_All_Client } from "../../../../ReduxStore/Slice/Client/ClientSlice";
+import { Get_All_Job_List } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const ClientList = () => {
@@ -12,6 +12,9 @@ const ClientList = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const [customerData, setCustomerData] = useState([]);
   const [activeTab, setActiveTab] = useState("viewclient");
+
+  console.log("location", location.state.row.id);
+   
 
   const tabs = [
     { id: "viewclient", label: "View Client" },
@@ -86,10 +89,14 @@ const ClientList = () => {
     console.log("Deleting row:", row);
   }
 
-  const GetAllServiceData = async () => {
-    const req = { action: "get", customer_id: location.state.id };
+  // {
+//     "action": "getByClient",
+//     "client_id": 3
+// }
+  const GetAllJobList = async () => {
+    const req = { action: "getByClient", client_id: location.state.row.id };
     const data = { req: req, authToken: token };
-    await dispatch(Get_All_Client(data))
+    await dispatch(Get_All_Job_List(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
@@ -104,14 +111,14 @@ const ClientList = () => {
   };
 
   useEffect(() => {
-    GetAllServiceData();
+    GetAllJobList();
   }, []);
 
   const handleAddClient = () => {
     navigate("/admin/createjob", { state: { details: location.state } });
   };
 
-  console.log("activeTab", activeTab);
+
 
   return (
     <div className="container-fluid">
@@ -125,36 +132,57 @@ const ClientList = () => {
                 id="pills-tab"
                 role="tablist"
               >
-                {tabs.map((tab) => (
-                  <li className="nav-item" role="presentation" key={tab.id}>
-                    <button
-                      className={`nav-link ${activeTab === tab.id ? "active" : ""
-                        }`}
-                      id={`${tab.id}-tab`}
-                      data-bs-toggle="pill"
-                      data-bs-target={`#${tab.id}`}
-                      type="button"
-                      role="tab"
-                      aria-controls={tab.id}
-                      aria-selected={activeTab === tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                    >
-                      {tab.label}
-                    </button>
-                  </li>
-                ))}
+                {
+                  tabs.map((tab) => (
+                    <li className="nav-item" role="presentation" key={tab.id}>
+                      <button
+                        className={`nav-link ${activeTab === tab.id ? "active" : ""
+                          }`}
+                        id={`${tab.id}-tab`}
+                        data-bs-toggle="pill"
+                        data-bs-target={`#${tab.id}`}
+                        type="button"
+                        role="tab"
+                        aria-controls={tab.id}
+                        aria-selected={activeTab === tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                      >
+                        {tab.label}
+                      </button>
+                    </li>
+                  ))}
               </ul>
             </div>
             {activeTab == "NoOfJobs" && (
-              <div className="col-md-4 col-auto">
-                <div
-                  className="btn btn-info text-white float-end blue-btn"
-                  onClick={handleAddClient}
-                >
-
-                  <i className="fa fa-plus" /> Create Job
+              <>
+                <div className="col-md-4 col-auto">
+                  <div
+                    className="btn btn-info text-white float-end blue-btn"
+                    onClick={handleAddClient}
+                  >
+                    <i className="fa fa-plus" /> Create Job
+                  </div>
                 </div>
-              </div>
+
+                {tabs.map((tab) => (
+                  <div
+                    key={tab.id}
+                    className={`tab-pane fade ${activeTab == tab.id ? "show active" : ""
+                      }`}
+                    id={tab.id}
+                    role="tabpanel"
+                    aria-labelledby={`${tab.id}-tab`}
+                  >
+                    {customerData && customerData && (
+                      <Datatable columns={columns} data={customerData} filter={false} />
+                    )}
+                  </div>
+                ))}
+
+
+              </>
+
+
             )}
           </div>
         </div>
@@ -303,20 +331,7 @@ const ClientList = () => {
 
           </div>
 
-          {tabs.map((tab) => (
-            <div
-              key={tab.id}
-              className={`tab-pane fade ${activeTab == tab.id ? "show active" : ""
-                }`}
-              id={tab.id}
-              role="tabpanel"
-              aria-labelledby={`${tab.id}-tab`}
-            >
-              {customerData && customerData && (
-                <Datatable columns={columns} data={customerData} filter={false} />
-              )}
-            </div>
-          ))}
+
         </div>
       }
 

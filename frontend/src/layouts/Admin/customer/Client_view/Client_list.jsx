@@ -135,7 +135,7 @@ const ClientList = () => {
       </div>
       <div className="tab-content" id="pills-tabContent">
 
-        {console.log("activeTab", activeTab)}
+         
         {tabs.map((tab) => (
           <div
             key={tab.id}
