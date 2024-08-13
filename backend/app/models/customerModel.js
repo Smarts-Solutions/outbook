@@ -337,15 +337,8 @@ const updateProcessCustomerServices = async (customerProcessData) => {
                     if (existing3.length === 0) {
                         await pool.execute(insertCSTQuery, [customer_id, service_id, cst]);
                     }
-                    
-
-
 
                 }
-
-               }else{
-                
-
                }
             }
 

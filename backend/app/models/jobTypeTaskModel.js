@@ -73,7 +73,7 @@ const updateJobType = async (JobType) => {
 };
 
 const addTask = async (task) => {
-    console.log("task -",task)
+    // console.log("task -",task)
      const {name,service_id,job_type_id} = task;
    
      try {
@@ -83,7 +83,13 @@ const addTask = async (task) => {
      VALUES (?, ?, ?)
      `;
      for (const valName of name) {
+      const checkQuery = `
+                SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?
+            `;
+      const [existing] = await pool.execute(checkQuery, [valName,service_id,job_type_id]);
+      if (existing.length === 0) {
        const [result] = await pool.execute(query, [valName,service_id,job_type_id]);
+       }
       }
      
       return { status: true, message: 'task add successfully.', data: [] };
