@@ -348,14 +348,11 @@ const StaffPage = () => {
     return (
         <div>
             <div className='container-fluid'>
-                <div className='content-title'>
-                <div className='tab-title'>
-                            <h3 className='mt-0'>Manage Staff</h3>
-                        </div>
-                </div>
                 <div className='report-data mt-4'>
                     <div className='d-flex justify-content-between align-items-center'>
-                       
+                        <div className='tab-title'>
+                            <h3 className='mt-0'>Manage Staff</h3>
+                        </div>
                         <div>
                            
                            
