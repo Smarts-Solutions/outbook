@@ -196,6 +196,20 @@ CREATE TABLE customer_services (
     UNIQUE (customer_id,service_id)
 );
 
+CREATE TABLE customer_service_task (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    service_id INT NOT NULL,
+    task_id INT NOT NULL,
+    status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_id) REFERENCES customers(id),
+    FOREIGN KEY (service_id) REFERENCES services(id),
+    FOREIGN KEY (task_id) REFERENCES task(id),
+    UNIQUE (customer_id,service_id,task_id)
+);
+
 /* Can a multiplayer account manager be allocated to one service? */
 
 CREATE TABLE `customer_service_account_managers` (
