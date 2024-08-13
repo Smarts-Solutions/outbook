@@ -96,6 +96,20 @@ CREATE TABLE job_types (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+/*--TABLE:- Task */
+CREATE TABLE task (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    service_id INT NOT NULL,
+    job_type_id INT NOT NULL,
+    status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    FOREIGN KEY (service_id) REFERENCES services(id),
+    FOREIGN KEY (job_type_id) REFERENCES job_types(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
 
 /*--TABLE:- CLIENT TYPE */
 CREATE TABLE client_types (
