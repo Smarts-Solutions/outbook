@@ -9,6 +9,8 @@ const router = express.Router();
 
 router.post('/getAddJobData',verifyToken, jobController.getAddJobData);
 router.post('/jobAdd',verifyToken, jobController.jobAdd);
+router.post('/jobAction',verifyToken, jobController.jobAction);
+router.post('/jobUpdate',verifyToken, jobController.jobUpdate);
 
 
 
