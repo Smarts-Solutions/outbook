@@ -105,11 +105,6 @@ const CreateJob = () => {
 
 
    
-
-
-
-
-
     const handleSubmit = async () => {
         const req = {
             account_manager_id: location.state.details.customer_id.account_manager_id,
@@ -155,22 +150,20 @@ const CreateJob = () => {
             invoice_date: jobData.InvoiceDate,
             invoice_hours: jobData.InvoiceHours,
             invoice_remark: jobData.InvoiceRemark
-        }
-
-        console.log("req", req)
-        // const data = { req: req, authToken: token }
-        // await dispatch(AddAllJobType(data))
-        //     .unwrap()
-        //     .then(async (response) => {
-        //         if (response.status) {
-        //             console.log("response", response)
-        //         } else {
-        //             console.log("response", response)
-        //         }
-        //     })
-        //     .catch((error) => {
-        //         console.log("Error", error);
-        //     });
+        } 
+        const data = { req: req, authToken: token }
+        await dispatch(AddAllJobType(data))
+            .unwrap()
+            .then(async (response) => {
+                if (response.status) {
+                    console.log("response", response)
+                } else {
+                    console.log("response", response)
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
     }
 
 
