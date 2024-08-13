@@ -89,10 +89,7 @@ const ClientList = () => {
     console.log("Deleting row:", row);
   }
 
-  // {
-//     "action": "getByClient",
-//     "client_id": 3
-// }
+  
   const GetAllJobList = async () => {
     const req = { action: "getByClient", client_id: location.state.row.id };
     const data = { req: req, authToken: token };
