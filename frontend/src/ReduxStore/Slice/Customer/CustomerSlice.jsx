@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { GETALLCOMPANY, ADD_CUSTOMER, GET_SERVICE, ADD_SERVICES, ADD_PEPPER_WORK,GET_ALL_CUSTOMER,GET_CUSTOMER , EDIT_CUSTOMER , Delete_Customer_File , GET_ALL_JOB_DATA , Add_Job_Type , GET_ALL_JOB_LIST } from "../../../Services/Customer/CustomerService";
+import { GETALLCOMPANY, ADD_CUSTOMER, GET_SERVICE, ADD_SERVICES, ADD_PEPPER_WORK,GET_ALL_CUSTOMER,GET_CUSTOMER , EDIT_CUSTOMER , Delete_Customer_File , GET_ALL_JOB_DATA , Add_Job_Type , GET_ALL_JOB_LIST , UPDATE_JOB } from "../../../Services/Customer/CustomerService";
 
 
 export const GetAllCompany = createAsyncThunk("seachCompany", async (data) => {
@@ -136,6 +136,18 @@ export const Get_All_Job_List = createAsyncThunk("jobAction", async (data) => {
   }
 });
 
+export const UpdateJob = createAsyncThunk("jobUpdate", async (data) => {
+  try {
+    const { req, authToken } = data
+    
+    const res = await UPDATE_JOB(req, authToken);
+
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
  
 
 
@@ -157,7 +169,8 @@ const CustomerSlice = createSlice({
     deletecustomerfile:[],
     getalljobdata:[],
     addjobtype:[],
-    getalljoblist:[]
+    getalljoblist:[],
+    updatejob:[],
     
   },
   reducers: {},
@@ -292,6 +305,17 @@ const CustomerSlice = createSlice({
         state.getalljoblist = action.payload;
       })
       .addCase(Get_All_Job_List.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(UpdateJob.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(UpdateJob.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.updatejob = action.payload;
+      })
+      .addCase(UpdateJob.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       })

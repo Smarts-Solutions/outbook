@@ -86,7 +86,9 @@ const ClientList = () => {
 
 
 
-  console.log("setCustomerData :", customerData)
+  console.log(" location.state.row.id  :",  location.state )
+
+ 
   const GetAllJobList = async () => {
     const req = { action: "getByClient", client_id: location.state.row.id };
     const data = { req: req, authToken: token };

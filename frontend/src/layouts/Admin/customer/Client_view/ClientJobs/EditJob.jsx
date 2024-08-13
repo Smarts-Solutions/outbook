@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
-import { GetAllJabData, AddAllJobType } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { GetAllJabData, UpdateJob } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import sweatalert from 'sweetalert2';
 import { Get_All_Job_List } from "../../../../../ReduxStore/Slice/Customer/CustomerSlice";
 
@@ -15,10 +15,9 @@ const CreateJob = () => {
     const [getJobDetails, setGetJobDetails] = useState({ loading: false, data: [] });
     const [errors, setErrors] = useState({})
 
-   
 
     const JobDetails = async () => {
-        const req = {action: "getByJobId", job_id: location.state.row.job_id }
+        const req = { action: "getByJobId", job_id: location.state.row.job_id }
         const data = { req: req, authToken: token }
         await dispatch(Get_All_Job_List(data))
             .unwrap()
@@ -90,18 +89,62 @@ const CreateJob = () => {
         InvoiceRemark: "",
     });
 
-    // useEffect(() => {
-    //     setJobData(prevState => ({
-    //         ...prevState,
-    //         AccountManager: location.state.details.customer_id.account_manager_firstname,
-    //         Customer: location.state.details.customer_id.trading_name,
-    //         Client: location.state.details.row.client_name
-    //     }));
-    // }, [AllJobData]);
+
+    
+
+
+    useEffect(() => {
+        setJobData(prevState => ({
+            ...prevState,
+            AccountManager: getJobDetails.loading && getJobDetails.data[0].account_manager_officer_first_name + " " + getJobDetails.loading && getJobDetails.data[0].account_manager_officer_last_name,
+            Customer: getJobDetails.loading && getJobDetails.data[0].customer_trading_name,
+            Client: getJobDetails.loading && getJobDetails.data[0].client_trading_name,
+            ClientJobCode: getJobDetails.loading && getJobDetails.data[0].client_job_code,
+            CustomerAccountManager: getJobDetails.loading && getJobDetails.data[0].account_manager_officer_id,
+            Service: getJobDetails.loading && getJobDetails.data[0].service_id,
+            JobType: getJobDetails.loading && getJobDetails.data[0].job_type_id,
+            BudgetedHours: getJobDetails.loading && getJobDetails.data[0].budgeted_hours,
+            Reviewer: getJobDetails.loading && getJobDetails.data[0].reviewer_id,
+            AllocatedTo: getJobDetails.loading && getJobDetails.data[0].allocated_id,
+            AllocatedOn: getJobDetails.loading && getJobDetails.data[0].allocated_on.split("T")[0],
+            DateReceivedOn: getJobDetails.loading && getJobDetails.data[0].date_received_on.split("T")[0],
+            YearEnd: getJobDetails.loading && getJobDetails.data[0].year_end,
+            TotalPreparationTime: getJobDetails.loading && getJobDetails.data[0].total_preparation_time,
+            ReviewTime: getJobDetails.loading && getJobDetails.data[0].review_time,
+            FeedbackIncorporationTime: getJobDetails.loading && getJobDetails.data[0].feedback_incorporation_time,
+            TotalTime: getJobDetails.loading && getJobDetails.data[0].total_time,
+            EngagementModel: getJobDetails.loading && getJobDetails.data[0].engagement_model,
+            ExpectedDeliveryDate: getJobDetails.loading && getJobDetails.data[0].expected_delivery_date.split("T")[0],
+            DueOn: getJobDetails.loading && getJobDetails.data[0].due_on.split("T")[0],
+            SubmissionDeadline: getJobDetails.loading && getJobDetails.data[0].submission_deadline.split("T")[0],
+            CustomerDeadlineDate: getJobDetails.loading && getJobDetails.data[0].customer_deadline_date.split("T")[0],
+            SLADeadlineDate: getJobDetails.loading && getJobDetails.data[0].sla_deadline_date.split("T")[0],
+            InternalDeadlineDate: getJobDetails.loading && getJobDetails.data[0].internal_deadline_date.split("T")[0],
+            FilingWithCompaniesHouseRequired: getJobDetails.loading && getJobDetails.data[0].filing_Companies_required,
+            CompaniesHouseFilingDate: getJobDetails.loading && getJobDetails.data[0].filing_Companies_date.split("T")[0],
+            FilingWithHMRCRequired: getJobDetails.loading && getJobDetails.data[0].filing_hmrc_required,
+            HMRCFilingDate: getJobDetails.loading && getJobDetails.data[0].filing_hmrc_date.split("T")[0],
+            OpeningBalanceAdjustmentRequired: getJobDetails.loading && getJobDetails.data[0].opening_balance_required,
+            OpeningBalanceAdjustmentDate: getJobDetails.loading && getJobDetails.data[0].opening_balance_date.split("T")[0],
+            NumberOfTransactions: getJobDetails.loading && getJobDetails.data[0].number_of_transaction,
+            NumberOfTrialBalanceItems: getJobDetails.loading && getJobDetails.data[0].number_of_balance_items,
+            Turnover: getJobDetails.loading && getJobDetails.data[0].turnover,
+            NoOfEmployees: getJobDetails.loading && getJobDetails.data[0].number_of_employees,
+            VATReconciliation: getJobDetails.loading && getJobDetails.data[0].vat_reconciliation,
+            Bookkeeping: getJobDetails.loading && getJobDetails.data[0].bookkeeping,
+            ProcessingType: getJobDetails.loading && getJobDetails.data[0].processing_type,
+            Invoiced: getJobDetails.loading && getJobDetails.data[0].invoiced,
+            Currency: getJobDetails.loading && getJobDetails.data[0].currency,
+            InvoiceValue: getJobDetails.loading && getJobDetails.data[0].invoice_value,
+            InvoiceDate: getJobDetails.loading && getJobDetails.data[0].invoice_date,
+            InvoiceHours: getJobDetails.loading && getJobDetails.data[0].invoice_hours,
+            InvoiceRemark: getJobDetails.loading && getJobDetails.data[0].invoice_remark
+        }));
+    }, [getJobDetails]);
 
 
     const GetJobData = async () => {
-        const req = { customer_id: "" }
+        const req = { customer_id: location.state.details.customer_id.id }
         const data = { req: req, authToken: token }
         await dispatch(GetAllJabData(data))
             .unwrap()
@@ -190,14 +233,18 @@ const CreateJob = () => {
         return Object.keys(newErrors).length === 0 ? true : false;
     };
 
-
-
-
+ 
+     
+    
+ 
+     
     const handleSubmit = async () => {
         const req = {
-            // account_manager_id: location.state.details.customer_id.account_manager_id,
-            // customer_id: location.state.details.customer_id.id,
-            // client_id: location.state.details.row.id,
+            job_id:location.state.row.job_id,
+            
+            account_manager_id: getJobDetails.loading && getJobDetails.data[0].account_manager_officer_id,
+            customer_id:  getJobDetails.loading && getJobDetails.data[0].customer_id,
+            client_id: getJobDetails.loading && getJobDetails.data[0].client_id,
             client_job_code: jobData.ClientJobCode,
             customer_contact_details_id: jobData.CustomerAccountManager,
             service_id: jobData.Service,
@@ -232,17 +279,16 @@ const CreateJob = () => {
             vat_reconciliation: jobData.VATReconciliation,
             bookkeeping: jobData.Bookkeeping,
             processing_type: jobData.ProcessingType,
-            invoiced: jobData.Invoiced,
-            currency: jobData.Currency,
-            invoice_value: jobData.InvoiceValue,
-            invoice_date: jobData.InvoiceDate,
-            invoice_hours: jobData.InvoiceHours,
-            invoice_remark: jobData.InvoiceRemark
+            invoiced: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.Invoiced,
+            currency: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.Currency,
+            invoice_value: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.InvoiceValue,
+            invoice_date: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.InvoiceDate,
+            invoice_hours: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.InvoiceHours,
+            invoice_remark: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.InvoiceRemark
         }
         const data = { req: req, authToken: token }
-
         if (validate()) {
-            await dispatch(AddAllJobType(data))
+            await dispatch(UpdateJob(data))
                 .unwrap()
                 .then(async (response) => {
                     if (response.status) {
@@ -254,7 +300,7 @@ const CreateJob = () => {
                             timer: 1500
                         })
                         setTimeout(() => {
-                            navigate('/admin/client/profile', { state: location.state });
+                            navigate('/admin/client/profile', { state: location.state.details});
                         }, 1500);
                     } else {
                         console.log("response", response)
@@ -278,7 +324,9 @@ const CreateJob = () => {
         : {};
 
 
-
+const handleClose=()=>{
+    navigate('/admin/client/profile', { state: location.state.details});
+}
 
 
     return (
@@ -880,8 +928,8 @@ const CreateJob = () => {
                                             </div>
                                         </div>
                                         <div className="hstack gap-2 justify-content-end">
-                                            <button type="button" className="btn btn-light" >Cancel</button>
-                                            <button type="button" className="btn btn-success nexttab nexttab" onClick={handleSubmit}>Add Job</button>
+                                            <button type="button" className="btn btn-light" onClick={handleClose}>Cancel</button>
+                                            <button type="button" className="btn btn-info text-white float-end blue-btn" onClick={handleSubmit}>Update</button>
                                         </div>
                                     </div>
                                 </div>

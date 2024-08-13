@@ -185,6 +185,20 @@ export async function GET_ALL_JOB_LIST(data, token) {
   }
 }
 
+// Add Job Type
+export async function UPDATE_JOB(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}jobUpdate`, data, {
+      headers: header(token),
+      data: {}
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+
 
 
 

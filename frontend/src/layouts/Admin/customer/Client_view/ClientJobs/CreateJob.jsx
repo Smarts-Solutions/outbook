@@ -162,8 +162,15 @@ console.log("location :", location.state)
         return Object.keys(newErrors).length === 0 ? true : false;
     };
 
+    
+     
+     
+     
+   
+  
 
- 
+
+     
 
     const handleSubmit = async () => {
         const req = {
@@ -171,12 +178,12 @@ console.log("location :", location.state)
             customer_id: location.state.details.customer_id.id,
             client_id: location.state.details.row.id,
             client_job_code: jobData.ClientJobCode,
-            customer_contact_details_id: jobData.CustomerAccountManager,
-            service_id: jobData.Service,
-            job_type_id: jobData.JobType,
-            budgeted_hours: jobData.BudgetedHours,
-            reviewer: jobData.Reviewer,
-            allocated_to: jobData.AllocatedTo,
+            customer_contact_details_id: Number(jobData.CustomerAccountManager),
+            service_id: Number(jobData.Service),
+            job_type_id: Number(jobData.JobType),
+            budgeted_hours: Number(jobData.BudgetedHours),
+            reviewer: Number(jobData.Reviewer),
+            allocated_to: Number(jobData.AllocatedTo),
             allocated_on: jobData.AllocatedOn,
             date_received_on: jobData.DateReceivedOn,
             year_end: jobData.YearEnd,
@@ -197,10 +204,10 @@ console.log("location :", location.state)
             filing_hmrc_date: jobData.HMRCFilingDate,
             opening_balance_required: jobData.OpeningBalanceAdjustmentRequired,
             opening_balance_date: jobData.OpeningBalanceAdjustmentDate,
-            number_of_transaction: jobData.NumberOfTransactions,
-            number_of_balance_items: jobData.NumberOfTrialBalanceItems,
-            turnover: jobData.Turnover,
-            number_of_employees: jobData.NoOfEmployees,
+            number_of_transaction: Number(jobData.NumberOfTransactions),
+            number_of_balance_items: Number(jobData.NumberOfTrialBalanceItems),
+            turnover: Number(jobData.Turnover),
+            number_of_employees: Number(jobData.NoOfEmployees),
             vat_reconciliation: jobData.VATReconciliation,
             bookkeeping: jobData.Bookkeeping,
             processing_type: jobData.ProcessingType,
@@ -250,7 +257,9 @@ console.log("location :", location.state)
         : {};
 
 
-
+        const handleClose=()=>{
+            navigate('/admin/client/profile' , {state :  location.state });
+        }
 
 
     return (
@@ -852,8 +861,8 @@ console.log("location :", location.state)
                                             </div>
                                         </div>
                                         <div className="hstack gap-2 justify-content-end">
-                                            <button type="button" className="btn btn-light" >Cancel</button>
-                                            <button type="button" className="btn btn-success nexttab nexttab" onClick={handleSubmit}>Add Job</button>
+                                            <button type="button" className="btn btn-light" onClick={handleClose} >Cancel</button>
+                                            <button type="button" className="btn btn-info text-white float-end blue-btn" onClick={handleSubmit}>Add Job</button>
                                         </div>
                                     </div>
                                 </div>
