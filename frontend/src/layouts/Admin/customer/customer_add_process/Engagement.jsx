@@ -345,31 +345,32 @@ const Engagement = () => {
                     <div className={"details__wrapper"}>
 
 
-                        <div className="card pricing-box p-4 m-2 mt-0">
+                        <div className="card report-data pricing-box p-0">
+                        <div className="card-header step-header-blue">
                             <h4
                                 className="card-title mb-0 flex-grow-1"
                                 style={{ marginBottom: "20px !important" }}
                             >
                                 Engagement Model
                             </h4>
-
+</div>
 
                             <div className="card-body">
 
                                 <div className="row">
                                     {checkboxOptions.map((option, index) => (
-                                        <div className="col-lg-4" key={option.id}>
+                                        <div className="col-lg-3" key={option.id}>
                                             <div className="mb-3">
                                                 <div className="form-check form-check-outline form-check-dark">
                                                     <input
-                                                        className="form-check-input"
+                                                        className="form-check-input new-checkbox me-1"
                                                         type="checkbox"
                                                         id={option.id}
                                                         checked={checkboxStates[index] === 1}
                                                         onChange={() => handleCheckboxChange(index)}
                                                     />
                                                     <label
-                                                        className="form-check-label new_checkbox"
+                                                        className="form-check-label new_checkbox pt-1"
                                                         htmlFor={option.id}
                                                     >
                                                         {option.label}
@@ -387,12 +388,14 @@ const Engagement = () => {
                                     {checkboxStates && checkboxStates[0] === 1 && (
                                         <div id="myDiv1" className="row">
                                             <div className="col-xl-12 col-md-12 col-lg-12">
-                                                <div className="card pricing-box p-4 m-2 mt-0">
-                                                    <div className="col-lg-6 col-md-6">
-                                                        <p className="office-name">FTE/Dedicated</p>
+                                                <div className="card pricing-box p-0">
+                                                    <div className="col-lg-12">
+                                                        <div className="card-header">
+                                                        <p className="office-name card-title fs-6">FTE/Dedicated</p>
+                                                        </div>
                                                     </div>
-
-                                                    <div className="row">
+                                                    <div className="card-body">
+                                                    <div className="row align-items-end">
                                                         {[
                                                             { label: 'Accountants', name: 'accountants', feeName: "Number of Accountants" },
                                                             { label: '', name: 'feePerAccountant', feeName: "Fee Per Accountant" },
@@ -405,15 +408,18 @@ const Engagement = () => {
                                                             { label: 'Number of Admin', name: 'numberOfAdmin', feeName: "Number of Admin/Other Staff" },
                                                             { label: '', name: 'feePerAdmin', feeName: "Fee Per Admin/Other Staff" },
                                                         ].map((field, index) => (
-                                                            <div className="col-lg-4" key={index}>
-                                                                <div className="mb-3">
-                                                                    <label className="form-label">{field.label}</label>
-                                                                    <br />
-                                                                    <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label>
+                                                            
+                                                            <div className="col-lg-3" key={index}>
+                                                                
+                                                                
+                                                                <div className="mb-3 cl">
+                                                                <label className="form-label">{field.label}</label>
+                                                                    {/* <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label> */}
                                                                     <input
                                                                         type="text"
                                                                         className="form-control"
                                                                         name={field.name}
+                                                                        placeholder={field.feeName}
                                                                         value={formValues1[field.name]}
                                                                         onChange={(e) => handleChange1(e)}
                                                                     />
@@ -424,7 +430,7 @@ const Engagement = () => {
                                                             </div>
                                                         ))}
                                                     </div>
-
+                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -435,10 +441,13 @@ const Engagement = () => {
                                     {checkboxStates && checkboxStates[2] === 1 && (
                                         <div id="myDiv2" className="row">
                                             <div style={{ marginBottom: "26px !important" }} className="col-xl-12 col-lg-12">
-                                                <div className="card pricing-box p-4 m-2 mt-0">
-                                                    <div className="col-lg-6 col-md-6">
-                                                        <p className="office-name">Adhoc/PAYG/Hourly</p>
+                                                <div className="card pricing-box p-0">
+                                                    <div className="col-lg-12">
+                                                    <div className="card-header">
+                                                        <p className="office-name card-title fs-6">Adhoc/PAYG/Hourly</p>
+                                                        </div>
                                                     </div>
+                                                    <div className="card-body">
                                                     <div className="row">
                                                         {[
                                                             { label: 'Total Outsourcing', name: 'total_outsourcing', feeName: 'Fee Percentage' },
@@ -452,12 +461,13 @@ const Engagement = () => {
                                                             <div className="col-lg-4" key={index}>
                                                                 <div className="mb-3">
                                                                     <label className="form-label">{field.label}</label> <br />
-                                                                    <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label>
+                                                                    {/* <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label> */}
                                                                     <input
                                                                         type="text"
                                                                         className="form-control"
                                                                         name={field.name}
                                                                         value={formValues2[field.name]}
+                                                                        placeholder={field.feeName}
                                                                         onChange={handleChange2}
                                                                     />
                                                                     {errors2[field.name] && (
@@ -468,7 +478,7 @@ const Engagement = () => {
                                                             </div>
                                                         ))}
                                                     </div>
-
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -479,10 +489,13 @@ const Engagement = () => {
                                     {checkboxStates && checkboxStates[1] === 1 && (
                                         <div id="myDiv3" className="row">
                                             <div style={{ marginBottom: "26px !important" }} className="col-xl-12 col-lg-12">
-                                                <div className="card pricing-box p-4 m-2 mt-0">
-                                                    <div className="col-lg-6 col-md-6">
-                                                        <p className="office-name">Percentage Model</p>
+                                                <div className="card pricing-box p-0">
+                                                    <div className="col-lg-12">
+                                                    <div className="card-header">
+                                                        <p className="office-name card-title fs-6">Percentage Model</p>
                                                     </div>
+                                                    </div>
+                                                    <div className="card-body">
                                                     <div className="row">
                                                         {[
                                                             { label: 'Accountants', name: 'adhoc_accountants', feeName: 'Fee Per Hour' },
@@ -494,12 +507,13 @@ const Engagement = () => {
                                                             <div className="col-lg-4" key={index}>
                                                                 <div className="mb-3">
                                                                     <label className="form-label">{field.label}</label><br />
-                                                                    <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label>
+                                                                    {/* <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label> */}
                                                                     <input
                                                                         type="text"
                                                                         className="form-control"
                                                                         name={field.name}
                                                                         value={formValues3[field.name]}
+                                                                        placeholder={field.feeName}
                                                                         onChange={handleChange3}
                                                                     />
                                                                     {errors3[field.name] && (
@@ -510,7 +524,7 @@ const Engagement = () => {
                                                             </div>
                                                         ))}
                                                     </div>
-
+                                                       </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -522,10 +536,13 @@ const Engagement = () => {
                                     {checkboxStates && checkboxStates[3] === 1 && (
                                         <div id="myDiv4" className="row">
                                             <div className="col-xl-12 col-lg-12">
-                                                <div className="card pricing-box p-4 m-2 mt-0">
-                                                    <div className="col-lg-6 col-md-6">
-                                                        <p className="office-name">Customised Pricing</p>
+                                                <div className="card pricing-box p-0">
+                                                    <div className="col-lg-12">
+                                                    <div className="card-header">
+                                                        <p className="office-name card-title fs-6">Customised Pricing</p>
                                                     </div>
+                                                    </div>
+                                                    <div className="card-body">
                                                     <div id="custprize">
                                                         {jobEntries.map((job, index) => (
                                                             <div className="row" key={index}>
@@ -572,7 +589,7 @@ const Engagement = () => {
                                                                 </div>
 
 
-                                                                <div className="col-lg-4">
+                                                                <div className="col-lg-3">
                                                                     <div className="mb-3">
                                                                         <label htmlFor={`costPerJob_${index}`} className="form-label">
                                                                             Cost Per Job
@@ -593,11 +610,11 @@ const Engagement = () => {
                                                                 </div>
 
                                                                 {jobEntries.length > 1 &&
-                                                                    <div className="col-lg-1 " style={{ marginTop: 22 }}>
-                                                                        <a className="add_icon" onClick={(e) => handleRemoveJob(index)}>
+                                                                    <div className="col-lg-1 text-center" style={{ marginTop: 22 }}>
+                                                                        <a className="add_icon text-decoration-none" onClick={(e) => handleRemoveJob(index)}>
                                                                             <i
-                                                                                style={{ fontSize: 38, cursor: "pointer", color: "#00AFEF" }}
-                                                                                className="fa-solid fa-trash"
+                                                                                style={{ fontSize: 25, cursor: "pointer", color: "#00AFEF" }}
+                                                                                className="ti-trash"
 
                                                                             />
 
@@ -606,16 +623,17 @@ const Engagement = () => {
 
                                                             </div>
                                                         ))}
-                                                        <div className="col-lg-1" style={{ marginTop: 22 }}>
+                                                        <div className="col-lg-12 text-end pe-3" style={{ marginTop: 22 }}>
                                                             <a className="add_icon" onClick={handleAddJob}>
                                                                 <i
-                                                                    style={{ fontSize: 38, cursor: "pointer", color: "#00AFEF" }}
+                                                                    style={{ fontSize: 28, cursor: "pointer", color: "#00AFEF" }}
                                                                     className="fa-solid fa-circle-plus"
                                                                 />
                                                             </a>
                                                         </div>
                                                     </div>
                                                     <div id="cust_prize"></div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

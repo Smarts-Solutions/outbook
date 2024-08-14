@@ -76,9 +76,12 @@ const Paper = () => {
                     <div className="row">
                         <div className="col-lg-12">
                             <div className="card">
+                                <div className="card-header step-header-blue">
+                                <p className="fs-6 card-title">Upload Customer Specific Paperwork</p>
+
+                                </div>
                                 <div className="card-body">
-                                    <p className="text-muted">Upload Customer Specific Paperwork</p>
-                                    <div className="dropzone dz-clickable">
+                                    {/* <div className="dropzone dz-clickable">
                                         <div className="dz-message needsclick">
                                             <div
                                                 className="mb-3"
@@ -116,17 +119,37 @@ const Paper = () => {
                                                     </button>
                                                 </label>
                                             </div>
-                                            <h6>
-                                                <p>Or Drag Files in here</p>
-                                            </h6>
+                                            
                                         </div>
-                                    </div>
+                                    </div> */}
+                                    <div className="input-group">
+  {/* Hello world */}
+  <div className="custom-file w-100">
+
+  <input
+                                                    type="file"
+                                                    ref={fileInputRef}
+                                                    multiple
+                                                    onChange={(event) => {
+                                                        setFieldValue("files", event.currentTarget.files);
+                                                        handleFileChange(event);
+                                                    }}
+                                                    className="custom-file-input form-control" id="inputGroupFile04"
+                                                    
+                                                />
+{/*     
+    <label className="custom-file-label" htmlFor="inputGroupFile04">
+      Choose file
+    </label> */}
+  </div>
+</div>
+
                                     <ul className="list-unstyled mb-0" id="dropzone-preview"></ul>
                                     <div className="container-fluid page-title-box">
                                         <div className="row">
                                             <div className="col-lg-12">
                                                 <div className="card">
-                                                    <div className="card-body">
+                                                    <div className="card-body pt-0">
                                                         <div id="customerList">
                                                             <div className="row g-4 mb-3">
                                                                 <div className="d-flex justify-content-end">
@@ -135,12 +158,12 @@ const Paper = () => {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="table-responsive table-card mt-3 mb-1">
+                                                            <div className="table-responsive table-card  mb-1">
                                                                 <table
                                                                     className="table align-middle table-nowrap"
                                                                     id="customerTable"
                                                                 >
-                                                                    <thead className="table-light">
+                                                                    <thead className="table-light table-head-blue">
                                                                         <tr>
                                                                             <th scope="col" style={{ width: 50 }}>
                                                                                 <div className="form-check">
@@ -190,7 +213,7 @@ const Paper = () => {
                                                                                                 <div className="d-flex gap-2">
                                                                                                     <div className="remove">
                                                                                                         <button
-                                                                                                            className="btn btn-sm btn-danger remove-item-btn"
+                                                                                                            className="btn btn-sm fs-5 text-danger remove-item-btn"
                                                                                                             onClick={() => {
                                                                                                                 const newFiles = Array.from(files);
                                                                                                                 newFiles.splice(index, 1);
