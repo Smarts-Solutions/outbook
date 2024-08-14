@@ -17,7 +17,7 @@ const Information = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const customer_id = localStorage.getItem("coustomerId");
-  console.log("customer_id", customer_id);
+  // console.log("customer_id", customer_id);
   
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
@@ -54,33 +54,7 @@ const Information = () => {
     { firstName: "", lastName: "", role: "", phoneNumber: "", email: "" },
   ]);
 
-  const GetCustomerData = async () => {
-    const req = { customer_id: customer_id, pageStatus: "1" }
-    const data = { req: req, authToken: token }
-    await dispatch(GET_CUSTOMER_DATA(data))
-        .unwrap()
-        .then(async (response) => {
-            if (response.status) {
-                setCustomerDetails({
-                    loading: false,
-                    data: response.data
-                });
-            }
-            else {
-                setCustomerDetails({
-                    loading: false,
-                    data: []
-                });
-            }
-        })
-        .catch((error) => {
-            console.log("Error 11", error);
-        });
-}
-
-useEffect(() => {
-    GetCustomerData()
-}, []);
+ 
 
   const handleAddContact = () => {
     setContacts([
@@ -255,8 +229,8 @@ useEffect(() => {
           PageStatus: "1",
           account_manager_id: getAccountMangerId,
           staff_id: staffDetails.id,
-          contact_id : !customerDetails.loading ? !customerDetails.loading && customerDetails.data.contact_details[0].contact_id : ""
         };
+        console.log(req);
         await AddCustomerFun(req);
       }
     },
@@ -332,8 +306,9 @@ useEffect(() => {
         CustomerType: CustomerType,
         account_manager_id: getAccountMangerId,
         staff_id: staffDetails.id,
-        contact_id : !customerDetails.loading ? !customerDetails.loading && customerDetails.data.contact_details[0].contact_id : ""
+        contact_id : customerDetails.data ? customerDetails.data && customerDetails.data.contact_details[0].contact_id : ""
       };
+   
       await AddCustomerFun(req);
     },
   });
@@ -409,8 +384,7 @@ useEffect(() => {
           contactDetails: contacts,
           CustomerType: CustomerType,
           account_manager_id: getAccountMangerId,
-          staff_id: staffDetails.id,
-          contact_id : !customerDetails.loading ? !customerDetails.loading && customerDetails.data.contact_details[0].contact_id : ""
+          staff_id: staffDetails.id
         };
 
         await AddCustomerFun(req);
@@ -726,54 +700,6 @@ useEffect(() => {
   ];
 
 
-  useEffect(() => {
-    setCustomerType(!customerDetails.data && customerDetails.data.customer.customer_type)
-    setAccountMangerId(!customerDetails.data && customerDetails.data.customer.account_manager_id)
-
-    if (!customerDetails.data && customerDetails.data.customer.customer_type == '1') {
-      formik1.setFieldValue("Trading_Name", customerDetails.data.customer.trading_name);
-      formik1.setFieldValue("Trading_Address", customerDetails.data.customer.trading_address);
-      formik1.setFieldValue("VAT_Registered", customerDetails.data.customer.vat_registered);
-      formik1.setFieldValue("VAT_Number", customerDetails.data.customer.vat_number);
-      formik1.setFieldValue("Website", customerDetails.data.customer.website);
-      formik1.setFieldValue("First_Name", customerDetails.data.customer.first_name);
-      formik1.setFieldValue("Last_Name", customerDetails.data.customer.last_name);
-      formik1.setFieldValue("Phone", customerDetails.data.customer.phone);
-      formik1.setFieldValue("Email", customerDetails.data.customer.email);
-      formik1.setFieldValue("Residential_Address", customerDetails.data.customer.residential_address);
-    }
-    if (!customerDetails.data && customerDetails.data.customer.customer_type == '2') {
-      formik.setFieldValue("company_name", customerDetails.data.customer.company_name);
-      formik.setFieldValue("entity_type", customerDetails.data.customer.entity_type);
-      formik.setFieldValue("company_status", customerDetails.data.customer.company_status);
-      formik.setFieldValue("company_number", customerDetails.data.customer.company_number);
-      formik.setFieldValue("Registered_Office_Addres", customerDetails.data.customer.registered_office_address);
-      formik.setFieldValue("Incorporation_Date", customerDetails.data.customer.incorporation_date);
-      formik.setFieldValue("Incorporation_in", customerDetails.data.customer.incorporation_in);
-      formik.setFieldValue("VAT_Registered", customerDetails.data.customer.vat_registered);
-      formik.setFieldValue("VAT_Number", customerDetails.data.customer.vat_number);
-      formik.setFieldValue("Website", customerDetails.data.customer.website);
-      formik.setFieldValue("Trading_Name", customerDetails.data.customer.trading_name);
-      formik.setFieldValue("Trading_Address", customerDetails.data.customer.trading_address);
-      setContacts(!customerDetails.data && customerDetails.data.contact_details)
-    }
-      
-    if (!customerDetails.data && customerDetails.data.customer.customer_type == '3') {
-      formik2.setFieldValue("Trading_Name", customerDetails.data.customer.trading_name);
-      formik2.setFieldValue("Trading_Address", customerDetails.data.customer.trading_address);
-      formik2.setFieldValue("VAT_Registered", customerDetails.data.customer.vat_registered);
-      formik2.setFieldValue("VAT_Number", customerDetails.data.customer.vat_number);
-      formik2.setFieldValue("Website", customerDetails.data.customer.website);
-      setContacts(!customerDetails.data && customerDetails.data.contact_details)
-      
-    }
-        
-}, [customerDetails])
-
-
-
-
-
   const Get_Company = async () => {
     const data = { search: formik.values.search_company_name };
     await dispatch(GetAllCompany(data))
@@ -896,6 +822,88 @@ useEffect(() => {
     }
     setErrors(newErrors);
   };
+
+
+  const GetCustomerData = async () => {
+    const req = { customer_id: customer_id, pageStatus: "1" }
+    const data = { req: req, authToken: token }
+    await dispatch(GET_CUSTOMER_DATA(data))
+        .unwrap()
+        .then(async (response) => {
+            if (response.status) {
+              const customerDetailsExist = response.data
+              console.log("response data",response.data)
+              console.log("customerDetailsExist.customer.first_name",customerDetailsExist.customer.first_name)
+          
+
+              setCustomerType(customerDetailsExist && customerDetailsExist.customer.customer_type)
+              setAccountMangerId(customerDetailsExist && customerDetailsExist.customer.account_manager_id)
+          
+              if (customerDetailsExist && customerDetailsExist.customer.customer_type == '1') {
+                formik1.setFieldValue("Trading_Name", customerDetailsExist.customer.trading_name);
+                formik1.setFieldValue("Trading_Address", customerDetailsExist.customer.trading_address);
+                formik1.setFieldValue("VAT_Registered", customerDetailsExist.customer.vat_registered);
+                formik1.setFieldValue("VAT_Number", customerDetailsExist.customer.vat_number);
+                formik1.setFieldValue("Website", customerDetailsExist.customer.website);
+                formik1.setFieldValue("First_Name", customerDetailsExist.contact_details[0].first_name);
+                formik1.setFieldValue("Last_Name", customerDetailsExist.contact_details[0].last_name);
+                formik1.setFieldValue("Phone", customerDetailsExist.contact_details[0].phone);
+                formik1.setFieldValue("Email", customerDetailsExist.contact_details[0].email);
+                formik1.setFieldValue("Residential_Address", customerDetailsExist.contact_details[0].residential_address);
+              }
+              if (customerDetailsExist && customerDetailsExist.customer.customer_type == '2') {
+                formik.setFieldValue("company_name", customerDetailsExist.customer.company_name);
+                formik.setFieldValue("entity_type", customerDetailsExist.customer.entity_type);
+                formik.setFieldValue("company_status", customerDetailsExist.customer.company_status);
+                formik.setFieldValue("company_number", customerDetailsExist.customer.company_number);
+                formik.setFieldValue("Registered_Office_Addres", customerDetailsExist.customer.registered_office_address);
+                formik.setFieldValue("Incorporation_Date", customerDetailsExist.customer.incorporation_date);
+                formik.setFieldValue("Incorporation_in", customerDetailsExist.customer.incorporation_in);
+                formik.setFieldValue("VAT_Registered", customerDetailsExist.customer.vat_registered);
+                formik.setFieldValue("VAT_Number", customerDetailsExist.customer.vat_number);
+                formik.setFieldValue("Website", customerDetailsExist.customer.website);
+                formik.setFieldValue("Trading_Name", customerDetailsExist.customer.trading_name);
+                formik.setFieldValue("Trading_Address", customerDetailsExist.customer.trading_address);
+                setContacts(customerDetailsExist && customerDetailsExist.contact_details)
+              }
+                
+              if (customerDetailsExist && customerDetailsExist.customer.customer_type == '3') {
+                formik2.setFieldValue("Trading_Name", customerDetailsExist.customer.trading_name);
+                formik2.setFieldValue("Trading_Address", customerDetailsExist.customer.trading_address);
+                formik2.setFieldValue("VAT_Registered", customerDetailsExist.customer.vat_registered);
+                formik2.setFieldValue("VAT_Number", customerDetailsExist.customer.vat_number);
+                formik2.setFieldValue("Website", customerDetailsExist.customer.website);
+                setContacts(customerDetailsExist && customerDetailsExist.contact_details)
+                
+              }
+
+
+
+
+
+
+                setCustomerDetails({
+                    loading: false,
+                    data: response.data
+                });
+            }
+            else {
+                setCustomerDetails({
+                    loading: false,
+                    data: []
+                });
+            }
+        })
+        .catch((error) => {
+            console.log("Error 11", error);
+        });
+}
+
+useEffect(() => {
+   if(customer_id != null){
+   GetCustomerData()
+   }
+}, []);
 
 
 

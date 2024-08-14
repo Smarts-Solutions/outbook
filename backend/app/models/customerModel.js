@@ -184,9 +184,6 @@ const createCustomer = async (customer) => {
 
 else{
     
-    
-    customer_id,Trading_Name,Trading_Address,VAT_Registered,VAT_Number,Website,First_Name,Last_Name,Phone,Email,Residential_Address,PageStatus,CustomerType,account_manager_id,staff_id
-    
     const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, contactDetails } = customer;
     console.log("customer" , customer)
       
@@ -209,6 +206,13 @@ else{
     //Solo Traders Details
     if (CustomerType == "1") {
         const {First_Name,Last_Name,Phone,Email,Residential_Address,contact_id} = customer;
+        console.log("First_Name",First_Name);
+        console.log("Last_Name",Last_Name);
+        console.log("Phone",Phone);
+        console.log("Email",Email);
+        console.log("Residential_Address",Residential_Address);
+        console.log("contact_id",contact_id);
+        console.log("customer_id",customer_id);
         const query2 = `
     UPDATE customer_contact_details
     SET first_name = ?, last_name = ?, phone = ?, email = ?, residential_address = ?
@@ -219,6 +223,7 @@ else{
             const [result2] = await pool.execute(query2, [First_Name,Last_Name,Phone,Email,Residential_Address, customer_id, contact_id]);
             return { status: true, message: 'Customer updated successfully.', data: customer_id };
         } catch (err) {
+            console.log('err',err)
             return { status: false, message: 'Update Error Customer Type 1' };
         }
 
