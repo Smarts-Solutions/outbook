@@ -23,14 +23,48 @@ const handleJobType = async (req, res) => {
               res.status(200).json({ status:true, message: 'JobType updated successfully' });
               break;
           default:
-              res.status(400).json({ status:false, message: 'Invalid action' });
+              res.status(200).json({ status:false, message: 'Invalid action' });
       }
   } catch (error) {
       res.status(500).json({status:false, message: error.message });
   }
 };
 
+const addTask = async (req, res) => {
+    try {
+       const { ...task } = req.body;
+      //  console.log("job",job)
+         const result = await jobTypeTaskService.addTask(task);
+         if(!result.status){
+          return  res.status(200).json({ status: false, message: result.message });  
+          }else{
+          return  res.status(200).json({ status: true, message: result.message , data : result.data});
+          }
+      
+      } catch (error) {
+        res.status(500).json({ status:false, message: error.message});
+      }
+  }
+
+  const getTask = async (req, res) => {
+    try {
+       const { ...task } = req.body;
+      //  console.log("job",job)
+         const result = await jobTypeTaskService.getTask(task);
+         if(!result.status){
+          return  res.status(200).json({ status: false, message: result.message });  
+          }else{
+          return  res.status(200).json({ status: true, message: result.message , data : result.data});
+          }
+      
+      } catch (error) {
+        res.status(500).json({ status:false, message: error.message});
+      }
+  }
+
 
 module.exports = {
   handleJobType,
+  addTask,
+  getTask
 };

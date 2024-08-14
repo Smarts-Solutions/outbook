@@ -19,10 +19,20 @@ const modifyJobType = async (JobType) => {
   return jobTypeTaskModel.updateJobType(JobType);
 };
 
+const addTask = async (task) => {
+  return jobTypeTaskModel.addTask(task);
+};
+
+const getTask = async (task) => {
+  return jobTypeTaskModel.getTask(task);
+};
+
 
 module.exports = {
     addJobType,
     removeJobType,
     modifyJobType,
-    getJobType
+    getJobType,
+    addTask,
+    getTask
 };

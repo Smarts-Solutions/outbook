@@ -96,6 +96,20 @@ CREATE TABLE job_types (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+/*--TABLE:- Task */
+CREATE TABLE task (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    service_id INT NOT NULL,
+    job_type_id INT NOT NULL,
+    status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    FOREIGN KEY (service_id) REFERENCES services(id),
+    FOREIGN KEY (job_type_id) REFERENCES job_types(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
 
 /*--TABLE:- CLIENT TYPE */
 CREATE TABLE client_types (
@@ -180,6 +194,22 @@ CREATE TABLE customer_services (
     FOREIGN KEY (customer_id) REFERENCES customers(id),
     FOREIGN KEY (service_id) REFERENCES services(id),
     UNIQUE (customer_id,service_id)
+);
+
+
+/* Customer Service Task */
+CREATE TABLE customer_service_task (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    service_id INT NOT NULL,
+    task_id INT NOT NULL,
+    status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_id) REFERENCES customers(id),
+    FOREIGN KEY (service_id) REFERENCES services(id),
+    FOREIGN KEY (task_id) REFERENCES task(id),
+    UNIQUE (customer_id,service_id,task_id)
 );
 
 /* Can a multiplayer account manager be allocated to one service? */
@@ -423,6 +453,7 @@ CREATE TABLE client_contact_details (
 /*--TABLE:- CREATE JOB   */
 CREATE TABLE jobs (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    job_id VARCHAR(100) NOT NULL UNIQUE,
     account_manager_id INT NOT NULL COMMENT 'Only staff members who are account managers',
     customer_id INT NOT NULL,
     client_id INT NOT NULL,
@@ -431,8 +462,8 @@ CREATE TABLE jobs (
     service_id INT NOT NULL,
     job_type_id INT NOT NULL,
     budgeted_hours DECIMAL(10, 2) NOT NULL,
-    /* reviewer INT NOT NULL  */
-    /* allocated_to INT NOT NULL  */
+    reviewer INT NOT NULL, 
+    allocated_to INT NOT NULL,
     allocated_on DATE NOT NULL,
     date_received_on DATE NOT NULL,
     year_end VARCHAR(50) NOT NULL,
@@ -440,7 +471,7 @@ CREATE TABLE jobs (
     review_time VARCHAR(50) NOT NULL,
     feedback_incorporation_time VARCHAR(50) NOT NULL,
     total_time VARCHAR(50) NOT NULL,
-    /* engagement_model INT NOT NULL  */
+    engagement_model VARCHAR(255) NOT NULL,
     expected_delivery_date DATE NOT NULL,
     due_on DATE NOT NULL,
     submission_deadline DATE NOT NULL,
@@ -461,7 +492,7 @@ CREATE TABLE jobs (
     bookkeeping ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: No, 1: Yes',
     processing_type ENUM('1', '2') NOT NULL DEFAULT '1' COMMENT '1: Manual, 2: Software',
     invoiced ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: No, 1: Yes',
-     /* currency INT NOT NULL  */
+    currency INT NOT NULL,
     invoice_value DECIMAL(15, 2) NOT NULL,
     invoice_date DATE NOT NULL,
     invoice_hours DECIMAL(10, 2) NOT NULL,
@@ -469,11 +500,14 @@ CREATE TABLE jobs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (account_manager_id) REFERENCES staffs(id),
+    FOREIGN KEY (reviewer) REFERENCES staffs(id),
+    FOREIGN KEY (allocated_to) REFERENCES staffs(id),
     FOREIGN KEY (customer_id) REFERENCES customers(id),
     FOREIGN KEY (client_id) REFERENCES clients(id),
     FOREIGN KEY (customer_contact_details_id) REFERENCES customer_contact_details(id),
     FOREIGN KEY (service_id) REFERENCES services(id),
-    FOREIGN KEY (job_type_id) REFERENCES job_types(id)
+    FOREIGN KEY (job_type_id) REFERENCES job_types(id),
+    FOREIGN KEY (currency) REFERENCES countries(id)
     );
 
 

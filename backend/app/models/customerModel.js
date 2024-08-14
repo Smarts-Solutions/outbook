@@ -237,6 +237,7 @@ const updateProcessCustomerServices = async (customerProcessData) => {
     for (const serVal of services) {
         let service_id = serVal.service_id;
         let account_manager_id = serVal.account_manager_id;
+        let customer_service_task = serVal.customer_service_task;
 
         try {
             // Process 1 table
@@ -260,12 +261,11 @@ const updateProcessCustomerServices = async (customerProcessData) => {
             }
 
 
-            // Process 2 table
-            const insertManagerQuery = `
+            // Process 2 table Account manager id
+           const insertManagerQuery = `
                 INSERT INTO customer_service_account_managers (customer_service_id, account_manager_id)
                 VALUES (?, ?)
             `;
-
             if (account_manager_id.length > 0) {
                 for (const ac_id of account_manager_id) {
                     // WORKING IN PROGRESS................
@@ -320,6 +320,29 @@ const updateProcessCustomerServices = async (customerProcessData) => {
                 await pool.execute(insertManagerQuery2, [customer_service_id, account_manager_id_exit]);
                     }
             }
+
+
+            // Process 3 table customer service task
+            if(customer_service_task != undefined){
+                const insertCSTQuery = `
+                INSERT INTO customer_service_task (customer_id,service_id,task_id)
+                VALUES (?, ?, ?)
+            `;
+               if(customer_service_task.length > 0){
+                for (const cst of customer_service_task) {
+                    const checkQuery3 = `
+                    SELECT customer_id , service_id , task_id FROM customer_service_task WHERE customer_id = ? AND service_id = ? AND task_id = ?
+                   `;
+                    const [existing3] = await pool.execute(checkQuery3, [customer_id, service_id, cst]);
+                    if (existing3.length === 0) {
+                        await pool.execute(insertCSTQuery, [customer_id, service_id, cst]);
+                    }
+
+                }
+               }
+            }
+
+
 
         } catch (err) {
             console.error('Error inserting data:', err);
