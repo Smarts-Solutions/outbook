@@ -228,7 +228,7 @@ const deleteCustomer = async (customer) => {
 
 const updateProcessCustomerServices = async (customerProcessData) => {
     //console.log("customerProcessData",customerProcessData)
-    const { customer_id, pageStatus ,services } = customerProcessData;
+    const { customer_id,services } = customerProcessData;
     const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
 
     var account_manager_id_exit = ExistCustomer[0].account_manager_id;
@@ -349,10 +349,9 @@ const updateProcessCustomerServices = async (customerProcessData) => {
             throw err;
         }
     }
- 
     // Update customer process page
-     await pool.execute('UPDATE customers SET form_process = ? WHERE id = ?', [ pageStatus,customer_id]);
-
+     let pageStatus = "2";
+     await pool.execute('UPDATE customers SET form_process = ? WHERE id = ?', [pageStatus,customer_id]);
 
     return customer_id;
 
@@ -360,7 +359,7 @@ const updateProcessCustomerServices = async (customerProcessData) => {
 
 const updateProcessCustomerEngagementModel = async (customerProcessData) => {
     // console.log("customerProcessData", customerProcessData)
-    const { customer_id, pageStatus ,fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing } = customerProcessData;
+    const { customer_id ,fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing } = customerProcessData;
     console.log("customer_id", customer_id);
 
     const checkQuery = `SELECT id FROM customer_engagement_model WHERE customer_id = ? `;
@@ -697,6 +696,7 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
     }
 
     // Update customer process page
+    let pageStatus = "3";
     await pool.execute('UPDATE customers SET form_process = ? WHERE id = ?', [ pageStatus,customer_id]);
 
     return customer_id;
@@ -736,8 +736,8 @@ const updateProcessCustomerFile = async (customerProcessDataFiles, customer_id) 
         }
     }
      
-    let pageStatus = "4"
     // Update customer process page
+    let pageStatus = "4"
     await pool.execute('UPDATE customers SET form_process = ? WHERE id = ?', [ pageStatus,customer_id]);
     return customer_id
 }
