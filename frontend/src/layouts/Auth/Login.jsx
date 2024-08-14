@@ -110,7 +110,7 @@ const Login = () => {
 
 <div className="container">
         <div className="row  d-flex justify-content-center vh-100">
-          <div className="col-8 align-self-center form-container">
+          <div className="col-8 col-md-9 align-self-center form-container">
             <div className="row ">
 
               <div className='col-md-6 ps-0'>
@@ -132,11 +132,11 @@ const Login = () => {
                       <div className="form-group mb-2">
                         {/* <label htmlFor="username">Email</label> */}
                         
-                        <div className="input-group mb-2"><input type="email" className="form-control" name="username" id="username" placeholder="Enter Email Id"
+                        <div className="input-group "><input type="email" className="form-control" name="username" id="username" placeholder="Enter Email Id"
                           onChange={(e) => setEmail(e.target.value)} value={Email} />
                         </div>
                         {errorEmail ?
-                       <span style={{color:'red'}}>{errorEmail}</span> : ""
+                       <span className='error-text'>{errorEmail}</span> : ""
                         }
 
 
@@ -144,15 +144,15 @@ const Login = () => {
                       </div>
                       <div className="form-group">
                         {/* <label htmlFor="userpassword">Password</label> */}
-                        <div className="input-group mb-2"><input type="password" className="form-control" name="password" id="userpassword" placeholder="Enter password"
+                        <div className="input-group "><input type="password" className="form-control" name="password" id="userpassword" placeholder="Enter password"
                           onChange={(e) => setPassword(e.target.value)} /></div>
                         {errorPassword ?
-                          <span style={{color:'red'}}>{errorPassword}</span> : ""
+                          <span  className='error-text' >{errorPassword}</span> : ""
                         }
                       </div>
                       <div className="form-group row my-2 text-center">
                        
-                        <div className="col-sm-12 "><a className="text-muted font-13 text-decoration-none" href=""><i className="ti-lock pe-1" />
+                        <div className="col-sm-12 "><a className="text-muted font-13 forget-btn" href=""><i className="ti-lock pe-1" />
                           Forgot password?</a></div>{/*end col*/}
                       </div>
                       <div className="form-group mb-0 row text-center">
