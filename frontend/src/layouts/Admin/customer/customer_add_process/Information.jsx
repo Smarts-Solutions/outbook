@@ -29,12 +29,15 @@ const Information = () => {
     data: [],
 });
 
-console.log("customerDetails", !customerDetails.loading && customerDetails.data);
+console.log("customerDetails", !customerDetails.loading && customerDetails.data.customer);
+
   const [personRoleDataAll, setPersonRoleDataAll] = useState({
     loading: true,
     data: [],
   });
+
   const [getAllSearchCompany, setGetAllSearchCompany] = useState([]);
+
   const [contacts, setContacts] = useState([
     {
       authorised_signatory_status: false,
@@ -45,6 +48,7 @@ console.log("customerDetails", !customerDetails.loading && customerDetails.data)
       email: "",
     },
   ]);
+
   const [errors, setErrors] = useState([
     { firstName: "", lastName: "", role: "", phoneNumber: "", email: "" },
   ]);
@@ -718,8 +722,43 @@ useEffect(() => {
 
 
   useEffect(() => {
-    formik.setFieldValue("accountManager", getAccountMangerId);
-  }, [getAccountMangerId]);
+    setCustomerType(!customerDetails.loading && customerDetails.data.customer.customer_type)
+    setAccountMangerId(!customerDetails.loading && customerDetails.data.customer.account_manager_id)
+
+    if (!customerDetails.loading && customerDetails.data.customer.customer_type == '2') {
+      formik1.setFieldValue("Trading_Name", !customerDetails.loading && customerDetails.data.customer.trading_name)
+      formik1.setFieldValue("Trading_Address", !customerDetails.loading && customerDetails.data.customer.trading_address)
+      formik1.setFieldValue("VAT_Registered", !customerDetails.loading && customerDetails.data.customer.vat_registered)
+      formik1.setFieldValue("VAT_Number", !customerDetails.loading && customerDetails.data.customer.vat_number)
+      formik1.setFieldValue("Website", !customerDetails.loading && customerDetails.data.customer.website)
+      formik1.setFieldValue("First_Name", !customerDetails.loading && customerDetails.data.contact_details[0].first_name)
+      formik1.setFieldValue("Last_Name", !customerDetails.loading && customerDetails.data.contact_details[0].last_name)
+      formik1.setFieldValue("Phone", !customerDetails.loading && customerDetails.data.contact_details[0].phone)
+      formik1.setFieldValue("Email", !customerDetails.loading && customerDetails.data.contact_details[0].email)
+      formik1.setFieldValue("Residential_Address", !customerDetails.loading && customerDetails.data.contact_details[0].residential_address)
+    }
+    if (!customerDetails.loading && customerDetails.data.customer.customer_type == '1') {
+      formik2.setFieldValue("Trading_Name", !customerDetails.loading && customerDetails.data.customer.trading_name)
+      formik2.setFieldValue("Trading_Address", !customerDetails.loading && customerDetails.data.customer.trading_address)
+      formik2.setFieldValue("VAT_Registered", !customerDetails.loading && customerDetails.data.customer.vat_registered)
+      formik2.setFieldValue("VAT_Number", !customerDetails.loading && customerDetails.data.customer.vat_number)
+      formik2.setFieldValue("Website", !customerDetails.loading && customerDetails.data.customer.website)
+    }
+    if (!customerDetails.loading && customerDetails.data.customer.customer_type == '3') {
+      formik.setFieldValue("Trading_Name", !customerDetails.loading && customerDetails.data.customer.trading_name)
+      formik.setFieldValue("Trading_Address", !customerDetails.loading && customerDetails.data.customer.trading_address)
+      formik.setFieldValue("VAT_Registered", !customerDetails.loading && customerDetails.data.customer.vat_registered)
+      formik.setFieldValue("VAT_Number", !customerDetails.loading && customerDetails.data.customer.vat_number)
+      formik.setFieldValue("Website", !customerDetails.loading && customerDetails.data.customer.website)
+      setContacts(!customerDetails.loading && customerDetails.data.contact_details)
+    }
+        
+
+ 
+
+}, [customerDetails])
+
+
 
 
 
@@ -845,6 +884,9 @@ useEffect(() => {
     }
     setErrors(newErrors);
   };
+
+
+
 
   return (
     <Formik

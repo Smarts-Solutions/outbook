@@ -193,19 +193,7 @@ const Information = ({ id, pageStatus }) => {
     }, []);
 
 
-
-    const handleChangeValue = (e) => {
-
-
-
-        // const fieldName = e.target.name;
-        // const fieldValue = e.target.value;
-
-        // setCustomerData(prevData => ({
-        //     ...prevData,
-        //     [fieldName]: fieldValue
-        // }));
-    };
+ 
 
     //  for sole trader
     const handleChange1 = (e) => {
