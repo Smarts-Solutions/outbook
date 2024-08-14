@@ -235,7 +235,7 @@ useEffect(() => {
       setErrors(newErrors);
       if (formIsValid) {
         let req = {
-          customer_id: customer_id,
+          customer_id: Number(customer_id),
           company_name: values.company_name,
           entity_type: values.entity_type,
           company_status: values.company_status,
@@ -314,7 +314,7 @@ useEffect(() => {
 
     onSubmit: async (values) => {
       const req = {
-        customer_id: customer_id,
+        customer_id: Number(customer_id),
         Trading_Name: values.Trading_Name,
         Trading_Address: values.Trading_Address,
         VAT_Registered: values.VAT_Registered,
@@ -395,7 +395,7 @@ useEffect(() => {
 
       if (formIsValid) {
         const req = {
-          customer_id: customer_id,
+          customer_id: Number(customer_id),
           Trading_Name: values.Trading_Name,
           Trading_Address: values.Trading_Address,
           VAT_Registered: values.VAT_Registered,
@@ -753,9 +753,6 @@ useEffect(() => {
       setContacts(!customerDetails.loading && customerDetails.data.contact_details)
     }
         
-
- 
-
 }, [customerDetails])
 
 

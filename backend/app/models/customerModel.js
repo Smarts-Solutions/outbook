@@ -22,6 +22,8 @@ async function generateNextUniqueCode() {
 const createCustomer = async (customer) => {
     // Customer Code(cust+CustName+UniqueNo)
     const { customer_id } = customer;
+
+    console.log("customer_id", customer_id);
    if(customer_id == undefined || customer_id == null || customer_id == ""){
     let UniqueNo = await generateNextUniqueCode()
     if (customer.CustomerType == "1") {
@@ -178,15 +180,14 @@ const createCustomer = async (customer) => {
             throw err;
         }
     }
-}
+   }
 
 else{
-
-    const { customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website, contactDetails } = customer;
-
-
-    const firstThreeLetters = trading_name.substring(0, 3);
-    const customer_code = "cust_" + firstThreeLetters + "_" + lastCode;
+     
+    
+    const { customer_type, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, contactDetails } = customer;
+    console.log("customer" , customer)
+      
 
     const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ? AND id != ?`;
     const [check] = await pool.execute(checkQuery, [trading_name, customer_id]);
