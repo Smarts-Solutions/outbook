@@ -8151,11 +8151,11 @@ button.btn.btn-info, .blue-btn {
   border: 1px solid !important;
   background: transparent !important;
 }
-.blue-btn:hover
+.blue-btn:hover,.btn-info:hover
 {  color: #00AFEF !important;
   border-color: #00AFEF !important;
   border: 1px solid !important;
-  background: transparent !important; 
+  background: transparent !important;
 }
 .white-btn
 {
@@ -8178,8 +8178,18 @@ button.btn.btn-info, .blue-btn {
   background: #00AFEF !important;
 }
 .report-data {
-  border: 1px solid #9E9E9E;
-  padding: 15px;
+  /* border: 1px solid #9E9E9E; */
+  padding: 20px;
+  border-radius: 6px;
+  background-color: #fff;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+}
+.content-title {
+  margin-top: 25px;
+  background-color: #fff;
+  padding: 20px;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+  border-radius: 6px;
 }
 .datatable-wrapper
 {
@@ -8371,4 +8381,15 @@ color: #fff;
   background: #ebf4f7;
   box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 
+}
+thead.table-striped th, .table-head-blue th{
+  background: #EBF4F7 !important;
+  font-size: 14px;
+  color: #4B4B4B;
+  font-weight: 600;
+}
+.new-checkbox
+{
+  height: 30px;
+  width: 30px;
 }
