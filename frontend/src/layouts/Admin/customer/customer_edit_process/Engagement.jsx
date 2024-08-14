@@ -540,7 +540,7 @@ const Engagement = () => {
 
 
 
-                                    {checkboxStates && checkboxStates[1] === 1 && (
+                                    {checkboxStates && checkboxStates[2] === 1 && (
                                         <div id="myDiv2" className="row">
                                             <div style={{ marginBottom: "26px !important" }} className="col-xl-12 col-lg-12">
                                                 <div className="card pricing-box p-4 m-2 mt-0">
@@ -584,7 +584,7 @@ const Engagement = () => {
 
 
 
-                                    {checkboxStates && checkboxStates[2] === 1 && (
+                                    {checkboxStates && checkboxStates[1] === 1 && (
                                         <div id="myDiv3" className="row">
                                             <div style={{ marginBottom: "26px !important" }} className="col-xl-12 col-lg-12">
                                                 <div className="card pricing-box p-4 m-2 mt-0">

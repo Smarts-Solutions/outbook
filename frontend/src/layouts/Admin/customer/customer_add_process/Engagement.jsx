@@ -266,8 +266,6 @@ const Engagement = () => {
                 "fee_per_admin_staff": formValues1.feePerAdmin,
             };
         }
-
-
         if (checkboxStates[1] === 1) {
             req = {
                 ...req,
@@ -290,9 +288,6 @@ const Engagement = () => {
                 "adhoc_admin_staff": formValues3.adhoc_admin_staff,
             };
         }
-
-
-
         if (checkboxStates[3] === 1) {
             req = {
                 ...req,
@@ -336,6 +331,8 @@ const Engagement = () => {
     }, []);
 
 
+
+    console.log("checkboxStates", checkboxStates)
     return (
         <Formik
             initialValues={address}
@@ -435,7 +432,7 @@ const Engagement = () => {
 
 
 
-                                    {checkboxStates && checkboxStates[1] === 1 && (
+                                    {checkboxStates && checkboxStates[2] === 1 && (
                                         <div id="myDiv2" className="row">
                                             <div style={{ marginBottom: "26px !important" }} className="col-xl-12 col-lg-12">
                                                 <div className="card pricing-box p-4 m-2 mt-0">
@@ -479,7 +476,7 @@ const Engagement = () => {
 
 
 
-                                    {checkboxStates && checkboxStates[2] === 1 && (
+                                    {checkboxStates && checkboxStates[1] === 1 && (
                                         <div id="myDiv3" className="row">
                                             <div style={{ marginBottom: "26px !important" }} className="col-xl-12 col-lg-12">
                                                 <div className="card pricing-box p-4 m-2 mt-0">
@@ -540,7 +537,7 @@ const Engagement = () => {
                                                                         <input
                                                                             type="text"
                                                                             className="form-control"
-                                                                            placeholder={1}
+                                                                            placeholder={"Please Enter Minimum number of Jobs"}
                                                                             name="minimum_number_of_jobs"
                                                                             id={`minimumJobs_${index}`}
                                                                             value={job.minimum_number_of_jobs}
@@ -583,6 +580,7 @@ const Engagement = () => {
                                                                         <input
                                                                             type="text"
                                                                             className="form-control"
+                                                                            placeholder={"Please Enter Cost Per Job"}
                                                                             name="cost_per_job"
                                                                             id={`costPerJob_${index}`}
                                                                             value={job.cost_per_job}

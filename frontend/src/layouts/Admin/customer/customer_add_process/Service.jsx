@@ -22,7 +22,7 @@ const Service = () => {
     const [services, setServices] = useState([]);
     const [tempServices, setTempServices] = useState("");
 
-
+console.log("next", address)
 
     const GetAllServiceData = async () => {
         const req = { action: "get" };

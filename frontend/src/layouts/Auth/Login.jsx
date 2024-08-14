@@ -24,7 +24,7 @@ const Login = () => {
       return
     }
     else if (!Email_regex(Email)) {
-      console.log(Email)
+      
       setErrorEmail(INVALID_EMAIL_ERROR)
       return
     }

@@ -11,12 +11,9 @@ const CreateJob = () => {
     const navigate = useNavigate();
     const token = JSON.parse(localStorage.getItem("token"));
     const dispatch = useDispatch();
-
     const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
     const [errors, setErrors] = useState({})
-    const [touched, setTouched] = useState({});
-
-    console.log("location :------", location.state)
+    const [isSubmitted, setIsSubmitted] = useState(false);
 
 
     const [jobData, setJobData] = useState({
@@ -102,94 +99,99 @@ const CreateJob = () => {
         GetJobData()
     }, []);
 
-
-    const [showModal, setShowModal] = useState(false);
-
-
-
-    // const HandleChange = (e) => {
-    //     const { name, value } = e.target;
-
-    //     validate()
-    //     setJobData(prevState => ({
-    //         ...prevState,
-    //         [name]: value
-    //     }));
-    // }
-
     const HandleChange = (e) => {
         const { name, value } = e.target;
 
-        setTouched(prevState => ({
-            ...prevState,
-            [name]: true
-        }));
 
-        validate(); // Validate on change if you want immediate feedback
         setJobData(prevState => ({
             ...prevState,
             [name]: value
         }));
+
+        validate(name, value);
+
+
     }
 
+    const fieldErrors = {
+        'AccountManager': 'Please Enter Account Manager',
+        'Customer': 'Please Enter Customer',
+        'Client': 'Please Select Client',
+        'ClientJobCode': 'Please Enter Client Job Code',
+        'CustomerAccountManager': 'Please Select Customer Account Manager',
+        'Service': 'Please Select Service',
+        'JobType': 'Please Select Job Type',
+        'BudgetedHours': 'Please Enter Budgeted Hours',
+        'Reviewer': 'Please Select Reviewer',
+        'AllocatedTo': 'Please Select Allocated To',
+        'AllocatedOn': 'Please Enter Allocated On',
+        'DateReceivedOn': 'Please Enter Date Received On',
+        'YearEnd': 'Please Enter Year End',
+        'TotalPreparationTime': 'Please Enter Total Preparation Time',
+        'ReviewTime': 'Please Enter Review Time',
+        'FeedbackIncorporationTime': 'Please Enter Feedback Incorporation Time',
+        'TotalTime': 'Please Enter Total Time',
+        'EngagementModel': 'Please Select Engagement Model',
+        'ExpectedDeliveryDate': 'Please Enter Expected Delivery Date',
+        'DueOn': 'Please Enter Due On',
+        'SubmissionDeadline': 'Please Enter Submission Deadline',
+        'CustomerDeadlineDate': 'Please Enter Customer Deadline Date',
+        'SLADeadlineDate': 'Please Enter SLA Deadline Date',
+        'InternalDeadlineDate': 'Please Enter Internal Deadline Date',
+        'FilingWithCompaniesHouseRequired': 'Please Select Filing With Companies House Required',
+        'CompaniesHouseFilingDate': 'Please Enter Companies House Filing Date',
+        'FilingWithHMRCRequired': 'Please Select Filing With HMRC Required',
+        'HMRCFilingDate': 'Please Enter HMRC Filing Date',
+        'OpeningBalanceAdjustmentRequired': 'Please Select Opening Balance Adjustment Required',
+        'OpeningBalanceAdjustmentDate': 'Please Enter Opening Balance Adjustment Date',
+        'NumberOfTransactions': 'Please Enter Number Of Transactions',
+        'NumberOfTrialBalanceItems': 'Please Enter Number Of Trial Balance Items',
+        'Turnover': 'Please Enter Turnover',
+        'NoOfEmployees': 'Please Enter No Of Employees',
+        'VATReconciliation': 'Please Select VAT Reconciliation',
+        'Bookkeeping': 'Please Select Bookkeeping',
+        'ProcessingType': 'Please Select Processing Type',
+        'Invoiced': 'Please Select Invoiced',
+        'Currency': 'Please Select Currency',
+        'InvoiceValue': 'Please Enter Invoice Value',
+        'InvoiceDate': 'Please Enter Invoice Date',
+        'InvoiceHours': 'Please Enter Invoice Hours',
+        'InvoiceRemark': 'Please Enter Invoice Remark'
+    };
 
-    const validate = () => {
-        const newErrors = {};
+    const validate = (name, value, isSubmitting = false) => {
+        const newErrors = { ...errors };
 
-
-        for (const key in jobData) {
-            if (touched[key] && !jobData[key]) {
-                if (key == 'AccountManager') newErrors[key] = 'Please Enter Account Manager';
-                if (key == 'Customer') newErrors[key] = 'Please Enter Customer';
-                if (key == 'Client') newErrors[key] = 'Please Select Client';
-                if (key == 'ClientJobCode') newErrors[key] = 'Please Enter Client Job Code';
-                if (key == 'CustomerAccountManager') newErrors[key] = 'Please Select Customer Account Manager';
-                if (key == 'Service') newErrors[key] = 'Please Select Service';
-                if (key == 'JobType') newErrors[key] = 'Please Select Job Type';
-                if (key == 'BudgetedHours') newErrors[key] = 'Please Enter Budgeted Hours';
-                if (key == 'Reviewer') newErrors[key] = 'Please Select Reviewer';
-                if (key == 'AllocatedTo') newErrors[key] = 'Please Select Allocated To';
-                if (key == 'AllocatedOn') newErrors[key] = 'Please Enter Allocated On';
-                if (key == 'DateReceivedOn') newErrors[key] = 'Please Enter Date Received On';
-                if (key == 'YearEnd') newErrors[key] = 'Please Enter Year End';
-                if (key == 'TotalPreparationTime') newErrors[key] = 'Please Enter Total Preparation Time';
-                if (key == 'ReviewTime') newErrors[key] = 'Please Enter Review Time';
-                if (key == 'FeedbackIncorporationTime') newErrors[key] = 'Please Enter Feedback Incorporation Time';
-                if (key == 'TotalTime') newErrors[key] = 'Please Enter Total Time';
-                if (key == 'EngagementModel') newErrors[key] = 'Please Select Engagement Model';
-                if (key == 'ExpectedDeliveryDate') newErrors[key] = 'Please Enter Expected Delivery Date';
-                if (key == 'DueOn') newErrors[key] = 'Please Enter Due On';
-                if (key == 'SubmissionDeadline') newErrors[key] = 'Please Enter Submission Deadline';
-                if (key == 'CustomerDeadlineDate') newErrors[key] = 'Please Enter Customer Deadline Date';
-                if (key == 'SLADeadlineDate') newErrors[key] = 'Please Enter SLA Deadline Date';
-                if (key == 'InternalDeadlineDate') newErrors[key] = 'Please Enter Internal Deadline Date';
-                if (key == 'FilingWithCompaniesHouseRequired') newErrors[key] = 'Please Select Filing With Companies House Required';
-                if (key == 'CompaniesHouseFilingDate') newErrors[key] = 'Please Enter Companies House Filing Date';
-                if (key == 'FilingWithHMRCRequired') newErrors[key] = 'Please Select Filing With HMRC Required';
-                if (key == 'HMRCFilingDate') newErrors[key] = 'Please Enter HMRC Filing Date';
-                if (key == 'OpeningBalanceAdjustmentRequired') newErrors[key] = 'Please Select Opening Balance Adjustment Required';
-                if (key == 'OpeningBalanceAdjustmentDate') newErrors[key] = 'Please Enter Opening Balance Adjustment Date';
-                if (key == 'NumberOfTransactions') newErrors[key] = 'Please Enter Number Of Transactions';
-                if (key == 'NumberOfTrialBalanceItems') newErrors[key] = 'Please Enter Number Of Trial Balance Items';
-                if (key == 'Turnover') newErrors[key] = 'Please Enter Turnover';
-                if (key == 'NoOfEmployees') newErrors[key] = 'Please Enter No Of Employees';
-                if (key == 'VATReconciliation') newErrors[key] = 'Please Select VAT Reconciliation';
-                if (key == 'Bookkeeping') newErrors[key] = 'Please Select Bookkeeping';
-                if (key == 'ProcessingType') newErrors[key] = 'Please Select Processing Type';
-                if (key == 'Invoiced' && jobData.EngagementModel != "fte_dedicated_staffing") newErrors[key] = 'Please Select Invoiced';
-                if (key == 'Currency' && jobData.EngagementModel != "fte_dedicated_staffing") newErrors[key] = 'Please Select Currency';
-                if (key == 'InvoiceValue' && jobData.EngagementModel != "fte_dedicated_staffing") newErrors[key] = 'Please Enter Invoice Value';
-                if (key == 'InvoiceDate' && jobData.EngagementModel != "fte_dedicated_staffing") newErrors[key] = 'Please Enter Invoice Date';
-                if (key == 'InvoiceHours' && jobData.EngagementModel != "fte_dedicated_staffing") newErrors[key] = 'Please Enter Invoice Hours';
-                if (key == 'InvoiceRemark' && jobData.EngagementModel != "fte_dedicated_staffing") newErrors[key] = 'Please Enter Invoice Remark';
+        if (isSubmitting) {
+            for (const key in fieldErrors) {
+                if (!jobData[key]) {
+                    newErrors[key] = fieldErrors[key];
+                }
             }
         }
-        setErrors(newErrors)
-        return Object.keys(newErrors).length === 0 ? true : false;
+        else {
+            if (!value) {
+                if (fieldErrors[name]) {
+                    newErrors[name] = fieldErrors[name];
+                }
+            } else {
+                delete newErrors[name];
+            }
+        }
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
 
-
+    const validateAllFields = () => {
+        let isValid = true;
+        for (const key in jobData) {
+            if (!validate(key, jobData[key], true)) {
+                isValid = false;
+            }
+        }
+        return isValid;
+    };
 
     const handleSubmit = async () => {
         const req = {
@@ -238,8 +240,8 @@ const CreateJob = () => {
             invoice_remark: jobData.InvoiceRemark
         }
         const data = { req: req, authToken: token }
-
-        const isValid = validate();
+        setIsSubmitted(true);
+        const isValid = validateAllFields();
         if (isValid) {
             await dispatch(AddAllJobType(data))
                 .unwrap()
@@ -265,8 +267,6 @@ const CreateJob = () => {
         }
     }
 
-
-
     const filteredData = AllJobData.data?.engagement_model?.[0]
         ? Object.keys(AllJobData.data.engagement_model[0])
             .filter(key => AllJobData.data.engagement_model[0][key] === "1")
@@ -285,7 +285,7 @@ const CreateJob = () => {
             navigate('/admin/client/profile', { state: location.state });
         }
     }
-    console.log("jobData.JobType", jobData.JobType)
+
 
 
     return (
@@ -362,16 +362,10 @@ const CreateJob = () => {
                                                                     <div className="mb-3 col-lg-3">
                                                                         <label className="form-label">Client Job Code</label>
                                                                         <input type="text" className="form-control" placeholder="Client Job Code"
-                                                                            name="ClientJobCode" onChange={HandleChange} value={jobData.ClientJobCode}
-                                                                            onBlur={() => setTouched(prevState => ({ ...prevState, ClientJobCode: true }))}
-
-                                                                        />
-                                                                        {touched['ClientJobCode'] && errors['ClientJobCode'] && (
+                                                                            name="ClientJobCode" onChange={HandleChange} value={jobData.ClientJobCode} />
+                                                                        {errors['ClientJobCode'] && (
                                                                             <div style={{ 'color': 'red' }}>{errors['ClientJobCode']}</div>
                                                                         )}
-                                                                        {/* {errors['ClientJobCode'] && (
-                                                                            <div style={{ 'color': 'red' }}>{errors['ClientJobCode']}</div>
-                                                                        )} */}
                                                                     </div>
 
                                                                     <div className="col-lg-3">
@@ -916,36 +910,7 @@ const CreateJob = () => {
                             </div>
                         </div>
                     </div>
-                    {
 
-
-                        <>
-                            {/* Conditional Modal Rendering */}
-                            {showModal && (
-                                <div className="modal fade show" id="staticBackdrop" tabIndex="-1" aria-labelledby="staticBackdropLabel" style={{ display: 'block', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-                                    <div className="modal-dialog">
-                                        <div className="modal-content">
-                                            <div className="modal-header">
-                                                <h5 className="modal-title" id="staticBackdropLabel">Modal title</h5>
-                                                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
-                                            </div>
-                                            <div className="modal-body">
-                                                Modal content goes here...
-                                            </div>
-                                            <div className="modal-footer">
-                                                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Close</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                        </>
-
-
-
-
-                    }
                 </div>
 
             </div>
