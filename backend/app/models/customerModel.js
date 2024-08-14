@@ -226,7 +226,7 @@ else{
     }
 
     // Company Details
-    else if (customer_type == "2") {
+    else if (CustomerType == "2") {
         const { company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date, incorporation_in } = customer;
         try {
             // Update customer_company_information
@@ -238,7 +238,6 @@ else{
 
 
             const [incorporation_date_s] = incorporation_date.split('T');
-
 
 
             const query2 = `
@@ -315,7 +314,7 @@ else{
     }
 
     // Partnership Details
-    else if (customer_type == "3") {
+    else if (CustomerType == "3") {
 
         try {
 

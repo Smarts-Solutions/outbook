@@ -52,6 +52,8 @@ const Paper = () => {
                         icon: 'success',
                         timer: 3000,
                     }).then(() => {
+                        localStorage.removeItem("currentStep");
+                        localStorage.removeItem("coustomerId");
                         navigate('/admin/customer');
                     })
                 }
