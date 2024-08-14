@@ -213,12 +213,12 @@ const Service = () => {
                         <div className="row">
                             <div className="table-responsive table-card mt-3 mb-1">
                                 <table className="table align-middle table-nowrap" id="customerTable">
-                                    <thead className="table-light">
+                                    <thead className="table-light table-head-blue">
                                         <tr>
                                             <th scope="col" style={{ width: 50 }}>
                                                 <div className="form-check">
                                                     <input
-                                                        className="form-check-input new_input"
+                                                        className="form-check-input new_input new-checkbox"
                                                         type="checkbox"
                                                         id="checkAll"
                                                         onChange={handleSelectAllChange}
@@ -237,7 +237,7 @@ const Service = () => {
                                                     <th scope="row">
                                                         <div className="form-check">
                                                             <input
-                                                                className="form-check-input new_input"
+                                                                className="form-check-input new_input new-checkbox"
                                                                 type="checkbox"
                                                                 onChange={(e) => handleCheckboxChange(e.target.checked, item, 2)}
                                                                 checked={services.includes(item.id)}

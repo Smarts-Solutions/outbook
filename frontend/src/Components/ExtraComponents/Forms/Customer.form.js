@@ -563,7 +563,25 @@ const ReusableForm = ({
                     </div>
                   </div>
                 </>
-              ) : (
+              ) : field.type === "TradingDetails" ? (
+                <>
+                  <>
+                  <div className={`col-lg-${field.col_size}`}>
+                    <div className="mb-3  mt-4 row flex-column">
+                      <div className="card-header step-card-header mb-4" ><h6 className="my-0">Trading Details </h6></div>
+                      {/* <label
+                        className={`col-lg-${field.label_size}`}
+                        htmlFor={field.name}
+                      >
+                        Sole Trading
+                      </label> */}
+                      <div></div>
+                    </div>
+                  </div>
+                </>
+                </>
+              ) :
+               (
                 <>
                   <div className={`col-lg-${field.col_size}`}>
                     <div className="mb-3  mt-4 row flex-column">
