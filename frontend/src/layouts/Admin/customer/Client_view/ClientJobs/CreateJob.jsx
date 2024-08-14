@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
 import { GetAllJabData, AddAllJobType } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import sweatalert from 'sweetalert2';
+import * as bootstrap from 'bootstrap';
+
 
 const CreateJob = () => {
     const location = useLocation()
@@ -12,6 +14,7 @@ const CreateJob = () => {
 
     const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
     const [errors, setErrors] = useState({})
+    const [touched, setTouched] = useState({});
 
     console.log("location :------", location.state)
 
@@ -99,9 +102,30 @@ const CreateJob = () => {
         GetJobData()
     }, []);
 
+
+    const [showModal, setShowModal] = useState(false);
+
+
+
+    // const HandleChange = (e) => {
+    //     const { name, value } = e.target;
+
+    //     validate()
+    //     setJobData(prevState => ({
+    //         ...prevState,
+    //         [name]: value
+    //     }));
+    // }
+
     const HandleChange = (e) => {
         const { name, value } = e.target;
-        validate()
+
+        setTouched(prevState => ({
+            ...prevState,
+            [name]: true
+        }));
+
+        validate(); // Validate on change if you want immediate feedback
         setJobData(prevState => ({
             ...prevState,
             [name]: value
@@ -111,8 +135,10 @@ const CreateJob = () => {
 
     const validate = () => {
         const newErrors = {};
+
+
         for (const key in jobData) {
-            if (!jobData[key]) {
+            if (touched[key] && !jobData[key]) {
                 if (key == 'AccountManager') newErrors[key] = 'Please Enter Account Manager';
                 if (key == 'Customer') newErrors[key] = 'Please Enter Customer';
                 if (key == 'Client') newErrors[key] = 'Please Select Client';
@@ -213,7 +239,8 @@ const CreateJob = () => {
         }
         const data = { req: req, authToken: token }
 
-        if (validate()) {
+        const isValid = validate();
+        if (isValid) {
             await dispatch(AddAllJobType(data))
                 .unwrap()
                 .then(async (response) => {
@@ -226,7 +253,7 @@ const CreateJob = () => {
                             timer: 1500
                         })
                         setTimeout(() => {
-                            location.state.goto == "Customer" ? navigate('/admin/Clientlist', { state: location.state.details }) :  navigate('/admin/client/profile', { state: location.state.details });
+                            location.state.goto == "Customer" ? navigate('/admin/Clientlist', { state: location.state.details }) : navigate('/admin/client/profile', { state: location.state.details });
                         }, 1500);
                     } else {
                         console.log("response", response)
@@ -258,6 +285,7 @@ const CreateJob = () => {
             navigate('/admin/client/profile', { state: location.state });
         }
     }
+    console.log("jobData.JobType", jobData.JobType)
 
 
     return (
@@ -334,10 +362,16 @@ const CreateJob = () => {
                                                                     <div className="mb-3 col-lg-3">
                                                                         <label className="form-label">Client Job Code</label>
                                                                         <input type="text" className="form-control" placeholder="Client Job Code"
-                                                                            name="ClientJobCode" onChange={HandleChange} value={jobData.ClientJobCode} />
-                                                                        {errors['ClientJobCode'] && (
+                                                                            name="ClientJobCode" onChange={HandleChange} value={jobData.ClientJobCode}
+                                                                            onBlur={() => setTouched(prevState => ({ ...prevState, ClientJobCode: true }))}
+
+                                                                        />
+                                                                        {touched['ClientJobCode'] && errors['ClientJobCode'] && (
                                                                             <div style={{ 'color': 'red' }}>{errors['ClientJobCode']}</div>
                                                                         )}
+                                                                        {/* {errors['ClientJobCode'] && (
+                                                                            <div style={{ 'color': 'red' }}>{errors['ClientJobCode']}</div>
+                                                                        )} */}
                                                                     </div>
 
                                                                     <div className="col-lg-3">
@@ -379,18 +413,30 @@ const CreateJob = () => {
 
                                                                     <div className="col-lg-3">
                                                                         <label className="form-label">Job Type</label>
-                                                                        <select className="form-select mb-3 jobtype"
-                                                                            name="JobType" onChange={HandleChange} value={jobData.JobType}>
+                                                                        <select
+                                                                            className="form-select mb-3 jobtype"
+                                                                            name="JobType"
+                                                                            onChange={HandleChange}
+
+                                                                            value={jobData.JobType}
+                                                                        >
                                                                             <option value="">Select Job Type</option>
                                                                             {AllJobData.loading &&
                                                                                 AllJobData.data.job_type.map((jobtype) => (
-                                                                                    <option value={jobtype.job_type_id} key={jobtype.job_type_id}>{jobtype.job_type_name}</option>
+                                                                                    <option
+                                                                                        value={jobtype.job_type_id}
+                                                                                        key={jobtype.job_type_id}
+                                                                                    >
+                                                                                        {jobtype.job_type_name}
+                                                                                    </option>
                                                                                 ))}
                                                                         </select>
+
                                                                         {errors['JobType'] && (
-                                                                            <div style={{ 'color': 'red' }}>{errors['JobType']}</div>
+                                                                            <div style={{ color: 'red' }}>{errors['JobType']}</div>
                                                                         )}
                                                                     </div>
+
 
                                                                     <div className="col-lg-3">
                                                                         <label className="form-label">Budgeted Hours</label>
@@ -870,9 +916,46 @@ const CreateJob = () => {
                             </div>
                         </div>
                     </div>
+                    {
+
+
+                        <>
+                            {/* Conditional Modal Rendering */}
+                            {showModal && (
+                                <div className="modal fade show" id="staticBackdrop" tabIndex="-1" aria-labelledby="staticBackdropLabel" style={{ display: 'block', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                                    <div className="modal-dialog">
+                                        <div className="modal-content">
+                                            <div className="modal-header">
+                                                <h5 className="modal-title" id="staticBackdropLabel">Modal title</h5>
+                                                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+                                            </div>
+                                            <div className="modal-body">
+                                                Modal content goes here...
+                                            </div>
+                                            <div className="modal-footer">
+                                                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                        </>
+
+
+
+
+                    }
                 </div>
+
             </div>
+
+
+
         </div>
+
+
+
     )
 }
 
