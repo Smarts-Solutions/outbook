@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { GETALLCOMPANY, ADD_CUSTOMER, GET_SERVICE, ADD_SERVICES, ADD_PEPPER_WORK,GET_ALL_CUSTOMER,GET_CUSTOMER , EDIT_CUSTOMER , Delete_Customer_File } from "../../../Services/Customer/CustomerService";
+import { GETALLCOMPANY, ADD_CUSTOMER, GET_SERVICE, ADD_SERVICES, ADD_PEPPER_WORK,GET_ALL_CUSTOMER,GET_CUSTOMER , EDIT_CUSTOMER , Delete_Customer_File , GET_ALL_JOB_DATA , Add_Job_Type , GET_ALL_JOB_LIST , UPDATE_JOB } from "../../../Services/Customer/CustomerService";
 
 
 export const GetAllCompany = createAsyncThunk("seachCompany", async (data) => {
@@ -100,6 +100,56 @@ export const DELETE_CUSTOMER_FILE = createAsyncThunk("updateProcessCustomerFileA
   }
 });
 
+export const GetAllJabData = createAsyncThunk("getAddJobData", async (data) => {
+  try {
+    const { req, authToken } = data
+    
+    const res = await GET_ALL_JOB_DATA(req, authToken);
+
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const AddAllJobType = createAsyncThunk("jobAdd", async (data) => {
+  try {
+    const { req, authToken } = data
+    
+    const res = await Add_Job_Type(req, authToken);
+
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const Get_All_Job_List = createAsyncThunk("jobAction", async (data) => {
+  try {
+    const { req, authToken } = data
+    
+    const res = await GET_ALL_JOB_LIST(req, authToken);
+
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const UpdateJob = createAsyncThunk("jobUpdate", async (data) => {
+  try {
+    const { req, authToken } = data
+    
+    const res = await UPDATE_JOB(req, authToken);
+
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+ 
+
 
  
 
@@ -116,8 +166,12 @@ const CustomerSlice = createSlice({
     getallcustomers:[],
     getcustomer:[],
     editcustomer:[],
-    deletecustomerfile:[]
-     
+    deletecustomerfile:[],
+    getalljobdata:[],
+    addjobtype:[],
+    getalljoblist:[],
+    updatejob:[],
+    
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -221,6 +275,54 @@ const CustomerSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
       })
+      .addCase(GetAllJabData.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(GetAllJabData.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.getalljobdata = action.payload;
+      })
+      .addCase(GetAllJabData.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(AddAllJobType.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(AddAllJobType.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.addjobtype = action.payload;
+      })
+      .addCase(AddAllJobType.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(Get_All_Job_List.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(Get_All_Job_List.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.getalljoblist = action.payload;
+      })
+      .addCase(Get_All_Job_List.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(UpdateJob.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(UpdateJob.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.updatejob = action.payload;
+      })
+      .addCase(UpdateJob.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+
+     
+      
+
 
 
        

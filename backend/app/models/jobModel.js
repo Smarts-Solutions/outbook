@@ -434,6 +434,7 @@ const getJobByClient = async (job) => {
 
 const getJobById = async (job) => {
      const {job_id} = job;
+     console.log("job_id",job_id)
      try {
      const query = `
     SELECT 
@@ -517,6 +518,8 @@ const getJobById = async (job) => {
      WHERE 
      jobs.id = ?
      `;
+
+     console.log("query",query)
      const [rows] = await pool.execute(query, [job_id]);
      return { status: true, message: 'Success.', data: rows };
      } catch (error) {

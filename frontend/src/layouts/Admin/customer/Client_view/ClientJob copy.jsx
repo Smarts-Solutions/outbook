@@ -111,7 +111,7 @@ const ClientList = () => {
     navigate("/admin/createjob", { state: { id: location.state.id } });
   };
 
-  console.log("activeTab", activeTab);
+ 
 
   return (
     <div className="container-fluid">
@@ -162,7 +162,7 @@ const ClientList = () => {
         </div>
       
       <div className="tab-content" id="pills-tabContent">
-        {console.log("activeTab", activeTab)}
+         
 
         <div className="report-data">
           <div className="card-body">

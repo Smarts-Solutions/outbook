@@ -130,7 +130,7 @@ const CreateClient = () => {
 
 
 
-  
+
     const handleSubmit = async () => {
         if (selectClientType == 1 && validate1()) {
             const req = {
@@ -162,7 +162,7 @@ const CreateClient = () => {
                         setTimeout(() => {
                             navigate('/admin/Clientlist', { state: location.state });
                         }, 1500)
-                        
+
                     } else {
                         Swal.fire({
                             icon: 'success',
@@ -333,7 +333,7 @@ const CreateClient = () => {
         setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
     };
 
-    
+
     const validate1 = () => {
         const newErrors = {};
         for (const key in getSoleTraderDetails) {
@@ -532,7 +532,7 @@ const CreateClient = () => {
         }
         setContactsErrors(newErrors);
     };
- 
+
     useEffect(() => {
         if (getSearchDetails.length > 0) {
             setCompanyDetails(prevState => ({
@@ -622,7 +622,7 @@ const CreateClient = () => {
                                                                     <div className="card card_shadow ">
                                                                         <div className="card-header align-items-center d-flex">
                                                                             <h4 className="card-title mb-0 flex-grow-1">
-                                                                                Company Information
+                                                                                Sole Trader
                                                                             </h4>
                                                                         </div>
                                                                         {/* end card header */}
@@ -802,7 +802,7 @@ const CreateClient = () => {
                                                                     <div className="col-lg-12">
                                                                         <div className="card card_shadow ">
                                                                             <div className="card-header align-items-center d-flex">
-                                                                                <h4 className="card-title mb-0 flex-grow-1">Company Information</h4>
+                                                                                <h4 className="card-title mb-0 flex-grow-1">Company</h4>
                                                                             </div>
                                                                             {/* end card header */}
                                                                             <div className="card-body">
@@ -816,17 +816,23 @@ const CreateClient = () => {
                                                                                                     <input type="text" className="form-control" placeholder="Outbooks Quality & Certainty"
                                                                                                         name="SearchCompany" onChange={(e) => setSearchItem(e.target.value)} value={searchItem}
                                                                                                         onClick={() => setShowDropdown(true)}
+                                                                                                        style={{ cursor: "pointer" }}
                                                                                                     />
                                                                                                     {
                                                                                                         getAllSearchCompany.length > 0 && showDropdown ?
-                                                                                                            <div className='dropdown-list'  >
+                                                                                                            <div className='dropdown-list'>
                                                                                                                 {getAllSearchCompany && getAllSearchCompany.map((company, index) => (
-                                                                                                                    <div key={index} onClick={() => { setSearchItem(company.title); setShowDropdown(false) }} >
+                                                                                                                    <div
+                                                                                                                        key={index}
+                                                                                                                        onClick={() => { setSearchItem(company.title); setShowDropdown(false); }}
+                                                                                                                        style={{ cursor: "pointer", padding: "8px 0" }} // Adjust padding as needed
+                                                                                                                    >
                                                                                                                         {company.title}
                                                                                                                     </div>
                                                                                                                 ))}
                                                                                                             </div> : ""
                                                                                                     }
+
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
@@ -847,7 +853,7 @@ const CreateClient = () => {
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Entity Type<span style={{ color: "red" }}>*</span>   </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="LTD"
-                                                                                                    name="EntityType" onChange={(e) => handleChange2(e)} value={getCompanyDetails.EntityType}  disabled/>
+                                                                                                    name="EntityType" onChange={(e) => handleChange2(e)} value={getCompanyDetails.EntityType} disabled />
                                                                                                 {errors2['EntityType'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['EntityType']}</div>
                                                                                                 )}
@@ -857,7 +863,7 @@ const CreateClient = () => {
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  >  Company Status  <span style={{ color: "red" }}>*</span> </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Active"
-                                                                                                    name="CompanyStatus" onChange={(e) => handleChange2(e)} value={getCompanyDetails.CompanyStatus}   disabled />
+                                                                                                    name="CompanyStatus" onChange={(e) => handleChange2(e)} value={getCompanyDetails.CompanyStatus} disabled />
                                                                                                 {errors2['CompanyStatus'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['CompanyStatus']}</div>)}
                                                                                             </div>
@@ -878,7 +884,7 @@ const CreateClient = () => {
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Registered Office Address<span style={{ color: "red" }}>*</span>  </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Suite Winsor & Netwon Building, White Fridrs Avenue, England,HA3 5RN"
-                                                                                                    name="RegisteredOfficeAddress" onChange={(e) => handleChange2(e)} value={getCompanyDetails.RegisteredOfficeAddress}   disabled
+                                                                                                    name="RegisteredOfficeAddress" onChange={(e) => handleChange2(e)} value={getCompanyDetails.RegisteredOfficeAddress} disabled
                                                                                                 />
                                                                                                 {errors2['RegisteredOfficeAddress'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['RegisteredOfficeAddress']}</div>
@@ -889,7 +895,7 @@ const CreateClient = () => {
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Incorporation Date</label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="07-01-2023"
-                                                                                                    name="IncorporationDate" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationDate}   disabled
+                                                                                                    name="IncorporationDate" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationDate} disabled
                                                                                                 />
                                                                                                 {errors2['IncorporationDate'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['IncorporationDate']}</div>
@@ -900,9 +906,9 @@ const CreateClient = () => {
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  > Incorporation in  <span style={{ color: "red" }}>*</span> </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Please Enter Incorporation In"
-                                                                                                    name="IncorporationIn" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationIn}   disabled
+                                                                                                    name="IncorporationIn" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationIn} disabled
                                                                                                 />
-                                                                                                 
+
                                                                                                 {errors2['IncorporationIn'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['IncorporationIn']}</div>
                                                                                                 )}
@@ -1134,6 +1140,9 @@ const CreateClient = () => {
                                                                     <div className="row " >
                                                                         <div className="col-lg-12">
                                                                             <div className="card card_shadow ">
+                                                                                <div className="card-header align-items-center d-flex">
+                                                                                    <h4 className="card-title mb-0 flex-grow-1">Partnership</h4>
+                                                                                </div>
                                                                                 {/* end card header */}
                                                                                 <div className="card-body">
                                                                                     <div className="row">
@@ -1288,8 +1297,8 @@ const CreateClient = () => {
                                                                                                             <div className="col-lg-3">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label">Role<span style={{ color: "red" }}>*</span></label>
-     
-    <select
+
+                                                                                                                    <select
                                                                                                                         className="form-select"
                                                                                                                         id={`role-${index}`}
                                                                                                                         value={contacts1.role}

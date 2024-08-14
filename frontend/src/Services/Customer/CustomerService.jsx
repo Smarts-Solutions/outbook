@@ -144,6 +144,60 @@ export async function Delete_Customer_File(data, token) {
 }
 
 
+// Get All Job Data
+export async function GET_ALL_JOB_DATA(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getAddJobData`, data, {
+      headers: header(token),
+      data: {}
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+
+
+// Add Job Type
+export async function Add_Job_Type(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}jobAdd`, data, {
+      headers: header(token),
+      data: {}
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+// Add Job Type
+export async function GET_ALL_JOB_LIST(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}jobAction`, data, {
+      headers: header(token),
+      data: {}
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+// Add Job Type
+export async function UPDATE_JOB(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}jobUpdate`, data, {
+      headers: header(token),
+      data: {}
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
 
 
 

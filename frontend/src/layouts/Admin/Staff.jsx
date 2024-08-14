@@ -103,6 +103,7 @@ const StaffPage = () => {
     const tabs = [
         { id: 'this-week', label: 'This week' },
         { id: 'last-week', label: 'Last week' },
+        { id: 'this-month', label: 'This month' },
         { id: 'last-month', label: 'Last month' },
         { id: 'last-quarter', label: 'Last quarter' },
         { id: 'this-6-months', label: 'This 6 months' },

@@ -1,20 +1,49 @@
 import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
-import { GetAllJabData, AddAllJobType } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { GetAllJabData, UpdateJob } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import sweatalert from 'sweetalert2';
+import { Get_All_Job_List } from "../../../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 const CreateJob = () => {
     const location = useLocation()
     const navigate = useNavigate();
     const token = JSON.parse(localStorage.getItem("token"));
     const dispatch = useDispatch();
-
     const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
+    const [getJobDetails, setGetJobDetails] = useState({ loading: false, data: [] });
     const [errors, setErrors] = useState({})
 
-    console.log("location :------", location.state)
 
+
+
+    const JobDetails = async () => {
+        const req = { action: "getByJobId", job_id: location.state.row.job_id }
+        const data = { req: req, authToken: token }
+        await dispatch(Get_All_Job_List(data))
+            .unwrap()
+            .then(async (response) => {
+                if (response.status) {
+                    setGetJobDetails({
+                        loading: true,
+                        data: response.data
+                    })
+                }
+                else {
+                    setGetJobDetails({
+                        loading: true,
+                        data: []
+                    })
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    }
+
+    useEffect(() => {
+        JobDetails()
+    }, []);
 
     const [jobData, setJobData] = useState({
         AccountManager: "",
@@ -62,14 +91,58 @@ const CreateJob = () => {
         InvoiceRemark: "",
     });
 
+
+
+
+ 
     useEffect(() => {
         setJobData(prevState => ({
             ...prevState,
-            AccountManager: location.state.goto == "Customer" ? location.state.details.account_manager_firstname + " " + location.state.details.account_manager_lastname : location.state.details.customer_id.account_manager_firstname + " " + location.state.details.customer_id.account_manager_lastname,
-            Customer: location.state.goto == "Customer" ? location.state.details.trading_name : location.state.details.customer_id.trading_name,
-            Client: location.state.goto == "Customer" ? "" : location.state.details.row.client_name
+            AccountManager: getJobDetails.loading && getJobDetails.data[0].account_manager_officer_first_name + " " + getJobDetails.loading && getJobDetails.data[0].account_manager_officer_last_name,
+            Customer: getJobDetails.loading && getJobDetails.data[0].customer_trading_name,
+            Client: location.state.goto == "Customer" ? getJobDetails.loading && getJobDetails.data[0].client_id : getJobDetails.loading && getJobDetails.data[0].client_trading_name,
+            ClientJobCode: getJobDetails.loading && getJobDetails.data[0].client_job_code,
+            CustomerAccountManager: getJobDetails.loading && getJobDetails.data[0].account_manager_officer_id,
+            Service: getJobDetails.loading && getJobDetails.data[0].service_id,
+            JobType: getJobDetails.loading && getJobDetails.data[0].job_type_id,
+            BudgetedHours: getJobDetails.loading && getJobDetails.data[0].budgeted_hours,
+            Reviewer: getJobDetails.loading && getJobDetails.data[0].reviewer_id,
+            AllocatedTo: getJobDetails.loading && getJobDetails.data[0].allocated_id,
+            AllocatedOn: getJobDetails.loading && getJobDetails.data[0].allocated_on.split("T")[0],
+            DateReceivedOn: getJobDetails.loading && getJobDetails.data[0].date_received_on.split("T")[0],
+            YearEnd: getJobDetails.loading && getJobDetails.data[0].year_end,
+            TotalPreparationTime: getJobDetails.loading && getJobDetails.data[0].total_preparation_time,
+            ReviewTime: getJobDetails.loading && getJobDetails.data[0].review_time,
+            FeedbackIncorporationTime: getJobDetails.loading && getJobDetails.data[0].feedback_incorporation_time,
+            TotalTime: getJobDetails.loading && getJobDetails.data[0].total_time,
+            EngagementModel: getJobDetails.loading && getJobDetails.data[0].engagement_model,
+            ExpectedDeliveryDate: getJobDetails.loading && getJobDetails.data[0].expected_delivery_date.split("T")[0],
+            DueOn: getJobDetails.loading && getJobDetails.data[0].due_on.split("T")[0],
+            SubmissionDeadline: getJobDetails.loading && getJobDetails.data[0].submission_deadline.split("T")[0],
+            CustomerDeadlineDate: getJobDetails.loading && getJobDetails.data[0].customer_deadline_date.split("T")[0],
+            SLADeadlineDate: getJobDetails.loading && getJobDetails.data[0].sla_deadline_date.split("T")[0],
+            InternalDeadlineDate: getJobDetails.loading && getJobDetails.data[0].internal_deadline_date.split("T")[0],
+            FilingWithCompaniesHouseRequired: getJobDetails.loading && getJobDetails.data[0].filing_Companies_required,
+            CompaniesHouseFilingDate: getJobDetails.loading && getJobDetails.data[0].filing_Companies_date.split("T")[0],
+            FilingWithHMRCRequired: getJobDetails.loading && getJobDetails.data[0].filing_hmrc_required,
+            HMRCFilingDate: getJobDetails.loading && getJobDetails.data[0].filing_hmrc_date.split("T")[0],
+            OpeningBalanceAdjustmentRequired: getJobDetails.loading && getJobDetails.data[0].opening_balance_required,
+            OpeningBalanceAdjustmentDate: getJobDetails.loading && getJobDetails.data[0].opening_balance_date.split("T")[0],
+            NumberOfTransactions: getJobDetails.loading && getJobDetails.data[0].number_of_transaction,
+            NumberOfTrialBalanceItems: getJobDetails.loading && getJobDetails.data[0].number_of_balance_items,
+            Turnover: getJobDetails.loading && getJobDetails.data[0].turnover,
+            NoOfEmployees: getJobDetails.loading && getJobDetails.data[0].number_of_employees,
+            VATReconciliation: getJobDetails.loading && getJobDetails.data[0].vat_reconciliation,
+            Bookkeeping: getJobDetails.loading && getJobDetails.data[0].bookkeeping,
+            ProcessingType: getJobDetails.loading && getJobDetails.data[0].processing_type,
+            Invoiced: getJobDetails.loading && getJobDetails.data[0].invoiced,
+            Currency: getJobDetails.loading && getJobDetails.data[0].currency,
+            InvoiceValue: getJobDetails.loading && getJobDetails.data[0].invoice_value,
+            InvoiceDate: getJobDetails.loading && getJobDetails.data[0].invoice_date,
+            InvoiceHours: getJobDetails.loading && getJobDetails.data[0].invoice_hours,
+            InvoiceRemark: getJobDetails.loading && getJobDetails.data[0].invoice_remark
         }));
-    }, [AllJobData]);
+    }, [getJobDetails]);
 
 
     const GetJobData = async () => {
@@ -165,18 +238,21 @@ const CreateJob = () => {
 
 
 
+
+
     const handleSubmit = async () => {
         const req = {
-            account_manager_id: location.state.goto == "Customer" ? location.state.details.account_manager_id : location.state.details.customer_id.account_manager_id,
-            customer_id: location.state.goto == "Customer" ? location.state.details.id : location.state.details.customer_id.id,
-            client_id: location.state.goto == "Customer" ? jobData.Client : location.state.details.row.id,
+            job_id: location.state.row.job_id,
+            account_manager_id: getJobDetails.loading && getJobDetails.data[0].account_manager_officer_id,
+            customer_id: getJobDetails.loading && getJobDetails.data[0].customer_id,
+            client_id:  getJobDetails.loading && getJobDetails.data[0].client_id,
             client_job_code: jobData.ClientJobCode,
-            customer_contact_details_id: Number(jobData.CustomerAccountManager),
-            service_id: Number(jobData.Service),
-            job_type_id: Number(jobData.JobType),
-            budgeted_hours: Number(jobData.BudgetedHours),
-            reviewer: Number(jobData.Reviewer),
-            allocated_to: Number(jobData.AllocatedTo),
+            customer_contact_details_id: jobData.CustomerAccountManager,
+            service_id: jobData.Service,
+            job_type_id: jobData.JobType,
+            budgeted_hours: jobData.BudgetedHours,
+            reviewer: jobData.Reviewer,
+            allocated_to: jobData.AllocatedTo,
             allocated_on: jobData.AllocatedOn,
             date_received_on: jobData.DateReceivedOn,
             year_end: jobData.YearEnd,
@@ -197,24 +273,23 @@ const CreateJob = () => {
             filing_hmrc_date: jobData.HMRCFilingDate,
             opening_balance_required: jobData.OpeningBalanceAdjustmentRequired,
             opening_balance_date: jobData.OpeningBalanceAdjustmentDate,
-            number_of_transaction: Number(jobData.NumberOfTransactions),
-            number_of_balance_items: Number(jobData.NumberOfTrialBalanceItems),
-            turnover: Number(jobData.Turnover),
-            number_of_employees: Number(jobData.NoOfEmployees),
+            number_of_transaction: jobData.NumberOfTransactions,
+            number_of_balance_items: jobData.NumberOfTrialBalanceItems,
+            turnover: jobData.Turnover,
+            number_of_employees: jobData.NoOfEmployees,
             vat_reconciliation: jobData.VATReconciliation,
             bookkeeping: jobData.Bookkeeping,
             processing_type: jobData.ProcessingType,
-            invoiced: jobData.Invoiced,
-            currency: jobData.Currency,
-            invoice_value: jobData.InvoiceValue,
-            invoice_date: jobData.InvoiceDate,
-            invoice_hours: jobData.InvoiceHours,
-            invoice_remark: jobData.InvoiceRemark
+            invoiced: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.Invoiced,
+            currency: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.Currency,
+            invoice_value: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.InvoiceValue,
+            invoice_date: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.InvoiceDate,
+            invoice_hours: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.InvoiceHours,
+            invoice_remark: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.InvoiceRemark
         }
         const data = { req: req, authToken: token }
-
         if (validate()) {
-            await dispatch(AddAllJobType(data))
+            await dispatch(UpdateJob(data))
                 .unwrap()
                 .then(async (response) => {
                     if (response.status) {
@@ -226,7 +301,9 @@ const CreateJob = () => {
                             timer: 1500
                         })
                         setTimeout(() => {
-                            location.state.goto == "Customer" ? navigate('/admin/Clientlist', { state: location.state.details }) :  navigate('/admin/client/profile', { state: location.state.details });
+                            setTimeout(() => {
+                                location.state.goto == "Customer" ? navigate('/admin/Clientlist', { state: location.state.details }) : navigate('/admin/client/profile', { state: location.state.details });
+                            }, 1500);
                         }, 1500);
                     } else {
                         console.log("response", response)
@@ -237,8 +314,6 @@ const CreateJob = () => {
                 });
         }
     }
-
-
 
     const filteredData = AllJobData.data?.engagement_model?.[0]
         ? Object.keys(AllJobData.data.engagement_model[0])
@@ -251,13 +326,10 @@ const CreateJob = () => {
 
 
     const handleClose = () => {
-        if (location.state.goto == "Customer")
-            navigate('/admin/Clientlist', { state: location.state });
-        else {
-
-            navigate('/admin/client/profile', { state: location.state });
-        }
+        location.state.goto == "Customer" ? navigate('/admin/Clientlist', { state: location.state.details }) :
+        navigate('/admin/client/profile', { state: location.state.details });
     }
+ 
 
 
     return (
@@ -267,7 +339,7 @@ const CreateJob = () => {
                     <div className="col-xl-12">
                         <div className="card">
                             <div className="card-header">
-                                <h4 className="card-title mb-0">Create New Job</h4>
+                                <h4 className="card-title mb-0">Update Job</h4>
                             </div>
 
                             <div className="card-body form-steps">
@@ -302,7 +374,6 @@ const CreateJob = () => {
                                                                     </div>
                                                                     {
                                                                         location.state.goto == "Customer" ?
-
                                                                             <div className="col-lg-3">
                                                                                 <label className="form-label">Client</label>
                                                                                 <select className="form-select mb-3"
@@ -324,12 +395,12 @@ const CreateJob = () => {
                                                                                 <label className="form-label">Client</label>
                                                                                 <input type="text" className="form-control" placeholder="Client Job Code"
                                                                                     name="Client" onChange={HandleChange} value={jobData.Client} disabled />
-
                                                                                 {errors['Client'] && (
                                                                                     <div style={{ 'color': 'red' }}>{errors['Client']}</div>
                                                                                 )}
                                                                             </div>
                                                                     }
+
 
                                                                     <div className="mb-3 col-lg-3">
                                                                         <label className="form-label">Client Job Code</label>
@@ -862,8 +933,8 @@ const CreateJob = () => {
                                             </div>
                                         </div>
                                         <div className="hstack gap-2 justify-content-end">
-                                            <button type="button" className="btn btn-light" onClick={handleClose} >Cancel</button>
-                                            <button type="button" className="btn btn-info text-white float-end blue-btn" onClick={handleSubmit}>Add Job</button>
+                                            <button type="button" className="btn btn-light" onClick={handleClose}>Cancel</button>
+                                            <button type="button" className="btn btn-info text-white float-end blue-btn" onClick={handleSubmit}>Update</button>
                                         </div>
                                     </div>
                                 </div>
