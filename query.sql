@@ -514,6 +514,7 @@ CREATE TABLE jobs (
     /*--TABLE:- CHECKLIST  */  
     CREATE TABLE checklists (
         id INT AUTO_INCREMENT PRIMARY KEY,
+        customer_id INT NOT NULL,
         service_id INT NOT NULL,
         job_type_id INT NOT NULL,
         client_type_id INT NOT NULL,
@@ -523,7 +524,8 @@ CREATE TABLE jobs (
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (service_id) REFERENCES services(id),
         FOREIGN KEY (job_type_id) REFERENCES job_types(id),
-        FOREIGN KEY (client_type_id) REFERENCES client_types(id)
+        FOREIGN KEY (client_type_id) REFERENCES client_types(id),
+        FOREIGN KEY (customer_id) REFERENCES customers(id)
     );
 
 
@@ -531,11 +533,14 @@ CREATE TABLE jobs (
     CREATE TABLE checklist_tasks (
         id INT AUTO_INCREMENT PRIMARY KEY,
         checklist_id INT NOT NULL,
+        task_id INT NOT NULL,
         task_name VARCHAR(100) NOT NULL,
         budgeted_hour DECIMAL(10,2) NOT NULL COMMENT 'Budgeted hours for the task',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (checklist_id) REFERENCES checklists(id)
+        FOREIGN KEY (checklist_id) REFERENCES checklists(id),
+        FOREIGN KEY (task_id) REFERENCES task(id),
+        UNIQUE (checklist_id,task_id)
     );
 
     /*--TABLE:- MASTER STATUS */
