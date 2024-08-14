@@ -7,5 +7,7 @@ const router = express.Router();
 router.post('/jobType',verifyToken, jobTypeTaskController.handleJobType);
 router.post('/addTask',verifyToken, jobTypeTaskController.addTask);
 router.post('/getTask',verifyToken, jobTypeTaskController.getTask);
+router.post('/addChecklist',verifyToken, jobTypeTaskController.addChecklist);
+router.post('/checklistAction',verifyToken, jobTypeTaskController.checklistAction);
 
 module.exports = router;

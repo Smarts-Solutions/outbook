@@ -27,6 +27,28 @@ const getTask = async (task) => {
   return jobTypeTaskModel.getTask(task);
 };
 
+const addChecklist = async (checklist) => {
+  return jobTypeTaskModel.addChecklist(checklist);
+};
+
+const checklistAction = async (checklist) => {
+
+  const {action} = checklist
+  if(action === "get"){
+    return jobTypeTaskModel.getChecklist(checklist);
+  }
+  else if(action === "getById"){
+    return jobTypeTaskModel.getByIdChecklist(checklist);
+  }
+  else if(action === "delete"){
+    return jobTypeTaskModel.deleteChecklist(checklist);
+  }
+  else{
+    return { status: false, message: 'Error getting checklist.' };
+  }
+
+};
+
 
 module.exports = {
     addJobType,
@@ -34,5 +56,7 @@ module.exports = {
     modifyJobType,
     getJobType,
     addTask,
-    getTask
+    getTask,
+    addChecklist,
+    checklistAction
 };

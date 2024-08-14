@@ -27,7 +27,7 @@ const getAddJobData = async (job) => {
      customer = {
         customer_id: rows[0].customer_id,
         customer_trading_name: rows[0].customer_trading_name
-    };
+     };
 
      client = rows.map(row => ({
         client_id: row.client_id,
