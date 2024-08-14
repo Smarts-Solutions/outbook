@@ -183,14 +183,16 @@ const createCustomer = async (customer) => {
    }
 
 else{
-     
     
-    const { customer_type, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, contactDetails } = customer;
+    
+    customer_id,Trading_Name,Trading_Address,VAT_Registered,VAT_Number,Website,First_Name,Last_Name,Phone,Email,Residential_Address,PageStatus,CustomerType,account_manager_id,staff_id
+    
+    const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, contactDetails } = customer;
     console.log("customer" , customer)
       
 
     const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ? AND id != ?`;
-    const [check] = await pool.execute(checkQuery, [trading_name, customer_id]);
+    const [check] = await pool.execute(checkQuery, [Trading_Name, customer_id]);
 
     if (check.length > 0) {
         return { status: false, message: 'Customers Trading Name Already Exists.' };
@@ -198,22 +200,15 @@ else{
 
     const query = `
     UPDATE customers
-    SET customer_type = ?, staff_id = ?, account_manager_id = ?, trading_name = ?, customer_code = ?, trading_address = ?, vat_registered = ?, vat_number = ?, website = ?
+    SET customer_type = ?, staff_id = ?, account_manager_id = ?, trading_name = ?, trading_address = ?, vat_registered = ?, vat_number = ?, website = ?
     WHERE id = ?
     `;
 
-    const [result] = await pool.execute(query, [customer_type, staff_id, account_manager_id, trading_name, customer_code, trading_address, vat_registered, vat_number, website, customer_id]);
+    const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, customer_id]);
 
     //Solo Traders Details
-    if (customer_type == "1") {
-
-        let contact_id = contactDetails[0].contact_id;
-        let first_name = contactDetails[0].first_name;
-        let last_name = contactDetails[0].last_name;
-        let email = contactDetails[0].email;
-        let phone = contactDetails[0].phone;
-        let residential_address = contactDetails[0].residential_address;
-
+    if (CustomerType == "1") {
+        const {First_Name,Last_Name,Phone,Email,Residential_Address,contact_id} = customer;
         const query2 = `
     UPDATE customer_contact_details
     SET first_name = ?, last_name = ?, phone = ?, email = ?, residential_address = ?
@@ -221,7 +216,7 @@ else{
      `;
 
         try {
-            const [result2] = await pool.execute(query2, [first_name, last_name, phone, email, residential_address, customer_id, contact_id]);
+            const [result2] = await pool.execute(query2, [First_Name,Last_Name,Phone,Email,Residential_Address, customer_id, contact_id]);
             return { status: true, message: 'Customer updated successfully.', data: customer_id };
         } catch (err) {
             return { status: false, message: 'Update Error Customer Type 1' };
