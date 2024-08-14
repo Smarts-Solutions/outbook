@@ -21,8 +21,9 @@ async function generateNextUniqueCode() {
 
 const createCustomer = async (customer) => {
     // Customer Code(cust+CustName+UniqueNo)
+    const { customer_id } = customer;
+   if(customer_id == undefined || customer_id == null || customer_id == ""){
     let UniqueNo = await generateNextUniqueCode()
-
     if (customer.CustomerType == "1") {
         // console.log("customer model", customer)
         const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, First_Name, Last_Name, Phone, Email, Residential_Address } = customer;
@@ -177,6 +178,211 @@ const createCustomer = async (customer) => {
             throw err;
         }
     }
+}
+
+else{
+
+    const { customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website, contactDetails } = customer;
+
+
+    const firstThreeLetters = trading_name.substring(0, 3);
+    const customer_code = "cust_" + firstThreeLetters + "_" + lastCode;
+
+    const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ? AND id != ?`;
+    const [check] = await pool.execute(checkQuery, [trading_name, customer_id]);
+
+    if (check.length > 0) {
+        return { status: false, message: 'Customers Trading Name Already Exists.' };
+    }
+
+    const query = `
+    UPDATE customers
+    SET customer_type = ?, staff_id = ?, account_manager_id = ?, trading_name = ?, customer_code = ?, trading_address = ?, vat_registered = ?, vat_number = ?, website = ?
+    WHERE id = ?
+    `;
+
+    const [result] = await pool.execute(query, [customer_type, staff_id, account_manager_id, trading_name, customer_code, trading_address, vat_registered, vat_number, website, customer_id]);
+
+    //Solo Traders Details
+    if (customer_type == "1") {
+
+        let contact_id = contactDetails[0].contact_id;
+        let first_name = contactDetails[0].first_name;
+        let last_name = contactDetails[0].last_name;
+        let email = contactDetails[0].email;
+        let phone = contactDetails[0].phone;
+        let residential_address = contactDetails[0].residential_address;
+
+        const query2 = `
+    UPDATE customer_contact_details
+    SET first_name = ?, last_name = ?, phone = ?, email = ?, residential_address = ?
+    WHERE customer_id = ? AND id = ?
+     `;
+
+        try {
+            const [result2] = await pool.execute(query2, [first_name, last_name, phone, email, residential_address, customer_id, contact_id]);
+            return { status: true, message: 'Customer updated successfully.', data: customer_id };
+        } catch (err) {
+            return { status: false, message: 'Update Error Customer Type 1' };
+        }
+
+
+    }
+
+    // Company Details
+    else if (customer_type == "2") {
+        const { company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date, incorporation_in } = customer;
+        try {
+            // Update customer_company_information
+
+            console.log("registered_office_address", registered_office_address)
+            console.log("incorporation_date", incorporation_date)
+            console.log("incorporation_in", incorporation_in)
+            console.log('customer', customer)
+
+
+            const [incorporation_date_s] = incorporation_date.split('T');
+
+
+
+            const query2 = `
+                UPDATE customer_company_information
+                SET company_name = ?, entity_type = ?, company_status = ?, company_number = ?, registered_office_address = ?, incorporation_date = ?, incorporation_in = ?
+                WHERE customer_id = ?
+            `;
+            const [result2] = await pool.execute(query2, [company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date_s, incorporation_in, customer_id]);
+
+
+            console.log("CP 2")
+
+            const [existIdResult] = await pool.execute('SELECT id FROM customer_contact_details WHERE customer_id = ?', [customer_id]);
+            const idArray = await existIdResult.map(item => item.id);
+            let arrayInterId = []
+
+            console.log("CP 3")
+
+            // Update customer_contact_details
+            const query3 = `
+                UPDATE customer_contact_details
+                SET contact_person_role_id = ?, first_name = ?, last_name = ?, phone = ?, email = ? ,residential_address = ?
+                WHERE customer_id = ? AND id = ?
+            `;
+
+            for (const detail of contactDetails) {
+
+                let contact_id = detail.contact_id;
+                let customer_contact_person_role_id = detail.customer_contact_person_role_id;
+                let first_name = detail.first_name;
+                let last_name = detail.last_name;
+                let email = detail.email;
+                let phone = detail.phone;
+                let residential_address = detail.residential_address;
+                if (contact_id == "" || contact_id == undefined || contact_id == null) {
+                    console.log("CP 4")
+
+                    const query4 = `
+                    INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone,email,residential_address)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    `;
+                    const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone, email, residential_address]);
+
+                }
+                else {
+                    console.log("CP 5")
+                    arrayInterId.push(contact_id)
+                    const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone, email, residential_address, customer_id, contact_id]);
+                }
+            }
+
+            let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
+            console.log("CP 6")
+
+            if (deleteIdArray.length > 0) {
+                for (const id of deleteIdArray) {
+
+                    const query3 = `
+                    DELETE FROM customer_contact_details WHERE id = ?
+                    `;
+                    const [result3] = await pool.execute(query3, [id]);
+                }
+            }
+
+
+            return { status: true, message: 'Customer updated successfully.', data: customer_id };
+
+        } catch (err) {
+            console.log("err ", err)
+            return { status: false, message: 'Update Error Customer Type 2' };
+        }
+
+
+    }
+
+    // Partnership Details
+    else if (customer_type == "3") {
+
+        try {
+
+
+            const [existIdResult] = await pool.execute('SELECT id FROM customer_contact_details WHERE customer_id = ?', [customer_id]);
+            const idArray = await existIdResult.map(item => item.id);
+            let arrayInterId = []
+
+
+            const query3 = `
+            UPDATE customer_contact_details
+            SET contact_person_role_id = ?, first_name = ?, last_name = ?, phone = ?, email = ? ,residential_address = ? ,authorised_signatory_status = ?
+            WHERE customer_id = ? AND id = ?
+           `;
+
+
+
+            for (const detail of contactDetails) {
+
+                let contact_id = detail.contact_id;
+                let customer_contact_person_role_id = detail.customer_contact_person_role_id;
+                let first_name = detail.first_name;
+                let last_name = detail.last_name;
+                let email = detail.email;
+                let phone = detail.phone;
+                let residential_address = detail.residential_address;
+                let authorised_signatory_status = detail.authorised_signatory_status;
+                if (contact_id == "" || contact_id == undefined || contact_id == null) {
+                    const query4 = `
+                    INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone,email,residential_address,authorised_signatory_status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    `;
+                    const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone, email, residential_address, authorised_signatory_status]);
+                } else {
+
+                    arrayInterId.push(contact_id)
+                    const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone, email, residential_address, authorised_signatory_status, customer_id, contact_id]);
+                }
+
+            }
+
+            let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
+            if (deleteIdArray.length > 0) {
+                for (const id of deleteIdArray) {
+                    const query3 = `
+                    DELETE FROM customer_contact_details WHERE id = ?
+                    `;
+                    const [result3] = await pool.execute(query3, [id]);
+                }
+            }
+
+            return { status: true, message: 'Customer updated successfully.', data: customer_id };
+
+        } catch (err) {
+            return { status: false, message: 'Update Error Customer Type 3' };
+        }
+
+    }
+
+}
+
+
+
 
 };
 
