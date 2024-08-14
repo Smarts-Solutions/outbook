@@ -11,16 +11,25 @@ import MultiStepFormContext from "./MultiStepFormContext";
 import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
 import { PersonRole } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
+import { GET_CUSTOMER_DATA } from '../../../../ReduxStore/Slice/Customer/CustomerSlice'
 
 const Information = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
+  const customer_id = localStorage.getItem("coustomerId");
+  console.log("customer_id", customer_id);
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
   const [getAccountMangerId, setAccountMangerId] = useState("");
   const [CustomerType, setCustomerType] = useState("1");
   const [getNextStatus, setNextStatus] = useState("0");
+  const [customerDetails, setCustomerDetails] = useState({
+    loading: true,
+    data: [],
+});
+
+console.log("customerDetails", !customerDetails.loading && customerDetails.data);
   const [personRoleDataAll, setPersonRoleDataAll] = useState({
     loading: true,
     data: [],
@@ -39,6 +48,34 @@ const Information = () => {
   const [errors, setErrors] = useState([
     { firstName: "", lastName: "", role: "", phoneNumber: "", email: "" },
   ]);
+
+  const GetCustomerData = async () => {
+    const req = { customer_id: customer_id, pageStatus: "1" }
+    const data = { req: req, authToken: token }
+    await dispatch(GET_CUSTOMER_DATA(data))
+        .unwrap()
+        .then(async (response) => {
+            if (response.status) {
+                setCustomerDetails({
+                    loading: false,
+                    data: response.data
+                });
+            }
+            else {
+                setCustomerDetails({
+                    loading: false,
+                    data: []
+                });
+            }
+        })
+        .catch((error) => {
+            console.log("Error", error);
+        });
+}
+
+useEffect(() => {
+    GetCustomerData()
+}, []);
 
   const handleAddContact = () => {
     setContacts([
@@ -194,6 +231,7 @@ const Information = () => {
       setErrors(newErrors);
       if (formIsValid) {
         let req = {
+          customer_id: customer_id,
           company_name: values.company_name,
           entity_type: values.entity_type,
           company_status: values.company_status,
@@ -272,6 +310,7 @@ const Information = () => {
 
     onSubmit: async (values) => {
       const req = {
+        customer_id: customer_id,
         Trading_Name: values.Trading_Name,
         Trading_Address: values.Trading_Address,
         VAT_Registered: values.VAT_Registered,
@@ -352,6 +391,7 @@ const Information = () => {
 
       if (formIsValid) {
         const req = {
+          customer_id: customer_id,
           Trading_Name: values.Trading_Name,
           Trading_Address: values.Trading_Address,
           VAT_Registered: values.VAT_Registered,
@@ -675,6 +715,12 @@ const Information = () => {
       disable: false,
     },
   ];
+
+
+  useEffect(() => {
+    formik.setFieldValue("accountManager", getAccountMangerId);
+  }, [getAccountMangerId]);
+
 
 
   const Get_Company = async () => {
