@@ -8,8 +8,8 @@ const Modal_Component = ({ isOpen, handleClose, Submit_Function, Submit_Function
     return (
         <div>
             <Modal show={isOpen} centered size={size} backdrop={backdrop} onHide={handleClose}>
-                <Modal.Header closeButton className={`${title === "Verify OTP" ? 'border-0' : ""}`}  >
-                    <Modal.Title  >{title}</Modal.Title >
+                <Modal.Header closeButton className={`${title === "Verify OTP" ? 'border-0 ' : "bg-info"}`}  >
+                    <Modal.Title className='mb-0 text-white' >{title}</Modal.Title >
                 </Modal.Header>
                 <Modal.Body>{rest.children}</Modal.Body>
                 <Modal.Footer className={`${title === "Verify OTP" ? 'border-0' : ""}`}>

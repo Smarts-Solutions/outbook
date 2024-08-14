@@ -18,6 +18,8 @@ const ClientList = () => {
     { id: 'client', label: 'Client' },
     { id: 'job', label: 'Job' },
     { id: 'documents', label: 'Documents' },
+    { id: 'statuses', label: 'Status' },
+    { id: 'checklist', label: 'Checklist' },
   ];
 
 
@@ -186,6 +188,9 @@ const ClientList = () => {
     navigate('/admin/createjob', { state: { details: location.state , goto:"Customer"} });
   }
 
+  const handleClick=()=>{
+    navigate('/admin/create/checklist');
+  }
 
   return (
     <div className='container-fluid'>
@@ -263,7 +268,281 @@ const ClientList = () => {
             )} */}
           </div>
         )}
+         
+         {activeTab == "statuses" && (
+          <div
+            className={`tab-pane fade ${activeTab == "statuses" ? 'show active' : ''}`}
+            id={'statuses'}
+            role="tabpanel"
+            
+          >
+             <div className='container-fluid'>
+     
+        <div className='report-data mt-4 '>
+          <div className='d-flex justify-content-between align-items-center'>
+            <div className='tab-title'>
+              <h3 className='mt-0'>Status List</h3>
+            </div>
+            <div>
+              <button type="button"
 
+                data-bs-toggle="modal"
+                data-bs-target="#exampleModal" className='btn btn-info text-white float-end ms-2'> <i className="fa fa-plus pe-1" />Add Status</button>
+             
+
+            </div>
+          </div>
+
+          <div className='row mt-3'>
+            <div className='col-lg-8'> <div className='datatable-wrapper '>
+
+
+{ClientData && ClientData && (
+    <Datatable columns={columns} data={ClientData} filter={false} />
+  )}
+</div>  </div>
+            <div className="col-lg-4">
+  <div className="card">
+    <div className="card-header">
+      <div className="row align-items-center">
+        <div className="col">
+          <h4 className="card-title">Master Status</h4>
+        </div>
+      
+      </div>
+      {/*end row*/}
+    </div>
+    {/*end card-header*/}
+    <div className="card-body">
+    <div className="activity">
+                    
+                    <p className="text-muted mb-0 font-13 py-2 border-bottom">
+                             updated the status of
+                             to awaiting customer
+                            response
+                          </p>
+                          <p className="text-muted mb-0 font-13 py-2 border-bottom">
+                             updated the status of
+                             to awaiting customer
+                            response
+                          </p>
+                          <p className="text-muted mb-0 font-13 py-2 border-bottom">
+                             updated the status of
+                             to awaiting customer
+                            response
+                          </p>
+                  </div>
+      {/*end analytics-dash-activity*/}
+    </div>
+    {/*end card-body*/}
+  </div>
+  {/*end card*/}
+</div>
+
+          </div>
+         
+        </div>
+        {/* <!-- Button trigger modal --> */}
+
+
+        {/* <!-- Modal --> */}
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog  modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header bg-info">
+                <h5 class="modal-title text-white" id="exampleModalLabel">Add Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form className="tablelist-form">
+                  <div className="modal-body">
+                    <div className="mb-3" id="modal-id" style={{ display: "none" }}>
+                      <label htmlFor="id-field" className="form-label">
+                        ID
+                      </label>
+                      <input
+                        type="text"
+                        id="id-field"
+                        className="form-control"
+                        placeholder="ID"
+                        readOnly=""
+                      />
+                    </div>
+                   
+                    <div className="col-lg-12">
+                      <div className="mb-3">
+                        <label htmlFor="firstNameinput" className="form-label">
+                        Link To The Master Status
+                        </label>
+                        <select
+                          id="VAT_dropdown1"
+                          className="form-select mb-3"
+                          aria-label="Default select example"
+                          style={{ color: "#8a8c8e !important" }}
+                        >
+                          <option selected="">Pending</option>
+                          <option value={1}>Hold</option>
+                          {/* <option value="1">Missing Paperworks
+                                              </option> */}
+                          <option value={1}>Completed</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="col-lg-12">
+                      <div className="mb-3">
+                        <label htmlFor="firstNameinput" className="form-label">
+                        Status Name
+                        </label>
+                        <select
+                          id="VAT_dropdown1"
+                          className="form-select mb-3"
+                          aria-label="Default select example"
+                          style={{ color: "#8a8c8e !important" }}
+                        >
+                          <option selected="">Pending</option>
+                          <option value={1}>Hold</option>
+                          {/* <option value="1">Missing Paperworks
+                                              </option> */}
+                          <option value={1}>Completed</option>
+                        </select>
+                      </div>
+                    </div>
+                    {/* <div class="mb-3">
+                                      <label for="customername-field" class="form-label">Link status</label>
+                                      <input type="text" id="phone-field" class="form-control"
+                                          placeholder="Outbooks Outsourcing Pvt Ltd" required />
+                                  </div> */}
+                  </div>
+
+                </form>
+
+
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Save </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+           
+          </div>
+        )}
+        {activeTab == "checklist" && (
+          <div
+            className={`tab-pane fade ${activeTab == "checklist" ? 'show active' : ''}`}
+            id={'checklist'}
+            role="tabpanel"
+            
+          >
+      
+       <div className='container-fluid'>
+      {/* <div className='content-title'>
+                <div className='tab-title'>
+                            <h3 className='mt-0'>Status List</h3>
+                        </div>
+                </div> */}
+        <div className='report-data mt-4 '>
+          <div className='d-flex justify-content-between align-items-center'>
+            <div className='tab-title'>
+              <h3 className='mt-0'>Checklist
+              </h3>
+            </div>
+            <div>
+              <button type="button"
+          onClick={handleClick}
+               className='btn btn-info text-white float-end ms-2'> <i className="fa fa-plus" />Add Checklist</button>
+              
+
+            </div>
+          </div>
+          <div className='datatable-wrapper '>
+
+
+          {ClientData && ClientData && (
+              <Datatable columns={columns} data={ClientData} filter={false} />
+            )}
+          </div>
+        </div>
+        {/* <!-- Button trigger modal --> */}
+
+
+        {/* <!-- Modal --> */}
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog  modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Set Default Access</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form className="tablelist-form">
+                  <div className="modal-body">
+                    <div className="mb-3" id="modal-id" style={{ display: "none" }}>
+                      <label htmlFor="id-field" className="form-label">
+                        ID
+                      </label>
+                      <input
+                        type="text"
+                        id="id-field"
+                        className="form-control"
+                        placeholder="ID"
+                        readOnly=""
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="customername-field" className="form-label">
+                        Status Name
+                      </label>
+                      <input
+                        type="text"
+                        id="customername-field"
+                        className="form-control"
+                        placeholder="Enter Status Name"
+                        required=""
+                      />
+                    </div>
+                    <div className="col-lg-12">
+                      <div className="mb-3">
+                        <label htmlFor="firstNameinput" className="form-label">
+                          Status Type
+                        </label>
+                        <select
+                          id="VAT_dropdown1"
+                          className="form-select mb-3"
+                          aria-label="Default select example"
+                          style={{ color: "#8a8c8e !important" }}
+                        >
+                          <option selected="">Pending</option>
+                          <option value={1}>Hold</option>
+                          {/* <option value="1">Missing Paperworks
+                                              </option> */}
+                          <option value={1}>Completed</option>
+                        </select>
+                      </div>
+                    </div>
+                    {/* <div class="mb-3">
+                                      <label for="customername-field" class="form-label">Link status</label>
+                                      <input type="text" id="phone-field" class="form-control"
+                                          placeholder="Outbooks Outsourcing Pvt Ltd" required />
+                                  </div> */}
+                  </div>
+
+                </form>
+
+
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Save </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+        )}
       </div>
     </div>
   );

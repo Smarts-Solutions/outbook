@@ -47,11 +47,16 @@ const Status = () => {
   return (
     <div>
       <div className='container-fluid'>
-        <div className='report-data mt-4'>
-          <div className='d-flex justify-content-between align-items-center'>
-            <div className='tab-title'>
+      <div className='content-title'>
+                <div className='tab-title'>
+                            <h3 className='mt-0'>Status</h3>
+                        </div>
+                </div>
+        <div className='report-data mt-4 '>
+          <div className='d-flex justify-content-end align-items-center'>
+            {/* <div className='tab-title'>
               <h3 className='mt-0'>Status</h3>
-            </div>
+            </div> */}
             <div>
               <button type="button"
 
@@ -78,7 +83,7 @@ const Status = () => {
         <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div class="modal-dialog  modal-dialog-centered">
             <div class="modal-content">
-              <div class="modal-header">
+              <div class=" bg-info modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Set Default Access</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>

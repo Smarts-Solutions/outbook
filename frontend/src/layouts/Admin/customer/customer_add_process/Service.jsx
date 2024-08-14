@@ -206,11 +206,13 @@ const Service = () => {
         >
             {({ handleSubmit }) => (
                 <div className="details__wrapper">
-                    <div className="card pricing-box p-4 m-2 mt-0">
+                    <div className="card report-data pricing-box p-0">
+                       <div className="card-header step-header-blue">
                         <h4 className="card-title mb-0" style={{ marginBottom: "20px !important" }}>
                             Select Services
                         </h4>
-                        <div className="row">
+                        </div>
+                        <div className="row card-body pt-0">
                             <div className="table-responsive table-card mt-3 mb-1">
                                 <table className="table align-middle table-nowrap" id="customerTable">
                                     <thead className="table-light table-head-blue">
@@ -249,10 +251,10 @@ const Service = () => {
                                                         <div className="d-flex">
                                                             <div className="remove">
                                                                 <button
-                                                                    className="btn btn-sm btn-success remove-item-btn"
+                                                                    className="btn btn-sm tn btn-outline-info remove-item-btn"
                                                                     onClick={() => { setModal(true); AddServiceId(item.id) }}
                                                                 >
-                                                                    <i className="ti-user" />
+                                                                   Assign Account Manager <i className="fa fa-user" />
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -273,15 +275,15 @@ const Service = () => {
                     <CommanModal
                         isOpen={getModal}
                         backdrop="static"
-                        size="ms-5"
+                        size="ms"
                         title="Add Account Manager"
                         hideBtn={true}
                         handleClose={() => setModal(false)}
                     >
-                        <div className="modal-body">
+                        <div className="py-2">
                             <div className="row">
-                                <div className="col-10">
-                                    <div className="search-box ms-2">
+                                <div className="col-9">
+                                    <div className="search-box">
                                         <i className="ri-search-line search-icon" />
                                         <input
                                             type="text"
@@ -306,22 +308,24 @@ const Service = () => {
                                     )}
                                 </div>
 
-                                <div className="col-2">
+                                <div className="col-3 ps-0">
                                     <div>
                                         <button
                                             type="button"
-                                            className="btn btn-success add-btn"
+                                            className="btn btn-dark add-btn text-white add-btn"
                                             id="create-btn"
                                             onClick={AddManager}
                                         >
+                                           
                                             Add
+                                            <i className="ps-2 ti-plus"></i>
                                         </button>
                                     </div>
                                 </div>
                                 <div className="col-md-6" />
                                 <div className="table-responsive mt-3 mb-1">
                                     <table className="table align-middle table-nowrap" id="customerTable">
-                                        <thead className="table-light">
+                                        <thead className="table-light table-head-blue">
                                             <tr>
                                                 <th>Account Name</th>
                                                 <th className="tabel_left text-align-right">Action</th>
@@ -340,9 +344,9 @@ const Service = () => {
                                                                         <div className="remove">
                                                                             <a
                                                                                 onClick={() => removeManager(accountManager.id, manager.service_id)}
-                                                                                className="btn btn-sm btn-danger remove-item-btn"
+                                                                                className="btn btn-sm text-danger fs-5 remove-item-btn"
                                                                             >
-                                                                                Remove
+                                                                                <i className="ti-trash"></i>
                                                                             </a>
                                                                         </div>
                                                                     </div>
