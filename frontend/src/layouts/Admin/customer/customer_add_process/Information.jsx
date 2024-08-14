@@ -18,6 +18,7 @@ const Information = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const customer_id = localStorage.getItem("coustomerId");
   console.log("customer_id", customer_id);
+  
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
@@ -29,7 +30,7 @@ const Information = () => {
     data: [],
 });
 
-console.log("customerDetails", !customerDetails.loading && customerDetails.data.contact_details[0].contact_id);
+// console.log("customerDetails", !customerDetails.loading && customerDetails.data.contact_details[0].contact_id);
 
   const [personRoleDataAll, setPersonRoleDataAll] = useState({
     loading: true,
@@ -73,7 +74,7 @@ console.log("customerDetails", !customerDetails.loading && customerDetails.data.
             }
         })
         .catch((error) => {
-            console.log("Error", error);
+            console.log("Error 11", error);
         });
 }
 
@@ -726,10 +727,10 @@ useEffect(() => {
 
 
   useEffect(() => {
-    setCustomerType(!customerDetails.loading && customerDetails.data.customer.customer_type)
-    setAccountMangerId(!customerDetails.loading && customerDetails.data.customer.account_manager_id)
+    setCustomerType(!customerDetails.data && customerDetails.data.customer.customer_type)
+    setAccountMangerId(!customerDetails.data && customerDetails.data.customer.account_manager_id)
 
-    if (!customerDetails.loading && customerDetails.data.customer.customer_type == '1') {
+    if (!customerDetails.data && customerDetails.data.customer.customer_type == '1') {
       formik1.setFieldValue("Trading_Name", customerDetails.data.customer.trading_name);
       formik1.setFieldValue("Trading_Address", customerDetails.data.customer.trading_address);
       formik1.setFieldValue("VAT_Registered", customerDetails.data.customer.vat_registered);
@@ -741,7 +742,7 @@ useEffect(() => {
       formik1.setFieldValue("Email", customerDetails.data.customer.email);
       formik1.setFieldValue("Residential_Address", customerDetails.data.customer.residential_address);
     }
-    if (!customerDetails.loading && customerDetails.data.customer.customer_type == '2') {
+    if (!customerDetails.data && customerDetails.data.customer.customer_type == '2') {
       formik.setFieldValue("company_name", customerDetails.data.customer.company_name);
       formik.setFieldValue("entity_type", customerDetails.data.customer.entity_type);
       formik.setFieldValue("company_status", customerDetails.data.customer.company_status);
@@ -754,16 +755,16 @@ useEffect(() => {
       formik.setFieldValue("Website", customerDetails.data.customer.website);
       formik.setFieldValue("Trading_Name", customerDetails.data.customer.trading_name);
       formik.setFieldValue("Trading_Address", customerDetails.data.customer.trading_address);
-      setContacts(!customerDetails.loading && customerDetails.data.contact_details)
+      setContacts(!customerDetails.data && customerDetails.data.contact_details)
     }
       
-    if (!customerDetails.loading && customerDetails.data.customer.customer_type == '3') {
+    if (!customerDetails.data && customerDetails.data.customer.customer_type == '3') {
       formik2.setFieldValue("Trading_Name", customerDetails.data.customer.trading_name);
       formik2.setFieldValue("Trading_Address", customerDetails.data.customer.trading_address);
       formik2.setFieldValue("VAT_Registered", customerDetails.data.customer.vat_registered);
       formik2.setFieldValue("VAT_Number", customerDetails.data.customer.vat_number);
       formik2.setFieldValue("Website", customerDetails.data.customer.website);
-      setContacts(!customerDetails.loading && customerDetails.data.contact_details)
+      setContacts(!customerDetails.data && customerDetails.data.contact_details)
       
     }
         
