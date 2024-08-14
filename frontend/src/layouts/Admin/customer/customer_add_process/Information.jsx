@@ -675,6 +675,8 @@ const Information = () => {
       disable: false,
     },
   ];
+
+
   const Get_Company = async () => {
     const data = { search: formik.values.search_company_name };
     await dispatch(GetAllCompany(data))
@@ -814,7 +816,7 @@ const Information = () => {
                 <div className="card card_shadow">
                   <div className="card-header step-header-blue align-items-center d-flex">
                     <h4 className="card-title mb-0 flex-grow-1">
-                      Customer Type <span style={{ color: "red" }}>*</span>
+                      Customer Type
                     </h4>
                   </div>
                   <div className="card-body">
@@ -843,8 +845,8 @@ const Information = () => {
                 <div className="card card_shadow">
                   <div className="card-header step-header-blue align-items-center d-flex">
                     <h4 className="card-title mb-0 flex-grow-1">
-                      Outbooks Account Manager{" "}
-                      <span style={{ color: "red" }}>*</span>
+                      Outbooks Account Manager
+                       
                     </h4>
                   </div>
                   <div className="card-body">
@@ -1521,7 +1523,7 @@ const Information = () => {
                                   </div>
                                 </div>
                               </div>
-                            </div>{" "}
+                            </div> 
                             {/* end col */}
                           </div>
                         </section>
