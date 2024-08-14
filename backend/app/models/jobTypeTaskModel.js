@@ -259,6 +259,73 @@ const deleteChecklist = async (checklist) => {
     }
 }
 
+const updateChecklist = async (checklist) => {
+
+    const {checklists_id,customer_id, service_id, job_type_id, client_type_id, check_list_name, status, task} = checklist;
+     
+    console.log("checklist ", checklist);
+    // EXIST checklist tasks id
+    const [ExistChecklistsids] = await pool.execute('SELECT id  FROM `checklist_tasks` WHERE checklist_id =' + checklists_id);
+    const idArray = await ExistChecklistsids.map(item => item.id);
+    let arrayInterId = []
+
+
+
+try {
+    // Update query for checklists table
+    const updateChecklistQuery = `
+    UPDATE checklists 
+    SET customer_id = ?, 
+        service_id = ?, 
+        job_type_id = ?, 
+        client_type_id = ?, 
+        check_list_name = ?, 
+        status = ?
+    WHERE id = ?
+    `;
+    const [checklistResult] = await pool.execute(updateChecklistQuery, [
+        customer_id,
+        service_id,
+        job_type_id,
+        client_type_id,
+        check_list_name,
+        status,
+        checklists_id
+    ]);
+
+    // Update query for checklist_tasks table
+    const updateChecklistTasksQuery = `
+    UPDATE checklist_tasks 
+    SET task_name = ?, 
+        budgeted_hour = ?
+    WHERE checklist_id = ? AND task_id = ?
+    `;
+    for (const valTask of task) {
+        const {checklist_tasks_id,task_id, task_name, budgeted_hour} = valTask;
+        arrayInterId.push(checklist_tasks_id)
+        await pool.execute(updateChecklistTasksQuery, [
+            task_name,
+            budgeted_hour,
+            checklists_id,
+            task_id
+        ]);
+    }
+
+    let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
+    if (deleteIdArray.length > 0) {
+        for (const id of deleteIdArray) {
+            await pool.execute('DELETE FROM checklist_tasks WHERE id = ?', [id]);
+        }
+    }
+
+    return {status: true, message: 'Checklist updated successfully.', data: []};
+
+} catch (err) {
+    console.log("err ", err);
+    return {status: false, message: 'Error updating checklist.'};
+}
+}
+
 
 
 module.exports = {
@@ -271,6 +338,7 @@ module.exports = {
     addChecklist,
     getChecklist,
     getByIdChecklist,
-    deleteChecklist
+    deleteChecklist,
+    updateChecklist
   
 };

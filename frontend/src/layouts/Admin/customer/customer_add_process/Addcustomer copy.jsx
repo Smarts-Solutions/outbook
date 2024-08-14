@@ -26,16 +26,11 @@ const AddCustomer = () => {
 
     const [details, setDetails] = useState(detailsInitialState);
     const [address, setAddress] = useState(addressInitialState);
-    // const [coustomerId, setCoustomerId] = useState("");
+    const [coustomerId, setCoustomerId] = useState("");
     // const [currentStep, setCurrentStep] = useState(0);
     const [currentStep, setCurrentStep] = useState(() => {
         const savedStep = localStorage.getItem('currentStep');
         return savedStep !== null ? Number(savedStep) : 0;
-    });
-
-    const [coustomerId, setCoustomerId] = useState(() => {
-        const savedId = localStorage.getItem('coustomerId');
-        return savedId !== null ? savedId : "";
     });
     
     // const currentStep = useRef(0);
@@ -57,10 +52,8 @@ const AddCustomer = () => {
         }
     };
 
-
     const next = (data) => {
         setCoustomerId(data);
-        localStorage.setItem('coustomerId', data);
         if (currentStep < 3) {
             const nextStep = currentStep + 1;
             setCurrentStep(nextStep);
@@ -83,9 +76,8 @@ const AddCustomer = () => {
 
     useEffect(() => {
         addressInitialState.coustomerId = coustomerId;
-        // setAddress({ ...addressInitialState, coustomerId });
         setAddress(coustomerId)
-    }, [coustomerId]);
+    }, [currentStep]);
 
     return (
 

@@ -9,5 +9,6 @@ router.post('/addTask',verifyToken, jobTypeTaskController.addTask);
 router.post('/getTask',verifyToken, jobTypeTaskController.getTask);
 router.post('/addChecklist',verifyToken, jobTypeTaskController.addChecklist);
 router.post('/checklistAction',verifyToken, jobTypeTaskController.checklistAction);
+router.post('/updateChecklist',verifyToken, jobTypeTaskController.updateChecklist);
 
 module.exports = router;

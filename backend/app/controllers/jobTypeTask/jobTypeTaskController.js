@@ -94,11 +94,28 @@ const jobTypeTaskService = require('../../services/jobTypeTask/jobTypeTaskServic
       }
   }
 
+  const updateChecklist = async (req, res) => {
+    try {
+       const { ...checklist } = req.body;
+      
+         const result = await jobTypeTaskService.updateChecklist(checklist);
+         if(!result.status){
+          return  res.status(200).json({ status: false, message: result.message });  
+          }else{
+          return  res.status(200).json({ status: true, message: result.message , data : result.data});
+          }
+      
+      } catch (error) {
+        res.status(500).json({ status:false, message: error.message});
+      }
+  }
+
 
 module.exports = {
   handleJobType,
   addTask,
   getTask,
   addChecklist,
-  checklistAction
+  checklistAction,
+  updateChecklist
 };
