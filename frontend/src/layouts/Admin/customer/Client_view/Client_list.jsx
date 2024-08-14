@@ -22,6 +22,7 @@ const ClientList = () => {
 
 
 
+  console.log("location-------------", location.state)
 
   const JobDetails = async () => {
     const req = { action: "getByCustomer", customer_id: location.state.id }
@@ -118,7 +119,7 @@ const ClientList = () => {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="edit-icon" onClick={() => handleEdit(row)}>
+          <button className="edit-icon" onClick={() => handleJobEdit(row)}>
             <i className="ti-pencil" />
           </button>
           <button className="delete-icon" onClick={() => handleDelete(row)}>
@@ -140,6 +141,11 @@ const ClientList = () => {
   function handleEdit(row) {
 
     navigate('/admin/client/edit', { state: { row, id: location.state.id } });
+  }
+
+  function handleJobEdit(row) {
+    navigate("/admin/job/edit", { state: {details: location.state , row : row , goto: "Customer" } });
+    
   }
 
   function handleDelete(row) {
@@ -177,7 +183,7 @@ const ClientList = () => {
 
 
   const handleAddJob = () => {
-    // navigate('/admin/createjob', { state: { id: location.state.id } });
+    navigate('/admin/createjob', { state: { details: location.state , goto:"Customer"} });
   }
 
 

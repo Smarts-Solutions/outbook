@@ -10,10 +10,11 @@ const CreateJob = () => {
     const navigate = useNavigate();
     const token = JSON.parse(localStorage.getItem("token"));
     const dispatch = useDispatch();
-
     const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
     const [getJobDetails, setGetJobDetails] = useState({ loading: false, data: [] });
     const [errors, setErrors] = useState({})
+
+
 
 
     const JobDetails = async () => {
@@ -39,6 +40,7 @@ const CreateJob = () => {
                 console.log("Error", error);
             });
     }
+
     useEffect(() => {
         JobDetails()
     }, []);
@@ -90,15 +92,15 @@ const CreateJob = () => {
     });
 
 
-    
 
 
+ 
     useEffect(() => {
         setJobData(prevState => ({
             ...prevState,
             AccountManager: getJobDetails.loading && getJobDetails.data[0].account_manager_officer_first_name + " " + getJobDetails.loading && getJobDetails.data[0].account_manager_officer_last_name,
             Customer: getJobDetails.loading && getJobDetails.data[0].customer_trading_name,
-            Client: getJobDetails.loading && getJobDetails.data[0].client_trading_name,
+            Client: location.state.goto == "Customer" ? getJobDetails.loading && getJobDetails.data[0].client_id : getJobDetails.loading && getJobDetails.data[0].client_trading_name,
             ClientJobCode: getJobDetails.loading && getJobDetails.data[0].client_job_code,
             CustomerAccountManager: getJobDetails.loading && getJobDetails.data[0].account_manager_officer_id,
             Service: getJobDetails.loading && getJobDetails.data[0].service_id,
@@ -144,7 +146,7 @@ const CreateJob = () => {
 
 
     const GetJobData = async () => {
-        const req = { customer_id: location.state.details.customer_id.id }
+        const req = { customer_id: location.state.goto == "Customer" ? location.state.details.id : location.state.details.customer_id.id }
         const data = { req: req, authToken: token }
         await dispatch(GetAllJabData(data))
             .unwrap()
@@ -233,18 +235,17 @@ const CreateJob = () => {
         return Object.keys(newErrors).length === 0 ? true : false;
     };
 
- 
-     
-    
- 
-     
+
+
+
+
+
     const handleSubmit = async () => {
         const req = {
-            job_id:location.state.row.job_id,
-            
+            job_id: location.state.row.job_id,
             account_manager_id: getJobDetails.loading && getJobDetails.data[0].account_manager_officer_id,
-            customer_id:  getJobDetails.loading && getJobDetails.data[0].customer_id,
-            client_id: getJobDetails.loading && getJobDetails.data[0].client_id,
+            customer_id: getJobDetails.loading && getJobDetails.data[0].customer_id,
+            client_id:  getJobDetails.loading && getJobDetails.data[0].client_id,
             client_job_code: jobData.ClientJobCode,
             customer_contact_details_id: jobData.CustomerAccountManager,
             service_id: jobData.Service,
@@ -300,7 +301,9 @@ const CreateJob = () => {
                             timer: 1500
                         })
                         setTimeout(() => {
-                            navigate('/admin/client/profile', { state: location.state.details});
+                            setTimeout(() => {
+                                location.state.goto == "Customer" ? navigate('/admin/Clientlist', { state: location.state.details }) : navigate('/admin/client/profile', { state: location.state.details });
+                            }, 1500);
                         }, 1500);
                     } else {
                         console.log("response", response)
@@ -312,8 +315,6 @@ const CreateJob = () => {
         }
     }
 
-
-
     const filteredData = AllJobData.data?.engagement_model?.[0]
         ? Object.keys(AllJobData.data.engagement_model[0])
             .filter(key => AllJobData.data.engagement_model[0][key] === "1")
@@ -324,9 +325,11 @@ const CreateJob = () => {
         : {};
 
 
-const handleClose=()=>{
-    navigate('/admin/client/profile', { state: location.state.details});
-}
+    const handleClose = () => {
+        location.state.goto == "Customer" ? navigate('/admin/Clientlist', { state: location.state.details }) :
+        navigate('/admin/client/profile', { state: location.state.details });
+    }
+ 
 
 
     return (
@@ -369,33 +372,35 @@ const handleClose=()=>{
                                                                             <div style={{ 'color': 'red' }}>{errors['Customer']}</div>
                                                                         )}
                                                                     </div>
+                                                                    {
+                                                                        location.state.goto == "Customer" ?
+                                                                            <div className="col-lg-3">
+                                                                                <label className="form-label">Client</label>
+                                                                                <select className="form-select mb-3"
+                                                                                    name="Client" onChange={HandleChange} value={jobData.Client}>
+                                                                                    <option value="">Select Client</option>
+                                                                                    {AllJobData.loading &&
+                                                                                        AllJobData.data.client.map((client) => (
+                                                                                            <option value={client.client_id} key={client.client_id}>{client.client_trading_name}</option>
+                                                                                        ))
+                                                                                    }
+                                                                                </select>
+                                                                                {errors['Client'] && (
+                                                                                    <div style={{ 'color': 'red' }}>{errors['Client']}</div>
+                                                                                )}
 
-                                                                    {/* <div className="col-lg-3">
-                                                                        <label className="form-label">Client</label>
-                                                                        <select className="form-select mb-3"
-                                                                            name="Client" onChange={HandleChange} value={jobData.Client}>
-                                                                            <option value="">Select Client</option>
-                                                                            {AllJobData.loading &&
-                                                                                AllJobData.data.client.map((client) => (
-                                                                                    <option value={client.client_id} key={client.client_id}>{client.client_trading_name}</option>
-                                                                                ))
-                                                                            }
-                                                                        </select>
-                                                                        {errors['Client'] && (
-                                                                            <div style={{ 'color': 'red' }}>{errors['Client']}</div>
-                                                                        )}
+                                                                            </div>
+                                                                            :
+                                                                            <div className="col-lg-3">
+                                                                                <label className="form-label">Client</label>
+                                                                                <input type="text" className="form-control" placeholder="Client Job Code"
+                                                                                    name="Client" onChange={HandleChange} value={jobData.Client} disabled />
+                                                                                {errors['Client'] && (
+                                                                                    <div style={{ 'color': 'red' }}>{errors['Client']}</div>
+                                                                                )}
+                                                                            </div>
+                                                                    }
 
-                                                                    </div> */}
-                                                                    <div className="col-lg-3">
-                                                                        <label className="form-label">Client</label>
-                                                                        <input type="text" className="form-control" placeholder="Client Job Code"
-                                                                            name="Client" onChange={HandleChange} value={jobData.Client} disabled />
-
-                                                                        {errors['Client'] && (
-                                                                            <div style={{ 'color': 'red' }}>{errors['Client']}</div>
-                                                                        )}
-
-                                                                    </div>
 
                                                                     <div className="mb-3 col-lg-3">
                                                                         <label className="form-label">Client Job Code</label>

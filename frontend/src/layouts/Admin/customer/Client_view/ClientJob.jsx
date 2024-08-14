@@ -14,6 +14,7 @@ const ClientList = () => {
   const [activeTab, setActiveTab] = useState("viewclient");
 
    
+ 
 
 
   const tabs = [
@@ -111,7 +112,7 @@ const ClientList = () => {
   }, []);
 
   const handleAddClient = () => {
-    navigate("/admin/createjob", { state: { details: location.state } });
+    navigate("/admin/createjob", { state: { details: location.state , goto:"client" } });
   };
 
 
