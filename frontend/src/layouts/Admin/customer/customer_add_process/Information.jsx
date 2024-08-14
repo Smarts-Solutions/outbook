@@ -29,7 +29,7 @@ const Information = () => {
     data: [],
 });
 
-console.log("customerDetails", !customerDetails.loading && customerDetails.data.customer);
+console.log("customerDetails", !customerDetails.loading && customerDetails.data.contact_details[0].contact_id);
 
   const [personRoleDataAll, setPersonRoleDataAll] = useState({
     loading: true,
@@ -236,6 +236,7 @@ useEffect(() => {
       if (formIsValid) {
         let req = {
           customer_id: Number(customer_id),
+          contact_id : customerDetails.data.contact_id,
           company_name: values.company_name,
           entity_type: values.entity_type,
           company_status: values.company_status,
@@ -253,6 +254,7 @@ useEffect(() => {
           PageStatus: "1",
           account_manager_id: getAccountMangerId,
           staff_id: staffDetails.id,
+          contact_id : !customerDetails.loading ? !customerDetails.loading && customerDetails.data.contact_details[0].contact_id : ""
         };
         await AddCustomerFun(req);
       }
@@ -329,6 +331,7 @@ useEffect(() => {
         CustomerType: CustomerType,
         account_manager_id: getAccountMangerId,
         staff_id: staffDetails.id,
+        contact_id : !customerDetails.loading ? !customerDetails.loading && customerDetails.data.contact_details[0].contact_id : ""
       };
       await AddCustomerFun(req);
     },
@@ -406,6 +409,7 @@ useEffect(() => {
           CustomerType: CustomerType,
           account_manager_id: getAccountMangerId,
           staff_id: staffDetails.id,
+          contact_id : !customerDetails.loading ? !customerDetails.loading && customerDetails.data.contact_details[0].contact_id : ""
         };
 
         await AddCustomerFun(req);
@@ -725,32 +729,42 @@ useEffect(() => {
     setCustomerType(!customerDetails.loading && customerDetails.data.customer.customer_type)
     setAccountMangerId(!customerDetails.loading && customerDetails.data.customer.account_manager_id)
 
-    if (!customerDetails.loading && customerDetails.data.customer.customer_type == '2') {
-      formik1.setFieldValue("Trading_Name", !customerDetails.loading && customerDetails.data.customer.trading_name)
-      formik1.setFieldValue("Trading_Address", !customerDetails.loading && customerDetails.data.customer.trading_address)
-      formik1.setFieldValue("VAT_Registered", !customerDetails.loading && customerDetails.data.customer.vat_registered)
-      formik1.setFieldValue("VAT_Number", !customerDetails.loading && customerDetails.data.customer.vat_number)
-      formik1.setFieldValue("Website", !customerDetails.loading && customerDetails.data.customer.website)
-      formik1.setFieldValue("First_Name", !customerDetails.loading && customerDetails.data.contact_details[0].first_name)
-      formik1.setFieldValue("Last_Name", !customerDetails.loading && customerDetails.data.contact_details[0].last_name)
-      formik1.setFieldValue("Phone", !customerDetails.loading && customerDetails.data.contact_details[0].phone)
-      formik1.setFieldValue("Email", !customerDetails.loading && customerDetails.data.contact_details[0].email)
-      formik1.setFieldValue("Residential_Address", !customerDetails.loading && customerDetails.data.contact_details[0].residential_address)
-    }
     if (!customerDetails.loading && customerDetails.data.customer.customer_type == '1') {
-      formik2.setFieldValue("Trading_Name", !customerDetails.loading && customerDetails.data.customer.trading_name)
-      formik2.setFieldValue("Trading_Address", !customerDetails.loading && customerDetails.data.customer.trading_address)
-      formik2.setFieldValue("VAT_Registered", !customerDetails.loading && customerDetails.data.customer.vat_registered)
-      formik2.setFieldValue("VAT_Number", !customerDetails.loading && customerDetails.data.customer.vat_number)
-      formik2.setFieldValue("Website", !customerDetails.loading && customerDetails.data.customer.website)
+      formik1.setFieldValue("Trading_Name", customerDetails.data.customer.trading_name);
+      formik1.setFieldValue("Trading_Address", customerDetails.data.customer.trading_address);
+      formik1.setFieldValue("VAT_Registered", customerDetails.data.customer.vat_registered);
+      formik1.setFieldValue("VAT_Number", customerDetails.data.customer.vat_number);
+      formik1.setFieldValue("Website", customerDetails.data.customer.website);
+      formik1.setFieldValue("First_Name", customerDetails.data.customer.first_name);
+      formik1.setFieldValue("Last_Name", customerDetails.data.customer.last_name);
+      formik1.setFieldValue("Phone", customerDetails.data.customer.phone);
+      formik1.setFieldValue("Email", customerDetails.data.customer.email);
+      formik1.setFieldValue("Residential_Address", customerDetails.data.customer.residential_address);
     }
-    if (!customerDetails.loading && customerDetails.data.customer.customer_type == '3') {
-      formik.setFieldValue("Trading_Name", !customerDetails.loading && customerDetails.data.customer.trading_name)
-      formik.setFieldValue("Trading_Address", !customerDetails.loading && customerDetails.data.customer.trading_address)
-      formik.setFieldValue("VAT_Registered", !customerDetails.loading && customerDetails.data.customer.vat_registered)
-      formik.setFieldValue("VAT_Number", !customerDetails.loading && customerDetails.data.customer.vat_number)
-      formik.setFieldValue("Website", !customerDetails.loading && customerDetails.data.customer.website)
+    if (!customerDetails.loading && customerDetails.data.customer.customer_type == '2') {
+      formik.setFieldValue("company_name", customerDetails.data.customer.company_name);
+      formik.setFieldValue("entity_type", customerDetails.data.customer.entity_type);
+      formik.setFieldValue("company_status", customerDetails.data.customer.company_status);
+      formik.setFieldValue("company_number", customerDetails.data.customer.company_number);
+      formik.setFieldValue("Registered_Office_Addres", customerDetails.data.customer.registered_office_address);
+      formik.setFieldValue("Incorporation_Date", customerDetails.data.customer.incorporation_date);
+      formik.setFieldValue("Incorporation_in", customerDetails.data.customer.incorporation_in);
+      formik.setFieldValue("VAT_Registered", customerDetails.data.customer.vat_registered);
+      formik.setFieldValue("VAT_Number", customerDetails.data.customer.vat_number);
+      formik.setFieldValue("Website", customerDetails.data.customer.website);
+      formik.setFieldValue("Trading_Name", customerDetails.data.customer.trading_name);
+      formik.setFieldValue("Trading_Address", customerDetails.data.customer.trading_address);
       setContacts(!customerDetails.loading && customerDetails.data.contact_details)
+    }
+      
+    if (!customerDetails.loading && customerDetails.data.customer.customer_type == '3') {
+      formik2.setFieldValue("Trading_Name", customerDetails.data.customer.trading_name);
+      formik2.setFieldValue("Trading_Address", customerDetails.data.customer.trading_address);
+      formik2.setFieldValue("VAT_Registered", customerDetails.data.customer.vat_registered);
+      formik2.setFieldValue("VAT_Number", customerDetails.data.customer.vat_number);
+      formik2.setFieldValue("Website", customerDetails.data.customer.website);
+      setContacts(!customerDetails.loading && customerDetails.data.contact_details)
+      
     }
         
 }, [customerDetails])
