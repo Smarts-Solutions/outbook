@@ -49,6 +49,10 @@ const checklistAction = async (checklist) => {
 
 };
 
+const updateChecklist = async (checklist) => {
+  return jobTypeTaskModel.updateChecklist(checklist);
+};
+
 
 module.exports = {
     addJobType,
@@ -58,5 +62,6 @@ module.exports = {
     addTask,
     getTask,
     addChecklist,
-    checklistAction
+    checklistAction,
+    updateChecklist
 };
