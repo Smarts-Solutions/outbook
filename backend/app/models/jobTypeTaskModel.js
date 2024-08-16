@@ -348,6 +348,21 @@ const customerGetService = async (task) => {
     }
 }
 
+const getClientTypeChecklist = async(checklist) => {
+
+    const query = `
+    SELECT * FROM client_types
+    ORDER BY id DESC
+    `;
+    try {
+    const [result] = await pool.execute(query);
+    return { status: true, message: 'getClientTypeChecklist get successfully.', data: result };
+    }
+    catch (err) {
+     return { status: false, message: 'Error get getClientTypeChecklist.' };
+    }
+}
+
 
 
 module.exports = {
@@ -362,6 +377,7 @@ module.exports = {
     getByIdChecklist,
     deleteChecklist,
     updateChecklist,
-    customerGetService
+    customerGetService,
+    getClientTypeChecklist
   
 };
