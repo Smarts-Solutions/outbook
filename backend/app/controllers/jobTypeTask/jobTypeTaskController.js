@@ -110,6 +110,22 @@ const jobTypeTaskService = require('../../services/jobTypeTask/jobTypeTaskServic
       }
   }
 
+  const customerGetService = async (req, res) => {
+    try {
+       const { ...task } = req.body;
+      //  console.log("job",job)
+         const result = await jobTypeTaskService.customerGetService(task);
+         if(!result.status){
+          return  res.status(200).json({ status: false, message: result.message });  
+          }else{
+          return  res.status(200).json({ status: true, message: result.message , data : result.data});
+          }
+      
+      } catch (error) {
+        res.status(500).json({ status:false, message: error.message});
+      }
+  }
+
 
 module.exports = {
   handleJobType,
@@ -117,5 +133,6 @@ module.exports = {
   getTask,
   addChecklist,
   checklistAction,
-  updateChecklist
+  updateChecklist,
+  customerGetService
 };
