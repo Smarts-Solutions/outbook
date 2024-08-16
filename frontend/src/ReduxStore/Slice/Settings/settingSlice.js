@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE , CLIENTINDUSTRY ,COUNTRY , JOBTYPE,ADDTASK,GetServicesByCustomer,GETTASK } from "../../../Services/Settings/settingService";
+import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE , CLIENTINDUSTRY ,COUNTRY , JOBTYPE,ADDTASK,GetServicesByCustomer,GETTASK,getListAction ,addChecklist} from "../../../Services/Settings/settingService";
 
 
 
@@ -116,8 +116,27 @@ export const GETTASKDATA = createAsyncThunk("getTask", async (data) => {
   }
 });
 
+export const getList = createAsyncThunk("checklistAction", async (data) => {
+  try {
+    const { req, authToken } = data
+    const res = await getListAction(req, authToken);
+    return await res;
+  } catch
+  (err) {
+    return err;
+  }
+});
 
-
+export const addChecklists = createAsyncThunk("addChecklist", async (data) => {
+  try {
+    const { req, authToken } = data
+    const res = await addChecklist(req, authToken);
+    return await res;
+  } catch
+  (err) {
+    return err;
+  }
+});
 
 //Setting Slice
 const SettingSlice = createSlice({
@@ -134,7 +153,9 @@ const SettingSlice = createSlice({
     jobtype:[],
     addtak:[],
     customergetervices:[],
-    gettask:[]
+    gettask:[],
+    list:[],
+    addChecklistData:[]
   },
 
   reducers: {},
@@ -248,6 +269,28 @@ const SettingSlice = createSlice({
         state.gettask = action.payload;
       })
       .addCase(GETTASKDATA.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(getList.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(getList.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.list = action.payload;
+      })
+      .addCase(getList.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(addChecklists.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(addChecklists.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.addChecklistData = action.payload;
+      })
+      .addCase(addChecklists.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
       });

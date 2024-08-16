@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import { JobType, GetServicesByCustomers, GETTASKDATA } from '../../../../ReduxStore/Slice/Settings/settingSlice';
+import { JobType, GetServicesByCustomers, GETTASKDATA, getList, addChecklists } from '../../../../ReduxStore/Slice/Settings/settingSlice';
 
 const CreateCheckList = () => {
   const location = useLocation();
@@ -17,7 +17,6 @@ const CreateCheckList = () => {
     status: '',
   });
 
-
   const [formData1, setFormData1] = useState({
     customer_id: location.state?.id || '',
     service_id: '',
@@ -27,10 +26,9 @@ const CreateCheckList = () => {
     status: '',
   });
 
+  const [tasks, setTasks] = useState([{ task_id: "", task_name: '', budgeted_hour: '' }]);
 
-  const [tasks, setTasks] = useState([
-    { task_id: "", task_name: '', budgeted_hour: '' }
-  ]);
+  const [errors, setErrors] = useState({}); // Validation errors
 
   useEffect(() => {
     if (formData.customer_id) {
@@ -45,16 +43,25 @@ const CreateCheckList = () => {
         })
         .catch(error => console.error("Error fetching service types:", error));
     }
+
+    const req = { "action": "getClientType" };
+    const data = { req, authToken: token };
+    dispatch(getList(data))
+      .unwrap()
+      .then(response => {
+        if (response.status) {
+          setFormData(data => ({ ...data, client_type_id: response.data }));
+        }
+      })
+      .catch(error => console.log("Error fetching service types:", error));
+
   }, [formData.customer_id, dispatch, token]);
-
-
-
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
     setFormData1(prev => ({ ...prev, [name]: value }));
   };
-
 
   const handleTaskChange = (index, e) => {
     const { name, value } = e.target;
@@ -63,12 +70,9 @@ const CreateCheckList = () => {
     setTasks(newTasks);
   };
 
-
-
   const addTask = () => {
-    setTasks([...tasks, { task_name: '', budgeted_hour: '' }]);
+    setTasks([...tasks, { task_name: '', budgeted_hour: '',task_id:null }]);
   };
-
 
   const removeTask = (index) => {
     const newTasks = tasks.filter((_, i) => i !== index);
@@ -96,34 +100,61 @@ const CreateCheckList = () => {
       .then(response => {
         if (response.status) {
           if (response.data.length > 0) {
-            var taskData = response.data.map((item) => {
-              return { task_id: item.id, task_name: item.name, budgeted_hour: "" }
-            })
+            const taskData = response.data.map((item) => ({
+              task_id: item.id,
+              task_name: item.name,
+              budgeted_hour: ""
+            }));
             setTasks(taskData);
+          } else {
+            setTasks([{ task_name: '', budgeted_hour: '' }]);
           }
-          else {
-            setTasks([{ task_name: '', budgeted_hour: '' }])
-          }
-
         }
       })
       .catch(error => console.log("Error fetching job types:", error));
-
   };
 
-  // Handle form submission
+  // Handle form submission with validation
   const handleSubmit = async () => {
-    const payload = {
+    let validationErrors = {};
+
+    if (!formData1.service_id) validationErrors.service_id = "Service Type is required";
+    if (!formData1.job_type_id) validationErrors.job_type_id = "Job Type is required";
+    if (!formData1.client_type_id) validationErrors.client_type_id = "Client Type is required";
+    if (!formData1.check_list_name) validationErrors.check_list_name = "Check List Name is required";
+    if (!formData1.status) validationErrors.status = "Status is required";
+
+    tasks.forEach((task, index) => {
+      if (!task.task_name) validationErrors[`task_name_${index}`] = "Task Name is required";
+      if (!task.budgeted_hour) validationErrors[`budgeted_hour_${index}`] = "Budgeted Hour is required";
+    });
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    const req = {
       ...formData1,
       task: tasks.map(task => ({
         task_name: task.task_name,
         budgeted_hour: task.budgeted_hour,
-        task_id:task.task_id
+        task_id: task.task_id
       })),
     };
-    console.log('Submitting:', payload);
-  };
 
+    const data = { req, authToken: token };
+    await dispatch(addChecklists(data))
+      .unwrap()
+      .then(response => {
+        if (response.status) {
+          console.log("Response:", response);
+        }
+      })
+      .catch((error) =>
+        console.log("Error fetching job types:", error)
+      );
+  };
 
   return (
     <div className="container-fluid">
@@ -148,13 +179,13 @@ const CreateCheckList = () => {
                     }}
                   >
                     <option value="">Please Select Service Type</option>
-
                     {formData.service_id && formData.service_id.map(service => (
                       <option key={service.service_id} value={service.service_id}>
                         {service.service_name}
                       </option>
                     ))}
                   </select>
+                  {errors.service_id && <p className="text-danger">{errors.service_id}</p>}
                 </div>
               </div>
             </div>
@@ -177,6 +208,7 @@ const CreateCheckList = () => {
                       </option>
                     ))}
                   </select>
+                  {errors.job_type_id && <p className="text-danger">{errors.job_type_id}</p>}
                 </div>
               </div>
             </div>
@@ -190,9 +222,13 @@ const CreateCheckList = () => {
                     onChange={handleInputChange}
                   >
                     <option value="">Please Select Client Type</option>
-                    <option value="1">Yes</option>
-                    <option value="0">No</option>
+                    {formData.client_type_id && formData.client_type_id.map(client => (
+                      <option key={client.id} value={client.id}>
+                        {client.type}
+                      </option>
+                    ))}
                   </select>
+                  {errors.client_type_id && <p className="text-danger">{errors.client_type_id}</p>}
                 </div>
               </div>
             </div>
@@ -207,6 +243,7 @@ const CreateCheckList = () => {
                     defaultValue={formData.check_list_name}
                     onChange={handleInputChange}
                   />
+                  {errors.check_list_name && <p className="text-danger">{errors.check_list_name}</p>}
                 </div>
               </div>
             </div>
@@ -220,64 +257,51 @@ const CreateCheckList = () => {
                     onChange={handleInputChange}
                   >
                     <option value="">Please Select Status</option>
-                    <option value="1">Active</option>
-                    <option value="0">Inactive</option>
+                    <option value="0">Active</option>
+                    <option value="1">Inactive</option>
                   </select>
+                  {errors.status && <p className="text-danger">{errors.status}</p>}
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        <div>
-          <div className="table-responsive table-card mt-3 mb-1">
-            <table className="table align-middle table-nowrap" id="customerTable">
-              <thead className="table-striped">
-                <tr>
-                  <th>Task Name</th>
-                  <th>Budgeted Hour</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody className="list form-check-all">
-                {tasks && tasks.map((task, index) => (
-                  <tr key={index}>
-                    <td>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="task_name"
-                        placeholder="Task Name"
-                        value={task.task_name}
-                        onChange={(e) => handleTaskChange(index, e)}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="budgeted_hour"
-                        placeholder="Budgeted Hour"
-                        value={task.budgeted_hour}
-                        onChange={(e) => handleTaskChange(index, e)}
-                      />
-                    </td>
-                    <td>
-                      <div className="d-flex gap-2">
-                        <button onClick={addTask} className="edit-icon">
-                          <i className="ti-plus" />
-                        </button>
-                        <button onClick={() => removeTask(index)} className="delete-icon">
-                          <i className="ti-trash" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+          <div className="mt-4">
+            {tasks.map((task, index) => (
+              <div key={index} className="d-flex gap-3 mt-4">
+                <div className="col-lg-4">
+                  <input
+                    type="text"
+                    name="task_name"
+                    className="form-control"
+                    value={task.task_name}
+                    onChange={(e) => handleTaskChange(index, e)}
+                    placeholder="Task Name"
+                    disabled={task.task_id}
+                  />
+                  {errors[`task_name_${index}`] && <p className="text-danger">{errors[`task_name_${index}`]}</p>}
+                </div>
+                <div className="col-lg-4">
+                  <input
+                    type="text"
+                    name="budgeted_hour"
+                    className="form-control"
+                    value={task.budgeted_hour}
+                    onChange={(e) => handleTaskChange(index, e)}
+                    placeholder="Budgeted Hour"
+                  />
+                  {errors[`budgeted_hour_${index}`] && <p className="text-danger">{errors[`budgeted_hour_${index}`]}</p>}
+                </div>
+                <button className="btn btn-danger" onClick={() => removeTask(index)}>Remove</button>
+              </div>
+            ))}
+            <button className="btn btn-primary mt-3" onClick={addTask}>Add Task</button>
+          </div>
+
+          <div className="col-lg-12 mt-4">
+            <button className="btn btn-primary" onClick={handleSubmit}>Submit</button>
           </div>
         </div>
-        <button onClick={handleSubmit} className="btn btn-primary mt-3">Submit Checklist</button>
       </div>
     </div>
   );

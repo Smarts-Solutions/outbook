@@ -152,20 +152,33 @@ export async function GETTASK(data, token) {
 
 
 
-// export async function GETTASK(data, token) {
-//     try {
-//         const res = await axios.post(`${Config.base_url}checklistAction`, data, {
-//             headers: header(token),
-//             data: {}
-//         })
-//         return await res?.data;
-//     }
-//     catch (err) {
-//         return await err;
-//     }
-// }
+export async function getListAction(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}checklistAction`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
 
 
+
+export async function addChecklist(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}addChecklist`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
 
 
 
