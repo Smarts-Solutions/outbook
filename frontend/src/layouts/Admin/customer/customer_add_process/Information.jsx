@@ -453,7 +453,7 @@ const Information = () => {
     },
     {
       name: "VAT_Registered",
-      // label: "VAT Registered",
+       label: "VAT Registered",
       type: "select3",
       options: [
         { value: "1", label: "Yes" },
@@ -598,7 +598,7 @@ const Information = () => {
     },
     {
       name: "VAT_Registered",
-      // label: "VAT Registered",
+       label: "VAT Registered",
       type: "select3",
       options: [
         { value: "1", label: "Yes" },
@@ -671,7 +671,7 @@ const Information = () => {
     },
     {
       name: "VAT_Registered",
-      // label: "VAT Registered",
+       label: "VAT Registered",
       type: "select3",
       options: [
         { value: "1", label: "Yes" },

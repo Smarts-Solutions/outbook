@@ -569,8 +569,8 @@ const CreateClient = () => {
                 <div className="row">
                     <div className="col-xl-12">
                         <div className="card">
-                            <div className="card-header">
-                                <h4 className="card-title mb-0">Create New Client</h4>
+                            <div className="card-header step-header-blue">
+                                <h4 className="card-title mb-0 ">Create New Client</h4>
                             </div>
                             {/* end card header */}
                             <div className="card-body form-steps">
@@ -584,7 +584,7 @@ const CreateClient = () => {
                                         >
                                             <div>
                                                 <div className="row">
-                                                    <div className="col-lg-7">
+                                                    <div className="col-lg-12">
                                                         <div className="card card_shadow">
                                                             <div className="card-body">
                                                                 <div className="row">
@@ -597,7 +597,7 @@ const CreateClient = () => {
                                                                             <span style={{ color: "red" }}>*</span>
                                                                         </label>
                                                                         <select
-                                                                            className="form-select mb-3"
+                                                                            className="form-select "
                                                                             value={selectClientType}
                                                                             onChange={(e) => setSelectClientType(e.target.value)}
                                                                         >
@@ -620,18 +620,18 @@ const CreateClient = () => {
 
                                                                 <div className="col-lg-12">
                                                                     <div className="card card_shadow ">
-                                                                        <div className="card-header align-items-center d-flex">
-                                                                            <h4 className="card-title mb-0 flex-grow-1">
+                                                                        <div className="card-header card-header-light-blue align-items-center d-flex">
+                                                                            <h4 className="card-title mb-0 flex-grow-1 fs-16">
                                                                                 Sole Trader
                                                                             </h4>
                                                                         </div>
                                                                         {/* end card header */}
                                                                         <div className="card-body">
                                                                             <div className="row">
-                                                                                <div className="col-lg-3">
-                                                                                    <div className="mb-3">
+                                                                                <div className="col-lg-4 mb-3">
+                                                                                    <div className="">
                                                                                         <label className="form-label">Client Industry<span style={{ color: "red" }}>*</span></label>
-                                                                                        <select className="form-select mb-3" aria-label="Default select example"
+                                                                                        <select className="form-select " aria-label="Default select example"
                                                                                             name="IndustryType"
                                                                                             value={getSoleTraderDetails.IndustryType}
                                                                                             onChange={(e) => handleChange1(e)}>
@@ -647,7 +647,7 @@ const CreateClient = () => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label">Trading Name<span style={{ color: "red" }}>*</span></label>
                                                                                         <input type="text" name="tradingName" className="form-control" placeholder="Trading Name"
@@ -659,7 +659,7 @@ const CreateClient = () => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label">Trading Address<span style={{ color: "red" }}>*</span></label>
                                                                                         <input type="text" className="form-control" placeholder="Trading Address" name="tradingAddress"
@@ -671,10 +671,10 @@ const CreateClient = () => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
-                                                                                    <div className="mb-3">
+                                                                                <div className="col-lg-4 mb-3">
+                                                                                    <div className="">
                                                                                         <label className="form-label" >VAT Registered</label>
-                                                                                        <select className="form-select mb-3" aria-label="Default select example"
+                                                                                        <select className="form-select " aria-label="Default select example"
                                                                                             name="vatRegistered"
                                                                                             value={getSoleTraderDetails.vatRegistered}
                                                                                             onChange={(e) => handleChange1(e)}
@@ -692,7 +692,7 @@ const CreateClient = () => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label">VAT Number<span style={{ color: "red" }}>*</span></label>
                                                                                         <input type="text" className="form-control" placeholder="VAT Number"
@@ -705,7 +705,7 @@ const CreateClient = () => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label">Website<span style={{ color: "red" }}>*</span></label>
                                                                                         <input type="text" className="form-control"
@@ -720,10 +720,10 @@ const CreateClient = () => {
 
                                                                                     </div>
                                                                                 </div>
-                                                                                <h4 className="card-title mb-0 flex-grow-1" style={{ marginBottom: "15px !important" }}>
+                                                                                <h4 className="card-title mb-3 border-bottom flex-grow-1 fs-14 mb-2">
                                                                                     Sole Trader Details
                                                                                 </h4>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label"  >First Name<span style={{ color: "red" }}>*</span></label>
                                                                                         <input type="text" className="form-control"
@@ -737,7 +737,7 @@ const CreateClient = () => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label" >Last Name<span style={{ color: "red" }}>*</span></label>
                                                                                         <input type="text" className="form-control" placeholder="Last Name"
@@ -750,7 +750,7 @@ const CreateClient = () => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label" >Phone<span style={{ color: "red" }}>*</span></label>
                                                                                         <input type="text" className="form-control"
@@ -764,7 +764,7 @@ const CreateClient = () => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label" >Email<span style={{ color: "red" }}>*</span></label>
                                                                                         <input type="text" className="form-control" placeholder="Enter Email ID"
@@ -801,15 +801,15 @@ const CreateClient = () => {
                                                                 <div className="row">
                                                                     <div className="col-lg-12">
                                                                         <div className="card card_shadow ">
-                                                                            <div className="card-header align-items-center d-flex">
-                                                                                <h4 className="card-title mb-0 flex-grow-1">Company</h4>
+                                                                            <div className="card-header card-header-light-blue align-items-center d-flex">
+                                                                                <h4 className="card-title mb-0 flex-grow-1 fs-16">Company</h4>
                                                                             </div>
                                                                             {/* end card header */}
                                                                             <div className="card-body">
                                                                                 <div className="row">
-                                                                                    <h4 className="card-title mb-0 flex-grow-1">Contact Information</h4>
+                                                                                    {/* <h4 className="card-title flex-grow-1 fs-14 mb-2">Contact Information</h4> */}
                                                                                     <div className="row">
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <div className='position-relative'>
                                                                                                     <label className="form-label">Search Company</label>
@@ -836,7 +836,7 @@ const CreateClient = () => {
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label" >Company Name<span style={{ color: "red" }}>*</span>  </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Outbooks Quality & Certainty LTD"
@@ -849,7 +849,7 @@ const CreateClient = () => {
 
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Entity Type<span style={{ color: "red" }}>*</span>   </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="LTD"
@@ -859,7 +859,7 @@ const CreateClient = () => {
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  >  Company Status  <span style={{ color: "red" }}>*</span> </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Active"
@@ -868,7 +868,7 @@ const CreateClient = () => {
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['CompanyStatus']}</div>)}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Company Number<span style={{ color: "red" }}>*</span></label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Company Number"
@@ -877,6 +877,17 @@ const CreateClient = () => {
                                                                                                 />
                                                                                                 {errors2['CompanyNumber'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['CompanyNumber']}</div>
+                                                                                                )}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div className="col-lg-4">
+                                                                                            <div className="mb-3">
+                                                                                                <label className="form-label">Incorporation Date</label>
+                                                                                                <input type="text" className="form-control input_bg" placeholder="07-01-2023"
+                                                                                                    name="IncorporationDate" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationDate} disabled
+                                                                                                />
+                                                                                                {errors2['IncorporationDate'] && (
+                                                                                                    <div style={{ 'color': 'red' }}>{errors2['IncorporationDate']}</div>
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
@@ -891,18 +902,8 @@ const CreateClient = () => {
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
-                                                                                            <div className="mb-3">
-                                                                                                <label className="form-label">Incorporation Date</label>
-                                                                                                <input type="text" className="form-control input_bg" placeholder="07-01-2023"
-                                                                                                    name="IncorporationDate" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationDate} disabled
-                                                                                                />
-                                                                                                {errors2['IncorporationDate'] && (
-                                                                                                    <div style={{ 'color': 'red' }}>{errors2['IncorporationDate']}</div>
-                                                                                                )}
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  > Incorporation in  <span style={{ color: "red" }}>*</span> </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Please Enter Incorporation In"
@@ -914,10 +915,10 @@ const CreateClient = () => {
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  >VAT Registered</label>
-                                                                                                <select className="form-select mb-3" name="VATRegistered" onChange={(e) => handleChange2(e)} value={getCompanyDetails.VATRegistered}>
+                                                                                                <select className="form-select " name="VATRegistered" onChange={(e) => handleChange2(e)} value={getCompanyDetails.VATRegistered}>
                                                                                                     <option value=''>Please Select VAT Registered</option>
                                                                                                     <option value={1}>Yes</option>
                                                                                                     <option value={0}>No</option>
@@ -927,7 +928,7 @@ const CreateClient = () => {
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3" >
+                                                                                        <div className="col-lg-4" >
                                                                                             <div className="mb-3">
                                                                                                 <div className="mb-3">
                                                                                                     <label className="form-label">VAT Number</label>
@@ -940,7 +941,7 @@ const CreateClient = () => {
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Website</label>
                                                                                                 <input type="text" className="form-control " placeholder="URL"
@@ -961,10 +962,10 @@ const CreateClient = () => {
                                                                             {/* end card header */}
                                                                             <div className="card-body">
                                                                                 <div className="row">
-                                                                                    <div className="col-lg-6">
+                                                                                    <div className="col-lg-4">
                                                                                         <div className="mb-3">
                                                                                             <label className="form-label">Client Industry<span style={{ color: "red" }}>*</span></label>
-                                                                                            <select className="form-select mb-3"
+                                                                                            <select className="form-select "
                                                                                                 name="ClientIndustry" onChange={(e) => handleChange2(e)} value={getCompanyDetails.ClientIndustry}>
                                                                                                 <option value=''>Select Client Industry</option>
                                                                                                 {
@@ -979,7 +980,7 @@ const CreateClient = () => {
                                                                                             )}
                                                                                         </div>
                                                                                     </div>
-                                                                                    <div className="col-lg-6">
+                                                                                    <div className="col-lg-4">
                                                                                         <div className="mb-3">
                                                                                             <label className="form-label">Trading Name<span style={{ color: "red" }}>*</span></label>
                                                                                             <input type="text" className="form-control" placeholder="Trading Name"
@@ -990,7 +991,7 @@ const CreateClient = () => {
                                                                                             )}
                                                                                         </div>
                                                                                     </div>
-                                                                                    <div className="col-lg-6">
+                                                                                    <div className="col-lg-4">
                                                                                         <div className="mb-3">
                                                                                             <label className="form-label">Trading Address<span style={{ color: "red" }}>*</span> </label>
                                                                                             <input type="text" className="form-control" placeholder="Trading Address"
@@ -1008,8 +1009,8 @@ const CreateClient = () => {
                                                                     <div className="row">
                                                                         <div className="col-lg-12">
                                                                             <div className="card card_shadow">
-                                                                                <div className="card-header align-items-center d-flex">
-                                                                                    <h4 className="card-title mb-0 flex-grow-1">
+                                                                                <div className="card-header card-header-light-blue align-items-center d-flex">
+                                                                                    <h4 className="card-title mb-0 flex-grow-1 fs-16">
                                                                                         Officer Details
                                                                                     </h4>
                                                                                 </div>
@@ -1033,7 +1034,7 @@ const CreateClient = () => {
                                                                                                                     </div>
                                                                                                                 </div>
                                                                                                             )}
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label htmlFor={`first_name-${index}`} className="form-label">
                                                                                                                         First Name<span style={{ color: 'red' }}>*</span>
@@ -1049,7 +1050,7 @@ const CreateClient = () => {
                                                                                                                     {errors[index].first_name && <div style={{ color: 'red' }}>{errors[index].first_name}</div>}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label htmlFor={`last_name-${index}`} className="form-label">
                                                                                                                         Last Name<span style={{ color: 'red' }}>*</span>
@@ -1065,7 +1066,7 @@ const CreateClient = () => {
                                                                                                                     {errors[index].last_name && <div style={{ color: 'red' }}>{errors[index].last_name}</div>}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label htmlFor={`role-${index}`} className="form-label">
                                                                                                                         Role<span style={{ color: 'red' }}>*</span>
@@ -1085,7 +1086,7 @@ const CreateClient = () => {
                                                                                                                     {errors[index].role && <div style={{ color: 'red' }}>{errors[index].role}</div>}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label htmlFor={`phone-${index}`} className="form-label">
                                                                                                                         Phone
@@ -1101,7 +1102,7 @@ const CreateClient = () => {
                                                                                                                     {errors[index].phone && <div style={{ color: 'red' }}>{errors[index].phone}</div>}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label htmlFor={`email-${index}`} className="form-label">
                                                                                                                         Email<span style={{ color: 'red' }}>*</span>
@@ -1140,16 +1141,16 @@ const CreateClient = () => {
                                                                     <div className="row " >
                                                                         <div className="col-lg-12">
                                                                             <div className="card card_shadow ">
-                                                                                <div className="card-header align-items-center d-flex">
-                                                                                    <h4 className="card-title mb-0 flex-grow-1">Partnership</h4>
+                                                                                <div className="card-header  card-header-light-blue align-items-center d-flex">
+                                                                                    <h4 className="card-title mb-0 flex-grow-1 fs-16">Partnership</h4>
                                                                                 </div>
                                                                                 {/* end card header */}
                                                                                 <div className="card-body">
                                                                                     <div className="row">
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Client Industry<span style={{ color: "red" }}>*</span></label>
-                                                                                                <select className="form-select mb-3"
+                                                                                                <select className="form-select "
                                                                                                     name="ClientIndustry" value={getPartnershipDetails.ClientIndustry} onChange={(e) => handleChange3(e)}>
                                                                                                     <option value={0}>Select Client Industry</option>
                                                                                                     {
@@ -1164,7 +1165,7 @@ const CreateClient = () => {
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Trading Name<span style={{ color: "red" }}>*</span></label>
                                                                                                 <input type="text" className="form-control" placeholder="Trading Name"
@@ -1174,7 +1175,7 @@ const CreateClient = () => {
                                                                                                     <div style={{ 'color': 'red' }}>{errors3['TradingName']}</div>)}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Trading Address<span style={{ color: "red" }}>*</span> </label>
                                                                                                 <input type="text" className="form-control" placeholder="Trading Address"
@@ -1184,11 +1185,11 @@ const CreateClient = () => {
                                                                                                     <div style={{ 'color': 'red' }}>{errors3['TradingAddress']}</div>)}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <div className="mb-3">
                                                                                                     <label className="form-label">VAT Registered</label>
-                                                                                                    <select className="form-select mb-3"
+                                                                                                    <select className="form-select "
                                                                                                         name="VATRegistered" value={getPartnershipDetails.VATRegistered} onChange={(e) => handleChange3(e)}
                                                                                                     >
                                                                                                         <option value="">Select VAT Registered</option>
@@ -1201,7 +1202,7 @@ const CreateClient = () => {
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <div className="mb-3">
                                                                                                     <label className="form-label"> VAT Number</label>
@@ -1213,7 +1214,7 @@ const CreateClient = () => {
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">
                                                                                                     Website
@@ -1233,8 +1234,8 @@ const CreateClient = () => {
                                                                         <div className="row">
                                                                             <div className="col-lg-12">
                                                                                 <div className="card card_shadow">
-                                                                                    <div className="card-header align-items-center d-flex">
-                                                                                        <h4 className="card-title mb-0 flex-grow-1">
+                                                                                    <div className="card-header card-header-light-blue align-items-center d-flex">
+                                                                                        <h4 className="card-title mb-0 flex-grow-1 fs-16">
                                                                                             Contact Details
                                                                                         </h4>
                                                                                     </div>
@@ -1272,7 +1273,7 @@ const CreateClient = () => {
                                                                                                                     )}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label">First Name<span style={{ color: "red" }}>*</span></label>
                                                                                                                     <input type="text" className="form-control" placeholder="First Name"
@@ -1283,7 +1284,7 @@ const CreateClient = () => {
                                                                                                                     )}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label"> Last Name<span style={{ color: "red" }}>*</span></label>
                                                                                                                     <input type="text" className="form-control" placeholder=" Last Name"
@@ -1294,7 +1295,7 @@ const CreateClient = () => {
                                                                                                                     )}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label">Role<span style={{ color: "red" }}>*</span></label>
 
@@ -1316,7 +1317,7 @@ const CreateClient = () => {
 
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label">Phone<span style={{ color: "red" }}>*</span></label>
                                                                                                                     <input type="number" className="form-control" placeholder="Phone"
@@ -1328,7 +1329,7 @@ const CreateClient = () => {
                                                                                                                     )}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label"> Alternate Phone<span style={{ color: "red" }}>*</span></label>
                                                                                                                     <input type="number" className="form-control" placeholder=" Alternate Phone"
@@ -1340,7 +1341,7 @@ const CreateClient = () => {
                                                                                                                     )}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label">Email<span style={{ color: "red" }}>*</span></label>
                                                                                                                     <input type="text" className="form-control" placeholder="Enter Email"
@@ -1352,7 +1353,7 @@ const CreateClient = () => {
                                                                                                                     )}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label"> Alternate Email<span style={{ color: "red" }}>*</span></label>
                                                                                                                     <input type="text" className="form-control" placeholder="Enter Alternate Email"
