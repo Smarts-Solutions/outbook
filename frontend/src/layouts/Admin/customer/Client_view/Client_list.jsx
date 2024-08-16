@@ -5,7 +5,7 @@ import Datatable from '../../../../Components/ExtraComponents/Datatable';
 import { Get_All_Client } from '../../../../ReduxStore/Slice/Client/ClientSlice';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Get_All_Job_List } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
-import {getList} from '../../../../ReduxStore/Slice/Settings/settingSlice';
+import { getList } from '../../../../ReduxStore/Slice/Settings/settingSlice';
 
 
 
@@ -15,14 +15,20 @@ const ClientList = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const [ClientData, setClientData] = useState([]);
-  const [activeTab, setActiveTab] = useState('client');
   const [getJobDetails, setGetJobDetails] = useState({ loading: false, data: [] });
   const [getCheckList, setCheckList] = useState([]);
+  const getActiveTav = localStorage.getItem('Clientlist')
+  
+  const [activeTab, setActiveTab] = useState(getActiveTav ? getActiveTav : 'client');
+
+  const SetTab = (e) => {
+    setActiveTab(e)
+    localStorage.setItem('Clientlist', e)
+  }
 
 
   let tabs = [
     { id: 'client', label: 'Client' },
-    // Conditionally add the 'job' tab if ClientData has elements
     ...(ClientData.length > 0 ? [{ id: 'job', label: 'Job' }] : []),
     { id: 'documents', label: 'Documents' },
     { id: 'statuses', label: 'Status' },
@@ -267,7 +273,7 @@ const ClientList = () => {
                         role="tab"
                         aria-controls={tab.id}
                         aria-selected={activeTab === tab.id}
-                        onClick={() => setActiveTab(tab.id)}
+                        onClick={() => SetTab(tab.id)}
                       >
                         {tab.label}
                       </button>
@@ -297,7 +303,7 @@ const ClientList = () => {
             )}
           </div>
         )}
-        
+
 
         {activeTab == "job" && (
           <div
@@ -494,7 +500,7 @@ const ClientList = () => {
           >
 
             <div className='container-fluid'>
-           
+
               <div className='report-data mt-4 '>
                 <div className='d-flex justify-content-between align-items-center'>
                   <div className='tab-title'>
@@ -568,17 +574,12 @@ const ClientList = () => {
                               >
                                 <option selected="">Pending</option>
                                 <option value={1}>Hold</option>
-                                {/* <option value="1">Missing Paperworks
-                                              </option> */}
+
                                 <option value={1}>Completed</option>
                               </select>
                             </div>
                           </div>
-                          {/* <div class="mb-3">
-                                      <label for="customername-field" class="form-label">Link status</label>
-                                      <input type="text" id="phone-field" class="form-control"
-                                          placeholder="Outbooks Outsourcing Pvt Ltd" required />
-                                  </div> */}
+
                         </div>
 
                       </form>
