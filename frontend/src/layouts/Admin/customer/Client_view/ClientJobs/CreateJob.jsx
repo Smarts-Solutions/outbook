@@ -226,7 +226,7 @@ const CreateJob = () => {
                             timer: 1500
                         })
                         setTimeout(() => {
-                            location.state.goto == "Customer" ? navigate('/admin/Clientlist', { state: location.state.details }) :  navigate('/admin/client/profile', { state: location.state.details });
+                            location.state.goto == "Customer" ? navigate('/admin/Clientlist', { state: location.state.details }) : navigate('/admin/client/profile', { state: location.state.details });
                         }, 1500);
                     } else {
                         console.log("response", response)
@@ -266,7 +266,7 @@ const CreateJob = () => {
                 <div className="row mt-4">
                     <div className="col-xl-12">
                         <div className="card">
-                            <div className="card-header">
+                            <div className="card-header step-header-blue">
                                 <h4 className="card-title mb-0">Create New Job</h4>
                             </div>
 
@@ -279,11 +279,11 @@ const CreateJob = () => {
                                                     <div className="col-lg-12">
                                                         <div className="card card_shadow">
                                                             <div className="card-header align-items-center d-flex">
-                                                                <h4 className="card-title mb-0 flex-grow-1">Job Information</h4>
+                                                                <h4 className="card-title mb-0 flex-grow-1 fs-16">Job Information</h4>
                                                             </div>
                                                             <div className="card-body">
                                                                 <div className="row">
-                                                                    <div className="mb-3 col-lg-3">
+                                                                    <div className="mb-3 col-lg-4">
                                                                         <label className="form-label"> Outbook Account Manager</label>
                                                                         <input type="text" className="form-control" placeholder="Account Manager" disabled
                                                                             name="AccountManager" onChange={HandleChange} value={jobData.AccountManager} />
@@ -292,7 +292,7 @@ const CreateJob = () => {
                                                                         )}
                                                                     </div>
 
-                                                                    <div id="invoiceremark" className="mb-3 col-lg-3">
+                                                                    <div id="invoiceremark" className="mb-3 col-lg-4">
                                                                         <label className="form-label">Customer</label>
                                                                         <input type="text" className="form-control" placeholder="Customer" disabled
                                                                             name="Customer" onChange={HandleChange} value={jobData.Customer} />
@@ -303,9 +303,9 @@ const CreateJob = () => {
                                                                     {
                                                                         location.state.goto == "Customer" ?
 
-                                                                            <div className="col-lg-3">
+                                                                            <div className="col-lg-4">
                                                                                 <label className="form-label">Client</label>
-                                                                                <select className="form-select mb-3"
+                                                                                <select className="form-select"
                                                                                     name="Client" onChange={HandleChange} value={jobData.Client}>
                                                                                     <option value="">Select Client</option>
                                                                                     {AllJobData.loading &&
@@ -320,7 +320,7 @@ const CreateJob = () => {
 
                                                                             </div>
                                                                             :
-                                                                            <div className="col-lg-3">
+                                                                            <div className="col-lg-4">
                                                                                 <label className="form-label">Client</label>
                                                                                 <input type="text" className="form-control" placeholder="Client Job Code"
                                                                                     name="Client" onChange={HandleChange} value={jobData.Client} disabled />
@@ -331,7 +331,7 @@ const CreateJob = () => {
                                                                             </div>
                                                                     }
 
-                                                                    <div className="mb-3 col-lg-3">
+                                                                    <div className="mb-3 col-lg-4">
                                                                         <label className="form-label">Client Job Code</label>
                                                                         <input type="text" className="form-control" placeholder="Client Job Code"
                                                                             name="ClientJobCode" onChange={HandleChange} value={jobData.ClientJobCode} />
@@ -340,9 +340,9 @@ const CreateJob = () => {
                                                                         )}
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
                                                                         <label className="form-label">Customer Account Manager(Officer)</label>
-                                                                        <select className="form-select mb-3"
+                                                                        <select className="form-select"
                                                                             name="CustomerAccountManager" onChange={HandleChange} value={jobData.CustomerAccountManager}>
                                                                             <option value="">Select Customer Account Manager</option>
                                                                             {
@@ -358,9 +358,9 @@ const CreateJob = () => {
 
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
                                                                         <label className="form-label">Service</label>
-                                                                        <select className="form-select mb-3"
+                                                                        <select className="form-select"
                                                                             name="Service" onChange={HandleChange} value={jobData.Service}>
                                                                             <option value="">Select Service</option>
                                                                             {
@@ -377,9 +377,9 @@ const CreateJob = () => {
                                                                         )}
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4 mb-3">
                                                                         <label className="form-label">Job Type</label>
-                                                                        <select className="form-select mb-3 jobtype"
+                                                                        <select className="form-select jobtype"
                                                                             name="JobType" onChange={HandleChange} value={jobData.JobType}>
                                                                             <option value="">Select Job Type</option>
                                                                             {AllJobData.loading &&
@@ -392,7 +392,7 @@ const CreateJob = () => {
                                                                         )}
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
                                                                         <label className="form-label">Budgeted Hours</label>
                                                                         <div className="input-group">
                                                                             <input type="text" className="form-control" placeholder='Enter Budgeted Hours'
@@ -400,15 +400,16 @@ const CreateJob = () => {
                                                                             />
 
                                                                             <span className="input-group-text">Hours</span>
-                                                                            {errors['BudgetedHours'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['BudgetedHours']}</div>
-                                                                            )}
+                                                                           
                                                                         </div>
+                                                                        {errors['BudgetedHours'] && (
+                                                                            <div style={{ 'color': 'red' }}>{errors['BudgetedHours']}</div>
+                                                                        )}
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
                                                                         <label className="form-label">Reviewer</label>
-                                                                        <select className="form-select mb-3"
+                                                                        <select className="form-select"
                                                                             name="Reviewer" onChange={HandleChange} value={jobData.Reviewer}>
                                                                             <option value=""> Select Reviewer</option>
                                                                             {
@@ -423,9 +424,9 @@ const CreateJob = () => {
                                                                         )}
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4 mb-3">
                                                                         <label className="form-label">Allocated To</label>
-                                                                        <select className="form-select mb-3"
+                                                                        <select className="form-select"
                                                                             name="AllocatedTo" onChange={HandleChange} value={jobData.AllocatedTo}>
                                                                             <option value=""> Select Staff</option>
                                                                             {AllJobData.loading &&
@@ -438,25 +439,25 @@ const CreateJob = () => {
                                                                         )}
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
-                                                                        <label className="form-label"  > Allocated On </label>
-                                                                        <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
+                                                                    <div className="col-lg-4">
+                                                                        <label className="form-label"> Allocated On </label>
+                                                                        <input type="date" className="form-control" placeholder="DD-MM-YYYY"
                                                                             name="AllocatedOn" onChange={HandleChange} value={jobData.AllocatedOn} />
                                                                         {errors['AllocatedOn'] && (
                                                                             <div style={{ 'color': 'red' }}>{errors['AllocatedOn']}</div>
                                                                         )}
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
                                                                         <label className="form-label">Date Received On</label>
-                                                                        <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
+                                                                        <input type="date" className="form-control" placeholder="DD-MM-YYYY"
                                                                             name="DateReceivedOn" onChange={HandleChange} value={jobData.DateReceivedOn} />
                                                                         {errors['DateReceivedOn'] && (
                                                                             <div style={{ 'color': 'red' }}>{errors['DateReceivedOn']}</div>
                                                                         )}
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
                                                                         <div className="mb-3">
                                                                             <label className="form-label"  > Year End </label>
                                                                             <input type="text" className="form-control" placeholder="Year End"
@@ -468,7 +469,7 @@ const CreateJob = () => {
                                                                         </div>
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
                                                                         <div className="mb-3">
                                                                             <label className="form-label">Total Preparation Time</label>
                                                                             <input type="text" className="form-control" placeholder="Total Preparation Time"
@@ -480,7 +481,7 @@ const CreateJob = () => {
                                                                         </div>
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
                                                                         <div className="mb-3">
                                                                             <label className="form-label" >Review Time</label>
                                                                             <input type="text" className="form-control" placeholder="Review Time"
@@ -491,7 +492,7 @@ const CreateJob = () => {
                                                                         </div>
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
                                                                         <div className="mb-3">
                                                                             <label className="form-label">Feedback Incorporation Time</label>
                                                                             <input type="text" className="form-control" placeholder="Feedback Incorporation Time"
@@ -503,7 +504,7 @@ const CreateJob = () => {
                                                                         </div>
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
                                                                         <div className="mb-3">
                                                                             <label className="form-label" > Total Time</label>
                                                                             <input type="text" className="form-control" placeholder="Total Time"
@@ -515,11 +516,11 @@ const CreateJob = () => {
                                                                         </div>
                                                                     </div>
 
-                                                                    <div id="invoice_type" className="col-lg-3">
+                                                                    <div id="invoice_type" className="col-lg-4">
                                                                         <label htmlFor="firstNameinput" className="form-label">
                                                                             Engagement Model
                                                                         </label>
-                                                                        <select className="form-select mb-3 invoice_type_dropdown"
+                                                                        <select className="form-select invoice_type_dropdown"
                                                                             name="EngagementModel" onChange={HandleChange} value={jobData.EngagementModel}
                                                                         >
                                                                             <option value="">Please Select Engagement Model</option>
@@ -541,14 +542,14 @@ const CreateJob = () => {
                                                     <div className="col-lg-12">
                                                         <div className="card card_shadow">
                                                             <div className="card-header align-items-center d-flex">
-                                                                <h4 className="card-title mb-0 flex-grow-1">Deadline</h4>
+                                                                <h4 className="card-title mb-0 flex-grow-1 fs-16">Deadline</h4>
                                                             </div>
                                                             <div className="card-body">
                                                                 <div className="" style={{ marginTop: 15 }}>
                                                                     <div className="row">
-                                                                        <div className="col-lg-4">
+                                                                        <div className="col-lg-4 mb-3">
                                                                             <label className="form-label">Expected Delivery Date</label>
-                                                                            <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
+                                                                            <input type="date" className="form-control" placeholder="DD-MM-YYYY"
                                                                                 name="ExpectedDeliveryDate" onChange={HandleChange} value={jobData.ExpectedDeliveryDate} />
                                                                             {errors['ExpectedDeliveryDate'] && (
                                                                                 <div style={{ 'color': 'red' }}>{errors['ExpectedDeliveryDate']}</div>
@@ -557,7 +558,7 @@ const CreateJob = () => {
                                                                         </div>
                                                                         <div className="col-lg-4">
                                                                             <label className="form-label" >Due On</label>
-                                                                            <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
+                                                                            <input type="date" className="form-control" placeholder="DD-MM-YYYY"
                                                                                 name="DueOn" onChange={HandleChange} value={jobData.DueOn} />
                                                                             {errors['DueOn'] && (
                                                                                 <div style={{ 'color': 'red' }}>{errors['DueOn']}</div>
@@ -565,7 +566,7 @@ const CreateJob = () => {
                                                                         </div>
                                                                         <div className="col-lg-4">
                                                                             <label className="form-label">Submission Deadline</label>
-                                                                            <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
+                                                                            <input type="date" className="form-control" placeholder="DD-MM-YYYY"
                                                                                 name="SubmissionDeadline" onChange={HandleChange} value={jobData.SubmissionDeadline} />
                                                                             {errors['SubmissionDeadline'] && (
                                                                                 <div style={{ 'color': 'red' }}>{errors['SubmissionDeadline']}</div>
@@ -573,7 +574,7 @@ const CreateJob = () => {
                                                                         </div>
                                                                         <div className="col-lg-4">
                                                                             <label className="form-label">Customer Deadline Date</label>
-                                                                            <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
+                                                                            <input type="date" className="form-control" placeholder="DD-MM-YYYY"
                                                                                 name="CustomerDeadlineDate" onChange={HandleChange} value={jobData.CustomerDeadlineDate} />
                                                                             {errors['CustomerDeadlineDate'] && (
                                                                                 <div style={{ 'color': 'red' }}>{errors['CustomerDeadlineDate']}</div>
@@ -581,7 +582,7 @@ const CreateJob = () => {
                                                                         </div>
                                                                         <div className="col-lg-4">
                                                                             <label className="form-label">SLA Deadline Date</label>
-                                                                            <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
+                                                                            <input type="date" className="form-control" placeholder="DD-MM-YYYY"
                                                                                 name="SLADeadlineDate" onChange={HandleChange} value={jobData.SLADeadlineDate} />
                                                                             {errors['SLADeadlineDate'] && (
                                                                                 <div style={{ 'color': 'red' }}>{errors['SLADeadlineDate']}</div>
@@ -589,7 +590,7 @@ const CreateJob = () => {
                                                                         </div>
                                                                         <div className="col-lg-4">
                                                                             <label className="form-label">Internal Deadline Date</label>
-                                                                            <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
+                                                                            <input type="date" className="form-control" placeholder="DD-MM-YYYY"
                                                                                 name="InternalDeadlineDate" onChange={HandleChange} value={jobData.InternalDeadlineDate} />
                                                                             {errors['InternalDeadlineDate'] && (
                                                                                 <div style={{ 'color': 'red' }}>{errors['InternalDeadlineDate']}</div>
@@ -604,7 +605,7 @@ const CreateJob = () => {
                                                     <div className="col-lg-12">
                                                         <div className="card card_shadow">
                                                             <div className="card-header align-items-center d-flex">
-                                                                <h4 className="card-title mb-0 flex-grow-1">Other Task</h4>
+                                                                <h4 className="card-title mb-0 flex-grow-1 fs-16">Other Task</h4>
                                                             </div>
                                                             <div className="card-body">
                                                                 <div className="" style={{ marginTop: 15 }}>
@@ -612,7 +613,7 @@ const CreateJob = () => {
                                                                         <div className="col-lg-4">
                                                                             <div className="mb-3">
                                                                                 <label className="form-label">Filing With Companies House Required?</label>
-                                                                                <select className="form-select mb-3"
+                                                                                <select className="form-select"
                                                                                     name="FilingWithCompaniesHouseRequired" onChange={HandleChange} value={jobData.FilingWithCompaniesHouseRequired}>
                                                                                     <option value="">Please Select Companies House Required</option>
                                                                                     <option value="0">No</option>
@@ -636,7 +637,7 @@ const CreateJob = () => {
                                                                         </div>
                                                                         <div className="col-lg-4">
                                                                             <label className="form-label" >Filing with HMRC Required?</label>
-                                                                            <select className="form-select mb-3 invoice_type_dropdown"
+                                                                            <select className="form-select invoice_type_dropdown"
                                                                                 name="FilingWithHMRCRequired" onChange={HandleChange} value={jobData.FilingWithHMRCRequired}>
                                                                                 <option value="">Please Select HMRC Required</option>
                                                                                 <option value="0">No</option>
@@ -659,7 +660,7 @@ const CreateJob = () => {
                                                                         <div className="col-lg-4">
                                                                             <div className="mb-3">
                                                                                 <label className="form-label">Opening Balance Adjustment Required</label>
-                                                                                <select className="form-select mb-3"
+                                                                                <select className="form-select"
                                                                                     name="OpeningBalanceAdjustmentRequired" onChange={HandleChange} value={jobData.OpeningBalanceAdjustmentRequired}>
                                                                                     <option value="">Please Select Opening Balance Adjustment</option>
                                                                                     <option value="1">Yes</option>
@@ -687,12 +688,12 @@ const CreateJob = () => {
                                                         </div>
                                                         <div className="card card_shadow">
                                                             <div className="card-header align-items-center d-flex">
-                                                                <h4 className="card-title mb-0 flex-grow-1">  Other Data </h4>
+                                                                <h4 className="card-title mb-0 flex-grow-1 fs-16">Other Data </h4>
                                                             </div>
                                                             <div className="card-body">
                                                                 <div className="" style={{ marginTop: 15 }}>
                                                                     <div className="row">
-                                                                        <div className="col-lg-3">
+                                                                        <div className="col-lg-4 mb-3">
                                                                             <label className="form-label" >Number of Transactions </label>
                                                                             <input type="text" className="form-control" placeholder="Number of Transactions"
                                                                                 name="NumberOfTransactions" onChange={HandleChange} value={jobData.NumberOfTransactions}
@@ -701,7 +702,7 @@ const CreateJob = () => {
                                                                                 <div style={{ 'color': 'red' }}>{errors['NumberOfTransactions']}</div>
                                                                             )}
                                                                         </div>
-                                                                        <div className="col-lg-3">
+                                                                        <div className="col-lg-4">
                                                                             <label className="form-label" >Number of Trial Balance Items</label>
                                                                             <input type="text" className="form-control" placeholder="Number of Trial Balance Items"
                                                                                 name="NumberOfTrialBalanceItems" onChange={HandleChange} value={jobData.NumberOfTrialBalanceItems}
@@ -710,8 +711,8 @@ const CreateJob = () => {
                                                                                 <div style={{ 'color': 'red' }}>{errors['NumberOfTrialBalanceItems']}</div>
                                                                             )}
                                                                         </div>
-                                                                        <div className="col-lg-3">
-                                                                            <label className="form-label" >Turnover</label>
+                                                                        <div className="col-lg-4">
+                                                                            <label className="form-label">Turnover</label>
                                                                             <input type="text" className="form-control" placeholder="Turnover"
                                                                                 name="Turnover" onChange={HandleChange} value={jobData.Turnover}
                                                                             />
@@ -719,8 +720,8 @@ const CreateJob = () => {
                                                                                 <div style={{ 'color': 'red' }}>{errors['Turnover']}</div>
                                                                             )}
                                                                         </div>
-                                                                        <div className="col-lg-3">
-                                                                            <label className="form-label"  >  No.Of Employees  </label>
+                                                                        <div className="col-lg-4 mb-3">
+                                                                            <label className="form-label">No.Of Employees</label>
                                                                             <input type="text" className="form-control" placeholder="No.Of Employees"
                                                                                 name="NoOfEmployees" onChange={HandleChange} value={jobData.NoOfEmployees}
                                                                             />
@@ -729,9 +730,9 @@ const CreateJob = () => {
                                                                             )}
 
                                                                         </div>
-                                                                        <div className="col-lg-3">
+                                                                        <div className="col-lg-4">
                                                                             <label className="form-label" >VAT Reconciliation</label>
-                                                                            <select className="form-select mb-3 invoice_type_dropdown"
+                                                                            <select className="form-select invoice_type_dropdown"
                                                                                 name="VATReconciliation" onChange={HandleChange} value={jobData.VATReconciliation}>
 
                                                                                 <option value="">Please Select VAT Reconciliation</option>
@@ -742,9 +743,9 @@ const CreateJob = () => {
                                                                                 <div style={{ 'color': 'red' }}>{errors['VATReconciliation']}</div>
                                                                             )}
                                                                         </div>
-                                                                        <div className="col-lg-3">
+                                                                        <div className="col-lg-4">
                                                                             <label className="form-label"  >Bookkeeping?</label>
-                                                                            <select className="form-select mb-3 invoice_type_dropdown"
+                                                                            <select className="form-select invoice_type_dropdown"
                                                                                 name="Bookkeeping" onChange={HandleChange} value={jobData.Bookkeeping}
                                                                             >
                                                                                 <option value="">Please Select Bookkeeping</option>
@@ -755,9 +756,9 @@ const CreateJob = () => {
                                                                                 <div style={{ 'color': 'red' }}>{errors['Bookkeeping']}</div>
                                                                             )}
                                                                         </div>
-                                                                        <div className="col-lg-3">
+                                                                        <div className="col-lg-4">
                                                                             <label className="form-label" >Processing Type</label>
-                                                                            <select className="form-select mb-3 invoice_type_dropdown"
+                                                                            <select className="form-select invoice_type_dropdown"
                                                                                 name="ProcessingType" onChange={HandleChange} value={jobData.ProcessingType}
                                                                             >
                                                                                 <option value="1"> Manual </option>
@@ -777,14 +778,14 @@ const CreateJob = () => {
                                                         <div className="col-lg-12">
                                                             <div className="card card_shadow">
                                                                 <div className="card-header align-items-center d-flex">
-                                                                    <h4 className="card-title mb-0 flex-grow-1">Invoice</h4>
+                                                                    <h4 className="card-title mb-0 flex-grow-1 fs-16">Invoice</h4>
                                                                 </div>
                                                                 <div className="card-body">
                                                                     <div style={{ marginTop: 15 }}>
                                                                         <div className="row">
-                                                                            <div className="col-lg-3">
+                                                                            <div className="col-lg-4 mb-3">
                                                                                 <label className="form-label">Invoiced?</label>
-                                                                                <select className="invoiced_dropdown form-select mb-3"
+                                                                                <select className="invoiced_dropdown form-select"
                                                                                     name="Invoiced" onChange={HandleChange} value={jobData.Invoiced}
                                                                                 >
                                                                                     <option value="">Please Select Invoiced</option>
@@ -796,9 +797,9 @@ const CreateJob = () => {
                                                                                 )}
 
                                                                             </div>
-                                                                            <div className="col-lg-3">
-                                                                                <label className="form-label" >Currency</label>
-                                                                                <select className="invoiced_dropdown form-select mb-3"
+                                                                            <div className="col-lg-4">
+                                                                                <label className="form-label">Currency</label>
+                                                                                <select className="invoiced_dropdown form-select"
                                                                                     name="Currency" onChange={HandleChange} value={jobData.Currency}
                                                                                 >
                                                                                     <option value="">Please Select Currency</option>
@@ -813,7 +814,7 @@ const CreateJob = () => {
                                                                                     <div style={{ 'color': 'red' }}>{errors['Currency']}</div>
                                                                                 )}
                                                                             </div>
-                                                                            <div className="col-lg-3">
+                                                                            <div className="col-lg-4">
                                                                                 <label className="form-label" > Invoice Value </label>
                                                                                 <input type="text" className="form-control" placeholder="Invoice Value"
                                                                                     name="InvoiceValue" onChange={HandleChange} value={jobData.InvoiceValue}
@@ -822,28 +823,29 @@ const CreateJob = () => {
                                                                                     <div style={{ 'color': 'red' }}>{errors['InvoiceValue']}</div>
                                                                                 )}
                                                                             </div>
-                                                                            <div className="col-lg-3">
+                                                                            <div className="col-lg-4">
                                                                                 <label className="form-label" > Invoice Date </label>
-                                                                                <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
+                                                                                <input type="date" className="form-control" placeholder="DD-MM-YYYY"
                                                                                     name="InvoiceDate" onChange={HandleChange} value={jobData.InvoiceDate}
                                                                                 />
                                                                                 {errors['InvoiceDate'] && (
                                                                                     <div style={{ 'color': 'red' }}>{errors['InvoiceDate']}</div>
                                                                                 )}
                                                                             </div>
-                                                                            <div className="col-lg-3">
+                                                                            <div className="col-lg-4">
                                                                                 <label className="form-label" >Invoice Hours </label>
                                                                                 <div className="input-group">
                                                                                     <input type="text" className="form-control"
                                                                                         name="InvoiceHours" onChange={HandleChange} value={jobData.InvoiceHours}
                                                                                     />
                                                                                     <span className="input-group-text" >Hours</span>
-                                                                                    {errors['InvoiceHours'] && (
-                                                                                        <div style={{ 'color': 'red' }}>{errors['InvoiceHours']}</div>
-                                                                                    )}
+                                                                                  
                                                                                 </div>
+                                                                                {errors['InvoiceHours'] && (
+                                                                                    <div style={{ 'color': 'red' }}>{errors['InvoiceHours']}</div>
+                                                                                )}
                                                                             </div>
-                                                                            <div id="invoicedremark" className="col-lg-3">
+                                                                            <div id="invoicedremark" className="col-lg-4">
                                                                                 <label className="form-label" >Invoice Remark</label>
                                                                                 <input type="text" className="form-control" placeholder="Invoice Remark"
                                                                                     name="InvoiceRemark" onChange={HandleChange} value={jobData.InvoiceRemark}

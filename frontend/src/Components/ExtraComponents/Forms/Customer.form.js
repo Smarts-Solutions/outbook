@@ -281,8 +281,8 @@ const ReusableForm = ({
                         />
                         <i
                           className={`fa-solid ${passwordVisible[field.name]
-                              ? "fa-eye-slash"
-                              : "fa-eye"
+                            ? "fa-eye-slash"
+                            : "fa-eye"
                             }`}
                           style={{
                             position: "absolute",
@@ -517,13 +517,13 @@ const ReusableForm = ({
                         <input
                           type="text"
                           className="form-control"
-                          style={{ background: field.disable ? "#eeeeee" : "" , cursor: "pointer" }}
+                          style={{ background: field.disable ? "#eeeeee" : "", cursor: "pointer" }}
                           id={field.name}
                           value={selectSearchItem}
                           placeholder={`Enter ${field.label}`}
                           {...formik.getFieldProps(field.name)}
                           defaultValue=""
-                          
+
 
                           readOnly={field.disable}
                           autoComplete="new-email"
@@ -541,7 +541,7 @@ const ReusableForm = ({
                                   }
                                   style={{ cursor: "pointer", padding: "8px 0" }}
                                 >
-                                  
+
                                   {company.title}
                                 </div>
                               ))}
@@ -566,37 +566,37 @@ const ReusableForm = ({
               ) : field.type === "TradingDetails" ? (
                 <>
                   <>
-                  <div className={`col-lg-${field.col_size}`}>
-                    <div className="mb-3  mt-4 row flex-column">
-                      <div className="card-header step-card-header mb-4" ><h6 className="my-0">Trading Details </h6></div>
-                      {/* <label
+                    <div className={`col-lg-${field.col_size}`}>
+                      <div className="mb-3  mt-4 row flex-column">
+                        <div className="card-header step-card-header mb-4" ><h6 className="my-0">Trading Details </h6></div>
+                        {/* <label
                         className={`col-lg-${field.label_size}`}
                         htmlFor={field.name}
                       >
                         Sole Trading
                       </label> */}
-                      <div></div>
+                        <div></div>
+                      </div>
                     </div>
-                  </div>
-                </>
+                  </>
                 </>
               ) :
-               (
-                <>
-                  <div className={`col-lg-${field.col_size}`}>
-                    <div className="mb-3  mt-4 row flex-column">
-                      <div className="card-header step-card-header" ><h6 className="my-0">Sole Trading </h6></div>
-                      {/* <label
+                (
+                  <>
+                    <div className={`col-lg-${field.col_size}`}>
+                      <div className="mb-3  mt-4 row flex-column">
+                        <div className="card-header step-card-header" ><h6 className="my-0">Sole Trading </h6></div>
+                        {/* <label
                         className={`col-lg-${field.label_size}`}
                         htmlFor={field.name}
                       >
                         Sole Trading
                       </label> */}
-                      <div></div>
+                        <div></div>
+                      </div>
                     </div>
-                  </div>
-                </>
-              )}
+                  </>
+                )}
             </>
           ))}
         </div>
