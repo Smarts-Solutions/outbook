@@ -13,16 +13,14 @@ const ClientList = () => {
   const [ClientData, setClientData] = useState([]);
   const [activeTab, setActiveTab] = useState('client');
   const [getJobDetails, setGetJobDetails] = useState({ loading: false, data: [] });
-
-  const tabs = [
+  let tabs = [
     { id: 'client', label: 'Client' },
-    { id: 'job', label: 'Job' },
+    // Conditionally add the 'job' tab if ClientData has elements
+    ...(ClientData.length > 0 ? [{ id: 'job', label: 'Job' }] : []),
     { id: 'documents', label: 'Documents' },
     { id: 'statuses', label: 'Status' },
     { id: 'checklist', label: 'Checklist' },
   ];
-
-
 
   console.log("location-------------", location.state)
 
@@ -155,7 +153,7 @@ const ClientList = () => {
   }
 
 
-  const GetAllServiceData = async () => {
+  const GetAllClientData = async () => {
     const req = { action: "get", customer_id: location.state.id };
     const data = { req: req, authToken: token };
     await dispatch(Get_All_Client(data))
@@ -175,7 +173,7 @@ const ClientList = () => {
   }
 
   useEffect(() => {
-    GetAllServiceData()
+    GetAllClientData()
   }, []);
 
 
@@ -242,6 +240,7 @@ const ClientList = () => {
             )}
           </div>
         )}
+        
 
         {activeTab == "job" && (
           <div
