@@ -1384,7 +1384,7 @@ const CreateClient = () => {
                                                 </section>
                                             </div>
                                             <div className="hstack gap-2 justify-content-end">
-                                                <button type="button" className="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="button" className="btn btn-light" onClick={(e)=> navigate('/admin/Clientlist', { state: { id: location.state.id } })}>Cancel</button>
                                                 <button className="btn btn-info text-white blue-btn" onClick={handleSubmit}>Create Client</button>
                                             </div>
                                         </div>

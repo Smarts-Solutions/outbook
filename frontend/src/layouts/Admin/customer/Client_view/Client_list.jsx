@@ -18,14 +18,12 @@ const ClientList = () => {
   const [getJobDetails, setGetJobDetails] = useState({ loading: false, data: [] });
   const [getCheckList, setCheckList] = useState([]);
   const getActiveTav = localStorage.getItem('Clientlist')
-  
   const [activeTab, setActiveTab] = useState(getActiveTav ? getActiveTav : 'client');
 
   const SetTab = (e) => {
     setActiveTab(e)
     localStorage.setItem('Clientlist', e)
   }
-
 
   let tabs = [
     { id: 'client', label: 'Client' },
@@ -34,7 +32,6 @@ const ClientList = () => {
     { id: 'statuses', label: 'Status' },
     { id: 'checklist', label: 'Checklist' },
   ];
-
 
   const JobDetails = async () => {
     const req = { action: "getByCustomer", customer_id: location.state.id }
@@ -62,7 +59,6 @@ const ClientList = () => {
   useEffect(() => {
     JobDetails()
   }, []);
-
 
 
   const columns = [
@@ -162,37 +158,21 @@ const ClientList = () => {
     { name: 'Job Type', selector: row => row.job_type_type, sortable: true },
     { name: 'Client Type', selector: row => row.client_type_type, sortable: true },
     { name: 'Status', selector: row => row.status == '1' ? "Active" : "Deactive", sortable: true },
-    {
-      name: 'Actions',
-      cell: row => (
-        <div>
-          <button className='edit-icon' onClick={() => handleEdit(row)}> <i className="ti-pencil" /></button>
-          <button className='delete-icon' onClick={() => handleDelete(row)}> <i className="ti-trash" /></button>
-        </div>
-      ),
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-    },
+    // {
+    //   name: 'Actions',
+    //   cell: row => (
+    //     <div>
+    //       <button className='edit-icon' onClick={() => handleEdit(row)}> <i className="ti-pencil" /></button>
+    //       <button className='delete-icon' onClick={() => handleDelete(row)}> <i className="ti-trash" /></button>
+    //     </div>
+    //   ),
+    //   ignoreRowClick: true,
+    //   allowOverflow: true,
+    //   button: true,
+    // },
   ];
 
-  const HandleClientView = (row) => {
-    navigate('/admin/client/profile', { state: { row, customer_id: location.state } });
-  }
 
-  function handleEdit(row) {
-
-    navigate('/admin/client/edit', { state: { row, id: location.state.id } });
-  }
-
-  function handleJobEdit(row) {
-    navigate("/admin/job/edit", { state: { details: location.state, row: row, goto: "Customer" } });
-
-  }
-
-  function handleDelete(row) {
-    console.log('Deleting row:', row);
-  }
 
 
   const GetAllClientData = async () => {
@@ -215,24 +195,9 @@ const ClientList = () => {
   }
 
   useEffect(() => {
-
     getCheckListData()
     GetAllClientData()
   }, []);
-
-
-  const handleAddClient = () => {
-    navigate('/admin/addclient', { state: { id: location.state.id } });
-  }
-
-
-  const handleAddJob = () => {
-    navigate('/admin/createjob', { state: { details: location.state, goto: "Customer" } });
-  }
-
-  const handleClick = () => {
-    navigate('/admin/create/checklist', { state: { id: location.state.id } });
-  }
 
   const getCheckListData = async () => {
     const req = { action: "get", customer_id: location.state.id }
@@ -251,6 +216,17 @@ const ClientList = () => {
         console.log("Error", error);
       });
   }
+
+
+
+  const HandleClientView = (row) => { navigate('/admin/client/profile', { state: { row, customer_id: location.state } }); }
+  const handleAddClient = () => { navigate('/admin/addclient', { state: { id: location.state.id } }); }
+  const handleAddJob = () => { navigate('/admin/createjob', { state: { details: location.state, goto: "Customer" } }); }
+  const handleClick = () => { navigate('/admin/create/checklist', { state: { id: location.state.id } }); }
+  function handleEdit(row) { navigate('/admin/client/edit', { state: { row, id: location.state.id } }); }
+  function handleJobEdit(row) { navigate("/admin/job/edit", { state: { details: location.state, row: row, goto: "Customer" } }); }
+  function handleDelete(row) { console.log('Deleting row:', row); }
+
 
 
   return (
@@ -282,8 +258,28 @@ const ClientList = () => {
                 </ul>
               </div>
               <div className="col-md-4 col-auto">
-                <div className='btn btn-info text-white float-end blue-btn' onClick={activeTab == "client" ? handleAddClient : handleAddJob}> <i className="fa fa-plus" />{activeTab == "client" ? " Add Client" : " Create Job"}</div>
+                {activeTab === "client" || activeTab === "checklist" || activeTab === "" ? (
+                  <div
+                    className="btn btn-info text-white float-end blue-btn"
+                    onClick={
+                      activeTab === "client"
+                        ? handleAddClient
+                        : activeTab === "checklist"
+                          ? handleClick
+                          : handleAddJob
+                    }
+                  >
+                    <i className="fa fa-plus" />
+                    {activeTab === "client"
+                      ? "Add Client"
+                      : activeTab === "checklist"
+                        ? "Add Checklist"
+                        : "Create Job"}
+                  </div>
+                ) : null}
               </div>
+
+
             </div>
           </div>
         </div>
@@ -298,13 +294,27 @@ const ClientList = () => {
             role="tabpanel"
             aria-labelledby={`client-tab`}
           >
-            {ClientData && ClientData && (
-              <Datatable columns={columns} data={ClientData} filter={false} />
-            )}
+            <div className='container-fluid'>
+              <div className='report-data mt-4 '>
+                <div className='d-flex justify-content-between align-items-center'>
+                  <div className='tab-title'>
+                    <h3 className='mt-0'>Clients
+                    </h3>
+                  </div>
+                </div>
+                <div className='datatable-wrapper '>
+                  {ClientData && ClientData && (
+                    <Datatable columns={columns} data={ClientData} filter={false} />
+                  )}
+                </div>
+              </div>
+
+
+
+            </div>
+
           </div>
         )}
-
-
         {activeTab == "job" && (
           <div
             className={`tab-pane fade ${activeTab == "job" ? 'show active' : ''}`}
@@ -317,7 +327,6 @@ const ClientList = () => {
             )}
           </div>
         )}
-
         {activeTab == "documents" && (
           <div
             className={`tab-pane fade ${activeTab == "documents" ? 'show active' : ''}`}
@@ -325,13 +334,30 @@ const ClientList = () => {
             role="tabpanel"
             aria-labelledby={`documents-tab`}
           >
-            {/* {ClientData && ClientData && (
-              <Datatable columns={columns} data={ClientData} filter={false} />
-            )} */}
+            <div className='container-fluid'>
+
+              <div className='report-data mt-4 '>
+                <div className='d-flex justify-content-between align-items-center'>
+                  <div className='tab-title'>
+                    <h3 className='mt-0'>Documents
+                    </h3>
+                  </div>
+
+                </div>
+                <div className='datatable-wrapper '>
+
+                  {ClientData && ClientData && (
+                    <Datatable columns={columns} data={ClientData} filter={false} />
+                  )}
+                </div>
+              </div>
+
+
+
+            </div>
           </div>
         )}
-
-        {activeTab == "statuses" && (
+        {activeTab == "status" && (
           <div
             className={`tab-pane fade ${activeTab == "statuses" ? 'show active' : ''}`}
             id={'statuses'}
@@ -496,9 +522,7 @@ const ClientList = () => {
             className={`tab-pane fade ${activeTab == "checklist" ? 'show active' : ''}`}
             id={'checklist'}
             role="tabpanel"
-
           >
-
             <div className='container-fluid'>
 
               <div className='report-data mt-4 '>
@@ -507,95 +531,25 @@ const ClientList = () => {
                     <h3 className='mt-0'>Checklist
                     </h3>
                   </div>
-                  <div>
-                    <button type="button"
-                      onClick={handleClick}
-                      className='btn btn-info text-white float-end ms-2'> <i className="fa fa-plus" />Add Checklist</button>
 
-
-                  </div>
                 </div>
                 <div className='datatable-wrapper '>
-
 
                   {ClientData && ClientData && (
                     <Datatable columns={CheckListColumns} data={getCheckList} filter={false} />
                   )}
                 </div>
               </div>
-              {/* <!-- Button trigger modal --> */}
 
 
-              {/* <!-- Modal --> */}
-              <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog  modal-dialog-centered">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title" id="exampleModalLabel">Set Default Access</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                      <form className="tablelist-form">
-                        <div className="modal-body">
-                          <div className="mb-3" id="modal-id" style={{ display: "none" }}>
-                            <label htmlFor="id-field" className="form-label">
-                              ID
-                            </label>
-                            <input
-                              type="text"
-                              id="id-field"
-                              className="form-control"
-                              placeholder="ID"
-                              readOnly=""
-                            />
-                          </div>
-                          <div className="mb-3">
-                            <label htmlFor="customername-field" className="form-label">
-                              Status Name
-                            </label>
-                            <input
-                              type="text"
-                              id="customername-field"
-                              className="form-control"
-                              placeholder="Enter Status Name"
-                              required=""
-                            />
-                          </div>
-                          <div className="col-lg-12">
-                            <div className="mb-3">
-                              <label htmlFor="firstNameinput" className="form-label">
-                                Status Type
-                              </label>
-                              <select
-                                id="VAT_dropdown1"
-                                className="form-select mb-3"
-                                aria-label="Default select example"
-                                style={{ color: "#8a8c8e !important" }}
-                              >
-                                <option selected="">Pending</option>
-                                <option value={1}>Hold</option>
 
-                                <option value={1}>Completed</option>
-                              </select>
-                            </div>
-                          </div>
-
-                        </div>
-
-                      </form>
-
-
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                      <button type="button" class="btn btn-primary">Save </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         )}
+
+
+
+
       </div>
     </div>
   );

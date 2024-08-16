@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { useLocation,useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { JobType, GetServicesByCustomers, GETTASKDATA, getList, addChecklists } from '../../../../ReduxStore/Slice/Settings/settingSlice';
 import sweatalert from 'sweetalert2';
 
@@ -282,7 +282,7 @@ const CreateCheckList = () => {
               </div>
             </div>
           </div>
-
+          <button className="btn btn-primary mt-3" onClick={addTask}>Add Task</button>
           <div className="mt-4">
             {tasks.map((task, index) => (
               <div key={index} className="d-flex gap-3 mt-4">
@@ -312,11 +312,12 @@ const CreateCheckList = () => {
                 <button className="btn btn-danger" onClick={() => removeTask(index)}>Remove</button>
               </div>
             ))}
-            <button className="btn btn-primary mt-3" onClick={addTask}>Add Task</button>
+
           </div>
 
           <div className="col-lg-12 mt-4">
-            <button className="btn btn-primary" onClick={handleSubmit}>Submit</button>
+            <button className="btn btn-secondary " onClick={(e) => navigate('/admin/Clientlist', { state: { id: location.state.id } })}>Back</button>
+            <button className="btn btn-primary ms-2" onClick={handleSubmit}>Submit</button>
           </div>
         </div>
       </div>
