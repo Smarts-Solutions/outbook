@@ -285,7 +285,6 @@ const Information = () => {
       if (!values.Residential_Address) {
         errors.Residential_Address = "Please Enter Residential Address";
       }
-
       return errors;
     },
 
@@ -306,7 +305,7 @@ const Information = () => {
         CustomerType: CustomerType,
         account_manager_id: getAccountMangerId,
         staff_id: staffDetails.id,
-        contact_id : customerDetails.data ? customerDetails.data && customerDetails.data.contact_details[0].contact_id : ""
+        //contact_id : customerDetails.data ? customerDetails.data && customerDetails.data.contact_details[0].contact_id : ""
       };
    
       await AddCustomerFun(req);

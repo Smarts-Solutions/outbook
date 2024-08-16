@@ -43,6 +43,9 @@ const checklistAction = async (checklist) => {
   else if(action === "delete"){
     return jobTypeTaskModel.deleteChecklist(checklist);
   }
+  else if(action === "getClientType"){
+    return jobTypeTaskModel.getClientTypeChecklist(checklist);
+  }
   else{
     return { status: false, message: 'Error getting checklist.' };
   }
