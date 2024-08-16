@@ -142,40 +142,41 @@ const Information = () => {
       if (!values.company_name) {
         errors.company_name = "Please Enter Company Name";
       }
-      if (!values.entity_type) {
+     else if (!values.entity_type) {
         errors.entity_type = "Please Enter Entity Type";
       }
-      if (!values.company_status) {
+     else if (!values.company_status) {
         errors.company_status = "Please Enter Company Status";
       }
-      if (!values.company_number) {
+     else if (!values.company_number) {
         errors.company_number = "Please Enter Company Number";
       }
-      if (!values.Registered_Office_Addres) {
+     else if (!values.Registered_Office_Addres) {
         errors.Registered_Office_Addres =
           "Please Enter Registered Office Address";
       }
-      if (!values.Incorporation_Date) {
+     else if (!values.Incorporation_Date) {
         errors.Incorporation_Date = "Please Enter Incorporation Date";
       }
-      if (!values.Incorporation_in) {
+     else if (!values.Incorporation_in) {
         errors.Incorporation_in = "Please Enter Incorporation in";
       }
-      if (!values.VAT_Registered) {
+     else if (!values.VAT_Registered) {
         errors.VAT_Registered = "Please Enter VAT Registered";
       }
-      if (!values.VAT_Number) {
+     else if (!values.VAT_Number) {
         errors.VAT_Number = "Please Enter VAT Number";
       }
-      if (!values.Website) {
+     else if (!values.Website) {
         errors.Website = "Please Enter Website";
       }
-      if (!values.Trading_Name) {
+     else if (!values.Trading_Name) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
-      if (!values.Trading_Address) {
+     else if (!values.Trading_Address) {
         errors.Trading_Address = "Please Enter Trading Address";
       }
+      
 
       return errors;
     },
@@ -254,35 +255,35 @@ const Information = () => {
       if (!values.Trading_Name) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
-      if (!values.Trading_Address) {
+     else if (!values.Trading_Address) {
         errors.Trading_Address = "Please Enter Trading Address";
       }
-      if (!values.VAT_Registered) {
+     else if (!values.VAT_Registered) {
         errors.VAT_Registered = "Please Enter VAT Registered";
       }
-      if (!values.VAT_Number) {
+     else if (!values.VAT_Number) {
         errors.VAT_Number = "Please Enter VAT Number";
       }
-      if (!values.Website) {
+     else if (!values.Website) {
         errors.Website = "Please Enter Website";
       }
-      if (!values.First_Name) {
+     else if (!values.First_Name) {
         errors.First_Name = "Please Enter First Name";
       }
-      if (!values.Last_Name) {
+    else if (!values.Last_Name) {
         errors.Last_Name = "Please Enter Last Name";
       }
-      if (!values.Phone) {
+     else if (!values.Phone) {
         errors.Phone = "Please Enter Phone";
       }
-      if (!values.Email) {
+      else if (!values.Email) {
         errors.Email = "Please Enter Email";
       }
       else if (!Email_regex(values.Email)) {
         errors.Email = "Please Enter Valid Email";
       }
-
-      if (!values.Residential_Address) {
+      
+      else if (!values.Residential_Address) {
         errors.Residential_Address = "Please Enter Residential Address";
       }
       return errors;
@@ -325,16 +326,16 @@ const Information = () => {
       if (!values.Trading_Name) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
-      if (!values.Trading_Address) {
+      else if (!values.Trading_Address) {
         errors.Trading_Address = "Please Enter Trading Address";
       }
-      if (!values.VAT_Registered) {
+      else if (!values.VAT_Registered) {
         errors.VAT_Registered = "Please Enter VAT Registered";
       }
-      if (!values.VAT_Number) {
+      else  if (!values.VAT_Number) {
         errors.VAT_Number = "Please Enter VAT Number";
       }
-      if (!values.Website) {
+      else if (!values.Website) {
         errors.Website = "Please Enter Website";
       }
 
@@ -965,9 +966,9 @@ useEffect(() => {
                           className="form-select mb-3"
                           onChange={(e) => handleChangeValue(e)}
                         >
-                          <option value="" disabled selected>
+                          {/* <option value="" selected>
                             Please select
-                          </option>
+                          </option> */}
                           {staffDataAll.data.map((data) => (
                             <option key={data.id} value={data.id}>
                               {data.first_name}
