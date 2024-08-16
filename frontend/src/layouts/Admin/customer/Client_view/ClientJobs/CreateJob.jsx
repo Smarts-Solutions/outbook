@@ -278,7 +278,7 @@ const CreateJob = () => {
                                                 <div className="row">
                                                     <div className="col-lg-12">
                                                         <div className="card card_shadow">
-                                                            <div className="card-header align-items-center d-flex">
+                                                            <div className="card-header card-header-light-blue align-items-center d-flex">
                                                                 <h4 className="card-title mb-0 flex-grow-1 fs-16">Job Information</h4>
                                                             </div>
                                                             <div className="card-body">
@@ -541,7 +541,7 @@ const CreateJob = () => {
 
                                                     <div className="col-lg-12">
                                                         <div className="card card_shadow">
-                                                            <div className="card-header align-items-center d-flex">
+                                                            <div className="card-header align-items-center d-flex card-header-light-blue">
                                                                 <h4 className="card-title mb-0 flex-grow-1 fs-16">Deadline</h4>
                                                             </div>
                                                             <div className="card-body">
@@ -604,7 +604,7 @@ const CreateJob = () => {
 
                                                     <div className="col-lg-12">
                                                         <div className="card card_shadow">
-                                                            <div className="card-header align-items-center d-flex">
+                                                            <div className="card-header card-header-light-blue align-items-center d-flex">
                                                                 <h4 className="card-title mb-0 flex-grow-1 fs-16">Other Task</h4>
                                                             </div>
                                                             <div className="card-body">
@@ -687,7 +687,7 @@ const CreateJob = () => {
                                                             </div>
                                                         </div>
                                                         <div className="card card_shadow">
-                                                            <div className="card-header align-items-center d-flex">
+                                                            <div className="card-header card-header-light-blue align-items-center d-flex">
                                                                 <h4 className="card-title mb-0 flex-grow-1 fs-16">Other Data </h4>
                                                             </div>
                                                             <div className="card-body">
@@ -777,7 +777,7 @@ const CreateJob = () => {
                                                     {jobData.EngagementModel != "fte_dedicated_staffing" && <div className="col-lg-12">
                                                         <div className="col-lg-12">
                                                             <div className="card card_shadow">
-                                                                <div className="card-header align-items-center d-flex">
+                                                                <div className="card-header card-header-light-blue align-items-center d-flex">
                                                                     <h4 className="card-title mb-0 flex-grow-1 fs-16">Invoice</h4>
                                                                 </div>
                                                                 <div className="card-body">

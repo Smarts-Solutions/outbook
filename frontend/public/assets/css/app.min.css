@@ -9727,8 +9727,8 @@ main .error__feedback {
   top: 4px;
 }
 
-.card-header.step-card-header {
-  /* background: #EBF4F7; */
+.card-header.card-header-light-blue {
+  background: #EBF4F7; 
 }
 
 .card-header.step-header-blue {

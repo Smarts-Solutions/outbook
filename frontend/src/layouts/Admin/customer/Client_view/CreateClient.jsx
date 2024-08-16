@@ -597,7 +597,7 @@ const CreateClient = () => {
                                                                             <span style={{ color: "red" }}>*</span>
                                                                         </label>
                                                                         <select
-                                                                            className="form-select mb-3"
+                                                                            className="form-select "
                                                                             value={selectClientType}
                                                                             onChange={(e) => setSelectClientType(e.target.value)}
                                                                         >
@@ -620,7 +620,7 @@ const CreateClient = () => {
 
                                                                 <div className="col-lg-12">
                                                                     <div className="card card_shadow ">
-                                                                        <div className="card-header align-items-center d-flex">
+                                                                        <div className="card-header card-header-light-blue align-items-center d-flex">
                                                                             <h4 className="card-title mb-0 flex-grow-1 fs-16">
                                                                                 Sole Trader
                                                                             </h4>
@@ -628,10 +628,10 @@ const CreateClient = () => {
                                                                         {/* end card header */}
                                                                         <div className="card-body">
                                                                             <div className="row">
-                                                                                <div className="col-lg-4">
-                                                                                    <div className="mb-3">
+                                                                                <div className="col-lg-4 mb-3">
+                                                                                    <div className="">
                                                                                         <label className="form-label">Client Industry<span style={{ color: "red" }}>*</span></label>
-                                                                                        <select className="form-select mb-3" aria-label="Default select example"
+                                                                                        <select className="form-select " aria-label="Default select example"
                                                                                             name="IndustryType"
                                                                                             value={getSoleTraderDetails.IndustryType}
                                                                                             onChange={(e) => handleChange1(e)}>
@@ -671,10 +671,10 @@ const CreateClient = () => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-4">
-                                                                                    <div className="mb-3">
+                                                                                <div className="col-lg-4 mb-3">
+                                                                                    <div className="">
                                                                                         <label className="form-label" >VAT Registered</label>
-                                                                                        <select className="form-select mb-3" aria-label="Default select example"
+                                                                                        <select className="form-select " aria-label="Default select example"
                                                                                             name="vatRegistered"
                                                                                             value={getSoleTraderDetails.vatRegistered}
                                                                                             onChange={(e) => handleChange1(e)}
@@ -801,13 +801,13 @@ const CreateClient = () => {
                                                                 <div className="row">
                                                                     <div className="col-lg-12">
                                                                         <div className="card card_shadow ">
-                                                                            <div className="card-header align-items-center d-flex">
+                                                                            <div className="card-header card-header-light-blue align-items-center d-flex">
                                                                                 <h4 className="card-title mb-0 flex-grow-1 fs-16">Company</h4>
                                                                             </div>
                                                                             {/* end card header */}
                                                                             <div className="card-body">
                                                                                 <div className="row">
-                                                                                    <h4 className="card-title flex-grow-1 fs-14 mb-2">Contact Information</h4>
+                                                                                    {/* <h4 className="card-title flex-grow-1 fs-14 mb-2">Contact Information</h4> */}
                                                                                     <div className="row">
                                                                                         <div className="col-lg-4">
                                                                                             <div className="mb-3">
@@ -918,7 +918,7 @@ const CreateClient = () => {
                                                                                         <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  >VAT Registered</label>
-                                                                                                <select className="form-select mb-3" name="VATRegistered" onChange={(e) => handleChange2(e)} value={getCompanyDetails.VATRegistered}>
+                                                                                                <select className="form-select " name="VATRegistered" onChange={(e) => handleChange2(e)} value={getCompanyDetails.VATRegistered}>
                                                                                                     <option value=''>Please Select VAT Registered</option>
                                                                                                     <option value={1}>Yes</option>
                                                                                                     <option value={0}>No</option>
@@ -965,7 +965,7 @@ const CreateClient = () => {
                                                                                     <div className="col-lg-4">
                                                                                         <div className="mb-3">
                                                                                             <label className="form-label">Client Industry<span style={{ color: "red" }}>*</span></label>
-                                                                                            <select className="form-select mb-3"
+                                                                                            <select className="form-select "
                                                                                                 name="ClientIndustry" onChange={(e) => handleChange2(e)} value={getCompanyDetails.ClientIndustry}>
                                                                                                 <option value=''>Select Client Industry</option>
                                                                                                 {
@@ -1009,7 +1009,7 @@ const CreateClient = () => {
                                                                     <div className="row">
                                                                         <div className="col-lg-12">
                                                                             <div className="card card_shadow">
-                                                                                <div className="card-header align-items-center d-flex">
+                                                                                <div className="card-header card-header-light-blue align-items-center d-flex">
                                                                                     <h4 className="card-title mb-0 flex-grow-1 fs-16">
                                                                                         Officer Details
                                                                                     </h4>
@@ -1141,7 +1141,7 @@ const CreateClient = () => {
                                                                     <div className="row " >
                                                                         <div className="col-lg-12">
                                                                             <div className="card card_shadow ">
-                                                                                <div className="card-header align-items-center d-flex">
+                                                                                <div className="card-header  card-header-light-blue align-items-center d-flex">
                                                                                     <h4 className="card-title mb-0 flex-grow-1 fs-16">Partnership</h4>
                                                                                 </div>
                                                                                 {/* end card header */}
@@ -1150,7 +1150,7 @@ const CreateClient = () => {
                                                                                         <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Client Industry<span style={{ color: "red" }}>*</span></label>
-                                                                                                <select className="form-select mb-3"
+                                                                                                <select className="form-select "
                                                                                                     name="ClientIndustry" value={getPartnershipDetails.ClientIndustry} onChange={(e) => handleChange3(e)}>
                                                                                                     <option value={0}>Select Client Industry</option>
                                                                                                     {
@@ -1189,7 +1189,7 @@ const CreateClient = () => {
                                                                                             <div className="mb-3">
                                                                                                 <div className="mb-3">
                                                                                                     <label className="form-label">VAT Registered</label>
-                                                                                                    <select className="form-select mb-3"
+                                                                                                    <select className="form-select "
                                                                                                         name="VATRegistered" value={getPartnershipDetails.VATRegistered} onChange={(e) => handleChange3(e)}
                                                                                                     >
                                                                                                         <option value="">Select VAT Registered</option>
@@ -1234,7 +1234,7 @@ const CreateClient = () => {
                                                                         <div className="row">
                                                                             <div className="col-lg-12">
                                                                                 <div className="card card_shadow">
-                                                                                    <div className="card-header align-items-center d-flex">
+                                                                                    <div className="card-header card-header-light-blue align-items-center d-flex">
                                                                                         <h4 className="card-title mb-0 flex-grow-1 fs-16">
                                                                                             Contact Details
                                                                                         </h4>
