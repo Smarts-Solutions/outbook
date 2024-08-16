@@ -17,14 +17,15 @@ const createJobType = async (JobType) => {
     }
 };
 
-const getJobType = async () => { 
+const getJobType = async (JobType) => { 
+    const {service_id} = JobType;
     const query = `
-    SELECT job_types.id, job_types.type , job_types.status ,services.name as service_name FROM job_types JOIN services ON job_types.service_id = services.id
+    SELECT job_types.id, job_types.type , job_types.status ,services.name as service_name FROM job_types JOIN services ON job_types.service_id = services.id WHERE job_types.service_id = ?
     ORDER BY job_types.id DESC
     `;
 
     try {
-        const [result] = await pool.execute(query);
+        const [result] = await pool.execute(query,[service_id]);
         return result;
     } catch (err) {
         console.error('Error selecting data:', err);
@@ -101,13 +102,13 @@ const addTask = async (task) => {
    }
 
 const getTask = async (task) => {
-    const {service_id} = task;
+    const {service_id , job_type_id} = task;
     const query = `
-    SELECT id,name,service_id,job_type_id FROM task WHERE service_id = ?
+    SELECT id,name,service_id,job_type_id FROM task WHERE service_id = ? AND job_type_id = ?
     ORDER BY id DESC
     `;
     try {
-    const [result] = await pool.execute(query, [service_id]);
+    const [result] = await pool.execute(query, [service_id,job_type_id]);
     return { status: true, message: 'task get successfully.', data: result };
     }
     catch (err) {

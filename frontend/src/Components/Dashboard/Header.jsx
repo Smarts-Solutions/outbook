@@ -57,6 +57,8 @@ const Header = () => {
         localStorage.removeItem("staffDetails");
         localStorage.removeItem("token");
         localStorage.removeItem("role");
+        localStorage.removeItem("currentStep");
+        localStorage.removeItem("coustomerId");
         sessionStorage.clear();
         navigate("/login");
     };
