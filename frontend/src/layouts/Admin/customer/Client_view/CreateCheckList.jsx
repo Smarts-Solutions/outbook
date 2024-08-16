@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { useLocation,useNavigate } from 'react-router-dom';
 import { JobType, GetServicesByCustomers, GETTASKDATA, getList, addChecklists } from '../../../../ReduxStore/Slice/Settings/settingSlice';
+import sweatalert from 'sweetalert2';
 
 const CreateCheckList = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem('token'));
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     customer_id: location.state?.id || '',
@@ -59,7 +61,7 @@ const CreateCheckList = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     setFormData1(prev => ({ ...prev, [name]: value }));
   };
 
@@ -71,7 +73,7 @@ const CreateCheckList = () => {
   };
 
   const addTask = () => {
-    setTasks([...tasks, { task_name: '', budgeted_hour: '',task_id:null }]);
+    setTasks([...tasks, { task_name: '', budgeted_hour: '', task_id: null }]);
   };
 
   const removeTask = (index) => {
@@ -148,7 +150,22 @@ const CreateCheckList = () => {
       .unwrap()
       .then(response => {
         if (response.status) {
-          console.log("Response:", response);
+          sweatalert.fire({
+            title: 'Success',
+            text: response.message,
+            icon: 'success',
+            confirmButtonText: 'Ok',
+          });
+          setFormData({
+            customer_id: location.state?.id || '',
+            service_id: '',
+            job_type_id: '',
+            client_type_id: '',
+            check_list_name: '',
+            status: '',
+          });
+          setTasks([{ task_id: "", task_name: '', budgeted_hour: '' }]);
+          navigate('/admin/Clientlist', { state: { id: location.state.id } });
         }
       })
       .catch((error) =>
@@ -283,7 +300,7 @@ const CreateCheckList = () => {
                 </div>
                 <div className="col-lg-4">
                   <input
-                    type="text"
+                    type="Number"
                     name="budgeted_hour"
                     className="form-control"
                     value={task.budgeted_hour}
