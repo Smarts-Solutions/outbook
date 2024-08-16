@@ -71,6 +71,7 @@ const Status = () => {
           <div className='datatable-wrapper mt-minus'>
 
 
+
             <Datatable
               filter={true}
               columns={columns} data={data} />
