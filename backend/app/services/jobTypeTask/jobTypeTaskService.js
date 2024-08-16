@@ -7,8 +7,8 @@ const addJobType = async (JobType) => {
   return jobTypeTaskModel.createJobType(JobType);
 };
 
-const getJobType = async () => {
-  return jobTypeTaskModel.getJobType();
+const getJobType = async (JobType) => {
+  return jobTypeTaskModel.getJobType(JobType);
 }
 
 const removeJobType = async (JobTypeId) => {

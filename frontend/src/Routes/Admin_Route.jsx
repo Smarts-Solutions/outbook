@@ -69,6 +69,7 @@ const Admin_Route = () => {
             <Route path="/client/profile" element={<ClientProfile />} />
             <Route path="/createjob" element={<CreateJob />} />
             <Route path="/job/edit" element={<JobEdit />} />
+            <Route path="/create/checklist" element={<CreateCheckList />} />
 
 
           </Routes>

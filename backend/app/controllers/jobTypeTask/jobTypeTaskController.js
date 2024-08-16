@@ -11,7 +11,7 @@ const jobTypeTaskService = require('../../services/jobTypeTask/jobTypeTaskServic
                 res.status(201).json({ status:true, userId: result ,message: 'JobType created successfully' });
                 break;
             case 'get':
-                result = await jobTypeTaskService.getJobType();
+                result = await jobTypeTaskService.getJobType(JobType);
                 res.status(200).json({ status:true, data: result });
                 break;   
             case 'delete':
