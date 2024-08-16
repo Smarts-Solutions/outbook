@@ -303,7 +303,7 @@ const jobAdd = async (job) => {
   const firstThreeLettersexistCustomerName = existCustomerName.substring(0, 3);
 
    // Exist Client name
-   const [ExistClient] = await pool.execute('SELECT trading_name FROM Clients WHERE id =' + client_id);
+   const [ExistClient] = await pool.execute('SELECT trading_name FROM clients WHERE id =' + client_id);
    const existClientName = ExistClient[0].trading_name
    const firstThreeLettersexistClientName = existClientName.substring(0, 3);
 

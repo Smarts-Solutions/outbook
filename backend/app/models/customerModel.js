@@ -387,6 +387,7 @@ else{
 };
 
 const getCustomer = async (customer) => {
+   const {staff_id} = customer
     const query = `
     SELECT 
     customers.*, 
@@ -404,12 +405,13 @@ JOIN
     staffs AS staff2 ON customers.account_manager_id = staff2.id
 LEFT JOIN 
     customer_company_information ON customers.id = customer_company_information.customer_id
+WHERE staff1.id = ?   
 ORDER BY 
     customers.id DESC;
     `;
 
     try {
-        const [result] = await pool.execute(query);
+        const [result] = await pool.execute(query,[staff_id]);
         return { status: true, message: 'Success..', data: result };
 
     } catch (err) {

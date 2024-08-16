@@ -164,12 +164,15 @@ const Information = () => {
      else if (!values.VAT_Registered) {
         errors.VAT_Registered = "Please Enter VAT Registered";
       }
-     else if (!values.VAT_Number) {
+     else if (values.VAT_Registered === '1' && !values.VAT_Number) {
         errors.VAT_Number = "Please Enter VAT Number";
-      }
-     else if (!values.Website) {
-        errors.Website = "Please Enter Website";
-      }
+     }
+    //  else if (!values.VAT_Number) {
+    //     errors.VAT_Number = "Please Enter VAT Number";
+    //   }
+    //  else if (!values.Website) {
+    //     errors.Website = "Please Enter Website";
+    //   }
      else if (!values.Trading_Name) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
@@ -261,12 +264,15 @@ const Information = () => {
      else if (!values.VAT_Registered) {
         errors.VAT_Registered = "Please Enter VAT Registered";
       }
-     else if (!values.VAT_Number) {
+    //  else if (!values.VAT_Number) {
+    //     errors.VAT_Number = "Please Enter VAT Number";
+    //   }
+    else  if (values.VAT_Registered === '1' && !values.VAT_Number) {
         errors.VAT_Number = "Please Enter VAT Number";
-      }
-     else if (!values.Website) {
-        errors.Website = "Please Enter Website";
-      }
+     }
+    //  else if (!values.Website) {
+    //     errors.Website = "Please Enter Website";
+    //   }
      else if (!values.First_Name) {
         errors.First_Name = "Please Enter First Name";
       }
@@ -332,11 +338,14 @@ const Information = () => {
       else if (!values.VAT_Registered) {
         errors.VAT_Registered = "Please Enter VAT Registered";
       }
-      else  if (!values.VAT_Number) {
+      // else  if (!values.VAT_Number) {
+      //   errors.VAT_Number = "Please Enter VAT Number";
+      // }
+      // else if (!values.Website) {
+      //   errors.Website = "Please Enter Website";
+      // }
+      else if (values.VAT_Registered === '1' && !values.VAT_Number) {
         errors.VAT_Number = "Please Enter VAT Number";
-      }
-      else if (!values.Website) {
-        errors.Website = "Please Enter Website";
       }
 
       return errors;

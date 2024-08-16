@@ -62,6 +62,8 @@ const Engagement = () => {
     const [checkboxStates, setCheckboxStates] = useState(Array(checkboxOptions.length).fill(0));
 
     const handleCheckboxChange = (index) => {
+
+       
         setCheckboxStates(prevStates => {
             const newStates = [...prevStates];
             newStates[index] = newStates[index] === 1 ? 0 : 1;
@@ -229,6 +231,7 @@ const Engagement = () => {
     }
 
     const handleSubmit = async () => {
+       
         if (!checkboxStates.some(state => state === 1)) {
             alert("Please select at least one option.");
             return;
@@ -250,6 +253,8 @@ const Engagement = () => {
             "adhoc_payg_hourly": checkboxStates[2].toString(),
             "customised_pricing": checkboxStates[3].toString(),
         };
+
+       
 
         if (checkboxStates[0] === 1) {
             req = {
@@ -295,7 +300,7 @@ const Engagement = () => {
             };
         }
  
-
+      
         const data = { req: req, authToken: token }
         await dispatch(Edit_Customer(data))
             .unwrap()
@@ -438,7 +443,7 @@ const Engagement = () => {
 
 
 
-                                    {checkboxStates && checkboxStates[2] === 1 && (
+                                    {checkboxStates && checkboxStates[1] === 1 && (
                                         <div id="myDiv2" className="row">
                                             <div style={{ marginBottom: "26px !important" }} className="col-xl-12 col-lg-12">
                                                 <div className="card pricing-box p-0">
@@ -486,7 +491,7 @@ const Engagement = () => {
 
 
 
-                                    {checkboxStates && checkboxStates[1] === 1 && (
+                                    {checkboxStates && checkboxStates[2] === 1 && (
                                         <div id="myDiv3" className="row">
                                             <div style={{ marginBottom: "26px !important" }} className="col-xl-12 col-lg-12">
                                                 <div className="card pricing-box p-0">
