@@ -136,7 +136,25 @@ const addChecklist = async (checklist) => {
     `;
     for (const valTask of task) {
         const {task_id,task_name,budgeted_hour} = valTask;
-    const [result] = await pool.execute(checklistTasksQuery, [checklist_id,task_id,task_name,budgeted_hour]);
+        if(task_id==""|| task_id==null || task_id==undefined){
+            const InsertTaskquery = `
+            INSERT INTO task (name,service_id,job_type_id)
+            VALUES (?, ?, ?)
+            `;  
+
+            const checkQuery = `
+                SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?
+            `;
+         const [existing] = await pool.execute(checkQuery, [task_name,service_id,job_type_id]);
+           if (existing.length === 0) {
+           const [result] = await pool.execute(InsertTaskquery, [task_name,service_id,job_type_id]);
+              const task_id = result.insertId;
+              const [result1] = await pool.execute(checklistTasksQuery, [checklist_id,task_id,task_name,budgeted_hour]);
+          }
+
+        }else{
+        const [result] = await pool.execute(checklistTasksQuery, [checklist_id,task_id,task_name,budgeted_hour]);
+        }
     }
 
     return { status: true, message: 'checklist add successfully.', data: [] };

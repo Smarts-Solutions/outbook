@@ -17,6 +17,7 @@ const getAddJobData = async (job) => {
         customers
    JOIN 
         clients ON customers.id = clients.customer_id
+   WHERE customers.id = ?    
    ORDER BY 
     customers.id DESC;
   `;
@@ -47,6 +48,7 @@ const getAddJobData = async (job) => {
         customers
    JOIN 
         customer_contact_details ON customers.id = customer_contact_details.customer_id
+   WHERE customers.id = ?     
    ORDER BY 
     customers.id DESC;
   `;
@@ -72,7 +74,7 @@ const getAddJobData = async (job) => {
          customer_services ON customers.id = customer_services.customer_id
     JOIN 
          job_types ON job_types.service_id = customer_services.service_id
-
+    WHERE customers.id = ?
     ORDER BY 
      customers.id DESC;
    `;
