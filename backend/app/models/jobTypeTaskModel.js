@@ -327,6 +327,27 @@ try {
 }
 }
 
+const customerGetService = async (task) => {
+    const {customer_id} = task;
+    const query = `
+    SELECT 
+    services.id AS service_id,
+    services.name AS service_name
+    FROM customer_services
+    JOIN
+    services ON services.id = customer_services.service_id
+    WHERE customer_services.customer_id = ?
+    ORDER BY customer_services.id DESC
+    `;
+    try {
+    const [result] = await pool.execute(query, [customer_id]);
+    return { status: true, message: 'service get successfully.', data: result };
+    }
+    catch (err) {
+     return { status: false, message: 'Error get service.' };
+    }
+}
+
 
 
 module.exports = {
@@ -340,6 +361,7 @@ module.exports = {
     getChecklist,
     getByIdChecklist,
     deleteChecklist,
-    updateChecklist
+    updateChecklist,
+    customerGetService
   
 };
