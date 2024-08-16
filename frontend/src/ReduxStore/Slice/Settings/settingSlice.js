@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE , CLIENTINDUSTRY ,COUNTRY , JOBTYPE,ADDTASK } from "../../../Services/Settings/settingService";
+import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE , CLIENTINDUSTRY ,COUNTRY , JOBTYPE,ADDTASK,GetServicesByCustomer,GETTASK } from "../../../Services/Settings/settingService";
 
 
 
@@ -94,6 +94,28 @@ export const AddTask = createAsyncThunk("addTask", async (data) => {
   }
 });
 
+export const GetServicesByCustomers = createAsyncThunk("customerGetService", async (data) => {
+  try {
+    const { req, authToken } = data
+    const res = await GetServicesByCustomer(req, authToken);
+    return await res;
+  } catch
+  (err) {
+    return err;
+  }
+});
+
+export const GETTASKDATA = createAsyncThunk("getTask", async (data) => {
+  try {
+    const { req, authToken } = data
+    const res = await GETTASK(req, authToken);
+    return await res;
+  } catch
+  (err) {
+    return err;
+  }
+});
+
 
 
 
@@ -110,7 +132,9 @@ const SettingSlice = createSlice({
     clientIndustry: [],
     country: [],
     jobtype:[],
-    addtak:[]
+    addtak:[],
+    customergetervices:[],
+    gettask:[]
   },
 
   reducers: {},
@@ -202,6 +226,28 @@ const SettingSlice = createSlice({
         state.addtak = action.payload;
       })
       .addCase(AddTask.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(GetServicesByCustomers.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(GetServicesByCustomers.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.customergetervices = action.payload;
+      })
+      .addCase(GetServicesByCustomers.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(GETTASKDATA.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(GETTASKDATA.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.gettask = action.payload;
+      })
+      .addCase(GETTASKDATA.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
       });

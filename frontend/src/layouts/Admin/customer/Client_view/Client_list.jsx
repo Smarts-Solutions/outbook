@@ -24,8 +24,6 @@ const ClientList = () => {
 
 
 
-  console.log("location-------------", location.state)
-
   const JobDetails = async () => {
     const req = { action: "getByCustomer", customer_id: location.state.id }
     const data = { req: req, authToken: token }
@@ -189,7 +187,7 @@ const ClientList = () => {
   }
 
   const handleClick=()=>{
-    navigate('/admin/create/checklist');
+    navigate('/admin/create/checklist',{state:{id:location.state.id}});
   }
 
   return (

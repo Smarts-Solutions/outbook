@@ -121,7 +121,49 @@ export async function ADDTASK(data, token) {
     }
 }
 
- 
+
+// Service Action API Add, Edit, Delete
+export async function GetServicesByCustomer(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}customerGetService`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+
+export async function GETTASK(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}getTask`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+
+
+// export async function GETTASK(data, token) {
+//     try {
+//         const res = await axios.post(`${Config.base_url}checklistAction`, data, {
+//             headers: header(token),
+//             data: {}
+//         })
+//         return await res?.data;
+//     }
+//     catch (err) {
+//         return await err;
+//     }
+// }
 
 
 

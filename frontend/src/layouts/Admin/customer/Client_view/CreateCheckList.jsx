@@ -1,8 +1,131 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import { JobType, GetServicesByCustomers, GETTASKDATA } from '../../../../ReduxStore/Slice/Settings/settingSlice';
 
 const CreateCheckList = () => {
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const token = JSON.parse(localStorage.getItem('token'));
+
+  const [formData, setFormData] = useState({
+    customer_id: location.state?.id || '',
+    service_id: '',
+    job_type_id: '',
+    client_type_id: '',
+    check_list_name: '',
+    status: '',
+  });
+
+
+  const [formData1, setFormData1] = useState({
+    customer_id: location.state?.id || '',
+    service_id: '',
+    job_type_id: '',
+    client_type_id: '',
+    check_list_name: '',
+    status: '',
+  });
+
+
+  const [tasks, setTasks] = useState([
+    { task_id: "", task_name: '', budgeted_hour: '' }
+  ]);
+
+  useEffect(() => {
+    if (formData.customer_id) {
+      const req = { customer_id: formData.customer_id };
+      const data = { req, authToken: token };
+      dispatch(GetServicesByCustomers(data))
+        .unwrap()
+        .then(response => {
+          if (response.status) {
+            setFormData(data => ({ ...data, service_id: response.data }));
+          }
+        })
+        .catch(error => console.error("Error fetching service types:", error));
+    }
+  }, [formData.customer_id, dispatch, token]);
+
+
+
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData1(prev => ({ ...prev, [name]: value }));
+  };
+
+
+  const handleTaskChange = (index, e) => {
+    const { name, value } = e.target;
+    const newTasks = [...tasks];
+    newTasks[index][name] = value;
+    setTasks(newTasks);
+  };
+
+
+
+  const addTask = () => {
+    setTasks([...tasks, { task_name: '', budgeted_hour: '' }]);
+  };
+
+
+  const removeTask = (index) => {
+    const newTasks = tasks.filter((_, i) => i !== index);
+    setTasks(newTasks);
+  };
+
+  const getJobTypeData = async (service_id) => {
+    const req = { service_id, action: 'get' };
+    const data = { req, authToken: token };
+    await dispatch(JobType(data))
+      .unwrap()
+      .then(response => {
+        if (response.status) {
+          setFormData(data => ({ ...data, job_type_id: response.data }));
+        }
+      })
+      .catch(error => console.log("Error fetching job types:", error));
+  };
+
+  const getTaskData = async (job_type_id) => {
+    const req = { service_id: formData1.service_id, job_type_id };
+    const data = { req, authToken: token };
+    await dispatch(GETTASKDATA(data))
+      .unwrap()
+      .then(response => {
+        if (response.status) {
+          if (response.data.length > 0) {
+            var taskData = response.data.map((item) => {
+              return { task_id: item.id, task_name: item.name, budgeted_hour: "" }
+            })
+            setTasks(taskData);
+          }
+          else {
+            setTasks([{ task_name: '', budgeted_hour: '' }])
+          }
+
+        }
+      })
+      .catch(error => console.log("Error fetching job types:", error));
+
+  };
+
+  // Handle form submission
+  const handleSubmit = async () => {
+    const payload = {
+      ...formData1,
+      task: tasks.map(task => ({
+        task_name: task.task_name,
+        budgeted_hour: task.budgeted_hour,
+        task_id:task.task_id
+      })),
+    };
+    console.log('Submitting:', payload);
+  };
+
+
   return (
-   
     <div className="container-fluid">
       <div className="content-title">
         <div className="tab-title">
@@ -13,95 +136,92 @@ const CreateCheckList = () => {
         <div>
           <div className="row">
             <div className="col-lg-4 mt-4">
-              <div className=" row">
-                {/* <label className="col-lg-12" htmlFor="VAT_Registered">
-                  Service Type <span className="text-danger">*</span>
-                </label> */}
+              <div className="row">
                 <div className="col-lg-12">
                   <select
                     className="default-select wide form-select"
-                    id="VAT_Registered"
-                    name="VAT_Registered"
+                    name="service_id"
+                    defaultValue={formData.service_id}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      getJobTypeData(e.target.value);
+                    }}
                   >
-                    <option value="">Please Select  Service Type</option>
-                    <option value={1}>Yes</option>
-                    <option value={0}>No</option>
+                    <option value="">Please Select Service Type</option>
+
+                    {formData.service_id && formData.service_id.map(service => (
+                      <option key={service.service_id} value={service.service_id}>
+                        {service.service_name}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
             </div>
             <div className="col-lg-4 mt-4">
-              <div className=" row">
-                {/* <label className="col-lg-12" htmlFor="VAT_Registered">
-                  Job Type <span className="text-danger">*</span>
-                </label> */}
+              <div className="row">
                 <div className="col-lg-12">
                   <select
                     className="default-select wide form-select"
-                    id="VAT_Registered"
-                    name="VAT_Registered"
+                    name="job_type_id"
+                    defaultValue={formData.job_type_id}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      getTaskData(e.target.value);
+                    }}
                   >
                     <option value="">Please Select Job Type</option>
-                    <option value={1}>Yes</option>
-                    <option value={0}>No</option>
+                    {formData.job_type_id && formData.job_type_id.map(job => (
+                      <option key={job.id} value={job.id}>
+                        {job.type}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
             </div>
             <div className="col-lg-4 mt-4">
-              <div className=" row">
-                {/* <label className="col-lg-12" htmlFor="VAT_Registered">
-                  Client Type <span className="text-danger">*</span>
-                </label> */}
-
+              <div className="row">
                 <div className="col-lg-12">
                   <select
                     className="default-select wide form-select"
-                    id="VAT_Registered"
-                    name="VAT_Registered"
+                    name="client_type_id"
+                    defaultValue={formData.client_type_id}
+                    onChange={handleInputChange}
                   >
                     <option value="">Please Select Client Type</option>
-                    <option value={1}>Yes</option>
-                    <option value={0}>No</option>
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
                   </select>
                 </div>
               </div>
             </div>
             <div className="col-lg-4 mt-4">
               <div className="mb-3 row flex-column">
-                {/* <label className="col-lg-12" htmlFor="Trading_Address">
-                  Check List Name<span className="text-danger">*</span>
-                </label> */}
                 <div>
                   <input
                     type="text"
                     className="form-control"
-                    id="Trading_Address"
                     placeholder="Check List Name"
-                    name="Trading_Address"
-                    autoComplete="new-email"
-                    defaultValue=""
+                    name="check_list_name"
+                    defaultValue={formData.check_list_name}
+                    onChange={handleInputChange}
                   />
-                  <div className="invalid-feedback">
-                    Please enter Trading Address
-                  </div>
                 </div>
               </div>
             </div>
             <div className="col-lg-4 mt-4">
-              <div className=" row">
-                {/* <label className="col-lg-12" htmlFor="VAT_Registered">
-                  Status
-                </label> */}
+              <div className="row">
                 <div className="col-lg-12">
                   <select
                     className="default-select wide form-select"
-                    id="VAT_Registered"
-                    name="VAT_Registered"
+                    name="status"
+                    defaultValue={formData.status}
+                    onChange={handleInputChange}
                   >
                     <option value="">Please Select Status</option>
-                    <option value={1}>Yes</option>
-                    <option value={0}>No</option>
+                    <option value="1">Active</option>
+                    <option value="0">Inactive</option>
                   </select>
                 </div>
               </div>
@@ -109,137 +229,58 @@ const CreateCheckList = () => {
           </div>
         </div>
         <div>
-          <div
-            class="table-responsive
-table-card mt-3 mb-1"
-          >
-            <table
-              className="table align-middle table-nowrap"
-              id="customerTable"
-            >
+          <div className="table-responsive table-card mt-3 mb-1">
+            <table className="table align-middle table-nowrap" id="customerTable">
               <thead className="table-striped">
                 <tr>
-                  <th className="" data-="customer_name">
-                    Task Name
-                  </th>
-                  <th className="" data-="email">
-                    Budgeted Hour
-                  </th>
-                  <th className="" data-="action">
-                    Action
-                  </th>
+                  <th>Task Name</th>
+                  <th>Budgeted Hour</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody className="list form-check-all">
-                <tr className="tabel_new">
-                
-                  <td >
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Perform bank reconciliation"
-                    />
-                  </td>
-                  <td >
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder={10}
-                    />
-                  </td>
-                  <td>
-                    <div className="d-flex gap-2">
-                      <div>
-                        <button className="edit-icon">
+                {tasks && tasks.map((task, index) => (
+                  <tr key={index}>
+                    <td>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="task_name"
+                        placeholder="Task Name"
+                        value={task.task_name}
+                        onChange={(e) => handleTaskChange(index, e)}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="budgeted_hour"
+                        placeholder="Budgeted Hour"
+                        value={task.budgeted_hour}
+                        onChange={(e) => handleTaskChange(index, e)}
+                      />
+                    </td>
+                    <td>
+                      <div className="d-flex gap-2">
+                        <button onClick={addTask} className="edit-icon">
                           <i className="ti-plus" />
                         </button>
-                        <button className="delete-icon">
+                        <button onClick={() => removeTask(index)} className="delete-icon">
                           <i className="ti-trash" />
                         </button>
                       </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                 
-                  <td>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Gather bank statments"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder={10}
-                    />
-                  </td>
-                  <td>
-                    <div className="d-flex gap-2">
-                      <div>
-                        <button className="edit-icon">
-                          <i className="ti-plus" />
-                        </button>
-                        <button className="delete-icon">
-                          <i className="ti-trash" />
-                        </button>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr className="tabel_new">
-                 
-                  <td>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Reconcile VAT ledger"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder={10}
-                    />
-                  </td>
-                  <td>
-                    <div className="d-flex gap-2">
-                      <div>
-                        <button className="edit-icon">
-                          <i className="ti-plus" />
-                        </button>
-                        <button className="delete-icon">
-                          <i className="ti-trash" />
-                        </button>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
-            <div className="noresult" style={{ display: "none" }}>
-              <div className="text-center">
-                <lord-icon
-                  src="https://cdn.lordicon.com/msoeawqm.json"
-                  trigger="loop"
-                  colors="primary:#121331,secondary:#08a88a"
-                  style={{ width: 75, height: 75 }}
-                />
-                <h5 className="mt-2">Sorry! No Result Found</h5>
-                <p className="text-muted mb-0">
-                  We've searched more than 150+ Orders We did not find any
-                  orders for you search.
-                </p>
-              </div>
-            </div>
           </div>
         </div>
+        <button onClick={handleSubmit} className="btn btn-primary mt-3">Submit Checklist</button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CreateCheckList
+export default CreateCheckList;
