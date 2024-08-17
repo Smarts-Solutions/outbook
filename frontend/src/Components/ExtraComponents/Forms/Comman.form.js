@@ -424,7 +424,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
 
                         :
 
-                        <div className="modal-footer">
+                        <div className="modal-footer mt-4 mb-0">
                             <button
                                 type="button"
                                 className="btn btn-secondary m-2"
@@ -433,7 +433,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                 Cancel
                             </button>
 
-                            <button className={`btn btn-primary ${location.pathname === 'resetpassword' ? 'col-md-11' : ''}`} type="submit" disabled={formik.isSubmitting}>
+                            <button className={`btn btn-info ${location.pathname === 'resetpassword' ? 'col-md-11' : ''}`} type="submit" disabled={formik.isSubmitting}>
                                 {btn_name}
                             </button>
                         </div>

@@ -2,7 +2,7 @@ import React from 'react';
 
 const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange, buttonName }) => {
 
-  const columnClass = fields.length === 1 ? 'col-12' : 'col-md-6';
+  const columnClass = fields.length === 1 ? 'col-12' : 'col-md-12';
 
   return (
     <div
@@ -20,10 +20,10 @@ const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange, button
               onClick={onClose}
             />
           </div>
-          <div className="modal-body row">
+          <div className="modal-body pb-4">
             {fields.map((field, index) => (
               <div className={`data-table-extensions-filter ${columnClass}`} key={index}>
-                <label htmlFor={field.name} className="icon mb-2">{field.label}</label>
+                <label htmlFor={field.name} className="icon mb-1 mt-2">{field.label}</label>
                 {field.type === 'text' ? (
                   <input
                     type="text"
@@ -54,7 +54,7 @@ const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange, button
                 ) : field.type === 'select' ? (
                   <select
                     name={field.name}
-                    className="filter-select form-control"
+                    className="filter-select form-select"
                     value={field.value}
                     onChange={(e) => onChange(e, index)}
                   >
@@ -70,7 +70,7 @@ const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange, button
 
 
           </div>
-          <div className="modal-footer">
+          <div className="modal-footer ">
             <button
               type="button"
               className="btn btn-secondary"

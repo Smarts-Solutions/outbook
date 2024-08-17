@@ -135,7 +135,7 @@ const StaffPage = () => {
                     <button className='delete-icon' onClick={(e) => { ServiceData(row); SetCompetancy(true) }}>Add Competency</button>
                     )}
                  
-                    <button className='delete-icon'>Log Logs</button>
+                    <button className='delete-icon'>View Logs</button>
                     
                     {row.role === "ADMIN" || row.role === "SUPERADMIN" ? (
                         showStaffDeleteTab && (
@@ -425,8 +425,8 @@ const StaffPage = () => {
 
                 handleClose={() => setPortfolio(false)}
             >
-                <div className="modal-body">
-                    <div className="row">
+                <div className="modal-body px-0">
+                    <div className="row w-100">
                         <div className="col-10">
                             <div className="search-box ms-2">
                                 <i className="ri-search-line search-icon" />
@@ -441,7 +441,7 @@ const StaffPage = () => {
                             <div>
                                 <button
                                     type="button"
-                                    className="btn btn-success add-btn"
+                                    className="btn btn-secondary add-btn"
                                     data-bs-toggle="modal"
                                     id="create-btn"
                                     data-bs-target="#showModal123"
@@ -474,9 +474,9 @@ const StaffPage = () => {
                                                 <div className="remove">
                                                     <a
                                                         onclick="deleteRecordModalshow()"
-                                                        className="btn btn-sm btn-danger remove-item-btn"
+                                                        className="text-decoration-none remove-item-btn"
                                                     >
-                                                        Remove
+                                                        <i className='ti-trash text-danger fs-5'></i>
                                                     </a>
                                                 </div>
                                             </div>
@@ -527,14 +527,14 @@ const StaffPage = () => {
                 isOpen={addCompetancy}
                 backdrop="static"
                 size="ms-5"
-                title="Add Competancy"
+                title="Add Competency"
                 hideBtn={true}
                 handleClose={() => SetCompetancy(false)}
             >
                 <FormGroup>
                     <Row>
                         {serviceDataAll.data.map((item, index) => (
-                            <Col key={item.id} md={index < 3 ? 4 : 6}>
+                            <Col key={item.id} md={index < 6 ? 6 : 6}>
                                 <div className="form-check">
                                     <Label className="form-check-label">
                                         <Input
@@ -542,7 +542,7 @@ const StaffPage = () => {
                                             name={item.service_name}
                                             defaultChecked={item.status}
                                             onChange={(e) => handleCheckboxChange(e, item.service_id)}
-                                            className="form-check-input"
+                                            className="form-check-input new-checkbox me-2 mt-1"
                                         />
                                         {item.service_name}
                                     </Label>
@@ -552,7 +552,7 @@ const StaffPage = () => {
                     </Row>
                 </FormGroup>
                 <div className="d-flex justify-content-end">
-                    <Button color="primary" onClick={handleUpdate}>
+                    <Button className="btn btn-info" color="primary" onClick={handleUpdate}>
                         Update
                     </Button>
                 </div>

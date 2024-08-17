@@ -15,13 +15,13 @@ const Modal_Component = ({ isOpen, handleClose, Submit_Function, Submit_Function
                 <Modal.Footer className={`${title === "Verify OTP" ? 'border-0' : ""}`}>
 
                     {cancel_btn ?
-                        <button type="submit" className="btn btn-danger " onClick={() => Submit_Cancel_Function()}>
+                        <button type="submit" className="btn btn-secondary " onClick={() => Submit_Cancel_Function()}>
                             Cancel
                         </button> : ""}
 
 
                     {hideBtn === true ? "" :
-                        <Button type="submit" className="btn btn-primary " disabled={disabled_submit} onClick={()=> Submit_Function()}>
+                        <Button type="submit" className="btn btn-info " disabled={disabled_submit} onClick={()=> Submit_Function()}>
                             {btn_name}
                         </Button>}
 

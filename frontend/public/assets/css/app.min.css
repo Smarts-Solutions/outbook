@@ -91,6 +91,7 @@
   display: block;
   width: 100%;
   margin-top: 6px;
+  transition: 0.2s all;
 }
 
 .left-sidenav-menu li.active,
@@ -2328,10 +2329,11 @@ a.ui-button:active,
   color: #1761fd;
 }
 
-label {
+.form-label,label {
   font-weight: 500;
-  color: #4B4B4B;
+  color: #333547;
   font-size: 13px;
+  margin-bottom: 5px;
 }
 
 .custom-control-label {
@@ -5137,7 +5139,7 @@ pre[class*="language-"] {
 }
 
 .bg-light-alt {
-  background-color: #fbfbfb !important;
+  background-color: #dcf6ff !important;
 }
 
 .bg-soft-primary {
@@ -5480,9 +5482,9 @@ pre[class*="language-"] {
 
 .chart-report-card .report-main-icon,
 .report-card .report-main-icon {
-  font-size: 28px;
-  width: 64px;
-  height: 64px;
+  font-size: 20px;
+  width: 50px;
+  height: 50px;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
@@ -8725,7 +8727,7 @@ ul.steppedprogress li:first-child:after {
   color: #333547;
 }
 
-.account-body .account-social h6:after {
+.account-body .account-social h6:after ,.or:after{
   display: inline-block;
   margin: 0 6px 4px 6px;
   content: " ";
@@ -8734,7 +8736,7 @@ ul.steppedprogress li:first-child:after {
   width: 120px;
 }
 
-.account-body .account-social h6:before {
+.account-body .account-social h6:before,.or:before {
   display: inline-block;
   margin: 0 6px 4px 6px;
   content: " ";
@@ -9477,20 +9479,39 @@ button.delete-icon i {
 }
 
 button.btn.btn-info,
-.blue-btn {
-  background: #00AFEF;
+.blue-btn, .swal2-confirm {
+  background: #00AFEF !important;
   border-color: #00AFEF !important;
   border: 1px solid !important;
-  border-radius: 0;
+  border-radius: 5px !important;
   padding: 10px 20px;
-  font-weight: 900;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 16.94px;
+  height: auto;
+  position: relative;
+  z-index: 1;
+  color: #fff !important;
+}
+.btn-secondary, .swal2-cancel {
+  background: #fff !important;
+  border-color: #00AFEF !important;
+  border: 1px solid !important;
+  color: #00AFEF !important;
+  border-radius: 5px !important;
+  padding: 10px 20px;
+  font-weight: 600;
   font-size: 14px;
   line-height: 16.94px;
   height: auto;
   position: relative;
   z-index: 1;
 }
-
+.btn-secondary:hover
+{
+  background: #00AFEF !important;
+  color: #fff !important;
+}
 .btn-danger {
   background-color: #dc3545;
   border: 1px solid !important;
@@ -9510,8 +9531,8 @@ button.btn.btn-info,
   background: transparent !important;
 }
 
-.blue-btn:hover,
-.btn-info:hover {
+body .blue-btn:hover,
+body .btn-info:hover {
   color: #00AFEF !important;
   border-color: #00AFEF !important;
   border: 1px solid !important;
@@ -9541,11 +9562,15 @@ button.btn.btn-info,
 .report-data {
   /* border: 1px solid #9E9E9E; */
   padding: 20px;
-  border-radius: 6px;
+  border-radius: 10px;
   background-color: #fff;
+  border: 0px !important;
   box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 }
-
+.label-height
+{
+  height: 20px;
+}
 .content-title {
   margin-top: 25px;
   background-color: #fff;
@@ -9679,8 +9704,34 @@ main .error__feedback {
   background: #00AFEF !important;
 }
 
+
+/* .ant-steps .ant-steps-item-icon {
+
+  display: block;
+} */
+/* .ant-steps .ant-steps-item-title::before {
+  position: absolute;
+  top: 16px;
+  inset-inline-start: 100%;
+  display: block;
+  width: 9999px;
+  height: 1px;
+  background: rgba(5, 5, 5, 0.06);
+  content: "";
+}
+.ant-steps .ant-steps-item-wait>.ant-steps-item-container>.ant-steps-item-content>.ant-steps-item-title::before {
+  background-color: rgba(5, 5, 5, 0.06);
+}
+.ant-steps-item-container,.ant-steps-item-icon {
+text-align: center;
+margin: 0px auto;
+}
+.ant-steps .ant-steps-item-icon {
+  display: block;
+  margin: 0px auto !important;
+} */
 .btn-info {
-  border-radius: 1px !important;
+  border-radius: 5px !important;
 }
 
 .rdt_TableCell {
@@ -9777,8 +9828,11 @@ thead.table-striped th,
 .modal-body {
   background-color: #fff !important;
 }
-
-body .bg-info.modal-header {
+.modal-header .modal-title
+{
+ color: #fff !important;
+}
+body .bg-info.modal-header, .modal-header{
   background-color: #01afef !important;
 }
 
@@ -9821,4 +9875,28 @@ body .bg-info.modal-header {
 
 .fs-24 {
   font-size: 24px;
+}
+.form-select, .form-control
+{
+  font-size: 14px !important;
+  color: #4B4B4B !important;
+}
+body .accordion-button:not(.collapsed)::after {
+
+  transform: rotate(180deg) !important;
+}
+.accordion-button::after {
+
+  transform: rotate(0deg) !important;
+}
+.accordion-item
+{ 
+  border-radius: 0px !important;
+}
+.error-text {
+  background: #cb0000;
+  color: #fff;
+  font-size: 12px;
+  padding: 0px 10px;
+  margin-top: 4px;
 }

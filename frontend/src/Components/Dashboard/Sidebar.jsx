@@ -22,7 +22,7 @@ const Sidebar = () => {
       <div className="left-sidenav">
         {/* LOGO */}
         <div className="brand">
-          <a href="/dashboard/crm-index.html" className="logo">
+          <Link to="/admin/dashboard" className="logo">
             <span>
               <img
                 src="/assets/images/logo.png"
@@ -30,7 +30,7 @@ const Sidebar = () => {
                 className="logo-lg logo-light"
               />
             </span>
-          </a>
+          </Link>
         </div>
         {/* End Logo */}
         <ul className="metismenu left-sidenav-menu">
