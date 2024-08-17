@@ -563,15 +563,24 @@ const CreateClient = () => {
     }, [searchItem])
 
 
+    
+    const HandleCancel=()=>{
+        navigate('/admin/Clientlist', { state: { id: location.state.id } });
+    }
+
     return (
         <div>
             <div className="container-fluid mt-4">
                 <div className="row">
                     <div className="col-xl-12">
                         <div className="card">
-                            <div className="card-header">
+                       
+                            <div className="card-header d-flex justify-content-between">
                                 <h4 className="card-title mb-0">Create New Client</h4>
+                                <button type="button" className="btn btn-info text-white blue-btn"  onClick={HandleCancel}>Back</button>
                             </div>
+
+
                             {/* end card header */}
                             <div className="card-body form-steps">
                                 <div>

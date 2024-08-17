@@ -6,7 +6,7 @@ import { Get_All_Client } from '../../../../ReduxStore/Slice/Client/ClientSlice'
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Get_All_Job_List } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getList } from '../../../../ReduxStore/Slice/Settings/settingSlice';
-
+import sweatalert from 'sweetalert2';
 
 
 const ClientList = () => {
@@ -20,7 +20,7 @@ const ClientList = () => {
   const [getCheckList1, setCheckList1] = useState([]);
 
   const getActiveTav = localStorage.getItem('Clientlist')
-  const [activeTab, setActiveTab] = useState(getActiveTav ? getActiveTav : 'client');
+  const [activeTab, setActiveTab] = useState(location.state && location.state.route && location.state.route ==  "Checklist" ? "checklist"  : location.state.route ==  "job" ? "job":'client');
   const [searchQuery, setSearchQuery] = useState('');
 
 
@@ -28,12 +28,11 @@ const ClientList = () => {
 
   const SetTab = (e) => {
     setActiveTab(e)
-    localStorage.setItem('Clientlist', e)
   }
 
   let tabs = [
     { id: 'client', label: 'Client' },
-    ...(ClientData.length > 0 ? [{ id: 'job', label: 'Job' }] : []),
+    ...(ClientData && ClientData.length > 0 ? [{ id: 'job', label: 'Job' }] : []),
     { id: 'documents', label: 'Documents' },
     { id: 'status', label: 'Status' },
     { id: 'checklist', label: 'Checklist' },
@@ -161,18 +160,18 @@ const ClientList = () => {
     { name: 'Job Type', selector: row => row.job_type_type, sortable: true },
     { name: 'Client Type', selector: row => row.client_type_type, sortable: true },
     { name: 'Status', selector: row => row.status == '1' ? "Active" : "Deactive", sortable: true },
-    // {
-    //   name: 'Actions',
-    //   cell: row => (
-    //     <div>
-    //       <button className='edit-icon' onClick={() => handleEdit(row)}> <i className="ti-pencil" /></button>
-    //       <button className='delete-icon' onClick={() => handleDelete(row)}> <i className="ti-trash" /></button>
-    //     </div>
-    //   ),
-    //   ignoreRowClick: true,
-    //   allowOverflow: true,
-    //   button: true,
-    // },
+    {
+      name: 'Actions',
+      cell: row => (
+        <div>
+          <button className='edit-icon' onClick={() => EditChecklist(row)}> <i className="ti-pencil" /></button>
+          <button className='delete-icon' onClick={() => ChecklistDelete(row)}> <i className="ti-trash" /></button>
+        </div>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+    },
   ];
 
 
@@ -222,15 +221,53 @@ const ClientList = () => {
       });
   }
 
+  const ChecklistDelete = async (row) => {
+
+    const req = { action: "delete", checklist_id: row.checklists_id }
+    const data = { req: req, authToken: token }
+    await dispatch(getList(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          sweatalert.fire({
+            title: 'Deleted',
+            icon: 'success',
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 1500
+          })
+          getCheckListData()
+
+        }
+        else {
+          sweatalert.fire({
+            title: 'Failed',
+            icon: 'error',
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 1500
+          })
+
+        }
+      })
+      .catch((error) => {
+        console.log("Error", error);
+      });
+  }
+
+
 
 
   const HandleClientView = (row) => { navigate('/admin/client/profile', { state: { row, customer_id: location.state } }); }
   const handleAddClient = () => { navigate('/admin/addclient', { state: { id: location.state.id } }); }
   const handleAddJob = () => { navigate('/admin/createjob', { state: { details: location.state, goto: "Customer" } }); }
-  const handleClick = () => { navigate('/admin/create/checklist', { state: { id: location.state.id } }); }
   function handleEdit(row) { navigate('/admin/client/edit', { state: { row, id: location.state.id } }); }
   function handleJobEdit(row) { navigate("/admin/job/edit", { state: { details: location.state, row: row, goto: "Customer" } }); }
   function handleDelete(row) { console.log('Deleting row:', row); }
+
+  const handleClick = () => { navigate('/admin/create/checklist', { state: { id: location.state.id } }); }
+  const EditChecklist = (row) => { navigate('/admin/edit/checklist', { state: { id: location.state.id ,checklist_id: row.checklists_id} }); }
+
 
 
   useEffect(() => {
@@ -245,6 +282,9 @@ const ClientList = () => {
       setCheckList1([]);
     }
   }, [searchQuery])
+
+
+
 
   return (
     <div className='container-fluid'>
@@ -275,7 +315,7 @@ const ClientList = () => {
                 </ul>
               </div>
               <div className="col-md-4 col-auto">
-                {activeTab === "client" || activeTab === "checklist" || activeTab === "" ? (
+                {activeTab === "client" || activeTab === "checklist" || activeTab === ""  || activeTab === "job" ? (
                   <div
                     className="btn btn-info text-white float-end blue-btn"
                     onClick={
@@ -287,11 +327,7 @@ const ClientList = () => {
                     }
                   >
                     <i className="fa fa-plus" />
-                    {activeTab === "client"
-                      ? "Add Client"
-                      : activeTab === "checklist"
-                        ? "Add Checklist"
-                        : "Create Job"}
+                    {activeTab === "client" ? "Add Client" : activeTab === "checklist" ? "Add Checklist" : "Create Job"}
                   </div>
                 ) : null}
               </div>

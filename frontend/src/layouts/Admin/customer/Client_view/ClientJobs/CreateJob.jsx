@@ -286,7 +286,7 @@ const CreateJob = () => {
         }
     }
 
-
+console.log(location.state)
 
     return (
         <div>
@@ -294,8 +294,10 @@ const CreateJob = () => {
                 <div className="row mt-4">
                     <div className="col-xl-12">
                         <div className="card">
-                            <div className="card-header">
-                                <h4 className="card-title mb-0">Create New Job</h4>
+
+                            <div className="card-header d-flex justify-content-between">
+                                <h3 className="card-title mb-0">Create New Job</h3>
+                                <button type="button" className="btn btn-info text-white blue-btn" onClick={() => navigate('/admin/Clientlist', { state: { id: location.state.details.id, route: "job" } })}>Back</button>
                             </div>
 
                             <div className="card-body form-steps">
