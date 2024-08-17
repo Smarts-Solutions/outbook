@@ -563,15 +563,22 @@ const CreateClient = () => {
     }, [searchItem])
 
 
+    
+    const HandleCancel=()=>{
+        navigate('/admin/Clientlist', { state: { id: location.state.id } });
+    }
+
     return (
         <div>
             <div className="container-fluid mt-4">
                 <div className="row">
                     <div className="col-xl-12">
                         <div className="card">
-                            <div className="card-header step-header-blue">
-                                <h4 className="card-title mb-0 ">Create New Client</h4>
+                            <div className="card-header">
+                                <h4 className="card-title mb-0">Create New Client</h4>
                             </div>
+
+
                             {/* end card header */}
                             <div className="card-body form-steps">
                                 <div>
@@ -1385,7 +1392,7 @@ const CreateClient = () => {
                                                 </section>
                                             </div>
                                             <div className="hstack gap-2 justify-content-end">
-                                                <button type="button" className="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="button" className="btn btn-light" onClick={(e)=> navigate('/admin/Clientlist', { state: { id: location.state.id } })}>Cancel</button>
                                                 <button className="btn btn-info text-white blue-btn" onClick={handleSubmit}>Create Client</button>
                                             </div>
                                         </div>

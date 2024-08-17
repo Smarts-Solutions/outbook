@@ -437,13 +437,7 @@ const Setting = () => {
                                 onChange={handleFileUpload} // Handle file upload
                             />
                         </div>
-                        <div className="col-lg-12">
-                            <div className="remove" style={{ float: 'right' }}>
-                                <a className="btn btn-sm add-btn-job_type add-btn-new" onClick={(e) => handleSaveTask()}>
-                                    UPLOAD
-                                </a>
-                            </div>
-                        </div>
+                    
                         <br />
                         <div style={{ border: '2px hidden black', margin: '5px' }} className="table-responsive table-card mt-3 mb-1">
                             <table className="table align-middle table-nowrap" id="customerTable">
@@ -481,6 +475,13 @@ const Setting = () => {
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+                        <div className="col-lg-12">
+                            <div className="remove" style={{ float: 'right' }}>
+                                <a className="btn btn-sm add-btn-job_type add-btn-new" onClick={(e) => handleSaveTask()}>
+                                    Submit
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>

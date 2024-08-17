@@ -686,7 +686,7 @@ const ClientEdit = () => {
                         <div className="card">
                             <div className="card-header d-flex justify-content-between">
                                 <h4 className="card-title mb-0">Edit Client</h4>
-                                <button type="button" className="btn btn-info text-white blue-btn" data-bs-dismiss="modal" onClick={HandleCancel}>Back</button>
+                                <button type="button" className="btn btn-info text-white blue-btn"  onClick={HandleCancel}>Back</button>
                             </div>
                            
                             {/* end card header */}
@@ -1539,7 +1539,7 @@ const ClientEdit = () => {
                                                 </section>
                                             </div>
                                             <div className="hstack gap-2 justify-content-end">
-                                                <button type="button" className="btn btn-light" data-bs-dismiss="modal" onClick={HandleCancel}>Cancel</button>
+                                                <button type="button" className="btn btn-light"  onClick={HandleCancel}>Cancel</button>
                                                 <button className="btn btn-info text-white blue-btn" onClick={handleUpdate}>Update Client</button>
                                             </div>
                                         </div>

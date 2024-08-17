@@ -182,3 +182,15 @@ export async function addChecklist(data, token) {
 
 
 
+export async function UpdateChecklist(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}updateChecklist`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}

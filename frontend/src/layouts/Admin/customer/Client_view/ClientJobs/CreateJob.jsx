@@ -286,7 +286,7 @@ const CreateJob = () => {
         }
     }
 
-
+console.log(location.state)
 
     return (
         <div>
@@ -294,7 +294,7 @@ const CreateJob = () => {
                 <div className="row mt-4">
                     <div className="col-xl-12">
                         <div className="card">
-                            <div className="card-header step-header-blue">
+                            <div className="card-header">
                                 <h4 className="card-title mb-0">Create New Job</h4>
                             </div>
 

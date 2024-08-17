@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { useLocation,useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { JobType, GetServicesByCustomers, GETTASKDATA, getList, addChecklists } from '../../../../ReduxStore/Slice/Settings/settingSlice';
 import sweatalert from 'sweetalert2';
 
@@ -165,7 +165,7 @@ const CreateCheckList = () => {
             status: '',
           });
           setTasks([{ task_id: "", task_name: '', budgeted_hour: '' }]);
-          navigate('/admin/Clientlist', { state: { id: location.state.id } });
+          navigate('/admin/Clientlist', { state: { id: location.state.id, route: "Checklist" } });
         }
       })
       .catch((error) =>
@@ -176,9 +176,15 @@ const CreateCheckList = () => {
   return (
     <div className="container-fluid">
       <div className="content-title">
-        <div className="tab-title">
-          <h3 className="mt-0">Create New Checklist</h3>
+  
+
+        <div className="card-header d-flex justify-content-between">
+          <h3 className="card-title mb-0">Create New Checklist</h3>
+          <button type="button" className="btn btn-info text-white blue-btn" onClick={()=> navigate('/admin/Clientlist', { state: { id: location.state.id, route: "Checklist" } })}>Back</button>
         </div>
+
+
+
       </div>
       <div className="report-data mt-4">
         <div>
@@ -274,15 +280,15 @@ const CreateCheckList = () => {
                     onChange={handleInputChange}
                   >
                     <option value="">Please Select Status</option>
-                    <option value="0">Active</option>
-                    <option value="1">Inactive</option>
+                    <option value="1">Active</option>
+                    <option value="0">Inactive</option>
                   </select>
                   {errors.status && <p className="text-danger">{errors.status}</p>}
                 </div>
               </div>
             </div>
           </div>
-
+          <button className="btn btn-primary mt-3" onClick={addTask}>Add Task</button>
           <div className="mt-4">
             {tasks.map((task, index) => (
               <div key={index} className="d-flex gap-3 mt-4">
@@ -312,11 +318,12 @@ const CreateCheckList = () => {
                 <button className="btn btn-danger" onClick={() => removeTask(index)}>Remove</button>
               </div>
             ))}
-            <button className="btn btn-primary mt-3" onClick={addTask}>Add Task</button>
+
           </div>
 
           <div className="col-lg-12 mt-4">
-            <button className="btn btn-primary" onClick={handleSubmit}>Submit</button>
+            <button className="btn btn-secondary " onClick={(e) => navigate('/admin/Clientlist', { state: { id: location.state.id, route: "Checklist" } })}>Cancel</button>
+            <button className="btn btn-primary ms-2" onClick={handleSubmit}>Submit</button>
           </div>
         </div>
       </div>

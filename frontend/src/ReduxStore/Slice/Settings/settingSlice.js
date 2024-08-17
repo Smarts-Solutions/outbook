@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE , CLIENTINDUSTRY ,COUNTRY , JOBTYPE,ADDTASK,GetServicesByCustomer,GETTASK,getListAction ,addChecklist} from "../../../Services/Settings/settingService";
+import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE , CLIENTINDUSTRY ,COUNTRY , JOBTYPE,ADDTASK,GetServicesByCustomer,GETTASK,getListAction ,addChecklist,UpdateChecklist} from "../../../Services/Settings/settingService";
 
 
 
@@ -138,6 +138,17 @@ export const addChecklists = createAsyncThunk("addChecklist", async (data) => {
   }
 });
 
+export const UpdateChecklistData = createAsyncThunk("updateChecklist", async (data) => {
+  try {
+    const { req, authToken } = data
+    const res = await UpdateChecklist(req, authToken);
+    return await res;
+  } catch
+  (err) {
+    return err;
+  }
+});
+
 //Setting Slice
 const SettingSlice = createSlice({
   name: "SettingSlice",
@@ -155,7 +166,8 @@ const SettingSlice = createSlice({
     customergetervices:[],
     gettask:[],
     list:[],
-    addChecklistData:[]
+    addChecklistData:[],
+    updatecheckdata:[]
   },
 
   reducers: {},
@@ -291,6 +303,17 @@ const SettingSlice = createSlice({
         state.addChecklistData = action.payload;
       })
       .addCase(addChecklists.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(UpdateChecklistData.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(UpdateChecklistData.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.updatecheckdata = action.payload;
+      })
+      .addCase(UpdateChecklistData.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
       });
