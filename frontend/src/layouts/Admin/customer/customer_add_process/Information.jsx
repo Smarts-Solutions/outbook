@@ -315,6 +315,7 @@ const Information = () => {
       if (getAccountMangerId == "") {
         return
       }
+      console.log("values", values)
 
       const req = {
         customer_id: Number(customer_id),
@@ -546,7 +547,7 @@ const Information = () => {
     {
       name: "Phone",
       label: "Phone",
-      type: "number",
+      type: "number1",
       label_size: 12,
       col_size: 4,
       disable: false,
@@ -765,6 +766,10 @@ const Information = () => {
 
         if (response.status) {
           setCountryDataAll({ loading: false, data: response.data });
+          formik.setFieldValue("CountryData", response.data);
+          formik1.setFieldValue("CountryData", response.data);
+          formik2.setFieldValue("CountryData", response.data);
+
         } else {
           setCountryDataAll({ loading: false, data: [] });
         }
@@ -1221,8 +1226,6 @@ const Information = () => {
                                             </div>
                                           </div>
 
-
-
                                           <div className="col-lg-4 ps-1">
                                             <div className="mb-3 d-flex align-items-center">
 
@@ -1263,13 +1266,6 @@ const Information = () => {
                                               </div>
                                             )}
                                           </div>
-
-
-
-
-
-
-
 
                                           <div className="col-lg-4 ">
                                             <div className="mb-3">
@@ -1559,13 +1555,29 @@ const Information = () => {
                                                   </div>
                                                 </div>
                                                 <div className="col-lg-4">
-                                                  <div className="mb-3">
-                                                    <label
+                                                  <label
                                                       htmlFor={`phone-${index}`}
                                                       className="form-label"
                                                     >
                                                       Phone
                                                     </label>
+                                                  <div className="mb-3 d-flex align-items-center">
+                                                    <select
+                                                      className="form-select me-2"
+                                                      id={`countryCode-${index}`}
+                                                      value={contact.countryCode}
+                                                      onChange={(e) =>
+                                                        handleChange(index, "countryCode", e.target.value)
+                                                      }
+                                                      style={{ width: "30%" }}
+                                                    >
+                                                      {countryDataAll && countryDataAll.data.map((item, i) => (
+                                                        <option value={item.code} key={i}>
+                                                          {item.code}
+                                                        </option>
+                                                      ))}
+                                                    </select>
+                                                
                                                     <input
                                                       type="number"
                                                       className="form-control"

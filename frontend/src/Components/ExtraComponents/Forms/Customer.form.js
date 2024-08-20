@@ -1,29 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Email_regex, Mobile_regex } from "../../../Utils/Common_regex";
 
-const ReusableForm = ({
-  initialValues,
-  validationSchema,
-  onSubmit,
-  fromDate,
-  isSelected,
-  fieldtype,
-  formik,
-  btn_name,
-  forlogin,
-  title,
-  label_size,
-  col_size,
-  disable,
-  check_box_true,
-  row_size,
-  additional_field,
-  showImagePreview,
-  placeholderdata,
-  disabled,
-  closeBtn,
-}) => {
+const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isSelected, fieldtype, formik, btn_name, forlogin, title, label_size, col_size, disable, check_box_true, row_size, additional_field, showImagePreview, placeholderdata, disabled, closeBtn, }) => {
   const location = useLocation();
   const [passwordVisible, setPasswordVisible] = useState({});
   const [selectSearchItem, setSelectSearchItem] = useState("");
@@ -37,6 +15,12 @@ const ReusableForm = ({
       formik.values.search_company_name == "" ? "" : pre
     );
   }, [formik.values.search_company_name]);
+
+
+
+
+
+
 
   return (
     <form onSubmit={formik.handleSubmit}>
@@ -75,9 +59,7 @@ const ReusableForm = ({
                           disabled={field.disable}
                           defaultValue={'0'}
                         >
-                          {/* <option value="" selected disable={field.disable}>
-                            Please Select VAT Registered
-                          </option> */}
+
                           {field.options.map((option) => (
                             <option key={option.value} value={option.value}>
                               {option.label}
@@ -444,6 +426,60 @@ const ReusableForm = ({
                       </div>
                     </div>
                   </div>
+                </>
+              ) : field.type === "number1" ? (
+                <>
+                  <div className={`col-lg-${field.col_size}`}>
+
+                    
+                  <label
+                        className={`col-lg-${field.label_size}`}
+                        htmlFor={field.name}
+                        style={{ width: "15%" }}
+                      >
+                        {field.label}
+                        <span className="text-danger">*</span>
+                      </label>
+                    <div className="mb-3 row align-items-center">
+               
+
+                      <div className="d-flex align-items-center" style={{ width: "85%" }}>
+                      
+                        <select
+                          className="form-select me-2"
+                          style={{ width: "30%" }}
+                          {...formik.getFieldProps("countryCode")}
+                        >
+                          {formik.values && formik.values.CountryData && formik.values.CountryData.map((item, i) => (
+                            <option value={item.code} key={i}>
+                              {item.code}
+                            </option>
+                          ))}
+                        </select>
+
+                        <input
+                          type="number"
+                          className="form-control"
+                          style={{ background: field.disable ? "#eeeeee" : "", width: "70%" }}
+                          id={field.name}
+                          placeholder={`Enter ${field.label}`}
+                          {...formik.getFieldProps(field.name)}
+                          defaultValue=""
+                          readOnly={field.disable}
+                          autoComplete="new-email"
+                      
+                        />
+                      </div>
+
+                      <div style={{ color: "red", marginTop: "0.25rem", width: "100%" }}>
+                        {formik.touched[field.name] && formik.errors[field.name] && (
+                          <div>{formik.errors[field.name]}</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+
                 </>
               ) : field.type === "text1" ? (
                 <>
