@@ -452,6 +452,7 @@ CREATE TABLE client_contact_details (
 
 
 
+
 /*--TABLE:- CREATE JOB   */
 CREATE TABLE jobs (
     id INT AUTO_INCREMENT PRIMARY KEY,
