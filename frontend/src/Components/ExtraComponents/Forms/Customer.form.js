@@ -73,10 +73,11 @@ const ReusableForm = ({
                           style={{ background: field.disable ? "#eeeeee" : "" }}
                           {...formik.getFieldProps(field.name)}
                           disabled={field.disable}
+                          defaultValue={'0'}
                         >
-                          <option value="" selected disable={field.disable}>
+                          {/* <option value="" selected disable={field.disable}>
                             Please Select VAT Registered
-                          </option>
+                          </option> */}
                           {field.options.map((option) => (
                             <option key={option.value} value={option.value}>
                               {option.label}

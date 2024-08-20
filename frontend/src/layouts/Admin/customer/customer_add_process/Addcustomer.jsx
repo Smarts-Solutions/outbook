@@ -28,12 +28,7 @@ const AddCustomer = () => {
     const [address, setAddress] = useState(addressInitialState);
     const [coustomerId, setCoustomerId] = useState("");
     const [currentStep, setCurrentStep] = useState(0);
-    // const [currentStep, setCurrentStep] = useState(() => {
-    //     const savedStep = localStorage.getItem('currentStep');
-    //     return savedStep !== null ? Number(savedStep) : 0;
-    // });
-    
-    // const currentStep = useRef(0);
+   
 
     const { Step } = Steps;
 

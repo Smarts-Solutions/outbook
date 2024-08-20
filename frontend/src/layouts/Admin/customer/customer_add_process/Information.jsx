@@ -30,7 +30,6 @@ const Information = () => {
     data: [],
 });
 
-// console.log("customerDetails", !customerDetails.loading && customerDetails.data.contact_details[0].contact_id);
 
   const [personRoleDataAll, setPersonRoleDataAll] = useState({
     loading: true,
@@ -131,7 +130,7 @@ const Information = () => {
       Registered_Office_Addres: "",
       Incorporation_Date: "",
       Incorporation_in: "",
-      VAT_Registered: "",
+      VAT_Registered:'0',
       VAT_Number: "",
       Website: "",
       Trading_Name: "",
@@ -161,9 +160,9 @@ const Information = () => {
      else if (!values.Incorporation_in) {
         errors.Incorporation_in = "Please Enter Incorporation in";
       }
-     else if (!values.VAT_Registered) {
-        errors.VAT_Registered = "Please Enter VAT Registered";
-      }
+    //  else if (!values.VAT_Registered) {
+    //     errors.VAT_Registered = "Please Enter VAT Registered";
+    //   }
      else if (values.VAT_Registered === '1' && !values.VAT_Number) {
         errors.VAT_Number = "Please Enter VAT Number";
      }
@@ -176,9 +175,9 @@ const Information = () => {
      else if (!values.Trading_Name) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
-     else if (!values.Trading_Address) {
-        errors.Trading_Address = "Please Enter Trading Address";
-      }
+    //  else if (!values.Trading_Address) {
+    //     errors.Trading_Address = "Please Enter Trading Address";
+    //   }
       
 
       return errors;
@@ -244,7 +243,7 @@ const Information = () => {
     initialValues: {
       Trading_Name: "",
       Trading_Address: "",
-      VAT_Registered: "",
+      VAT_Registered: '0',
       VAT_Number: "",
       Website: "",
       First_Name: "",
@@ -258,9 +257,9 @@ const Information = () => {
       if (!values.Trading_Name) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
-     else if (!values.Trading_Address) {
-        errors.Trading_Address = "Please Enter Trading Address";
-      }
+    //  else if (!values.Trading_Address) {
+    //     errors.Trading_Address = "Please Enter Trading Address";
+    //   }
      else if (!values.VAT_Registered) {
         errors.VAT_Registered = "Please Enter VAT Registered";
       }
@@ -323,7 +322,7 @@ const Information = () => {
     initialValues: {
       Trading_Name: "",
       Trading_Address: "",
-      VAT_Registered: "",
+      VAT_Registered: "0",
       VAT_Number: "",
       Website: "",
     },
@@ -332,9 +331,9 @@ const Information = () => {
       if (!values.Trading_Name) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
-      else if (!values.Trading_Address) {
-        errors.Trading_Address = "Please Enter Trading Address";
-      }
+      // else if (!values.Trading_Address) {
+      //   errors.Trading_Address = "Please Enter Trading Address";
+      // }
       else if (!values.VAT_Registered) {
         errors.VAT_Registered = "Please Enter VAT Registered";
       }
@@ -1632,9 +1631,7 @@ useEffect(() => {
                                             Add Contact
                                           </button>
                                         </div>
-                                        {/* <div className="d-flex justify-content-end">
-                                                                                                    <button className="btn btn-success" type="submit">Submit</button>
-                                                                                                </div> */}
+                                      
                                       </div>
                                     </form>
                                   </div>
@@ -1847,14 +1844,6 @@ useEffect(() => {
             </div>
           </section>
 
-          {/* <div className="form__item button__items d-flex justify-content-between">
-                        <Button className="white-btn" type="default" onClick={prev}>
-                            Back
-                        </Button>
-                        <Button className="btn btn-info text-white blue-btn" type="submit" onClick={handleSubmit}>
-                            Next
-                        </Button>
-                    </div> */}
         </div>
       )}
     </Formik>
