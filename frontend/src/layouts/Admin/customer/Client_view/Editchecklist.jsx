@@ -169,13 +169,13 @@ const CreateCheckList = () => {
                 checklist_tasks_id: task.checklist_tasks_id
             })),
         };
-        console.log("req", req)
+     
 
         const data = { req, authToken: token };
         await dispatch(UpdateChecklistData(data))
             .unwrap()
             .then(response => {
-                console.log("response", response)
+              
                 if (response.status) {
                     sweatalert.fire({
                         title: 'Success',

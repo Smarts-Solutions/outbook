@@ -4,7 +4,7 @@ const customerService = require('../../services/customers/customerService');
 const addCustomer = async (req, res) => {
   try {
      const { ...customer } = req.body;
-    //  console.log("customer",customer)
+    
       const result = await customerService.addCustomer(customer);
       if(!result.status){
         return  res.status(200).json({ status: false, message: result.message });  
@@ -19,7 +19,7 @@ const addCustomer = async (req, res) => {
 const customerAction = async (req, res) => {
   try {
      const { ...customer } = req.body;
-    //  console.log("customer",customer)
+   
       const result = await customerService.customerAction(customer);
       if(!result.status){
         return  res.status(200).json({ status: false, message: result.message });  
@@ -34,7 +34,7 @@ const customerAction = async (req, res) => {
 const getSingleCustomer = async (req, res) => {
   try {
      const { ...customer } = req.body;
-    //  console.log("customer",customer)
+  
       const data = await customerService.getSingleCustomer(customer);
       if(data != undefined){
        return res.status(200).json({ status:true,message: "Success..",data : data});
@@ -50,7 +50,7 @@ const updateProcessCustomer = async (req, res) => {
   
   try {
      const { ...customerProcessData } = req.body;
-    //  console.log("customer",customer)
+   
       const data = await customerService.updateProcessCustomer(customerProcessData);
       if(data != undefined){
        return res.status(200).json({ status:true,message: "Success..",data : data});
@@ -96,7 +96,7 @@ const updateProcessCustomerFileAction = async (req, res) => {
 const customerUpdate = async (req, res) => {
   try {
      const { ...customer } = req.body;
-    //  console.log("customer",customer)
+    
       const result = await customerService.customerUpdate(customer);
       if(!result.status){
         return  res.status(200).json({ status: false, message: result.message });  

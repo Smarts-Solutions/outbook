@@ -20,18 +20,19 @@ const createJobType = async (JobType) => {
 const getJobType = async (JobType) => { 
     const {service_id} = JobType;
     const query = `
-    SELECT job_types.id, job_types.type , job_types.status ,services.name as service_name FROM job_types JOIN services ON job_types.service_id = services.id WHERE job_types.service_id = ?
+    SELECT job_types.id, job_types.type , job_types.status ,services.name as service_name FROM job_types JOIN services ON job_types.service_id = services.id 
     ORDER BY job_types.id DESC
     `;
 
     try {
-        const [result] = await pool.execute(query,[service_id]);
+        const [result] = await pool.execute(query);
         return result;
     } catch (err) {
         console.error('Error selecting data:', err);
         throw err;
     }
 }
+
 
 const deleteJobType = async (JobTypeId) => {
     const query = `
@@ -74,7 +75,7 @@ const updateJobType = async (JobType) => {
 
 // Task Module
 const addTask = async (task) => {
-    // console.log("task -",task)
+   
      const {name,service_id,job_type_id} = task;
    
      try {
@@ -95,7 +96,7 @@ const addTask = async (task) => {
      
       return { status: true, message: 'task add successfully.', data: [] };
      } catch (err) {
-       console.log("Error:", err);
+  
        return { status: false, message: 'Error adding task.' };
      }
      
@@ -119,7 +120,6 @@ const getTask = async (task) => {
 const addChecklist = async (checklist) => {
     const {customer_id,service_id,job_type_id,client_type_id,check_list_name,status,task} = checklist;
      
-    console.log("checklist ",checklist)
     try {
     const query = `
     INSERT INTO checklists (customer_id,service_id,job_type_id,client_type_id,check_list_name,status)
@@ -161,7 +161,7 @@ const addChecklist = async (checklist) => {
    
     }
     catch (err) {
-     console.log("err ",err)
+  
      return { status: false, message: 'Error added checklist.' };
     }
 }
@@ -260,7 +260,7 @@ const getByIdChecklist = async(checklist) => {
     return { status: true, message: 'checklist get successfully.', data: result };
     }
     catch (err) {
-        console.log("err" , err)
+
      return { status: false, message: 'Error get checklist.' };
     }
 }
@@ -282,7 +282,6 @@ const updateChecklist = async (checklist) => {
 
     const {checklists_id,customer_id, service_id, job_type_id, client_type_id, check_list_name, status, task} = checklist;
      
-    console.log("checklist ", checklist);
     // EXIST checklist tasks id
     const [ExistChecklistsids] = await pool.execute('SELECT id  FROM `checklist_tasks` WHERE checklist_id =' + checklists_id);
     const idArray = await ExistChecklistsids.map(item => item.id);
@@ -340,7 +339,7 @@ try {
     return {status: true, message: 'Checklist updated successfully.', data: []};
 
 } catch (err) {
-    console.log("err ", err);
+    
     return {status: false, message: 'Error updating checklist.'};
 }
 }

@@ -64,10 +64,9 @@ const ClientList = () => {
 }
 
   function handleDelete(row) {
-    console.log('Deleting row:', row);
+  
   }
  
-  console.log("location",location.state); 
 
  
 
@@ -95,7 +94,6 @@ const ClientList = () => {
   }, []);
 
 
-  console.log("location.state :", location.state)
   const handleCreateJob = () => {
     navigate('/admin/createjob' , {state : {details : location.state}});
   }
@@ -142,7 +140,6 @@ const ClientList = () => {
       </div>
       <div className="tab-content" id="pills-tabContent">
 
-        {console.log("activeTab", activeTab)}
         {tabs.map((tab) => (
           <div
             key={tab.id}

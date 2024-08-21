@@ -33,7 +33,7 @@ const jobTypeTaskService = require('../../services/jobTypeTask/jobTypeTaskServic
   const addTask = async (req, res) => {
     try {
        const { ...task } = req.body;
-      //  console.log("job",job)
+    
          const result = await jobTypeTaskService.addTask(task);
          if(!result.status){
           return  res.status(200).json({ status: false, message: result.message });  
@@ -49,7 +49,7 @@ const jobTypeTaskService = require('../../services/jobTypeTask/jobTypeTaskServic
   const getTask = async (req, res) => {
     try {
        const { ...task } = req.body;
-      //  console.log("job",job)
+   
          const result = await jobTypeTaskService.getTask(task);
          if(!result.status){
           return  res.status(200).json({ status: false, message: result.message });  
@@ -113,7 +113,7 @@ const jobTypeTaskService = require('../../services/jobTypeTask/jobTypeTaskServic
   const customerGetService = async (req, res) => {
     try {
        const { ...task } = req.body;
-      //  console.log("job",job)
+  
          const result = await jobTypeTaskService.customerGetService(task);
          if(!result.status){
           return  res.status(200).json({ status: false, message: result.message });  

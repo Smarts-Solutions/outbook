@@ -3,13 +3,10 @@ import { useDispatch } from "react-redux";
 import { Formik, Field, Form, useFormik } from "formik";
 import AddFrom from "../../../../Components/ExtraComponents/Forms/Customer.form";
 import { Email_regex } from "../../../../Utils/Common_regex";
-import {
-  GetAllCompany,
-  AddCustomer,
-} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { GetAllCompany, AddCustomer } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import MultiStepFormContext from "./MultiStepFormContext";
 import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
-import { PersonRole } from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import { PersonRole, Country } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import { GET_CUSTOMER_DATA } from '../../../../ReduxStore/Slice/Customer/CustomerSlice'
 
@@ -17,44 +14,31 @@ const Information = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const customer_id = localStorage.getItem("coustomerId");
-  // console.log("customer_id", customer_id);
-  
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
   const [getAccountMangerId, setAccountMangerId] = useState("");
+  const [getAccountMangerIdErr, setAccountMangerIdErr] = useState("");
+
   const [CustomerType, setCustomerType] = useState("1");
   const [getNextStatus, setNextStatus] = useState("0");
-  const [customerDetails, setCustomerDetails] = useState({
-    loading: true,
-    data: [],
-});
-
-// console.log("customerDetails", !customerDetails.loading && customerDetails.data.contact_details[0].contact_id);
-
-  const [personRoleDataAll, setPersonRoleDataAll] = useState({
-    loading: true,
-    data: [],
-  });
-
+  const [customerDetails, setCustomerDetails] = useState({ loading: true, data: [] });
+  const [personRoleDataAll, setPersonRoleDataAll] = useState({ loading: true, data: [] });
+  const [errors, setErrors] = useState([{ firstName: "", lastName: "", role: "", phoneNumber: "", email: "" }]);
   const [getAllSearchCompany, setGetAllSearchCompany] = useState([]);
-
-  const [contacts, setContacts] = useState([
-    {
-      authorised_signatory_status: false,
-      firstName: "",
-      lastName: "",
-      role: "",
-      phoneNumber: "",
-      email: "",
-    },
+  const [countryDataAll, setCountryDataAll] = useState({ loading: true, data: [] });
+  const [contacts, setContacts] = useState([{
+    authorised_signatory_status: false,
+    firstName: "",
+    lastName: "",
+    role: "",
+    phoneNumber: "",
+    email: "",
+  },
   ]);
 
-  const [errors, setErrors] = useState([
-    { firstName: "", lastName: "", role: "", phoneNumber: "", email: "" },
-  ]);
 
- 
+
 
   const handleAddContact = () => {
     setContacts([
@@ -101,12 +85,13 @@ const Information = () => {
   };
 
   const AddCustomerFun = async (req) => {
+
     const data = { req: req, authToken: token };
     await dispatch(AddCustomer(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          next(response.data , 2);
+          next(response.data, 2);
         } else {
           sweatalert.fire({
             icon: "error",
@@ -131,7 +116,7 @@ const Information = () => {
       Registered_Office_Addres: "",
       Incorporation_Date: "",
       Incorporation_in: "",
-      VAT_Registered: "",
+      VAT_Registered: '0',
       VAT_Number: "",
       Website: "",
       Trading_Name: "",
@@ -139,47 +124,53 @@ const Information = () => {
     },
     validate: (values) => {
       let errors = {};
+
+      if (formik.touched.Trading_Name == true && getAccountMangerId == "") {
+        setAccountMangerIdErr("Please select an Account Manager")
+        return
+      }
+
       if (!values.company_name) {
         errors.company_name = "Please Enter Company Name";
       }
-     else if (!values.entity_type) {
+      else if (!values.entity_type) {
         errors.entity_type = "Please Enter Entity Type";
       }
-     else if (!values.company_status) {
+      else if (!values.company_status) {
         errors.company_status = "Please Enter Company Status";
       }
-     else if (!values.company_number) {
+      else if (!values.company_number) {
         errors.company_number = "Please Enter Company Number";
       }
-     else if (!values.Registered_Office_Addres) {
+      else if (!values.Registered_Office_Addres) {
         errors.Registered_Office_Addres =
           "Please Enter Registered Office Address";
       }
-     else if (!values.Incorporation_Date) {
+      else if (!values.Incorporation_Date) {
         errors.Incorporation_Date = "Please Enter Incorporation Date";
       }
-     else if (!values.Incorporation_in) {
+      else if (!values.Incorporation_in) {
         errors.Incorporation_in = "Please Enter Incorporation in";
       }
-     else if (!values.VAT_Registered) {
-        errors.VAT_Registered = "Please Enter VAT Registered";
-      }
-     else if (values.VAT_Registered === '1' && !values.VAT_Number) {
+      //  else if (!values.VAT_Registered) {
+      //     errors.VAT_Registered = "Please Enter VAT Registered";
+      //   }
+      else if (values.VAT_Registered === '1' && !values.VAT_Number) {
         errors.VAT_Number = "Please Enter VAT Number";
-     }
-    //  else if (!values.VAT_Number) {
-    //     errors.VAT_Number = "Please Enter VAT Number";
-    //   }
-    //  else if (!values.Website) {
-    //     errors.Website = "Please Enter Website";
-    //   }
-     else if (!values.Trading_Name) {
+      }
+      //  else if (!values.VAT_Number) {
+      //     errors.VAT_Number = "Please Enter VAT Number";
+      //   }
+      //  else if (!values.Website) {
+      //     errors.Website = "Please Enter Website";
+      //   }
+      else if (!values.Trading_Name) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
-     else if (!values.Trading_Address) {
-        errors.Trading_Address = "Please Enter Trading Address";
-      }
-      
+      //  else if (!values.Trading_Address) {
+      //     errors.Trading_Address = "Please Enter Trading Address";
+      //   }
+
 
       return errors;
     },
@@ -189,8 +180,8 @@ const Information = () => {
         const error = {
           firstName: contact.firstName ? "" : "First Name is required",
           lastName: contact.lastName ? "" : "Last Name is required",
-          role: contact.role ? "" : "Role is required",
-          phoneNumber: contact.phoneNumber ? "" : "Phone Number is required",
+          // role: contact.role ? "" : "Role is required",
+          // phoneNumber: contact.phoneNumber ? "" : "Phone Number is required",
           email:
             contact.email === ""
               ? "Email Id is required"
@@ -213,9 +204,12 @@ const Information = () => {
 
       setErrors(newErrors);
       if (formIsValid) {
+        if (getAccountMangerId == "") {
+          return
+        }
         let req = {
           customer_id: Number(customer_id),
-          contact_id : customerDetails.data.contact_id,
+          contact_id: customerDetails.data.contact_id,
           company_name: values.company_name,
           entity_type: values.entity_type,
           company_status: values.company_status,
@@ -234,7 +228,6 @@ const Information = () => {
           account_manager_id: getAccountMangerId,
           staff_id: staffDetails.id,
         };
-        console.log(req);
         await AddCustomerFun(req);
       }
     },
@@ -244,7 +237,7 @@ const Information = () => {
     initialValues: {
       Trading_Name: "",
       Trading_Address: "",
-      VAT_Registered: "",
+      VAT_Registered: '0',
       VAT_Number: "",
       Website: "",
       First_Name: "",
@@ -255,47 +248,74 @@ const Information = () => {
     },
     validate: (values) => {
       let errors = {};
+
+
+      if (formik1.touched.Email == true && getAccountMangerId == "") {
+        setAccountMangerIdErr("Please select an Account Manager")
+        return
+      }
       if (!values.Trading_Name) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
-     else if (!values.Trading_Address) {
-        errors.Trading_Address = "Please Enter Trading Address";
+      if (values.Trading_Name && values.Trading_Name.length > 100) {
+        errors.Trading_Name = "Trading Name cannot exceed 100 characters";
       }
-     else if (!values.VAT_Registered) {
+
+      else if (values.Trading_Address && values.Trading_Address.length > 200) {
+        errors.Trading_Address = "Trading Address cannot exceed 200 characters";
+      }
+      else if (!values.VAT_Registered) {
         errors.VAT_Registered = "Please Enter VAT Registered";
       }
-    //  else if (!values.VAT_Number) {
-    //     errors.VAT_Number = "Please Enter VAT Number";
-    //   }
-    else  if (values.VAT_Registered === '1' && !values.VAT_Number) {
+
+      else if (values.VAT_Registered === '1' && !values.VAT_Number) {
         errors.VAT_Number = "Please Enter VAT Number";
-     }
-    //  else if (!values.Website) {
-    //     errors.Website = "Please Enter Website";
-    //   }
-     else if (!values.First_Name) {
+      }
+      else if (values.VAT_Number && values.VAT_Number.length > 9) {
+        errors.VAT_Number = "VAT Number cannot exceed 9 Numbers";
+      }
+
+      else if (values.Website && values.Website.length > 200) {
+        errors.Website = "Website cannot exceed 200 characters";
+      }
+
+      else if (!values.First_Name) {
         errors.First_Name = "Please Enter First Name";
       }
-    else if (!values.Last_Name) {
+      else if (values.First_Name && values.First_Name.length > 50) {
+        errors.First_Name = "First Name exceed 50 characters";
+      }
+
+      else if (!values.Last_Name) {
         errors.Last_Name = "Please Enter Last Name";
       }
-     else if (!values.Phone) {
-        errors.Phone = "Please Enter Phone";
+      else if (values.Last_Name && values.Last_Name.length > 50) {
+        errors.Last_Name = "Last Name exceed 50 characters";
       }
+
       else if (!values.Email) {
         errors.Email = "Please Enter Email";
       }
       else if (!Email_regex(values.Email)) {
         errors.Email = "Please Enter Valid Email";
       }
-      
+
       else if (!values.Residential_Address) {
         errors.Residential_Address = "Please Enter Residential Address";
+      }
+
+      else if (values.Residential_Address && values.Residential_Address.length > 200) {
+        errors.Residential_Address = "Residential Address cannot exceed 200 characters";
       }
       return errors;
     },
 
     onSubmit: async (values) => {
+
+      if (getAccountMangerId == "") {
+        return
+      }
+
       const req = {
         customer_id: Number(customer_id),
         Trading_Name: values.Trading_Name,
@@ -314,7 +334,7 @@ const Information = () => {
         staff_id: staffDetails.id,
         //contact_id : customerDetails.data ? customerDetails.data && customerDetails.data.contact_details[0].contact_id : ""
       };
-   
+
       await AddCustomerFun(req);
     },
   });
@@ -323,27 +343,25 @@ const Information = () => {
     initialValues: {
       Trading_Name: "",
       Trading_Address: "",
-      VAT_Registered: "",
+      VAT_Registered: "0",
       VAT_Number: "",
       Website: "",
     },
     validate: (values) => {
       let errors = {};
+      if (formik2.touched.Trading_Name == true && getAccountMangerId == "") {
+        setAccountMangerIdErr("Please select an Account Manager")
+        return
+      }
+
       if (!values.Trading_Name) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
-      else if (!values.Trading_Address) {
-        errors.Trading_Address = "Please Enter Trading Address";
-      }
+
       else if (!values.VAT_Registered) {
         errors.VAT_Registered = "Please Enter VAT Registered";
       }
-      // else  if (!values.VAT_Number) {
-      //   errors.VAT_Number = "Please Enter VAT Number";
-      // }
-      // else if (!values.Website) {
-      //   errors.Website = "Please Enter Website";
-      // }
+
       else if (values.VAT_Registered === '1' && !values.VAT_Number) {
         errors.VAT_Number = "Please Enter VAT Number";
       }
@@ -357,8 +375,8 @@ const Information = () => {
         const error = {
           firstName: contact.firstName ? "" : "First Name is required",
           lastName: contact.lastName ? "" : "Last Name is required",
-          role: contact.role ? "" : "Role is required",
-          phoneNumber: contact.phoneNumber ? "" : "Phone Number is required",
+          // role: contact.role ? "" : "Role is required",
+          // phoneNumber: contact.phoneNumber ? "" : "Phone Number is required",
           email:
             contact.email === ""
               ? "Email Id is required"
@@ -382,6 +400,10 @@ const Information = () => {
       setErrors(newErrors);
 
       if (formIsValid) {
+
+        if (getAccountMangerId == "") {
+          return
+        }
         const req = {
           customer_id: Number(customer_id),
           Trading_Name: values.Trading_Name,
@@ -422,25 +444,33 @@ const Information = () => {
   }
 
   useEffect(() => {
+
+
     formik.setFieldValue("company_name", getCompanyDetails[0]?.title);
     formik.setFieldValue("entity_type", getCompanyDetails[0]?.company_type);
-    formik.setFieldValue(
-      "company_status",
-      getCompanyDetails[0]?.company_status
-    );
-    formik.setFieldValue(
-      "company_number",
-      getCompanyDetails[0]?.company_number
-    );
-    formik.setFieldValue(
-      "Registered_Office_Addres",
-      getCompanyDetails[0]?.address_snippet
-    );
-    formik.setFieldValue(
-      "Incorporation_Date",
-      getCompanyDetails[0]?.date_of_creation
-    );
+    formik.setFieldValue("company_status", getCompanyDetails[0]?.company_status);
+    formik.setFieldValue("company_number", getCompanyDetails[0]?.company_number);
+    formik.setFieldValue("Registered_Office_Addres", getCompanyDetails[0]?.address_snippet);
+    formik.setFieldValue("Incorporation_Date", getCompanyDetails[0]?.date_of_creation);
     formik.setFieldValue("Incorporation_in", getCompanyDetails[0]?.description);
+
+    formik.setFieldValue("Trading_Name", getCompanyDetails[0]?.title);
+    formik.setFieldValue("Trading_Address", getCompanyDetails[0]?.address_snippet);
+
+    if (formik.values.search_company_name == "") {
+
+      formik.setFieldValue("company_name", "");
+      formik.setFieldValue("entity_type", "");
+      formik.setFieldValue("company_status", "");
+      formik.setFieldValue("company_number", "");
+      formik.setFieldValue("Registered_Office_Addres", "");
+      formik.setFieldValue("Incorporation_Date", "");
+      formik.setFieldValue("Incorporation_in", "");
+
+      formik.setFieldValue("Trading_Name", "");
+      formik.setFieldValue("Trading_Address", "");
+    }
+
   }, [formik.values.search_company_name]);
 
   const fields = [
@@ -462,7 +492,7 @@ const Information = () => {
     },
     {
       name: "VAT_Registered",
-       label: "VAT Registered",
+      label: "VAT Registered",
       type: "select3",
       options: [
         { value: "1", label: "Yes" },
@@ -515,7 +545,7 @@ const Information = () => {
     {
       name: "Phone",
       label: "Phone",
-      type: "number",
+      type: "number1",
       label_size: 12,
       col_size: 4,
       disable: false,
@@ -607,7 +637,7 @@ const Information = () => {
     },
     {
       name: "VAT_Registered",
-       label: "VAT Registered",
+      label: "VAT Registered",
       type: "select3",
       options: [
         { value: "1", label: "Yes" },
@@ -680,7 +710,7 @@ const Information = () => {
     },
     {
       name: "VAT_Registered",
-       label: "VAT Registered",
+      label: "VAT Registered",
       type: "select3",
       options: [
         { value: "1", label: "Yes" },
@@ -725,6 +755,30 @@ const Information = () => {
       });
   };
 
+
+  const CountryData = async (req) => {
+    const data = { req: { action: "get" }, authToken: token };
+    await dispatch(Country(data))
+      .unwrap()
+      .then(async (response) => {
+
+        if (response.status) {
+          setCountryDataAll({ loading: false, data: response.data });
+          formik.setFieldValue("CountryData", response.data);
+          formik1.setFieldValue("CountryData", response.data);
+          formik2.setFieldValue("CountryData", response.data);
+
+        } else {
+          setCountryDataAll({ loading: false, data: [] });
+        }
+
+      })
+      .catch((error) => {
+        console.log("Error", error);
+      });
+  };
+
+
   useEffect(() => {
     Get_Company();
   }, [formik.values.search_company_name]);
@@ -735,7 +789,6 @@ const Information = () => {
         Staff({ req: { action: "getmanager" }, authToken: token })
       ).unwrap();
       if (response.status) {
-        setAccountMangerId(response.data[0].id);
         setStaffDataAll({ loading: false, data: response.data });
       } else {
         setStaffDataAll({ loading: false, data: [] });
@@ -749,10 +802,12 @@ const Information = () => {
   useEffect(() => {
     CustomerPersonRoleData();
     fetchStaffData();
+    CountryData()
   }, []);
 
   const handleChangeValue = (e) => {
     setAccountMangerId(e.target.value);
+    setAccountMangerIdErr("")
   };
 
   useEffect(() => {
@@ -810,9 +865,9 @@ const Information = () => {
       case "lastName":
         newErrors[index].lastName = value ? "" : "Last Name is required";
         break;
-      case "role":
-        newErrors[index].role = value ? "" : "Role is required";
-        break;
+      // case "role":
+      // newErrors[index].role = value ? "" : "Role is required";
+      // break;
       case "email":
         if (!value) {
           newErrors[index].email = "Email Id is required";
@@ -823,9 +878,9 @@ const Information = () => {
         }
         break;
 
-      case "phoneNumber":
-        newErrors[index].phoneNumber = value ? "" : "Phone Number is required";
-        break;
+      // case "phoneNumber":
+      //   newErrors[index].phoneNumber = value ? "" : "Phone Number is required";
+      //   break;
       default:
         break;
     }
@@ -837,84 +892,81 @@ const Information = () => {
     const req = { customer_id: customer_id, pageStatus: "1" }
     const data = { req: req, authToken: token }
     await dispatch(GET_CUSTOMER_DATA(data))
-        .unwrap()
-        .then(async (response) => {
-            if (response.status) {
-              const customerDetailsExist = response.data
-              console.log("response data",response.data)
-              console.log("customerDetailsExist.customer.first_name",customerDetailsExist.customer.first_name)
-          
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const customerDetailsExist = response.data
 
-              setCustomerType(customerDetailsExist && customerDetailsExist.customer.customer_type)
-              setAccountMangerId(customerDetailsExist && customerDetailsExist.customer.account_manager_id)
-          
-              if (customerDetailsExist && customerDetailsExist.customer.customer_type == '1') {
-                formik1.setFieldValue("Trading_Name", customerDetailsExist.customer.trading_name);
-                formik1.setFieldValue("Trading_Address", customerDetailsExist.customer.trading_address);
-                formik1.setFieldValue("VAT_Registered", customerDetailsExist.customer.vat_registered);
-                formik1.setFieldValue("VAT_Number", customerDetailsExist.customer.vat_number);
-                formik1.setFieldValue("Website", customerDetailsExist.customer.website);
-                formik1.setFieldValue("First_Name", customerDetailsExist.contact_details[0].first_name);
-                formik1.setFieldValue("Last_Name", customerDetailsExist.contact_details[0].last_name);
-                formik1.setFieldValue("Phone", customerDetailsExist.contact_details[0].phone);
-                formik1.setFieldValue("Email", customerDetailsExist.contact_details[0].email);
-                formik1.setFieldValue("Residential_Address", customerDetailsExist.contact_details[0].residential_address);
-              }
-              if (customerDetailsExist && customerDetailsExist.customer.customer_type == '2') {
-                formik.setFieldValue("company_name", customerDetailsExist.customer.company_name);
-                formik.setFieldValue("entity_type", customerDetailsExist.customer.entity_type);
-                formik.setFieldValue("company_status", customerDetailsExist.customer.company_status);
-                formik.setFieldValue("company_number", customerDetailsExist.customer.company_number);
-                formik.setFieldValue("Registered_Office_Addres", customerDetailsExist.customer.registered_office_address);
-                formik.setFieldValue("Incorporation_Date", customerDetailsExist.customer.incorporation_date);
-                formik.setFieldValue("Incorporation_in", customerDetailsExist.customer.incorporation_in);
-                formik.setFieldValue("VAT_Registered", customerDetailsExist.customer.vat_registered);
-                formik.setFieldValue("VAT_Number", customerDetailsExist.customer.vat_number);
-                formik.setFieldValue("Website", customerDetailsExist.customer.website);
-                formik.setFieldValue("Trading_Name", customerDetailsExist.customer.trading_name);
-                formik.setFieldValue("Trading_Address", customerDetailsExist.customer.trading_address);
-                setContacts(customerDetailsExist && customerDetailsExist.contact_details)
-              }
-                
-              if (customerDetailsExist && customerDetailsExist.customer.customer_type == '3') {
-                formik2.setFieldValue("Trading_Name", customerDetailsExist.customer.trading_name);
-                formik2.setFieldValue("Trading_Address", customerDetailsExist.customer.trading_address);
-                formik2.setFieldValue("VAT_Registered", customerDetailsExist.customer.vat_registered);
-                formik2.setFieldValue("VAT_Number", customerDetailsExist.customer.vat_number);
-                formik2.setFieldValue("Website", customerDetailsExist.customer.website);
-                setContacts(customerDetailsExist && customerDetailsExist.contact_details)
-                
-              }
 
+
+          setCustomerType(customerDetailsExist && customerDetailsExist.customer.customer_type)
+          setAccountMangerId(customerDetailsExist && customerDetailsExist.customer.account_manager_id)
+
+          if (customerDetailsExist && customerDetailsExist.customer.customer_type == '1') {
+            formik1.setFieldValue("Trading_Name", customerDetailsExist.customer.trading_name);
+            formik1.setFieldValue("Trading_Address", customerDetailsExist.customer.trading_address);
+            formik1.setFieldValue("VAT_Registered", customerDetailsExist.customer.vat_registered);
+            formik1.setFieldValue("VAT_Number", customerDetailsExist.customer.vat_number);
+            formik1.setFieldValue("Website", customerDetailsExist.customer.website);
+            formik1.setFieldValue("First_Name", customerDetailsExist.contact_details[0].first_name);
+            formik1.setFieldValue("Last_Name", customerDetailsExist.contact_details[0].last_name);
+            formik1.setFieldValue("Phone", customerDetailsExist.contact_details[0].phone);
+            formik1.setFieldValue("Email", customerDetailsExist.contact_details[0].email);
+            formik1.setFieldValue("Residential_Address", customerDetailsExist.contact_details[0].residential_address);
+          }
+          if (customerDetailsExist && customerDetailsExist.customer.customer_type == '2') {
+            formik.setFieldValue("company_name", customerDetailsExist.customer.company_name);
+            formik.setFieldValue("entity_type", customerDetailsExist.customer.entity_type);
+            formik.setFieldValue("company_status", customerDetailsExist.customer.company_status);
+            formik.setFieldValue("company_number", customerDetailsExist.customer.company_number);
+            formik.setFieldValue("Registered_Office_Addres", customerDetailsExist.customer.registered_office_address);
+            formik.setFieldValue("Incorporation_Date", customerDetailsExist.customer.incorporation_date);
+            formik.setFieldValue("Incorporation_in", customerDetailsExist.customer.incorporation_in);
+            formik.setFieldValue("VAT_Registered", customerDetailsExist.customer.vat_registered);
+            formik.setFieldValue("VAT_Number", customerDetailsExist.customer.vat_number);
+            formik.setFieldValue("Website", customerDetailsExist.customer.website);
+            formik.setFieldValue("Trading_Name", customerDetailsExist.customer.trading_name);
+            formik.setFieldValue("Trading_Address", customerDetailsExist.customer.trading_address);
+            setContacts(customerDetailsExist && customerDetailsExist.contact_details)
+          }
+
+          if (customerDetailsExist && customerDetailsExist.customer.customer_type == '3') {
+            formik2.setFieldValue("Trading_Name", customerDetailsExist.customer.trading_name);
+            formik2.setFieldValue("Trading_Address", customerDetailsExist.customer.trading_address);
+            formik2.setFieldValue("VAT_Registered", customerDetailsExist.customer.vat_registered);
+            formik2.setFieldValue("VAT_Number", customerDetailsExist.customer.vat_number);
+            formik2.setFieldValue("Website", customerDetailsExist.customer.website);
+            setContacts(customerDetailsExist && customerDetailsExist.contact_details)
+
+          }
 
 
 
 
 
-                setCustomerDetails({
-                    loading: false,
-                    data: response.data
-                });
-            }
-            else {
-                setCustomerDetails({
-                    loading: false,
-                    data: []
-                });
-            }
-        })
-        .catch((error) => {
-            console.log("Error 11", error);
-        });
-}
 
-useEffect(() => {
-   if(customer_id != null){
-   GetCustomerData()
-   }
-}, []);
+          setCustomerDetails({
+            loading: false,
+            data: response.data
+          });
+        }
+        else {
+          setCustomerDetails({
+            loading: false,
+            data: []
+          });
+        }
+      })
+      .catch((error) => {
+        console.log("Error 11", error);
+      });
+  }
 
-
+  useEffect(() => {
+    if (customer_id != null) {
+      GetCustomerData()
+    }
+  }, []);
 
 
   return (
@@ -963,7 +1015,7 @@ useEffect(() => {
                   <div className="card-header step-header-blue align-items-center d-flex">
                     <h4 className="card-title mb-0 flex-grow-1">
                       Outbooks Account Manager
-                       
+
                     </h4>
                   </div>
                   <div className="card-body">
@@ -975,18 +1027,23 @@ useEffect(() => {
                           className="form-select mb-3"
                           onChange={(e) => handleChangeValue(e)}
                         >
-                          {/* <option value="" selected>
+                          <option value="" selected>
                             Please select
-                          </option> */}
+                          </option>
                           {staffDataAll.data.map((data) => (
                             <option key={data.id} value={data.id}>
                               {data.first_name}
                             </option>
                           ))}
                         </Field>
+
+                        {getAccountMangerIdErr && (
+                          <div style={{ color: "red" }}>{getAccountMangerIdErr && getAccountMangerIdErr}</div>
+                        )}
                       </div>
                     </div>
                   </div>
+
                 </div>
               </div>
             </div>
@@ -1071,56 +1128,6 @@ useEffect(() => {
                                           )}
                                           <div className="col-lg-4 ps-1">
                                             <div className="mb-3">
-                                              {/* <label
-                               
-                                  <div className="card-header card-header-light-blue step-card-header align-items-center d-flex">
-                                    <h4 className="card-title mb-0 flex-grow-1">
-                                      Contact Details
-                                    </h4>
-                                  </div>
-                                 
-                                    <div className="row mt-3">
-                                      {contacts.map((contact, index) => (
-                                        <div
-                                          className="col-xl-12 col-lg-12 mt-3"
-                                          key={index}
-                                        >
-                                          <div className=" pricing-box  m-2 mt-0">
-                                            <div className="row">
-                                              {index !== 0 && (
-                                                <div className="col-lg-12">
-                                                  <div className="form-check mb-3 d-flex justify-content-end">
-                                                    <button
-                                                      className="btn btn-danger"
-                                                      onClick={() =>
-                                                        handleDeleteContact(
-                                                          index
-                                                        )
-                                                      }
-                                                      disabled={
-                                                        contacts.length === 1
-                                                      }
-                                                    >
-                                                      Delete
-                                                    </button>
-                                                  </div>
-                                                </div>
-                                              )}
-                                              <div className="col-lg-4 ps-1">
-                                                <div className="mb-3">
-                                                  {/* <label
-                                                    htmlFor={`firstName-${index}`}
-                                                    className="form-label"
-                                                  >
-                                                    First Name
-                                                    <span
-                                                      style={{
-                                                        color: "red",
-                                                      }}
-                                                    >
-                                                      *
-                                                    </span>
-                                                  </label> */}
                                               <input
                                                 type="text"
                                                 className="form-control"
@@ -1148,19 +1155,7 @@ useEffect(() => {
                                           </div>
                                           <div className="col-lg-4">
                                             <div className="mb-3">
-                                              {/* <label
-                                                    htmlFor={`lastName-${index}`}
-                                                    className="form-label"
-                                                  >
-                                                    Last Name
-                                                    <span
-                                                      style={{
-                                                        color: "red",
-                                                      }}
-                                                    >
-                                                      *
-                                                    </span>
-                                                  </label> */}
+
                                               <input
                                                 type="text"
                                                 className="form-control"
@@ -1188,19 +1183,7 @@ useEffect(() => {
                                           </div>
                                           <div className="col-lg-4">
                                             <div className="mb-3">
-                                              {/* <label
-                                                    htmlFor={`role-${index}`}
-                                                    className="form-label"
-                                                  >
-                                                    Role
-                                                    <span
-                                                      style={{
-                                                        color: "red",
-                                                      }}
-                                                    >
-                                                      *
-                                                    </span>
-                                                  </label> */}
+
                                               <select
                                                 className="form-select"
                                                 id={`role-${index}`}
@@ -1239,14 +1222,27 @@ useEffect(() => {
                                               )}
                                             </div>
                                           </div>
+
                                           <div className="col-lg-4 ps-1">
-                                            <div className="mb-3">
-                                              {/* <label
-                                                    htmlFor={`phone-${index}`}
-                                                    className="form-label"
-                                                  >
-                                                    Phone
-                                                  </label> */}
+                                            <div className="mb-3 d-flex align-items-center">
+
+                                              <select
+                                                className="form-select me-2"
+                                                id={`countryCode-${index}`}
+                                                value={contact.countryCode}
+                                                onChange={(e) =>
+                                                  handleChange(index, "countryCode", e.target.value)
+                                                }
+                                                style={{ width: "30%" }}
+                                              >
+                                                {countryDataAll && countryDataAll.data.map((item, i) => (
+                                                  <option value={item.code} key={i}>
+                                                    {item.code}
+                                                  </option>
+                                                ))}
+                                              </select>
+
+
                                               <input
                                                 type="number"
                                                 className="form-control"
@@ -1254,43 +1250,23 @@ useEffect(() => {
                                                 id={`phoneNumber-${index}`}
                                                 value={contact.phoneNumber}
                                                 onChange={(e) =>
-                                                  handleChange(
-                                                    index,
-                                                    "phoneNumber",
-                                                    e.target.value
-                                                  )
+                                                  handleChange(index, "phoneNumber", e.target.value)
                                                 }
+                                                style={{ width: "70%" }}
                                               />
-                                              {errors[index]
-                                                .phoneNumber && (
-                                                  <div
-                                                    style={{
-                                                      color: "red",
-                                                    }}
-                                                  >
-                                                    {
-                                                      errors[index]
-                                                        .phoneNumber
-                                                    }
-                                                  </div>
-                                                )}
                                             </div>
+
+                                            {/* Error Display */}
+                                            {errors[index] && errors[index].phoneNumber && (
+                                              <div style={{ color: "red" }}>
+                                                {errors[index].phoneNumber}
+                                              </div>
+                                            )}
                                           </div>
+
                                           <div className="col-lg-4 ">
                                             <div className="mb-3">
-                                              {/* <label
-                                                    htmlFor={`email-${index}`}
-                                                    className="form-label"
-                                                  >
-                                                    Email
-                                                    <span
-                                                      style={{
-                                                        color: "red",
-                                                      }}
-                                                    >
-                                                      *
-                                                    </span>
-                                                  </label> */}
+
                                               <input
                                                 type="text"
                                                 className="form-control"
@@ -1577,13 +1553,29 @@ useEffect(() => {
                                                   </div>
                                                 </div>
                                                 <div className="col-lg-4">
-                                                  <div className="mb-3">
-                                                    <label
+                                                  <label
                                                       htmlFor={`phone-${index}`}
                                                       className="form-label"
                                                     >
                                                       Phone
                                                     </label>
+                                                  <div className="mb-3 d-flex align-items-center">
+                                                    <select
+                                                      className="form-select me-2"
+                                                      id={`countryCode-${index}`}
+                                                      value={contact.countryCode}
+                                                      onChange={(e) =>
+                                                        handleChange(index, "countryCode", e.target.value)
+                                                      }
+                                                      style={{ width: "30%" }}
+                                                    >
+                                                      {countryDataAll && countryDataAll.data.map((item, i) => (
+                                                        <option value={item.code} key={i}>
+                                                          {item.code}
+                                                        </option>
+                                                      ))}
+                                                    </select>
+                                                
                                                     <input
                                                       type="number"
                                                       className="form-control"
@@ -1670,15 +1662,13 @@ useEffect(() => {
                                             Add Contact
                                           </button>
                                         </div>
-                                        {/* <div className="d-flex justify-content-end">
-                                                                                                    <button className="btn btn-success" type="submit">Submit</button>
-                                                                                                </div> */}
+
                                       </div>
                                     </form>
                                   </div>
                                 </div>
                               </div>
-                            </div> 
+                            </div>
                             {/* end col */}
                           </div>
                         </section>
@@ -1886,14 +1876,6 @@ useEffect(() => {
             </div>
           </section>
 
-          {/* <div className="form__item button__items d-flex justify-content-between">
-                        <Button className="white-btn" type="default" onClick={prev}>
-                            Back
-                        </Button>
-                        <Button className="btn btn-info text-white blue-btn" type="submit" onClick={handleSubmit}>
-                            Next
-                        </Button>
-                    </div> */}
         </div>
       )}
     </Formik>

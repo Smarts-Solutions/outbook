@@ -976,7 +976,7 @@ const Setting = () => {
               CountryData(req);
               break;
             default:
-              console.log("Invalid tabStatus");
+            
               break;
           }
           sweatalert.fire({

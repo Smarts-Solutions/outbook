@@ -23,7 +23,7 @@ const loginRequest = {
 export const initializeMsal = async () => {
     try {
         await pca.initialize();
-        console.log('MSAL initialized successfully');
+        // console.log('MSAL initialized successfully');
     } catch (error) {
         console.error('Error initializing MSAL:', error);
     }
@@ -32,7 +32,7 @@ export const initializeMsal = async () => {
 export const azureLogin = async () => {
     await initializeMsal(); // Ensure MSAL is initialized before login
     try {
-        console.log('login Accounts',pca.getAllAccounts());
+    
         await pca.loginPopup(loginRequest);
         return pca.getAllAccounts();
     } catch (error) {

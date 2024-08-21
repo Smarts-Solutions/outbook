@@ -67,12 +67,12 @@ const Customer = () => {
 
 
   function handleEdit(row) {
-    console.log('Editing row:', row.id);
+
     navigate('/admin/editcustomer', { state: row });
   }
 
   function handleDelete(row) {
-    console.log('Deleting row:', row);
+  
   }
 
 
