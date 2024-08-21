@@ -111,7 +111,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         </select>
                         {formik.touched[field.name] &&
                           formik.errors[field.name] && (
-                            <div className="error-text">
+                            <div className="error-text"  style={{color:"red"}}>
                               {formik.errors[field.name]}
                             </div>
                           )}
@@ -383,7 +383,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         </div>
                         {formik.touched[field.name] &&
                           formik.errors[field.name] && (
-                            <div className="error-text">
+                            <div className="error-text" style={{color:"red"}}>
                               {formik.errors[field.name]}
                             </div>
                           )}
