@@ -50,7 +50,6 @@ const Paper = () => {
                         data.append("files", file);
                     });
 
-                    console.log("FormData after appending files:", data.getAll("files"));
                 } else {
                     setCustomerDetails({
                         loading: false,
@@ -73,7 +72,7 @@ const Paper = () => {
 
         if (fileState && typeof fileState[Symbol.iterator] === 'function') {
             Array.from(fileState).forEach((file, index) => {
-                console.log("file", file)
+      
 
                 data.append("files", file);
             });
@@ -106,7 +105,6 @@ const Paper = () => {
     };
 
 
-    console.log("---", data.getAll("files"));
 
     return (
         <Formik

@@ -334,7 +334,7 @@ const CreateJob = () => {
                             }, 1500);
                         }, 1500);
                     } else {
-                        console.log("response", response)
+                       
                     }
                 })
                 .catch((error) => {

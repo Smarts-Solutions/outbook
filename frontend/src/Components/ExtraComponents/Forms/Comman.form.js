@@ -363,7 +363,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                                                                                 {field.filteredCompanies && field.filteredCompanies.map((company, index) => (
                                                                                                     <div key={index} onClick={() => setSelectSearchItem(company.title)}>
 
-                                                                                                        {console.log("company", company)}
+                                                                                                
                                                                                                         {company.title}
                                                                                                     </div>
 

@@ -315,7 +315,6 @@ const Information = () => {
       if (getAccountMangerId == "") {
         return
       }
-      console.log("values", values)
 
       const req = {
         customer_id: Number(customer_id),
@@ -445,8 +444,7 @@ const Information = () => {
   }
 
   useEffect(() => {
-    console.log("getCompanyDetails[0]", getCompanyDetails[0])
-    console.log("formik.values.search_company_name", formik.values.search_company_name)
+
 
     formik.setFieldValue("company_name", getCompanyDetails[0]?.title);
     formik.setFieldValue("entity_type", getCompanyDetails[0]?.company_type);

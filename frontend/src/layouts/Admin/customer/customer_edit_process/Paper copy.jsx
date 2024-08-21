@@ -88,7 +88,7 @@ const Paper = () => {
     };
 
     const removeItem = async (file) => {
-        console.log("id", file);
+
         const req = { action: "delete", customer_id: location.state.id, id: file.customer_paper_work_id, file_name: file.file_name };
         const data = { req: req, authToken: token };
 

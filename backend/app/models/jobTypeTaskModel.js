@@ -120,7 +120,6 @@ const getTask = async (task) => {
 const addChecklist = async (checklist) => {
     const {customer_id,service_id,job_type_id,client_type_id,check_list_name,status,task} = checklist;
      
-    console.log("checklist ",checklist)
     try {
     const query = `
     INSERT INTO checklists (customer_id,service_id,job_type_id,client_type_id,check_list_name,status)

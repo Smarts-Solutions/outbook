@@ -36,7 +36,7 @@ const CommonModal = ({ modalId, title, businessOpen, colDetails, onClose, onSave
 
     const handleUpdate = () => {
 
-        console.log('Data:', data);
+     
 
     };
 

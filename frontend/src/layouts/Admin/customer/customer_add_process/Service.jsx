@@ -22,7 +22,6 @@ const Service = () => {
     const [services, setServices] = useState([]);
     const [tempServices, setTempServices] = useState("");
 
-console.log("next", address)
 
     const GetAllServiceData = async () => {
         const req = { action: "get" };
@@ -37,7 +36,6 @@ console.log("next", address)
                 }
             })
             .catch((error) => {
-                console.log("Error", error);
                 setAllService({ loading: false, data: [] });
             });
     }
@@ -178,7 +176,6 @@ console.log("next", address)
             services: MatchData
         };
     
-        console.log("req", req);
     
         // Send request
         const data = { req: req, authToken: token };

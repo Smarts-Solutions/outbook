@@ -258,7 +258,7 @@ const CreateJob = () => {
                             location.state.goto == "Customer" ? navigate('/admin/Clientlist', { state: location.state.details }) : navigate('/admin/client/profile', { state: location.state.details });
                         }, 1500);
                     } else {
-                        console.log("response", response)
+                     
                     }
                 })
                 .catch((error) => {
@@ -286,7 +286,6 @@ const CreateJob = () => {
         }
     }
 
-console.log(location.state)
 
     return (
         <div>

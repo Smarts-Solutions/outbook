@@ -119,7 +119,6 @@ const ClientList = () => {
 
 
 
-  console.log(" location.state.row.id  :",  getClientDetails && getClientDetails.data )
 
  
   const GetAllJobList = async () => {
@@ -225,7 +224,7 @@ const ClientList = () => {
                       <div className="dastyle-profile_user-detail">
                         <h5 className="dastyle-user-name">Mr.Ajeet Agarwal</h5>
                         <p className="mb-0 dastyle-user-name-post">
-                          Client Code: {getClientDetails && getClientDetails.data.client.client_code}
+                          Client Code: {getClientDetails.data && getClientDetails.data.client && getClientDetails.data.client.client_code}
                         </p>
                       </div>
                     </div>
@@ -250,7 +249,7 @@ const ClientList = () => {
                         <b>
                           <span className="">Trading Name</span>
                         </b>
-                        <p className="">Outbooks Outsourcing Pvt Ltd</p>
+                        <p className=""> {getClientDetails.data && getClientDetails.data.client && getClientDetails.data.client.trading_name}</p>
                       </div>
 
                       <div className="col-auto">
@@ -258,8 +257,7 @@ const ClientList = () => {
                           <span className="">Trading Address</span>
                         </b>
                         <p className="mb-0 ">
-                          Suite 18, Winsor & Newton Building, Whitefriars Avenue,
-                          Harrow HA3 5RN
+                        {getClientDetails.data && getClientDetails.data.client && getClientDetails.data.client.trading_address}
                         </p>
                       </div>
 
