@@ -338,17 +338,17 @@ const CreateClient = () => {
         const newErrors = {};
         for (const key in getSoleTraderDetails) {
             if (!getSoleTraderDetails[key]) {
-                if (key == 'IndustryType') newErrors[key] = 'Select Client Industry';
-                else if (key == 'tradingName') newErrors[key] = 'Please enter Trading Name';
+                // if (key == 'IndustryType') newErrors[key] = 'Select Client Industry';
+                 if (key == 'tradingName') newErrors[key] = 'Please enter Trading Name';
                 else if (key == 'tradingAddress') newErrors[key] = 'Please enter Trading Address';
                 else if (key == 'vatRegistered') newErrors[key] = 'Please select VAT Registered';
-                else if (key == 'vatNumber') newErrors[key] = 'Please enter VAT Number';
-                else if (key == 'website') newErrors[key] = 'Please enter Website';
+                // else if (key == 'vatNumber') newErrors[key] = 'Please enter VAT Number';
+                // else if (key == 'website') newErrors[key] = 'Please enter Website';
                 else if (key == 'first_name') newErrors[key] = 'Please enter First Name';
                 else if (key == 'last_name') newErrors[key] = 'Please enter Last Name';
-                else if (key == 'phone') newErrors[key] = 'Please enter Phone';
-                else if (key == 'email') newErrors[key] = 'Please enter Email';
-                else if (key == 'residentialAddress') newErrors[key] = 'Please enter Residential Address';
+                // else if (key == 'phone') newErrors[key] = 'Please enter Phone';
+                // else if (key == 'email') newErrors[key] = 'Please enter Email';
+                // else if (key == 'residentialAddress') newErrors[key] = 'Please enter Residential Address';
             }
             else if (key == 'email' && !Email_regex(getSoleTraderDetails[key])) {
                 newErrors[key] = 'Please enter valid Email';
@@ -370,9 +370,9 @@ const CreateClient = () => {
                 else if (key == 'IncorporationDate') newErrors[key] = 'Please Enter Incorporation Date';
                 else if (key == 'IncorporationIn') newErrors[key] = 'Please Enter Incorporation In';
                 else if (key == 'VATRegistered') newErrors[key] = 'Please Enter VAT Registered';
-                else if (key == 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
-                else if (key == 'Website') newErrors[key] = 'Please Enter Website';
-                else if (key == 'ClientIndustry') newErrors[key] = 'Please Enter Client Industry';
+                // else if (key == 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
+                // else if (key == 'Website') newErrors[key] = 'Please Enter Website';
+                // else if (key == 'ClientIndustry') newErrors[key] = 'Please Enter Client Industry';
                 else if (key == 'TradingName') newErrors[key] = 'Please Enter Trading Name';
                 else if (key == 'TradingAddress') newErrors[key] = 'Please Enter Trading Address';
             }
@@ -387,12 +387,12 @@ const CreateClient = () => {
             if (!getPartnershipDetails[key]) {
                 console.log("key", key)
 
-                if (key === 'ClientIndustry') newErrors[key] = 'Please Select Client Industry';
-                else if (key === 'TradingName') newErrors[key] = 'Please Enter Trading Name';
+                // if (key === 'ClientIndustry') newErrors[key] = 'Please Select Client Industry';
+                 if (key === 'TradingName') newErrors[key] = 'Please Enter Trading Name';
                 else if (key === 'TradingAddress') newErrors[key] = 'Please Enter Trading Address';
                 else if (key === 'VATRegistered') newErrors[key] = 'Please Enter VAT Registered';
-                else if (key === 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
-                else if (key === 'Website') newErrors[key] = 'Please Enter Website';
+                // else if (key === 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
+                // else if (key === 'Website') newErrors[key] = 'Please Enter Website';
             }
         }
 
@@ -649,9 +649,9 @@ const CreateClient = () => {
                                                                                                 })
                                                                                             }
                                                                                         </select>
-                                                                                        {errors1['IndustryType'] && (
+                                                                                        {/* {errors1['IndustryType'] && (
                                                                                             <div style={{ 'color': 'red' }}>{errors1['IndustryType']}</div>
-                                                                                        )}
+                                                                                        )} */}
                                                                                     </div>
                                                                                 </div>
                                                                                 <div className="col-lg-4">
@@ -707,9 +707,9 @@ const CreateClient = () => {
                                                                                             value={getSoleTraderDetails.vatNumber}
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                         />
-                                                                                        {errors1['vatNumber'] && (
+                                                                                        {/* {errors1['vatNumber'] && (
                                                                                             <div style={{ 'color': 'red' }}>{errors1['vatNumber']}</div>
-                                                                                        )}
+                                                                                        )} */}
                                                                                     </div>
                                                                                 </div>
                                                                                 <div className="col-lg-4">
@@ -942,9 +942,9 @@ const CreateClient = () => {
                                                                                                     <input type="text" className="form-control " placeholder="VAT Number"
                                                                                                         name="VATNumber" onChange={(e) => handleChange2(e)} value={getCompanyDetails.VATNumber}
                                                                                                     />
-                                                                                                    {errors2['VATNumber'] && (
+                                                                                                    {/* {errors2['VATNumber'] && (
                                                                                                         <div style={{ 'color': 'red' }}>{errors2['VATNumber']}</div>
-                                                                                                    )}
+                                                                                                    )} */}
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
@@ -954,9 +954,9 @@ const CreateClient = () => {
                                                                                                 <input type="text" className="form-control " placeholder="URL"
                                                                                                     name="Website" onChange={(e) => handleChange2(e)} value={getCompanyDetails.Website}
                                                                                                 />
-                                                                                                {errors2['Website'] && (
+                                                                                                {/* {errors2['Website'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['Website']}</div>
-                                                                                                )}
+                                                                                                )} */}
                                                                                             </div>
                                                                                         </div>
                                                                                     </div>
@@ -982,9 +982,9 @@ const CreateClient = () => {
                                                                                                 }
 
                                                                                             </select>
-                                                                                            {errors2['ClientIndustry'] && (
+                                                                                            {/* {errors2['ClientIndustry'] && (
                                                                                                 <div style={{ 'color': 'red' }}>{errors2['ClientIndustry']}</div>
-                                                                                            )}
+                                                                                            )} */}
                                                                                         </div>
                                                                                     </div>
                                                                                     <div className="col-lg-4">
@@ -1167,9 +1167,9 @@ const CreateClient = () => {
                                                                                                     }
 
                                                                                                 </select>
-                                                                                                {errors3['ClientIndustry'] && (
+                                                                                                {/* {errors3['ClientIndustry'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors3['ClientIndustry']}</div>
-                                                                                                )}
+                                                                                                )} */}
                                                                                             </div>
                                                                                         </div>
                                                                                         <div className="col-lg-4">
@@ -1216,8 +1216,8 @@ const CreateClient = () => {
                                                                                                     <input type="text" className="form-control " placeholder="VAT Number"
                                                                                                         name="VATNumber" value={getPartnershipDetails.VATNumber} onChange={(e) => handleChange3(e)}
                                                                                                     />
-                                                                                                    {errors3['VATNumber'] && (
-                                                                                                        <div style={{ 'color': 'red' }}>{errors3['VATNumber']}</div>)}
+                                                                                                    {/* {errors3['VATNumber'] && (
+                                                                                                        <div style={{ 'color': 'red' }}>{errors3['VATNumber']}</div>)} */}
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
@@ -1230,8 +1230,8 @@ const CreateClient = () => {
                                                                                                     name="Website" value={getPartnershipDetails.Website} onChange={(e) => handleChange3(e)}
                                                                                                 />
 
-                                                                                                {errors3['Website'] && (
-                                                                                                    <div style={{ 'color': 'red' }}>{errors3['Website']}</div>)}
+                                                                                                {/* {errors3['Website'] && (
+                                                                                                    <div style={{ 'color': 'red' }}>{errors3['Website']}</div>)} */}
                                                                                             </div>
                                                                                         </div>
                                                                                     </div>
