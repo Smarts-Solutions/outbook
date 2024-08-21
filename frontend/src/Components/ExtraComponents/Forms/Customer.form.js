@@ -23,9 +23,9 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
 
 
   return (
-    <form onSubmit={formik.handleSubmit}>
+    <form className="w-100" onSubmit={formik.handleSubmit}>
       <div
-        className="row"
+        className=""
         style={{
           height: `${title === "addgroup" ? "65vh" : ""}`,
           overflowY: `${title === "addgroup" ? "scroll" : ""}`,
@@ -68,7 +68,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         </select>
                         {formik.touched[field.name] &&
                           formik.errors[field.name] && (
-                            <div style={{ color: "red" }}>
+                            <div className="error-text">
                               {formik.errors[field.name]}
                             </div>
                           )}
@@ -111,7 +111,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         </select>
                         {formik.touched[field.name] &&
                           formik.errors[field.name] && (
-                            <div style={{ color: "red" }}>
+                            <div className="error-text">
                               {formik.errors[field.name]}
                             </div>
                           )}
@@ -148,7 +148,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                   </div>
                                   {formik.touched[field.name] &&
                                     formik.errors[field.name] && (
-                                      <div style={{ color: "red" }}>
+                                      <div className="error-text">
                                         {formik.errors[field.name]}
                                       </div>
                                     )}
@@ -182,7 +182,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                             </div>
                             {formik.touched[field.name] &&
                               formik.errors[field.name] && (
-                                <div style={{ color: "red" }}>
+                                <div className="error-text">
                                   {formik.errors[field.name]}
                                 </div>
                               )}
@@ -283,7 +283,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         ></i>
                         {formik.touched[field.name] &&
                           formik.errors[field.name] && (
-                            <div style={{ color: "red" }}>
+                            <div className="error-text">
                               {formik.errors[field.name]}
                             </div>
                           )}
@@ -311,7 +311,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         </div>
                         {formik.touched[field.name] &&
                           formik.errors[field.name] && (
-                            <div style={{ color: "red" }}>
+                            <div className="error-text">
                               {formik.errors[field.name]}
                             </div>
                           )}
@@ -347,7 +347,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         </div>
                         {formik.touched[field.name] &&
                           formik.errors[field.name] && (
-                            <div style={{ color: "red" }}>
+                            <div className="error-text">
                               {formik.errors[field.name]}
                             </div>
                           )}
@@ -383,7 +383,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         </div>
                         {formik.touched[field.name] &&
                           formik.errors[field.name] && (
-                            <div style={{ color: "red" }}>
+                            <div className="error-text">
                               {formik.errors[field.name]}
                             </div>
                           )}
@@ -419,7 +419,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         </div>
                         {formik.touched[field.name] &&
                           formik.errors[field.name] && (
-                            <div style={{ color: "red" }}>
+                            <div className="error-text">
                               {formik.errors[field.name]}
                             </div>
                           )}
@@ -531,7 +531,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         </div>
                         {formik.touched[field.name] &&
                           formik.errors[field.name] && (
-                            <div style={{ color: "red" }}>
+                            <div className="error-text">
                               {formik.errors[field.name]}
                             </div>
                           )}
@@ -592,7 +592,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         </div>
                         {formik.touched[field.name] &&
                           formik.errors[field.name] && (
-                            <div style={{ color: "red" }}>
+                            <div className="error-text">
                               {formik.errors[field.name]}
                             </div>
                           )}
@@ -605,7 +605,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                   <>
                     <div className={`col-lg-${field.col_size}`}>
                       <div className="mb-3  mt-4 row flex-column">
-                        <div className="card-header step-card-header mb-4" ><h6 className="my-0">Trading Details </h6></div>
+                        <div className="card-header card-header-light-blue step-card-header mb-4 card-header-light-blue" ><h6 className="my-0">Trading Details </h6></div>
                         {/* <label
                         className={`col-lg-${field.label_size}`}
                         htmlFor={field.name}
@@ -622,7 +622,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                   <>
                     <div className={`col-lg-${field.col_size}`}>
                       <div className="mb-3  mt-4 row flex-column">
-                        <div className="card-header step-card-header" ><h6 className="my-0">Sole Trading </h6></div>
+                        <div className="card-header card-header-light-blue step-card-header" ><h6 className="my-0">Sole Trading </h6></div>
                         {/* <label
                         className={`col-lg-${field.label_size}`}
                         htmlFor={field.name}
@@ -643,14 +643,14 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
           <div className="modal-footer d-flex justify-content-between">
             <button
               type="button"
-              className="btn btn-secondry border m-2"
+              className="btn btn-secondary m-2"
               onClick={closeBtn}
             >
-              Back
+              Previous
             </button>
 
             <button
-              className={`btn btn-info text-white blue-btn`}
+              className={`btn btn-info text-white blue-btn m-2 `}
               type="submit"
               disabled={formik.isSubmitting}
             >

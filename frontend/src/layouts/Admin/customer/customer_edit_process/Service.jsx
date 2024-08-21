@@ -304,9 +304,9 @@ const Service = () => {
                                                                 <td className="text-align-right">
                                                                     <button
                                                                         onClick={() => removeManager(accountManager.id, manager.service_id)}
-                                                                        className="btn btn-sm btn-danger remove-item-btn"
+                                                                        className="btn btn-sm  remove-item-btn"
                                                                     >
-                                                                        Remove
+                                                                        <i className="ti-trash text-danger fs-5"></i>
                                                                     </button>
                                                                 </td>
                                                             </tr>

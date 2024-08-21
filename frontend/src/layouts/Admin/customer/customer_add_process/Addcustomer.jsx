@@ -89,7 +89,7 @@ const AddCustomer = () => {
                 </div>
             </div> */}
             <div className="col-sm-12">
-                <div className="page-title-box">
+                <div className="page-title-box pt-3">
                
                     <Provider value={{ details, setDetails, next, prev, address, setAddress }}>
                         <Steps current={currentStep}>
