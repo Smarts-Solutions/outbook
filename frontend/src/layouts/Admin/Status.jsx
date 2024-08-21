@@ -61,10 +61,10 @@ const Status = () => {
               <button type="button"
 
                 data-bs-toggle="modal"
-                data-bs-target="#exampleModal" className='btn btn-info text-white float-end ms-2'> <i className="fa fa-plus" />Add Status</button>
+                data-bs-target="#exampleModal" className='btn btn-info text-white float-end ms-2'> <i className="fa fa-plus pe-1" />  Add Status</button>
               <button type="button"
 
-                className='btn btn-info text-white float-end '>View Log</button>
+                className='btn btn-info text-white float-end '>   <i className="fa-regular fa-eye pe-1"></i> View Log</button>
 
             </div>
           </div>
@@ -147,7 +147,7 @@ const Status = () => {
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary">Save </button>
+                <button type="button" class="btn btn-info">Save </button>
               </div>
             </div>
           </div>

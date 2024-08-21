@@ -400,7 +400,7 @@ const Engagement = () => {
                                                         </div>
                                                     </div>
                                                     <div className="card-body">
-                                                    <div className="row align-items-end">
+                                                    <div className="row">
                                                         {[
                                                             { label: 'Accountants', name: 'accountants', feeName: "Number of Accountants" },
                                                             { label: '', name: 'feePerAccountant', feeName: "Fee Per Accountant" },
@@ -414,12 +414,12 @@ const Engagement = () => {
                                                             { label: '', name: 'feePerAdmin', feeName: "Fee Per Admin/Other Staff" },
                                                         ].map((field, index) => (
                                                             
-                                                            <div className="col-lg-3" key={index}>
+                                                            <div className="col-lg-6" key={index}>
                                                                 
                                                                 
                                                                 <div className="mb-3 cl">
-                                                                <label className="form-label">{field.label}</label>
-                                                                    {/* <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label> */}
+                                                                <label className="form-label d-block label-height">{field.label}</label>
+                                                                    <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label>
                                                                     <input
                                                                         type="text"
                                                                         className="form-control"
@@ -429,7 +429,7 @@ const Engagement = () => {
                                                                         onChange={(e) => handleChange1(e)}
                                                                     />
                                                                     {errors1[field.name] && (
-                                                                        <div className="text-danger">{errors1[field.name]}</div>
+                                                                        <div className="error-text">{errors1[field.name]}</div>
                                                                     )}
                                                                 </div>
                                                             </div>
@@ -476,7 +476,7 @@ const Engagement = () => {
                                                                         onChange={handleChange2}
                                                                     />
                                                                     {errors2[field.name] && (
-                                                                        <div className="text-danger">{errors2[field.name]}</div>
+                                                                        <div className="error-text">{errors2[field.name]}</div>
                                                                     )}
 
                                                                 </div>
@@ -522,7 +522,7 @@ const Engagement = () => {
                                                                         onChange={handleChange3}
                                                                     />
                                                                     {errors3[field.name] && (
-                                                                        <div className="text-danger">{errors3[field.name]}</div>
+                                                                        <div className="error-text">{errors3[field.name]}</div>
                                                                     )}
 
                                                                 </div>
@@ -566,7 +566,7 @@ const Engagement = () => {
                                                                             onChange={(e) => handleChange4(index, e)}
                                                                         />
                                                                         {errors4[index] && (
-                                                                            <div className="text-danger">{errors4[index].minimum_number_of_jobs}</div>
+                                                                            <div className="error-text">{errors4[index].minimum_number_of_jobs}</div>
                                                                         )}
                                                                     </div>
                                                                 </div>
@@ -576,7 +576,7 @@ const Engagement = () => {
                                                                     </label>
                                                                     <select
                                                                         id={`jobType_${index}`}
-                                                                        className="form-select mb-3"
+                                                                        className="form-select "
                                                                         name="job_type_id"
                                                                         value={job.job_type_id}
                                                                         onChange={(e) => handleChange4(index, e)}
@@ -587,7 +587,7 @@ const Engagement = () => {
                                                                         ))}
                                                                     </select>
                                                                     {errors4[index] && (
-                                                                        <div className="text-danger">{errors4[index].job_type_id}</div>
+                                                                        <div className="error-text">{errors4[index].job_type_id}</div>
                                                                     )}
 
 
@@ -609,7 +609,7 @@ const Engagement = () => {
                                                                             onChange={(e) => handleChange4(index, e)}
                                                                         />
                                                                         {errors4[index] && (
-                                                                            <div className="text-danger">{errors4[index].cost_per_job}</div>
+                                                                            <div className="error-text">{errors4[index].cost_per_job}</div>
                                                                         )}
                                                                     </div>
                                                                 </div>

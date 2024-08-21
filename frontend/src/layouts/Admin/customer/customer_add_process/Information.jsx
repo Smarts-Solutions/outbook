@@ -995,8 +995,8 @@ useEffect(() => {
             <div className="row" id="form1">
               {CustomerType == 1 ? (
                 <>
-                  <div className="card card_shadow pt-3">
-                    <div className="card-header  step-card-header align-items-center d-flex">
+                  <div className="card card_shadow p-0 ">
+                    <div className="card-header card-header-light-blue  step-card-header align-items-center d-flex">
                       <h4 className="card-title mb-0 flex-grow-1">
                         Sole Trader
                       </h4>
@@ -1016,13 +1016,13 @@ useEffect(() => {
                 </>
               ) : CustomerType == 2 ? (
                 <>
-                  <div className="card card_shadow pt-3 ">
-                    <div className="card-header mb-3 step-card-header align-items-center d-flex">
+                  <div className="card card_shadow px-0">
+                    <div className="card-header card-header-light-blue  mb-3 step-card-header align-items-center d-flex">
                       <h4 className="card-title mb-0 flex-grow-1">
                         Company Information
                       </h4>
                     </div>
-
+                    <div className="card-body">
                     <AddFrom
                       fieldtype={fields1.filter(
                         (field) =>
@@ -1072,6 +1072,43 @@ useEffect(() => {
                                           <div className="col-lg-4 ps-1">
                                             <div className="mb-3">
                                               {/* <label
+                               
+                                  <div className="card-header card-header-light-blue step-card-header align-items-center d-flex">
+                                    <h4 className="card-title mb-0 flex-grow-1">
+                                      Contact Details
+                                    </h4>
+                                  </div>
+                                 
+                                    <div className="row mt-3">
+                                      {contacts.map((contact, index) => (
+                                        <div
+                                          className="col-xl-12 col-lg-12 mt-3"
+                                          key={index}
+                                        >
+                                          <div className=" pricing-box  m-2 mt-0">
+                                            <div className="row">
+                                              {index !== 0 && (
+                                                <div className="col-lg-12">
+                                                  <div className="form-check mb-3 d-flex justify-content-end">
+                                                    <button
+                                                      className="btn btn-danger"
+                                                      onClick={() =>
+                                                        handleDeleteContact(
+                                                          index
+                                                        )
+                                                      }
+                                                      disabled={
+                                                        contacts.length === 1
+                                                      }
+                                                    >
+                                                      Delete
+                                                    </button>
+                                                  </div>
+                                                </div>
+                                              )}
+                                              <div className="col-lg-4 ps-1">
+                                                <div className="mb-3">
+                                                  {/* <label
                                                     htmlFor={`firstName-${index}`}
                                                     className="form-label"
                                                   >
@@ -1301,17 +1338,18 @@ useEffect(() => {
                         </section>
                       }
                     />
+                    </div>
                   </div>
                 </>
               ) : CustomerType == 3 ? (
                 <>
-                  <div className="card card-shadow pt-3 ">
-                    <div className="card-header mb-3 step-card-header align-items-center d-flex">
+                  <div className="card card-shadow px-0 ">
+                    <div className="card-header mb-3 card-header-light-blue step-card-header align-items-center d-flex">
                       <h4 className="card-title mb-0 flex-grow-1">
                         Partnership Information
                       </h4>
                     </div>
-
+                    <div className="card-body">
                     <AddFrom
                       fieldtype={fields3.filter(
                         (field) =>
@@ -1325,7 +1363,7 @@ useEffect(() => {
                             <div className="row">
                               <div className="col-lg-12">
                                 <div className="">
-                                  <div className="card-header step-card-header align-items-center d-flex">
+                                  <div className="card-header card-header-light-blue step-card-header step-card-header align-items-center d-flex">
                                     <h4 className="card-title mb-0 flex-grow-1">
                                       Contact Details
                                     </h4>
@@ -1646,6 +1684,7 @@ useEffect(() => {
                         </section>
                       }
                     />
+                  </div>
                   </div>
                 </>
               ) : (

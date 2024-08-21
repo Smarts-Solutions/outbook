@@ -87,7 +87,7 @@ const Setting = () => {
     }
 
     const columnJobType = [
-        { name: 'Job Type', selector: row => row.type, sortable: true },
+        { name: 'Job Type', selector: row => row.type, sortable: true,width:"85%" },
         {
             name: 'Actions',
             cell: row => (
@@ -335,20 +335,25 @@ const Setting = () => {
     return (
         <div>
             <div className='container-fluid'>
+            <div className='content-title'>
+                <div className='tab-title'>
+                            <h3 className='mt-0'>Job Type</h3>
+                        </div>
+                </div>
                 <div className="tab-content mt-4" id="pills-tabContent">
                     {/* {/ Staff Role Start /} */}
 
                     <div className={`tab-pane show active`}>
                         <div className='report-data'>
-                            <div className='d-flex justify-content-between align-items-center'>
-                                <div className='tab-title'>
+                            <div className='d-flex justify-content-end align-items-center'>
+                                {/* <div className='tab-title'>
                                     <h3 className='mt-0'>Job Type</h3>
-                                </div>
+                                </div> */}
                                 <div>
                                     <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '1')}> <i className="fa fa-plus" /> Add Job Type</button>
                                 </div>
                             </div>
-                            <div className='datatable-wrapper'>
+                            <div className='datatable-wrapper mt-minus'>
                                 <Datatable
                                     filter={true}
                                     columns={columnJobType}
@@ -414,19 +419,20 @@ const Setting = () => {
                                     />
                                 </div>
                             </div>
-                            <div className="col-lg-1 ">
+                            <div className="col-lg-2 ">
                                 <div className="remove">
                                     <a
-                                        className="btn btn-sm add-btn-job_type add-btn-new"
+                                        className="btn btn-secondary btn-sm add-btn-job_type add-btn-new"
                                         onClick={handleAddTask} // Call handleAddTask when clicked
                                     >
-                                        ADD
+                                       ADD
                                     </a>
                                 </div>
                             </div>
                         </div>
-                        <h6 style={{ textAlign: 'center' }}>OR</h6>
-                        <div className="mb-3 col-lg-12">
+                        <h6 className='or text-center'>OR</h6>
+                        <div className='row align-items-center'>
+                        <div className="mb-3 col-lg-9">
                             <label htmlFor="firstNameinput" className="form-label">Import Excel</label>
                             <input
                                 type="file"
@@ -437,7 +443,13 @@ const Setting = () => {
                                 onChange={handleFileUpload} // Handle file upload
                             />
                         </div>
-                    
+                        <div className="col-lg-12">
+                            <div className="remove" style={{ float: 'right' }}>
+                                <a className="btn btn-sm add-btn-job_type add-btn-new">
+                                    UPLOAD
+                                </a>
+                            </div>
+                        </div>
                         <br />
                         <div style={{ border: '2px hidden black', margin: '5px' }} className="table-responsive table-card mt-3 mb-1">
                             <table className="table align-middle table-nowrap" id="customerTable">

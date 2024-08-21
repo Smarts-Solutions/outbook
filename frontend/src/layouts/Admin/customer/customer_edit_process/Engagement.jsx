@@ -455,14 +455,15 @@ const Engagement = () => {
                     <div className={"details__wrapper"}>
 
 
-                        <div className="card pricing-box p-4 m-2 mt-0">
+                        <div className="card report-data pricing-box  p-0">
+                            <div className="card-header step-header-blue">
                             <h4
                                 className="card-title mb-0 flex-grow-1"
                                 style={{ marginBottom: "20px !important" }}
                             >
                                 Engagement Model
                             </h4>
-
+                            </div>
 
                             <div className="card-body">
 
@@ -472,14 +473,14 @@ const Engagement = () => {
                                             <div className="mb-3">
                                                 <div className="form-check form-check-outline form-check-dark">
                                                     <input
-                                                        className="form-check-input"
+                                                        className="form-check-input new-checkbox me-1"
                                                         type="checkbox"
                                                         id={option.id}
                                                         checked={checkboxStates[index] === 1}
                                                         onChange={() => handleCheckboxChange(index)}
                                                     />
                                                     <label
-                                                        className="form-check-label new_checkbox"
+                                                        className="form-check-label new_checkbox pt-1"
                                                         htmlFor={option.id}
                                                     >
                                                         {option.label}
