@@ -179,17 +179,19 @@ const Service = () => {
         >
             {({ handleSubmit }) => (
                 <div className="details__wrapper">
-                    <div className="card pricing-box p-4 m-2 mt-0">
+                    <div className="card pricing-box m-2 mt-0">
+                        <div className="card-header step-header-blue">
                         <h4 className="card-title mb-0">Select Services</h4>
-                        <div className="row">
-                            <div className="table-responsive table-card mt-3 mb-1">
+                        </div>
+                        <div className="row card-body">
+                            <div className="table-responsive table-card mb-1">
                                 <table className="table align-middle table-nowrap">
-                                    <thead className="table-light">
+                                    <thead className="table-light table-head-blue">
                                         <tr>
                                             <th scope="col" style={{ width: 50 }}>
                                                 <div className="form-check">
                                                     <input
-                                                        className="form-check-input new_input"
+                                                        className="form-check-input new_input new-checkbox"
                                                         type="checkbox"
                                                         id="checkAll"
                                                         onChange={handleSelectAllChange}
@@ -208,7 +210,7 @@ const Service = () => {
                                                     <th scope="row">
                                                         <div className="form-check">
                                                             <input
-                                                                className="form-check-input new_input"
+                                                                className="form-check-input new_input new-checkbox"
                                                                 type="checkbox"
                                                                 onChange={(e) => handleCheckboxChange(e, item)}
                                                                 checked={services.includes(item.id)}
@@ -217,14 +219,13 @@ const Service = () => {
                                                     </th>
                                                     <td className="customer_name">{item.name}</td>
                                                     <td>
-                                                        <div className="d-flex">
-                                                            <button
-                                                                className="btn btn-sm btn-success remove-item-btn"
-                                                                onClick={() => { setModal(true); setTempServices(item.id); }}
-                                                            >
-                                                                <i className="ti-user" />
-                                                            </button>
-                                                        </div>
+                                                    <button className="btn btn-sm tn btn-outline-info remove-item-btn"
+                                                    onClick={() => { setModal(true); setTempServices(item.id); }}
+                                                    >
+  Assign Account Manager <i className="fa fa-user" />
+</button>
+
+                                                    
                                                     </td>
                                                 </tr>
                                             ))
@@ -247,10 +248,10 @@ const Service = () => {
                         hideBtn={true}
                         handleClose={() => setModal(false)}
                     >
-                        <div className="modal-body">
+                        <div className="">
                             <div className="row">
-                                <div className="col-10">
-                                    <div className="search-box ms-2">
+                                <div className="col-9">
+                                    <div className="search-box ">
                                         <i className="ri-search-line search-icon" />
                                         <input
                                             type="text"
@@ -275,13 +276,14 @@ const Service = () => {
                                     )}
                                 </div>
 
-                                <div className="col-2">
+                                <div className="col-3">
                                     <button
                                         type="button"
-                                        className="btn btn-success add-btn"
+                                        className=" btn btn-outline-info add-btn  "
                                         onClick={AddManager}
-                                    >
-                                        Add
+                                    >Add
+                                        <i className="ps-2 ti-plus"></i>
+                                        
                                     </button>
                                 </div>
 

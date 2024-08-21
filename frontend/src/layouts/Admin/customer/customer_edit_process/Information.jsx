@@ -661,6 +661,10 @@ const Information = ({ id, pageStatus }) => {
     }, [customerDetails])
 
     return (
+        <>
+        
+  
+
         <Formik
             initialValues={address}
             onSubmit={(values) => {
@@ -671,11 +675,11 @@ const Information = ({ id, pageStatus }) => {
             {({ handleSubmit }) => (
                 <Form className="details__wrapper">
 
-
+<div className="bg-blue-light pt-3 px-3 rounded">
                     <div className="row">
                         <div className="col-lg-6">
                             <div className="card card_shadow">
-                                <div className="card-header align-items-center d-flex">
+                                <div className="card-header step-header-blue align-items-center d-flex">
                                     <h4 className="card-title mb-0 flex-grow-1">
                                         Customer Type <span style={{ color: "red" }}>*</span>
                                     </h4>
@@ -686,7 +690,7 @@ const Information = ({ id, pageStatus }) => {
                                             <Field
                                                 as="select"
                                                 name="customerType"
-                                                className="form-select mb-3"
+                                                className="form-select "
                                                 onChange={(e) => setCustomerType(e.target.value)}
                                                 value={customerType}
                                             >
@@ -702,7 +706,7 @@ const Information = ({ id, pageStatus }) => {
                         </div>
                         <div className="col-lg-6">
                             <div className="card card_shadow">
-                                <div className="card-header align-items-center d-flex">
+                                <div className="card-header step-header-blue align-items-center d-flex">
                                     <h4 className="card-title mb-0 flex-grow-1">
                                         Outbooks Account Manager <span style={{ color: "red" }}>*</span>
                                     </h4>
@@ -710,7 +714,7 @@ const Information = ({ id, pageStatus }) => {
                                 <div className="card-body">
                                     <div className="row">
                                         <div className="col-lg-12">
-                                            <Field as="select" name="accountManager" className="form-select mb-3" onChange={(e) => setManagerType(e.target.value)} value={ManagerType}>
+                                            <Field as="select" name="accountManager" className="form-select " onChange={(e) => setManagerType(e.target.value)} value={ManagerType}>
                                                 <option value="">Select Manager </option>
                                                 {staffDataAll.data.map((data) => (
                                                     <option key={data.id} value={data.id}>
@@ -724,15 +728,15 @@ const Information = ({ id, pageStatus }) => {
                             </div>
                         </div>
                     </div>
-
+                    </div>
                     <section>
                         {
                             customerType == 1 ?
-                                <div className="row"  >
+                                <div className="row mt-3"  >
 
                                     <div className="col-lg-12">
                                         <div className="card card_shadow ">
-                                            <div className="card-header align-items-center d-flex">
+                                            <div className="card-header card-header-light-blue step-card-header  align-items-center d-flex">
                                                 <h4 className="card-title mb-0 flex-grow-1">
                                                     Sole Trader
                                                 </h4>
@@ -741,7 +745,7 @@ const Information = ({ id, pageStatus }) => {
                                             <div className="card-body">
                                                 <div className="row">
 
-                                                    <div className="col-lg-3">
+                                                    <div className="col-lg-4">
                                                         <div className="mb-3">
                                                             <label className="form-label">Trading Name<span style={{ color: "red" }}>*</span></label>
                                                             <input type="text" name="tradingName" className="form-control" placeholder="Trading Name"
@@ -749,11 +753,11 @@ const Information = ({ id, pageStatus }) => {
                                                                 value={getSoleTraderDetails.tradingName}
                                                             />
                                                             {errors1['tradingName'] && (
-                                                                <div style={{ 'color': 'red' }}>{errors1['tradingName']}</div>
+                                                                <div className="error-text">{errors1['tradingName']}</div>
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <div className="col-lg-3">
+                                                    <div className="col-lg-4">
                                                         <div className="mb-3">
                                                             <label className="form-label">Trading Address<span style={{ color: "red" }}>*</span></label>
                                                             <input type="text" className="form-control" placeholder="Trading Address" name="tradingAddress"
@@ -761,14 +765,14 @@ const Information = ({ id, pageStatus }) => {
                                                                 value={getSoleTraderDetails.tradingAddress}
                                                             />
                                                             {errors1['tradingAddress'] && (
-                                                                <div style={{ 'color': 'red' }}>{errors1['tradingAddress']}</div>
+                                                                <div className="error-text">{errors1['tradingAddress']}</div>
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <div className="col-lg-3">
+                                                    <div className="col-lg-4">
                                                         <div className="mb-3">
                                                             <label className="form-label" >VAT Registered</label>
-                                                            <select className="form-select mb-3" aria-label="Default select example"
+                                                            <select className="form-select " aria-label="Default select example"
                                                                 name="vatRegistered"
                                                                 value={getSoleTraderDetails.vatRegistered}
                                                                 onChange={(e) => handleChange1(e)}
@@ -782,11 +786,11 @@ const Information = ({ id, pageStatus }) => {
 
                                                             </select>
                                                             {errors1['vatRegistered'] && (
-                                                                <div style={{ 'color': 'red' }}>{errors1['vatRegistered']}</div>
+                                                                <div className="error-text">{errors1['vatRegistered']}</div>
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <div className="col-lg-3">
+                                                    <div className="col-lg-4">
                                                         <div className="mb-3">
                                                             <label className="form-label">VAT Number<span style={{ color: "red" }}>*</span></label>
                                                             <input type="text" className="form-control" placeholder="VAT Number"
@@ -795,11 +799,11 @@ const Information = ({ id, pageStatus }) => {
                                                                 onChange={(e) => handleChange1(e)}
                                                             />
                                                             {errors1['vatNumber'] && (
-                                                                <div style={{ 'color': 'red' }}>{errors1['vatNumber']}</div>
+                                                                <div className="error-text">{errors1['vatNumber']}</div>
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <div className="col-lg-3">
+                                                    <div className="col-lg-4">
                                                         <div className="mb-3">
                                                             <label className="form-label">Website<span style={{ color: "red" }}>*</span></label>
                                                             <input type="text" className="form-control"
@@ -809,15 +813,23 @@ const Information = ({ id, pageStatus }) => {
                                                                 onChange={(e) => handleChange1(e)}
                                                             />
                                                             {errors1['website'] && (
-                                                                <div style={{ 'color': 'red' }}>{errors1['website']}</div>
+                                                                <div className="error-text">{errors1['website']}</div>
                                                             )}
 
                                                         </div>
                                                     </div>
+                                                    </div>
+                                                    </div>
+                                                    </div>
+                                                    <div className="card">
+                                                    <div className="card-header card-header-light-blue step-card-header mb-3 ">
                                                     <h4 className="card-title mb-0 flex-grow-1" style={{ marginBottom: "15px !important" }}>
                                                         Sole Trader Details
                                                     </h4>
-                                                    <div className="col-lg-3">
+                                                    </div>
+                                                    <div className="card-body">
+                                                        <div className="row">
+                                                    <div className="col-lg-4">
                                                         <div className="mb-3">
                                                             <label className="form-label"  >First Name<span style={{ color: "red" }}>*</span></label>
                                                             <input type="text" className="form-control"
@@ -827,11 +839,11 @@ const Information = ({ id, pageStatus }) => {
                                                                 onChange={(e) => handleChange1(e)}
                                                             />
                                                             {errors1['first_name'] && (
-                                                                <div style={{ 'color': 'red' }}>{errors1['first_name']}</div>
+                                                                <div className="error-text">{errors1['first_name']}</div>
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <div className="col-lg-3">
+                                                    <div className="col-lg-4">
                                                         <div className="mb-3">
                                                             <label className="form-label" >Last Name<span style={{ color: "red" }}>*</span></label>
                                                             <input type="text" className="form-control" placeholder="Last Name"
@@ -840,11 +852,11 @@ const Information = ({ id, pageStatus }) => {
                                                                 onChange={(e) => handleChange1(e)}
                                                             />
                                                             {errors1['last_name'] && (
-                                                                <div style={{ 'color': 'red' }}>{errors1['last_name']}</div>
+                                                                <div className="error-text">{errors1['last_name']}</div>
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <div className="col-lg-3">
+                                                    <div className="col-lg-4">
                                                         <div className="mb-3">
                                                             <label className="form-label" >Phone<span style={{ color: "red" }}>*</span></label>
                                                             <input type="text" className="form-control"
@@ -854,11 +866,11 @@ const Information = ({ id, pageStatus }) => {
                                                                 onChange={(e) => handleChange1(e)}
                                                             />
                                                             {errors1['phone'] && (
-                                                                <div style={{ 'color': 'red' }}>{errors1['phone']}</div>
+                                                                <div className="error-text">{errors1['phone']}</div>
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <div className="col-lg-3">
+                                                    <div className="col-lg-4">
                                                         <div className="mb-3">
                                                             <label className="form-label" >Email<span style={{ color: "red" }}>*</span></label>
                                                             <input type="text" className="form-control" placeholder="Enter Email ID"
@@ -867,7 +879,7 @@ const Information = ({ id, pageStatus }) => {
                                                                 onChange={(e) => handleChange1(e)}
                                                             />
                                                             {errors1['email'] && (
-                                                                <div style={{ 'color': 'red' }}>{errors1['email']}</div>
+                                                                <div className="error-text">{errors1['email']}</div>
                                                             )}
                                                         </div>
                                                     </div>
@@ -881,7 +893,7 @@ const Information = ({ id, pageStatus }) => {
                                                                 onChange={(e) => handleChange1(e)}
                                                             />
                                                             {errors1['residentialAddress'] && (
-                                                                <div style={{ 'color': 'red' }}>{errors1['residentialAddress']}</div>
+                                                                <div className="error-text">{errors1['residentialAddress']}</div>
                                                             )}
                                                         </div>
                                                     </div>
@@ -892,10 +904,10 @@ const Information = ({ id, pageStatus }) => {
                                 </div>
                                 :
                                 customerType == 2 ?
-                                    <div className="row">
+                                    <div className="row mt-3">
                                         <div className="col-lg-12">
                                             <div className="card card_shadow ">
-                                                <div className="card-header align-items-center d-flex">
+                                                <div className="card-header card-header-light-blue  step-card-header align-items-center d-flex">
                                                     <h4 className="card-title mb-0 flex-grow-1">Company</h4>
                                                 </div>
                                                 {/* end card header */}
@@ -903,7 +915,7 @@ const Information = ({ id, pageStatus }) => {
                                                     <div className="row">
 
                                                         <div className="row">
-                                                            <div className="col-lg-3">
+                                                            <div className="col-lg-4">
                                                                 <div className="mb-3">
                                                                     <div className='position-relative'>
                                                                         <label className="form-label">Search Company</label>
@@ -928,7 +940,7 @@ const Information = ({ id, pageStatus }) => {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="col-lg-3">
+                                                            <div className="col-lg-4">
                                                                 <div className="mb-3">
                                                                     <label className="form-label" >Company Name<span style={{ color: "red" }}>*</span>  </label>
                                                                     <input type="text" className="form-control input_bg" placeholder="Outbooks Quality & Certainty LTD"
@@ -936,38 +948,38 @@ const Information = ({ id, pageStatus }) => {
                                                                         disabled
                                                                     />
                                                                     {errors2['CompanyName'] && (
-                                                                        <div style={{ 'color': 'red' }}>{errors2['CompanyName']}</div>
+                                                                        <div className="error-text">{errors2['CompanyName']}</div>
                                                                     )}
 
                                                                 </div>
                                                             </div>
-                                                            <div className="col-lg-3">
+                                                            <div className="col-lg-4">
                                                                 <div className="mb-3">
                                                                     <label className="form-label">Entity Type<span style={{ color: "red" }}>*</span>   </label>
                                                                     <input type="text" className="form-control input_bg" placeholder="LTD"
                                                                         name="EntityType" onChange={(e) => handleChange2(e)} value={getCompanyDetails.EntityType} disabled />
                                                                     {errors2['EntityType'] && (
-                                                                        <div style={{ 'color': 'red' }}>{errors2['EntityType']}</div>
+                                                                        <div className="error-text">{errors2['EntityType']}</div>
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <div className="col-lg-3">
+                                                            <div className="col-lg-4">
                                                                 <div className="mb-3">
                                                                     <label className="form-label"  >Company Status<span style={{ color: "red" }}>*</span> </label>
                                                                     <input type="text" className="form-control input_bg" placeholder="Active"
                                                                         name="CompanyStatus" onChange={(e) => handleChange2(e)} value={getCompanyDetails.CompanyStatus} disabled />
                                                                     {errors2['CompanyStatus'] && (
-                                                                        <div style={{ 'color': 'red' }}>{errors2['CompanyStatus']}</div>)}
+                                                                        <div className="error-text">{errors2['CompanyStatus']}</div>)}
                                                                 </div>
                                                             </div>
-                                                            <div className="col-lg-3">
+                                                            <div className="col-lg-4">
                                                                 <div className="mb-3">
                                                                     <label className="form-label">Company Number<span style={{ color: "red" }}>*</span></label>
                                                                     <input type="text" className="form-control input_bg" placeholder="Company Number"
                                                                         name="CompanyNumber" onChange={(e) => handleChange2(e)} value={getCompanyDetails.CompanyNumber} disabled
                                                                     />
                                                                     {errors2['CompanyNumber'] && (
-                                                                        <div style={{ 'color': 'red' }}>{errors2['CompanyNumber']}</div>
+                                                                        <div className="error-text">{errors2['CompanyNumber']}</div>
                                                                     )}
                                                                 </div>
                                                             </div>
@@ -978,22 +990,22 @@ const Information = ({ id, pageStatus }) => {
                                                                         name="RegisteredOfficeAddress" onChange={(e) => handleChange2(e)} value={getCompanyDetails.RegisteredOfficeAddress} disabled
                                                                     />
                                                                     {errors2['RegisteredOfficeAddress'] && (
-                                                                        <div style={{ 'color': 'red' }}>{errors2['RegisteredOfficeAddress']}</div>
+                                                                        <div className="error-text">{errors2['RegisteredOfficeAddress']}</div>
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <div className="col-lg-3">
+                                                            <div className="col-lg-4">
                                                                 <div className="mb-3">
                                                                     <label className="form-label">Incorporation Date</label>
                                                                     <input type="text" className="form-control input_bg" placeholder="07-01-2023"
                                                                         name="IncorporationDate" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationDate} disabled
                                                                     />
                                                                     {errors2['IncorporationDate'] && (
-                                                                        <div style={{ 'color': 'red' }}>{errors2['IncorporationDate']}</div>
+                                                                        <div className="error-text">{errors2['IncorporationDate']}</div>
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <div className="col-lg-3">
+                                                            <div className="col-lg-4">
                                                                 <div className="mb-3">
                                                                     <label className="form-label"  > Incorporation in  <span style={{ color: "red" }}>*</span> </label>
                                                                     <input type="text" className="form-control input_bg" placeholder="Please Enter Incorporation In"
@@ -1001,24 +1013,24 @@ const Information = ({ id, pageStatus }) => {
                                                                     />
 
                                                                     {errors2['IncorporationIn'] && (
-                                                                        <div style={{ 'color': 'red' }}>{errors2['IncorporationIn']}</div>
+                                                                        <div className="error-text">{errors2['IncorporationIn']}</div>
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <div className="col-lg-3">
+                                                            <div className="col-lg-4">
                                                                 <div className="mb-3">
                                                                     <label className="form-label"  >VAT Registered</label>
-                                                                    <select className="form-select mb-3" name="VATRegistered" onChange={(e) => handleChange2(e)} value={getCompanyDetails.VATRegistered}>
+                                                                    <select className="form-select " name="VATRegistered" onChange={(e) => handleChange2(e)} value={getCompanyDetails.VATRegistered}>
                                                                         <option value=''>Please Select VAT Registered</option>
                                                                         <option value={1}>Yes</option>
                                                                         <option value={0}>No</option>
                                                                     </select>
                                                                     {errors2['VATRegistered'] && (
-                                                                        <div style={{ 'color': 'red' }}>{errors2['VATRegistered']}</div>
+                                                                        <div className="error-text">{errors2['VATRegistered']}</div>
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <div className="col-lg-3" >
+                                                            <div className="col-lg-4" >
                                                                 <div className="mb-3">
                                                                     <div className="mb-3">
                                                                         <label className="form-label">VAT Number</label>
@@ -1026,19 +1038,19 @@ const Information = ({ id, pageStatus }) => {
                                                                             name="VATNumber" onChange={(e) => handleChange2(e)} value={getCompanyDetails.VATNumber}
                                                                         />
                                                                         {errors2['VATNumber'] && (
-                                                                            <div style={{ 'color': 'red' }}>{errors2['VATNumber']}</div>
+                                                                            <div className="error-text">{errors2['VATNumber']}</div>
                                                                         )}
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="col-lg-3">
+                                                            <div className="col-lg-4">
                                                                 <div className="mb-3">
                                                                     <label className="form-label">Website</label>
                                                                     <input type="text" className="form-control " placeholder="URL"
                                                                         name="Website" onChange={(e) => handleChange2(e)} value={getCompanyDetails.Website}
                                                                     />
                                                                     {errors2['Website'] && (
-                                                                        <div style={{ 'color': 'red' }}>{errors2['Website']}</div>
+                                                                        <div className="error-text">{errors2['Website']}</div>
                                                                     )}
                                                                 </div>
                                                             </div>
@@ -1060,7 +1072,7 @@ const Information = ({ id, pageStatus }) => {
                                                                     name="TradingName" onChange={(e) => handleChange2(e)} value={getCompanyDetails.TradingName}
                                                                 />
                                                                 {errors2['TradingName'] && (
-                                                                    <div style={{ 'color': 'red' }}>{errors2['TradingName']}</div>
+                                                                    <div className="error-text">{errors2['TradingName']}</div>
                                                                 )}
                                                             </div>
                                                         </div>
@@ -1071,7 +1083,7 @@ const Information = ({ id, pageStatus }) => {
                                                                     name="TradingAddress" onChange={(e) => handleChange2(e)} value={getCompanyDetails.TradingAddress}
                                                                 />
                                                                 {errors2['TradingAddress'] && (
-                                                                    <div style={{ 'color': 'red' }}>{errors2['TradingAddress']}</div>
+                                                                    <div className="error-text">{errors2['TradingAddress']}</div>
                                                                 )}
                                                             </div>
                                                         </div>
@@ -1082,7 +1094,7 @@ const Information = ({ id, pageStatus }) => {
                                         <div className="row">
                                             <div className="col-lg-12">
                                                 <div className="card card_shadow">
-                                                    <div className="card-header align-items-center d-flex">
+                                                    <div className="card-header step-card-header card-header-light-blue   align-items-center d-flex">
                                                         <h4 className="card-title mb-0 flex-grow-1">
                                                             Officer Details
                                                         </h4>
@@ -1092,7 +1104,7 @@ const Information = ({ id, pageStatus }) => {
                                                             <div className="row">
                                                                 {contacts.length > 0 && contacts.map((contact, index) => (
                                                                     <div className="col-xl-12 col-lg-12 mt-3" key={index}>
-                                                                        <div className="card pricing-box p-4 m-2 mt-0">
+                                                                        <div className=" pricing-box px-2 m-2 mt-0">
                                                                             <div className="row">
                                                                                 {index !== 0 && (
                                                                                     <div className="col-lg-12">
@@ -1107,7 +1119,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                         </div>
                                                                                     </div>
                                                                                 )}
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label htmlFor={`first_name-${index}`} className="form-label">
                                                                                             First Name<span style={{ color: 'red' }}>*</span>
@@ -1125,7 +1137,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label htmlFor={`last_name-${index}`} className="form-label">
                                                                                             Last Name<span style={{ color: 'red' }}>*</span>
@@ -1143,7 +1155,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label htmlFor={`customer_contact_person_role_id-${index}`} className="form-label">
                                                                                             Role<span style={{ color: 'red' }}>*</span>
@@ -1169,7 +1181,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label htmlFor={`phone-${index}`} className="form-label">
                                                                                             Phone
@@ -1187,7 +1199,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label htmlFor={`email-${index}`} className="form-label">
                                                                                             Email<span style={{ color: 'red' }}>*</span>
@@ -1209,7 +1221,7 @@ const Information = ({ id, pageStatus }) => {
                                                                         </div>
                                                                     </div>
                                                                 ))}
-                                                                <div className="card-header d-flex align-items-center">
+                                                                <div className="px-4 d-flex align-items-center">
                                                                     <h5 className="card-title mb-0 flex-grow-1"></h5>
                                                                     <button className="btn btn-info text-white blue-btn" onClick={handleAddContact}>
                                                                         Add Contact
@@ -1225,40 +1237,40 @@ const Information = ({ id, pageStatus }) => {
                                     </div>
                                     :
                                     customerType == 3 ?
-                                        <div className="row " >
+                                        <div className="row mt-3" >
                                             <div className="col-lg-12">
                                                 <div className="card card_shadow ">
-                                                    <div className="card-header align-items-center d-flex">
+                                                    <div className=" card-header card-header-light-blue step-card-header align-items-center d-flex">
                                                         <h4 className="card-title mb-0 flex-grow-1">Partnership</h4>
                                                     </div>
                                                     <div className="card-body">
                                                         <div className="row">
 
-                                                            <div className="col-lg-3">
+                                                            <div className="col-lg-4">
                                                                 <div className="mb-3">
                                                                     <label className="form-label">Trading Name<span style={{ color: "red" }}>*</span></label>
                                                                     <input type="text" className="form-control" placeholder="Trading Name"
                                                                         name="TradingName" value={getPartnershipDetails.TradingName} onChange={(e) => handleChange3(e)}
                                                                     />
                                                                     {errors3['TradingName'] && (
-                                                                        <div style={{ 'color': 'red' }}>{errors3['TradingName']}</div>)}
+                                                                        <div className="error-text">{errors3['TradingName']}</div>)}
                                                                 </div>
                                                             </div>
-                                                            <div className="col-lg-3">
+                                                            <div className="col-lg-4">
                                                                 <div className="mb-3">
                                                                     <label className="form-label">Trading Address<span style={{ color: "red" }}>*</span> </label>
                                                                     <input type="text" className="form-control" placeholder="Trading Address"
                                                                         name="TradingAddress" value={getPartnershipDetails.TradingAddress} onChange={(e) => handleChange3(e)}
                                                                     />
                                                                     {errors3['TradingAddress'] && (
-                                                                        <div style={{ 'color': 'red' }}>{errors3['TradingAddress']}</div>)}
+                                                                        <div className="error-text">{errors3['TradingAddress']}</div>)}
                                                                 </div>
                                                             </div>
-                                                            <div className="col-lg-3">
+                                                            <div className="col-lg-4">
                                                                 <div className="mb-3">
                                                                     <div className="mb-3">
                                                                         <label className="form-label">VAT Registered</label>
-                                                                        <select className="form-select mb-3"
+                                                                        <select className="form-select "
                                                                             name="VATRegistered" value={getPartnershipDetails.VATRegistered} onChange={(e) => handleChange3(e)}
                                                                         >
                                                                             <option value="">Select VAT Registered</option>
@@ -1266,12 +1278,12 @@ const Information = ({ id, pageStatus }) => {
                                                                             <option value={0}>No</option>
                                                                         </select>
                                                                         {errors3['VATRegistered'] && (
-                                                                            <div style={{ 'color': 'red' }}>{errors3['VATRegistered']}</div>)}
+                                                                            <div className="error-text">{errors3['VATRegistered']}</div>)}
 
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="col-lg-3">
+                                                            <div className="col-lg-4">
                                                                 <div className="mb-3">
                                                                     <div className="mb-3">
                                                                         <label className="form-label"> VAT Number</label>
@@ -1279,11 +1291,11 @@ const Information = ({ id, pageStatus }) => {
                                                                             name="VATNumber" value={getPartnershipDetails.VATNumber} onChange={(e) => handleChange3(e)}
                                                                         />
                                                                         {errors3['VATNumber'] && (
-                                                                            <div style={{ 'color': 'red' }}>{errors3['VATNumber']}</div>)}
+                                                                            <div className="error-text">{errors3['VATNumber']}</div>)}
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="col-lg-3">
+                                                            <div className="col-lg-4">
                                                                 <div className="mb-3">
                                                                     <label className="form-label">
                                                                         Website
@@ -1293,7 +1305,7 @@ const Information = ({ id, pageStatus }) => {
                                                                     />
 
                                                                     {errors3['Website'] && (
-                                                                        <div style={{ 'color': 'red' }}>{errors3['Website']}</div>)}
+                                                                        <div className="error-text">{errors3['Website']}</div>)}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1303,7 +1315,7 @@ const Information = ({ id, pageStatus }) => {
                                             <div className="row">
                                                 <div className="col-lg-12">
                                                     <div className="card card_shadow">
-                                                        <div className="card-header align-items-center d-flex">
+                                                        <div className=" card-header card-header-light-blue step-card-header align-items-center d-flex">
                                                             <h4 className="card-title mb-0 flex-grow-1">
                                                                 Contact Details
                                                             </h4>
@@ -1342,7 +1354,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label">First Name<span style={{ color: "red" }}>*</span></label>
                                                                                         <input
@@ -1358,7 +1370,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label">Last Name<span style={{ color: "red" }}>*</span></label>
                                                                                         <input
@@ -1374,7 +1386,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label">Role<span style={{ color: "red" }}>*</span></label>
                                                                                         <select
@@ -1394,7 +1406,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label">Phone<span style={{ color: "red" }}>*</span></label>
                                                                                         <input
@@ -1411,7 +1423,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                     </div>
                                                                                 </div>
 
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label">Email<span style={{ color: "red" }}>*</span></label>
                                                                                         <input
@@ -1433,7 +1445,7 @@ const Information = ({ id, pageStatus }) => {
                                                                     </div>
                                                                 ))}
 
-                                                                <div className="card-header d-flex align-items-center">
+                                                                <div className="px-4 d-flex align-items-center">
                                                                     <h5 className="card-title mb-0 flex-grow-1"></h5>
                                                                     <div>
                                                                         <button className="btn btn-info text-white blue-btn" onClick={handleAddContact1}>Add Partner</button>
@@ -1456,9 +1468,12 @@ const Information = ({ id, pageStatus }) => {
                             Next
                         </Button>
                     </div>
+                  
                 </Form>
+                
             )}
         </Formik>
+        </>
     );
 };
 
