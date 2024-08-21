@@ -9869,3 +9869,20 @@ font-size: 14px;
 .fs-24 {
   font-size: 24px;
 }
+body .bg-info.modal-header, .modal-header {
+
+  background-color: #01afef !important;
+  
+  }
+  
+  
+  .modal-header .modal-title {
+  
+  color: #fff !important;
+  
+  }
+
+  .error-text {
+    color: red;
+    
+  }
