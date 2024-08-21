@@ -225,6 +225,10 @@ const Access = () => {
                             { name: 'Role Name', selector: row => row.role_name, sortable: true },
                         ]} data={roleDataAll.data} /> */}
                     </div>
+                    <div className="modal-footer">
+                              
+                       <button type="button" className="btn btn-info mt-3" onClick={handleSaveChanges}>Save changes</button>
+                    </div>
                 </div>
 
                 {/* Modal */}
