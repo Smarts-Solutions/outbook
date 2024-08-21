@@ -453,7 +453,6 @@ const Engagement = () => {
 
                     <div className={"details__wrapper"}>
 
-
                         <div className="card report-data pricing-box  p-0">
                             <div className="card-header step-header-blue">
                             <h4
