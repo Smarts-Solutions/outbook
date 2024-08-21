@@ -4,7 +4,7 @@ const clientService = require('../../services/client/clientService');
 const addClient = async (req, res) => {
   try {
      const { ...client } = req.body;
-    //  console.log("client",client)
+    
        const result = await clientService.addClient(client);
 
        if(!result.status){
@@ -21,7 +21,7 @@ const addClient = async (req, res) => {
 const clientAction = async (req, res) => {
   try {
      const { ...client } = req.body;
-     console.log("client",client)
+
       const result = await clientService.clientAction(client);
       if(!result.status){
         return  res.status(200).json({ status: false, message: result.message });  

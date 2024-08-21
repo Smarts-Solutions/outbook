@@ -4,14 +4,14 @@ const { jwtSecret } = require('../config/config');
 
 const verifyToken = (req, res, next) => {
     const token = req.header('Authorization');
-    // console.log("token",token)
+ 
     if (!token) {
         return res.status(401).json({
             status:false,
             message: "Unauthorized-token"
         });
     }
-    // console.log("jwtSecret ",jwtSecret)
+
     jwt.verify(token, jwtSecret, async (err, decoded) => {
         if (err) {
             return res.status(401).json({

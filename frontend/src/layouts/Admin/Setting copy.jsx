@@ -365,11 +365,11 @@ const Setting = () => {
                     serviceData(req); 
                     break;
                 default:
-                    console.log("Invalid tabStatus"); 
+               
                     break;
             }
         } else {
-            console.log("Deletion cancelled"); 
+         
         }
     };
     

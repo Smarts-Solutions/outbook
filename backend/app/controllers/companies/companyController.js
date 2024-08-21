@@ -19,7 +19,7 @@ const seachCompany = async (req, res) => {
           return res.status(200).json({ status: true,data:response.data, message: "success.." });
         })
         .catch((error) => {
-          console.log(error);
+     
           return res.send({ status: false, message: error.message });
         });
     } else {
