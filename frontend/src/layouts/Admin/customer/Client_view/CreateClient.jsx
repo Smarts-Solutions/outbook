@@ -29,7 +29,7 @@ const CreateClient = () => {
         IndustryType: '',
         tradingName: "",
         tradingAddress: "",
-        vatRegistered: "",
+        vatRegistered: "0",
         vatNumber: "",
         website: "",
         first_name: "",
@@ -47,7 +47,7 @@ const CreateClient = () => {
         RegisteredOfficeAddress: '',
         IncorporationDate: '',
         IncorporationIn: '',
-        VATRegistered: '',
+        VATRegistered: '0',
         VATNumber: '',
         Website: '',
         ClientIndustry: '',
@@ -58,7 +58,7 @@ const CreateClient = () => {
         ClientIndustry: '',
         TradingName: '',
         TradingAddress: '',
-        VATRegistered: '',
+        VATRegistered: '0',
         VATNumber: '',
         Website: '',
     })
@@ -338,11 +338,13 @@ const CreateClient = () => {
         const newErrors = {};
         for (const key in getSoleTraderDetails) {
             if (!getSoleTraderDetails[key]) {
+
                 // if (key == 'IndustryType') newErrors[key] = 'Select Client Industry';
-                 if (key == 'tradingName') newErrors[key] = 'Please enter Trading Name';
+                if (key == 'tradingName') newErrors[key] = 'Please enter Trading Name';
                 else if (key == 'tradingAddress') newErrors[key] = 'Please enter Trading Address';
                 else if (key == 'vatRegistered') newErrors[key] = 'Please select VAT Registered';
-                // else if (key == 'vatNumber') newErrors[key] = 'Please enter VAT Number';
+
+                else if (getSoleTraderDetails.vatRegistered == 1 && key == 'vatNumber') newErrors[key] = 'Please enter VAT Number';
                 // else if (key == 'website') newErrors[key] = 'Please enter Website';
                 else if (key == 'first_name') newErrors[key] = 'Please enter First Name';
                 else if (key == 'last_name') newErrors[key] = 'Please enter Last Name';
@@ -370,7 +372,7 @@ const CreateClient = () => {
                 else if (key == 'IncorporationDate') newErrors[key] = 'Please Enter Incorporation Date';
                 else if (key == 'IncorporationIn') newErrors[key] = 'Please Enter Incorporation In';
                 else if (key == 'VATRegistered') newErrors[key] = 'Please Enter VAT Registered';
-                // else if (key == 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
+                else if (getCompanyDetails.VATRegistered == 1 && key == 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
                 // else if (key == 'Website') newErrors[key] = 'Please Enter Website';
                 // else if (key == 'ClientIndustry') newErrors[key] = 'Please Enter Client Industry';
                 else if (key == 'TradingName') newErrors[key] = 'Please Enter Trading Name';
@@ -385,13 +387,13 @@ const CreateClient = () => {
         const newErrors = {};
         for (const key in getPartnershipDetails) {
             if (!getPartnershipDetails[key]) {
-                console.log("key", key)
+              
 
                 // if (key === 'ClientIndustry') newErrors[key] = 'Please Select Client Industry';
-                 if (key === 'TradingName') newErrors[key] = 'Please Enter Trading Name';
+                if (key === 'TradingName') newErrors[key] = 'Please Enter Trading Name';
                 else if (key === 'TradingAddress') newErrors[key] = 'Please Enter Trading Address';
                 else if (key === 'VATRegistered') newErrors[key] = 'Please Enter VAT Registered';
-                // else if (key === 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
+                else if (getPartnershipDetails.VATRegistered == 1 && key === 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
                 // else if (key === 'Website') newErrors[key] = 'Please Enter Website';
             }
         }
@@ -563,8 +565,8 @@ const CreateClient = () => {
     }, [searchItem])
 
 
-    
-    const HandleCancel=()=>{
+
+    const HandleCancel = () => {
         navigate('/admin/Clientlist', { state: { id: location.state.id } });
     }
 
@@ -683,12 +685,11 @@ const CreateClient = () => {
                                                                                         <label className="form-label" >VAT Registered</label>
                                                                                         <select className="form-select " aria-label="Default select example"
                                                                                             name="vatRegistered"
-                                                                                            value={getSoleTraderDetails.vatRegistered}
+                                                                                            defaultValue={0}
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                         >
 
-                                                                                            <option selected="">Please Select VAT Registered</option>
-
+                                                                                     
                                                                                             <option value={1}>Yes</option>
                                                                                             <option value={0}>No</option>
 
@@ -707,9 +708,9 @@ const CreateClient = () => {
                                                                                             value={getSoleTraderDetails.vatNumber}
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                         />
-                                                                                        {/* {errors1['vatNumber'] && (
+                                                                                        {errors1['vatNumber'] && (
                                                                                             <div style={{ 'color': 'red' }}>{errors1['vatNumber']}</div>
-                                                                                        )} */}
+                                                                                        )}
                                                                                     </div>
                                                                                 </div>
                                                                                 <div className="col-lg-4">
@@ -909,7 +910,7 @@ const CreateClient = () => {
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
-                                                                                        
+
                                                                                         <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  > Incorporation in  <span style={{ color: "red" }}>*</span> </label>
@@ -925,8 +926,8 @@ const CreateClient = () => {
                                                                                         <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  >VAT Registered</label>
-                                                                                                <select className="form-select " name="VATRegistered" onChange={(e) => handleChange2(e)} value={getCompanyDetails.VATRegistered}>
-                                                                                                    <option value=''>Please Select VAT Registered</option>
+                                                                                                <select className="form-select " name="VATRegistered" onChange={(e) => handleChange2(e)} defaultValue={0}>
+                                                                                                    
                                                                                                     <option value={1}>Yes</option>
                                                                                                     <option value={0}>No</option>
                                                                                                 </select>
@@ -942,9 +943,9 @@ const CreateClient = () => {
                                                                                                     <input type="text" className="form-control " placeholder="VAT Number"
                                                                                                         name="VATNumber" onChange={(e) => handleChange2(e)} value={getCompanyDetails.VATNumber}
                                                                                                     />
-                                                                                                    {/* {errors2['VATNumber'] && (
+                                                                                                    {errors2['VATNumber'] && (
                                                                                                         <div style={{ 'color': 'red' }}>{errors2['VATNumber']}</div>
-                                                                                                    )} */}
+                                                                                                    )}
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
@@ -1090,7 +1091,7 @@ const CreateClient = () => {
                                                                                                                                 <option value={item.id} key={i}>{item.name}</option>
                                                                                                                             ))}
                                                                                                                     </select>
-                                                                                                                    {errors[index].role && <div style={{ color: 'red' }}>{errors[index].role}</div>}
+                                                                                                                    {/* {errors[index].role && <div style={{ color: 'red' }}>{errors[index].role}</div>} */}
                                                                                                                 </div>
                                                                                                             </div>
                                                                                                             <div className="col-lg-4">
@@ -1106,7 +1107,7 @@ const CreateClient = () => {
                                                                                                                         value={contact.phone}
                                                                                                                         onChange={(e) => handleChange(index, 'phone', e.target.value)}
                                                                                                                     />
-                                                                                                                    {errors[index].phone && <div style={{ color: 'red' }}>{errors[index].phone}</div>}
+                                                                                                                    {/* {errors[index].phone && <div style={{ color: 'red' }}>{errors[index].phone}</div>} */}
                                                                                                                 </div>
                                                                                                             </div>
                                                                                                             <div className="col-lg-4">
@@ -1122,7 +1123,7 @@ const CreateClient = () => {
                                                                                                                         value={contact.email}
                                                                                                                         onChange={(e) => handleChange(index, 'email', e.target.value)}
                                                                                                                     />
-                                                                                                                    {errors[index].email && <div style={{ color: 'red' }}>{errors[index].email}</div>}
+                                                                                                                    {/* {errors[index].email && <div style={{ color: 'red' }}>{errors[index].email}</div>} */}
                                                                                                                 </div>
                                                                                                             </div>
                                                                                                         </div>
@@ -1197,9 +1198,8 @@ const CreateClient = () => {
                                                                                                 <div className="mb-3">
                                                                                                     <label className="form-label">VAT Registered</label>
                                                                                                     <select className="form-select "
-                                                                                                        name="VATRegistered" value={getPartnershipDetails.VATRegistered} onChange={(e) => handleChange3(e)}
+                                                                                                        name="VATRegistered" defaultValue={0} onChange={(e) => handleChange3(e)}
                                                                                                     >
-                                                                                                        <option value="">Select VAT Registered</option>
                                                                                                         <option value={1}>Yes</option>
                                                                                                         <option value={0}>No</option>
                                                                                                     </select>
@@ -1216,8 +1216,8 @@ const CreateClient = () => {
                                                                                                     <input type="text" className="form-control " placeholder="VAT Number"
                                                                                                         name="VATNumber" value={getPartnershipDetails.VATNumber} onChange={(e) => handleChange3(e)}
                                                                                                     />
-                                                                                                    {/* {errors3['VATNumber'] && (
-                                                                                                        <div style={{ 'color': 'red' }}>{errors3['VATNumber']}</div>)} */}
+                                                                                                    {errors3['VATNumber'] && (
+                                                                                                        <div style={{ 'color': 'red' }}>{errors3['VATNumber']}</div>)}
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
@@ -1318,9 +1318,9 @@ const CreateClient = () => {
                                                                                                                                 <option value={item.id} key={i}>{item.name}</option>
                                                                                                                             ))}
                                                                                                                     </select>
-                                                                                                                    {contactsErrors[index].role && (
+                                                                                                                    {/* {contactsErrors[index].role && (
                                                                                                                         <div style={{ 'color': 'red' }}>{contactsErrors[index].role}</div>
-                                                                                                                    )}
+                                                                                                                    )} */}
 
                                                                                                                 </div>
                                                                                                             </div>
@@ -1331,9 +1331,9 @@ const CreateClient = () => {
                                                                                                                         name="phone" value={contacts1.phone} onChange={(e) => handleChange4(index, 'phone', e.target.value)}
 
                                                                                                                     />
-                                                                                                                    {contactsErrors[index].phone && (
+                                                                                                                    {/* {contactsErrors[index].phone && (
                                                                                                                         <div style={{ 'color': 'red' }}>{contactsErrors[index].phone}</div>
-                                                                                                                    )}
+                                                                                                                    )} */}
                                                                                                                 </div>
                                                                                                             </div>
                                                                                                             <div className="col-lg-4">
@@ -1343,9 +1343,9 @@ const CreateClient = () => {
 
                                                                                                                         name="alternate_phone" value={contacts1.alternate_phone} onChange={(e) => handleChange4(index, 'alternate_phone', e.target.value)}
                                                                                                                     />
-                                                                                                                    {contactsErrors[index].alternate_phone && (
+                                                                                                                    {/* {contactsErrors[index].alternate_phone && (
                                                                                                                         <div style={{ 'color': 'red' }}>{contactsErrors[index].alternate_phone}</div>
-                                                                                                                    )}
+                                                                                                                    )} */}
                                                                                                                 </div>
                                                                                                             </div>
                                                                                                             <div className="col-lg-4">
@@ -1355,9 +1355,9 @@ const CreateClient = () => {
                                                                                                                         name="email" value={contacts1.email} onChange={(e) => handleChange4(index, 'email', e.target.value)}
 
                                                                                                                     />
-                                                                                                                    {contactsErrors[index].email && (
+                                                                                                                    {/* {contactsErrors[index].email && (
                                                                                                                         <div style={{ 'color': 'red' }}>{contactsErrors[index].email}</div>
-                                                                                                                    )}
+                                                                                                                    )} */}
                                                                                                                 </div>
                                                                                                             </div>
                                                                                                             <div className="col-lg-4">
@@ -1366,9 +1366,9 @@ const CreateClient = () => {
                                                                                                                     <input type="text" className="form-control" placeholder="Enter Alternate Email"
                                                                                                                         name="alternate_email" value={contacts1.alternate_email} onChange={(e) => handleChange4(index, 'alternate_email', e.target.value)}
                                                                                                                     />
-                                                                                                                    {contactsErrors[index].alternate_email && (
+                                                                                                                    {/* {contactsErrors[index].alternate_email && (
                                                                                                                         <div style={{ 'color': 'red' }}>{contactsErrors[index].alternate_email}</div>
-                                                                                                                    )}
+                                                                                                                    )} */}
                                                                                                                 </div>
                                                                                                             </div>
                                                                                                         </div>
@@ -1392,7 +1392,7 @@ const CreateClient = () => {
                                                 </section>
                                             </div>
                                             <div className="hstack gap-2 justify-content-end">
-                                                <button type="button" className="btn btn-light" onClick={(e)=> navigate('/admin/Clientlist', { state: { id: location.state.id } })}>Cancel</button>
+                                                <button type="button" className="btn btn-light" onClick={(e) => navigate('/admin/Clientlist', { state: { id: location.state.id } })}>Cancel</button>
                                                 <button className="btn btn-info text-white blue-btn" onClick={handleSubmit}>Create Client</button>
                                             </div>
                                         </div>

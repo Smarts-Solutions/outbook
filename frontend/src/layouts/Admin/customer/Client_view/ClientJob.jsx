@@ -4,6 +4,8 @@ import { useDispatch } from "react-redux";
 import Datatable from "../../../../Components/ExtraComponents/Datatable";
 import { Get_All_Job_List } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useNavigate, useLocation } from "react-router-dom";
+import {  Get_All_Client } from '../../../../ReduxStore/Slice/Client/ClientSlice';
+
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -12,8 +14,37 @@ const ClientList = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const [customerData, setCustomerData] = useState([]);
   const [activeTab, setActiveTab] = useState("viewclient");
+  const [getClientDetails, setClientDetails] = useState({ loading: true, data: [] })
 
    
+
+
+
+
+  const GetClientDetails = async () => {
+    const req = { action: "getByid", client_id: location.state.row.id }
+    const data = { req: req, authToken: token }
+    await dispatch(Get_All_Client(data))
+        .unwrap()
+        .then((response) => {
+            if (response.status) {
+                setClientDetails({
+                    loading: false,
+                    data: response.data
+                })
+            } else {
+                setClientDetails({
+                    loading: false,
+                    data: []
+                })
+            }
+        })
+        .catch((error) => {
+            console.log("Error", error);
+        })
+}
+
+
  
 
 
@@ -22,6 +53,7 @@ const ClientList = () => {
     { id: "NoOfJobs", label: "No.Of Jobs" },
     { id: "documents", label: "Documents" },
   ];
+
 
   const columns = [
     {
@@ -87,7 +119,7 @@ const ClientList = () => {
 
 
 
-  console.log(" location.state.row.id  :",  location.state )
+  console.log(" location.state.row.id  :",  getClientDetails && getClientDetails.data )
 
  
   const GetAllJobList = async () => {
@@ -109,6 +141,7 @@ const ClientList = () => {
 
   useEffect(() => {
     GetAllJobList();
+    GetClientDetails()
   }, []);
 
   const handleAddClient = () => {
@@ -192,7 +225,7 @@ const ClientList = () => {
                       <div className="dastyle-profile_user-detail">
                         <h5 className="dastyle-user-name">Mr.Ajeet Agarwal</h5>
                         <p className="mb-0 dastyle-user-name-post">
-                          Client Code:CLT-001
+                          Client Code: {getClientDetails && getClientDetails.data.client.client_code}
                         </p>
                       </div>
                     </div>
