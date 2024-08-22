@@ -38,7 +38,8 @@ const ClientEdit = () => {
         last_name: "",
         phone: "",
         email: "",
-        residentialAddress: ""
+        residentialAddress: "",
+        phone_code: ""
     })
     const [getCompanyDetails, setCompanyDetails] = useState({
         SearchCompany: '',
@@ -604,6 +605,7 @@ const ClientEdit = () => {
     };
 
 
+   console.log("getClientDetails.data", getClientDetails.data) 
 
     useEffect(() => {
         setSelectClientType(location.state.row.client_type_name == 'SoleTrader' ? 1 : location.state.row.client_type_name == 'Company' ? 2 : 3)
@@ -622,7 +624,8 @@ const ClientEdit = () => {
                 last_name: !getClientDetails.loading && getClientDetails.data.contact_details[0].last_name,
                 phone: !getClientDetails.loading && getClientDetails.data.contact_details[0].phone,
                 email: !getClientDetails.loading && getClientDetails.data.contact_details[0].email,
-                residentialAddress: !getClientDetails.loading && getClientDetails.data.contact_details[0].residential_address
+                residentialAddress: !getClientDetails.loading && getClientDetails.data.contact_details[0].residential_address,
+                phone_code: !getClientDetails.loading && getClientDetails.data.contact_details[0].phone_code
             }))
         }
         if (location.state.row.client_type_name == 'Company') {

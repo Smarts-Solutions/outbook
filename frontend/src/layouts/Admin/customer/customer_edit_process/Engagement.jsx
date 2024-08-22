@@ -230,11 +230,6 @@ const Engagement = () => {
         setJobEntries(newJobEntries);
     };
 
-
-    
- 
-
-
     const validate1 = () => {
         const newErrors = {};
         for (const key in formValues1) {

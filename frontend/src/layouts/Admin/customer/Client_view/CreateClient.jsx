@@ -5,7 +5,7 @@ import { GetAllCompany } from '../../../../ReduxStore/Slice/Customer/CustomerSli
 import { Email_regex } from '../../../../Utils/Common_regex'
 import { useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2'
-import { PersonRole } from '../../../../ReduxStore/Slice/Settings/settingSlice'
+import { PersonRole, Country } from '../../../../ReduxStore/Slice/Settings/settingSlice'
 import Search from 'antd/es/transfer/search';
 const CreateClient = () => {
     const dispatch = useDispatch();
@@ -22,6 +22,7 @@ const CreateClient = () => {
     const [errors1, setErrors1] = useState({})
     const [errors2, setErrors2] = useState({})
     const [errors3, setErrors3] = useState({})
+    const [countryDataAll, setCountryDataAll] = useState({ loading: true, data: [] });
 
 
 
@@ -36,7 +37,9 @@ const CreateClient = () => {
         last_name: "",
         phone: "",
         email: "",
-        residentialAddress: ""
+        residentialAddress: "",
+        phone_code: "+44"
+
     })
     const [getCompanyDetails, setCompanyDetails] = useState({
         SearchCompany: '',
@@ -147,7 +150,8 @@ const CreateClient = () => {
                 phone: getSoleTraderDetails.phone,
                 email: getSoleTraderDetails.email,
                 residential_address: getSoleTraderDetails.residentialAddress,
-                client_code: location.state.id
+                client_code: location.state.id,
+                phone_code: getSoleTraderDetails.phone_code
             }
             await dispatch(Add_Client(req))
                 .unwrap()
@@ -387,7 +391,7 @@ const CreateClient = () => {
         const newErrors = {};
         for (const key in getPartnershipDetails) {
             if (!getPartnershipDetails[key]) {
-              
+
 
                 // if (key === 'ClientIndustry') newErrors[key] = 'Please Select Client Industry';
                 if (key === 'TradingName') newErrors[key] = 'Please Enter Trading Name';
@@ -420,7 +424,26 @@ const CreateClient = () => {
             })
     }
 
+    const CountryData = async (req) => {
+        const data = { req: { action: "get" }, authToken: token };
+        await dispatch(Country(data))
+            .unwrap()
+            .then(async (response) => {
+
+                if (response.status) {
+                    setCountryDataAll({ loading: false, data: response.data });
+                } else {
+                    setCountryDataAll({ loading: false, data: [] });
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    };
+
+
     useEffect(() => {
+        CountryData();
         getClientIndustry()
     }, [])
 
@@ -579,8 +602,6 @@ const CreateClient = () => {
                             <div className="card-header">
                                 <h4 className="card-title mb-0">Create New Client</h4>
                             </div>
-
-
                             {/* end card header */}
                             <div className="card-body form-steps">
                                 <div>
@@ -612,8 +633,7 @@ const CreateClient = () => {
                                                                         >
                                                                             <option value={1}>Sole Trader</option>
                                                                             <option value={2}>Company</option>
-                                                                            <option value={3}>Partnership</option>
-
+                                                                            <option value={3}>Partnership</option> 
                                                                         </select>
                                                                     </div>
                                                                 </div>
@@ -689,7 +709,7 @@ const CreateClient = () => {
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                         >
 
-                                                                                     
+
                                                                                             <option value={1}>Yes</option>
                                                                                             <option value={0}>No</option>
 
@@ -758,7 +778,37 @@ const CreateClient = () => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-4">
+
+                                                                                <div class="col-lg-4">
+                                                                                    <div class="mb-3">
+                                                                                        <label for="firstNameinput" class="form-label">Phone</label>
+                                                                                        <div class="row">
+                                                                                            <div class="col-md-4">
+                                                                                                <select class="form-select" onChange={(e) => handleChange1(e)} name="phone_code"
+                                                                                                    value={getSoleTraderDetails.phone_code}
+                                                                                                >
+                                                                                                    {countryDataAll.data.map((data) => (
+                                                                                                        <option key={data.code} value={data.code}>
+                                                                                                            {data.code}
+                                                                                                        </option>
+                                                                                                    ))}
+                                                                                                </select>
+                                                                                            </div>
+                                                                                            <div className="mb-3 col-md-8">
+                                                                                                <input type="text" className="form-control"
+                                                                                                    placeholder="Phone Number"
+                                                                                                    name="phone"
+                                                                                                    value={getSoleTraderDetails.phone}
+                                                                                                    onChange={(e) => handleChange1(e)}
+                                                                                                    maxLength={12}
+                                                                                                    minLength={9}
+                                                                                                />
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+
+                                                                                {/* <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label" >Phone<span style={{ color: "red" }}>*</span></label>
                                                                                         <input type="text" className="form-control"
@@ -771,7 +821,7 @@ const CreateClient = () => {
                                                                                             <div style={{ 'color': 'red' }}>{errors1['phone']}</div>
                                                                                         )}
                                                                                     </div>
-                                                                                </div>
+                                                                                </div> */}
                                                                                 <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label" >Email<span style={{ color: "red" }}>*</span></label>
@@ -927,7 +977,7 @@ const CreateClient = () => {
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  >VAT Registered</label>
                                                                                                 <select className="form-select " name="VATRegistered" onChange={(e) => handleChange2(e)} defaultValue={0}>
-                                                                                                    
+
                                                                                                     <option value={1}>Yes</option>
                                                                                                     <option value={0}>No</option>
                                                                                                 </select>
