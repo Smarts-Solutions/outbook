@@ -30,7 +30,7 @@ const createCustomer = async (customer) => {
    
 
     if (customer.CustomerType == "1") {
-        const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, First_Name, Last_Name, Phone, Email, Residential_Address ,phone_code } = customer;
+        const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, First_Name, Last_Name, Phone, Email, Residential_Address  } = customer;
         const firstThreeLetters = Trading_Name.substring(0, 3)
         const customer_code = "cust_" + firstThreeLetters + "_" + UniqueNo;
       
@@ -56,6 +56,8 @@ const createCustomer = async (customer) => {
         INSERT INTO customer_contact_details (customer_id,first_name,last_name,phone_code,phone,email,residential_address)
         VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
+           let phone_code = customer.phone_code == undefined ? "": ""
+       
             const [result2] = await pool.execute(query2, [customer_id, First_Name, Last_Name,phone_code ,Phone, Email, Residential_Address]);
             return { status: true, message: 'customer add successfully.', data: customer_id };
         } catch (err) {
@@ -105,10 +107,10 @@ const createCustomer = async (customer) => {
                 let role = detail.role;
                 let first_name = detail.firstName;
                 let last_name = detail.lastName;
-                let phone_code = detail.phone_code;
+                let phone_code = detail.phone_code== undefined ? "": "";
                 let phone = detail.phoneNumber;
                 let email = detail.email;
-     
+
                 const [result3] = await pool.execute(query3, [customer_id, role, first_name, last_name, phone_code,phone, email]);
 
             }
@@ -158,7 +160,7 @@ const createCustomer = async (customer) => {
                 let role = detail.role;
                 let first_name = detail.firstName;
                 let last_name = detail.lastName;
-                let phone_code = detail.phone_code;
+                let phone_code = detail.phone_code == undefined ? "": "";
                 let phone = detail.phoneNumber;
                 let email = detail.email;
                 let authorised_signatory_status = detail.authorised_signatory_status == true ? "1" : "0";
@@ -199,14 +201,15 @@ else{
 
     //Solo Traders Details
     if (CustomerType == "1") {
-        const {First_Name,Last_Name,phone_code,Phone,Email,Residential_Address,contact_id} = customer;
+        const {First_Name,Last_Name,Phone,Email,Residential_Address,contact_id} = customer;
   
         const query2 = `
     UPDATE customer_contact_details
     SET first_name = ?, last_name = ?, phone = ?,phone_code = ?, email = ?, residential_address = ?
     WHERE customer_id = ? AND id = ?
      `;
-
+        
+     let phone_code = customer.phone_code == undefined ? "": ""
         try {
             const [result2] = await pool.execute(query2, [First_Name,Last_Name,phone_code,Phone,Email,Residential_Address, customer_id, contact_id]);
             return { status: true, message: 'Customer updated successfully.', data: customer_id };
@@ -260,7 +263,7 @@ else{
                 let first_name = detail.first_name;
                 let last_name = detail.last_name;
                 let email = detail.email;
-                let phone_code = detail.phone_code;
+                let phone_code = detail.phone_code == undefined ? "": "";
                 let phone = detail.phone;
                 let residential_address = detail.residential_address;
                 if (contact_id == "" || contact_id == undefined || contact_id == null) {
@@ -330,7 +333,7 @@ else{
                 let first_name = detail.first_name;
                 let last_name = detail.last_name;
                 let email = detail.email;
-                let phone_code = detail.phone_code;
+                let phone_code = detail.phone_code == undefined ? "": "";
                 let phone = detail.phone;
                 let residential_address = detail.residential_address;
                 let authorised_signatory_status = detail.authorised_signatory_status;
