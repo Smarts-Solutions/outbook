@@ -21,11 +21,12 @@ const getJobType = async (JobType) => {
     const {service_id} = JobType;
     const query = `
     SELECT job_types.id, job_types.type , job_types.status ,services.name as service_name FROM job_types JOIN services ON job_types.service_id = services.id 
-    ORDER BY job_types.id DESC
+    WHERE job_types.service_id = ?
+    ORDER BY job_types.id DESC 
     `;
 
     try {
-        const [result] = await pool.execute(query);
+        const [result] = await pool.execute(query,[service_id]);
         return result;
     } catch (err) {
         console.error('Error selecting data:', err);
