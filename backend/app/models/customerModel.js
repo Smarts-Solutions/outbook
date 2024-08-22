@@ -26,7 +26,7 @@ const createCustomer = async (customer) => {
    if(customer_id == undefined || customer_id == null || customer_id == ""){
     let UniqueNo = await generateNextUniqueCode()
 
-   
+   console.log("customer",customer)
    
 
     if (customer.CustomerType == "1") {
@@ -968,6 +968,7 @@ const updateProcessCustomerFileDelete = async (customerProcessData) => {
 const getSingleCustomer = async (customer) => {
     let customerDetals = {}
     const { customer_id, pageStatus } = customer;
+   
     const [ExistCustomer] = await pool.execute('SELECT customer_type FROM `customers` WHERE id =' + customer_id);
 
     const customer_type = ExistCustomer[0].customer_type;

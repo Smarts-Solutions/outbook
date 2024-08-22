@@ -34,10 +34,12 @@ const Information = () => {
     role: "",
     phoneNumber: "",
     email: "",
+    phone_code: "+44"
   },
   ]);
 
 
+  console.log("contacts", contacts);
 
 
   const handleAddContact = () => {
@@ -50,6 +52,7 @@ const Information = () => {
         role: "",
         phoneNumber: "",
         email: "",
+        phone_code: "+44"
       },
     ]);
     setErrors([
@@ -245,6 +248,7 @@ const Information = () => {
       Phone: "",
       Email: "",
       Residential_Address: "",
+      countryCode:"+44",
       
     },
     validate: (values) => {
@@ -822,6 +826,7 @@ const Information = () => {
           role: "",
           phoneNumber: "",
           email: "",
+          phone_code: "+44"
         },
         {
           authorised_signatory_status: true,
@@ -830,6 +835,7 @@ const Information = () => {
           role: "",
           phoneNumber: "",
           email: "",
+          phone_code: "+44"
         },
       ]);
       setErrors([
@@ -893,6 +899,7 @@ const Information = () => {
           setAccountMangerId(customerDetailsExist && customerDetailsExist.customer.account_manager_id)
 
           if (customerDetailsExist && customerDetailsExist.customer.customer_type == '1') {
+            console.log("customerDetailsExist" )
             formik1.setFieldValue("Trading_Name", customerDetailsExist.customer.trading_name);
             formik1.setFieldValue("Trading_Address", customerDetailsExist.customer.trading_address);
             formik1.setFieldValue("VAT_Registered", customerDetailsExist.customer.vat_registered);
@@ -903,6 +910,7 @@ const Information = () => {
             formik1.setFieldValue("Phone", customerDetailsExist.contact_details[0].phone);
             formik1.setFieldValue("Email", customerDetailsExist.contact_details[0].email);
             formik1.setFieldValue("Residential_Address", customerDetailsExist.contact_details[0].residential_address);
+            formik1.setFieldValue("countryCode", customerDetailsExist.contact_details[0].phone_code);
           }
           if (customerDetailsExist && customerDetailsExist.customer.customer_type == '2') {
             formik.setFieldValue("company_name", customerDetailsExist.customer.company_name);
@@ -1218,10 +1226,10 @@ const Information = () => {
 
                                               <select
                                                 className="form-select me-2"
-                                                id={`countryCode-${index}`}
-                                                value={contact.countryCode}
+                                                id={`phone_code-${index}`}
+                                                value={contact.phone_code}
                                                 onChange={(e) =>
-                                                  handleChange(index, "countryCode", e.target.value)
+                                                  handleChange(index, "phone_code", e.target.value)
                                                 }
                                                 style={{ width: "30%" }}
                                               >
@@ -1552,10 +1560,10 @@ const Information = () => {
                                                   <div className="mb-3 d-flex align-items-center">
                                                     <select
                                                       className="form-select me-2"
-                                                      id={`countryCode-${index}`}
-                                                      value={contact.countryCode}
+                                                      id={`phone_code-${index}`}
+                                                      value={contact.phone_code}
                                                       onChange={(e) =>
-                                                        handleChange(index, "countryCode", e.target.value)
+                                                        handleChange(index, "phone_code", e.target.value)
                                                       }
                                                       style={{ width: "30%" }}
                                                     >
