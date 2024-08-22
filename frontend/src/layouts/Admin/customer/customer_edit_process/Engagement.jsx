@@ -667,6 +667,7 @@ const Engagement = () => {
                                                                         onChange={(e) => handleChange4(index, e)}
                                                                     >
                                                                         <option value="">Select Job Type</option>
+                                                                        <option value="1">demo</option>
                                                                         {jobType && jobType.map((data) => (
                                                                             <option key={data.type} value={data.id}>{data.type}</option>
                                                                         ))}

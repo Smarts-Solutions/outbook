@@ -25,11 +25,15 @@ const createCustomer = async (customer) => {
 
    if(customer_id == undefined || customer_id == null || customer_id == ""){
     let UniqueNo = await generateNextUniqueCode()
+
+   
+   
+
     if (customer.CustomerType == "1") {
-        const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, First_Name, Last_Name, Phone, Email, Residential_Address } = customer;
+        const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, First_Name, Last_Name, Phone, Email, Residential_Address ,phone_code } = customer;
         const firstThreeLetters = Trading_Name.substring(0, 3)
         const customer_code = "cust_" + firstThreeLetters + "_" + UniqueNo;
-
+      
 
         const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
 
@@ -39,7 +43,8 @@ const createCustomer = async (customer) => {
         }
 
 
-
+      
+        
         const query = `
     INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -50,10 +55,10 @@ const createCustomer = async (customer) => {
             const customer_id = result.insertId;
 
             const query2 = `
-        INSERT INTO customer_contact_details (customer_id,first_name,last_name,phone,email,residential_address)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO customer_contact_details (customer_id,first_name,last_name,phone_code,phone,email,residential_address)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
-            const [result2] = await pool.execute(query2, [customer_id, First_Name, Last_Name, Phone, Email, Residential_Address]);
+            const [result2] = await pool.execute(query2, [customer_id, First_Name, Last_Name,phone_code ,Phone, Email, Residential_Address]);
             return { status: true, message: 'customer add successfully.', data: customer_id };
         } catch (err) {
             console.error('Error inserting data:', err);
@@ -93,8 +98,8 @@ const createCustomer = async (customer) => {
 
 
             const query3 = `
-        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone,email)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
 
             for (const detail of contactDetails) {
@@ -102,10 +107,11 @@ const createCustomer = async (customer) => {
                 let role = detail.role;
                 let first_name = detail.firstName;
                 let last_name = detail.lastName;
+                let phone_code = detail.phone_code;
                 let phone = detail.phoneNumber;
                 let email = detail.email;
      
-                const [result3] = await pool.execute(query3, [customer_id, role, first_name, last_name, phone, email]);
+                const [result3] = await pool.execute(query3, [customer_id, role, first_name, last_name, phone_code,phone, email]);
 
             }
 
@@ -145,8 +151,8 @@ const createCustomer = async (customer) => {
 
 
             const query2 = `
-        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone,email,authorised_signatory_status)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email,authorised_signatory_status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
             for (const detail of contactDetails) {
@@ -154,11 +160,12 @@ const createCustomer = async (customer) => {
                 let role = detail.role;
                 let first_name = detail.firstName;
                 let last_name = detail.lastName;
+                let phone_code = detail.phone_code;
                 let phone = detail.phoneNumber;
                 let email = detail.email;
                 let authorised_signatory_status = detail.authorised_signatory_status == true ? "1" : "0";
  
-                const [result3] = await pool.execute(query2, [customer_id, role, first_name, last_name, phone, email, authorised_signatory_status]);
+                const [result3] = await pool.execute(query2, [customer_id, role, first_name, last_name, phone_code,phone, email, authorised_signatory_status]);
 
             }
 
@@ -194,16 +201,16 @@ else{
 
     //Solo Traders Details
     if (CustomerType == "1") {
-        const {First_Name,Last_Name,Phone,Email,Residential_Address,contact_id} = customer;
+        const {First_Name,Last_Name,phone_code,Phone,Email,Residential_Address,contact_id} = customer;
   
         const query2 = `
     UPDATE customer_contact_details
-    SET first_name = ?, last_name = ?, phone = ?, email = ?, residential_address = ?
+    SET first_name = ?, last_name = ?, phone = ?,phone_code = ?, email = ?, residential_address = ?
     WHERE customer_id = ? AND id = ?
      `;
 
         try {
-            const [result2] = await pool.execute(query2, [First_Name,Last_Name,Phone,Email,Residential_Address, customer_id, contact_id]);
+            const [result2] = await pool.execute(query2, [First_Name,Last_Name,phone_code,Phone,Email,Residential_Address, customer_id, contact_id]);
             return { status: true, message: 'Customer updated successfully.', data: customer_id };
         } catch (err) {
      
@@ -244,7 +251,7 @@ else{
             // Update customer_contact_details
             const query3 = `
                 UPDATE customer_contact_details
-                SET contact_person_role_id = ?, first_name = ?, last_name = ?, phone = ?, email = ? ,residential_address = ?
+                SET contact_person_role_id = ?, first_name = ?, last_name = ?, phone_code = ?, phone = ?, email = ? ,residential_address = ?
                 WHERE customer_id = ? AND id = ?
             `;
 
@@ -255,22 +262,23 @@ else{
                 let first_name = detail.first_name;
                 let last_name = detail.last_name;
                 let email = detail.email;
+                let phone_code = detail.phone_code;
                 let phone = detail.phone;
                 let residential_address = detail.residential_address;
                 if (contact_id == "" || contact_id == undefined || contact_id == null) {
                
 
                     const query4 = `
-                    INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone,email,residential_address)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email,residential_address)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     `;
-                    const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone, email, residential_address]);
+                    const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone_code,phone, email, residential_address]);
 
                 }
                 else {
           
                     arrayInterId.push(contact_id)
-                    const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone, email, residential_address, customer_id, contact_id]);
+                    const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone_code,phone, email, residential_address, customer_id, contact_id]);
                 }
             }
 
@@ -311,7 +319,7 @@ else{
 
             const query3 = `
             UPDATE customer_contact_details
-            SET contact_person_role_id = ?, first_name = ?, last_name = ?, phone = ?, email = ? ,residential_address = ? ,authorised_signatory_status = ?
+            SET contact_person_role_id = ?, first_name = ?, last_name = ?,phone_code = ? ,phone = ?, email = ? ,residential_address = ? ,authorised_signatory_status = ?
             WHERE customer_id = ? AND id = ?
            `;
 
@@ -324,19 +332,20 @@ else{
                 let first_name = detail.first_name;
                 let last_name = detail.last_name;
                 let email = detail.email;
+                let phone_code = detail.phone_code;
                 let phone = detail.phone;
                 let residential_address = detail.residential_address;
                 let authorised_signatory_status = detail.authorised_signatory_status;
                 if (contact_id == "" || contact_id == undefined || contact_id == null) {
                     const query4 = `
-                    INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone,email,residential_address,authorised_signatory_status)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email,residential_address,authorised_signatory_status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     `;
-                    const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone, email, residential_address, authorised_signatory_status]);
+                    const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone_code,phone, email, residential_address, authorised_signatory_status]);
                 } else {
 
                     arrayInterId.push(contact_id)
-                    const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone, email, residential_address, authorised_signatory_status, customer_id, contact_id]);
+                    const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone_code,phone, email, residential_address, authorised_signatory_status, customer_id, contact_id]);
                 }
 
             }
