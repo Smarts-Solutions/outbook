@@ -19,6 +19,10 @@ const handleCountry = async (req, res) => {
                 result = await countryService.getCountry();
                 res.status(200).json({ status: true, data: result });
                 break;
+            case 'getAll':
+                result = await countryService.getCountryAll();
+                res.status(200).json({ status: true, data: result });
+                break;
             case 'delete':
                 await countryService.removeCountry(Country.id);
                 res.status(200).json({ status: true, message: 'Country deleted successfully' });

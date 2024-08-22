@@ -10,6 +10,10 @@ const getCountry = async () => {
   return countryModel.getCountry();
 }
 
+const getCountryAll = async () => {
+  return countryModel.getCountryAll();
+}
+
 const removeCountry = async (CountryId) => {
   return countryModel.deleteCountry(CountryId);
 };
@@ -23,5 +27,6 @@ module.exports = {
   addCountry,
   getCountry,
   removeCountry,
-  modifyCountry
+  modifyCountry,
+  getCountryAll
 };

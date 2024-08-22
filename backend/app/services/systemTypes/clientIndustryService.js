@@ -10,6 +10,10 @@ const getClientIndustry = async () => {
   return clientIndustryModel.getClientIndustry();
 }
 
+const getClientIndustryAll = async () => {
+  return clientIndustryModel.getClientIndustryAll();
+}
+
 const removeClientIndustry = async (ClientIndustryId) => {
   return clientIndustryModel.deleteClientIndustry(ClientIndustryId);
 };
@@ -23,5 +27,6 @@ module.exports = {
   addClientIndustry,
   getClientIndustry,
   removeClientIndustry,
-  modifyClientIndustry
+  modifyClientIndustry,
+  getClientIndustryAll
 };

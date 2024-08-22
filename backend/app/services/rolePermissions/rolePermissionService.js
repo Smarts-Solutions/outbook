@@ -9,6 +9,10 @@ const addRole = async (Role) => {
 const getRole = async () => {
   return rolePermissionsModel.getRole();
 }
+
+const getRoleAll = async () => {
+  return rolePermissionsModel.getRoleAll();
+}
 const staffRole = async () => {
   return rolePermissionsModel.staffRole();
 }
@@ -58,5 +62,6 @@ module.exports = {
   modifyRole,
   getRole,
   staffRole,
-  accessRolePermissions
+  accessRolePermissions,
+  getRoleAll
 };

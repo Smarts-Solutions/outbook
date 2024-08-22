@@ -22,6 +22,20 @@ const createStatusType = async (StatusType) => {
 
 const getStatusType = async () => { 
     const query = `
+    SELECT * FROM status_types WHERE status = '1' ORDER BY id DESC
+    `;
+
+    try {
+        const [result] = await pool.execute(query);
+        return result;
+    } catch (err) {
+        console.error('Error selecting data:', err);
+        throw err;
+    }
+}
+
+const getStatusTypeAll = async () => { 
+    const query = `
     SELECT * FROM status_types ORDER BY id DESC
     `;
 
@@ -87,6 +101,7 @@ module.exports = {
     createStatusType,
     deleteStatusType,
     updateStatusType,
-    getStatusType
+    getStatusType,
+    getStatusTypeAll
   
 };

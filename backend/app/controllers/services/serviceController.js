@@ -18,7 +18,11 @@ const handleServices = async (req, res) => {
           case 'get':
               result = await serviceService.getServices();
               res.status(200).json({ status:true, data: result });
-              break;   
+              break;
+        case 'getAll':
+            result = await serviceService.getServicesAll();
+            res.status(200).json({ status:true, data: result });
+            break;       
           case 'delete':
               await serviceService.removeServices(Services.id);
               res.status(200).json({ status:true,message: 'Services deleted successfully' });

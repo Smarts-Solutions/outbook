@@ -35,8 +35,21 @@ const getRole = async () => {
     }
 };
 
+const getRoleAll = async () => {
+    const query = `
+    SELECT * FROM roles ORDER BY id DESC `;
+
+    try {
+        const [result] = await pool.execute(query);
+        return result;
+    } catch (err) {
+        console.error('Error selecting data:', err);
+        throw err;
+    }
+};
+
 const staffRole = async () => {
-    const query = `SELECT * FROM roles WHERE role NOT IN ('ADMIN','SUPERADMIN');`;
+    const query = `SELECT * FROM roles WHERE status = '1' AND role NOT IN ('ADMIN','SUPERADMIN');`;
 
     try {
         const [result] = await pool.execute(query);
@@ -170,5 +183,6 @@ module.exports = {
     updateRole,
     getRole,
     staffRole,
-    accessRolePermissions
+    accessRolePermissions,
+    getRoleAll
 };

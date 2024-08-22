@@ -122,7 +122,7 @@ const staffCompetency = async (staffCompetency) => {
 }
 
 const getStaffByEmail = async (email) => {
-    const [rows] = await pool.query('SELECT staffs.id , staffs.email , staffs.password , staffs.role_id ,roles.role_name ,roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id  WHERE staffs.email = ?', [email]);
+    const [rows] = await pool.query('SELECT staffs.id , staffs.email , staffs.password , staffs.role_id, staffs.status,roles.role_name ,roles.role  FROM staffs JOIN roles ON staffs.role_id = roles.id  WHERE staffs.email = ?', [email]);
 
     return rows[0];
 };

@@ -23,6 +23,21 @@ const createCustomerContactPersonRole = async (CustomerContactPersonRole) => {
 
 const getCustomerContactPersonRole = async () => { 
     const query = `
+    SELECT * FROM customer_contact_person_role WHERE status = '1'
+    ORDER BY id DESC 
+    `;
+
+    try {
+        const [result] = await pool.execute(query);
+        return result;
+    } catch (err) {
+        console.error('Error selecting data:', err);
+        throw err;
+    }
+}
+
+const getCustomerContactPersonRoleAll = async () => { 
+    const query = `
     SELECT * FROM customer_contact_person_role
     ORDER BY id DESC 
     `;
@@ -89,6 +104,7 @@ module.exports = {
     createCustomerContactPersonRole,
     deleteCustomerContactPersonRole,
     updateCustomerContactPersonRole,
-    getCustomerContactPersonRole
+    getCustomerContactPersonRole,
+    getCustomerContactPersonRoleAll
   
 };

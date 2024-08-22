@@ -22,6 +22,21 @@ const createCountry = async (Country) => {
 
 const getCountry = async () => { 
     const query = `
+    SELECT * FROM countries WHERE status = '1'
+    ORDER BY id DESC
+    `;
+
+    try {
+        const [result] = await pool.execute(query);
+        return result;
+    } catch (err) {
+        console.error('Error selecting data:', err);
+        throw err;
+    }
+}
+
+const getCountryAll = async () => { 
+    const query = `
     SELECT * FROM countries
     ORDER BY id DESC
     `;
@@ -86,6 +101,7 @@ module.exports = {
     createCountry,
     deleteCountry,
     updateCountry,
-    getCountry
+    getCountry,
+    getCountryAll
   
 };
