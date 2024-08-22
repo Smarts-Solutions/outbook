@@ -631,6 +631,7 @@ const Information = ({ id, pageStatus }) => {
     }, [searchItem])
 
 
+    console.log("customerDetails", customerDetails.data)
 
     useEffect(() => {
         setCustomerType(id.customer_type)
@@ -639,7 +640,7 @@ const Information = ({ id, pageStatus }) => {
         if (id.customer_type == '1') {
             setSoleTraderDetails(prevState => ({
                 ...prevState,
-                tradingName: !customerDetails.loading && customerDetails.data.customer.trading_name,
+                // tradingName: !customerDetails.loading && customerDetails.data.customer.trading_name,
                 tradingAddress: !customerDetails.loading && customerDetails.data.customer.trading_address,
                 vatRegistered: !customerDetails.loading && customerDetails.data.customer.vat_registered,
                 vatNumber: !customerDetails.loading && customerDetails.data.customer.vat_number,
