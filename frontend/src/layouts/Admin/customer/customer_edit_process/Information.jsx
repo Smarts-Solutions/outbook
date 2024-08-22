@@ -1103,12 +1103,12 @@ const Information = ({ id, pageStatus }) => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="row">
+
                                             <div className="col-lg-12">
                                                 <div className="card card_shadow">
                                                     <div className="card-header step-card-header card-header-light-blue   align-items-center d-flex">
                                                         <h4 className="card-title mb-0 flex-grow-1">
-                                                            Officer Details
+                                                            Contact Details
                                                         </h4>
                                                     </div>
                                                     <div className="row">
@@ -1145,7 +1145,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                             onChange={(e) => handleChange(index, 'first_name', e.target.value)}
                                                                                         />
                                                                                         {errors[index] && errors[index].first_name && (
-                                                                                            <div style={{ color: 'red' }}>{errors[index].first_name}</div>
+                                                                                            <div className="error-text">{errors[index].first_name}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -1163,7 +1163,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                             onChange={(e) => handleChange(index, 'last_name', e.target.value)}
                                                                                         />
                                                                                         {errors[index] && errors[index].last_name && (
-                                                                                            <div style={{ color: 'red' }}>{errors[index].last_name}</div>
+                                                                                            <div className="error-text">{errors[index].last_name}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -1189,7 +1189,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                                 ))}
                                                                                         </select>
                                                                                         {errors[index] && errors[index].customer_contact_person_role_id && (
-                                                                                            <div style={{ color: 'red' }}>{errors[index].customer_contact_person_role_id}</div>
+                                                                                            <div className="error-text">{errors[index].customer_contact_person_role_id}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -1207,7 +1207,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                             onChange={(e) => handleChange(index, 'phone', e.target.value)}
                                                                                         />
                                                                                         {errors[index] && errors[index].phone && (
-                                                                                            <div style={{ color: 'red' }}>{errors[index].phone}</div>
+                                                                                            <div className="error-text">{errors[index].phone}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -1225,7 +1225,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                             onChange={(e) => handleChange(index, 'email', e.target.value)}
                                                                                         />
                                                                                         {errors[index] && errors[index].email && (
-                                                                                            <div style={{ color: 'red' }}>{errors[index].email}</div>
+                                                                                            <div className="error-text">{errors[index].email}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -1246,7 +1246,7 @@ const Information = ({ id, pageStatus }) => {
                                             </div>{" "}
                                             {/* end col */}
                                         </div>
-                                    </div>
+                                    
                                     :
                                     customerType == 3 ?
                                         <div className="row mt-3" >
@@ -1324,7 +1324,7 @@ const Information = ({ id, pageStatus }) => {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="row">
+                                           
                                                 <div className="col-lg-12">
                                                     <div className="card card_shadow">
                                                         <div className=" card-header card-header-light-blue step-card-header align-items-center d-flex">
@@ -1378,7 +1378,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                             onChange={(e) => handleChange4(index, 'first_name', e.target.value)}
                                                                                         />
                                                                                         {contactsErrors[index]?.first_name && (
-                                                                                            <div style={{ color: 'red' }}>{contactsErrors[index].first_name}</div>
+                                                                                            <div  className="error-text">{contactsErrors[index].first_name}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -1394,7 +1394,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                             onChange={(e) => handleChange4(index, 'last_name', e.target.value)}
                                                                                         />
                                                                                         {contactsErrors[index]?.last_name && (
-                                                                                            <div style={{ color: 'red' }}>{contactsErrors[index].last_name}</div>
+                                                                                            <div  className="error-text">{contactsErrors[index].last_name}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -1414,7 +1414,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                                 ))}
                                                                                         </select>
                                                                                         {contactsErrors[index]?.customer_contact_person_role_id && (
-                                                                                            <div style={{ color: 'red' }}>{contactsErrors[index].customer_contact_person_role_id}</div>
+                                                                                            <div  className="error-text">{contactsErrors[index].customer_contact_person_role_id}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -1430,7 +1430,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                             onChange={(e) => handleChange4(index, 'phone', e.target.value)}
                                                                                         />
                                                                                         {contactsErrors[index]?.phone && (
-                                                                                            <div style={{ color: 'red' }}>{contactsErrors[index].phone}</div>
+                                                                                            <div  className="error-text">{contactsErrors[index].phone}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -1447,7 +1447,7 @@ const Information = ({ id, pageStatus }) => {
                                                                                             onChange={(e) => handleChange4(index, 'email', e.target.value)}
                                                                                         />
                                                                                         {contactsErrors[index]?.email && (
-                                                                                            <div style={{ color: 'red' }}>{contactsErrors[index].email}</div>
+                                                                                            <div  className="error-text">{contactsErrors[index].email}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -1468,13 +1468,13 @@ const Information = ({ id, pageStatus }) => {
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                       
                                         : ""
                         }
                     </section>
                     <div className="form__item button__items d-flex justify-content-between">
-                        <Button className="white-btn" type="default" onClick={prev}>
-                            Back
+                        <Button className="btn btn-secondary" type="default" onClick={prev}>
+                            Previous
                         </Button>
                         <Button className="btn btn-info text-white blue-btn" type="submit" onClick={handleSubmit}>
                             Next

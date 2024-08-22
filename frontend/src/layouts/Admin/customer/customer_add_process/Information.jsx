@@ -425,7 +425,7 @@ const Information = () => {
     },
     {
       name: "VAT_Registered",
-       label: "VAT Registered",
+      label: "VAT Registered",
       type: "select3",
       options: [
         { value: "1", label: "Yes" },
@@ -570,7 +570,7 @@ const Information = () => {
     },
     {
       name: "VAT_Registered",
-       label: "VAT Registered",
+      label: "VAT Registered",
       type: "select3",
       options: [
         { value: "1", label: "Yes" },
@@ -621,8 +621,6 @@ const Information = () => {
       col_size: 4,
       disable: false,
     },
-
-    
   ];
   const fields3 = [
     {
@@ -643,7 +641,7 @@ const Information = () => {
     },
     {
       name: "VAT_Registered",
-       label: "VAT Registered",
+      label: "VAT Registered",
       type: "select3",
       options: [
         { value: "1", label: "Yes" },
@@ -885,7 +883,6 @@ const Information = () => {
                         )}
                         formik={formik1}
                         btn_name="Next"
-                        
                       />
                     </div>
                   </div>
@@ -899,55 +896,52 @@ const Information = () => {
                       </h4>
                     </div>
                     <div className="card-body">
-                    <AddFrom
-                      fieldtype={fields1.filter(
-                        (field) =>
-                          !field.showWhen || field.showWhen(formik.values)
-                      )}
-                      formik={formik}
-                      btn_name="Next"
-                      additional_field={
-                        <section>
-                          <div className="row" id="form2">
-                            <div className="row">
-                              <div className="col-lg-12">
-                               
+                      <AddFrom
+                        fieldtype={fields1.filter(
+                          (field) =>
+                            !field.showWhen || field.showWhen(formik.values)
+                        )}
+                        formik={formik}
+                        btn_name="Next"
+                        additional_field={
+                          <section className="w-100">
+                            <div className="" id="form2">
+                              <div className="row">
+                                <div className="col-lg-12 px-0">
                                   <div className="card-header card-header-light-blue step-card-header align-items-center d-flex">
                                     <h4 className="card-title mb-0 flex-grow-1">
                                       Contact Details
                                     </h4>
                                   </div>
-                                 
-                                    <div className="row mt-3">
-                                      {contacts.map((contact, index) => (
-                                        <div
-                                          className="col-xl-12 col-lg-12 mt-3"
-                                          key={index}
-                                        >
-                                          <div className=" pricing-box  m-2 mt-0">
-                                            <div className="row">
-                                              {index !== 0 && (
-                                                <div className="col-lg-12">
-                                                  <div className="form-check mb-3 d-flex justify-content-end">
-                                                    <button
-                                                      className="btn btn-danger"
-                                                      onClick={() =>
-                                                        handleDeleteContact(
-                                                          index
-                                                        )
-                                                      }
-                                                      disabled={
-                                                        contacts.length === 1
-                                                      }
-                                                    >
-                                                      Delete
-                                                    </button>
-                                                  </div>
+
+                                  <div className="row card-body">
+                                    {contacts.map((contact, index) => (
+                                      <div
+                                        className="col-xl-12 col-lg-12 mt-3"
+                                        key={index}
+                                      >
+                                        <div className=" pricing-box  m-2 mt-0">
+                                          <div className="row">
+                                            {index !== 0 && (
+                                              <div className="col-lg-12">
+                                                <div className="form-check mb-3 d-flex justify-content-end">
+                                                  <button
+                                                    className="btn btn-danger"
+                                                    onClick={() =>
+                                                      handleDeleteContact(index)
+                                                    }
+                                                    disabled={
+                                                      contacts.length === 1
+                                                    }
+                                                  >
+                                                    Delete
+                                                  </button>
                                                 </div>
-                                              )}
-                                              <div className="col-lg-4 ps-1">
-                                                <div className="mb-3">
-                                                  {/* <label
+                                              </div>
+                                            )}
+                                            <div className="col-lg-4 ps-1">
+                                              <div className="mb-3">
+                                                {/* <label
                                                     htmlFor={`firstName-${index}`}
                                                     className="form-label"
                                                   >
@@ -960,34 +954,30 @@ const Information = () => {
                                                       *
                                                     </span>
                                                   </label> */}
-                                                  <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="First Name"
-                                                    id={`firstName-${index}`}
-                                                    value={contact.firstName}
-                                                    onChange={(e) =>
-                                                      handleChange(
-                                                        index,
-                                                        "firstName",
-                                                        e.target.value
-                                                      )
-                                                    }
-                                                  />
-                                                  {errors[index].firstName && (
-                                                    <div
-                                                      style={{
-                                                        color: "red",
-                                                      }}
-                                                    >
-                                                      {errors[index].firstName}
-                                                    </div>
-                                                  )}
-                                                </div>
+                                                <input
+                                                  type="text"
+                                                  className="form-control"
+                                                  placeholder="First Name"
+                                                  id={`firstName-${index}`}
+                                                  value={contact.firstName}
+                                                  onChange={(e) =>
+                                                    handleChange(
+                                                      index,
+                                                      "firstName",
+                                                      e.target.value
+                                                    )
+                                                  }
+                                                />
+                                                {errors[index].firstName && (
+                                                  <div
+                                                    className="error-text">{errors[index].firstName}
+                                                  </div>
+                                                )}
                                               </div>
-                                              <div className="col-lg-4">
-                                                <div className="mb-3">
-                                                  {/* <label
+                                            </div>
+                                            <div className="col-lg-4">
+                                              <div className="mb-3">
+                                                {/* <label
                                                     htmlFor={`lastName-${index}`}
                                                     className="form-label"
                                                   >
@@ -1000,34 +990,30 @@ const Information = () => {
                                                       *
                                                     </span>
                                                   </label> */}
-                                                  <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="Last Name"
-                                                    id={`lastName-${index}`}
-                                                    value={contact.lastName}
-                                                    onChange={(e) =>
-                                                      handleChange(
-                                                        index,
-                                                        "lastName",
-                                                        e.target.value
-                                                      )
-                                                    }
-                                                  />
-                                                  {errors[index].lastName && (
-                                                    <div
-                                                      style={{
-                                                        color: "red",
-                                                      }}
-                                                    >
-                                                      {errors[index].lastName}
-                                                    </div>
-                                                  )}
-                                                </div>
+                                                <input
+                                                  type="text"
+                                                  className="form-control"
+                                                  placeholder="Last Name"
+                                                  id={`lastName-${index}`}
+                                                  value={contact.lastName}
+                                                  onChange={(e) =>
+                                                    handleChange(
+                                                      index,
+                                                      "lastName",
+                                                      e.target.value
+                                                    )
+                                                  }
+                                                />
+                                                {errors[index].lastName && (
+                                                  <div
+                                                    className="error-text">{errors[index].lastName}
+                                                  </div>
+                                                )}
                                               </div>
-                                              <div className="col-lg-4">
-                                                <div className="mb-3">
-                                                  {/* <label
+                                            </div>
+                                            <div className="col-lg-4">
+                                              <div className="mb-3">
+                                                {/* <label
                                                     htmlFor={`role-${index}`}
                                                     className="form-label"
                                                   >
@@ -1040,84 +1026,72 @@ const Information = () => {
                                                       *
                                                     </span>
                                                   </label> */}
-                                                  <select
-                                                    className="form-select"
-                                                    id={`role-${index}`}
-                                                    value={contact.role}
-                                                    onChange={(e) =>
-                                                      handleChange(
-                                                        index,
-                                                        "role",
-                                                        e.target.value
+                                                <select
+                                                  className="form-select"
+                                                  id={`role-${index}`}
+                                                  value={contact.role}
+                                                  onChange={(e) =>
+                                                    handleChange(
+                                                      index,
+                                                      "role",
+                                                      e.target.value
+                                                    )
+                                                  }
+                                                >
+                                                  <option value="">
+                                                    Select Role
+                                                  </option>
+                                                  {personRoleDataAll &&
+                                                    personRoleDataAll.data.map(
+                                                      (item, i) => (
+                                                        <option
+                                                          value={item.id}
+                                                          key={i}
+                                                        >
+                                                          {item.name}
+                                                        </option>
                                                       )
-                                                    }
-                                                  >
-                                                    <option value="">
-                                                      Select Role
-                                                    </option>
-                                                    {personRoleDataAll &&
-                                                      personRoleDataAll.data.map(
-                                                        (item, i) => (
-                                                          <option
-                                                            value={item.id}
-                                                            key={i}
-                                                          >
-                                                            {item.name}
-                                                          </option>
-                                                        )
-                                                      )}
-                                                  </select>
-                                                  {errors[index].role && (
-                                                    <div
-                                                      style={{
-                                                        color: "red",
-                                                      }}
-                                                    >
-                                                      {errors[index].role}
-                                                    </div>
-                                                  )}
-                                                </div>
+                                                    )}
+                                                </select>
+                                                {errors[index].role && (
+                                                  <div
+                                                    className="error-text">{errors[index].role}
+                                                  </div>
+                                                )}
                                               </div>
-                                              <div className="col-lg-4 ps-1">
-                                                <div className="mb-3">
-                                                  {/* <label
+                                            </div>
+                                            <div className="col-lg-4 ps-1">
+                                              <div className="mb-3">
+                                                {/* <label
                                                     htmlFor={`phone-${index}`}
                                                     className="form-label"
                                                   >
                                                     Phone
                                                   </label> */}
-                                                  <input
-                                                    type="number"
-                                                    className="form-control"
-                                                    placeholder="Phone Number"
-                                                    id={`phoneNumber-${index}`}
-                                                    value={contact.phoneNumber}
-                                                    onChange={(e) =>
-                                                      handleChange(
-                                                        index,
-                                                        "phoneNumber",
-                                                        e.target.value
-                                                      )
-                                                    }
-                                                  />
-                                                  {errors[index]
-                                                    .phoneNumber && (
-                                                    <div
-                                                      style={{
-                                                        color: "red",
-                                                      }}
-                                                    >
-                                                      {
-                                                        errors[index]
-                                                          .phoneNumber
-                                                      }
-                                                    </div>
-                                                  )}
-                                                </div>
+                                                <input
+                                                  type="number"
+                                                  className="form-control"
+                                                  placeholder="Phone Number"
+                                                  id={`phoneNumber-${index}`}
+                                                  value={contact.phoneNumber}
+                                                  onChange={(e) =>
+                                                    handleChange(
+                                                      index,
+                                                      "phoneNumber",
+                                                      e.target.value
+                                                    )
+                                                  }
+                                                />
+                                                {errors[index].phoneNumber && (
+                                                  <div
+                                                    className="error-text">{errors[index].phoneNumber}
+                                                  </div>
+                                                )}
                                               </div>
-                                              <div className="col-lg-4 ">
-                                                <div className="mb-3">
-                                                  {/* <label
+                                            </div>
+                                            <div className="col-lg-4 ">
+                                              <div className="mb-3">
+                                                {/* <label
                                                     htmlFor={`email-${index}`}
                                                     className="form-label"
                                                   >
@@ -1130,53 +1104,47 @@ const Information = () => {
                                                       *
                                                     </span>
                                                   </label> */}
-                                                  <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="Email"
-                                                    id={`email-${index}`}
-                                                    value={contact.email}
-                                                    onChange={(e) =>
-                                                      handleChange(
-                                                        index,
-                                                        "email",
-                                                        e.target.value
-                                                      )
-                                                    }
-                                                  />
-                                                  {errors[index].email && (
-                                                    <div
-                                                      style={{
-                                                        color: "red",
-                                                      }}
-                                                    >
-                                                      {errors[index].email}
-                                                    </div>
-                                                  )}
-                                                </div>
+                                                <input
+                                                  type="text"
+                                                  className="form-control"
+                                                  placeholder="Email"
+                                                  id={`email-${index}`}
+                                                  value={contact.email}
+                                                  onChange={(e) =>
+                                                    handleChange(
+                                                      index,
+                                                      "email",
+                                                      e.target.value
+                                                    )
+                                                  }
+                                                />
+                                                {errors[index].email && (
+                                                  <div
+                                                    className="error-text">{errors[index].email}
+                                                  </div>
+                                                )}
                                               </div>
                                             </div>
                                           </div>
                                         </div>
-                                      ))}
-                                      <div className="card-header d-flex align-items-center">
-                                        <h5 className="card-title mb-0 flex-grow-1"></h5>
-                                        <button
-                                          className="btn btn-info text-white blue-btn"
-                                          onClick={handleAddContact}
-                                        >
-                                          Add Contact
-                                        </button>
                                       </div>
+                                    ))}
+                                    <div className="card-header d-flex align-items-center">
+                                      <h5 className="card-title mb-0 flex-grow-1"></h5>
+                                      <button
+                                        className="btn btn-info text-white blue-btn"
+                                        onClick={handleAddContact}
+                                      >
+                                        Add Contact
+                                      </button>
                                     </div>
-                                 
-                               
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </section>
-                      }
-                    />
+                          </section>
+                        }
+                      />
                     </div>
                   </div>
                 </>
@@ -1189,341 +1157,329 @@ const Information = () => {
                       </h4>
                     </div>
                     <div className="card-body">
-                    <AddFrom
-                      fieldtype={fields3.filter(
-                        (field) =>
-                          !field.showWhen || field.showWhen(formik2.values)
-                      )}
-                      formik={formik2}
-                      btn_name="Next"
-                      additional_field={
-                        <section>
-                          <div className="row" id="form2">
-                            <div className="row">
-                              <div className="col-lg-12">
-                                <div className="">
-                                  <div className="card-header card-header-light-blue step-card-header step-card-header align-items-center d-flex">
-                                    <h4 className="card-title mb-0 flex-grow-1">
-                                      Contact Details
-                                    </h4>
-                                  </div>
-                                  <div className="card-body">
-                                    <form onSubmit={handleSubmit}>
-                                      <div className="row">
-                                        {contacts.map((contact, index) => (
-                                          <div
-                                            className="col-xl-12 col-lg-12 mt-3"
-                                            key={index}
-                                          >
-                                            <div className="card pricing-box p-4 m-2 mt-0">
-                                              <div className="row">
-                                                <div className="col-lg-12">
-                                                  <div
-                                                    className="form-check form-switch form-switch-md mb-3 d-flex justify-content-between"
-                                                    dir="ltr"
-                                                  >
-                                                    <div>
+                      <AddFrom
+                        fieldtype={fields3.filter(
+                          (field) =>
+                            !field.showWhen || field.showWhen(formik2.values)
+                        )}
+                        formik={formik2}
+                        btn_name="Next"
+                        additional_field={
+                          <section>
+                            <div className="mt-2" id="form2">
+                              <div className="row">
+                                <div className="col-lg-12 px-0">
+                                  <div className="">
+                                    <div className="card-header card-header-light-blue step-card-header step-card-header align-items-center d-flex">
+                                      <h4 className="card-title mb-0 flex-grow-1">
+                                        Contact Details
+                                      </h4>
+                                    </div>
+                                    <div className="card-body">
+                                      <form onSubmit={handleSubmit}>
+                                        <div className="row">
+                                          {contacts.map((contact, index) => (
+                                            <div
+                                              className="col-xl-12 col-lg-12 mt-3"
+                                              key={index}
+                                            >
+                                              <div className="card pricing-box p-4 m-2 mt-0">
+                                                <div className="row">
+                                                  <div className="col-lg-12">
+                                                    <div
+                                                      className="form-check form-switch form-switch-md mb-3 d-flex justify-content-between"
+                                                      dir="ltr"
+                                                    >
+                                                      <div>
+                                                        <input
+                                                          type="checkbox"
+                                                          className="form-check-input"
+                                                          id={`customSwitchsizemd-${index}`}
+                                                          checked={
+                                                            contact.authorised_signatory_status
+                                                          }
+                                                          onChange={(e) =>
+                                                            handleChange(
+                                                              index,
+                                                              "authorised_signatory_status",
+                                                              e.target.checked
+                                                            )
+                                                          }
+                                                          defaultChecked={
+                                                            index === 0 ||
+                                                            index === 1
+                                                          }
+                                                          disabled={
+                                                            contacts.length ===
+                                                            2
+                                                              ? index === 0 ||
+                                                                index === 1
+                                                              : false
+                                                          }
+                                                        />
+                                                        <label
+                                                          className="form-check-label"
+                                                          htmlFor={`customSwitchsizemd-${index}`}
+                                                        >
+                                                          Authorised Signatory
+                                                        </label>
+                                                      </div>
+                                                      {index !== 0 &&
+                                                        index !== 1 && (
+                                                          <div>
+                                                            <button
+                                                              className="btn btn-danger"
+                                                              type="button"
+                                                              onClick={() =>
+                                                                handleDeleteContact(
+                                                                  index
+                                                                )
+                                                              }
+                                                              disabled={
+                                                                contacts.length ===
+                                                                1
+                                                              }
+                                                            >
+                                                              Delete
+                                                            </button>
+                                                          </div>
+                                                        )}
+                                                    </div>
+                                                  </div>
+
+                                                  <div className="col-lg-4">
+                                                    <div className="mb-3">
+                                                      <label
+                                                        htmlFor={`firstName-${index}`}
+                                                        className="form-label"
+                                                      >
+                                                        First Name
+                                                        <span
+                                                          style={{
+                                                            color: "red",
+                                                          }}
+                                                        >
+                                                          *
+                                                        </span>
+                                                      </label>
                                                       <input
-                                                        type="checkbox"
-                                                        className="form-check-input"
-                                                        id={`customSwitchsizemd-${index}`}
-                                                        checked={
-                                                          contact.authorised_signatory_status
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="First Name"
+                                                        id={`firstName-${index}`}
+                                                        value={
+                                                          contact.firstName
                                                         }
                                                         onChange={(e) =>
                                                           handleChange(
                                                             index,
-                                                            "authorised_signatory_status",
-                                                            e.target.checked
+                                                            "firstName",
+                                                            e.target.value
                                                           )
-                                                        }
-                                                        defaultChecked={
-                                                          index === 0 ||
-                                                          index === 1
-                                                        }
-                                                        disabled={
-                                                          contacts.length === 2
-                                                            ? index === 0 ||
-                                                              index === 1
-                                                            : false
                                                         }
                                                       />
-                                                      <label
-                                                        className="form-check-label"
-                                                        htmlFor={`customSwitchsizemd-${index}`}
-                                                      >
-                                                        Authorised Signatory
-                                                      </label>
-                                                    </div>
-                                                    {index !== 0 &&
-                                                      index !== 1 && (
-                                                        <div>
-                                                          <button
-                                                            className="btn btn-danger"
-                                                            type="button"
-                                                            onClick={() =>
-                                                              handleDeleteContact(
-                                                                index
-                                                              )
-                                                            }
-                                                            disabled={
-                                                              contacts.length ===
-                                                              1
-                                                            }
-                                                          >
-                                                            Delete
-                                                          </button>
+                                                      {errors[index]
+                                                        .firstName && (
+                                                        <div
+                                                          className="error-text">{errors[index]
+                                                              .firstName
+                                                          }
                                                         </div>
                                                       )}
+                                                    </div>
                                                   </div>
-                                                </div>
-
-                                                <div className="col-lg-4">
-                                                  <div className="mb-3">
-                                                    <label
-                                                      htmlFor={`firstName-${index}`}
-                                                      className="form-label"
-                                                    >
-                                                      First Name
-                                                      <span
-                                                        style={{
-                                                          color: "red",
-                                                        }}
+                                                  <div className="col-lg-4">
+                                                    <div className="mb-3">
+                                                      <label
+                                                        htmlFor={`lastName-${index}`}
+                                                        className="form-label"
                                                       >
-                                                        *
-                                                      </span>
-                                                    </label>
-                                                    <input
-                                                      type="text"
-                                                      className="form-control"
-                                                      placeholder="First Name"
-                                                      id={`firstName-${index}`}
-                                                      value={contact.firstName}
-                                                      onChange={(e) =>
-                                                        handleChange(
-                                                          index,
-                                                          "firstName",
-                                                          e.target.value
-                                                        )
-                                                      }
-                                                    />
-                                                    {errors[index]
-                                                      .firstName && (
-                                                      <div
-                                                        style={{
-                                                          color: "red",
-                                                        }}
-                                                      >
-                                                        {
-                                                          errors[index]
-                                                            .firstName
-                                                        }
-                                                      </div>
-                                                    )}
-                                                  </div>
-                                                </div>
-                                                <div className="col-lg-4">
-                                                  <div className="mb-3">
-                                                    <label
-                                                      htmlFor={`lastName-${index}`}
-                                                      className="form-label"
-                                                    >
-                                                      Last Name
-                                                      <span
-                                                        style={{
-                                                          color: "red",
-                                                        }}
-                                                      >
-                                                        *
-                                                      </span>
-                                                    </label>
-                                                    <input
-                                                      type="text"
-                                                      className="form-control"
-                                                      placeholder="Last Name"
-                                                      id={`lastName-${index}`}
-                                                      value={contact.lastName}
-                                                      onChange={(e) =>
-                                                        handleChange(
-                                                          index,
-                                                          "lastName",
-                                                          e.target.value
-                                                        )
-                                                      }
-                                                    />
-                                                    {errors[index].lastName && (
-                                                      <div
-                                                        style={{
-                                                          color: "red",
-                                                        }}
-                                                      >
-                                                        {errors[index].lastName}
-                                                      </div>
-                                                    )}
-                                                  </div>
-                                                </div>
-                                                <div className="col-lg-4">
-                                                  <div className="mb-3">
-                                                    <label
-                                                      htmlFor={`role-${index}`}
-                                                      className="form-label"
-                                                    >
-                                                      Role
-                                                      <span
-                                                        style={{
-                                                          color: "red",
-                                                        }}
-                                                      >
-                                                        *
-                                                      </span>
-                                                    </label>
-                                                    <select
-                                                      className="form-select"
-                                                      id={`role-${index}`}
-                                                      value={contact.role}
-                                                      onChange={(e) =>
-                                                        handleChange(
-                                                          index,
-                                                          "role",
-                                                          e.target.value
-                                                        )
-                                                      }
-                                                    >
-                                                      <option value="">
-                                                        Select Role
-                                                      </option>
-                                                      {personRoleDataAll &&
-                                                        personRoleDataAll.data.map(
-                                                          (item, idx) => (
-                                                            <option
-                                                              value={item.id}
-                                                              key={idx}
-                                                            >
-                                                              {item.name}
-                                                            </option>
+                                                        Last Name
+                                                        <span
+                                                          style={{
+                                                            color: "red",
+                                                          }}
+                                                        >
+                                                          *
+                                                        </span>
+                                                      </label>
+                                                      <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="Last Name"
+                                                        id={`lastName-${index}`}
+                                                        value={contact.lastName}
+                                                        onChange={(e) =>
+                                                          handleChange(
+                                                            index,
+                                                            "lastName",
+                                                            e.target.value
                                                           )
-                                                        )}
-                                                    </select>
-                                                    {errors[index].role && (
-                                                      <div
-                                                        style={{
-                                                          color: "red",
-                                                        }}
-                                                      >
-                                                        {errors[index].role}
-                                                      </div>
-                                                    )}
-                                                  </div>
-                                                </div>
-                                                <div className="col-lg-4">
-                                                  <div className="mb-3">
-                                                    <label
-                                                      htmlFor={`phone-${index}`}
-                                                      className="form-label"
-                                                    >
-                                                      Phone
-                                                    </label>
-                                                    <input
-                                                      type="number"
-                                                      className="form-control"
-                                                      placeholder="Phone Number"
-                                                      id={`phoneNumber-${index}`}
-                                                      value={
-                                                        contact.phoneNumber
-                                                      }
-                                                      onChange={(e) =>
-                                                        handleChange(
-                                                          index,
-                                                          "phoneNumber",
-                                                          e.target.value
-                                                        )
-                                                      }
-                                                    />
-                                                    {errors[index]
-                                                      .phoneNumber && (
-                                                      <div
-                                                        style={{
-                                                          color: "red",
-                                                        }}
-                                                      >
-                                                        {
-                                                          errors[index]
-                                                            .phoneNumber
                                                         }
-                                                      </div>
-                                                    )}
+                                                      />
+                                                      {errors[index]
+                                                        .lastName && (
+                                                        <div
+                                                          className="error-text">{errors[index]
+                                                              .lastName
+                                                          }
+                                                        </div>
+                                                      )}
+                                                    </div>
                                                   </div>
-                                                </div>
-                                                <div className="col-lg-4">
-                                                  <div className="mb-3">
-                                                    <label
-                                                      htmlFor={`email-${index}`}
-                                                      className="form-label"
-                                                    >
-                                                      Email
-                                                      <span
-                                                        style={{
-                                                          color: "red",
-                                                        }}
+                                                  <div className="col-lg-4">
+                                                    <div className="mb-3">
+                                                      <label
+                                                        htmlFor={`role-${index}`}
+                                                        className="form-label"
                                                       >
-                                                        *
-                                                      </span>
-                                                    </label>
-                                                    <input
-                                                      type="text"
-                                                      className="form-control"
-                                                      placeholder="Email"
-                                                      id={`email-${index}`}
-                                                      value={contact.email}
-                                                      onChange={(e) =>
-                                                        handleChange(
-                                                          index,
-                                                          "email",
-                                                          e.target.value
-                                                        )
-                                                      }
-                                                    />
-                                                    {errors[index].email && (
-                                                      <div
-                                                        style={{
-                                                          color: "red",
-                                                        }}
+                                                        Role
+                                                        <span
+                                                          style={{
+                                                            color: "red",
+                                                          }}
+                                                        >
+                                                          *
+                                                        </span>
+                                                      </label>
+                                                      <select
+                                                        className="form-select"
+                                                        id={`role-${index}`}
+                                                        value={contact.role}
+                                                        onChange={(e) =>
+                                                          handleChange(
+                                                            index,
+                                                            "role",
+                                                            e.target.value
+                                                          )
+                                                        }
                                                       >
-                                                        {errors[index].email}
-                                                      </div>
-                                                    )}
+                                                        <option value="">
+                                                          Select Role
+                                                        </option>
+                                                        {personRoleDataAll &&
+                                                          personRoleDataAll.data.map(
+                                                            (item, idx) => (
+                                                              <option
+                                                                value={item.id}
+                                                                key={idx}
+                                                              >
+                                                                {item.name}
+                                                              </option>
+                                                            )
+                                                          )}
+                                                      </select>
+                                                      {errors[index].role && (
+                                                        <div
+                                                          className="error-text"
+                                                        >
+                                                          {errors[index].role}
+                                                        </div>
+                                                      )}
+                                                    </div>
+                                                  </div>
+                                                  <div className="col-lg-4">
+                                                    <div className="mb-3">
+                                                      <label
+                                                        htmlFor={`phone-${index}`}
+                                                        className="form-label"
+                                                      >
+                                                        Phone
+                                                      </label>
+                                                      <input
+                                                        type="number"
+                                                        className="form-control"
+                                                        placeholder="Phone Number"
+                                                        id={`phoneNumber-${index}`}
+                                                        value={
+                                                          contact.phoneNumber
+                                                        }
+                                                        onChange={(e) =>
+                                                          handleChange(
+                                                            index,
+                                                            "phoneNumber",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                      />
+                                                      {errors[index]
+                                                        .phoneNumber && (
+                                                        <div
+                                                          className="error-text">{errors[index]
+                                                              .phoneNumber
+                                                          }
+                                                        </div>
+                                                      )}
+                                                    </div>
+                                                  </div>
+                                                  <div className="col-lg-4">
+                                                    <div className="mb-3">
+                                                      <label
+                                                        htmlFor={`email-${index}`}
+                                                        className="form-label"
+                                                      >
+                                                        Email
+                                                        <span
+                                                          style={{
+                                                            color: "red",
+                                                          }}
+                                                        >
+                                                          *
+                                                        </span>
+                                                      </label>
+                                                      <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="Email"
+                                                        id={`email-${index}`}
+                                                        value={contact.email}
+                                                        onChange={(e) =>
+                                                          handleChange(
+                                                            index,
+                                                            "email",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                      />
+                                                      {errors[index].email && (
+                                                        <div
+                                                          className="error-text"
+                                                        >
+                                                          {errors[index].email}
+                                                        </div>
+                                                      )}
+                                                    </div>
                                                   </div>
                                                 </div>
                                               </div>
                                             </div>
-                                          </div>
-                                        ))}
+                                          ))}
 
-                                        <div className="card-header d-flex align-items-center">
-                                          <h5 className="card-title mb-0 flex-grow-1"></h5>
-                                          <button
-                                            className="btn btn-info text-white blue-btn"
-                                            type="button"
-                                            onClick={handleAddContact}
-                                          >
-                                            Add Contact
-                                          </button>
-                                        </div>
-                                        {/* <div className="d-flex justify-content-end">
+                                          <div className="card-header d-flex align-items-center">
+                                            <h5 className="card-title mb-0 flex-grow-1"></h5>
+                                            <button
+                                              className="btn btn-info text-white blue-btn"
+                                              type="button"
+                                              onClick={handleAddContact}
+                                            >
+                                              Add Contact
+                                            </button>
+                                          </div>
+                                          {/* <div className="d-flex justify-content-end">
                                                                                                     <button className="btn btn-success" type="submit">Submit</button>
                                                                                                 </div> */}
-                                      </div>
-                                    </form>
+                                        </div>
+                                      </form>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </div>{" "}
-                            {/* end col */}
-                          </div>
-                        </section>
-                      }
-                    />
-                  </div>
+                              </div>{" "}
+                              {/* end col */}
+                            </div>
+                          </section>
+                        }
+                      />
+                    </div>
                   </div>
                 </>
               ) : (

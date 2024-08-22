@@ -4803,7 +4803,7 @@ pre[class*="lang-html"] {
   /* letter-spacing: 0.02em; */
   font-size: 20px;
   font-weight: 600;
-  margin: 6px 0 3px;
+  margin: 0px 0 3px;
   color: #333547;
   /* text-shadow: 0 0 1px rgba(241, 245, 250, 0.1); */
   font-family: "Inter", sans-serif;
@@ -9441,6 +9441,7 @@ span.sidebar-icons {
   font-size: 14px;
   color: #4B4B4B;
   font-weight: 600;
+  text-transform: none;
 }
 
 .datatable-container .rdt_TableRow {
@@ -9570,6 +9571,7 @@ body .btn-info:hover {
 .label-height
 {
   height: 20px;
+  display: block;
 }
 .content-title {
   margin-top: 25px;
@@ -9681,7 +9683,7 @@ body .btn-info:hover {
 
 main .details__wrapper {
 
-  margin: 5em auto;
+  margin: 4em auto;
 }
 
 main .form__item {
@@ -9896,7 +9898,10 @@ body .accordion-button:not(.collapsed)::after {
 .error-text {
   background: #cb0000;
   color: #fff;
-  font-size: 12px;
-  padding: 0px 10px;
+  font-size: 11px;
+  padding: 1px 6px;
   margin-top: 4px;
+}
+.form-select:focus {
+  box-shadow: none;
 }

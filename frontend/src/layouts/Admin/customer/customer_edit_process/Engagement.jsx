@@ -495,12 +495,14 @@ const Engagement = () => {
                                     {checkboxStates && checkboxStates[0] === 1 && (
                                         <div id="myDiv1" className="row">
                                             <div className="col-xl-12 col-md-12 col-lg-12">
-                                                <div className="card pricing-box p-4 m-2 mt-0">
-                                                    <div className="col-lg-6 col-md-6">
-                                                        <p className="office-name">FTE/Dedicated</p>
+                                                <div className="card pricing-box p-0">
+                                                <div className="col-lg-12">
+                                                        <div className="card-header step-card-header card-header-light-blue">
+                                                        <p className=" card-title fs-6 mb-0">FTE/Dedicated Staffing</p>
+                                                        </div>
                                                     </div>
 
-                                                    <div className="row">
+                                                    <div className="row card-body ">
                                                         {[
                                                             { label: 'Accountants', name: 'accountants', feeName: "Number of Accountants" },
                                                             { label: '', name: 'feePerAccountant', feeName: "Fee Per Accountant" },
@@ -513,10 +515,10 @@ const Engagement = () => {
                                                             { label: 'Number of Admin', name: 'numberOfAdmin', feeName: "Number of Admin/Other Staff" },
                                                             { label: '', name: 'feePerAdmin', feeName: "Fee Per Admin/Other Staff" },
                                                         ].map((field, index) => (
-                                                            <div className="col-lg-3" key={index}>
+                                                            <div className="col-lg-6" key={index}>
                                                                 <div className="mb-3">
-                                                                    <label className="form-label">{field.label}</label>
-                                                                    <br />
+                                                                    <label className="form-label label-height">{field.label}</label>
+                                                                  
                                                                     <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label>
                                                                     <input
                                                                         type="text"
@@ -526,7 +528,7 @@ const Engagement = () => {
                                                                         onChange={(e) => handleChange1(e)}
                                                                     />
                                                                     {errors1[field.name] && (
-                                                                        <div className="text-danger">{errors1[field.name]}</div>
+                                                                        <div className="error-text">{errors1[field.name]}</div>
                                                                     )}
                                                                 </div>
                                                             </div>
@@ -543,11 +545,14 @@ const Engagement = () => {
                                     {checkboxStates && checkboxStates[1] === 1 && (
                                         <div id="myDiv2" className="row">
                                             <div style={{ marginBottom: "26px !important" }} className="col-xl-12 col-lg-12">
-                                                <div className="card pricing-box p-4 m-2 mt-0">
-                                                    <div className="col-lg-6 col-md-6">
-                                                        <p className="office-name">Adhoc/PAYG/Hourly</p>
+                                                <div className="card pricing-box ">
+                                                <div className="col-lg-12">
+                                                        <div className="card-header step-card-header card-header-light-blue">
+                                                        <p className="office-name card-title fs-6 mb-0">Adhoc/PAYG/Hourly</p>
+                                                        </div>
                                                     </div>
-                                                    <div className="row">
+                                     
+                                                    <div className="row card-body">
                                                         {[
                                                             { label: 'Total Outsourcing', name: 'total_outsourcing', feeName: 'Fee Percentage' },
                                                             { label: 'Accountants', name: 'accountants', feeName: 'Fee Percentage' },
@@ -557,7 +562,7 @@ const Engagement = () => {
                                                             { label: 'Admin/Other Staff', name: 'admin_staff', feeName: 'Fee Percentage' },
 
                                                         ].map((field, index) => (
-                                                            <div className="col-lg-3" key={index}>
+                                                            <div className="col-lg-4" key={index}>
                                                                 <div className="mb-3">
                                                                     <label className="form-label">{field.label}</label> <br />
                                                                     <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label>
@@ -569,7 +574,7 @@ const Engagement = () => {
                                                                         onChange={handleChange2}
                                                                     />
                                                                     {errors2[field.name] && (
-                                                                        <div className="text-danger">{errors2[field.name]}</div>
+                                                                        <div className="error-text">{errors2[field.name]}</div>
                                                                     )}
 
                                                                 </div>
@@ -587,11 +592,14 @@ const Engagement = () => {
                                     {checkboxStates && checkboxStates[2] === 1 && (
                                         <div id="myDiv3" className="row">
                                             <div style={{ marginBottom: "26px !important" }} className="col-xl-12 col-lg-12">
-                                                <div className="card pricing-box p-4 m-2 mt-0">
-                                                    <div className="col-lg-6 col-md-6">
-                                                        <p className="office-name">Percentage Model</p>
+                                                <div className="card pricing-box ">
+                                                <div className="col-lg-12">
+                                                        <div className="card-header step-card-header card-header-light-blue">
+                                                        <p className=" card-title fs-6 mb-0">Percentage Model</p>
+                                                        </div>
                                                     </div>
-                                                    <div className="row">
+                                                    
+                                                    <div className="row card-body">
                                                         {[
                                                             { label: 'Accountants', name: 'adhoc_accountants', feeName: 'Fee Per Hour' },
                                                             { label: 'Bookkeepers', name: 'adhoc_bookkeepers', feeName: 'Fee Per Hour' },
@@ -599,7 +607,7 @@ const Engagement = () => {
                                                             { label: 'Tax Experts', name: 'adhoc_tax_experts', feeName: 'Fee Per Hour' },
                                                             { label: 'Admin/Other Staff', name: 'adhoc_admin_staff', feeName: 'Fee Per Hour' },
                                                         ].map((field, index) => (
-                                                            <div className="col-lg-3" key={index}>
+                                                            <div className="col-lg-4" key={index}>
                                                                 <div className="mb-3">
                                                                     <label className="form-label">{field.label}</label><br />
                                                                     <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label>
@@ -611,7 +619,7 @@ const Engagement = () => {
                                                                         onChange={handleChange3}
                                                                     />
                                                                     {errors3[field.name] && (
-                                                                        <div className="text-danger">{errors3[field.name]}</div>
+                                                                        <div className="error-text">{errors3[field.name]}</div>
                                                                     )}
 
                                                                 </div>
@@ -628,14 +636,17 @@ const Engagement = () => {
                                     {checkboxStates && checkboxStates[3] === 1 && (
                                         <div id="myDiv4" className="row">
                                             <div className="col-xl-12 col-lg-12">
-                                                <div className="card pricing-box p-4 m-2 mt-0">
-                                                    <div className="col-lg-6 col-md-6">
-                                                        <p className="office-name">Customised Pricing</p>
+                                                <div className="card pricing-box ">
+                                                <div className="col-lg-12">
+                                                        <div className="card-header step-card-header card-header-light-blue">
+                                                        <p className="office-name card-title fs-6 mb-0">Customised Pricing</p>
+                                                        </div>
                                                     </div>
+                                                    <div className="card-body">
                                                     <div id="custprize">
                                                         {jobEntries.map((job, index) => (
-                                                            <div className="row" key={index}>
-                                                                <div className="col-lg-3">
+                                                            <div className="row align-items-center" key={index}>
+                                                                <div className="col-lg-4">
                                                                     <div className="mb-3">
                                                                         <label htmlFor={`minimumJobs_${index}`} className="form-label">
                                                                             Minimum number of Jobs
@@ -650,17 +661,18 @@ const Engagement = () => {
                                                                             onChange={(e) => handleChange4(index, e)}
                                                                         />
                                                                         {errors4[index] && (
-                                                                            <div className="text-danger">{errors4[index].minimum_number_of_jobs}</div>
+                                                                            <div className="error-text">{errors4[index].minimum_number_of_jobs}</div>
                                                                         )}
                                                                     </div>
                                                                 </div>
-                                                                <div className="col-lg-3">
+                                                                <div className="col-lg-4">
+                                                                <div className="mb-3">
                                                                     <label htmlFor={`jobType_${index}`} className="form-label">
                                                                         Types Of Job
                                                                     </label>
                                                                     <select
                                                                         id={`jobType_${index}`}
-                                                                        className="form-select mb-3"
+                                                                        className="form-select"
                                                                         name="job_type_id"
                                                                         value={job.job_type_id}
                                                                         onChange={(e) => handleChange4(index, e)}
@@ -671,10 +683,10 @@ const Engagement = () => {
                                                                         ))}
                                                                     </select>
                                                                     {errors4[index] && (
-                                                                        <div className="text-danger">{errors4[index].job_type_id}</div>
+                                                                        <div className="error-text">{errors4[index].job_type_id}</div>
                                                                     )}
 
-
+                                                                   </div>
                                                                 </div>
 
 
@@ -692,17 +704,17 @@ const Engagement = () => {
                                                                             onChange={(e) => handleChange4(index, e)}
                                                                         />
                                                                         {errors4[index] && (
-                                                                            <div className="text-danger">{errors4[index].cost_per_job}</div>
+                                                                            <div className="error-text">{errors4[index].cost_per_job}</div>
                                                                         )}
                                                                     </div>
                                                                 </div>
 
                                                                 {jobEntries.length > 1 &&
-                                                                    <div className="col-lg-1 " style={{ marginTop: 22 }}>
-                                                                        <a className="add_icon" onClick={(e) => handleRemoveJob(index)}>
+                                                                    <div className="col-lg-1 text-center" >
+                                                                        <a className="add_icon text-decoration-none" onClick={(e) => handleRemoveJob(index)}>
                                                                             <i
-                                                                                style={{ fontSize: 38, cursor: "pointer", color: "#00AFEF" }}
-                                                                                className="fa-solid fa-trash"
+                                                                                style={{ fontSize: 25, cursor: "pointer",  }}
+                                                                                className="ti-trash text-danger"
 
                                                                             />
 
@@ -711,16 +723,17 @@ const Engagement = () => {
 
                                                             </div>
                                                         ))}
-                                                        <div className="col-lg-1" style={{ marginTop: 22 }}>
+                                                        <div className="col-lg-12 text-end pe-3" >
                                                             <a className="add_icon" onClick={handleAddJob}>
                                                                 <i
-                                                                    style={{ fontSize: 38, cursor: "pointer", color: "#00AFEF" }}
+                                                                    style={{ fontSize: 28, cursor: "pointer", color: "#00AFEF" }}
                                                                     className="fa-solid fa-circle-plus"
                                                                 />
                                                             </a>
                                                         </div>
                                                     </div>
                                                     <div id="cust_prize"></div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -733,8 +746,8 @@ const Engagement = () => {
                         </div>
 
                         <div className="form__item button__items d-flex justify-content-between">
-                            <Button className="white-btn" type="default" onClick={prev}>
-                                Back
+                            <Button className="btn btn-secondary" type="default" onClick={prev}>
+                                Previous
                             </Button>
                             <Button className="btn btn-info text-white blue-btn" onClick={handleSubmit}>
                                 Next

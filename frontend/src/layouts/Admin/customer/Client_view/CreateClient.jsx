@@ -566,6 +566,7 @@ const CreateClient = () => {
     return (
         <div>
             <div className="container-fluid mt-4">
+               
                 <div className="row">
                     <div className="col-xl-12">
                         <div className="card">
@@ -643,7 +644,7 @@ const CreateClient = () => {
                                                                                             }
                                                                                         </select>
                                                                                         {errors1['IndustryType'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['IndustryType']}</div>
+                                                                                            <div className="error-text">{errors1['IndustryType']}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -655,7 +656,7 @@ const CreateClient = () => {
                                                                                             value={getSoleTraderDetails.tradingName}
                                                                                         />
                                                                                         {errors1['tradingName'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['tradingName']}</div>
+                                                                                            <div className="error-text">{errors1['tradingName']}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -667,7 +668,7 @@ const CreateClient = () => {
                                                                                             value={getSoleTraderDetails.tradingAddress}
                                                                                         />
                                                                                         {errors1['tradingAddress'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['tradingAddress']}</div>
+                                                                                            <div className="error-text">{errors1['tradingAddress']}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -688,7 +689,7 @@ const CreateClient = () => {
 
                                                                                         </select>
                                                                                         {errors1['vatRegistered'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['vatRegistered']}</div>
+                                                                                            <div className="error-text">{errors1['vatRegistered']}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -701,7 +702,7 @@ const CreateClient = () => {
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                         />
                                                                                         {errors1['vatNumber'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['vatNumber']}</div>
+                                                                                            <div className="error-text">{errors1['vatNumber']}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -715,7 +716,7 @@ const CreateClient = () => {
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                         />
                                                                                         {errors1['website'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['website']}</div>
+                                                                                            <div className="error-text">{errors1['website']}</div>
                                                                                         )}
 
                                                                                     </div>
@@ -733,7 +734,7 @@ const CreateClient = () => {
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                         />
                                                                                         {errors1['first_name'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['first_name']}</div>
+                                                                                            <div className="error-text">{errors1['first_name']}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -746,7 +747,7 @@ const CreateClient = () => {
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                         />
                                                                                         {errors1['last_name'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['last_name']}</div>
+                                                                                            <div className="error-text">{errors1['last_name']}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -760,7 +761,7 @@ const CreateClient = () => {
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                         />
                                                                                         {errors1['phone'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['phone']}</div>
+                                                                                            <div className="error-text">{errors1['phone']}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -773,7 +774,7 @@ const CreateClient = () => {
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                         />
                                                                                         {errors1['email'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['email']}</div>
+                                                                                            <div className="error-text">{errors1['email']}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -787,7 +788,7 @@ const CreateClient = () => {
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                         />
                                                                                         {errors1['residentialAddress'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['residentialAddress']}</div>
+                                                                                            <div className="error-text">{errors1['residentialAddress']}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -844,7 +845,7 @@ const CreateClient = () => {
                                                                                                     disabled
                                                                                                 />
                                                                                                 {errors2['CompanyName'] && (
-                                                                                                    <div style={{ 'color': 'red' }}>{errors2['CompanyName']}</div>
+                                                                                                    <div className="error-text">{errors2['CompanyName']}</div>
                                                                                                 )}
 
                                                                                             </div>
@@ -855,7 +856,7 @@ const CreateClient = () => {
                                                                                                 <input type="text" className="form-control input_bg" placeholder="LTD"
                                                                                                     name="EntityType" onChange={(e) => handleChange2(e)} value={getCompanyDetails.EntityType} disabled />
                                                                                                 {errors2['EntityType'] && (
-                                                                                                    <div style={{ 'color': 'red' }}>{errors2['EntityType']}</div>
+                                                                                                    <div className="error-text">{errors2['EntityType']}</div>
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
@@ -865,7 +866,7 @@ const CreateClient = () => {
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Active"
                                                                                                     name="CompanyStatus" onChange={(e) => handleChange2(e)} value={getCompanyDetails.CompanyStatus} disabled />
                                                                                                 {errors2['CompanyStatus'] && (
-                                                                                                    <div style={{ 'color': 'red' }}>{errors2['CompanyStatus']}</div>)}
+                                                                                                    <div className="error-text">{errors2['CompanyStatus']}</div>)}
                                                                                             </div>
                                                                                         </div>
                                                                                         <div className="col-lg-4">
@@ -876,7 +877,7 @@ const CreateClient = () => {
                                                                                                     disabled
                                                                                                 />
                                                                                                 {errors2['CompanyNumber'] && (
-                                                                                                    <div style={{ 'color': 'red' }}>{errors2['CompanyNumber']}</div>
+                                                                                                    <div className="error-text">{errors2['CompanyNumber']}</div>
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
@@ -887,7 +888,7 @@ const CreateClient = () => {
                                                                                                     name="IncorporationDate" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationDate} disabled
                                                                                                 />
                                                                                                 {errors2['IncorporationDate'] && (
-                                                                                                    <div style={{ 'color': 'red' }}>{errors2['IncorporationDate']}</div>
+                                                                                                    <div className="error-text">{errors2['IncorporationDate']}</div>
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
@@ -898,7 +899,7 @@ const CreateClient = () => {
                                                                                                     name="RegisteredOfficeAddress" onChange={(e) => handleChange2(e)} value={getCompanyDetails.RegisteredOfficeAddress} disabled
                                                                                                 />
                                                                                                 {errors2['RegisteredOfficeAddress'] && (
-                                                                                                    <div style={{ 'color': 'red' }}>{errors2['RegisteredOfficeAddress']}</div>
+                                                                                                    <div className="error-text">{errors2['RegisteredOfficeAddress']}</div>
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
@@ -911,7 +912,7 @@ const CreateClient = () => {
                                                                                                 />
 
                                                                                                 {errors2['IncorporationIn'] && (
-                                                                                                    <div style={{ 'color': 'red' }}>{errors2['IncorporationIn']}</div>
+                                                                                                    <div className="error-text">{errors2['IncorporationIn']}</div>
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
@@ -924,7 +925,7 @@ const CreateClient = () => {
                                                                                                     <option value={0}>No</option>
                                                                                                 </select>
                                                                                                 {errors2['VATRegistered'] && (
-                                                                                                    <div style={{ 'color': 'red' }}>{errors2['VATRegistered']}</div>
+                                                                                                    <div className="error-text">{errors2['VATRegistered']}</div>
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
@@ -936,7 +937,7 @@ const CreateClient = () => {
                                                                                                         name="VATNumber" onChange={(e) => handleChange2(e)} value={getCompanyDetails.VATNumber}
                                                                                                     />
                                                                                                     {errors2['VATNumber'] && (
-                                                                                                        <div style={{ 'color': 'red' }}>{errors2['VATNumber']}</div>
+                                                                                                        <div className="error-text">{errors2['VATNumber']}</div>
                                                                                                     )}
                                                                                                 </div>
                                                                                             </div>
@@ -948,7 +949,7 @@ const CreateClient = () => {
                                                                                                     name="Website" onChange={(e) => handleChange2(e)} value={getCompanyDetails.Website}
                                                                                                 />
                                                                                                 {errors2['Website'] && (
-                                                                                                    <div style={{ 'color': 'red' }}>{errors2['Website']}</div>
+                                                                                                    <div className="error-text">{errors2['Website']}</div>
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
@@ -976,7 +977,7 @@ const CreateClient = () => {
 
                                                                                             </select>
                                                                                             {errors2['ClientIndustry'] && (
-                                                                                                <div style={{ 'color': 'red' }}>{errors2['ClientIndustry']}</div>
+                                                                                                <div className="error-text">{errors2['ClientIndustry']}</div>
                                                                                             )}
                                                                                         </div>
                                                                                     </div>
@@ -987,7 +988,7 @@ const CreateClient = () => {
                                                                                                 name="TradingName" onChange={(e) => handleChange2(e)} value={getCompanyDetails.TradingName}
                                                                                             />
                                                                                             {errors2['TradingName'] && (
-                                                                                                <div style={{ 'color': 'red' }}>{errors2['TradingName']}</div>
+                                                                                                <div className="error-text">{errors2['TradingName']}</div>
                                                                                             )}
                                                                                         </div>
                                                                                     </div>
@@ -998,7 +999,7 @@ const CreateClient = () => {
                                                                                                 name="TradingAddress" onChange={(e) => handleChange2(e)} value={getCompanyDetails.TradingAddress}
                                                                                             />
                                                                                             {errors2['TradingAddress'] && (
-                                                                                                <div style={{ 'color': 'red' }}>{errors2['TradingAddress']}</div>
+                                                                                                <div className="error-text">{errors2['TradingAddress']}</div>
                                                                                             )}
                                                                                         </div>
                                                                                     </div>
@@ -1161,7 +1162,7 @@ const CreateClient = () => {
 
                                                                                                 </select>
                                                                                                 {errors3['ClientIndustry'] && (
-                                                                                                    <div style={{ 'color': 'red' }}>{errors3['ClientIndustry']}</div>
+                                                                                                    <div className="error-text">{errors3['ClientIndustry']}</div>
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
@@ -1172,7 +1173,7 @@ const CreateClient = () => {
                                                                                                     name="TradingName" value={getPartnershipDetails.TradingName} onChange={(e) => handleChange3(e)}
                                                                                                 />
                                                                                                 {errors3['TradingName'] && (
-                                                                                                    <div style={{ 'color': 'red' }}>{errors3['TradingName']}</div>)}
+                                                                                                    <div className="error-text">{errors3['TradingName']}</div>)}
                                                                                             </div>
                                                                                         </div>
                                                                                         <div className="col-lg-4">
@@ -1182,7 +1183,7 @@ const CreateClient = () => {
                                                                                                     name="TradingAddress" value={getPartnershipDetails.TradingAddress} onChange={(e) => handleChange3(e)}
                                                                                                 />
                                                                                                 {errors3['TradingAddress'] && (
-                                                                                                    <div style={{ 'color': 'red' }}>{errors3['TradingAddress']}</div>)}
+                                                                                                    <div className="error-text">{errors3['TradingAddress']}</div>)}
                                                                                             </div>
                                                                                         </div>
                                                                                         <div className="col-lg-4">
@@ -1197,7 +1198,7 @@ const CreateClient = () => {
                                                                                                         <option value={0}>No</option>
                                                                                                     </select>
                                                                                                     {errors3['VATRegistered'] && (
-                                                                                                        <div style={{ 'color': 'red' }}>{errors3['VATRegistered']}</div>)}
+                                                                                                        <div className="error-text">{errors3['VATRegistered']}</div>)}
 
                                                                                                 </div>
                                                                                             </div>
@@ -1210,7 +1211,7 @@ const CreateClient = () => {
                                                                                                         name="VATNumber" value={getPartnershipDetails.VATNumber} onChange={(e) => handleChange3(e)}
                                                                                                     />
                                                                                                     {errors3['VATNumber'] && (
-                                                                                                        <div style={{ 'color': 'red' }}>{errors3['VATNumber']}</div>)}
+                                                                                                        <div className="error-text">{errors3['VATNumber']}</div>)}
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
@@ -1224,7 +1225,7 @@ const CreateClient = () => {
                                                                                                 />
 
                                                                                                 {errors3['Website'] && (
-                                                                                                    <div style={{ 'color': 'red' }}>{errors3['Website']}</div>)}
+                                                                                                    <div className="error-text">{errors3['Website']}</div>)}
                                                                                             </div>
                                                                                         </div>
                                                                                     </div>
@@ -1385,7 +1386,7 @@ const CreateClient = () => {
                                                 </section>
                                             </div>
                                             <div className="hstack gap-2 justify-content-end">
-                                                <button type="button" className="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                               
                                                 <button className="btn btn-info text-white blue-btn" onClick={handleSubmit}>Create Client</button>
                                             </div>
                                         </div>
