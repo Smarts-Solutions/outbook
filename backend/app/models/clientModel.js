@@ -40,7 +40,7 @@ const createClient = async (client) => {
     }
 
    
-    let client_industry_id = client.client_industry_id == undefined ? 0 :0
+    let client_industry_id = client.client_industry_id == undefined ? 0 :client.client_industry_id
 
   console.log("client_type",client_type)
   console.log("customer_id",customer_id)
@@ -70,8 +70,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 
     if (client_type == "1") {
         const { first_name, last_name, phone, email, residential_address } = client;
-        let phone_code = client.phone_code ==undefined ? "":""
-        let role = client.role ==undefined ? 0:0
+        let phone_code = client.phone_code ==undefined ? "":client.phone_code
+        let role = client.role ==undefined ? 0:client.role
 
         try {
             const query2 = `
@@ -113,7 +113,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 let role = detail.role == undefined ? 0: 0;
                 let first_name = detail.first_name;
                 let last_name = detail.last_name;
-                let phone_code = detail.phone_code==undefined ? "":""
+                let phone_code = detail.phone_code==undefined ? "":detail.phone_code
                 let phone = detail.phone
                 let email = detail.email;
                 const [result2] = await pool.execute(query2, [client_id, role, first_name, last_name, phone_code,phone, email]);
@@ -141,7 +141,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 let last_name = detail.last_name;
                 let email = detail.email;
                 let alternate_email = detail.alternate_email;
-                let phone_code = detail.phone_code
+                let phone_code = detail.phone_code == undefined ? "" :detail.phone_code
                 let phone = detail.phone
                 let alternate_phone = detail.alternate_phone;
                 let authorised_signatory_status = detail.authorised_signatory_status;
@@ -590,7 +590,7 @@ const clientUpdate = async (client) => {
                 for (const detail of contactDetails) {
 
                     let { customer_contact_person_role_id, first_name, last_name, phone, email, contact_id } = detail; // Assuming each contactDetail has an id
-                     let phone_code = detail.phone_code == undefined ? "" : ""
+                     let phone_code = detail.phone_code == undefined ? "" : detail.phone_code
                     if (contact_id == "" || contact_id == undefined || contact_id == null) {
                         const [result2] = await pool.execute('INSERT INTO client_contact_details (client_id,role,first_name,last_name,phone,phone_code,email) VALUES (?, ?, ?, ?, ?, ?, ?)', [client_id, customer_contact_person_role_id, first_name, last_name,phone_code, phone, email]);
                     } else {
@@ -642,7 +642,7 @@ const clientUpdate = async (client) => {
                 let last_name = detail.last_name;
                 let email = detail.email;
                 let alternate_email = detail.alternate_email;
-                let phone_code = detail.phone_code == undefined ? "" : ""
+                let phone_code = detail.phone_code == undefined ? "" : detail.phone_code
                 let phone = detail.phone;
                 let alternate_phone = detail.alternate_phone;
                 let authorised_signatory_status = detail.authorised_signatory_status;
