@@ -57,7 +57,7 @@ const createCustomer = async (customer) => {
         VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
            let phone_code = customer.phone_code == undefined ? "": ""
-       
+      
 
 
             const [result2] = await pool.execute(query2, [customer_id, First_Name, Last_Name,phone_code ,Phone, Email, Residential_Address]);
