@@ -1160,7 +1160,7 @@ const CreateClient = () => {
                                                                                                                     </div>
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-4">
+                                                                                                            {/* <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label htmlFor={`phone-${index}`} className="form-label">
                                                                                                                         Phone
@@ -1175,7 +1175,7 @@ const CreateClient = () => {
                                                                                                                     />
 
                                                                                                                 </div>
-                                                                                                            </div>
+                                                                                                            </div> */}
                                                                                                             <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label htmlFor={`email-${index}`} className="form-label">

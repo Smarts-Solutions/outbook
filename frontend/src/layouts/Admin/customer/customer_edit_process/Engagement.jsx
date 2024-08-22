@@ -284,30 +284,7 @@ const Engagement = () => {
         return Object.keys(newErrors).length === 0 ? true : false;
     };
 
-
-    // const validate4 = () => {
-    //     const newErrors = [];
-    
-    //     jobEntries.forEach((entry, index) => {
-    //         const entryErrors = {};
-    
-    //         if (!entry.minimum_number_of_jobs) {
-    //             entryErrors.minimum_number_of_jobs = 'Please Enter Minimum number of Jobs';
-    //         }  
-    
-    //         if (!entry.job_type_id) {
-    //             entryErrors.job_type_id = 'Please select a job type';
-    //         }
-    //         if (!entry.cost_per_job) {
-    //             entryErrors.cost_per_job = 'Please Enter Cost Per Job';
-    //         } 
-    //         if(Object.keys(entryErrors).length !== 0)
-    //             newErrors[index] = entryErrors;
-    //     });
  
-    //     setErrors4(newErrors);
-    //     return newErrors.length > 0 ? false : true;
-    // };
 
 
     const validate4 = () => {
@@ -365,7 +342,7 @@ const Engagement = () => {
             alert("Please select at least one option.");
             return;
         }
-        const validations = [validate1, validate2, validate3, validate4];
+        const validations = [validate1, validate3, validate2, validate4];
 
         for (let i = 0; i < checkboxStates.length; i++) {
             if (checkboxStates[i] === 1 && !validations[i]()) {
