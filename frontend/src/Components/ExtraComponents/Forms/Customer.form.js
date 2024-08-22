@@ -24,8 +24,9 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
 
   return (
     <form className="w-100" onSubmit={formik.handleSubmit}>
+      
       <div
-        className=""
+        className="w-100"
         style={{
           height: `${title === "addgroup" ? "65vh" : ""}`,
           overflowY: `${title === "addgroup" ? "scroll" : ""}`,
@@ -603,9 +604,9 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
               ) : field.type === "TradingDetails" ? (
                 <>
                   <>
-                    <div className={`col-lg-${field.col_size}`}>
+                    <div className={`col-lg-${field.col_size} px-2`}>
                       <div className="mb-3  mt-4 row flex-column">
-                        <div className="card-header card-header-light-blue step-card-header mb-4 card-header-light-blue" ><h6 className="my-0">Trading Details </h6></div>
+                        <div className="card-header card-header-light-blue step-card-header mb-4 card-header-light-blue" ><h6 className="my-0 fw-bold">Trading Details </h6></div>
                         {/* <label
                         className={`col-lg-${field.label_size}`}
                         htmlFor={field.name}
@@ -620,9 +621,9 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
               ) :
                 (
                   <>
-                    <div className={`col-lg-${field.col_size}`}>
+                    <div className={`col-lg-${field.col_size} px-2`}>
                       <div className="mb-3  mt-4 row flex-column">
-                        <div className="card-header card-header-light-blue step-card-header" ><h6 className="my-0">Sole Trading </h6></div>
+                        <div className="card-header card-header-light-blue step-card-header" ><h6 className="my-0 fw-bold">Sole Trading </h6></div>
                         {/* <label
                         className={`col-lg-${field.label_size}`}
                         htmlFor={field.name}

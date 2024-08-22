@@ -4803,7 +4803,7 @@ pre[class*="lang-html"] {
   /* letter-spacing: 0.02em; */
   font-size: 20px;
   font-weight: 600;
-  margin: 6px 0 3px;
+  margin: 0px 0 3px;
   color: #333547;
   /* text-shadow: 0 0 1px rgba(241, 245, 250, 0.1); */
   font-family: "Inter", sans-serif;
@@ -9441,6 +9441,7 @@ span.sidebar-icons {
   font-size: 14px;
   color: #4B4B4B;
   font-weight: 600;
+  text-transform: none;
 }
 
 .datatable-container .rdt_TableRow {
@@ -9570,6 +9571,7 @@ body .btn-info:hover {
 .label-height
 {
   height: 20px;
+  display: block;
 }
 .content-title {
   margin-top: 25px;
@@ -9681,7 +9683,7 @@ body .btn-info:hover {
 
 main .details__wrapper {
 
-  margin: 5em auto;
+  margin: 4em auto;
 }
 
 main .form__item {
@@ -9869,20 +9871,27 @@ font-size: 14px;
 .fs-24 {
   font-size: 24px;
 }
-body .bg-info.modal-header, .modal-header {
+.form-select, .form-control
+{
+  font-size: 14px !important;
+  color: #4B4B4B !important;
+}
+body .accordion-button:not(.collapsed)::after {
 
-  background-color: #01afef !important;
-  
-  }
-  
-  
-  .modal-header .modal-title {
-  
+  transform: rotate(180deg) !important;
+}
+.accordion-button::after {
+
+  transform: rotate(0deg) !important;
+}
+.accordion-item
+{ 
+  border-radius: 0px !important;
+}
+.error-text {
+  background: #cb0000;
   color: #fff !important;
-  
-  }
-
-  .error-text {
-    color: red;
-    
-  }
+  font-size: 12px;
+  padding: 0px 10px;
+  margin-top: 4px;
+}

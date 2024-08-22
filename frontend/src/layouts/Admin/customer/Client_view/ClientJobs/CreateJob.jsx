@@ -293,8 +293,8 @@ const CreateJob = () => {
                 <div className="row mt-4">
                     <div className="col-xl-12">
                         <div className="card">
-                            <div className="card-header">
-                                <h4 className="card-title mb-0">Create New Job</h4>
+                            <div className="card-header step-header-blue">
+                                <h4 className="card-title mb-0 mt-0">Create New Job</h4>
                             </div>
 
                             <div className="card-body form-steps">
@@ -315,7 +315,7 @@ const CreateJob = () => {
                                                                         <input type="text" className="form-control" placeholder="Account Manager" disabled
                                                                             name="AccountManager" onChange={HandleChange} value={jobData.AccountManager} />
                                                                         {errors['AccountManager'] && (
-                                                                            <div style={{ 'color': 'red' }}>{errors['AccountManager']}</div>
+                                                                            <div className="error-text">{errors['AccountManager']}</div>
                                                                         )}
                                                                     </div>
 
@@ -324,7 +324,7 @@ const CreateJob = () => {
                                                                         <input type="text" className="form-control" placeholder="Customer" disabled
                                                                             name="Customer" onChange={HandleChange} value={jobData.Customer} />
                                                                         {errors['Customer'] && (
-                                                                            <div style={{ 'color': 'red' }}>{errors['Customer']}</div>
+                                                                            <div className="error-text">{errors['Customer']}</div>
                                                                         )}
                                                                     </div>
                                                                     {
@@ -342,7 +342,7 @@ const CreateJob = () => {
                                                                                     }
                                                                                 </select>
                                                                                 {errors['Client'] && (
-                                                                                    <div style={{ 'color': 'red' }}>{errors['Client']}</div>
+                                                                                    <div className="error-text">{errors['Client']}</div>
                                                                                 )}
 
                                                                             </div>
@@ -353,7 +353,7 @@ const CreateJob = () => {
                                                                                     name="Client" onChange={HandleChange} value={jobData.Client} disabled />
 
                                                                                 {errors['Client'] && (
-                                                                                    <div style={{ 'color': 'red' }}>{errors['Client']}</div>
+                                                                                    <div className="error-text">{errors['Client']}</div>
                                                                                 )}
                                                                             </div>
                                                                     }
@@ -363,7 +363,7 @@ const CreateJob = () => {
                                                                         <input type="text" className="form-control" placeholder="Client Job Code"
                                                                             name="ClientJobCode" onChange={HandleChange} value={jobData.ClientJobCode} />
                                                                         {errors['ClientJobCode'] && (
-                                                                            <div style={{ 'color': 'red' }}>{errors['ClientJobCode']}</div>
+                                                                            <div className="error-text">{errors['ClientJobCode']}</div>
                                                                         )}
                                                                     </div>
 
@@ -380,7 +380,7 @@ const CreateJob = () => {
                                                                             }
                                                                         </select>
                                                                         {errors['CustomerAccountManager'] && (
-                                                                            <div style={{ 'color': 'red' }}>{errors['CustomerAccountManager']}</div>
+                                                                            <div className="error-text">{errors['CustomerAccountManager']}</div>
                                                                         )}
 
                                                                     </div>
@@ -400,7 +400,7 @@ const CreateJob = () => {
 
                                                                         </select>
                                                                         {errors['Service'] && (
-                                                                            <div style={{ 'color': 'red' }}>{errors['Service']}</div>
+                                                                            <div className="error-text">{errors['Service']}</div>
                                                                         )}
                                                                     </div>
 
@@ -421,7 +421,7 @@ const CreateJob = () => {
                                                                         </select>
 
                                                                         {errors['JobType'] && (
-                                                                            <div style={{ color: 'red' }}>{errors['JobType']}</div>
+                                                                            <div className="error-text">{errors['JobType']}</div>
                                                                         )}
                                                                     </div>
 
@@ -437,7 +437,7 @@ const CreateJob = () => {
                                                                            
                                                                         </div>
                                                                         {errors['BudgetedHours'] && (
-                                                                            <div style={{ 'color': 'red' }}>{errors['BudgetedHours']}</div>
+                                                                            <div className="error-text">{errors['BudgetedHours']}</div>
                                                                         )}
                                                                     </div>
 
@@ -454,7 +454,7 @@ const CreateJob = () => {
                                                                             }
                                                                         </select>
                                                                         {errors['Reviewer'] && (
-                                                                            <div style={{ 'color': 'red' }}>{errors['Reviewer']}</div>
+                                                                            <div className="error-text">{errors['Reviewer']}</div>
                                                                         )}
                                                                     </div>
 
@@ -469,7 +469,7 @@ const CreateJob = () => {
                                                                                 ))}
                                                                         </select>
                                                                         {errors['AllocatedTo'] && (
-                                                                            <div style={{ 'color': 'red' }}>{errors['AllocatedTo']}</div>
+                                                                            <div className="error-text">{errors['AllocatedTo']}</div>
                                                                         )}
                                                                     </div>
 
@@ -478,7 +478,7 @@ const CreateJob = () => {
                                                                         <input type="date" className="form-control" placeholder="DD-MM-YYYY"
                                                                             name="AllocatedOn" onChange={HandleChange} value={jobData.AllocatedOn} />
                                                                         {errors['AllocatedOn'] && (
-                                                                            <div style={{ 'color': 'red' }}>{errors['AllocatedOn']}</div>
+                                                                            <div className="error-text">{errors['AllocatedOn']}</div>
                                                                         )}
                                                                     </div>
 
@@ -487,7 +487,7 @@ const CreateJob = () => {
                                                                         <input type="date" className="form-control" placeholder="DD-MM-YYYY"
                                                                             name="DateReceivedOn" onChange={HandleChange} value={jobData.DateReceivedOn} />
                                                                         {errors['DateReceivedOn'] && (
-                                                                            <div style={{ 'color': 'red' }}>{errors['DateReceivedOn']}</div>
+                                                                            <div className="error-text">{errors['DateReceivedOn']}</div>
                                                                         )}
                                                                     </div>
 
@@ -497,7 +497,7 @@ const CreateJob = () => {
                                                                             <input type="text" className="form-control" placeholder="Year End"
                                                                                 name="YearEnd" onChange={HandleChange} value={jobData.YearEnd} />
                                                                             {errors['YearEnd'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['YearEnd']}</div>
+                                                                                <div className="error-text">{errors['YearEnd']}</div>
                                                                             )}
 
                                                                         </div>
@@ -509,7 +509,7 @@ const CreateJob = () => {
                                                                             <input type="text" className="form-control" placeholder="Total Preparation Time"
                                                                                 name="TotalPreparationTime" onChange={HandleChange} value={jobData.TotalPreparationTime} />
                                                                             {errors['TotalPreparationTime'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['TotalPreparationTime']}</div>
+                                                                                <div className="error-text">{errors['TotalPreparationTime']}</div>
                                                                             )}
 
                                                                         </div>
@@ -521,7 +521,7 @@ const CreateJob = () => {
                                                                             <input type="text" className="form-control" placeholder="Review Time"
                                                                                 name="ReviewTime" onChange={HandleChange} value={jobData.ReviewTime} />
                                                                             {errors['ReviewTime'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['ReviewTime']}</div>
+                                                                                <div className="error-text">{errors['ReviewTime']}</div>
                                                                             )}
                                                                         </div>
                                                                     </div>
@@ -532,7 +532,7 @@ const CreateJob = () => {
                                                                             <input type="text" className="form-control" placeholder="Feedback Incorporation Time"
                                                                                 name="FeedbackIncorporationTime" onChange={HandleChange} value={jobData.FeedbackIncorporationTime} />
                                                                             {errors['FeedbackIncorporationTime'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['FeedbackIncorporationTime']}</div>
+                                                                                <div className="error-text">{errors['FeedbackIncorporationTime']}</div>
                                                                             )}
 
                                                                         </div>
@@ -545,7 +545,7 @@ const CreateJob = () => {
                                                                                 name="TotalTime" onChange={HandleChange} value={jobData.TotalTime}
                                                                             />
                                                                             {errors['TotalTime'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['TotalTime']}</div>
+                                                                                <div className="error-text">{errors['TotalTime']}</div>
                                                                             )}
                                                                         </div>
                                                                     </div>
@@ -563,7 +563,7 @@ const CreateJob = () => {
                                                                             ))}
                                                                         </select>
                                                                         {errors['EngagementModel'] && (
-                                                                            <div style={{ 'color': 'red' }}>{errors['EngagementModel']}</div>
+                                                                            <div className="error-text">{errors['EngagementModel']}</div>
                                                                         )}
 
                                                                     </div>
@@ -586,7 +586,7 @@ const CreateJob = () => {
                                                                             <input type="date" className="form-control" placeholder="DD-MM-YYYY"
                                                                                 name="ExpectedDeliveryDate" onChange={HandleChange} value={jobData.ExpectedDeliveryDate} />
                                                                             {errors['ExpectedDeliveryDate'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['ExpectedDeliveryDate']}</div>
+                                                                                <div className="error-text">{errors['ExpectedDeliveryDate']}</div>
                                                                             )}
 
                                                                         </div>
@@ -595,7 +595,7 @@ const CreateJob = () => {
                                                                             <input type="date" className="form-control" placeholder="DD-MM-YYYY"
                                                                                 name="DueOn" onChange={HandleChange} value={jobData.DueOn} />
                                                                             {errors['DueOn'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['DueOn']}</div>
+                                                                                <div className="error-text">{errors['DueOn']}</div>
                                                                             )}
                                                                         </div>
                                                                         <div className="col-lg-4">
@@ -603,7 +603,7 @@ const CreateJob = () => {
                                                                             <input type="date" className="form-control" placeholder="DD-MM-YYYY"
                                                                                 name="SubmissionDeadline" onChange={HandleChange} value={jobData.SubmissionDeadline} />
                                                                             {errors['SubmissionDeadline'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['SubmissionDeadline']}</div>
+                                                                                <div className="error-text">{errors['SubmissionDeadline']}</div>
                                                                             )}
                                                                         </div>
                                                                         <div className="col-lg-4">
@@ -611,7 +611,7 @@ const CreateJob = () => {
                                                                             <input type="date" className="form-control" placeholder="DD-MM-YYYY"
                                                                                 name="CustomerDeadlineDate" onChange={HandleChange} value={jobData.CustomerDeadlineDate} />
                                                                             {errors['CustomerDeadlineDate'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['CustomerDeadlineDate']}</div>
+                                                                                <div className="error-text">{errors['CustomerDeadlineDate']}</div>
                                                                             )}
                                                                         </div>
                                                                         <div className="col-lg-4">
@@ -619,7 +619,7 @@ const CreateJob = () => {
                                                                             <input type="date" className="form-control" placeholder="DD-MM-YYYY"
                                                                                 name="SLADeadlineDate" onChange={HandleChange} value={jobData.SLADeadlineDate} />
                                                                             {errors['SLADeadlineDate'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['SLADeadlineDate']}</div>
+                                                                                <div className="error-text">{errors['SLADeadlineDate']}</div>
                                                                             )}
                                                                         </div>
                                                                         <div className="col-lg-4">
@@ -627,7 +627,7 @@ const CreateJob = () => {
                                                                             <input type="date" className="form-control" placeholder="DD-MM-YYYY"
                                                                                 name="InternalDeadlineDate" onChange={HandleChange} value={jobData.InternalDeadlineDate} />
                                                                             {errors['InternalDeadlineDate'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['InternalDeadlineDate']}</div>
+                                                                                <div className="error-text">{errors['InternalDeadlineDate']}</div>
                                                                             )}
                                                                         </div>
                                                                     </div>
@@ -654,7 +654,7 @@ const CreateJob = () => {
                                                                                     <option value="1">Yes</option>
                                                                                 </select>
                                                                                 {errors['FilingWithCompaniesHouseRequired'] && (
-                                                                                    <div style={{ 'color': 'red' }}>{errors['FilingWithCompaniesHouseRequired']}</div>
+                                                                                    <div className="error-text">{errors['FilingWithCompaniesHouseRequired']}</div>
                                                                                 )}
                                                                             </div>
                                                                         </div>
@@ -664,7 +664,7 @@ const CreateJob = () => {
                                                                                 <input type="date" className="form-control"
                                                                                     name="CompaniesHouseFilingDate" onChange={HandleChange} value={jobData.CompaniesHouseFilingDate} />
                                                                                 {errors['CompaniesHouseFilingDate'] && (
-                                                                                    <div style={{ 'color': 'red' }}>{errors['CompaniesHouseFilingDate']}</div>
+                                                                                    <div className="error-text">{errors['CompaniesHouseFilingDate']}</div>
                                                                                 )}
 
                                                                             </div>
@@ -678,7 +678,7 @@ const CreateJob = () => {
                                                                                 <option value="1">Yes</option>
                                                                             </select>
                                                                             {errors['FilingWithHMRCRequired'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['FilingWithHMRCRequired']}</div>
+                                                                                <div className="error-text">{errors['FilingWithHMRCRequired']}</div>
                                                                             )}
                                                                         </div>
                                                                         <div className="col-lg-4">
@@ -687,7 +687,7 @@ const CreateJob = () => {
                                                                                 <input type="date" className="form-control"
                                                                                     name="HMRCFilingDate" onChange={HandleChange} value={jobData.HMRCFilingDate} />
                                                                                 {errors['HMRCFilingDate'] && (
-                                                                                    <div style={{ 'color': 'red' }}>{errors['HMRCFilingDate']}</div>
+                                                                                    <div className="error-text">{errors['HMRCFilingDate']}</div>
                                                                                 )}
                                                                             </div>
                                                                         </div>
@@ -701,7 +701,7 @@ const CreateJob = () => {
                                                                                     <option value="0">No</option>
                                                                                 </select>
                                                                                 {errors['OpeningBalanceAdjustmentRequired'] && (
-                                                                                    <div style={{ 'color': 'red' }}>{errors['OpeningBalanceAdjustmentRequired']}</div>
+                                                                                    <div className="error-text">{errors['OpeningBalanceAdjustmentRequired']}</div>
                                                                                 )}
                                                                             </div>
                                                                         </div>
@@ -711,7 +711,7 @@ const CreateJob = () => {
                                                                                 <input type="date" className="form-control"
                                                                                     name="OpeningBalanceAdjustmentDate" onChange={HandleChange} value={jobData.OpeningBalanceAdjustmentDate} />
                                                                                 {errors['OpeningBalanceAdjustmentDate'] && (
-                                                                                    <div style={{ 'color': 'red' }}>{errors['OpeningBalanceAdjustmentDate']}</div>
+                                                                                    <div className="error-text">{errors['OpeningBalanceAdjustmentDate']}</div>
                                                                                 )}
 
                                                                             </div>
@@ -733,7 +733,7 @@ const CreateJob = () => {
                                                                                 name="NumberOfTransactions" onChange={HandleChange} value={jobData.NumberOfTransactions}
                                                                             />
                                                                             {errors['NumberOfTransactions'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['NumberOfTransactions']}</div>
+                                                                                <div className="error-text">{errors['NumberOfTransactions']}</div>
                                                                             )}
                                                                         </div>
                                                                         <div className="col-lg-4">
@@ -742,7 +742,7 @@ const CreateJob = () => {
                                                                                 name="NumberOfTrialBalanceItems" onChange={HandleChange} value={jobData.NumberOfTrialBalanceItems}
                                                                             />
                                                                             {errors['NumberOfTrialBalanceItems'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['NumberOfTrialBalanceItems']}</div>
+                                                                                <div className="error-text">{errors['NumberOfTrialBalanceItems']}</div>
                                                                             )}
                                                                         </div>
                                                                         <div className="col-lg-4">
@@ -751,7 +751,7 @@ const CreateJob = () => {
                                                                                 name="Turnover" onChange={HandleChange} value={jobData.Turnover}
                                                                             />
                                                                             {errors['Turnover'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['Turnover']}</div>
+                                                                                <div className="error-text">{errors['Turnover']}</div>
                                                                             )}
                                                                         </div>
                                                                         <div className="col-lg-4 mb-3">
@@ -760,7 +760,7 @@ const CreateJob = () => {
                                                                                 name="NoOfEmployees" onChange={HandleChange} value={jobData.NoOfEmployees}
                                                                             />
                                                                             {errors['NoOfEmployees'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['NoOfEmployees']}</div>
+                                                                                <div className="error-text">{errors['NoOfEmployees']}</div>
                                                                             )}
 
                                                                         </div>
@@ -774,7 +774,7 @@ const CreateJob = () => {
                                                                                 <option value="0">No</option>
                                                                             </select>
                                                                             {errors['VATReconciliation'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['VATReconciliation']}</div>
+                                                                                <div className="error-text">{errors['VATReconciliation']}</div>
                                                                             )}
                                                                         </div>
                                                                         <div className="col-lg-4">
@@ -787,7 +787,7 @@ const CreateJob = () => {
                                                                                 <option value="0">No</option>
                                                                             </select>
                                                                             {errors['Bookkeeping'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['Bookkeeping']}</div>
+                                                                                <div className="error-text">{errors['Bookkeeping']}</div>
                                                                             )}
                                                                         </div>
                                                                         <div className="col-lg-4">
@@ -799,7 +799,7 @@ const CreateJob = () => {
                                                                                 <option value="2">Software</option>
                                                                             </select>
                                                                             {errors['ProcessingType'] && (
-                                                                                <div style={{ 'color': 'red' }}>{errors['ProcessingType']}</div>
+                                                                                <div className="error-text">{errors['ProcessingType']}</div>
                                                                             )}
                                                                         </div>
                                                                     </div>
@@ -827,7 +827,7 @@ const CreateJob = () => {
                                                                                     <option value="0">No</option>
                                                                                 </select>
                                                                                 {errors['Invoiced'] && (
-                                                                                    <div style={{ 'color': 'red' }}>{errors['Invoiced']}</div>
+                                                                                    <div className="error-text">{errors['Invoiced']}</div>
                                                                                 )}
 
                                                                             </div>
@@ -845,7 +845,7 @@ const CreateJob = () => {
                                                                                     }
                                                                                 </select>
                                                                                 {errors['Currency'] && (
-                                                                                    <div style={{ 'color': 'red' }}>{errors['Currency']}</div>
+                                                                                    <div className="error-text">{errors['Currency']}</div>
                                                                                 )}
                                                                             </div>
                                                                             <div className="col-lg-4">
@@ -854,7 +854,7 @@ const CreateJob = () => {
                                                                                     name="InvoiceValue" onChange={HandleChange} value={jobData.InvoiceValue}
                                                                                 />
                                                                                 {errors['InvoiceValue'] && (
-                                                                                    <div style={{ 'color': 'red' }}>{errors['InvoiceValue']}</div>
+                                                                                    <div className="error-text">{errors['InvoiceValue']}</div>
                                                                                 )}
                                                                             </div>
                                                                             <div className="col-lg-4">
@@ -863,7 +863,7 @@ const CreateJob = () => {
                                                                                     name="InvoiceDate" onChange={HandleChange} value={jobData.InvoiceDate}
                                                                                 />
                                                                                 {errors['InvoiceDate'] && (
-                                                                                    <div style={{ 'color': 'red' }}>{errors['InvoiceDate']}</div>
+                                                                                    <div className="error-text">{errors['InvoiceDate']}</div>
                                                                                 )}
                                                                             </div>
                                                                             <div className="col-lg-4">
@@ -876,7 +876,7 @@ const CreateJob = () => {
                                                                                   
                                                                                 </div>
                                                                                 {errors['InvoiceHours'] && (
-                                                                                    <div style={{ 'color': 'red' }}>{errors['InvoiceHours']}</div>
+                                                                                    <div className="error-text">{errors['InvoiceHours']}</div>
                                                                                 )}
                                                                             </div>
                                                                             <div id="invoicedremark" className="col-lg-4">
@@ -885,7 +885,7 @@ const CreateJob = () => {
                                                                                     name="InvoiceRemark" onChange={HandleChange} value={jobData.InvoiceRemark}
                                                                                 />
                                                                                 {errors['InvoiceRemark'] && (
-                                                                                    <div style={{ 'color': 'red' }}>{errors['InvoiceRemark']}</div>
+                                                                                    <div className="error-text">{errors['InvoiceRemark']}</div>
                                                                                 )}
                                                                             </div>
                                                                         </div>
@@ -898,7 +898,7 @@ const CreateJob = () => {
                                             </div>
                                         </div>
                                         <div className="hstack gap-2 justify-content-end">
-                                            <button type="button" className="btn btn-light" onClick={handleClose} >Cancel</button>
+                                            {/* <button type="button" className="btn btn-secondary" onClick={handleClose} >Cancel</button> */}
                                             <button type="button" className="btn btn-info text-white float-end blue-btn" onClick={handleSubmit}>Add Job</button>
                                         </div>
                                     </div>

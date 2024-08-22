@@ -116,9 +116,9 @@ const StaffPage = () => {
     const columns = [
         { name: 'First Name', selector: row => row.first_name, sortable: true, width: '150px' },
         { name: 'Last Name', selector: row => row.last_name, sortable: true, width: '150px' },
-        { name: 'Email Address', selector: row => row.email, sortable: true, width: '200px' },
+        { name: 'Email Address', selector: row => row.email, sortable: true, width: 'auto' },
         { name: 'Phone', selector: row => row.phone, sortable: true, width: '150px' },
-        { name: 'Role', selector: row => row.role, sortable: true, width: '150px' },
+        { name: 'Role', selector: row => row.role, sortable: true, width: '200px' },
         { name: 'Status', cell: row => (<div><span className={`badge ${row.status === '1' ? 'bg-success' : 'bg-danger'}`}>{row.status === '1' ? 'Active' : 'Deactive'}</span></div>), width: '80px', },
         {
             name: 'Actions',
