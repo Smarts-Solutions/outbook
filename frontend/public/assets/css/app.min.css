@@ -9890,7 +9890,7 @@ body .accordion-button:not(.collapsed)::after {
 }
 .error-text {
   background: #cb0000;
-  color: #fff;
+  color: #fff !important;
   font-size: 12px;
   padding: 0px 10px;
   margin-top: 4px;

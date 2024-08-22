@@ -991,7 +991,7 @@ const Information = () => {
                         <Field
                           as="select"
                           name="customerType"
-                          className="form-select mb-3"
+                          className="form-select "
                           onChange={(e) => {
                             setCustomerType(e.target.value);
                             ChangeCustomerType(e.target.value);
@@ -1020,7 +1020,7 @@ const Information = () => {
                         <Field
                           as="select"
                           name="accountManager"
-                          className="form-select mb-3"
+                          className="form-select "
                           onChange={(e) => handleChangeValue(e)}
                         >
                           <option value="" selected>
@@ -1034,7 +1034,7 @@ const Information = () => {
                         </Field>
 
                         {getAccountMangerIdErr && (
-                          <div style={{ color: "red" }}>{getAccountMangerIdErr && getAccountMangerIdErr}</div>
+                          <div className="error-text" style={{ color: "red" }}>{getAccountMangerIdErr && getAccountMangerIdErr}</div>
                         )}
                       </div>
                     </div>
