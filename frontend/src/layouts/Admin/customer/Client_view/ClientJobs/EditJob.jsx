@@ -884,7 +884,7 @@ const CreateJob = () => {
                                                                     <div style={{ marginTop: 15 }}>
                                                                         <div className="row">
                                                                             <div className="col-lg-3">
-                                                                                <label className="form-label">Invoiced?</label>
+                                                                                <label className="form-label">Invoiced</label>
                                                                                 <select className="invoiced_dropdown form-select mb-3"
                                                                                     name="Invoiced" onChange={HandleChange} value={jobData.Invoiced}
                                                                                 >

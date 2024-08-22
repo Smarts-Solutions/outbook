@@ -158,12 +158,12 @@ const Information = () => {
       else if (values.VAT_Registered === '1' && !values.VAT_Number) {
         errors.VAT_Number = "Please Enter VAT Number";
       }
-      //  else if (!values.VAT_Number) {
-      //     errors.VAT_Number = "Please Enter VAT Number";
-      //   }
-      //  else if (!values.Website) {
-      //     errors.Website = "Please Enter Website";
-      //   }
+      else if (values.VAT_Number && values.VAT_Number.length > 9) {
+        errors.VAT_Number = "VAT Number cannot exceed 9 Numbers";
+      }
+      else if (values.Website && values.Website.length > 200) {
+        errors.Website = "Website cannot exceed 200 characters";
+      }
       else if (!values.Trading_Name) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
@@ -245,6 +245,7 @@ const Information = () => {
       Phone: "",
       Email: "",
       Residential_Address: "",
+      
     },
     validate: (values) => {
       let errors = {};
@@ -332,9 +333,10 @@ const Information = () => {
         CustomerType: CustomerType,
         account_manager_id: getAccountMangerId,
         staff_id: staffDetails.id,
-        //contact_id : customerDetails.data ? customerDetails.data && customerDetails.data.contact_details[0].contact_id : ""
+        phone_code:values.countryCode
+       
       };
-
+     
       await AddCustomerFun(req);
     },
   });
@@ -375,8 +377,6 @@ const Information = () => {
         const error = {
           firstName: contact.firstName ? "" : "First Name is required",
           lastName: contact.lastName ? "" : "Last Name is required",
-          // role: contact.role ? "" : "Role is required",
-          // phoneNumber: contact.phoneNumber ? "" : "Phone Number is required",
           email:
             contact.email === ""
               ? "Email Id is required"
@@ -385,13 +385,7 @@ const Information = () => {
                 : "Valid Email is required",
         };
 
-        if (
-          error.firstName ||
-          error.lastName ||
-          error.role ||
-          error.phoneNumber ||
-          error.email
-        ) {
+        if ( error.firstName || error.lastName || error.role ||  error.phoneNumber ||  error.email ) {
           formIsValid = false;
         }
         return error;
@@ -444,8 +438,6 @@ const Information = () => {
   }
 
   useEffect(() => {
-
-
     formik.setFieldValue("company_name", getCompanyDetails[0]?.title);
     formik.setFieldValue("entity_type", getCompanyDetails[0]?.company_type);
     formik.setFieldValue("company_status", getCompanyDetails[0]?.company_status);
@@ -453,12 +445,9 @@ const Information = () => {
     formik.setFieldValue("Registered_Office_Addres", getCompanyDetails[0]?.address_snippet);
     formik.setFieldValue("Incorporation_Date", getCompanyDetails[0]?.date_of_creation);
     formik.setFieldValue("Incorporation_in", getCompanyDetails[0]?.description);
-
     formik.setFieldValue("Trading_Name", getCompanyDetails[0]?.title);
     formik.setFieldValue("Trading_Address", getCompanyDetails[0]?.address_snippet);
-
     if (formik.values.search_company_name == "") {
-
       formik.setFieldValue("company_name", "");
       formik.setFieldValue("entity_type", "");
       formik.setFieldValue("company_status", "");
@@ -466,11 +455,9 @@ const Information = () => {
       formik.setFieldValue("Registered_Office_Addres", "");
       formik.setFieldValue("Incorporation_Date", "");
       formik.setFieldValue("Incorporation_in", "");
-
       formik.setFieldValue("Trading_Name", "");
       formik.setFieldValue("Trading_Address", "");
     }
-
   }, [formik.values.search_company_name]);
 
   const fields = [
@@ -968,6 +955,7 @@ const Information = () => {
     }
   }, []);
 
+ 
 
   return (
     <Formik
@@ -1015,7 +1003,6 @@ const Information = () => {
                   <div className="card-header step-header-blue align-items-center d-flex">
                     <h4 className="card-title mb-0 flex-grow-1">
                       Outbooks Account Manager
-
                     </h4>
                   </div>
                   <div className="card-body">
