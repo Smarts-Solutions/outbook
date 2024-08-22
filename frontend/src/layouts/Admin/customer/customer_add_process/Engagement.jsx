@@ -342,8 +342,7 @@ const Engagement = () => {
         if (checkboxStates[2] === 0)
             setErrors3({})
         if (checkboxStates[3] === 0)
-            setErrors4({})
-
+            setErrors4({}) 
     }, [checkboxStates])
 
 

@@ -67,7 +67,7 @@ const CreateClient = () => {
     })
 
     const [contacts, setContacts] = useState([
-        { authorised_signatory_status: false, first_name: '', last_name: '', role: '', phone: '', email: '' }
+        { authorised_signatory_status: false, first_name: '', last_name: '', role: '', phone: '', phone_code: "+44", email: '' }
     ]);
 
     const [contacts1, setContacts1] = useState([
@@ -85,7 +85,7 @@ const CreateClient = () => {
 
 
     const handleAddContact = () => {
-        setContacts([...contacts, { authorised_signatory_status: false, first_name: '', last_name: '', role: '', phone: '', email: '' }]);
+        setContacts([...contacts, { authorised_signatory_status: false, first_name: '', last_name: '', role: '', phone: '', phone_code: "", email: '' }]);
         setErrors([...errors, { first_name: '', last_name: '', role: '', phone: '', email: '' }]);
     };
 
@@ -213,7 +213,6 @@ const CreateClient = () => {
                     trading_address: getCompanyDetails.TradingAddress,
                     contactDetails: contacts
                 }
-
                 await dispatch(Add_Client(req))
                     .unwrap()
                     .then((response) => {
@@ -596,7 +595,7 @@ const CreateClient = () => {
     return (
         <div>
             <div className="container-fluid mt-4">
-               
+
                 <div className="row">
                     <div className="col-xl-12">
                         <div className="card">
@@ -634,7 +633,7 @@ const CreateClient = () => {
                                                                         >
                                                                             <option value={1}>Sole Trader</option>
                                                                             <option value={2}>Company</option>
-                                                                            <option value={3}>Partnership</option> 
+                                                                            <option value={3}>Partnership</option>
                                                                         </select>
                                                                     </div>
                                                                 </div>
@@ -809,20 +808,7 @@ const CreateClient = () => {
                                                                                     </div>
                                                                                 </div>
 
-                                                                                {/* <div className="col-lg-4">
-                                                                                    <div className="mb-3">
-                                                                                        <label className="form-label" >Phone<span style={{ color: "red" }}>*</span></label>
-                                                                                        <input type="text" className="form-control"
-                                                                                            placeholder="Phone Number"
-                                                                                            name="phone"
-                                                                                            value={getSoleTraderDetails.phone}
-                                                                                            onChange={(e) => handleChange1(e)}
-                                                                                        />
-                                                                                        {errors1['phone'] && (
-                                                                                            <div className="error-text">{errors1['phone']}</div>
-                                                                                        )}
-                                                                                    </div>
-                                                                                </div> */}
+
                                                                                 <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label" >Email<span style={{ color: "red" }}>*</span></label>
@@ -1145,6 +1131,35 @@ const CreateClient = () => {
                                                                                                                     {/* {errors[index].role && <div style={{ color: 'red' }}>{errors[index].role}</div>} */}
                                                                                                                 </div>
                                                                                                             </div>
+                                                                                                            <div class="col-lg-4">
+                                                                                                                <div class="mb-3">
+                                                                                                                    <label for="firstNameinput" class="form-label">Phone</label>
+                                                                                                                    <div class="row">
+                                                                                                                        <div class="col-md-4">
+                                                                                                                            <select class="form-select" onChange={(e) => handleChange1(e)} name="phone_code"
+                                                                                                                                value={getSoleTraderDetails.phone_code}
+                                                                                                                            >
+                                                                                                                                {countryDataAll.data.map((data) => (
+                                                                                                                                    <option key={data.code} value={data.code}>
+                                                                                                                                        {data.code}
+                                                                                                                                    </option>
+                                                                                                                                ))}
+                                                                                                                            </select>
+                                                                                                                        </div>
+                                                                                                                        <div className="mb-3 col-md-8">
+                                                                                                                            <input type="text"  
+                                                                                                                             className="form-control"
+                                                                                                                             placeholder="Phone Number"
+                                                                                                                             id={`phone-${index}`}
+                                                                                                                             value={contact.phone}
+                                                                                                                             onChange={(e) => handleChange(index, 'phone', e.target.value)}
+                                                                                                                                maxLength={12}
+                                                                                                                                minLength={9}
+                                                                                                                            />
+                                                                                                                        </div>
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                            </div>
                                                                                                             <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label htmlFor={`phone-${index}`} className="form-label">
@@ -1158,7 +1173,7 @@ const CreateClient = () => {
                                                                                                                         value={contact.phone}
                                                                                                                         onChange={(e) => handleChange(index, 'phone', e.target.value)}
                                                                                                                     />
-                                                                                                                    {/* {errors[index].phone && <div style={{ color: 'red' }}>{errors[index].phone}</div>} */}
+
                                                                                                                 </div>
                                                                                                             </div>
                                                                                                             <div className="col-lg-4">
