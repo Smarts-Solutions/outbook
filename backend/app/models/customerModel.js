@@ -42,8 +42,6 @@ const createCustomer = async (customer) => {
             return { status: false, message: 'Customer Trading Name Already Exists.' };
         }
 
-
-      
         
         const query = `
     INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process)
