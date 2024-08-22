@@ -252,15 +252,17 @@ const Engagement = () => {
             alert("Please select at least one option.");
             return;
         }
-        const validations = [validate1, validate2, validate3, validate4];
+        const validations = [validate1, validate3,validate2 , validate4];
+        console.log("checkboxStates",checkboxStates)
 
         for (let i = 0; i < checkboxStates.length; i++) {
-            if (checkboxStates[i] === 1 && !validations[i]()) {
+          console.log("i",checkboxStates[i])
+            if (checkboxStates[i] == 1 && !validations[i]()) {
 
                 return;
             }
         }
-
+ 
         let req = {
             "customer_id": address,
             "pageStatus": "3",
