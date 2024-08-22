@@ -180,9 +180,7 @@ CREATE TABLE customers (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (staff_id) REFERENCES staffs(id),
     FOREIGN KEY (account_manager_id) REFERENCES staffs(id)
-    
 );
-
 
 CREATE TABLE customer_services (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -224,8 +222,6 @@ CREATE TABLE `customer_service_account_managers` (
     UNIQUE (customer_service_id,account_manager_id)
 );
 
-
-
 /*--TABLE:- CUSTOMERS COMPANY INFORMATION  */
 CREATE TABLE customer_company_information (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -241,8 +237,6 @@ CREATE TABLE customer_company_information (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id)
 );
-
-
 
 /*--TABLE:- CUSTOMERS CONTACT DETAILS */
 CREATE TABLE customer_contact_details (
@@ -264,9 +258,6 @@ CREATE TABLE customer_contact_details (
     FOREIGN KEY (contact_person_role_id) REFERENCES customer_contact_person_role(id)
 );
 
-
-
-
 /*--TABLE:- CUSTOMERS ENGAGEMENT MODEL  */  
 CREATE TABLE customer_engagement_model (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -279,7 +270,6 @@ CREATE TABLE customer_engagement_model (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id)
 );
-
 
 /*--TABLE:- CUSTOMERS ENGAGEMENT MODEL FTE/Dedicated Staffing */ 
 CREATE TABLE customer_engagement_fte (
@@ -300,7 +290,6 @@ CREATE TABLE customer_engagement_fte (
     FOREIGN KEY (customer_engagement_model_id) REFERENCES customer_engagement_model(id)
 );
 
-
 /*--TABLE:- CUSTOMERS ENGAGEMENT MODEL PERCENTAGE MODEL*/
 CREATE TABLE customer_engagement_percentage (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -315,9 +304,6 @@ CREATE TABLE customer_engagement_percentage (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_engagement_model_id) REFERENCES customer_engagement_model(id)
 );
-
-
-
 
 /*--TABLE:- CUSTOMERS ENGAGEMENT MODEL Adhoc/PAYG/Hourly*/
 CREATE TABLE customer_engagement_adhoc_hourly (
@@ -432,7 +418,7 @@ CREATE TABLE client_contact_details (
     authorised_signatory_status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: off, 1: on',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (client_id) REFERENCES clients(id)
+    FOREIGN KEY (client_id) REFERENCES clients(id),
     FOREIGN KEY (role) REFERENCES customer_contact_person_role(id)
 );
 
@@ -464,42 +450,42 @@ CREATE TABLE jobs (
     customer_contact_details_id INT NOT NULL,
     service_id INT NOT NULL,
     job_type_id INT NOT NULL,
-    budgeted_hours DECIMAL(10, 2) NOT NULL,
-    reviewer INT NOT NULL, 
-    allocated_to INT NOT NULL,
-    allocated_on DATE NOT NULL,
-    date_received_on DATE NOT NULL,
-    year_end VARCHAR(50) NOT NULL,
-    total_preparation_time VARCHAR(50) NOT NULL,
-    review_time VARCHAR(50) NOT NULL,
-    feedback_incorporation_time VARCHAR(50) NOT NULL,
-    total_time VARCHAR(50) NOT NULL,
-    engagement_model VARCHAR(255) NOT NULL,
-    expected_delivery_date DATE NOT NULL,
-    due_on DATE NOT NULL,
-    submission_deadline DATE NOT NULL,
-    customer_deadline_date DATE NOT NULL,
-    sla_deadline_date DATE NOT NULL,
-    internal_deadline_date DATE NOT NULL,
-    filing_Companies_required ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: No, 1: Yes',
-    filing_Companies_date DATE NOT NULL,
-    filing_hmrc_required ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: No, 1: Yes',
-    filing_hmrc_date DATE NOT NULL,
-    opening_balance_required ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: No, 1: Yes',
-    opening_balance_date DATE NOT NULL,
-    number_of_transaction DECIMAL(10, 2) NOT NULL,
-    number_of_balance_items INT NOT NULL,
-    turnover DECIMAL(15, 2) NOT NULL,
-    number_of_employees INT NOT NULL,
-    vat_reconciliation ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: No, 1: Yes',
-    bookkeeping ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: No, 1: Yes',
-    processing_type ENUM('1', '2') NOT NULL DEFAULT '1' COMMENT '1: Manual, 2: Software',
-    invoiced ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: No, 1: Yes',
-    currency INT NOT NULL,
-    invoice_value DECIMAL(15, 2) NOT NULL,
-    invoice_date DATE NOT NULL,
-    invoice_hours DECIMAL(10, 2) NOT NULL,
-    invoice_remark VARCHAR(255) NOT NULL,
+    budgeted_hours DECIMAL(10, 2) DEFAULT NULL,
+    reviewer INT DEFAULT 0, 
+    allocated_to INT DEFAULT 0,
+    allocated_on DATE DEFAULT CURRENT_TIMESTAMP,
+    date_received_on DATE DEFAULT CURRENT_TIMESTAMP,
+    year_end VARCHAR(7) DEFAULT NULL,
+    total_preparation_time TIME DEFAULT CURRENT_TIME,
+    review_time TIME DEFAULT CURRENT_TIME,
+    feedback_incorporation_time TIME DEFAULT CURRENT_TIME,
+    total_time TIME DEFAULT CURRENT_TIME,
+    engagement_model VARCHAR(255) DEFAULT NULL,
+    expected_delivery_date DATE DEFAULT CURRENT_TIMESTAMP,
+    due_on DATE DEFAULT CURRENT_TIMESTAMP,
+    submission_deadline DATE DEFAULT CURRENT_TIMESTAMP,
+    customer_deadline_date DATE DEFAULT CURRENT_TIMESTAMP,
+    sla_deadline_date DATE DEFAULT CURRENT_TIMESTAMP,
+    internal_deadline_date DATE DEFAULT CURRENT_TIMESTAMP,
+    filing_Companies_required ENUM('0', '1') DEFAULT NULL DEFAULT '1' COMMENT '0: No, 1: Yes',
+    filing_Companies_date DATE DEFAULT CURRENT_TIMESTAMP,
+    filing_hmrc_required ENUM('0', '1') DEFAULT NULL DEFAULT '1' COMMENT '0: No, 1: Yes',
+    filing_hmrc_date DATE DEFAULT CURRENT_TIMESTAMP,
+    opening_balance_required ENUM('0', '1') DEFAULT NULL DEFAULT '1' COMMENT '0: No, 1: Yes',
+    opening_balance_date DATE DEFAULT CURRENT_TIMESTAMP,
+    number_of_transaction DECIMAL(10, 2) DEFAULT NULL,
+    number_of_balance_items INT DEFAULT NULL,
+    turnover DECIMAL(15, 2) DEFAULT NULL,
+    number_of_employees INT DEFAULT NULL,
+    vat_reconciliation ENUM('0', '1') DEFAULT NULL DEFAULT '1' COMMENT '0: No, 1: Yes',
+    bookkeeping ENUM('0', '1') DEFAULT NULL DEFAULT '1' COMMENT '0: No, 1: Yes',
+    processing_type ENUM('1', '2') DEFAULT NULL DEFAULT '1' COMMENT '1: Manual, 2: Software',
+    invoiced ENUM('0', '1') DEFAULT NULL DEFAULT '1' COMMENT '0: No, 1: Yes',
+    currency INT DEFAULT 0,
+    invoice_value DECIMAL(15, 2) DEFAULT NULL,
+    invoice_date DATE DEFAULT CURRENT_TIMESTAMP,
+    invoice_hours DECIMAL(10, 2) DEFAULT NULL,
+    invoice_remark TEXT DEFAULT NULL
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (account_manager_id) REFERENCES staffs(id),
