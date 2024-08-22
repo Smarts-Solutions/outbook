@@ -26,7 +26,7 @@ const createCustomer = async (customer) => {
    if(customer_id == undefined || customer_id == null || customer_id == ""){
     let UniqueNo = await generateNextUniqueCode()
 
-   
+   console.log("customer",customer)
    
 
     if (customer.CustomerType == "1") {
@@ -58,6 +58,8 @@ const createCustomer = async (customer) => {
         `;
            let phone_code = customer.phone_code == undefined ? "": ""
        
+
+
             const [result2] = await pool.execute(query2, [customer_id, First_Name, Last_Name,phone_code ,Phone, Email, Residential_Address]);
             return { status: true, message: 'customer add successfully.', data: customer_id };
         } catch (err) {
@@ -968,7 +970,7 @@ const updateProcessCustomerFileDelete = async (customerProcessData) => {
 const getSingleCustomer = async (customer) => {
     let customerDetals = {}
     const { customer_id, pageStatus } = customer;
-    console.log("cpp" , customer)
+   
     const [ExistCustomer] = await pool.execute('SELECT customer_type FROM `customers` WHERE id =' + customer_id);
 
     const customer_type = ExistCustomer[0].customer_type;

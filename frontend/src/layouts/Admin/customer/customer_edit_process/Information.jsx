@@ -4,14 +4,13 @@ import { Formik, Field, Form } from "formik";
 import { Button } from "antd";
 import { Input } from "formik-antd";
 import MultiStepFormContext from "./MultiStepFormContext";
-import { GET_CUSTOMER_DATA, Edit_Customer } from '../../../../ReduxStore/Slice/Customer/CustomerSlice'
+import { GET_CUSTOMER_DATA, Edit_Customer , GetAllCompany } from '../../../../ReduxStore/Slice/Customer/CustomerSlice'
 import { Staff } from '../../../../ReduxStore/Slice/Staff/staffSlice';
 import { Email_regex } from '../../../../Utils/Common_regex'
 
 import Swal from 'sweetalert2'
 import { useNavigate } from "react-router-dom";
 import { PersonRole, Country } from '../../../../ReduxStore/Slice/Settings/settingSlice'
-import { GetAllCompany } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
 
 const Information = ({ id, pageStatus }) => {
     const dispatch = useDispatch();
@@ -640,7 +639,7 @@ const Information = ({ id, pageStatus }) => {
         if (id.customer_type == '1') {
             setSoleTraderDetails(prevState => ({
                 ...prevState,
-                // tradingName: !customerDetails.loading && customerDetails.data.customer.trading_name,
+                tradingName: !customerDetails.loading && customerDetails.data.customer.trading_name,
                 tradingAddress: !customerDetails.loading && customerDetails.data.customer.trading_address,
                 vatRegistered: !customerDetails.loading && customerDetails.data.customer.vat_registered,
                 vatNumber: !customerDetails.loading && customerDetails.data.customer.vat_number,
@@ -650,6 +649,7 @@ const Information = ({ id, pageStatus }) => {
                 phone: !customerDetails.loading && customerDetails.data.contact_details[0].phone,
                 email: !customerDetails.loading && customerDetails.data.contact_details[0].email,
                 residentialAddress: !customerDetails.loading && customerDetails.data.contact_details[0].residential_address
+                
             }))
 
         }
