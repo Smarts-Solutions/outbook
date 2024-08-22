@@ -973,7 +973,7 @@ const getSingleCustomer = async (customer) => {
     if (pageStatus === "1") {
         //Solo Traders Details
         if (customer_type == "1") {
-            const query = `
+        const query = `
         SELECT 
         customers.id AS customer_id,
         customers.customer_type AS customer_type,
@@ -991,6 +991,7 @@ const getSingleCustomer = async (customer) => {
         customer_contact_details.first_name AS first_name,
         customer_contact_details.last_name AS last_name,
         customer_contact_details.email AS email,
+        customer_contact_details.phone_code AS phone_code,
         customer_contact_details.phone AS phone,
         customer_contact_details.residential_address AS residential_address,
         customer_contact_person_role.name AS customer_role_contact_name,
@@ -1033,6 +1034,7 @@ const getSingleCustomer = async (customer) => {
                     first_name: row.first_name,
                     last_name: row.last_name,
                     email: row.email,
+                    phone_code: row.phone_code,
                     phone: row.phone,
                     residential_address: row.residential_address,
                     // Add other contact detail fields as needed
@@ -1073,6 +1075,7 @@ const getSingleCustomer = async (customer) => {
             customer_contact_details.first_name AS first_name,
             customer_contact_details.last_name AS last_name,
             customer_contact_details.email AS email,
+            customer_contact_details.phone_code AS phone_code,
             customer_contact_details.phone AS phone,
             customer_contact_details.residential_address AS residential_address,
             customer_company_information.*,
@@ -1126,6 +1129,7 @@ const getSingleCustomer = async (customer) => {
                     first_name: row.first_name,
                     last_name: row.last_name,
                     email: row.email,
+                    phone_code: row.phone_code,
                     phone: row.phone,
                     residential_address: row.residential_address,
                     // Add other contact detail fields as needed
@@ -1167,6 +1171,7 @@ const getSingleCustomer = async (customer) => {
             customer_contact_details.first_name AS first_name,
             customer_contact_details.last_name AS last_name,
             customer_contact_details.email AS email,
+            customer_contact_details.phone_code AS phone_code,
             customer_contact_details.phone AS phone,
             customer_contact_details.residential_address AS residential_address,
             customer_contact_details.authorised_signatory_status AS authorised_signatory_status,
@@ -1209,6 +1214,7 @@ const getSingleCustomer = async (customer) => {
                     first_name: row.first_name,
                     last_name: row.last_name,
                     email: row.email,
+                    phone_code: row.phone_code,
                     phone: row.phone,
                     residential_address: row.residential_address,
                     authorised_signatory_status: row.authorised_signatory_status
@@ -1541,17 +1547,18 @@ const customerUpdate = async (customer) => {
             let first_name = contactDetails[0].first_name;
             let last_name = contactDetails[0].last_name;
             let email = contactDetails[0].email;
+            let phone_code = contactDetails[0].phone_code;
             let phone = contactDetails[0].phone;
             let residential_address = contactDetails[0].residential_address;
 
             const query2 = `
         UPDATE customer_contact_details
-        SET first_name = ?, last_name = ?, phone = ?, email = ?, residential_address = ?
+        SET first_name = ?, last_name = ?, phone_code = ?, phone = ?, email = ?, residential_address = ?
         WHERE customer_id = ? AND id = ?
          `;
 
             try {
-                const [result2] = await pool.execute(query2, [first_name, last_name, phone, email, residential_address, customer_id, contact_id]);
+                const [result2] = await pool.execute(query2, [first_name, last_name, phone_code,phone, email, residential_address, customer_id, contact_id]);
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
             } catch (err) {
                 return { status: false, message: 'Update Error Customer Type 1' };
@@ -1587,7 +1594,7 @@ const customerUpdate = async (customer) => {
                 // Update customer_contact_details
                 const query3 = `
                     UPDATE customer_contact_details
-                    SET contact_person_role_id = ?, first_name = ?, last_name = ?, phone = ?, email = ? ,residential_address = ?
+                    SET contact_person_role_id = ?, first_name = ?, last_name = ?, phone_code = ?, phone = ?, email = ? ,residential_address = ?
                     WHERE customer_id = ? AND id = ?
                 `;
 
@@ -1598,21 +1605,22 @@ const customerUpdate = async (customer) => {
                     let first_name = detail.first_name;
                     let last_name = detail.last_name;
                     let email = detail.email;
+                    let phone_code = detail.phone_code;
                     let phone = detail.phone;
                     let residential_address = detail.residential_address;
                     if (contact_id == "" || contact_id == undefined || contact_id == null) {
                 
 
                         const query4 = `
-                        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone,email,residential_address)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email,residential_address)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                         `;
-                        const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone, email, residential_address]);
+                        const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name,phone_code, phone, email, residential_address]);
 
                     }
                     else {
                         arrayInterId.push(contact_id)
-                        const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone, email, residential_address, customer_id, contact_id]);
+                        const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone_code,phone, email, residential_address, customer_id, contact_id]);
                     }
                 }
 
@@ -1653,7 +1661,7 @@ const customerUpdate = async (customer) => {
 
                 const query3 = `
                 UPDATE customer_contact_details
-                SET contact_person_role_id = ?, first_name = ?, last_name = ?, phone = ?, email = ? ,residential_address = ? ,authorised_signatory_status = ?
+                SET contact_person_role_id = ?, first_name = ?, last_name = ?,phone_code = ? ,phone = ?, email = ? ,residential_address = ? ,authorised_signatory_status = ?
                 WHERE customer_id = ? AND id = ?
                `;
 
@@ -1666,19 +1674,20 @@ const customerUpdate = async (customer) => {
                     let first_name = detail.first_name;
                     let last_name = detail.last_name;
                     let email = detail.email;
+                    let phone_code = detail.phone_code;
                     let phone = detail.phone;
                     let residential_address = detail.residential_address;
                     let authorised_signatory_status = detail.authorised_signatory_status;
                     if (contact_id == "" || contact_id == undefined || contact_id == null) {
                         const query4 = `
-                        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone,email,residential_address,authorised_signatory_status)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email,residential_address,authorised_signatory_status)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                         `;
-                        const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone, email, residential_address, authorised_signatory_status]);
+                        const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name,phone_code, phone, email, residential_address, authorised_signatory_status]);
                     } else {
 
                         arrayInterId.push(contact_id)
-                        const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone, email, residential_address, authorised_signatory_status, customer_id, contact_id]);
+                        const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone_code,phone, email, residential_address, authorised_signatory_status, customer_id, contact_id]);
                     }
 
                 }

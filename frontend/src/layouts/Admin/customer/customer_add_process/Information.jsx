@@ -316,6 +316,7 @@ const Information = () => {
       if (getAccountMangerId == "") {
         return
       }
+      
 
       const req = {
         customer_id: Number(customer_id),
@@ -336,6 +337,8 @@ const Information = () => {
         phone_code:values.countryCode
        
       };
+
+      
      
       await AddCustomerFun(req);
     },
