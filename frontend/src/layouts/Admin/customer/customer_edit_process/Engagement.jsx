@@ -231,6 +231,10 @@ const Engagement = () => {
     };
 
 
+    
+ 
+
+
     const validate1 = () => {
         const newErrors = {};
         for (const key in formValues1) {
@@ -286,26 +290,58 @@ const Engagement = () => {
     };
 
 
+    // const validate4 = () => {
+    //     const newErrors = [];
+    
+    //     jobEntries.forEach((entry, index) => {
+    //         const entryErrors = {};
+    
+    //         if (!entry.minimum_number_of_jobs) {
+    //             entryErrors.minimum_number_of_jobs = 'Please Enter Minimum number of Jobs';
+    //         }  
+    
+    //         if (!entry.job_type_id) {
+    //             entryErrors.job_type_id = 'Please select a job type';
+    //         }
+    //         if (!entry.cost_per_job) {
+    //             entryErrors.cost_per_job = 'Please Enter Cost Per Job';
+    //         } 
+    //         if(Object.keys(entryErrors).length !== 0)
+    //             newErrors[index] = entryErrors;
+    //     });
+ 
+    //     setErrors4(newErrors);
+    //     return newErrors.length > 0 ? false : true;
+    // };
+
+
     const validate4 = () => {
         const newErrors = [];
-    
+
         jobEntries.forEach((entry, index) => {
             const entryErrors = {};
-    
+
             if (!entry.minimum_number_of_jobs) {
                 entryErrors.minimum_number_of_jobs = 'Please Enter Minimum number of Jobs';
-            }  
-    
+            } else if (entry.minimum_number_of_jobs < 1 || entry.minimum_number_of_jobs > 100) {
+                entryErrors.minimum_number_of_jobs = 'Minimum number of Jobs must be between 1 and 100';
+            }
+
             if (!entry.job_type_id) {
                 entryErrors.job_type_id = 'Please select a job type';
             }
+
             if (!entry.cost_per_job) {
                 entryErrors.cost_per_job = 'Please Enter Cost Per Job';
-            } 
-            if(Object.keys(entryErrors).length !== 0)
+            } else if (entry.cost_per_job < 20 || entry.cost_per_job > 500) {
+                entryErrors.cost_per_job = 'Cost Per Job must be between 20 and 500';
+            }
+
+
+            if (Object.keys(entryErrors).length !== 0)
                 newErrors[index] = entryErrors;
         });
- 
+
         setErrors4(newErrors);
         return newErrors.length > 0 ? false : true;
     };
@@ -644,7 +680,7 @@ const Engagement = () => {
                                                                         <input
                                                                             type="text"
                                                                             className="form-control"
-                                                                            placeholder={1}
+                                                                            placeholder={"Please Enter Minimum number of Jobs"}
                                                                             name="minimum_number_of_jobs"
                                                                             id={`minimumJobs_${index}`}
                                                                             value={job.minimum_number_of_jobs}
@@ -689,6 +725,7 @@ const Engagement = () => {
                                                                             type="text"
                                                                             className="form-control"
                                                                             name="cost_per_job"
+                                                                             placeholder={"Please Enter Cost Per Job"}
                                                                             id={`costPerJob_${index}`}
                                                                             value={job.cost_per_job}
                                                                             onChange={(e) => handleChange4(index, e)}

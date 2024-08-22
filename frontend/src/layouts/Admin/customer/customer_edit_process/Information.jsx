@@ -442,7 +442,7 @@ const Information = ({ id, pageStatus }) => {
                 // else if (key == 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
                 // else if (key == 'Website') newErrors[key] = 'Please Enter Website';
 
-                // else if (key == 'TradingName') newErrors[key] = 'Please Enter Trading Name';
+                else if (key == 'TradingName') newErrors[key] = 'Please Enter Trading Name';
                 // else if (key == 'TradingAddress') newErrors[key] = 'Please Enter Trading Address';
             }
         }
@@ -1130,6 +1130,9 @@ const Information = ({ id, pageStatus }) => {
                                                                         name="TradingName" onChange={(e) => handleChange2(e)} value={getCompanyDetails.TradingName}
                                                                         maxLength={100}
                                                                     />
+                                                                       {errors2['TradingName'] && (
+                                                                                <div className="error-text">{errors2['TradingName']}</div>
+                                                                            )}
 
                                                                 </div>
                                                             </div>

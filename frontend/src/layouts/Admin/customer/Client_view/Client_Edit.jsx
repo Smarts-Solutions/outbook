@@ -6,7 +6,8 @@ import { Email_regex } from '../../../../Utils/Common_regex'
 import { useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2'
 import { Link } from 'react-router-dom';
-import { PersonRole } from '../../../../ReduxStore/Slice/Settings/settingSlice'
+import { PersonRole , Country } from '../../../../ReduxStore/Slice/Settings/settingSlice'
+ 
 import Search from 'antd/es/transfer/search';
 const ClientEdit = () => {
     const dispatch = useDispatch();
@@ -19,6 +20,7 @@ const ClientEdit = () => {
     const [showDropdown, setShowDropdown] = useState(true)
     const [getSearchDetails, setSearchDetails] = useState('')
     const [personRoleDataAll, setPersonRoleDataAll] = useState({ loading: true, data: [] });
+    const [countryDataAll, setCountryDataAll] = useState({ loading: true, data: [] });
     const [searchItem, setSearchItem] = useState('')
     const [errors1, setErrors1] = useState({})
     const [errors2, setErrors2] = useState({})
@@ -63,7 +65,7 @@ const ClientEdit = () => {
         Website: '',
     })
 
-   
+
 
 
     //  For Partnership
@@ -73,7 +75,7 @@ const ClientEdit = () => {
         { first_name: '', last_name: '', customer_contact_person_role_id: '', phone: '', alternate_phone: '', email: '', alternate_email: '' },
         { first_name: '', last_name: '', customer_contact_person_role_id: '', phone: '', alternate_phone: '', email: '', alternate_email: '' }
     ]);
-    
+
     const handleAddContact1 = () => {
         setContacts1([...contacts1, { authorised_signatory_status: 0, contact_id: "", first_name: '', last_name: '', customer_contact_person_role_id: '', phone: '', alternate_phone: '', email: '', alternate_email: '' }])
         setContactsErrors([...contactsErrors, { first_name: '', last_name: '', customer_contact_person_role_id: '', phone: '', alternate_phone: '', email: '', alternate_email: '' }]);
@@ -101,7 +103,7 @@ const ClientEdit = () => {
         setErrors([...errors, { first_name: '', last_name: '', customer_contact_person_role_id: '', phone: '', email: '' }]);
     };
 
-    
+
     const handleDeleteContact = (index) => {
         const newContacts = contacts.filter((_, i) => i !== index);
         const newErrors = errors.filter((_, i) => i !== index);
@@ -185,9 +187,30 @@ const ClientEdit = () => {
                 console.log("Error", err)
             })
     }
+    const CountryData = async (req) => {
+        const data = { req: { action: "get" }, authToken: token };
+        await dispatch(Country(data))
+            .unwrap()
+            .then(async (response) => {
 
-   
+                if (response.status) {
+                    setCountryDataAll({ loading: false, data: response.data });
+
+
+                } else {
+                    setCountryDataAll({ loading: false, data: [] });
+                }
+
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    };
+
+
+
     useEffect(() => {
+        CountryData()
         CustomerPersonRoleData();
         GetClientDetails()
         getClientIndustry()
@@ -233,7 +256,7 @@ const ClientEdit = () => {
                         }, 1500)
 
                     } else {
-                        
+
                         Swal.fire({
                             icon: 'error',
                             title: response.message,
@@ -385,12 +408,12 @@ const ClientEdit = () => {
         const newErrors = {};
         for (const key in getSoleTraderDetails) {
             if (!getSoleTraderDetails[key]) {
-                if (key == 'IndustryType') newErrors[key] = 'Select Client Industry';
-                else if (key == 'tradingName') newErrors[key] = 'Please enter Trading Name';
+                // if (key == 'IndustryType') newErrors[key] = 'Select Client Industry';
+                if (key == 'tradingName') newErrors[key] = 'Please enter Trading Name';
                 else if (key == 'tradingAddress') newErrors[key] = 'Please enter Trading Address';
                 else if (key == 'vatRegistered') newErrors[key] = 'Please select VAT Registered';
-                else if (key == 'vatNumber') newErrors[key] = 'Please enter VAT Number';
-                else if (key == 'website') newErrors[key] = 'Please enter Website';
+                // else if (key == 'vatNumber') newErrors[key] = 'Please enter VAT Number';
+                // else if (key == 'website') newErrors[key] = 'Please enter Website';
                 else if (key == 'first_name') newErrors[key] = 'Please enter First Name';
                 else if (key == 'last_name') newErrors[key] = 'Please enter Last Name';
                 else if (key == 'phone') newErrors[key] = 'Please enter Phone';
@@ -672,7 +695,7 @@ const ClientEdit = () => {
     }, [searchItem])
 
 
-    const HandleCancel=()=>{
+    const HandleCancel = () => {
         navigate('/admin/Clientlist', { state: { id: location.state.id } });
     }
 
@@ -686,9 +709,9 @@ const ClientEdit = () => {
                         <div className="card">
                             <div className="card-header d-flex justify-content-between">
                                 <h4 className="card-title mb-0">Edit Client</h4>
-                                <button type="button" className="btn btn-info text-white blue-btn"  onClick={HandleCancel}>Back</button>
+                                <button type="button" className="btn btn-info text-white blue-btn" onClick={HandleCancel}>Back</button>
                             </div>
-                           
+
                             {/* end card header */}
                             <div className="card-body form-steps">
                                 <div>
@@ -740,7 +763,7 @@ const ClientEdit = () => {
                                                                     <div className="card card_shadow ">
                                                                         <div className="card-header align-items-center d-flex">
                                                                             <h4 className="card-title mb-0 flex-grow-1">
-                                                                            Sole Trader
+                                                                                Sole Trader
                                                                             </h4>
                                                                         </div>
                                                                         {/* end card header */}
@@ -748,7 +771,7 @@ const ClientEdit = () => {
                                                                             <div className="row">
                                                                                 <div className="col-lg-3">
                                                                                     <div className="mb-3">
-                                                                                        <label className="form-label">Client Industry<span style={{ color: "red" }}>*</span></label>
+                                                                                        <label className="form-label">Client Industry</label>
                                                                                         <select className="form-select mb-3" aria-label="Default select example"
                                                                                             name="IndustryType"
                                                                                             value={getSoleTraderDetails.IndustryType}
@@ -760,9 +783,7 @@ const ClientEdit = () => {
                                                                                                 })
                                                                                             }
                                                                                         </select>
-                                                                                        {errors1['IndustryType'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['IndustryType']}</div>
-                                                                                        )}
+
                                                                                     </div>
                                                                                 </div>
                                                                                 <div className="col-lg-3">
@@ -771,6 +792,7 @@ const ClientEdit = () => {
                                                                                         <input type="text" name="tradingName" className="form-control" placeholder="Trading Name"
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                             value={getSoleTraderDetails.tradingName}
+                                                                                            maxLength={100}
                                                                                         />
                                                                                         {errors1['tradingName'] && (
                                                                                             <div style={{ 'color': 'red' }}>{errors1['tradingName']}</div>
@@ -783,6 +805,7 @@ const ClientEdit = () => {
                                                                                         <input type="text" className="form-control" placeholder="Trading Address" name="tradingAddress"
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                             value={getSoleTraderDetails.tradingAddress}
+                                                                                            maxLength={200}
                                                                                         />
                                                                                         {errors1['tradingAddress'] && (
                                                                                             <div style={{ 'color': 'red' }}>{errors1['tradingAddress']}</div>
@@ -797,9 +820,7 @@ const ClientEdit = () => {
                                                                                             value={getSoleTraderDetails.vatRegistered}
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                         >
-
                                                                                             <option selected="">Please Select VAT Registered</option>
-
                                                                                             <option value={1}>Yes</option>
                                                                                             <option value={0}>No</option>
 
@@ -817,10 +838,9 @@ const ClientEdit = () => {
                                                                                             name="vatNumber"
                                                                                             value={getSoleTraderDetails.vatNumber}
                                                                                             onChange={(e) => handleChange1(e)}
+                                                                                            maxLength={9}
                                                                                         />
-                                                                                        {errors1['vatNumber'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['vatNumber']}</div>
-                                                                                        )}
+
                                                                                     </div>
                                                                                 </div>
                                                                                 <div className="col-lg-3">
@@ -831,10 +851,9 @@ const ClientEdit = () => {
                                                                                             name="website"
                                                                                             value={getSoleTraderDetails.website}
                                                                                             onChange={(e) => handleChange1(e)}
+                                                                                            maxLength={200}
                                                                                         />
-                                                                                        {errors1['website'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['website']}</div>
-                                                                                        )}
+
 
                                                                                     </div>
                                                                                 </div>
@@ -849,6 +868,7 @@ const ClientEdit = () => {
                                                                                             name="first_name"
                                                                                             value={getSoleTraderDetails.first_name}
                                                                                             onChange={(e) => handleChange1(e)}
+                                                                                            maxLength={50}
                                                                                         />
                                                                                         {errors1['first_name'] && (
                                                                                             <div style={{ 'color': 'red' }}>{errors1['first_name']}</div>
@@ -862,13 +882,44 @@ const ClientEdit = () => {
                                                                                             name="last_name"
                                                                                             value={getSoleTraderDetails.last_name}
                                                                                             onChange={(e) => handleChange1(e)}
+                                                                                            maxLength={50}
                                                                                         />
                                                                                         {errors1['last_name'] && (
                                                                                             <div style={{ 'color': 'red' }}>{errors1['last_name']}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+
+
+                                                                                <div class="col-lg-4">
+                                                                                    <div class="mb-3">
+                                                                                        <label for="firstNameinput" class="form-label">Phone</label>
+                                                                                        <div class="row">
+                                                                                            <div class="col-md-4">
+                                                                                                <select class="form-select" onChange={(e) => handleChange1(e)} name="phone_code"
+                                                                                                    value={getSoleTraderDetails.phone_code}
+                                                                                                >
+                                                                                                    {countryDataAll.data.map((data) => (
+                                                                                                        <option key={data.code} value={data.code}>
+                                                                                                            {data.code}
+                                                                                                        </option>
+                                                                                                    ))}
+                                                                                                </select>
+                                                                                            </div>
+                                                                                            <div className="mb-3 col-md-8">
+                                                                                                <input type="text" className="form-control"
+                                                                                                     placeholder="Phone Number"
+                                                                                                     name="phone"
+                                                                                                     value={getSoleTraderDetails.phone}
+                                                                                                     onChange={(e) => handleChange1(e)}
+                                                                                                    maxLength={12}
+                                                                                                    minLength={9}
+                                                                                                />
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                {/* <div className="col-lg-3">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label" >Phone<span style={{ color: "red" }}>*</span></label>
                                                                                         <input type="text" className="form-control"
@@ -881,7 +932,7 @@ const ClientEdit = () => {
                                                                                             <div style={{ 'color': 'red' }}>{errors1['phone']}</div>
                                                                                         )}
                                                                                     </div>
-                                                                                </div>
+                                                                                </div> */}
                                                                                 <div className="col-lg-3">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label" >Email<span style={{ color: "red" }}>*</span></label>
@@ -934,14 +985,14 @@ const ClientEdit = () => {
                                                                                                     <input type="text" className="form-control" placeholder="Outbooks Quality & Certainty"
                                                                                                         name="SearchCompany" onChange={(e) => setSearchItem(e.target.value)} value={searchItem}
                                                                                                         onClick={() => setShowDropdown(true)}
-                                                                                                        style={{ cursor: "pointer" }} 
+                                                                                                        style={{ cursor: "pointer" }}
                                                                                                     />
                                                                                                     {
                                                                                                         getAllSearchCompany.length > 0 && showDropdown ?
                                                                                                             <div className='dropdown-list'  >
                                                                                                                 {getAllSearchCompany && getAllSearchCompany.map((company, index) => (
-                                                                                                                    <div key={index} onClick={() => { setSearchItem(company.title); setShowDropdown(false) }} 
-                                                                                                                    style={{ cursor: "pointer", padding: "8px 0" }}
+                                                                                                                    <div key={index} onClick={() => { setSearchItem(company.title); setShowDropdown(false) }}
+                                                                                                                        style={{ cursor: "pointer", padding: "8px 0" }}
                                                                                                                     >
                                                                                                                         {company.title}
 
@@ -1269,9 +1320,9 @@ const ClientEdit = () => {
                                                                     <div className="row " >
                                                                         <div className="col-lg-12">
                                                                             <div className="card card_shadow ">
-                                                                            <div className="card-header align-items-center d-flex">
-                                                                                <h4 className="card-title mb-0 flex-grow-1">Partnership</h4>
-                                                                            </div>
+                                                                                <div className="card-header align-items-center d-flex">
+                                                                                    <h4 className="card-title mb-0 flex-grow-1">Partnership</h4>
+                                                                                </div>
                                                                                 {/* end card header */}
                                                                                 <div className="card-body">
                                                                                     <div className="row">
@@ -1539,7 +1590,7 @@ const ClientEdit = () => {
                                                 </section>
                                             </div>
                                             <div className="hstack gap-2 justify-content-end">
-                                                <button type="button" className="btn btn-light"  onClick={HandleCancel}>Cancel</button>
+                                                <button type="button" className="btn btn-light" onClick={HandleCancel}>Cancel</button>
                                                 <button className="btn btn-info text-white blue-btn" onClick={handleUpdate}>Update Client</button>
                                             </div>
                                         </div>
