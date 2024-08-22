@@ -118,9 +118,31 @@ const Paper = () => {
                     <div className="row">
                         <div className="col-lg-12">
                             <div className="card">
+                            <div className="card-header step-header-blue">
+                                    <h4 className="card-title mb-0">Upload Customer Specific Paperwork</h4>
+                                    </div>
                                 <div className="card-body">
-                                    <p className="text-muted">Upload Customer Specific Paperwork</p>
-                                    <div className="dropzone dz-clickable">
+                                <div className="input-group">
+                    
+                    <div className="custom-file w-100">
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        multiple
+                        onChange={(event) => {
+                          setFieldValue("files", event.currentTarget.files);
+                          handleFileChange(event);
+                        }}
+                        className="custom-file-input form-control"
+                        id="inputGroupFile04"
+                      />
+                      {/*     
+    <label className="custom-file-label" htmlFor="inputGroupFile04">
+      Choose file
+    </label> */}
+                    </div>
+                  </div>
+                                    {/* <div className="dropzone dz-clickable">
                                         <div className="dz-message needsclick">
                                             <div
                                                 className="mb-3"
@@ -162,7 +184,7 @@ const Paper = () => {
                                                 <p>Or Drag Files in here</p>
                                             </h6>
                                         </div>
-                                    </div>
+                                    </div> */}
                                     <ul className="list-unstyled mb-0" id="dropzone-preview"></ul>
                                     <div className="container-fluid page-title-box">
                                         <div className="row">
@@ -170,19 +192,19 @@ const Paper = () => {
                                                 <div className="card">
                                                     <div className="card-body">
                                                         <div id="customerList">
-                                                            <div className="row g-4 mb-3">
+                                                            <div className="row g-4 ">
                                                                 <div className="d-flex justify-content-end">
                                                                     <div className="pagination-wrap hstack gap-2">
                                                                         {/* Upload button moved to file input trigger */}
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="table-responsive table-card mt-3 mb-1">
+                                                            <div className="table-responsive table-card mb-1">
                                                                 <table
                                                                     className="table align-middle table-nowrap"
                                                                     id="customerTable"
                                                                 >
-                                                                    <thead className="table-light">
+                                                                    <thead className="table-light table-head-blue">
                                                                         <tr>
                                                                             <th scope="col" style={{ width: 50 }}>
                                                                                 <div className="form-check">
@@ -232,7 +254,7 @@ const Paper = () => {
                                                                                                 <div className="d-flex gap-2">
                                                                                                     <div className="remove">
                                                                                                         <button
-                                                                                                            className="btn btn-sm btn-danger remove-item-btn"
+                                                                                                            className="btn btn-sm fs-5 text-danger remove-item-btn"
                                                                                                             onClick={() => {
                                                                                                                 const newFiles = Array.from(files);
                                                                                                                 newFiles.splice(index, 1);
@@ -258,24 +280,26 @@ const Paper = () => {
                                                                     </tbody>
                                                                 </table>
                                                             </div>
-                                                            <div className="d-flex align-items-start gap-3 mt-4">
+                                                            
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </div>
+                                                <div className="d-flex align-items-start gap-3 mt-4 justify-content-between">
                                                                 <button
                                                                     type="button"
-                                                                    className="btn btn-success text-decoration-none previestab"
+                                                                    className="btn btn-secondary text-decoration-none previestab"
                                                                     onClick={prev}
                                                                 >
                                                                     Previous
                                                                 </button>
-                                                                <Button className="btn btn-light" type="button" style={{ marginLeft: "auto" }}>
+                                                                {/* <Button className="btn btn-light" type="button" style={{ marginLeft: "auto" }}>
                                                                     Cancel
-                                                                </Button>
-                                                                <Button className="btn btn-info text-white text-center blue-btn" type="submit" onClick={() => handleSubmit()}>
+                                                                </Button> */}
+                                                                <Button className="btn btn-info text-white text-center blue-btn float-end" type="submit" onClick={() => handleSubmit()}>
                                                                     Save
                                                                 </Button>
                                                             </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
