@@ -158,12 +158,12 @@ const Information = () => {
       else if (values.VAT_Registered === '1' && !values.VAT_Number) {
         errors.VAT_Number = "Please Enter VAT Number";
       }
-      //  else if (!values.VAT_Number) {
-      //     errors.VAT_Number = "Please Enter VAT Number";
-      //   }
-      //  else if (!values.Website) {
-      //     errors.Website = "Please Enter Website";
-      //   }
+      else if (values.VAT_Number && values.VAT_Number.length > 9) {
+        errors.VAT_Number = "VAT Number cannot exceed 9 Numbers";
+      }
+      else if (values.Website && values.Website.length > 200) {
+        errors.Website = "Website cannot exceed 200 characters";
+      }
       else if (!values.Trading_Name) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
