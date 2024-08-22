@@ -293,8 +293,6 @@ const CreateJob = () => {
                 <div className="row mt-4">
                     <div className="col-xl-12">
                         <div className="card">
-                            <div className="card-header">
-                                <h4 className="card-title mb-0">Create New Job</h4>
                             <div className="card-header step-header-blue">
                                 <h4 className="card-title mb-0 mt-0">Create New Job</h4>
                             </div>
@@ -423,7 +421,6 @@ const CreateJob = () => {
                                                                         </select>
 
                                                                         {errors['JobType'] && (
-                                                                            <div style={{ color: 'red' }}>{errors['JobType']}</div>
                                                                             <div className="error-text">{errors['JobType']}</div>
                                                                         )}
                                                                     </div>
