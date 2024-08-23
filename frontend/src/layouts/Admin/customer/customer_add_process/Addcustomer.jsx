@@ -72,7 +72,7 @@ const AddCustomer = () => {
 
     return (
 
-        <>
+        <div className="container-fluid">
           <div className='content-title'>
                 <div className='tab-title'>
                             <h3 className='mt-0'>Create New Customer</h3>
@@ -99,7 +99,7 @@ const AddCustomer = () => {
                 </div>
             </div>
         </div>
-        </>
+        </div>
     );
 };
 

@@ -995,17 +995,6 @@ const Information = ({ id, pageStatus }) => {
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <div className="col-lg-6">
-                                                                <div className="mb-3">
-                                                                    <label className="form-label">Registered Office Address<span style={{ color: "red" }}>*</span>  </label>
-                                                                    <input type="text" className="form-control input_bg" placeholder="Suite Winsor & Netwon Building, White Fridrs Avenue, England,HA3 5RN"
-                                                                        name="RegisteredOfficeAddress" onChange={(e) => handleChange2(e)} value={getCompanyDetails.RegisteredOfficeAddress} disabled
-                                                                    />
-                                                                    {errors2['RegisteredOfficeAddress'] && (
-                                                                        <div className="error-text">{errors2['RegisteredOfficeAddress']}</div>
-                                                                    )}
-                                                                </div>
-                                                            </div>
                                                             <div className="col-lg-4">
                                                                 <div className="mb-3">
                                                                     <label className="form-label">Incorporation Date</label>
@@ -1017,7 +1006,7 @@ const Information = ({ id, pageStatus }) => {
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <div className="col-lg-4">
+                                                            <div className="col-lg-6">
                                                                 <div className="mb-3">
                                                                     <label className="form-label"  > Incorporation in  <span style={{ color: "red" }}>*</span> </label>
                                                                     <input type="text" className="form-control input_bg" placeholder="Please Enter Incorporation In"
@@ -1029,6 +1018,19 @@ const Information = ({ id, pageStatus }) => {
                                                                     )}
                                                                 </div>
                                                             </div>
+                                                            <div className="col-lg-6">
+                                                                <div className="mb-3">
+                                                                    <label className="form-label">Registered Office Address<span style={{ color: "red" }}>*</span>  </label>
+                                                                    <input type="text" className="form-control input_bg" placeholder="Suite Winsor & Netwon Building, White Fridrs Avenue, England,HA3 5RN"
+                                                                        name="RegisteredOfficeAddress" onChange={(e) => handleChange2(e)} value={getCompanyDetails.RegisteredOfficeAddress} disabled
+                                                                    />
+                                                                    {errors2['RegisteredOfficeAddress'] && (
+                                                                        <div className="error-text">{errors2['RegisteredOfficeAddress']}</div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                          
+                                                            
                                                             <div className="col-lg-4">
                                                                 <div className="mb-3">
                                                                     <label className="form-label"  >VAT Registered</label>
@@ -1474,10 +1476,10 @@ const Information = ({ id, pageStatus }) => {
                     </section>
                     <div className="form__item button__items d-flex justify-content-between">
                         <Button className="btn btn-secondary" type="default" onClick={prev}>
-                            Previous
+                        <i className="pe-2 fa-regular fa-arrow-left-long"></i>Previous
                         </Button>
                         <Button className="btn btn-info text-white blue-btn" type="submit" onClick={handleSubmit}>
-                            Next
+                        Next<i className="ps-2 fa-regular fa-arrow-right-long"></i>
                         </Button>
                     </div>
                   
