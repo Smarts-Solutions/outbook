@@ -4,7 +4,7 @@ import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
 import { JobType } from '../../../../ReduxStore/Slice/Settings/settingSlice'
 import { useDispatch } from 'react-redux';
-import { ADD_SERVICES_CUSTOMERS } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { Edit_Customer } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import { useLocation } from "react-router-dom";
 import { GET_CUSTOMER_DATA } from '../../../../ReduxStore/Slice/Customer/CustomerSlice'
 const checkboxOptions = [
@@ -421,7 +421,7 @@ const Engagement = () => {
 
 
         const data = { req: req, authToken: token }
-        await dispatch(ADD_SERVICES_CUSTOMERS(data))
+        await dispatch(Edit_Customer(data))
             .unwrap()
             .then(async (response) => {
                 if (response.status) {

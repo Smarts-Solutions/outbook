@@ -232,18 +232,23 @@ const Information = ({ id, pageStatus }) => {
             if (!getSoleTraderDetails[key]) {
                 if (key == 'IndustryType') newErrors[key] = 'Select Client Industry';
                 else if (key == 'tradingName') newErrors[key] = 'Please enter Trading Name';
-                // else if (key == 'tradingAddress') newErrors[key] = 'Please enter Trading Address';
+
                 else if (key == 'vatRegistered') newErrors[key] = 'Please select VAT Registered';
                 // else if (key == 'vatNumber') newErrors[key] = 'Please enter VAT Number';
                 // else if (key == 'website') newErrors[key] = 'Please enter Website';
                 else if (key == 'first_name') newErrors[key] = 'Please enter First Name';
                 else if (key == 'last_name') newErrors[key] = 'Please enter Last Name';
                 // else if (key == 'phone') newErrors[key] = 'Please enter Phone';
+
+
                 else if (key == 'email') newErrors[key] = 'Please enter Email';
                 else if (key == 'residentialAddress') newErrors[key] = 'Please enter Residential Address';
             }
             else if (key == 'email' && !Email_regex(getSoleTraderDetails[key])) {
                 newErrors[key] = 'Please enter valid Email';
+            }
+            else if (key == 'phone' && !/^\d{9,12}$/.test(getSoleTraderDetails[key])) {
+                newErrors[key] = 'Phone Number must be between 9 to 12 digits';
             }
         }
         setErrors1(newErrors)
@@ -477,6 +482,9 @@ const Information = ({ id, pageStatus }) => {
                     newErrors[index].email = '';
                 }
                 break;
+            case 'phone':
+                errors[index].phone = value === '' ? '' : /^\d{9,12}$/.test(value) ? '' : 'Phone Number must be between 9 to 12 digits';
+                break;
 
             default:
                 break;
@@ -555,15 +563,8 @@ const Information = ({ id, pageStatus }) => {
                     delete errors[index][field];
                 }
                 break;
-
             case 'phone':
-                if (!value.trim()) {
-                    errors[index] = { ...errors[index], [field]: 'This field is required' };
-                } else if (!/^\d+$/.test(value)) {
-                    errors[index] = { ...errors[index], [field]: 'Invalid phone number' };
-                } else {
-                    delete errors[index][field];
-                }
+                errors[index].phone = value === '' ? '' : /^\d{9,12}$/.test(value) ? '' : 'Phone Number must be between 9 to 12 digits';
                 break;
 
             default:
@@ -684,9 +685,6 @@ const Information = ({ id, pageStatus }) => {
 
 
 
-    console.log("errors2", errors2)
-
-    console.log("errors", errors)
     return (
         <>
 
@@ -918,8 +916,10 @@ const Information = ({ id, pageStatus }) => {
                                                                             value={getSoleTraderDetails.phone}
                                                                             onChange={(e) => handleChange1(e)}
                                                                             maxLength={12}
-                                                                            minLength={9}
                                                                         />
+                                                                        {errors1['phone'] && (
+                                                                            <div className="error-text">{errors1['phone']}</div>
+                                                                        )}
 
                                                                     </div>
                                                                 </div>
@@ -1266,6 +1266,9 @@ const Information = ({ id, pageStatus }) => {
                                                                                                         maxLength={12}
                                                                                                         minLength={9}
                                                                                                     />
+                                                                                                    {errors[index] && errors[index].phone && (
+                                                                                                        <div style={{ color: 'red' }}>{errors[index].phone}</div>
+                                                                                                    )}
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
@@ -1511,12 +1514,12 @@ const Information = ({ id, pageStatus }) => {
                                                                                                         minLength={9}
                                                                                                     />
                                                                                                     {contactsErrors[index]?.phone && (
-                                                                                                <div style={{ color: 'red' }}>{contactsErrors[index].phone}</div>
-                                                                                            )}
+                                                                                                        <div style={{ color: 'red' }}>{contactsErrors[index].phone}</div>
+                                                                                                    )}
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
-                                                                                    </div> 
+                                                                                    </div>
                                                                                     <div className="col-lg-4">
                                                                                         <div className="mb-3">
                                                                                             <label className="form-label">Email<span style={{ color: "red" }}>*</span></label>
