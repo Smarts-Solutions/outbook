@@ -563,7 +563,7 @@ const ClientEdit = () => {
             case 'email':
             case 'alternate_email':
                 if (!value.trim()) {
-                    errors[index] = { ...errors[index], [field]: 'This field is required' };
+                    errors[index] = { ...errors[index], [field]: '' };
                 } else if (!/\S+@\S+\.\S+/.test(value)) {
                     errors[index] = { ...errors[index], [field]: 'Invalid email address' };
                 } else {
@@ -580,7 +580,7 @@ const ClientEdit = () => {
                 break;
             case 'customer_contact_person_role_id':
                 if (!value) {
-                    errors[index] = { ...errors[index], [field]: 'This field is required' };
+                    errors[index] = { ...errors[index], [field]: '' };
                 } else {
                     delete errors[index][field];
                 }
@@ -1523,7 +1523,7 @@ const ClientEdit = () => {
                                                                                                                     <div class="row">
                                                                                                                         <div class="col-md-4">
                                                                                                                             <select class="form-select"
-                                                                                                                                  onChange={(e) => handleChange4(index, 'phone', e.target.value)}
+                                                                                                                                  onChange={(e) => handleChange4(index, 'phone_code', e.target.value)}
                                                                                                                                 name="phone_code"
                                                                                                                                 value={contact.phone_code}
                                                                                                                             >
@@ -1544,8 +1544,8 @@ const ClientEdit = () => {
                                                                                                                                 onChange={(e) => handleChange4(index, 'phone', e.target.value)}
                                                                                                                                 maxLength={12}  
                                                                                                                             />
-                                                                                                                            {errors[index] && errors[index].phone && (
-                                                                                                                                <div style={{ color: 'red' }}>{errors[index].phone}</div>
+                                                                                                                            {contactsErrors[index] && contactsErrors[index].phone && (
+                                                                                                                                <div style={{ color: 'red' }}>{contactsErrors[index].phone}</div>
                                                                                                                             )}
                                                                                                                         </div>
                                                                                                                     </div>
@@ -1582,8 +1582,8 @@ const ClientEdit = () => {
                                                                                                                                 onChange={(e) => handleChange4(index, 'alternate_phone', e.target.value)}
                                                                                                                                 maxLength={12}  
                                                                                                                             />
-                                                                                                                            {errors[index] && errors[index].phone && (
-                                                                                                                                <div style={{ color: 'red' }}>{errors[index].phone}</div>
+                                                                                                                            {contactsErrors[index] && contactsErrors[index].alternate_phone && (
+                                                                                                                                <div style={{ color: 'red' }}>{contactsErrors[index].alternate_phone}</div>
                                                                                                                             )}
                                                                                                                         </div>
                                                                                                                     </div>
