@@ -58,8 +58,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 
     if (client_type == "1") {
         const { first_name, last_name, phone, email, residential_address } = client;
-        let phone_code = client.phone_code ==undefined ? "":client.phone_code
-        let role = client.role ==undefined ? 0:client.role
+        let phone_code = client.phone_code ==undefined || client.phone_code == '' ? "":client.phone_code
+        let role = client.role == undefined || client.role =='' ? 0:client.role
 
         try {
             const query2 = `
@@ -98,10 +98,10 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 
             for (const detail of contactDetails) {
 
-                let role = detail.role == undefined ? 0: 0;
+                let role = detail.role == undefined || detail.role == ''? 0: detail.role;
                 let first_name = detail.first_name;
                 let last_name = detail.last_name;
-                let phone_code = detail.phone_code==undefined ? "":detail.phone_code
+                let phone_code = detail.phone_code==undefined || detail.phone_code == ''? "":detail.phone_code
                 let phone = detail.phone
                 let email = detail.email;
                 const [result2] = await pool.execute(query2, [client_id, role, first_name, last_name, phone_code,phone, email]);
@@ -118,22 +118,23 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         const { contactDetails } = client;
         try {
             const query2 = `
-        INSERT INTO client_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone_code,phone,alternate_phone,authorised_signatory_status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO client_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone_code,phone,alternate_phone_code,alternate_phone,authorised_signatory_status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
             for (const detail of contactDetails) {
 
-                let role = detail.role  == undefined ? 0: 0;
+                let role = detail.role == undefined || detail.role == ''? 0: detail.role;
                 let first_name = detail.first_name;
                 let last_name = detail.last_name;
                 let email = detail.email;
                 let alternate_email = detail.alternate_email;
-                let phone_code = detail.phone_code == undefined ? "" :detail.phone_code
+                let phone_code = detail.phone_code==undefined || detail.phone_code == ''? "":detail.phone_code
+                let alternate_phone_code = detail.alternate_phone_code==undefined || detail.alternate_phone_code == ''? "":detail.alternate_phone_code
                 let phone = detail.phone
                 let alternate_phone = detail.alternate_phone;
                 let authorised_signatory_status = detail.authorised_signatory_status;
-                const [result2] = await pool.execute(query2, [client_id, role, first_name, last_name, email, alternate_email, phone_code,phone, alternate_phone, authorised_signatory_status]);
+                const [result2] = await pool.execute(query2, [client_id, role, first_name, last_name, email, alternate_email, phone_code,phone, alternate_phone_code,alternate_phone, authorised_signatory_status]);
 
             }
 
@@ -386,6 +387,7 @@ WHERE
     client_contact_details.alternate_email AS alternate_email,
     client_contact_details.phone_code AS phone_code,
     client_contact_details.phone AS phone,
+    client_contact_details.alternate_phone_code AS alternate_phone_code,
     client_contact_details.alternate_phone AS alternate_phone,
     client_contact_details.authorised_signatory_status AS authorised_signatory_status,
     customer_contact_person_role.name AS customer_role_contact_name,
@@ -431,6 +433,7 @@ WHERE
                 alternate_email: row.alternate_email,
                 phone_code: row.phone_code,
                 phone: row.phone,
+                alternate_phone_code: row.alternate_phone_code,
                 alternate_phone: row.alternate_phone,
                 authorised_signatory_status: row.authorised_signatory_status == "1" ? true : false
                 // Add other contact detail fields as needed
@@ -532,7 +535,7 @@ const clientUpdate = async (client) => {
     if (client_type == "1") {
 
         const { first_name, last_name ,phone, email, residential_address } = client;
-        let phone_code = client.phone_code == undefined ? "" : ""
+        let phone_code = client.phone_code == undefined || client.phone_code == '' ? "" : client.phone_code
         try {
             const query2 = `
                 UPDATE client_contact_details 
@@ -578,7 +581,8 @@ const clientUpdate = async (client) => {
                 for (const detail of contactDetails) {
 
                     let { customer_contact_person_role_id, first_name, last_name, phone, email, contact_id } = detail; // Assuming each contactDetail has an id
-                     let phone_code = detail.phone_code == undefined ? "" : detail.phone_code
+                     let phone_code = detail.phone_code == undefined || detail.phone_code == ''? "" : detail.phone_code
+
                     if (contact_id == "" || contact_id == undefined || contact_id == null) {
                         const [result2] = await pool.execute('INSERT INTO client_contact_details (client_id,role,first_name,last_name,phone,phone_code,email) VALUES (?, ?, ?, ?, ?, ?, ?)', [client_id, customer_contact_person_role_id, first_name, last_name,phone_code, phone, email]);
                     } else {
@@ -620,7 +624,7 @@ const clientUpdate = async (client) => {
 
             const query2 = `
     UPDATE client_contact_details
-    SET role = ?, first_name = ?, last_name = ?, email = ?, alternate_email = ?, phone_code = ?,phone = ?, alternate_phone = ?, authorised_signatory_status = ?
+    SET role = ?, first_name = ?, last_name = ?, email = ?, alternate_email = ?, phone_code = ?,phone = ?, alternate_phone_code = ? ,alternate_phone = ?, authorised_signatory_status = ?
     WHERE client_id = ? AND id = ?
     `;
 
@@ -630,13 +634,14 @@ const clientUpdate = async (client) => {
                 let last_name = detail.last_name;
                 let email = detail.email;
                 let alternate_email = detail.alternate_email;
-                let phone_code = detail.phone_code == undefined ? "" : detail.phone_code
+                let phone_code = detail.phone_code == undefined || detail.phone_code == '' ? "" : detail.phone_code;
                 let phone = detail.phone;
+                let alternate_phone_code = detail.alternate_phone_code == undefined || detail.alternate_phone_code == '' ? "" : detail.alternate_phone_code;
                 let alternate_phone = detail.alternate_phone;
                 let authorised_signatory_status = detail.authorised_signatory_status;
                 let contact_id = detail.contact_id; // Assuming each contactDetail has an id
                 if (contact_id == "" || contact_id == undefined || contact_id == null) {
-                    const [result2] = await pool.execute('INSERT INTO client_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone_code,phone,alternate_phone,authorised_signatory_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [client_id, customer_contact_person_role_id, first_name, last_name, email, alternate_email, phone_code ,phone, alternate_phone, authorised_signatory_status]);
+                    const [result2] = await pool.execute('INSERT INTO client_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone_code,phone,alternate_phone_code,alternate_phone,authorised_signatory_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [client_id, customer_contact_person_role_id, first_name, last_name, email, alternate_email, phone_code ,phone, alternate_phone_code,alternate_phone, authorised_signatory_status]);
 
                 } else {
                     arrayInterId.push(contact_id)
