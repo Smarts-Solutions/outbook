@@ -38,9 +38,8 @@ const createClient = async (client) => {
     if (check.length > 0) {
         return { status: false, message: 'Client Trading Name Already Exists.' };
     }
-
    
-    let client_industry_id = client.client_industry_id == undefined ? 0 :client.client_industry_id
+    let client_industry_id = client.client_industry_id == undefined || client.client_industry_id == ''? 0 :client.client_industry_id
 
 
     const query = `
