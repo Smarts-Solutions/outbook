@@ -42,17 +42,6 @@ const createClient = async (client) => {
    
     let client_industry_id = client.client_industry_id == undefined ? 0 :client.client_industry_id
 
-  console.log("client_type",client_type)
-  console.log("customer_id",customer_id)
-    console.log("client_industry_id",client_industry_id)
-    console.log("trading_name",trading_name)
-    console.log("client_code",client_code)
-    console.log("trading_address",trading_address)
-    console.log("vat_registered",vat_registered)
-    console.log("vat_number",vat_number)
-    console.log("website",website)
-
-
 
     const query = `
 INSERT INTO clients (client_type,customer_id,client_industry_id,trading_name,client_code,trading_address,vat_registered,vat_number,website)
