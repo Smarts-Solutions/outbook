@@ -196,9 +196,7 @@ const CreateJob = () => {
         return isValid;
     };
 
-    let totalTime = Number(jobData.TotalPreparationTime) + Number(jobData.ReviewTime) +Number(jobData.FeedbackIncorporationTime)
-    totalTime = totalTime.toString();
-    console.log("totalTime ",totalTime)
+
 
     const handleSubmit = async () => {
         const req = {
@@ -297,7 +295,10 @@ const CreateJob = () => {
             navigate('/admin/client/profile', { state: location.state });
         }
     }
- 
+
+
+    let totalTime = Number(jobData.TotalPreparationTime) + Number(jobData.ReviewTime) + Number(jobData.FeedbackIncorporationTime)
+    totalTime = totalTime.toString();
 
     return (
         <div>
@@ -445,9 +446,9 @@ const CreateJob = () => {
                                                                             <input type="time"
                                                                                 name="BudgetedHours"
                                                                                 className="form-control"
-                                                                               
+
                                                                                 onChange={HandleChange}
-                                                                                
+
                                                                                 defaultValue={jobData.BudgetedHours.substring(0, 2) + ":" + jobData.BudgetedHours.substring(2)}
                                                                             />
 
@@ -512,8 +513,14 @@ const CreateJob = () => {
                                                                     <div className="col-lg-4">
                                                                         <div className="mb-3">
                                                                             <label className="form-label"  > Year End </label>
-                                                                            <input type="text" className="form-control" placeholder="Year End"
-                                                                                name="YearEnd" onChange={HandleChange} value={jobData.YearEnd} />
+                                                                            <input
+                                                                                type="month"
+                                                                                className="form-control"
+                                                                                placeholder="MM/YYYY"  
+                                                                                name="YearEnd"
+                                                                                onChange={HandleChange}
+                                                                                value={jobData.YearEnd}
+                                                                            />
                                                                             {errors['YearEnd'] && (
                                                                                 <div className="error-text">{errors['YearEnd']}</div>
                                                                             )}
@@ -528,7 +535,7 @@ const CreateJob = () => {
                                                                             <input type="time"
                                                                                 name="TotalPreparationTime"
                                                                                 className="form-control"
-                                                                                
+
                                                                                 onChange={HandleChange}
                                                                                 defaultValue={jobData.TotalPreparationTime.substring(0, 2) + ":" + jobData.TotalPreparationTime.substring(2)}
                                                                             />
@@ -546,7 +553,7 @@ const CreateJob = () => {
                                                                             <input type="time"
                                                                                 name="ReviewTime"
                                                                                 className="form-control"
-                                                                                
+
                                                                                 onChange={HandleChange}
                                                                                 defaultValue={jobData.ReviewTime.substring(0, 2) + ":" + jobData.ReviewTime.substring(2)}
                                                                             />
@@ -563,7 +570,7 @@ const CreateJob = () => {
                                                                             <input type="time"
                                                                                 name="FeedbackIncorporationTime"
                                                                                 className="form-control"
-                                                                                
+
                                                                                 onChange={HandleChange}
                                                                                 defaultValue={jobData.FeedbackIncorporationTime.substring(0, 2) + ":" + jobData.FeedbackIncorporationTime.substring(2)}
                                                                             />
@@ -578,10 +585,11 @@ const CreateJob = () => {
                                                                         <div className="mb-3">
                                                                             <label className="form-label" > Total Time</label>
 
-                                                                            <input type="time"
+                                                                            <input type="text"
                                                                                 name="TotalTime"
                                                                                 className="form-control"
-                                                                                defaultValue={totalTime.substring(0, 2) + ":" + totalTime.substring(2) }
+                                                                                value={totalTime.substring(0, 2) + ":" + totalTime.substring(2)}
+
                                                                                 //onChange={HandleChange}
                                                                                 disabled
                                                                             />
