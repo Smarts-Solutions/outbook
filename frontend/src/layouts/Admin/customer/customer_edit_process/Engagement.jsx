@@ -541,9 +541,50 @@ const Engagement = () => {
                                         </div>
                                     )}
 
-
-
                                     {checkboxStates && checkboxStates[1] === 1 && (
+                                        <div id="myDiv3" className="row">
+                                            <div style={{ marginBottom: "26px !important" }} className="col-xl-12 col-lg-12">
+                                                <div className="card pricing-box ">
+                                                <div className="col-lg-12">
+                                                        <div className="card-header step-card-header card-header-light-blue">
+                                                        <p className=" card-title fs-6 mb-0">Percentage Model</p>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="row card-body">
+                                                        {[
+                                                            { label: 'Accountants', name: 'adhoc_accountants', feeName: 'Fee Per Hour' },
+                                                            { label: 'Bookkeepers', name: 'adhoc_bookkeepers', feeName: 'Fee Per Hour' },
+                                                            { label: 'Payroll Experts', name: 'adhoc_payroll_experts', feeName: 'Fee Per Hour' },
+                                                            { label: 'Tax Experts', name: 'adhoc_tax_experts', feeName: 'Fee Per Hour' },
+                                                            { label: 'Admin/Other Staff', name: 'adhoc_admin_staff', feeName: 'Fee Per Hour' },
+                                                        ].map((field, index) => (
+                                                            <div className="col-lg-4" key={index}>
+                                                                <div className="mb-3">
+                                                                    <label className="form-label">{field.label}</label><br />
+                                                                    <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label>
+                                                                    <input
+                                                                        type="text"
+                                                                        className="form-control"
+                                                                        name={field.name}
+                                                                        value={formValues3[field.name]}
+                                                                        onChange={handleChange3}
+                                                                    />
+                                                                    {errors3[field.name] && (
+                                                                        <div className="error-text">{errors3[field.name]}</div>
+                                                                    )}
+
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {checkboxStates && checkboxStates[2] === 1 && (
                                         <div id="myDiv2" className="row">
                                             <div style={{ marginBottom: "26px !important" }} className="col-xl-12 col-lg-12">
                                                 <div className="card pricing-box ">
@@ -576,51 +617,6 @@ const Engagement = () => {
                                                                     />
                                                                     {errors2[field.name] && (
                                                                         <div className="error-text">{errors2[field.name]}</div>
-                                                                    )}
-
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-
-
-
-                                    {checkboxStates && checkboxStates[2] === 1 && (
-                                        <div id="myDiv3" className="row">
-                                            <div style={{ marginBottom: "26px !important" }} className="col-xl-12 col-lg-12">
-                                                <div className="card pricing-box ">
-                                                <div className="col-lg-12">
-                                                        <div className="card-header step-card-header card-header-light-blue">
-                                                        <p className=" card-title fs-6 mb-0">Percentage Model</p>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div className="row card-body">
-                                                        {[
-                                                            { label: 'Accountants', name: 'adhoc_accountants', feeName: 'Fee Per Hour' },
-                                                            { label: 'Bookkeepers', name: 'adhoc_bookkeepers', feeName: 'Fee Per Hour' },
-                                                            { label: 'Payroll Experts', name: 'adhoc_payroll_experts', feeName: 'Fee Per Hour' },
-                                                            { label: 'Tax Experts', name: 'adhoc_tax_experts', feeName: 'Fee Per Hour' },
-                                                            { label: 'Admin/Other Staff', name: 'adhoc_admin_staff', feeName: 'Fee Per Hour' },
-                                                        ].map((field, index) => (
-                                                            <div className="col-lg-4" key={index}>
-                                                                <div className="mb-3">
-                                                                    <label className="form-label">{field.label}</label><br />
-                                                                    <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label>
-                                                                    <input
-                                                                        type="text"
-                                                                        className="form-control"
-                                                                        name={field.name}
-                                                                        value={formValues3[field.name]}
-                                                                        onChange={handleChange3}
-                                                                    />
-                                                                    {errors3[field.name] && (
-                                                                        <div className="error-text">{errors3[field.name]}</div>
                                                                     )}
 
                                                                 </div>
