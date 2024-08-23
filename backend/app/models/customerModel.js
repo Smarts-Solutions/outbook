@@ -1512,7 +1512,8 @@ const getSingleCustomer = async (customer) => {
 }
 
 const customerUpdate = async (customer) => {
-
+   
+    console.log("")
     const { customer_id, pageStatus } = customer;
     const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
     var account_manager_id = ExistCustomer[0].account_manager_id;
@@ -2061,6 +2062,9 @@ const customerUpdate = async (customer) => {
         }
 
         if (customised_pricing === "1") {
+
+            console.log("customised_pricing ",customised_pricing)
+            return
 
             const { customer_id, customised_pricing, customised_pricing_data } = customer;
 
