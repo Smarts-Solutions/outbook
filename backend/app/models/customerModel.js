@@ -1513,7 +1513,7 @@ const getSingleCustomer = async (customer) => {
 
 const customerUpdate = async (customer) => {
    
-    console.log("")
+   
     const { customer_id, pageStatus } = customer;
     const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
     var account_manager_id = ExistCustomer[0].account_manager_id;
@@ -1838,8 +1838,7 @@ const customerUpdate = async (customer) => {
     else if (pageStatus === "3") {
 
         const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing } = customer;
-      
-
+    
         const checkQuery = `SELECT id FROM customer_engagement_model WHERE customer_id = ? `;
         const [existCustomer] = await pool.execute(checkQuery, [customer_id]);
         let customer_engagement_model_id;
@@ -2062,10 +2061,6 @@ const customerUpdate = async (customer) => {
         }
 
         if (customised_pricing === "1") {
-
-            console.log("customised_pricing ",customised_pricing)
-            return
-
             const { customer_id, customised_pricing, customised_pricing_data } = customer;
 
             const [existPricingData] = await pool.execute('SELECT id FROM customer_engagement_customised_pricing WHERE customer_engagement_model_id = ?', [customer_engagement_model_id]);
@@ -2204,11 +2199,6 @@ const customerUpdate = async (customer) => {
     //     const { customer_id, customer_paper_work } = customer;
 
     //     const [ExistPaperWorkIds] = await pool.execute('SELECT id  FROM `customer_paper_work` WHERE customer_id =' + customer_id);
-
-      
-
-
-
         
     // }
     else {
