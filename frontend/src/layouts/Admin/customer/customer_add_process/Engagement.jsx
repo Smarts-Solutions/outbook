@@ -85,7 +85,7 @@ const Engagement = () => {
   };
 
 
-  
+
   const handleChange2 = (e) => {
     const { name, value } = e.target;
     if (value === '' || (/^[0-9]*$/.test(value) && value <= 100)) {
@@ -222,9 +222,10 @@ const Engagement = () => {
         entryErrors.cost_per_job = 'Cost Per Job must be between 20 and 500';
       }
 
-
-      if (Object.keys(entryErrors).length !== 0)
+      if (Object.keys(entryErrors).length !== 0) {
         newErrors[index] = entryErrors;
+      }
+
     });
 
     setErrors4(newErrors);
