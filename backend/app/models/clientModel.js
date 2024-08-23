@@ -533,7 +533,7 @@ const clientUpdate = async (client) => {
     if (client_type == "1") {
 
         const { first_name, last_name ,phone, email, residential_address } = client;
-        let phone_code = client.phone_code == undefined ? "" : ""
+        let phone_code = client.phone_code == undefined ? "" : client.phone_code
         try {
             const query2 = `
                 UPDATE client_contact_details 
