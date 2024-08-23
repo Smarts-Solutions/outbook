@@ -248,8 +248,8 @@ const Information = () => {
       Phone: "",
       Email: "",
       Residential_Address: "",
-      countryCode:"+44",
-      
+      countryCode: "+44",
+
     },
     validate: (values) => {
       let errors = {};
@@ -320,7 +320,7 @@ const Information = () => {
       if (getAccountMangerId == "") {
         return
       }
-      
+
 
       const req = {
         customer_id: Number(customer_id),
@@ -338,12 +338,12 @@ const Information = () => {
         CustomerType: CustomerType,
         account_manager_id: getAccountMangerId,
         staff_id: staffDetails.id,
-        phone_code:values.countryCode
-       
+        phone_code: values.countryCode
+
       };
 
-      
-     
+
+
       await AddCustomerFun(req);
     },
   });
@@ -392,7 +392,7 @@ const Information = () => {
                 : "Valid Email is required",
         };
 
-        if ( error.firstName || error.lastName || error.role ||  error.phoneNumber ||  error.email ) {
+        if (error.firstName || error.lastName || error.role || error.phoneNumber || error.email) {
           formIsValid = false;
         }
         return error;
@@ -897,7 +897,7 @@ const Information = () => {
           setAccountMangerId(customerDetailsExist && customerDetailsExist.customer.account_manager_id)
 
           if (customerDetailsExist && customerDetailsExist.customer.customer_type == '1') {
-            console.log("customerDetailsExist" )
+            console.log("customerDetailsExist")
             formik1.setFieldValue("Trading_Name", customerDetailsExist.customer.trading_name);
             formik1.setFieldValue("Trading_Address", customerDetailsExist.customer.trading_address);
             formik1.setFieldValue("VAT_Registered", customerDetailsExist.customer.vat_registered);
@@ -964,7 +964,7 @@ const Information = () => {
     }
   }, []);
 
- 
+
 
   return (
     <Formik
@@ -1120,19 +1120,7 @@ const Information = () => {
                                             )}
                                             <div className="col-lg-4 ps-1">
                                               <div className="mb-3">
-                                                {/* <label
-                                                    htmlFor={`firstName-${index}`}
-                                                    className="form-label"
-                                                  >
-                                                    First Name
-                                                    <span
-                                                      style={{
-                                                        color: "red",
-                                                      }}
-                                                    >
-                                                      *
-                                                    </span>
-                                                  </label> */}
+
                                                 <input
                                                   type="text"
                                                   className="form-control"
@@ -1156,19 +1144,7 @@ const Information = () => {
                                             </div>
                                             <div className="col-lg-4">
                                               <div className="mb-3">
-                                                {/* <label
-                                                    htmlFor={`lastName-${index}`}
-                                                    className="form-label"
-                                                  >
-                                                    Last Name
-                                                    <span
-                                                      style={{
-                                                        color: "red",
-                                                      }}
-                                                    >
-                                                      *
-                                                    </span>
-                                                  </label> */}
+
                                                 <input
                                                   type="text"
                                                   className="form-control"
@@ -1192,19 +1168,7 @@ const Information = () => {
                                             </div>
                                             <div className="col-lg-4">
                                               <div className="mb-3">
-                                                {/* <label
-                                                    htmlFor={`role-${index}`}
-                                                    className="form-label"
-                                                  >
-                                                    Role
-                                                    <span
-                                                      style={{
-                                                        color: "red",
-                                                      }}
-                                                    >
-                                                      *
-                                                    </span>
-                                                  </label> */}
+
                                                 <select
                                                   className="form-select"
                                                   id={`role-${index}`}
@@ -1239,50 +1203,44 @@ const Information = () => {
                                                 )}
                                               </div>
                                             </div>
-                                            <div className="col-lg-4 ps-1">
-                                              <div className="mb-3">
-                                                {/* <label
-                                                    htmlFor={`phone-${index}`}
-                                                    className="form-label"
-                                                  >
-                                                    Phone
-                                                  </label> */}
-                                                <input
-                                                  type="number"
-                                                  className="form-control"
-                                                  placeholder="Phone Number"
-                                                  id={`phoneNumber-${index}`}
-                                                  value={contact.phoneNumber}
-                                                  onChange={(e) =>
-                                                    handleChange(
-                                                      index,
-                                                      "phoneNumber",
-                                                      e.target.value
-                                                    )
-                                                  }
-                                                />
-                                                {errors[index].phoneNumber && (
-                                                  <div
-                                                    className="error-text">{errors[index].phoneNumber}
+
+
+                                            <div class="col-lg-4">
+                                              <div class="mb-3">
+
+                                                <div class="row">
+                                                  <div class="col-md-4">
+                                                    <select class="form-select"
+                                                      onChange={(e) => handleChange(index, 'phone_code', e.target.value)}
+                                                      name="phone_code"
+                                                      value={contact.phone_code}
+                                                    >
+                                                      {countryDataAll.data.map((data) => (
+                                                        <option key={data.code} value={data.code}>
+                                                          {data.code}
+                                                        </option>
+                                                      ))}
+                                                    </select>
                                                   </div>
-                                                )}
+                                                  <div className="mb-3 col-md-8">
+                                                    <input type="text" className="form-control"
+                                                      placeholder="Phone Number"
+                                                      name="phone"
+                                                      id={`phone-${index}`}
+                                                      value={contact.phoneNumber}
+                                                      onChange={(e) => handleChange(index, "phoneNumber", e.target.value)}
+                                                      maxLength={12}
+                                                      minLength={9}
+                                                    />
+                                                    {errors[index].phoneNumber && (
+                                                      <div className="error-text">{errors[index].phoneNumber}</div>
+                                                    )}
+                                                  </div>
+                                                </div>
                                               </div>
                                             </div>
                                             <div className="col-lg-4 ">
                                               <div className="mb-3">
-                                                {/* <label
-                                                    htmlFor={`email-${index}`}
-                                                    className="form-label"
-                                                  >
-                                                    Email
-                                                    <span
-                                                      style={{
-                                                        color: "red",
-                                                      }}
-                                                    >
-                                                      *
-                                                    </span>
-                                                  </label> */}
                                                 <input
                                                   type="text"
                                                   className="form-control"
@@ -1390,9 +1348,9 @@ const Information = () => {
                                                           }
                                                           disabled={
                                                             contacts.length ===
-                                                            2
+                                                              2
                                                               ? index === 0 ||
-                                                                index === 1
+                                                              index === 1
                                                               : false
                                                           }
                                                         />
@@ -1459,12 +1417,12 @@ const Information = () => {
                                                       />
                                                       {errors[index]
                                                         .firstName && (
-                                                        <div
-                                                          className="error-text">{errors[index]
+                                                          <div
+                                                            className="error-text">{errors[index]
                                                               .firstName
-                                                          }
-                                                        </div>
-                                                      )}
+                                                            }
+                                                          </div>
+                                                        )}
                                                     </div>
                                                   </div>
                                                   <div className="col-lg-4">
@@ -1498,12 +1456,12 @@ const Information = () => {
                                                       />
                                                       {errors[index]
                                                         .lastName && (
-                                                        <div
-                                                          className="error-text">{errors[index]
+                                                          <div
+                                                            className="error-text">{errors[index]
                                                               .lastName
-                                                          }
-                                                        </div>
-                                                      )}
+                                                            }
+                                                          </div>
+                                                        )}
                                                     </div>
                                                   </div>
                                                   <div className="col-lg-4">
@@ -1557,40 +1515,42 @@ const Information = () => {
                                                       )}
                                                     </div>
                                                   </div>
-                                                  <div className="col-lg-4">
-                                                    <div className="mb-3">
-                                                      <label
-                                                        htmlFor={`phone-${index}`}
-                                                        className="form-label"
-                                                      >
-                                                        Phone
-                                                      </label>
-                                                      <input
-                                                        type="number"
-                                                        className="form-control"
-                                                        placeholder="Phone Number"
-                                                        id={`phoneNumber-${index}`}
-                                                        value={
-                                                          contact.phoneNumber
-                                                        }
-                                                        onChange={(e) =>
-                                                          handleChange(
-                                                            index,
-                                                            "phoneNumber",
-                                                            e.target.value
-                                                          )
-                                                        }
-                                                      />
-                                                      {errors[index]
-                                                        .phoneNumber && (
-                                                        <div
-                                                          className="error-text">{errors[index]
-                                                              .phoneNumber
-                                                          }
+
+                                                  <div class="col-lg-4">
+                                                    <div class="mb-3">
+                                                      <label for="firstNameinput" class="form-label">Phone</label>
+                                                      <div class="row">
+                                                        <div class="col-md-4">
+                                                          <select class="form-select"
+                                                            onChange={(e) => handleChange(index, 'phone_code', e.target.value)}
+                                                            name="phone_code"
+                                                            value={contact.phone_code}
+                                                          >
+                                                            {countryDataAll.data.map((data) => (
+                                                              <option key={data.code} value={data.code}>
+                                                                {data.code}
+                                                              </option>
+                                                            ))}
+                                                          </select>
                                                         </div>
-                                                      )}
+                                                        <div className="mb-3 col-md-8">
+                                                          <input type="text" className="form-control"
+                                                            placeholder="Phone Number"
+                                                            name="phone"
+                                                            id={`phone-${index}`}
+                                                            value={contact.phoneNumber}
+                                                            onChange={(e) => handleChange(index, "phoneNumber", e.target.value)}
+                                                            maxLength={12}
+                                                            minLength={9}
+                                                          />
+                                                          {errors[index].phoneNumber && (
+                                                            <div className="error-text">{errors[index].phoneNumber}</div>
+                                                          )}
+                                                        </div>
+                                                      </div>
                                                     </div>
                                                   </div>
+
                                                   <div className="col-lg-4">
                                                     <div className="mb-3">
                                                       <label
@@ -1806,8 +1766,7 @@ const Information = () => {
                         <input
                           type="text"
                           className="form-control "
-                          placeholder="VAT
-                                                                                 Number"
+                          placeholder="VAT Number"
                           id="firstNameinput"
                         />
                       </div>

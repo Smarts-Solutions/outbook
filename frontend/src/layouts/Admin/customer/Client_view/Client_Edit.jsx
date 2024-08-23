@@ -6,7 +6,8 @@ import { Email_regex } from '../../../../Utils/Common_regex'
 import { useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2'
 import { Link } from 'react-router-dom';
-import { PersonRole } from '../../../../ReduxStore/Slice/Settings/settingSlice'
+import { PersonRole, Country } from '../../../../ReduxStore/Slice/Settings/settingSlice'
+
 import Search from 'antd/es/transfer/search';
 const ClientEdit = () => {
     const dispatch = useDispatch();
@@ -19,6 +20,7 @@ const ClientEdit = () => {
     const [showDropdown, setShowDropdown] = useState(true)
     const [getSearchDetails, setSearchDetails] = useState('')
     const [personRoleDataAll, setPersonRoleDataAll] = useState({ loading: true, data: [] });
+    const [countryDataAll, setCountryDataAll] = useState({ loading: true, data: [] });
     const [searchItem, setSearchItem] = useState('')
     const [errors1, setErrors1] = useState({})
     const [errors2, setErrors2] = useState({})
@@ -36,7 +38,8 @@ const ClientEdit = () => {
         last_name: "",
         phone: "",
         email: "",
-        residentialAddress: ""
+        residentialAddress: "",
+        phone_code: ""
     })
     const [getCompanyDetails, setCompanyDetails] = useState({
         SearchCompany: '',
@@ -63,7 +66,7 @@ const ClientEdit = () => {
         Website: '',
     })
 
-   
+
 
 
     //  For Partnership
@@ -73,9 +76,9 @@ const ClientEdit = () => {
         { first_name: '', last_name: '', customer_contact_person_role_id: '', phone: '', alternate_phone: '', email: '', alternate_email: '' },
         { first_name: '', last_name: '', customer_contact_person_role_id: '', phone: '', alternate_phone: '', email: '', alternate_email: '' }
     ]);
-    
+
     const handleAddContact1 = () => {
-        setContacts1([...contacts1, { authorised_signatory_status: 0, contact_id: "", first_name: '', last_name: '', customer_contact_person_role_id: '', phone: '', alternate_phone: '', email: '', alternate_email: '' }])
+        setContacts1([...contacts1, { authorised_signatory_status: 0, contact_id: "", first_name: '', last_name: '', customer_contact_person_role_id: '', phone: '', phone_code: "+44", alternate_phone: '', alternate_phone_code: "+44", email: '', alternate_email: '' }])
         setContactsErrors([...contactsErrors, { first_name: '', last_name: '', customer_contact_person_role_id: '', phone: '', alternate_phone: '', email: '', alternate_email: '' }]);
     };
 
@@ -90,18 +93,18 @@ const ClientEdit = () => {
 
     // for Company
     const [contacts, setContacts] = useState([
-        { authorised_signatory_status: 0, contact_id: "", first_name: '', last_name: '', customer_contact_person_role_id: '', phone: '', email: '' }
+        { authorised_signatory_status: 0, contact_id: "", first_name: '', last_name: '', customer_contact_person_role_id: '', phone: '', phone_code: '', email: '' }
     ]);
 
     const [errors, setErrors] = useState([{ first_name: false, last_name: false, customer_contact_person_role_id: false, phoneCode: false, phone: false, email: false }
     ]);
 
     const handleAddContact = () => {
-        setContacts([...contacts, { authorised_signatory_status: 0, contact_id: "", first_name: '', last_name: '', customer_contact_person_role_id: '', phone: '', email: '' }]);
+        setContacts([...contacts, { authorised_signatory_status: 0, contact_id: "", first_name: '', last_name: '', customer_contact_person_role_id: '', phone: '', phone_code: '+44', email: '' }]);
         setErrors([...errors, { first_name: '', last_name: '', customer_contact_person_role_id: '', phone: '', email: '' }]);
     };
 
-    
+
     const handleDeleteContact = (index) => {
         const newContacts = contacts.filter((_, i) => i !== index);
         const newErrors = errors.filter((_, i) => i !== index);
@@ -186,8 +189,30 @@ const ClientEdit = () => {
             })
     }
 
-   
+    const CountryData = async (req) => {
+        const data = { req: { action: "get" }, authToken: token };
+        await dispatch(Country(data))
+            .unwrap()
+            .then(async (response) => {
+
+                if (response.status) {
+                    setCountryDataAll({ loading: false, data: response.data });
+
+
+                } else {
+                    setCountryDataAll({ loading: false, data: [] });
+                }
+
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    };
+
+
+
     useEffect(() => {
+        CountryData()
         CustomerPersonRoleData();
         GetClientDetails()
         getClientIndustry()
@@ -216,7 +241,8 @@ const ClientEdit = () => {
                 phone: getSoleTraderDetails.phone,
                 email: getSoleTraderDetails.email,
                 residential_address: getSoleTraderDetails.residentialAddress,
-                client_code: location.state.row.id
+                client_code: location.state.row.id,
+                phone_code: getSoleTraderDetails.phone_code
             }
             await dispatch(Edit_Client(req))
                 .unwrap()
@@ -233,7 +259,7 @@ const ClientEdit = () => {
                         }, 1500)
 
                     } else {
-                        
+
                         Swal.fire({
                             icon: 'error',
                             title: response.message,
@@ -249,10 +275,9 @@ const ClientEdit = () => {
             const newErrors = contacts.map((contact, index) => {
                 const error = {
                     first_name: contact.first_name ? '' : 'First Name is required',
-                    last_name: contact.last_name ? '' : 'Last Name is required',
-                    customer_contact_person_role_id: contact.customer_contact_person_role_id ? '' : 'Role is required',
-                    phone: contact.phone ? '' : 'Phone Number is required',
-                    email: contact.email === '' ? 'Email Id is required' : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email) ? '' : 'Valid Email is required',
+                    last_name: contact.last_name ? '' : 'Last Name is required',  
+                    phone: contact.phone === '' ? '' : /^\d{9,12}$/.test(contact.phone) ? '' : 'Phone Number must be between 9 to 12 digits',
+                    email: contact.email === '' ? '' : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email) ? '' : 'Valid Email is required',
                 };
 
                 if (error.first_name || error.last_name || error.customer_contact_person_role_id || error.phone || error.email) {
@@ -312,12 +337,11 @@ const ClientEdit = () => {
             const newErrors = contacts1.map((contact, index) => {
                 const error = {
                     first_name: contact.first_name ? '' : 'First Name is required',
-                    last_name: contact.last_name ? '' : 'Last Name is required',
-                    customer_contact_person_role_id: contact.customer_contact_person_role_id ? '' : 'Role is required',
-                    phone: contact.phone ? '' : 'Phone Number is required',
-                    alternate_phone: contact.alternate_phone ? '' : 'Alternate Phone Number is required',
-                    email: contact.email === '' ? 'Email Id is required' : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email) ? '' : 'Valid Email is required',
-                    alternate_email: contact.alternate_email === '' ? 'Alternate Email Id is required' : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.alternate_email) ? '' : 'Valid Email is required',
+                    last_name: contact.last_name ? '' : 'Last Name is required', 
+                    phone: contact.phone === '' ? '' : /^\d{9,12}$/.test(contact.phone) ? '' : 'Phone Number must be between 9 to 12 digits',
+                    alternate_phone: contact.alternate_phone === '' ? '' : /^\d{9,12}$/.test(contact.alternate_phone) ? '' : 'Alternate Phone Number must be between 9 to 12 digits',
+                    email: contact.email === '' ? '' : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email) ? '' : 'Valid Email is required',
+                    alternate_email: contact.alternate_email === '' ? '' : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.alternate_email) ? '' : 'Valid Email is required',
                 };
 
                 if (error.first_name || error.last_name || error.customer_contact_person_role_id || error.phone || error.email) {
@@ -384,22 +408,21 @@ const ClientEdit = () => {
     const validate1 = () => {
         const newErrors = {};
         for (const key in getSoleTraderDetails) {
-            if (!getSoleTraderDetails[key]) {
-                if (key == 'IndustryType') newErrors[key] = 'Select Client Industry';
-                else if (key == 'tradingName') newErrors[key] = 'Please enter Trading Name';
+            if (!getSoleTraderDetails[key]) { 
+                if (key == 'tradingName') newErrors[key] = 'Please enter Trading Name';
                 else if (key == 'tradingAddress') newErrors[key] = 'Please enter Trading Address';
-                else if (key == 'vatRegistered') newErrors[key] = 'Please select VAT Registered';
-                else if (key == 'vatNumber') newErrors[key] = 'Please enter VAT Number';
-                else if (key == 'website') newErrors[key] = 'Please enter Website';
+                else if (key == 'vatRegistered') newErrors[key] = 'Please select VAT Registered'; 
                 else if (key == 'first_name') newErrors[key] = 'Please enter First Name';
                 else if (key == 'last_name') newErrors[key] = 'Please enter Last Name';
-                else if (key == 'phone') newErrors[key] = 'Please enter Phone';
-                else if (key == 'email') newErrors[key] = 'Please enter Email';
-                else if (key == 'residentialAddress') newErrors[key] = 'Please enter Residential Address';
+                 
             }
             else if (key == 'email' && !Email_regex(getSoleTraderDetails[key])) {
                 newErrors[key] = 'Please enter valid Email';
             }
+            else if (key == 'phone' && !/^\d{9,12}$/.test(getSoleTraderDetails[key])) {
+                newErrors[key] = 'Phone Number must be between 9 to 12 digits';
+            }
+
         }
         setErrors1(newErrors)
         return Object.keys(newErrors).length === 0 ? true : false;
@@ -429,10 +452,7 @@ const ClientEdit = () => {
                 else if (key == 'RegisteredOfficeAddress') newErrors[key] = 'Please Enter Registered Office Address';
                 else if (key == 'IncorporationDate') newErrors[key] = 'Please Enter Incorporation Date';
                 else if (key == 'IncorporationIn') newErrors[key] = 'Please Enter Incorporation In';
-                else if (key == 'VATRegistered') newErrors[key] = 'Please Enter VAT Registered';
-                else if (key == 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
-                else if (key == 'Website') newErrors[key] = 'Please Enter Website';
-                else if (key == 'ClientIndustry') newErrors[key] = 'Please Enter Client Industry';
+                else if (key == 'VATRegistered') newErrors[key] = 'Please Enter VAT Registered'; 
                 else if (key == 'TradingName') newErrors[key] = 'Please Enter Trading Name';
                 else if (key == 'TradingAddress') newErrors[key] = 'Please Enter Trading Address';
             }
@@ -465,13 +485,10 @@ const ClientEdit = () => {
                 break;
             case 'last_name':
                 newErrors[index].last_name = value ? '' : 'Last Name is required';
-                break;
-            case 'customer_contact_person_role_id':
-                newErrors[index].customer_contact_person_role_id = value ? '' : 'Role is required';
-                break;
+                break; 
             case 'email':
                 if (!value) {
-                    newErrors[index].email = 'Email Id is required';
+                    newErrors[index].email = '';
                 } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
                     newErrors[index].email = 'Valid Email is required';
                 } else {
@@ -479,7 +496,8 @@ const ClientEdit = () => {
                 }
                 break;
             case 'phone':
-                newErrors[index].phone = value ? '' : 'Phone Number is required';
+                newErrors[index].phone = value === '' ? '' : /^\d{9,12}$/.test(value) ? '' : 'Phone Number must be between 9 to 12 digits';
+
                 break;
             default:
                 break;
@@ -502,15 +520,11 @@ const ClientEdit = () => {
     const validate3 = () => {
         const newErrors = {};
         for (const key in getPartnershipDetails) {
-            if (!getPartnershipDetails[key]) {
-
-
-                if (key === 'ClientIndustry') newErrors[key] = 'Please Select Client Industry';
-                else if (key === 'TradingName') newErrors[key] = 'Please Enter Trading Name';
+            if (!getPartnershipDetails[key]) { 
+                //  if (key === 'ClientIndustry') newErrors[key] = 'Please Select Client Industry';
+                 if (key === 'TradingName') newErrors[key] = 'Please Enter Trading Name';
                 else if (key === 'TradingAddress') newErrors[key] = 'Please Enter Trading Address';
-                else if (key === 'VATRegistered') newErrors[key] = 'Please Enter VAT Registered';
-                else if (key === 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
-                else if (key === 'Website') newErrors[key] = 'Please Enter Website';
+                else if (key === 'VATRegistered') newErrors[key] = 'Please Enter VAT Registered';  
             }
         }
 
@@ -549,7 +563,7 @@ const ClientEdit = () => {
             case 'email':
             case 'alternate_email':
                 if (!value.trim()) {
-                    errors[index] = { ...errors[index], [field]: 'This field is required' };
+                    errors[index] = { ...errors[index], [field]: '' };
                 } else if (!/\S+@\S+\.\S+/.test(value)) {
                     errors[index] = { ...errors[index], [field]: 'Invalid email address' };
                 } else {
@@ -557,18 +571,16 @@ const ClientEdit = () => {
                 }
                 break;
             case 'phone':
+                errors[index].phone = value === '' ? '' : /^\d{9,12}$/.test(value) ? '' : 'Phone Number must be between 9 to 12 digits';
+                break;
+
             case 'alternate_phone':
-                if (!value.trim()) {
-                    errors[index] = { ...errors[index], [field]: 'This field is required' };
-                } else if (!/^\d+$/.test(value)) {
-                    errors[index] = { ...errors[index], [field]: 'Invalid phone number' };
-                } else {
-                    delete errors[index][field];
-                }
+                errors[index].alternate_phone = value === '' ? '' : /^\d{9,12}$/.test(value) ? '' : 'Phone Number must be between 9 to 12 digits';
+
                 break;
             case 'customer_contact_person_role_id':
                 if (!value) {
-                    errors[index] = { ...errors[index], [field]: 'This field is required' };
+                    errors[index] = { ...errors[index], [field]: '' };
                 } else {
                     delete errors[index][field];
                 }
@@ -579,6 +591,7 @@ const ClientEdit = () => {
 
         setContactsErrors(errors);
     };
+
 
 
 
@@ -599,7 +612,8 @@ const ClientEdit = () => {
                 last_name: !getClientDetails.loading && getClientDetails.data.contact_details[0].last_name,
                 phone: !getClientDetails.loading && getClientDetails.data.contact_details[0].phone,
                 email: !getClientDetails.loading && getClientDetails.data.contact_details[0].email,
-                residentialAddress: !getClientDetails.loading && getClientDetails.data.contact_details[0].residential_address
+                residentialAddress: !getClientDetails.loading && getClientDetails.data.contact_details[0].residential_address,
+                phone_code: !getClientDetails.loading && getClientDetails.data.contact_details[0].phone_code
             }))
         }
         if (location.state.row.client_type_name == 'Company') {
@@ -672,7 +686,7 @@ const ClientEdit = () => {
     }, [searchItem])
 
 
-    const HandleCancel=()=>{
+    const HandleCancel = () => {
         navigate('/admin/Clientlist', { state: { id: location.state.id } });
     }
 
@@ -686,9 +700,9 @@ const ClientEdit = () => {
                         <div className="card">
                             <div className="card-header d-flex justify-content-between">
                                 <h4 className="card-title mb-0">Edit Client</h4>
-                                <button type="button" className="btn btn-info text-white blue-btn"  onClick={HandleCancel}>Back</button>
+                                <button type="button" className="btn btn-info text-white blue-btn" onClick={HandleCancel}>Back</button>
                             </div>
-                           
+
                             {/* end card header */}
                             <div className="card-body form-steps">
                                 <div>
@@ -740,7 +754,7 @@ const ClientEdit = () => {
                                                                     <div className="card card_shadow ">
                                                                         <div className="card-header align-items-center d-flex">
                                                                             <h4 className="card-title mb-0 flex-grow-1">
-                                                                            Sole Trader
+                                                                                Sole Trader
                                                                             </h4>
                                                                         </div>
                                                                         {/* end card header */}
@@ -748,7 +762,7 @@ const ClientEdit = () => {
                                                                             <div className="row">
                                                                                 <div className="col-lg-3">
                                                                                     <div className="mb-3">
-                                                                                        <label className="form-label">Client Industry<span style={{ color: "red" }}>*</span></label>
+                                                                                        <label className="form-label">Client Industry</label>
                                                                                         <select className="form-select mb-3" aria-label="Default select example"
                                                                                             name="IndustryType"
                                                                                             value={getSoleTraderDetails.IndustryType}
@@ -760,9 +774,7 @@ const ClientEdit = () => {
                                                                                                 })
                                                                                             }
                                                                                         </select>
-                                                                                        {errors1['IndustryType'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['IndustryType']}</div>
-                                                                                        )}
+
                                                                                     </div>
                                                                                 </div>
                                                                                 <div className="col-lg-3">
@@ -771,6 +783,7 @@ const ClientEdit = () => {
                                                                                         <input type="text" name="tradingName" className="form-control" placeholder="Trading Name"
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                             value={getSoleTraderDetails.tradingName}
+                                                                                            maxLength={100}
                                                                                         />
                                                                                         {errors1['tradingName'] && (
                                                                                             <div style={{ 'color': 'red' }}>{errors1['tradingName']}</div>
@@ -783,6 +796,7 @@ const ClientEdit = () => {
                                                                                         <input type="text" className="form-control" placeholder="Trading Address" name="tradingAddress"
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                             value={getSoleTraderDetails.tradingAddress}
+                                                                                            maxLength={200}
                                                                                         />
                                                                                         {errors1['tradingAddress'] && (
                                                                                             <div style={{ 'color': 'red' }}>{errors1['tradingAddress']}</div>
@@ -797,9 +811,7 @@ const ClientEdit = () => {
                                                                                             value={getSoleTraderDetails.vatRegistered}
                                                                                             onChange={(e) => handleChange1(e)}
                                                                                         >
-
                                                                                             <option selected="">Please Select VAT Registered</option>
-
                                                                                             <option value={1}>Yes</option>
                                                                                             <option value={0}>No</option>
 
@@ -817,10 +829,9 @@ const ClientEdit = () => {
                                                                                             name="vatNumber"
                                                                                             value={getSoleTraderDetails.vatNumber}
                                                                                             onChange={(e) => handleChange1(e)}
+                                                                                            maxLength={9}
                                                                                         />
-                                                                                        {errors1['vatNumber'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['vatNumber']}</div>
-                                                                                        )}
+
                                                                                     </div>
                                                                                 </div>
                                                                                 <div className="col-lg-3">
@@ -831,10 +842,9 @@ const ClientEdit = () => {
                                                                                             name="website"
                                                                                             value={getSoleTraderDetails.website}
                                                                                             onChange={(e) => handleChange1(e)}
+                                                                                            maxLength={200}
                                                                                         />
-                                                                                        {errors1['website'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['website']}</div>
-                                                                                        )}
+
 
                                                                                     </div>
                                                                                 </div>
@@ -849,6 +859,7 @@ const ClientEdit = () => {
                                                                                             name="first_name"
                                                                                             value={getSoleTraderDetails.first_name}
                                                                                             onChange={(e) => handleChange1(e)}
+                                                                                            maxLength={50}
                                                                                         />
                                                                                         {errors1['first_name'] && (
                                                                                             <div style={{ 'color': 'red' }}>{errors1['first_name']}</div>
@@ -862,26 +873,47 @@ const ClientEdit = () => {
                                                                                             name="last_name"
                                                                                             value={getSoleTraderDetails.last_name}
                                                                                             onChange={(e) => handleChange1(e)}
+                                                                                            maxLength={50}
                                                                                         />
                                                                                         {errors1['last_name'] && (
                                                                                             <div style={{ 'color': 'red' }}>{errors1['last_name']}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
-                                                                                    <div className="mb-3">
-                                                                                        <label className="form-label" >Phone<span style={{ color: "red" }}>*</span></label>
-                                                                                        <input type="text" className="form-control"
-                                                                                            placeholder="Phone Number"
-                                                                                            name="phone"
-                                                                                            value={getSoleTraderDetails.phone}
-                                                                                            onChange={(e) => handleChange1(e)}
-                                                                                        />
-                                                                                        {errors1['phone'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['phone']}</div>
-                                                                                        )}
+
+
+                                                                                <div class="col-lg-4">
+                                                                                    <div class="mb-3">
+                                                                                        <label for="firstNameinput" class="form-label">Phone</label>
+                                                                                        <div class="row">
+                                                                                            <div class="col-md-4">
+                                                                                                <select class="form-select" onChange={(e) => handleChange1(e)} name="phone_code"
+                                                                                                    value={getSoleTraderDetails.phone_code}
+                                                                                                >
+                                                                                                    {countryDataAll.data.map((data) => (
+                                                                                                        <option key={data.code} value={data.code}>
+                                                                                                            {data.code}
+                                                                                                        </option>
+                                                                                                    ))}
+                                                                                                </select>
+                                                                                            </div>
+                                                                                            <div className="mb-3 col-md-8">
+                                                                                                <input type="text" className="form-control"
+                                                                                                    placeholder="Phone Number"
+                                                                                                    name="phone"
+                                                                                                    value={getSoleTraderDetails.phone}
+                                                                                                    onChange={(e) => handleChange1(e)}
+                                                                                                    maxLength={12}
+                                                                                                    minLength={9}
+                                                                                                />
+                                                                                                {errors1['phone'] && (
+                                                                                                    <div style={{ 'color': 'red' }}>{errors1['phone']}</div>
+                                                                                                )}
+                                                                                            </div>
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
+
                                                                                 <div className="col-lg-3">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label" >Email<span style={{ color: "red" }}>*</span></label>
@@ -934,14 +966,14 @@ const ClientEdit = () => {
                                                                                                     <input type="text" className="form-control" placeholder="Outbooks Quality & Certainty"
                                                                                                         name="SearchCompany" onChange={(e) => setSearchItem(e.target.value)} value={searchItem}
                                                                                                         onClick={() => setShowDropdown(true)}
-                                                                                                        style={{ cursor: "pointer" }} 
+                                                                                                        style={{ cursor: "pointer" }}
                                                                                                     />
                                                                                                     {
                                                                                                         getAllSearchCompany.length > 0 && showDropdown ?
                                                                                                             <div className='dropdown-list'  >
                                                                                                                 {getAllSearchCompany && getAllSearchCompany.map((company, index) => (
-                                                                                                                    <div key={index} onClick={() => { setSearchItem(company.title); setShowDropdown(false) }} 
-                                                                                                                    style={{ cursor: "pointer", padding: "8px 0" }}
+                                                                                                                    <div key={index} onClick={() => { setSearchItem(company.title); setShowDropdown(false) }}
+                                                                                                                        style={{ cursor: "pointer", padding: "8px 0" }}
                                                                                                                     >
                                                                                                                         {company.title}
 
@@ -1048,6 +1080,7 @@ const ClientEdit = () => {
                                                                                                     <label className="form-label">VAT Number</label>
                                                                                                     <input type="text" className="form-control " placeholder="VAT Number"
                                                                                                         name="VATNumber" onChange={(e) => handleChange2(e)} value={getCompanyDetails.VATNumber}
+                                                                                                        maxLength={9}
                                                                                                     />
                                                                                                     {errors2['VATNumber'] && (
                                                                                                         <div style={{ 'color': 'red' }}>{errors2['VATNumber']}</div>
@@ -1060,6 +1093,7 @@ const ClientEdit = () => {
                                                                                                 <label className="form-label">Website</label>
                                                                                                 <input type="text" className="form-control " placeholder="URL"
                                                                                                     name="Website" onChange={(e) => handleChange2(e)} value={getCompanyDetails.Website}
+                                                                                                    maxLength={200}
                                                                                                 />
                                                                                                 {errors2['Website'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['Website']}</div>
@@ -1078,7 +1112,7 @@ const ClientEdit = () => {
                                                                                 <div className="row">
                                                                                     <div className="col-lg-6">
                                                                                         <div className="mb-3">
-                                                                                            <label className="form-label">Client Industry<span style={{ color: "red" }}>*</span></label>
+                                                                                            <label className="form-label">Client Industry</label>
                                                                                             <select className="form-select mb-3"
                                                                                                 name="ClientIndustry" onChange={(e) => handleChange2(e)} value={getCompanyDetails.ClientIndustry}>
                                                                                                 <option value=''>Select Client Industry</option>
@@ -1099,6 +1133,7 @@ const ClientEdit = () => {
                                                                                             <label className="form-label">Trading Name<span style={{ color: "red" }}>*</span></label>
                                                                                             <input type="text" className="form-control" placeholder="Trading Name"
                                                                                                 name="TradingName" onChange={(e) => handleChange2(e)} value={getCompanyDetails.TradingName}
+                                                                                                maxLength={100}
                                                                                             />
                                                                                             {errors2['TradingName'] && (
                                                                                                 <div style={{ 'color': 'red' }}>{errors2['TradingName']}</div>
@@ -1110,6 +1145,7 @@ const ClientEdit = () => {
                                                                                             <label className="form-label">Trading Address<span style={{ color: "red" }}>*</span> </label>
                                                                                             <input type="text" className="form-control" placeholder="Trading Address"
                                                                                                 name="TradingAddress" onChange={(e) => handleChange2(e)} value={getCompanyDetails.TradingAddress}
+                                                                                                maxLength={200}
                                                                                             />
                                                                                             {errors2['TradingAddress'] && (
                                                                                                 <div style={{ 'color': 'red' }}>{errors2['TradingAddress']}</div>
@@ -1160,6 +1196,7 @@ const ClientEdit = () => {
                                                                                                                         id={`first_name-${index}`}
                                                                                                                         value={contact.first_name}
                                                                                                                         onChange={(e) => handleChange(index, 'first_name', e.target.value)}
+                                                                                                                        maxLength={50}
                                                                                                                     />
                                                                                                                     {errors[index] && errors[index].first_name && (
                                                                                                                         <div style={{ color: 'red' }}>{errors[index].first_name}</div>
@@ -1178,6 +1215,7 @@ const ClientEdit = () => {
                                                                                                                         id={`last_name-${index}`}
                                                                                                                         value={contact.last_name}
                                                                                                                         onChange={(e) => handleChange(index, 'last_name', e.target.value)}
+                                                                                                                        maxLength={50}
                                                                                                                     />
                                                                                                                     {errors[index] && errors[index].last_name && (
                                                                                                                         <div style={{ color: 'red' }}>{errors[index].last_name}</div>
@@ -1199,7 +1237,6 @@ const ClientEdit = () => {
                                                                                                                         {personRoleDataAll &&
                                                                                                                             personRoleDataAll.data.map((item, i) => (
                                                                                                                                 <>
-
                                                                                                                                     <option value={item.id} key={i}>{item.name}</option>
                                                                                                                                 </>
 
@@ -1210,24 +1247,45 @@ const ClientEdit = () => {
                                                                                                                     )}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
-                                                                                                                <div className="mb-3">
-                                                                                                                    <label htmlFor={`phone-${index}`} className="form-label">
-                                                                                                                        Phone
-                                                                                                                    </label>
-                                                                                                                    <input
-                                                                                                                        type="number"
-                                                                                                                        className="form-control"
-                                                                                                                        placeholder="Phone Number"
-                                                                                                                        id={`phone-${index}`}
-                                                                                                                        value={contact.phone}
-                                                                                                                        onChange={(e) => handleChange(index, 'phone', e.target.value)}
-                                                                                                                    />
-                                                                                                                    {errors[index] && errors[index].phone && (
-                                                                                                                        <div style={{ color: 'red' }}>{errors[index].phone}</div>
-                                                                                                                    )}
+
+                                                                                                            <div class="col-lg-4">
+                                                                                                                <div class="mb-3">
+                                                                                                                    <label for="firstNameinput" class="form-label">Phone</label>
+                                                                                                                    <div class="row">
+                                                                                                                        <div class="col-md-4">
+                                                                                                                            <select class="form-select"
+                                                                                                                                onChange={(e) => handleChange(index, 'phone_code', e.target.value)}
+                                                                                                                                name="phone_code"
+                                                                                                                                value={contact.phone_code}
+                                                                                                                            >
+                                                                                                                                {countryDataAll.data.map((data) => (
+                                                                                                                                    <option key={data.code} value={data.code}>
+                                                                                                                                        {data.code}
+                                                                                                                                    </option>
+                                                                                                                                ))}
+                                                                                                                            </select>
+                                                                                                                        </div>
+                                                                                                                        <div className="mb-3 col-md-8">
+                                                                                                                            <input
+                                                                                                                                type="number"
+                                                                                                                                className="form-control"
+                                                                                                                                placeholder="Phone Number"
+                                                                                                                                id={`phone-${index}`}
+                                                                                                                                value={contact.phone}
+                                                                                                                                onChange={(e) => handleChange(index, 'phone', e.target.value)}
+                                                                                                                                maxLength={12}
+                                                                                                                                minLength={9}
+                                                                                                                            />
+                                                                                                                            {errors[index] && errors[index].phone && (
+                                                                                                                                <div style={{ color: 'red' }}>{errors[index].phone}</div>
+                                                                                                                            )}
+                                                                                                                        </div>
+                                                                                                                    </div>
                                                                                                                 </div>
                                                                                                             </div>
+
+
+ 
                                                                                                             <div className="col-lg-3">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label htmlFor={`email-${index}`} className="form-label">
@@ -1269,15 +1327,15 @@ const ClientEdit = () => {
                                                                     <div className="row " >
                                                                         <div className="col-lg-12">
                                                                             <div className="card card_shadow ">
-                                                                            <div className="card-header align-items-center d-flex">
-                                                                                <h4 className="card-title mb-0 flex-grow-1">Partnership</h4>
-                                                                            </div>
+                                                                                <div className="card-header align-items-center d-flex">
+                                                                                    <h4 className="card-title mb-0 flex-grow-1">Partnership</h4>
+                                                                                </div>
                                                                                 {/* end card header */}
                                                                                 <div className="card-body">
                                                                                     <div className="row">
                                                                                         <div className="col-lg-3">
                                                                                             <div className="mb-3">
-                                                                                                <label className="form-label">Client Industry<span style={{ color: "red" }}>*</span></label>
+                                                                                                <label className="form-label">Client Industry</label>
                                                                                                 <select className="form-select mb-3"
                                                                                                     name="ClientIndustry" value={getPartnershipDetails.ClientIndustry} onChange={(e) => handleChange3(e)}>
                                                                                                     <option value={0}>Select Client Industry</option>
@@ -1298,6 +1356,7 @@ const ClientEdit = () => {
                                                                                                 <label className="form-label">Trading Name<span style={{ color: "red" }}>*</span></label>
                                                                                                 <input type="text" className="form-control" placeholder="Trading Name"
                                                                                                     name="TradingName" value={getPartnershipDetails.TradingName} onChange={(e) => handleChange3(e)}
+                                                                                                    maxLength={100}
                                                                                                 />
                                                                                                 {errors3['TradingName'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors3['TradingName']}</div>)}
@@ -1308,6 +1367,7 @@ const ClientEdit = () => {
                                                                                                 <label className="form-label">Trading Address<span style={{ color: "red" }}>*</span> </label>
                                                                                                 <input type="text" className="form-control" placeholder="Trading Address"
                                                                                                     name="TradingAddress" value={getPartnershipDetails.TradingAddress} onChange={(e) => handleChange3(e)}
+                                                                                                    maxLength={200}
                                                                                                 />
                                                                                                 {errors3['TradingAddress'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors3['TradingAddress']}</div>)}
@@ -1336,6 +1396,7 @@ const ClientEdit = () => {
                                                                                                     <label className="form-label"> VAT Number</label>
                                                                                                     <input type="text" className="form-control " placeholder="VAT Number"
                                                                                                         name="VATNumber" value={getPartnershipDetails.VATNumber} onChange={(e) => handleChange3(e)}
+                                                                                                        maxLength={9}
                                                                                                     />
                                                                                                     {errors3['VATNumber'] && (
                                                                                                         <div style={{ 'color': 'red' }}>{errors3['VATNumber']}</div>)}
@@ -1349,6 +1410,7 @@ const ClientEdit = () => {
                                                                                                 </label>
                                                                                                 <input type="text" className="form-control " placeholder="URL"
                                                                                                     name="Website" value={getPartnershipDetails.Website} onChange={(e) => handleChange3(e)}
+                                                                                                    maxLength={200}
                                                                                                 />
 
                                                                                                 {errors3['Website'] && (
@@ -1401,7 +1463,7 @@ const ClientEdit = () => {
                                                                                                                     )}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label">First Name<span style={{ color: "red" }}>*</span></label>
                                                                                                                     <input
@@ -1411,13 +1473,14 @@ const ClientEdit = () => {
                                                                                                                         name="first_name"
                                                                                                                         value={contact.first_name}
                                                                                                                         onChange={(e) => handleChange4(index, 'first_name', e.target.value)}
+                                                                                                                        maxLength={50}
                                                                                                                     />
                                                                                                                     {contactsErrors[index]?.first_name && (
                                                                                                                         <div style={{ color: 'red' }}>{contactsErrors[index].first_name}</div>
                                                                                                                     )}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label">Last Name<span style={{ color: "red" }}>*</span></label>
                                                                                                                     <input
@@ -1427,13 +1490,14 @@ const ClientEdit = () => {
                                                                                                                         name="last_name"
                                                                                                                         value={contact.last_name}
                                                                                                                         onChange={(e) => handleChange4(index, 'last_name', e.target.value)}
+                                                                                                                        maxLength={50}
                                                                                                                     />
                                                                                                                     {contactsErrors[index]?.last_name && (
                                                                                                                         <div style={{ color: 'red' }}>{contactsErrors[index].last_name}</div>
                                                                                                                     )}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label">Role<span style={{ color: "red" }}>*</span></label>
                                                                                                                     <select
@@ -1453,38 +1517,78 @@ const ClientEdit = () => {
                                                                                                                     )}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
-                                                                                                                <div className="mb-3">
-                                                                                                                    <label className="form-label">Phone<span style={{ color: "red" }}>*</span></label>
-                                                                                                                    <input
-                                                                                                                        type="number"
-                                                                                                                        className="form-control"
-                                                                                                                        placeholder="Phone"
-                                                                                                                        name="phone"
-                                                                                                                        value={contact.phone}
-                                                                                                                        onChange={(e) => handleChange4(index, 'phone', e.target.value)}
-                                                                                                                    />
-                                                                                                                    {contactsErrors[index]?.phone && (
-                                                                                                                        <div style={{ color: 'red' }}>{contactsErrors[index].phone}</div>
-                                                                                                                    )}
+                                                                                                            <div class="col-lg-4">
+                                                                                                                <div class="mb-3">
+                                                                                                                    <label for="firstNameinput" class="form-label">Phone</label>
+                                                                                                                    <div class="row">
+                                                                                                                        <div class="col-md-4">
+                                                                                                                            <select class="form-select"
+                                                                                                                                  onChange={(e) => handleChange4(index, 'phone_code', e.target.value)}
+                                                                                                                                name="phone_code"
+                                                                                                                                value={contact.phone_code}
+                                                                                                                            >
+                                                                                                                                {countryDataAll.data.map((data) => (
+                                                                                                                                    <option key={data.code} value={data.code}>
+                                                                                                                                        {data.code}
+                                                                                                                                    </option>
+                                                                                                                                ))}
+                                                                                                                            </select>
+                                                                                                                        </div>
+                                                                                                                        <div className="mb-3 col-md-8">
+                                                                                                                            <input
+                                                                                                                                type="number"
+                                                                                                                                className="form-control"
+                                                                                                                                placeholder="Phone"
+                                                                                                                                name="phone"
+                                                                                                                                value={contact.phone}
+                                                                                                                                onChange={(e) => handleChange4(index, 'phone', e.target.value)}
+                                                                                                                                maxLength={12}  
+                                                                                                                            />
+                                                                                                                            {contactsErrors[index] && contactsErrors[index].phone && (
+                                                                                                                                <div style={{ color: 'red' }}>{contactsErrors[index].phone}</div>
+                                                                                                                            )}
+                                                                                                                        </div>
+                                                                                                                    </div>
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
-                                                                                                                <div className="mb-3">
-                                                                                                                    <label className="form-label">Alternate Phone<span style={{ color: "red" }}>*</span></label>
-                                                                                                                    <input
-                                                                                                                        type="number"
-                                                                                                                        className="form-control"
-                                                                                                                        placeholder="Alternate Phone"
-                                                                                                                        name="alternate_phone"
-                                                                                                                        value={contact.alternate_phone}
-                                                                                                                        onChange={(e) => handleChange4(index, 'alternate_phone', e.target.value)}
-                                                                                                                    />
-                                                                                                                    {contactsErrors[index]?.alternate_phone && (
-                                                                                                                        <div style={{ color: 'red' }}>{contactsErrors[index].alternate_phone}</div>
-                                                                                                                    )}
+
+                                                                                                             
+
+
+<div class="col-lg-4">
+                                                                                                                <div class="mb-3">
+                                                                                                                    <label for="firstNameinput" class="form-label">Alternate Phone</label>
+                                                                                                                    <div class="row">
+                                                                                                                        <div class="col-md-4">
+                                                                                                                            <select class="form-select"
+                                                                                                                                  onChange={(e) => handleChange4(index, 'alternate_phone_code', e.target.value)}
+                                                                                                                                name="alternate_phone_code"
+                                                                                                                                value={contact.alternate_phone_code}
+                                                                                                                            >
+                                                                                                                                {countryDataAll.data.map((data) => (
+                                                                                                                                    <option key={data.code} value={data.code}>
+                                                                                                                                        {data.code}
+                                                                                                                                    </option>
+                                                                                                                                ))}
+                                                                                                                            </select>
+                                                                                                                        </div>
+                                                                                                                        <div className="mb-3 col-md-8">
+                                                                                                                            <input
+                                                                                                                                type="number"
+                                                                                                                                className="form-control"
+                                                                                                                                placeholder="Alternate Phone"
+                                                                                                                                name="alternate_phone"
+                                                                                                                                value={contact.alternate_phone}
+                                                                                                                                onChange={(e) => handleChange4(index, 'alternate_phone', e.target.value)}
+                                                                                                                                maxLength={12}  
+                                                                                                                            />
+                                                                                                                            {contactsErrors[index] && contactsErrors[index].alternate_phone && (
+                                                                                                                                <div style={{ color: 'red' }}>{contactsErrors[index].alternate_phone}</div>
+                                                                                                                            )}
+                                                                                                                        </div>
+                                                                                                                    </div>
                                                                                                                 </div>
-                                                                                                            </div>
+                                                                                                            </div> 
                                                                                                             <div className="col-lg-3">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label">Email<span style={{ color: "red" }}>*</span></label>
@@ -1539,7 +1643,7 @@ const ClientEdit = () => {
                                                 </section>
                                             </div>
                                             <div className="hstack gap-2 justify-content-end">
-                                                <button type="button" className="btn btn-light"  onClick={HandleCancel}>Cancel</button>
+                                                <button type="button" className="btn btn-light" onClick={HandleCancel}>Cancel</button>
                                                 <button className="btn btn-info text-white blue-btn" onClick={handleUpdate}>Update Client</button>
                                             </div>
                                         </div>

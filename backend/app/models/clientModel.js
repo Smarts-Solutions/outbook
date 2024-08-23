@@ -535,7 +535,7 @@ const clientUpdate = async (client) => {
     if (client_type == "1") {
 
         const { first_name, last_name ,phone, email, residential_address } = client;
-        let phone_code = client.phone_code == undefined || client.phone_code == '' ? "" : client.phone_code
+        let phone_code = client.phone_code == undefined ? "" : client.phone_code
         try {
             const query2 = `
                 UPDATE client_contact_details 
@@ -645,7 +645,7 @@ const clientUpdate = async (client) => {
 
                 } else {
                     arrayInterId.push(contact_id)
-                    const [result2] = await pool.execute(query2, [customer_contact_person_role_id, first_name, last_name, email, alternate_email, phone_code ,phone, alternate_phone, authorised_signatory_status, client_id, contact_id]);
+                    const [result2] = await pool.execute(query2, [customer_contact_person_role_id, first_name, last_name, email, alternate_email, phone_code ,phone, alternate_phone_code,alternate_phone, authorised_signatory_status, client_id, contact_id]);
                 }
 
             }
@@ -661,6 +661,7 @@ const clientUpdate = async (client) => {
             }
 
         } catch (err) {
+            console.log("err", err)
             return { status: false, message: 'client update Err Client Type 3' };
         }
 
