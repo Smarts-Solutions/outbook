@@ -39,7 +39,7 @@ const Information = () => {
   ]);
 
 
-  console.log("contacts", contacts);
+ 
 
 
   const handleAddContact = () => {
@@ -253,6 +253,7 @@ const Information = () => {
     },
     validate: (values) => {
       let errors = {};
+ 
 
 
       if (formik1.touched.Email == true && getAccountMangerId == "") {
@@ -264,6 +265,13 @@ const Information = () => {
       }
       if (values.Trading_Name && values.Trading_Name.length > 100) {
         errors.Trading_Name = "Trading Name cannot exceed 100 characters";
+      }
+      if(values.Phone && values.Phone.toString().length > 12){
+        errors.Phone = "Phone Number cannot exceed 12 digits";
+
+      }
+      else if(values.Phone && values.Phone.toString().length < 9){
+        errors.Phone = "Phone Number cannot be less than 9 digits";
       }
 
       else if (values.Trading_Address && values.Trading_Address.length > 200) {
@@ -311,7 +319,8 @@ const Information = () => {
 
       else if (values.Residential_Address && values.Residential_Address.length > 200) {
         errors.Residential_Address = "Residential Address cannot exceed 200 characters";
-      }
+      } 
+
       return errors;
     },
 
@@ -859,9 +868,7 @@ const Information = () => {
       case "lastName":
         newErrors[index].lastName = value ? "" : "Last Name is required";
         break;
-      // case "role":
-      // newErrors[index].role = value ? "" : "Role is required";
-      // break;
+      
       case "email":
         if (!value) {
           newErrors[index].email = "Email Id is required";
@@ -872,9 +879,10 @@ const Information = () => {
         }
         break;
 
-      // case "phoneNumber":
-      //   newErrors[index].phoneNumber = value ? "" : "Phone Number is required";
-      //   break;
+      
+      case 'phoneNumber':
+        newErrors[index].phoneNumber = value === '' ? '' : /^\d{9,12}$/.test(value) ? '' : 'Phone Number must be between 9 to 12 digits';
+        break;
       default:
         break;
     }
@@ -897,7 +905,7 @@ const Information = () => {
           setAccountMangerId(customerDetailsExist && customerDetailsExist.customer.account_manager_id)
 
           if (customerDetailsExist && customerDetailsExist.customer.customer_type == '1') {
-            console.log("customerDetailsExist")
+            
             formik1.setFieldValue("Trading_Name", customerDetailsExist.customer.trading_name);
             formik1.setFieldValue("Trading_Address", customerDetailsExist.customer.trading_address);
             formik1.setFieldValue("VAT_Registered", customerDetailsExist.customer.vat_registered);
