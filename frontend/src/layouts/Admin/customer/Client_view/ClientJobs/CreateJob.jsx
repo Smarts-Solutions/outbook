@@ -4,7 +4,8 @@ import { useDispatch } from 'react-redux';
 import { GetAllJabData, AddAllJobType } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import sweatalert from 'sweetalert2';
 import * as bootstrap from 'bootstrap';
-
+import { JobType } from '../../../../../ReduxStore/Slice/Settings/settingSlice'
+import { Modal, Button } from 'react-bootstrap';
 
 const CreateJob = () => {
     const location = useLocation()
@@ -12,6 +13,7 @@ const CreateJob = () => {
     const token = JSON.parse(localStorage.getItem("token"));
     const dispatch = useDispatch();
     const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
+    const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] })
     const [errors, setErrors] = useState({})
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [PreparationTimne, setPreparationTimne] = useState({ hours: "", minutes: "" })
@@ -20,6 +22,7 @@ const CreateJob = () => {
     const [budgetedHours, setBudgetedHours] = useState({ hours: "", minutes: "" })
     const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" })
 
+    const [jobModalStatus, jobModalSetStatus] = useState(false);
 
     const [jobData, setJobData] = useState({
         AccountManager: "",
@@ -70,6 +73,8 @@ const CreateJob = () => {
 
 
 
+
+
     useEffect(() => {
         setJobData(prevState => ({
             ...prevState,
@@ -103,9 +108,39 @@ const CreateJob = () => {
             });
 
     }
+
     useEffect(() => {
         GetJobData()
     }, []);
+
+    const GetJobType = async () => {
+        const req = { action: "get", service_id: 2 }
+        const data = { req: req, authToken: token }
+        await dispatch(JobType(data))
+            .unwrap()
+            .then(async (response) => {
+                if (response.status) {
+                    setJob_Type({
+                        loading: true,
+                        data: response.data
+                    })
+                } else {
+                    setJob_Type({
+                        loading: true,
+                        data: []
+                    })
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    }
+
+    useEffect(() => {
+        GetJobType()
+    }, [jobData.Service]);
+
+
 
     const HandleChange = (e) => {
         console.log("e.target", e.target.value)
@@ -317,7 +352,13 @@ const CreateJob = () => {
 
 
 
+    const openJobModal = (e) => {
+        console.log("e.target.value", e.target.value)
+        if (e.target.value != "") {
+            jobModalSetStatus(true)
+        }
 
+    }
 
 
 
@@ -441,15 +482,15 @@ const CreateJob = () => {
                                                                     <div className="col-lg-4 mb-3">
                                                                         <label className="form-label">Job Type</label>
                                                                         <select className="form-select mb-3 jobtype"
-                                                                            name="JobType" onChange={HandleChange} value={jobData.JobType}>
+                                                                            name="JobType" onChange={(e) => { HandleChange(e); openJobModal(e) }} value={jobData.JobType}>
                                                                             <option value="">Select Job Type</option>
-                                                                            {AllJobData.loading &&
-                                                                                AllJobData.data.job_type.map((jobtype) => (
+                                                                            {get_Job_Type.loading &&
+                                                                                get_Job_Type.data.map((jobtype) => (
                                                                                     <option
-                                                                                        value={jobtype.job_type_id}
-                                                                                        key={jobtype.job_type_id}
+                                                                                        value={jobtype.id}
+                                                                                        key={jobtype.id}
                                                                                     >
-                                                                                        {jobtype.job_type_name}
+                                                                                        {jobtype.type}
                                                                                     </option>
                                                                                 ))}
                                                                         </select>
@@ -1079,6 +1120,126 @@ const CreateJob = () => {
                                                 </div>
                                             </div>
                                         </div>
+
+
+                                        {jobModalStatus && (
+                                            <Modal show={jobModalStatus} onHide={(e) => jobModalSetStatus(false)} centered size="lg">
+                                                <Modal.Header closeButton>
+                                                    <Modal.Title>Tasks</Modal.Title>
+                                                </Modal.Header>
+                                                <Modal.Body>
+                                                    <div className="tablelist-form">
+                                                        <div className="modal-body">
+                                                            <div className="row">
+                                                                <div className="col-md-12" style={{ display: "flex" }}>
+                                                                    <div className="col-lg-6">
+                                                                        <select
+                                                                            id="search-select"
+                                                                            className="form-select mb-3"
+                                                                            aria-label="Default select example"
+                                                                            style={{ color: "#8a8c8e !important" }}
+                                                                        >
+                                                                            <option value="" selected="">
+                                                                                {" "}
+                                                                                Select Checklist Name
+                                                                            </option>
+                                                                            <option value="">Checklist 1</option>
+                                                                            <option value="">Checklist 2</option>
+                                                                            <option value="">Checklist 3</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div className="col-lg-6">
+                                                                        <div className="col-sm-auto" style={{ marginLeft: 250 }}>
+                                                                            <a id="open-add-task-modal" className="btn btn-success add-btn">
+                                                                                <i className="ri-add-fill align-bottom me-1" />
+                                                                                Add Task
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-lg-6 column" id="column1">
+                                                                    <div className="card">
+                                                                        <div className="card-body">
+                                                                            <div id="customerList">
+                                                                                <div className="table-responsive table-card mt-3 mb-1">
+                                                                                    <table
+                                                                                        className="table align-middle table-nowrap"
+                                                                                        id="customerTable"
+                                                                                    >
+                                                                                        <thead className="table-light">
+                                                                                            <tr>
+                                                                                                <th className="" data-="status">
+                                                                                                    Task Name{" "}
+                                                                                                </th>
+                                                                                                <th className="" data-="status">
+                                                                                                    Budgeted Hour
+                                                                                                </th>
+                                                                                                <th>Action</th>
+                                                                                            </tr>
+                                                                                        </thead>
+                                                                                        <tbody className="list form-check-all">
+                                                                                            <tr className="">
+                                                                                                <td>Task 1 </td>
+                                                                                                <td>10 hr</td>
+                                                                                                <td>
+                                                                                                    <div className="add">
+                                                                                                        <button className="btn btn-sm btn-success add-item-btn">+</button>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                            </tr>
+
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-lg-6 " id="column2">
+                                                                    <div className="card">
+                                                                        <div className="card-body">
+                                                                            <div id="customerList">
+                                                                                <div className="table-responsive table-card mt-3 mb-1">
+                                                                                    <table
+                                                                                        className="table align-middle table-nowrap"
+                                                                                        id="customerTable"
+                                                                                    >
+                                                                                        <thead className="table-light">
+                                                                                            <tr>
+                                                                                                <th className="" data-="status">
+                                                                                                    Task Name{" "}
+                                                                                                </th>
+                                                                                                <th className="" data-="status">
+                                                                                                    Budgeted Hour
+                                                                                                </th>
+                                                                                                <th>Action</th>
+                                                                                            </tr>
+                                                                                        </thead>
+                                                                                        <tbody className="list form-check-all">
+                                                                                            <tr className="">
+                                                                                                <td>Task 1 </td>
+                                                                                                <td>10 hr </td>
+                                                                                                <td>
+                                                                                                    <div className="remove">
+                                                                                                        <button class="delete-icon"><i class="ti-trash"></i></button>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                </div>  
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </Modal.Body>
+                                            </Modal>
+                                        )}
+
+
                                         <div className="hstack gap-2 justify-content-end">
 
                                             <button type="button" className="btn btn-info text-white float-end blue-btn" onClick={handleSubmit}>Add Job</button>
