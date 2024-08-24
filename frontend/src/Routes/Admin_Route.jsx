@@ -11,7 +11,8 @@ import Service from '../layouts/Admin/customer/customer_add_process/Service';
 import Footer from '../Components/Dashboard/Footer';
 import Access from '../layouts/Admin/Access';
 import Setting from '../layouts/Admin/Setting';
-import Staff from '../layouts/Admin/Staff';
+import Staff from '../layouts/Admin/Staff/Staff';
+import ViewLogs from '../layouts/Admin/Staff/ViewLogs';
 import Addcustomer from '../layouts/Admin/customer/customer_add_process/Addcustomer';
 import Editcustomer from '../layouts/Admin/customer/customer_edit_process/Editcustomer';
 import AddNewClient from '../layouts/Admin/customer/Client_view/CreateClient'
@@ -57,6 +58,7 @@ const Admin_Route = () => {
             <Route path="/profile" element={<Profile />} />
             <Route path="/status" element={<Status />} />
             <Route path="/staff" element={<Staff />} />
+            <Route path="/viewlogs" element={<ViewLogs />} />
             <Route path="/access" element={<Access />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/add/jobtype" element={<JobType />} />
