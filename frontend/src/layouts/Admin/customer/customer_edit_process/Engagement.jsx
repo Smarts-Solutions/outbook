@@ -567,25 +567,27 @@ const Engagement = () => {
 
                                                     <div className="row card-body">
                                                         {[
-                                                            { label: 'Accountants', name: 'adhoc_accountants', feeName: 'Fee Per Hour' },
-                                                            { label: 'Bookkeepers', name: 'adhoc_bookkeepers', feeName: 'Fee Per Hour' },
-                                                            { label: 'Payroll Experts', name: 'adhoc_payroll_experts', feeName: 'Fee Per Hour' },
-                                                            { label: 'Tax Experts', name: 'adhoc_tax_experts', feeName: 'Fee Per Hour' },
-                                                            { label: 'Admin/Other Staff', name: 'adhoc_admin_staff', feeName: 'Fee Per Hour' },
+                                                            { label: 'Total Outsourcing', name: 'total_outsourcing', feeName: 'Fee Percentage' },
+                                                            { label: 'Accountants', name: 'accountants', feeName: 'Fee Percentage' },
+                                                            { label: 'Bookkeepers', name: 'bookkeepers', feeName: 'Fee Percentage' },
+                                                            { label: 'Payroll Experts', name: 'payroll_experts', feeName: 'Fee Percentage Expert' },
+                                                            { label: 'Tax Experts', name: 'tax_experts', feeName: 'Fee Percentage' },
+                                                            { label: 'Admin/Other Staff', name: 'admin_staff', feeName: 'Fee Percentage' },
+
                                                         ].map((field, index) => (
                                                             <div className="col-lg-4" key={index}>
                                                                 <div className="mb-3">
-                                                                    <label className="form-label">{field.label}</label><br />
+                                                                    <label className="form-label">{field.label}</label> <br />
                                                                     <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label>
                                                                     <input
                                                                         type="text"
                                                                         className="form-control"
                                                                         name={field.name}
-                                                                        value={formValues3[field.name]}
-                                                                        onChange={handleChange3}
+                                                                        value={formValues2[field.name]}
+                                                                        onChange={handleChange2}
                                                                     />
-                                                                    {errors3[field.name] && (
-                                                                        <div className="error-text">{errors3[field.name]}</div>
+                                                                    {errors2[field.name] && (
+                                                                        <div className="error-text">{errors2[field.name]}</div>
                                                                     )}
 
                                                                 </div>
@@ -608,29 +610,28 @@ const Engagement = () => {
                                                         </div>
                                                     </div>
 
+                                                   
                                                     <div className="row card-body">
                                                         {[
-                                                            { label: 'Total Outsourcing', name: 'total_outsourcing', feeName: 'Fee Percentage' },
-                                                            { label: 'Accountants', name: 'accountants', feeName: 'Fee Percentage' },
-                                                            { label: 'Bookkeepers', name: 'bookkeepers', feeName: 'Fee Percentage' },
-                                                            { label: 'Payroll Experts', name: 'payroll_experts', feeName: 'Fee Percentage Expert' },
-                                                            { label: 'Tax Experts', name: 'tax_experts', feeName: 'Fee Percentage' },
-                                                            { label: 'Admin/Other Staff', name: 'admin_staff', feeName: 'Fee Percentage' },
-
+                                                            { label: 'Accountants', name: 'adhoc_accountants', feeName: 'Fee Per Hour' },
+                                                            { label: 'Bookkeepers', name: 'adhoc_bookkeepers', feeName: 'Fee Per Hour' },
+                                                            { label: 'Payroll Experts', name: 'adhoc_payroll_experts', feeName: 'Fee Per Hour' },
+                                                            { label: 'Tax Experts', name: 'adhoc_tax_experts', feeName: 'Fee Per Hour' },
+                                                            { label: 'Admin/Other Staff', name: 'adhoc_admin_staff', feeName: 'Fee Per Hour' },
                                                         ].map((field, index) => (
                                                             <div className="col-lg-4" key={index}>
                                                                 <div className="mb-3">
-                                                                    <label className="form-label">{field.label}</label> <br />
+                                                                    <label className="form-label">{field.label}</label><br />
                                                                     <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label>
                                                                     <input
                                                                         type="text"
                                                                         className="form-control"
                                                                         name={field.name}
-                                                                        value={formValues2[field.name]}
-                                                                        onChange={handleChange2}
+                                                                        value={formValues3[field.name]}
+                                                                        onChange={handleChange3}
                                                                     />
-                                                                    {errors2[field.name] && (
-                                                                        <div className="error-text">{errors2[field.name]}</div>
+                                                                    {errors3[field.name] && (
+                                                                        <div className="error-text">{errors3[field.name]}</div>
                                                                     )}
 
                                                                 </div>
