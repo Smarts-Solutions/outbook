@@ -1,10 +1,29 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { GETALLCOMPANY, ADD_CUSTOMER, GET_SERVICE, ADD_SERVICES, ADD_PEPPER_WORK,GET_ALL_CUSTOMER,GET_CUSTOMER , EDIT_CUSTOMER , Delete_Customer_File , GET_ALL_JOB_DATA , Add_Job_Type , GET_ALL_JOB_LIST , UPDATE_JOB } from "../../../Services/Customer/CustomerService";
+import { GETALLCOMPANY, ADD_CUSTOMER, GET_SERVICE, ADD_SERVICES, ADD_PEPPER_WORK, GET_ALL_CUSTOMER, GET_CUSTOMER, EDIT_CUSTOMER, Delete_Customer_File, GET_ALL_JOB_DATA, Add_Job_Type, GET_ALL_JOB_LIST, UPDATE_JOB } from "../../../Services/Customer/CustomerService";
+
+import axios from "axios";
+const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+
+
+export async function GET_IP(data, token) {
+  try {
+    const res = await axios.get(`https://api.ipify.org?format=json`)
+    return await res;
+  }
+  catch (err) {
+  }
+}
+
+
 
 
 export const GetAllCompany = createAsyncThunk("seachCompany", async (data) => {
   try {
-    const res = await GETALLCOMPANY(data);
+    const { req } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await GETALLCOMPANY(updatedReq);
+
     return await res;
   } catch (err) {
     throw err;
@@ -13,8 +32,12 @@ export const GetAllCompany = createAsyncThunk("seachCompany", async (data) => {
 
 export const AddCustomer = createAsyncThunk("addCustomer", async (data) => {
   try {
+
     const { req, authToken } = data
-    const res = await ADD_CUSTOMER(req, authToken);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await ADD_CUSTOMER(updatedReq, authToken);
+
     return await res;
   } catch (err) {
     throw err;
@@ -23,8 +46,10 @@ export const AddCustomer = createAsyncThunk("addCustomer", async (data) => {
 
 export const Get_Service = createAsyncThunk("service", async (data) => {
   try {
-    const { req, authToken } = data
-    const res = await GET_SERVICE(req, authToken);
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await GET_SERVICE(updatedReq, authToken);
     return await res;
   } catch (err) {
     throw err;
@@ -33,8 +58,11 @@ export const Get_Service = createAsyncThunk("service", async (data) => {
 
 export const ADD_SERVICES_CUSTOMERS = createAsyncThunk("updateProcessCustomer", async (data) => {
   try {
-    const { req, authToken } = data
-    const res = await ADD_SERVICES(req, authToken);
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await ADD_SERVICES(updatedReq, authToken);
+
     return await res;
   } catch (err) {
     throw err;
@@ -43,9 +71,12 @@ export const ADD_SERVICES_CUSTOMERS = createAsyncThunk("updateProcessCustomer", 
 
 export const ADD_PEPPER_WORKS = createAsyncThunk("updateProcessCustomerFile", async (data) => {
   try {
-    const { req, authToken } = data
-    const res = await ADD_PEPPER_WORK(req, authToken);
-   
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await ADD_PEPPER_WORK(updatedReq, authToken);
+
+
     return await res;
   } catch (err) {
     throw err;
@@ -56,7 +87,11 @@ export const ADD_PEPPER_WORKS = createAsyncThunk("updateProcessCustomerFile", as
 export const GET_ALL_CUSTOMERS = createAsyncThunk("customerAction", async (data) => {
   try {
     const { req, authToken } = data
-    const res = await GET_ALL_CUSTOMER(req, authToken);
+
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await GET_ALL_CUSTOMER(updatedReq, authToken);
+
 
     return await res;
   } catch (err) {
@@ -67,8 +102,11 @@ export const GET_ALL_CUSTOMERS = createAsyncThunk("customerAction", async (data)
 
 export const GET_CUSTOMER_DATA = createAsyncThunk("getSingleCustomer", async (data) => {
   try {
-    const { req, authToken } = data
-    const res = await GET_CUSTOMER(req, authToken);
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await GET_CUSTOMER(updatedReq, authToken);
+
 
     return await res;
   } catch (err) {
@@ -78,9 +116,10 @@ export const GET_CUSTOMER_DATA = createAsyncThunk("getSingleCustomer", async (da
 
 export const Edit_Customer = createAsyncThunk("customerUpdate", async (data) => {
   try {
-    const { req, authToken } = data
-    
-    const res = await EDIT_CUSTOMER(req, authToken);
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await EDIT_CUSTOMER(updatedReq, authToken);
 
     return await res;
   } catch (err) {
@@ -90,9 +129,11 @@ export const Edit_Customer = createAsyncThunk("customerUpdate", async (data) => 
 
 export const DELETE_CUSTOMER_FILE = createAsyncThunk("updateProcessCustomerFileAction", async (data) => {
   try {
-    const { req, authToken } = data
-    
-    const res = await Delete_Customer_File(req, authToken);
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await Delete_Customer_File(updatedReq, authToken);
+
 
     return await res;
   } catch (err) {
@@ -102,9 +143,11 @@ export const DELETE_CUSTOMER_FILE = createAsyncThunk("updateProcessCustomerFileA
 
 export const GetAllJabData = createAsyncThunk("getAddJobData", async (data) => {
   try {
-    const { req, authToken } = data
-    
-    const res = await GET_ALL_JOB_DATA(req, authToken);
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await GET_ALL_JOB_DATA(updatedReq, authToken);
+
 
     return await res;
   } catch (err) {
@@ -114,9 +157,11 @@ export const GetAllJabData = createAsyncThunk("getAddJobData", async (data) => {
 
 export const AddAllJobType = createAsyncThunk("jobAdd", async (data) => {
   try {
-    const { req, authToken } = data
-    
-    const res = await Add_Job_Type(req, authToken);
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await Add_Job_Type(updatedReq, authToken);
+
 
     return await res;
   } catch (err) {
@@ -126,9 +171,11 @@ export const AddAllJobType = createAsyncThunk("jobAdd", async (data) => {
 
 export const Get_All_Job_List = createAsyncThunk("jobAction", async (data) => {
   try {
-    const { req, authToken } = data
-    
-    const res = await GET_ALL_JOB_LIST(req, authToken);
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await GET_ALL_JOB_LIST(updatedReq, authToken);
+
 
     return await res;
   } catch (err) {
@@ -138,9 +185,11 @@ export const Get_All_Job_List = createAsyncThunk("jobAction", async (data) => {
 
 export const UpdateJob = createAsyncThunk("jobUpdate", async (data) => {
   try {
-    const { req, authToken } = data
-    
-    const res = await UPDATE_JOB(req, authToken);
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await UPDATE_JOB(updatedReq, authToken);
+
 
     return await res;
   } catch (err) {
@@ -148,10 +197,10 @@ export const UpdateJob = createAsyncThunk("jobUpdate", async (data) => {
   }
 });
 
- 
 
 
- 
+
+
 
 const CustomerSlice = createSlice({
   name: "CustomerSlice",
@@ -163,15 +212,15 @@ const CustomerSlice = createSlice({
     get_service: [],
     addcustomerservices: [],
     pepperwork: [],
-    getallcustomers:[],
-    getcustomer:[],
-    editcustomer:[],
-    deletecustomerfile:[],
-    getalljobdata:[],
-    addjobtype:[],
-    getalljoblist:[],
-    updatejob:[],
-    
+    getallcustomers: [],
+    getcustomer: [],
+    editcustomer: [],
+    deletecustomerfile: [],
+    getalljobdata: [],
+    addjobtype: [],
+    getalljoblist: [],
+    updatejob: [],
+
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -320,12 +369,12 @@ const CustomerSlice = createSlice({
         state.isError = true;
       })
 
-     
-      
 
 
 
-       
+
+
+
   },
 });
 

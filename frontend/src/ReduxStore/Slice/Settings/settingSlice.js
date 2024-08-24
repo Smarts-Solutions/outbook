@@ -1,26 +1,43 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE , CLIENTINDUSTRY ,COUNTRY , JOBTYPE,ADDTASK,GetServicesByCustomer,GETTASK,getListAction ,addChecklist,UpdateChecklist} from "../../../Services/Settings/settingService";
+import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE, CLIENTINDUSTRY, COUNTRY, JOBTYPE, ADDTASK, GetServicesByCustomer, GETTASK, getListAction, addChecklist, UpdateChecklist } from "../../../Services/Settings/settingService";
+import axios from "axios";
+
+
+const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+export async function GET_IP(data, token) {
+  try {
+    const res = await axios.get(`https://api.ipify.org?format=json`)
+    return await res;
+  }
+  catch (err) {
+  }
+}
 
 
 
 
-//Get Role
+// Get Role
 export const Role = createAsyncThunk("role", async (data) => {
   try {
-    const { req, authToken } = data
-    const res = await ROLE(req, authToken);
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await ROLE(updatedReq, authToken);
     return await res;
   } catch (err) {
     return err;
   }
 });
 
+
 //Get StatusType
 export const StatusType = createAsyncThunk("statusType", async (data) => {
   try {
     const { req, authToken } = data
-    const res = await STATUS_TYPE(req, authToken);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await STATUS_TYPE(updatedReq, authToken);
     return await res;
   } catch (err) {
     return err;
@@ -31,7 +48,9 @@ export const StatusType = createAsyncThunk("statusType", async (data) => {
 export const Service = createAsyncThunk("service", async (data) => {
   try {
     const { req, authToken } = data
-    const res = await SERVICE(req, authToken);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await SERVICE(updatedReq, authToken);
     return await res;
   } catch (err) {
     return err;
@@ -43,7 +62,10 @@ export const Service = createAsyncThunk("service", async (data) => {
 export const PersonRole = createAsyncThunk("customerContactPersonRole", async (data) => {
   try {
     const { req, authToken } = data
-    const res = await PERSONROLE(req, authToken);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await PERSONROLE(updatedReq, authToken);
+
     return await res;
   } catch (err) {
     return err;
@@ -54,7 +76,11 @@ export const PersonRole = createAsyncThunk("customerContactPersonRole", async (d
 export const ClientIndustry = createAsyncThunk("clientIndustry", async (data) => {
   try {
     const { req, authToken } = data
-    const res = await CLIENTINDUSTRY(req, authToken);
+
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await CLIENTINDUSTRY(updatedReq, authToken);
+
     return await res;
   } catch (err) {
     return err;
@@ -65,7 +91,10 @@ export const ClientIndustry = createAsyncThunk("clientIndustry", async (data) =>
 export const Country = createAsyncThunk("country", async (data) => {
   try {
     const { req, authToken } = data
-    const res = await COUNTRY(req, authToken);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await COUNTRY(updatedReq, authToken);
+
     return await res;
   } catch (err) {
     return err;
@@ -76,7 +105,10 @@ export const Country = createAsyncThunk("country", async (data) => {
 export const JobType = createAsyncThunk("jobType", async (data) => {
   try {
     const { req, authToken } = data
-    const res = await JOBTYPE(req, authToken);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await JOBTYPE(updatedReq, authToken);
+
     return await res;
   } catch (err) {
     return err;
@@ -86,7 +118,10 @@ export const JobType = createAsyncThunk("jobType", async (data) => {
 export const AddTask = createAsyncThunk("addTask", async (data) => {
   try {
     const { req, authToken } = data
-    const res = await ADDTASK(req, authToken);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await ADDTASK(updatedReq, authToken);
+
     return await res;
   } catch
   (err) {
@@ -97,7 +132,10 @@ export const AddTask = createAsyncThunk("addTask", async (data) => {
 export const GetServicesByCustomers = createAsyncThunk("customerGetService", async (data) => {
   try {
     const { req, authToken } = data
-    const res = await GetServicesByCustomer(req, authToken);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await GetServicesByCustomer(updatedReq, authToken);
+
     return await res;
   } catch
   (err) {
@@ -108,7 +146,10 @@ export const GetServicesByCustomers = createAsyncThunk("customerGetService", asy
 export const GETTASKDATA = createAsyncThunk("getTask", async (data) => {
   try {
     const { req, authToken } = data
-    const res = await GETTASK(req, authToken);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await GETTASK(updatedReq, authToken);
+
     return await res;
   } catch
   (err) {
@@ -119,7 +160,10 @@ export const GETTASKDATA = createAsyncThunk("getTask", async (data) => {
 export const getList = createAsyncThunk("checklistAction", async (data) => {
   try {
     const { req, authToken } = data
-    const res = await getListAction(req, authToken);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await getListAction(updatedReq, authToken);
+
     return await res;
   } catch
   (err) {
@@ -130,7 +174,10 @@ export const getList = createAsyncThunk("checklistAction", async (data) => {
 export const addChecklists = createAsyncThunk("addChecklist", async (data) => {
   try {
     const { req, authToken } = data
-    const res = await addChecklist(req, authToken);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await addChecklist(updatedReq, authToken);
+
     return await res;
   } catch
   (err) {
@@ -141,7 +188,10 @@ export const addChecklists = createAsyncThunk("addChecklist", async (data) => {
 export const UpdateChecklistData = createAsyncThunk("updateChecklist", async (data) => {
   try {
     const { req, authToken } = data
-    const res = await UpdateChecklist(req, authToken);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await UpdateChecklist(updatedReq, authToken);
+
     return await res;
   } catch
   (err) {
@@ -161,13 +211,13 @@ const SettingSlice = createSlice({
     personrole: [],
     clientIndustry: [],
     country: [],
-    jobtype:[],
-    addtak:[],
-    customergetervices:[],
-    gettask:[],
-    list:[],
-    addChecklistData:[],
-    updatecheckdata:[]
+    jobtype: [],
+    addtak: [],
+    customergetervices: [],
+    gettask: [],
+    list: [],
+    addChecklistData: [],
+    updatecheckdata: []
   },
 
   reducers: {},
@@ -188,7 +238,7 @@ const SettingSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(StatusType.fulfilled, (state, action) => {
-        
+
         state.isLoading = false;
         state.statustype = action.payload;
       })

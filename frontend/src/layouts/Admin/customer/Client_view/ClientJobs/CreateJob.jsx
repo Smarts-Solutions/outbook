@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
 import { GetAllJabData, AddAllJobType } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
@@ -14,6 +14,11 @@ const CreateJob = () => {
     const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
     const [errors, setErrors] = useState({})
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [PreparationTimne, setPreparationTimne] = useState({ hours: "", minutes: "" })
+    const [FeedbackIncorporationTime, setFeedbackIncorporationTime] = useState({ hours: "", minutes: "" })
+    const [reviewTime, setReviewTime] = useState({ hours: "", minutes: "" })
+    const [budgetedHours, setBudgetedHours] = useState({ hours: "", minutes: "" })
+    const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" })
 
 
     const [jobData, setJobData] = useState({
@@ -62,6 +67,9 @@ const CreateJob = () => {
         InvoiceRemark: "",
     });
 
+
+
+
     useEffect(() => {
         setJobData(prevState => ({
             ...prevState,
@@ -100,9 +108,14 @@ const CreateJob = () => {
     }, []);
 
     const HandleChange = (e) => {
+        console.log("e.target", e.target.value)
         let name = e.target.name
         let value = e.target.value
-
+        if (name == "NumberOfTransactions" || name == "NumberOfTrialBalanceItems" || name == "Turnover") {
+            if (!/^[0-9+]*$/.test(value)) {
+                return;
+            }
+        }
         if (['BudgetedHours', 'TotalPreparationTime', 'ReviewTime', 'FeedbackIncorporationTime'].includes(name)) {
             value = (value).replace(":", "")
         }
@@ -112,8 +125,6 @@ const CreateJob = () => {
         }));
 
         validate(name, value);
-
-
     }
 
     const fieldErrors = {
@@ -133,33 +144,33 @@ const CreateJob = () => {
         // 'TotalPreparationTime': 'Please Enter Total Preparation Time',
         // 'ReviewTime': 'Please Enter Review Time',
         // 'FeedbackIncorporationTime': 'Please Enter Feedback Incorporation Time',
-        'TotalTime': 'Please Enter Total Time',
-        'EngagementModel': 'Please Select Engagement Model',
-        'ExpectedDeliveryDate': 'Please Enter Expected Delivery Date',
-        'DueOn': 'Please Enter Due On',
-        'SubmissionDeadline': 'Please Enter Submission Deadline',
-        'CustomerDeadlineDate': 'Please Enter Customer Deadline Date',
-        'SLADeadlineDate': 'Please Enter SLA Deadline Date',
-        'InternalDeadlineDate': 'Please Enter Internal Deadline Date',
-        'FilingWithCompaniesHouseRequired': 'Please Select Filing With Companies House Required',
-        'CompaniesHouseFilingDate': 'Please Enter Companies House Filing Date',
-        'FilingWithHMRCRequired': 'Please Select Filing With HMRC Required',
-        'HMRCFilingDate': 'Please Enter HMRC Filing Date',
-        'OpeningBalanceAdjustmentRequired': 'Please Select Opening Balance Adjustment Required',
-        'OpeningBalanceAdjustmentDate': 'Please Enter Opening Balance Adjustment Date',
-        'NumberOfTransactions': 'Please Enter Number Of Transactions',
-        'NumberOfTrialBalanceItems': 'Please Enter Number Of Trial Balance Items',
-        'Turnover': 'Please Enter Turnover',
-        'NoOfEmployees': 'Please Enter No Of Employees',
-        'VATReconciliation': 'Please Select VAT Reconciliation',
-        'Bookkeeping': 'Please Select Bookkeeping',
-        'ProcessingType': 'Please Select Processing Type',
-        'Invoiced': 'Please Select Invoiced',
-        'Currency': 'Please Select Currency',
-        'InvoiceValue': 'Please Enter Invoice Value',
-        'InvoiceDate': 'Please Enter Invoice Date',
-        'InvoiceHours': 'Please Enter Invoice Hours',
-        'InvoiceRemark': 'Please Enter Invoice Remark'
+        // 'TotalTime': 'Please Enter Total Time',
+        // 'EngagementModel': 'Please Select Engagement Model',
+        // 'ExpectedDeliveryDate': 'Please Enter Expected Delivery Date',
+        // 'DueOn': 'Please Enter Due On',
+        // 'SubmissionDeadline': 'Please Enter Submission Deadline',
+        // 'CustomerDeadlineDate': 'Please Enter Customer Deadline Date',
+        // 'SLADeadlineDate': 'Please Enter SLA Deadline Date',
+        // 'InternalDeadlineDate': 'Please Enter Internal Deadline Date',
+        // 'FilingWithCompaniesHouseRequired': 'Please Select Filing With Companies House Required',
+        // 'CompaniesHouseFilingDate': 'Please Enter Companies House Filing Date',
+        // 'FilingWithHMRCRequired': 'Please Select Filing With HMRC Required',
+        // 'HMRCFilingDate': 'Please Enter HMRC Filing Date',
+        // 'OpeningBalanceAdjustmentRequired': 'Please Select Opening Balance Adjustment Required',
+        // 'OpeningBalanceAdjustmentDate': 'Please Enter Opening Balance Adjustment Date',
+        'NumberOfTransactions': 'Please Enter Number Of Transactions less than 1000000',
+        'NumberOfTrialBalanceItems': 'Please Enter Number Of Trial Balance Items less than 5000',
+        'Turnover': 'Please Enter Turnover less than 200000000',
+        // 'NoOfEmployees': 'Please Enter No Of Employees',
+        // 'VATReconciliation': 'Please Select VAT Reconciliation',
+        // 'Bookkeeping': 'Please Select Bookkeeping',
+        // 'ProcessingType': 'Please Select Processing Type',
+        // 'Invoiced': 'Please Select Invoiced',
+        // 'Currency': 'Please Select Currency',
+        // 'InvoiceValue': 'Please Enter Invoice Value',
+        // 'InvoiceDate': 'Please Enter Invoice Date',
+        // 'InvoiceHours': 'Please Enter Invoice Hours',
+        // 'InvoiceRemark': 'Please Enter Invoice Remark'
     };
 
     const validate = (name, value, isSubmitting = false) => {
@@ -167,17 +178,30 @@ const CreateJob = () => {
 
         if (isSubmitting) {
             for (const key in fieldErrors) {
-                if (!jobData[key]) {
+                if (!jobData[key] && key != "NumberOfTransactions" && key != "NumberOfTrialBalanceItems" && key != "Turnover") {
                     newErrors[key] = fieldErrors[key];
                 }
             }
         }
         else {
-            if (!value) {
+            if (!value && name != "NumberOfTransactions" && name != "NumberOfTrialBalanceItems" && name != "Turnover") {
                 if (fieldErrors[name]) {
                     newErrors[name] = fieldErrors[name];
                 }
-            } else {
+            }
+            else if (name == "NumberOfTransactions" && (value > 1000000)) {
+                newErrors[name] = fieldErrors[name];
+            }
+            else if (name == "NumberOfTrialBalanceItems" && (value > 5000)) {
+                newErrors[name] = fieldErrors[name];
+            }
+            else if (name == "Turnover" && (value > 200000000)) {
+                newErrors[name] = fieldErrors[name];
+            }
+
+
+
+            else {
                 delete newErrors[name];
             }
         }
@@ -198,6 +222,7 @@ const CreateJob = () => {
 
 
 
+
     const handleSubmit = async () => {
         const req = {
             account_manager_id: location.state.goto == "Customer" ? location.state.details.account_manager_id : location.state.details.customer_id.account_manager_id,
@@ -207,16 +232,16 @@ const CreateJob = () => {
             customer_contact_details_id: Number(jobData.CustomerAccountManager),
             service_id: Number(jobData.Service),
             job_type_id: Number(jobData.JobType),
-            budgeted_hours: Number(jobData.BudgetedHours),
+            budgeted_hours: budgetedHours.hours + ":" + budgetedHours.minutes,
             reviewer: Number(jobData.Reviewer),
             allocated_to: Number(jobData.AllocatedTo),
             allocated_on: jobData.AllocatedOn ? jobData.AllocatedOn : new Date().toISOString().split('T')[0],
             date_received_on: jobData.DateReceivedOn ? jobData.DateReceivedOn : new Date().toISOString().split('T')[0],
             year_end: jobData.YearEnd,
-            total_preparation_time: Number(jobData.TotalPreparationTime),
-            review_time: Number(jobData.ReviewTime),
-            feedback_incorporation_time: Number(jobData.FeedbackIncorporationTime),
-            total_time: jobData.TotalTime,
+            total_preparation_time: PreparationTimne.hours + ":" + PreparationTimne.minutes,
+            review_time: reviewTime.hours + ":" + reviewTime.minutes,
+            feedback_incorporation_time: FeedbackIncorporationTime.hours + ":" + FeedbackIncorporationTime.minutes,
+            total_time: Math.floor(totalHours / 60) + ":" + totalHours % 60,
             engagement_model: jobData.EngagementModel,
             expected_delivery_date: jobData.ExpectedDeliveryDate,
             due_on: jobData.DueOn,
@@ -287,18 +312,14 @@ const CreateJob = () => {
         : {};
 
 
-    const handleClose = () => {
-        if (location.state.goto == "Customer")
-            navigate('/admin/Clientlist', { state: location.state });
-        else {
 
-            navigate('/admin/client/profile', { state: location.state });
-        }
-    }
+    const totalHours = Number(PreparationTimne.hours) * 60 + Number(PreparationTimne.minutes) + Number(reviewTime.hours) * 60 + Number(reviewTime.minutes) + Number(FeedbackIncorporationTime.hours) * 60 + Number(FeedbackIncorporationTime.minutes)
 
 
-    let totalTime = Number(jobData.TotalPreparationTime) + Number(jobData.ReviewTime) + Number(jobData.FeedbackIncorporationTime)
-    totalTime = totalTime.toString();
+
+
+
+
 
     return (
         <div>
@@ -438,26 +459,40 @@ const CreateJob = () => {
                                                                         )}
                                                                     </div>
 
-
                                                                     <div className="col-lg-4">
-                                                                        <label className="form-label">Budgeted Hours</label>
-                                                                        <div className="input-group">
-
-                                                                            <input type="time"
-                                                                                name="BudgetedHours"
-                                                                                className="form-control"
-
-                                                                                onChange={HandleChange}
-
-                                                                                defaultValue={jobData.BudgetedHours.substring(0, 2) + ":" + jobData.BudgetedHours.substring(2)}
-                                                                            />
-
-                                                                            <span className="input-group-text">Hours</span>
+                                                                        <div className="mb-3">
+                                                                            <label className="form-label" >Budgeted Hours</label>
+                                                                            <div className="input-group">
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    placeholder="Hours"
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || Number(value) >= 0) {
+                                                                                            setBudgetedHours({ ...budgetedHours, hours: value });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={budgetedHours.hours}
+                                                                                />
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    placeholder="Minutes"
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                                                                                            setBudgetedHours({
+                                                                                                ...budgetedHours,
+                                                                                                minutes: value
+                                                                                            });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={budgetedHours.minutes}
+                                                                                />
+                                                                            </div>
 
                                                                         </div>
-                                                                        {errors['BudgetedHours'] && (
-                                                                            <div className="error-text">{errors['BudgetedHours']}</div>
-                                                                        )}
                                                                     </div>
 
                                                                     <div className="col-lg-4">
@@ -512,11 +547,11 @@ const CreateJob = () => {
 
                                                                     <div className="col-lg-4">
                                                                         <div className="mb-3">
-                                                                            <label className="form-label"  > Year End </label>
+                                                                            <label className="form-label">Year End</label>
                                                                             <input
                                                                                 type="month"
                                                                                 className="form-control"
-                                                                                placeholder="MM/YYYY"  
+                                                                                placeholder="MM/YYYY"
                                                                                 name="YearEnd"
                                                                                 onChange={HandleChange}
                                                                                 value={jobData.YearEnd}
@@ -527,57 +562,120 @@ const CreateJob = () => {
 
                                                                         </div>
                                                                     </div>
-
                                                                     <div className="col-lg-4">
                                                                         <div className="mb-3">
-                                                                            <label className="form-label">Total Preparation Time</label>
-
-                                                                            <input type="time"
-                                                                                name="TotalPreparationTime"
-                                                                                className="form-control"
-
-                                                                                onChange={HandleChange}
-                                                                                defaultValue={jobData.TotalPreparationTime.substring(0, 2) + ":" + jobData.TotalPreparationTime.substring(2)}
-                                                                            />
-
+                                                                            <label className="form-label" >Total Preparation Time</label>
+                                                                            <div className="input-group">
+                                                                                <input
+                                                                                    type="number"
+                                                                                    className="form-control"
+                                                                                    placeholder="Hours"
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || Number(value) >= 0) {
+                                                                                            setPreparationTimne({ ...PreparationTimne, hours: value });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={PreparationTimne.hours}
+                                                                                />
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    placeholder="Minutes"
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                                                                                            setPreparationTimne({
+                                                                                                ...PreparationTimne,
+                                                                                                minutes: value
+                                                                                            });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={PreparationTimne.minutes}
+                                                                                />
+                                                                            </div>
                                                                             {errors['TotalPreparationTime'] && (
                                                                                 <div className="error-text">{errors['TotalPreparationTime']}</div>
                                                                             )}
-
                                                                         </div>
                                                                     </div>
+
 
                                                                     <div className="col-lg-4">
                                                                         <div className="mb-3">
                                                                             <label className="form-label" >Review Time</label>
-                                                                            <input type="time"
-                                                                                name="ReviewTime"
-                                                                                className="form-control"
+                                                                            <div className="input-group">
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    placeholder="Hours"
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || Number(value) >= 0) {
+                                                                                            setReviewTime({ ...reviewTime, hours: value });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={reviewTime.hours}
+                                                                                />
 
-                                                                                onChange={HandleChange}
-                                                                                defaultValue={jobData.ReviewTime.substring(0, 2) + ":" + jobData.ReviewTime.substring(2)}
-                                                                            />
-                                                                            {errors['ReviewTime'] && (
-                                                                                <div className="error-text">{errors['ReviewTime']}</div>
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    placeholder="Minutes"
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                                                                                            setReviewTime({
+                                                                                                ...reviewTime,
+                                                                                                minutes: value
+                                                                                            });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={reviewTime.minutes}
+                                                                                />
+
+                                                                            </div>
+                                                                            {errors['TotalPreparationTime'] && (
+                                                                                <div className="error-text">{errors['TotalPreparationTime']}</div>
                                                                             )}
                                                                         </div>
                                                                     </div>
-
                                                                     <div className="col-lg-4">
                                                                         <div className="mb-3">
-                                                                            <label className="form-label">Feedback Incorporation Time</label>
+                                                                            <label className="form-label" >Feedback Incorporation Time</label>
+                                                                            <div className="input-group">
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    placeholder="Hours"
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || /^[0-9]*$/.test(value)) {
+                                                                                            setFeedbackIncorporationTime({ ...FeedbackIncorporationTime, hours: value });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={FeedbackIncorporationTime.hours}
+                                                                                />
 
-                                                                            <input type="time"
-                                                                                name="FeedbackIncorporationTime"
-                                                                                className="form-control"
-
-                                                                                onChange={HandleChange}
-                                                                                defaultValue={jobData.FeedbackIncorporationTime.substring(0, 2) + ":" + jobData.FeedbackIncorporationTime.substring(2)}
-                                                                            />
-                                                                            {errors['FeedbackIncorporationTime'] && (
-                                                                                <div className="error-text">{errors['FeedbackIncorporationTime']}</div>
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    placeholder="Minutes"
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                                                                                            setFeedbackIncorporationTime({
+                                                                                                ...FeedbackIncorporationTime,
+                                                                                                minutes: value
+                                                                                            });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={FeedbackIncorporationTime.minutes}
+                                                                                />
+                                                                            </div>
+                                                                            {errors['TotalPreparationTime'] && (
+                                                                                <div className="error-text">{errors['TotalPreparationTime']}</div>
                                                                             )}
-
                                                                         </div>
                                                                     </div>
 
@@ -588,13 +686,10 @@ const CreateJob = () => {
                                                                             <input type="text"
                                                                                 name="TotalTime"
                                                                                 className="form-control"
-                                                                                value={totalTime.substring(0, 2) + ":" + totalTime.substring(2)}
-
-                                                                                //onChange={HandleChange}
+                                                                                value={Math.floor(totalHours / 60) + ":" + totalHours % 60}
+                                                                                onChange={HandleChange}
                                                                                 disabled
                                                                             />
-
-
                                                                             {errors['TotalTime'] && (
                                                                                 <div className="error-text">{errors['TotalTime']}</div>
                                                                             )}
@@ -701,8 +796,8 @@ const CreateJob = () => {
                                                                                 <select className="form-select"
                                                                                     name="FilingWithCompaniesHouseRequired" onChange={HandleChange} value={jobData.FilingWithCompaniesHouseRequired}>
                                                                                     <option value="">Please Select Companies House Required</option>
-                                                                                    <option value="0">No</option>
                                                                                     <option value="1">Yes</option>
+                                                                                    <option value="0">No</option>
                                                                                 </select>
                                                                                 {errors['FilingWithCompaniesHouseRequired'] && (
                                                                                     <div className="error-text">{errors['FilingWithCompaniesHouseRequired']}</div>
@@ -725,8 +820,8 @@ const CreateJob = () => {
                                                                             <select className="form-select invoice_type_dropdown"
                                                                                 name="FilingWithHMRCRequired" onChange={HandleChange} value={jobData.FilingWithHMRCRequired}>
                                                                                 <option value="">Please Select HMRC Required</option>
-                                                                                <option value="0">No</option>
                                                                                 <option value="1">Yes</option>
+                                                                                <option value="0">No</option>
                                                                             </select>
                                                                             {errors['FilingWithHMRCRequired'] && (
                                                                                 <div className="error-text">{errors['FilingWithHMRCRequired']}</div>
@@ -782,6 +877,7 @@ const CreateJob = () => {
                                                                             <label className="form-label" >Number of Transactions </label>
                                                                             <input type="text" className="form-control" placeholder="Number of Transactions"
                                                                                 name="NumberOfTransactions" onChange={HandleChange} value={jobData.NumberOfTransactions}
+
                                                                             />
                                                                             {errors['NumberOfTransactions'] && (
                                                                                 <div className="error-text">{errors['NumberOfTransactions']}</div>
@@ -789,8 +885,9 @@ const CreateJob = () => {
                                                                         </div>
                                                                         <div className="col-lg-4">
                                                                             <label className="form-label" >Number of Trial Balance Items</label>
-                                                                            <input type="text" className="form-control" placeholder="Number of Trial Balance Items"
+                                                                            <input type="text" className="form-control" placeholder="Enter Trial Balance Items"
                                                                                 name="NumberOfTrialBalanceItems" onChange={HandleChange} value={jobData.NumberOfTrialBalanceItems}
+
                                                                             />
                                                                             {errors['NumberOfTrialBalanceItems'] && (
                                                                                 <div className="error-text">{errors['NumberOfTrialBalanceItems']}</div>
@@ -798,7 +895,7 @@ const CreateJob = () => {
                                                                         </div>
                                                                         <div className="col-lg-4">
                                                                             <label className="form-label">Turnover</label>
-                                                                            <input type="text" className="form-control" placeholder="Turnover"
+                                                                            <input type="text" className="form-control" placeholder="Enter Turnover"
                                                                                 name="Turnover" onChange={HandleChange} value={jobData.Turnover}
                                                                             />
                                                                             {errors['Turnover'] && (
@@ -846,6 +943,7 @@ const CreateJob = () => {
                                                                             <select className="form-select invoice_type_dropdown"
                                                                                 name="ProcessingType" onChange={HandleChange} value={jobData.ProcessingType}
                                                                             >
+                                                                                <option value="">Please Select Processing Type</option>
                                                                                 <option value="1"> Manual </option>
                                                                                 <option value="2">Software</option>
                                                                             </select>
@@ -909,31 +1007,64 @@ const CreateJob = () => {
                                                                                 )}
                                                                             </div>
                                                                             <div className="col-lg-4">
-                                                                                <label className="form-label" > Invoice Date </label>
-                                                                                <input type="date" className="form-control" placeholder="DD-MM-YYYY"
-                                                                                    name="InvoiceDate" onChange={HandleChange} value={jobData.InvoiceDate}
+                                                                                <label className="form-label">Invoice Date</label>
+                                                                                <input
+                                                                                    type="date"
+                                                                                    className="form-control"
+                                                                                    placeholder="DD-MM-YYYY"
+                                                                                    name="InvoiceDate"
+                                                                                    onChange={HandleChange}
+                                                                                    value={jobData.InvoiceDate}
+                                                                                    max={new Date().toISOString().split("T")[0]}
                                                                                 />
                                                                                 {errors['InvoiceDate'] && (
                                                                                     <div className="error-text">{errors['InvoiceDate']}</div>
                                                                                 )}
                                                                             </div>
+
+
+
                                                                             <div className="col-lg-4">
-                                                                                <label className="form-label" >Invoice Hours </label>
-                                                                                <div className="input-group">
-                                                                                    <input type="text" className="form-control"
-                                                                                        name="InvoiceHours" onChange={HandleChange} value={jobData.InvoiceHours}
-                                                                                    />
-                                                                                    <span className="input-group-text" >Hours</span>
+                                                                                <div className="mb-3">
+                                                                                    <label className="form-label" >Invoice Date</label>
+                                                                                    <div className="input-group">
+                                                                                        <input
+                                                                                            type="text"
+                                                                                            className="form-control"
+                                                                                            placeholder="Hours"
+                                                                                            onChange={(e) => {
+                                                                                                const value = e.target.value;
+                                                                                                if (value === '' || Number(value) >= 0) {
+                                                                                                    setInvoiceTime({ ...invoiceTime, hours: value });
+                                                                                                }
+                                                                                            }}
+                                                                                            value={invoiceTime.hours}
+                                                                                        />
+                                                                                        <input
+                                                                                            type="text"
+                                                                                            className="form-control"
+                                                                                            placeholder="Minutes"
+                                                                                            onChange={(e) => {
+                                                                                                const value = e.target.value;
+                                                                                                if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                                                                                                    setInvoiceTime({
+                                                                                                        ...invoiceTime,
+                                                                                                        minutes: value
+                                                                                                    });
+                                                                                                }
+                                                                                            }}
+                                                                                            value={invoiceTime.minutes}
+                                                                                        />
+                                                                                    </div>
 
                                                                                 </div>
-                                                                                {errors['InvoiceHours'] && (
-                                                                                    <div className="error-text">{errors['InvoiceHours']}</div>
-                                                                                )}
                                                                             </div>
+
                                                                             <div id="invoicedremark" className="col-lg-4">
                                                                                 <label className="form-label" >Invoice Remark</label>
                                                                                 <input type="text" className="form-control" placeholder="Invoice Remark"
                                                                                     name="InvoiceRemark" onChange={HandleChange} value={jobData.InvoiceRemark}
+                                                                                    maxLength={500}
                                                                                 />
                                                                                 {errors['InvoiceRemark'] && (
                                                                                     <div className="error-text">{errors['InvoiceRemark']}</div>
@@ -949,7 +1080,7 @@ const CreateJob = () => {
                                             </div>
                                         </div>
                                         <div className="hstack gap-2 justify-content-end">
-                                            {/* <button type="button" className="btn btn-secondary" onClick={handleClose} >Cancel</button> */}
+
                                             <button type="button" className="btn btn-info text-white float-end blue-btn" onClick={handleSubmit}>Add Job</button>
                                         </div>
                                     </div>
