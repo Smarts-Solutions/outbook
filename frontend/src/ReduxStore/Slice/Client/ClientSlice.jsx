@@ -1,11 +1,28 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { GET_CLIENT_INDUSTRY, ADD_CLIENT, GET_ALL_CLIENT , EDIT_CLIENT } from "../../../Services/Client/ClientService";
+import { GET_CLIENT_INDUSTRY, ADD_CLIENT, GET_ALL_CLIENT, EDIT_CLIENT } from "../../../Services/Client/ClientService";
+
+import axios from "axios";
+const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+const token = localStorage.getItem("token");
+
+
+export async function GET_IP(data, token) {
+  try {
+    const res = await axios.get(`https://api.ipify.org?format=json`)
+    return await res;
+  }
+  catch (err) {
+  }
+}
 
 
 export const GetClientIndustry = createAsyncThunk("clientIndustry", async (data) => {
   const { req, authToken } = data
   try {
-    const res = await GET_CLIENT_INDUSTRY(req, authToken);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await GET_CLIENT_INDUSTRY(updatedReq, authToken);
+
     return await res;
   } catch (err) {
     throw err;
@@ -15,7 +32,10 @@ export const GetClientIndustry = createAsyncThunk("clientIndustry", async (data)
 export const Get_All_Client = createAsyncThunk("clientAction", async (data) => {
   const { req, authToken } = data
   try {
-    const res = await GET_ALL_CLIENT(req, authToken);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await GET_ALL_CLIENT(updatedReq, authToken);
+
     return await res;
   } catch (err) {
     throw err;
@@ -23,9 +43,13 @@ export const Get_All_Client = createAsyncThunk("clientAction", async (data) => {
 });
 
 export const Add_Client = createAsyncThunk("addClient", async (req) => {
+  const authToken = token;
 
   try {
-    const res = await ADD_CLIENT(req);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await ADD_CLIENT(updatedReq, authToken);
+
     return await res;
   } catch (err) {
     throw err;
@@ -33,16 +57,19 @@ export const Add_Client = createAsyncThunk("addClient", async (req) => {
 });
 
 export const Edit_Client = createAsyncThunk("clientUpdate", async (req) => {
-
+  const authToken = token;
   try {
-    const res = await EDIT_CLIENT(req);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await EDIT_CLIENT(updatedReq, authToken);
+
     return await res;
   } catch (err) {
     throw err;
   }
 });
 
- 
+
 
 
 const ClientSlice = createSlice({
@@ -56,7 +83,7 @@ const ClientSlice = createSlice({
     getallclient: [],
     editclient: [],
 
-    
+
 
 
   },
@@ -107,7 +134,7 @@ const ClientSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
       });
-       
+
 
 
   },

@@ -1,11 +1,30 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { GETACCESS, ROLEACCESS } from "../../../Services/Access/Accessservices";
+import axios from "axios";
+const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+
+
+export async function GET_IP(data, token) {
+  try {
+    const res = await axios.get(`https://api.ipify.org?format=json`)
+    return await res;
+  }
+  catch (err) {
+  }
+}
+
+
+
+
+
 
 // Unique action type for GetAccess
 export const GetAccess = createAsyncThunk("accessRolePermissions/getAccess", async (data) => {
   try {
     const { req, authToken } = data;
-    const res = await GETACCESS(req, authToken);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await GETACCESS(updatedReq, authToken);
     return await res;
   } catch (err) {
     throw err;
@@ -16,7 +35,10 @@ export const GetAccess = createAsyncThunk("accessRolePermissions/getAccess", asy
 export const RoleAccess = createAsyncThunk("accessRolePermissions/roleAccess", async (data) => {
   try {
     const { req, authToken } = data;
-    const res = await ROLEACCESS(req, authToken);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await ROLEACCESS(updatedReq, authToken);
+     
     return await res;
   } catch (err) {
     throw err;
