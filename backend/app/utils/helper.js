@@ -18,8 +18,7 @@ const SatffLogUpdateOperation = async (logData) => {
     } catch (error) {
        console.log("Error in SatffLogUpdateOperation",error) 
     }
-    // const logQuery = `INSERT INTO log_files SET ?`;
-    // await pool.execute(logQuery, logData);
+  
   };
   
   module.exports = { SatffLogUpdateOperation };
