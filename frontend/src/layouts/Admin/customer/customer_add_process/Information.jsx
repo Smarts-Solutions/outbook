@@ -2,42 +2,45 @@ import React, { useState, useEffect, useContext } from "react";
 import { useDispatch } from "react-redux";
 import { Formik, Field, Form, useFormik } from "formik";
 import AddFrom from "../../../../Components/ExtraComponents/Forms/Customer.form";
-import {
-  GetAllCompany,
-  AddCustomer,
-} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { Email_regex } from "../../../../Utils/Common_regex";
+import { GetAllCompany, AddCustomer } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import MultiStepFormContext from "./MultiStepFormContext";
 import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
-import { PersonRole } from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import { PersonRole, Country } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
+import { GET_CUSTOMER_DATA } from '../../../../ReduxStore/Slice/Customer/CustomerSlice'
 
 const Information = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
+  const customer_id = localStorage.getItem("coustomerId");
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
   const [getAccountMangerId, setAccountMangerId] = useState("");
+  const [getAccountMangerIdErr, setAccountMangerIdErr] = useState("");
+
   const [CustomerType, setCustomerType] = useState("1");
   const [getNextStatus, setNextStatus] = useState("0");
-  const [personRoleDataAll, setPersonRoleDataAll] = useState({
-    loading: true,
-    data: [],
-  });
+  const [customerDetails, setCustomerDetails] = useState({ loading: true, data: [] });
+  const [personRoleDataAll, setPersonRoleDataAll] = useState({ loading: true, data: [] });
+  const [errors, setErrors] = useState([{ firstName: "", lastName: "", role: "", phoneNumber: "", email: "" }]);
   const [getAllSearchCompany, setGetAllSearchCompany] = useState([]);
-  const [contacts, setContacts] = useState([
-    {
-      authorised_signatory_status: false,
-      firstName: "",
-      lastName: "",
-      role: "",
-      phoneNumber: "",
-      email: "",
-    },
+  const [countryDataAll, setCountryDataAll] = useState({ loading: true, data: [] });
+  const [contacts, setContacts] = useState([{
+    authorised_signatory_status: false,
+    firstName: "",
+    lastName: "",
+    role: "",
+    phoneNumber: "",
+    email: "",
+    phone_code: "+44"
+  },
   ]);
-  const [errors, setErrors] = useState([
-    { firstName: "", lastName: "", role: "", phoneNumber: "", email: "" },
-  ]);
+
+
+ 
+
 
   const handleAddContact = () => {
     setContacts([
@@ -49,6 +52,7 @@ const Information = () => {
         role: "",
         phoneNumber: "",
         email: "",
+        phone_code: "+44"
       },
     ]);
     setErrors([
@@ -84,12 +88,13 @@ const Information = () => {
   };
 
   const AddCustomerFun = async (req) => {
+
     const data = { req: req, authToken: token };
     await dispatch(AddCustomer(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          next(response.data);
+          next(response.data, 2);
         } else {
           sweatalert.fire({
             icon: "error",
@@ -114,7 +119,7 @@ const Information = () => {
       Registered_Office_Addres: "",
       Incorporation_Date: "",
       Incorporation_in: "",
-      VAT_Registered: "",
+      VAT_Registered: '0',
       VAT_Number: "",
       Website: "",
       Trading_Name: "",
@@ -122,43 +127,53 @@ const Information = () => {
     },
     validate: (values) => {
       let errors = {};
+
+      if (formik.touched.Trading_Name == true && getAccountMangerId == "") {
+        setAccountMangerIdErr("Please select an Account Manager")
+        return
+      }
+
       if (!values.company_name) {
         errors.company_name = "Please Enter Company Name";
       }
-      if (!values.entity_type) {
+      else if (!values.entity_type) {
         errors.entity_type = "Please Enter Entity Type";
       }
-      if (!values.company_status) {
+      else if (!values.company_status) {
         errors.company_status = "Please Enter Company Status";
       }
-      if (!values.company_number) {
+      else if (!values.company_number) {
         errors.company_number = "Please Enter Company Number";
       }
-      if (!values.Registered_Office_Addres) {
+      else if (!values.Registered_Office_Addres) {
         errors.Registered_Office_Addres =
           "Please Enter Registered Office Address";
       }
-      if (!values.Incorporation_Date) {
+      else if (!values.Incorporation_Date) {
         errors.Incorporation_Date = "Please Enter Incorporation Date";
       }
-      if (!values.Incorporation_in) {
+      else if (!values.Incorporation_in) {
         errors.Incorporation_in = "Please Enter Incorporation in";
       }
-      if (!values.VAT_Registered) {
-        errors.VAT_Registered = "Please Enter VAT Registered";
-      }
-      if (!values.VAT_Number) {
+      //  else if (!values.VAT_Registered) {
+      //     errors.VAT_Registered = "Please Enter VAT Registered";
+      //   }
+      else if (values.VAT_Registered === '1' && !values.VAT_Number) {
         errors.VAT_Number = "Please Enter VAT Number";
       }
-      if (!values.Website) {
-        errors.Website = "Please Enter Website";
+      else if (values.VAT_Number && values.VAT_Number.length > 9) {
+        errors.VAT_Number = "VAT Number cannot exceed 9 Numbers";
       }
-      if (!values.Trading_Name) {
+      else if (values.Website && values.Website.length > 200) {
+        errors.Website = "Website cannot exceed 200 characters";
+      }
+      else if (!values.Trading_Name) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
-      if (!values.Trading_Address) {
-        errors.Trading_Address = "Please Enter Trading Address";
-      }
+      //  else if (!values.Trading_Address) {
+      //     errors.Trading_Address = "Please Enter Trading Address";
+      //   }
+
 
       return errors;
     },
@@ -168,14 +183,14 @@ const Information = () => {
         const error = {
           firstName: contact.firstName ? "" : "First Name is required",
           lastName: contact.lastName ? "" : "Last Name is required",
-          role: contact.role ? "" : "Role is required",
-          phoneNumber: contact.phoneNumber ? "" : "Phone Number is required",
+          // role: contact.role ? "" : "Role is required",
+          // phoneNumber: contact.phoneNumber ? "" : "Phone Number is required",
           email:
             contact.email === ""
               ? "Email Id is required"
               : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-              ? ""
-              : "Valid Email is required",
+                ? ""
+                : "Valid Email is required",
         };
 
         if (
@@ -192,7 +207,12 @@ const Information = () => {
 
       setErrors(newErrors);
       if (formIsValid) {
+        if (getAccountMangerId == "") {
+          return
+        }
         let req = {
+          customer_id: Number(customer_id),
+          contact_id: customerDetails.data.contact_id,
           company_name: values.company_name,
           entity_type: values.entity_type,
           company_status: values.company_status,
@@ -220,7 +240,7 @@ const Information = () => {
     initialValues: {
       Trading_Name: "",
       Trading_Address: "",
-      VAT_Registered: "",
+      VAT_Registered: '0',
       VAT_Number: "",
       Website: "",
       First_Name: "",
@@ -228,45 +248,91 @@ const Information = () => {
       Phone: "",
       Email: "",
       Residential_Address: "",
+      countryCode: "+44",
+
     },
     validate: (values) => {
       let errors = {};
+ 
+
+
+      if (formik1.touched.Email == true && getAccountMangerId == "") {
+        setAccountMangerIdErr("Please select an Account Manager")
+        return
+      }
       if (!values.Trading_Name) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
-      if (!values.Trading_Address) {
-        errors.Trading_Address = "Please Enter Trading Address";
+      if (values.Trading_Name && values.Trading_Name.length > 100) {
+        errors.Trading_Name = "Trading Name cannot exceed 100 characters";
       }
-      if (!values.VAT_Registered) {
+      if(values.Phone && values.Phone.toString().length > 12){
+        errors.Phone = "Phone Number cannot exceed 12 digits";
+
+      }
+      else if(values.Phone && values.Phone.toString().length < 9){
+        errors.Phone = "Phone Number cannot be less than 9 digits";
+      }
+
+      else if (values.Trading_Address && values.Trading_Address.length > 200) {
+        errors.Trading_Address = "Trading Address cannot exceed 200 characters";
+      }
+      else if (!values.VAT_Registered) {
         errors.VAT_Registered = "Please Enter VAT Registered";
       }
-      if (!values.VAT_Number) {
+
+      else if (values.VAT_Registered === '1' && !values.VAT_Number) {
         errors.VAT_Number = "Please Enter VAT Number";
       }
-      if (!values.Website) {
-        errors.Website = "Please Enter Website";
+      else if (values.VAT_Number && values.VAT_Number.length > 9) {
+        errors.VAT_Number = "VAT Number cannot exceed 9 Numbers";
       }
-      if (!values.First_Name) {
+
+      else if (values.Website && values.Website.length > 200) {
+        errors.Website = "Website cannot exceed 200 characters";
+      }
+
+      else if (!values.First_Name) {
         errors.First_Name = "Please Enter First Name";
       }
-      if (!values.Last_Name) {
+      else if (values.First_Name && values.First_Name.length > 50) {
+        errors.First_Name = "First Name exceed 50 characters";
+      }
+
+      else if (!values.Last_Name) {
         errors.Last_Name = "Please Enter Last Name";
       }
-      if (!values.Phone) {
-        errors.Phone = "Please Enter Phone";
+      else if (values.Last_Name && values.Last_Name.length > 50) {
+        errors.Last_Name = "Last Name exceed 50 characters";
       }
-      if (!values.Email) {
+
+      else if (!values.Email) {
         errors.Email = "Please Enter Email";
       }
-      if (!values.Residential_Address) {
+      else if (!Email_regex(values.Email)) {
+        errors.Email = "Please Enter Valid Email";
+      }
+
+      else if (!values.Residential_Address) {
         errors.Residential_Address = "Please Enter Residential Address";
       }
+
+      else if (values.Residential_Address && values.Residential_Address.length > 200) {
+        errors.Residential_Address = "Residential Address cannot exceed 200 characters";
+      } 
 
       return errors;
     },
 
     onSubmit: async (values) => {
+
+      if (getAccountMangerId == "") {
+        return
+      }
+
+
       const req = {
+        customer_id: Number(customer_id),
         Trading_Name: values.Trading_Name,
         Trading_Address: values.Trading_Address,
         VAT_Registered: values.VAT_Registered,
@@ -281,7 +347,12 @@ const Information = () => {
         CustomerType: CustomerType,
         account_manager_id: getAccountMangerId,
         staff_id: staffDetails.id,
+        phone_code: values.countryCode
+
       };
+
+
+
       await AddCustomerFun(req);
     },
   });
@@ -290,26 +361,27 @@ const Information = () => {
     initialValues: {
       Trading_Name: "",
       Trading_Address: "",
-      VAT_Registered: "",
+      VAT_Registered: "0",
       VAT_Number: "",
       Website: "",
     },
     validate: (values) => {
       let errors = {};
+      if (formik2.touched.Trading_Name == true && getAccountMangerId == "") {
+        setAccountMangerIdErr("Please select an Account Manager")
+        return
+      }
+
       if (!values.Trading_Name) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
-      if (!values.Trading_Address) {
-        errors.Trading_Address = "Please Enter Trading Address";
-      }
-      if (!values.VAT_Registered) {
+
+      else if (!values.VAT_Registered) {
         errors.VAT_Registered = "Please Enter VAT Registered";
       }
-      if (!values.VAT_Number) {
+
+      else if (values.VAT_Registered === '1' && !values.VAT_Number) {
         errors.VAT_Number = "Please Enter VAT Number";
-      }
-      if (!values.Website) {
-        errors.Website = "Please Enter Website";
       }
 
       return errors;
@@ -321,23 +393,15 @@ const Information = () => {
         const error = {
           firstName: contact.firstName ? "" : "First Name is required",
           lastName: contact.lastName ? "" : "Last Name is required",
-          role: contact.role ? "" : "Role is required",
-          phoneNumber: contact.phoneNumber ? "" : "Phone Number is required",
           email:
             contact.email === ""
               ? "Email Id is required"
               : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-              ? ""
-              : "Valid Email is required",
+                ? ""
+                : "Valid Email is required",
         };
 
-        if (
-          error.firstName ||
-          error.lastName ||
-          error.role ||
-          error.phoneNumber ||
-          error.email
-        ) {
+        if (error.firstName || error.lastName || error.role || error.phoneNumber || error.email) {
           formIsValid = false;
         }
         return error;
@@ -346,7 +410,12 @@ const Information = () => {
       setErrors(newErrors);
 
       if (formIsValid) {
+
+        if (getAccountMangerId == "") {
+          return
+        }
         const req = {
+          customer_id: Number(customer_id),
           Trading_Name: values.Trading_Name,
           Trading_Address: values.Trading_Address,
           VAT_Registered: values.VAT_Registered,
@@ -356,7 +425,7 @@ const Information = () => {
           contactDetails: contacts,
           CustomerType: CustomerType,
           account_manager_id: getAccountMangerId,
-          staff_id: staffDetails.id,
+          staff_id: staffDetails.id
         };
 
         await AddCustomerFun(req);
@@ -387,23 +456,24 @@ const Information = () => {
   useEffect(() => {
     formik.setFieldValue("company_name", getCompanyDetails[0]?.title);
     formik.setFieldValue("entity_type", getCompanyDetails[0]?.company_type);
-    formik.setFieldValue(
-      "company_status",
-      getCompanyDetails[0]?.company_status
-    );
-    formik.setFieldValue(
-      "company_number",
-      getCompanyDetails[0]?.company_number
-    );
-    formik.setFieldValue(
-      "Registered_Office_Addres",
-      getCompanyDetails[0]?.address_snippet
-    );
-    formik.setFieldValue(
-      "Incorporation_Date",
-      getCompanyDetails[0]?.date_of_creation
-    );
+    formik.setFieldValue("company_status", getCompanyDetails[0]?.company_status);
+    formik.setFieldValue("company_number", getCompanyDetails[0]?.company_number);
+    formik.setFieldValue("Registered_Office_Addres", getCompanyDetails[0]?.address_snippet);
+    formik.setFieldValue("Incorporation_Date", getCompanyDetails[0]?.date_of_creation);
     formik.setFieldValue("Incorporation_in", getCompanyDetails[0]?.description);
+    formik.setFieldValue("Trading_Name", getCompanyDetails[0]?.title);
+    formik.setFieldValue("Trading_Address", getCompanyDetails[0]?.address_snippet);
+    if (formik.values.search_company_name == "") {
+      formik.setFieldValue("company_name", "");
+      formik.setFieldValue("entity_type", "");
+      formik.setFieldValue("company_status", "");
+      formik.setFieldValue("company_number", "");
+      formik.setFieldValue("Registered_Office_Addres", "");
+      formik.setFieldValue("Incorporation_Date", "");
+      formik.setFieldValue("Incorporation_in", "");
+      formik.setFieldValue("Trading_Name", "");
+      formik.setFieldValue("Trading_Address", "");
+    }
   }, [formik.values.search_company_name]);
 
   const fields = [
@@ -478,7 +548,7 @@ const Information = () => {
     {
       name: "Phone",
       label: "Phone",
-      type: "number",
+      type: "number1",
       label_size: 12,
       col_size: 4,
       disable: false,
@@ -668,6 +738,8 @@ const Information = () => {
       disable: false,
     },
   ];
+
+
   const Get_Company = async () => {
     const data = { search: formik.values.search_company_name };
     await dispatch(GetAllCompany(data))
@@ -684,6 +756,30 @@ const Information = () => {
       });
   };
 
+
+  const CountryData = async (req) => {
+    const data = { req: { action: "get" }, authToken: token };
+    await dispatch(Country(data))
+      .unwrap()
+      .then(async (response) => {
+
+        if (response.status) {
+          setCountryDataAll({ loading: false, data: response.data });
+          formik.setFieldValue("CountryData", response.data);
+          formik1.setFieldValue("CountryData", response.data);
+          formik2.setFieldValue("CountryData", response.data);
+
+        } else {
+          setCountryDataAll({ loading: false, data: [] });
+        }
+
+      })
+      .catch((error) => {
+        console.log("Error", error);
+      });
+  };
+
+
   useEffect(() => {
     Get_Company();
   }, [formik.values.search_company_name]);
@@ -694,7 +790,6 @@ const Information = () => {
         Staff({ req: { action: "getmanager" }, authToken: token })
       ).unwrap();
       if (response.status) {
-        setAccountMangerId(response.data[0].id);
         setStaffDataAll({ loading: false, data: response.data });
       } else {
         setStaffDataAll({ loading: false, data: [] });
@@ -708,10 +803,12 @@ const Information = () => {
   useEffect(() => {
     CustomerPersonRoleData();
     fetchStaffData();
+    CountryData()
   }, []);
 
   const handleChangeValue = (e) => {
     setAccountMangerId(e.target.value);
+    setAccountMangerIdErr("")
   };
 
   useEffect(() => {
@@ -736,6 +833,7 @@ const Information = () => {
           role: "",
           phoneNumber: "",
           email: "",
+          phone_code: "+44"
         },
         {
           authorised_signatory_status: true,
@@ -744,6 +842,7 @@ const Information = () => {
           role: "",
           phoneNumber: "",
           email: "",
+          phone_code: "+44"
         },
       ]);
       setErrors([
@@ -769,9 +868,7 @@ const Information = () => {
       case "lastName":
         newErrors[index].lastName = value ? "" : "Last Name is required";
         break;
-      case "role":
-        newErrors[index].role = value ? "" : "Role is required";
-        break;
+      
       case "email":
         if (!value) {
           newErrors[index].email = "Email Id is required";
@@ -782,14 +879,100 @@ const Information = () => {
         }
         break;
 
-      case "phoneNumber":
-        newErrors[index].phoneNumber = value ? "" : "Phone Number is required";
+      
+      case 'phoneNumber':
+        newErrors[index].phoneNumber = value === '' ? '' : /^\d{9,12}$/.test(value) ? '' : 'Phone Number must be between 9 to 12 digits';
         break;
       default:
         break;
     }
     setErrors(newErrors);
   };
+
+
+  const GetCustomerData = async () => {
+    const req = { customer_id: customer_id, pageStatus: "1" }
+    const data = { req: req, authToken: token }
+    await dispatch(GET_CUSTOMER_DATA(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const customerDetailsExist = response.data
+
+
+
+          setCustomerType(customerDetailsExist && customerDetailsExist.customer.customer_type)
+          setAccountMangerId(customerDetailsExist && customerDetailsExist.customer.account_manager_id)
+
+          if (customerDetailsExist && customerDetailsExist.customer.customer_type == '1') {
+            
+            formik1.setFieldValue("Trading_Name", customerDetailsExist.customer.trading_name);
+            formik1.setFieldValue("Trading_Address", customerDetailsExist.customer.trading_address);
+            formik1.setFieldValue("VAT_Registered", customerDetailsExist.customer.vat_registered);
+            formik1.setFieldValue("VAT_Number", customerDetailsExist.customer.vat_number);
+            formik1.setFieldValue("Website", customerDetailsExist.customer.website);
+            formik1.setFieldValue("First_Name", customerDetailsExist.contact_details[0].first_name);
+            formik1.setFieldValue("Last_Name", customerDetailsExist.contact_details[0].last_name);
+            formik1.setFieldValue("Phone", customerDetailsExist.contact_details[0].phone);
+            formik1.setFieldValue("Email", customerDetailsExist.contact_details[0].email);
+            formik1.setFieldValue("Residential_Address", customerDetailsExist.contact_details[0].residential_address);
+            formik1.setFieldValue("countryCode", customerDetailsExist.contact_details[0].phone_code);
+          }
+          if (customerDetailsExist && customerDetailsExist.customer.customer_type == '2') {
+            formik.setFieldValue("company_name", customerDetailsExist.customer.company_name);
+            formik.setFieldValue("entity_type", customerDetailsExist.customer.entity_type);
+            formik.setFieldValue("company_status", customerDetailsExist.customer.company_status);
+            formik.setFieldValue("company_number", customerDetailsExist.customer.company_number);
+            formik.setFieldValue("Registered_Office_Addres", customerDetailsExist.customer.registered_office_address);
+            formik.setFieldValue("Incorporation_Date", customerDetailsExist.customer.incorporation_date);
+            formik.setFieldValue("Incorporation_in", customerDetailsExist.customer.incorporation_in);
+            formik.setFieldValue("VAT_Registered", customerDetailsExist.customer.vat_registered);
+            formik.setFieldValue("VAT_Number", customerDetailsExist.customer.vat_number);
+            formik.setFieldValue("Website", customerDetailsExist.customer.website);
+            formik.setFieldValue("Trading_Name", customerDetailsExist.customer.trading_name);
+            formik.setFieldValue("Trading_Address", customerDetailsExist.customer.trading_address);
+            setContacts(customerDetailsExist && customerDetailsExist.contact_details)
+          }
+
+          if (customerDetailsExist && customerDetailsExist.customer.customer_type == '3') {
+            formik2.setFieldValue("Trading_Name", customerDetailsExist.customer.trading_name);
+            formik2.setFieldValue("Trading_Address", customerDetailsExist.customer.trading_address);
+            formik2.setFieldValue("VAT_Registered", customerDetailsExist.customer.vat_registered);
+            formik2.setFieldValue("VAT_Number", customerDetailsExist.customer.vat_number);
+            formik2.setFieldValue("Website", customerDetailsExist.customer.website);
+            setContacts(customerDetailsExist && customerDetailsExist.contact_details)
+
+          }
+
+
+
+
+
+
+          setCustomerDetails({
+            loading: false,
+            data: response.data
+          });
+        }
+        else {
+          setCustomerDetails({
+            loading: false,
+            data: []
+          });
+        }
+      })
+      .catch((error) => {
+        console.log("Error 11", error);
+      });
+  }
+
+  useEffect(() => {
+    if (customer_id != null) {
+      GetCustomerData()
+    }
+  }, []);
+
+
 
   return (
     <Formik
@@ -807,7 +990,7 @@ const Information = () => {
                 <div className="card card_shadow">
                   <div className="card-header step-header-blue align-items-center d-flex">
                     <h4 className="card-title mb-0 flex-grow-1">
-                      Customer Type <span style={{ color: "red" }}>*</span>
+                      Customer Type
                     </h4>
                   </div>
                   <div className="card-body">
@@ -816,7 +999,7 @@ const Information = () => {
                         <Field
                           as="select"
                           name="customerType"
-                          className="form-select mb-3"
+                          className="form-select "
                           onChange={(e) => {
                             setCustomerType(e.target.value);
                             ChangeCustomerType(e.target.value);
@@ -836,8 +1019,7 @@ const Information = () => {
                 <div className="card card_shadow">
                   <div className="card-header step-header-blue align-items-center d-flex">
                     <h4 className="card-title mb-0 flex-grow-1">
-                      Outbooks Account Manager{" "}
-                      <span style={{ color: "red" }}>*</span>
+                      Outbooks Account Manager
                     </h4>
                   </div>
                   <div className="card-body">
@@ -846,10 +1028,10 @@ const Information = () => {
                         <Field
                           as="select"
                           name="accountManager"
-                          className="form-select mb-3"
+                          className="form-select "
                           onChange={(e) => handleChangeValue(e)}
                         >
-                          <option value="" disabled selected>
+                          <option value="" selected>
                             Please select
                           </option>
                           {staffDataAll.data.map((data) => (
@@ -858,9 +1040,14 @@ const Information = () => {
                             </option>
                           ))}
                         </Field>
+
+                        {getAccountMangerIdErr && (
+                          <div className="error-text" style={{ color: "red" }}>{getAccountMangerIdErr && getAccountMangerIdErr}</div>
+                        )}
                       </div>
                     </div>
                   </div>
+
                 </div>
               </div>
             </div>
@@ -872,7 +1059,7 @@ const Information = () => {
                   <div className="card card_shadow p-0 ">
                     <div className="card-header card-header-light-blue  step-card-header align-items-center d-flex">
                       <h4 className="card-title mb-0 flex-grow-1">
-                        Company Information
+                        Sole Trader
                       </h4>
                     </div>
                     <div className="card-body">
@@ -941,19 +1128,7 @@ const Information = () => {
                                             )}
                                             <div className="col-lg-4 ps-1">
                                               <div className="mb-3">
-                                                {/* <label
-                                                    htmlFor={`firstName-${index}`}
-                                                    className="form-label"
-                                                  >
-                                                    First Name
-                                                    <span
-                                                      style={{
-                                                        color: "red",
-                                                      }}
-                                                    >
-                                                      *
-                                                    </span>
-                                                  </label> */}
+
                                                 <input
                                                   type="text"
                                                   className="form-control"
@@ -977,19 +1152,7 @@ const Information = () => {
                                             </div>
                                             <div className="col-lg-4">
                                               <div className="mb-3">
-                                                {/* <label
-                                                    htmlFor={`lastName-${index}`}
-                                                    className="form-label"
-                                                  >
-                                                    Last Name
-                                                    <span
-                                                      style={{
-                                                        color: "red",
-                                                      }}
-                                                    >
-                                                      *
-                                                    </span>
-                                                  </label> */}
+
                                                 <input
                                                   type="text"
                                                   className="form-control"
@@ -1013,19 +1176,7 @@ const Information = () => {
                                             </div>
                                             <div className="col-lg-4">
                                               <div className="mb-3">
-                                                {/* <label
-                                                    htmlFor={`role-${index}`}
-                                                    className="form-label"
-                                                  >
-                                                    Role
-                                                    <span
-                                                      style={{
-                                                        color: "red",
-                                                      }}
-                                                    >
-                                                      *
-                                                    </span>
-                                                  </label> */}
+
                                                 <select
                                                   className="form-select"
                                                   id={`role-${index}`}
@@ -1060,50 +1211,44 @@ const Information = () => {
                                                 )}
                                               </div>
                                             </div>
-                                            <div className="col-lg-4 ps-1">
-                                              <div className="mb-3">
-                                                {/* <label
-                                                    htmlFor={`phone-${index}`}
-                                                    className="form-label"
-                                                  >
-                                                    Phone
-                                                  </label> */}
-                                                <input
-                                                  type="number"
-                                                  className="form-control"
-                                                  placeholder="Phone Number"
-                                                  id={`phoneNumber-${index}`}
-                                                  value={contact.phoneNumber}
-                                                  onChange={(e) =>
-                                                    handleChange(
-                                                      index,
-                                                      "phoneNumber",
-                                                      e.target.value
-                                                    )
-                                                  }
-                                                />
-                                                {errors[index].phoneNumber && (
-                                                  <div
-                                                    className="error-text">{errors[index].phoneNumber}
+
+
+                                            <div class="col-lg-4">
+                                              <div class="mb-3">
+
+                                                <div class="row">
+                                                  <div class="col-md-4">
+                                                    <select class="form-select"
+                                                      onChange={(e) => handleChange(index, 'phone_code', e.target.value)}
+                                                      name="phone_code"
+                                                      value={contact.phone_code}
+                                                    >
+                                                      {countryDataAll.data.map((data) => (
+                                                        <option key={data.code} value={data.code}>
+                                                          {data.code}
+                                                        </option>
+                                                      ))}
+                                                    </select>
                                                   </div>
-                                                )}
+                                                  <div className="mb-3 col-md-8">
+                                                    <input type="text" className="form-control"
+                                                      placeholder="Phone Number"
+                                                      name="phone"
+                                                      id={`phone-${index}`}
+                                                      value={contact.phoneNumber}
+                                                      onChange={(e) => handleChange(index, "phoneNumber", e.target.value)}
+                                                      maxLength={12}
+                                                      minLength={9}
+                                                    />
+                                                    {errors[index].phoneNumber && (
+                                                      <div className="error-text">{errors[index].phoneNumber}</div>
+                                                    )}
+                                                  </div>
+                                                </div>
                                               </div>
                                             </div>
                                             <div className="col-lg-4 ">
                                               <div className="mb-3">
-                                                {/* <label
-                                                    htmlFor={`email-${index}`}
-                                                    className="form-label"
-                                                  >
-                                                    Email
-                                                    <span
-                                                      style={{
-                                                        color: "red",
-                                                      }}
-                                                    >
-                                                      *
-                                                    </span>
-                                                  </label> */}
                                                 <input
                                                   type="text"
                                                   className="form-control"
@@ -1211,9 +1356,9 @@ const Information = () => {
                                                           }
                                                           disabled={
                                                             contacts.length ===
-                                                            2
+                                                              2
                                                               ? index === 0 ||
-                                                                index === 1
+                                                              index === 1
                                                               : false
                                                           }
                                                         />
@@ -1280,12 +1425,12 @@ const Information = () => {
                                                       />
                                                       {errors[index]
                                                         .firstName && (
-                                                        <div
-                                                          className="error-text">{errors[index]
+                                                          <div
+                                                            className="error-text">{errors[index]
                                                               .firstName
-                                                          }
-                                                        </div>
-                                                      )}
+                                                            }
+                                                          </div>
+                                                        )}
                                                     </div>
                                                   </div>
                                                   <div className="col-lg-4">
@@ -1319,12 +1464,12 @@ const Information = () => {
                                                       />
                                                       {errors[index]
                                                         .lastName && (
-                                                        <div
-                                                          className="error-text">{errors[index]
+                                                          <div
+                                                            className="error-text">{errors[index]
                                                               .lastName
-                                                          }
-                                                        </div>
-                                                      )}
+                                                            }
+                                                          </div>
+                                                        )}
                                                     </div>
                                                   </div>
                                                   <div className="col-lg-4">
@@ -1378,40 +1523,42 @@ const Information = () => {
                                                       )}
                                                     </div>
                                                   </div>
-                                                  <div className="col-lg-4">
-                                                    <div className="mb-3">
-                                                      <label
-                                                        htmlFor={`phone-${index}`}
-                                                        className="form-label"
-                                                      >
-                                                        Phone
-                                                      </label>
-                                                      <input
-                                                        type="number"
-                                                        className="form-control"
-                                                        placeholder="Phone Number"
-                                                        id={`phoneNumber-${index}`}
-                                                        value={
-                                                          contact.phoneNumber
-                                                        }
-                                                        onChange={(e) =>
-                                                          handleChange(
-                                                            index,
-                                                            "phoneNumber",
-                                                            e.target.value
-                                                          )
-                                                        }
-                                                      />
-                                                      {errors[index]
-                                                        .phoneNumber && (
-                                                        <div
-                                                          className="error-text">{errors[index]
-                                                              .phoneNumber
-                                                          }
+
+                                                  <div class="col-lg-4">
+                                                    <div class="mb-3">
+                                                      <label for="firstNameinput" class="form-label">Phone</label>
+                                                      <div class="row">
+                                                        <div class="col-md-4">
+                                                          <select class="form-select"
+                                                            onChange={(e) => handleChange(index, 'phone_code', e.target.value)}
+                                                            name="phone_code"
+                                                            value={contact.phone_code}
+                                                          >
+                                                            {countryDataAll.data.map((data) => (
+                                                              <option key={data.code} value={data.code}>
+                                                                {data.code}
+                                                              </option>
+                                                            ))}
+                                                          </select>
                                                         </div>
-                                                      )}
+                                                        <div className="mb-3 col-md-8">
+                                                          <input type="text" className="form-control"
+                                                            placeholder="Phone Number"
+                                                            name="phone"
+                                                            id={`phone-${index}`}
+                                                            value={contact.phoneNumber}
+                                                            onChange={(e) => handleChange(index, "phoneNumber", e.target.value)}
+                                                            maxLength={12}
+                                                            minLength={9}
+                                                          />
+                                                          {errors[index].phoneNumber && (
+                                                            <div className="error-text">{errors[index].phoneNumber}</div>
+                                                          )}
+                                                        </div>
+                                                      </div>
                                                     </div>
                                                   </div>
+
                                                   <div className="col-lg-4">
                                                     <div className="mb-3">
                                                       <label
@@ -1627,8 +1774,7 @@ const Information = () => {
                         <input
                           type="text"
                           className="form-control "
-                          placeholder="VAT
-                                                                                 Number"
+                          placeholder="VAT Number"
                           id="firstNameinput"
                         />
                       </div>
@@ -1681,14 +1827,6 @@ const Information = () => {
             </div>
           </section>
 
-          {/* <div className="form__item button__items d-flex justify-content-between">
-                        <Button className="white-btn" type="default" onClick={prev}>
-                            Back
-                        </Button>
-                        <Button className="btn btn-info text-white blue-btn" type="submit" onClick={handleSubmit}>
-                            Next
-                        </Button>
-                    </div> */}
         </div>
       )}
     </Formik>

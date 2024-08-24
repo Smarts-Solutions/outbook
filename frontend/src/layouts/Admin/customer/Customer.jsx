@@ -9,6 +9,7 @@ const Customer = () => {
   const navigate = useNavigate();
 
   const token = JSON.parse(localStorage.getItem("token"));
+  const staffDetails = JSON.parse(localStorage.getItem('staffDetails'));
   const [customerData, setCustomerData] = useState([]);
 
   const tabs = [
@@ -39,7 +40,7 @@ const Customer = () => {
     { name: 'Company Name', selector: row => row.company_name == null ? "" : row.company_name, sortable: true },
     { name: 'Company Number', selector: row => row.company_number == null ? "" : row.company_number, sortable: true },
     { name: 'Type', selector: row => row.customer_type == 1 ? "Sole Trader" : row.customer_type == 2 ? "	Company" : row.customer_type == 3 ? "Partnership" : "-", sortable: true },
-    // { name: 'Account Manager', selector: row => row.account_manager_firstname + ' ' + row.account_manager_lastname, sortable: true },
+     { name: 'Account Manager', selector: row => row.account_manager_firstname + ' ' + row.account_manager_lastname, sortable: true },
     {
       name: 'Actions',
       cell: row => (
@@ -66,18 +67,18 @@ const Customer = () => {
 
 
   function handleEdit(row) {
-    console.log('Editing row:', row.id);
+
     navigate('/admin/editcustomer', { state: row });
   }
 
   function handleDelete(row) {
-    console.log('Deleting row:', row);
+  
   }
 
 
 
-  const GetAllServiceData = async () => {
-    const req = { action: "get" };
+  const GetAllCustomerData = async () => {
+    const req = { action: "get" ,staff_id: staffDetails.id};
     const data = { req: req, authToken: token };
     await dispatch(GET_ALL_CUSTOMERS(data))
       .unwrap()
@@ -96,7 +97,7 @@ const Customer = () => {
   }
 
   useEffect(() => {
-    GetAllServiceData()
+    GetAllCustomerData()
   }, []);
 
   return (

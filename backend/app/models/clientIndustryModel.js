@@ -24,6 +24,21 @@ const createClientIndustry = async (ClientIndustry) => {
 
 const getClientIndustry = async () => { 
     const query = `
+    SELECT * FROM client_industry_types WHERE status = '1'
+    ORDER BY id DESC
+    `;
+
+    try {
+        const [result] = await pool.execute(query);
+        return result;
+    } catch (err) {
+        console.error('Error selecting data:', err);
+        throw err;
+    }
+}
+
+const getClientIndustryAll = async () => { 
+    const query = `
     SELECT * FROM client_industry_types
     ORDER BY id DESC
     `;
@@ -91,6 +106,7 @@ module.exports = {
     createClientIndustry,
     deleteClientIndustry,
     updateClientIndustry,
-    getClientIndustry
+    getClientIndustry,
+    getClientIndustryAll
   
 };

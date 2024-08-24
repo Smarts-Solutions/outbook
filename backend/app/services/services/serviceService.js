@@ -10,6 +10,10 @@ const getServices = async () => {
   return serviceModel.getServices();
 }
 
+const getServicesAll = async () => {
+  return serviceModel.getServicesAll();
+}
+
 const removeServices = async (ServicesId) => {
   return serviceModel.deleteServices(ServicesId);
 };
@@ -23,5 +27,6 @@ module.exports = {
     addServices,
     removeServices,
     modifyServices,
-    getServices
+    getServices,
+    getServicesAll
 };

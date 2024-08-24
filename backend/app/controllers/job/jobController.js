@@ -4,7 +4,7 @@ const jobService = require('../../services/job/jobService');
 const getAddJobData = async (req, res) => {
   try {
      const { ...job } = req.body;
-    //  console.log("job",job)
+
        const result = await jobService.getAddJobData(job);
        if(!result.status){
         return  res.status(200).json({ status: false, message: result.message });  
@@ -20,7 +20,7 @@ const getAddJobData = async (req, res) => {
 const jobAdd = async (req, res) => {
   try {
      const { ...job } = req.body;
-    //  console.log("job",job)
+    
        const result = await jobService.jobAdd(job);
        if(!result.status){
         return  res.status(200).json({ status: false, message: result.message });  
@@ -36,7 +36,7 @@ const jobAdd = async (req, res) => {
 const jobAction = async (req, res) => {
   try {
      const { ...job } = req.body;
-    //  console.log("job",job)
+  
        const result = await jobService.jobAction(job);
        if(!result.status){
         return  res.status(200).json({ status: false, message: result.message });  
@@ -52,7 +52,7 @@ const jobAction = async (req, res) => {
 const jobUpdate = async (req, res) => {
   try {
      const { ...job } = req.body;
-    //  console.log("job",job)
+  
        const result = await jobService.jobUpdate(job);
        if(!result.status){
         return  res.status(200).json({ status: false, message: result.message });  

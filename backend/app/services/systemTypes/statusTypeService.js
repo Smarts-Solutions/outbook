@@ -10,6 +10,10 @@ const getStatusType = async () => {
   return statusTypeModel.getStatusType();
 }
 
+const getStatusTypeAll = async () => {
+  return statusTypeModel.getStatusTypeAll();
+}
+
 const removeStatusType = async (StatusTypeId) => {
   return statusTypeModel.deleteStatusType(StatusTypeId);
 };
@@ -23,5 +27,6 @@ module.exports = {
   addStatusType,
   getStatusType,
   removeStatusType,
-  modifyStatusType
+  modifyStatusType,
+  getStatusTypeAll
 };

@@ -9826,18 +9826,13 @@ thead.table-striped th,
   height: 20px;
   width: 20px;
 }
-
-.modal-body {
+.modal-body{
   background-color: #fff !important;
 }
-.modal-header .modal-title
-{
- color: #fff !important;
-}
-body .bg-info.modal-header, .modal-header{
+
+body .bg-info.modal-header {
   background-color: #01afef !important;
 }
-
 .search-results .search-result-item {
   padding: 4px;
   border: 1px solid #d9d9d9;
@@ -9845,20 +9840,18 @@ body .bg-info.modal-header, .modal-header{
   border-radius: 5px;
   margin: 3px 0;
 }
-
-.table td {
-  font-size: 14px;
-  color: #4B4B4B;
-  font-weight: 600;
+.table td
+{
+font-size: 14px;
+    color: #4B4B4B;
+    font-weight: 600;
 }
-
 .modal .btn-close {
   opacity: 1;
 
   background: white var(--bs-btn-close-bg) center / 1em auto no-repeat !important;
-
+ 
 }
-
 .btn-outline-info:hover {
   background: #00AFEF !important;
   color: #fff !important;
@@ -9897,11 +9890,8 @@ body .accordion-button:not(.collapsed)::after {
 }
 .error-text {
   background: #cb0000;
-  color: #fff;
-  font-size: 11px;
-  padding: 1px 6px;
+  color: #fff !important;
+  font-size: 12px;
+  padding: 0px 10px;
   margin-top: 4px;
-}
-.form-select:focus {
-  box-shadow: none;
 }

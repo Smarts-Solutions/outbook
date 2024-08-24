@@ -1,17 +1,17 @@
 const pool = require('../config/database');
 const deleteUploadFile = require('../middlewares/deleteUploadFile');
-//   deleteUploadFile('1722257591646-SSSSSSSS.jpg')
+
 
 async function generateNextUniqueCode() {
     const [rows] = await pool.execute('SELECT client_code FROM clients ORDER BY id DESC LIMIT 1');
-    let newCode = '00001'; // Default code if table is empty
+    let newCode = '00001'; 
     if (rows.length > 0) {
         const inputString = rows[0].client_code;
         const parts = inputString.split('_');
         const lastPart = parts[parts.length - 1];
         const lastCode = lastPart;
         const nextCode = parseInt(lastCode, 10) + 1;
-        // console.log("nextCode", nextCode);
+
         newCode = "0000" + nextCode
     }
 
@@ -22,10 +22,10 @@ const createClient = async (client) => {
     // Customer Code(cust+CustName+UniqueNo)
     let UniqueNo = await generateNextUniqueCode()
     let client_id;
-    const { client_type, customer_id, client_industry_id, trading_name, trading_address, vat_registered, vat_number, website } = client;
+    const { client_type, customer_id, trading_name, trading_address, vat_registered, vat_number, website } = client;
 
     const [ExistCustomer] = await pool.execute('SELECT trading_name FROM customers WHERE id =' + customer_id);
-    // console.log("ExistCustomer",ExistCustomer[0].trading_name)
+
     const existCustomerName = ExistCustomer[0].trading_name
     const firstThreeLettersexistCustomerName = existCustomerName.substring(0, 3)
     const firstThreeLettersClientName = trading_name.substring(0, 3)
@@ -38,9 +38,8 @@ const createClient = async (client) => {
     if (check.length > 0) {
         return { status: false, message: 'Client Trading Name Already Exists.' };
     }
-
-
-
+   
+    let client_industry_id = client.client_industry_id == undefined || client.client_industry_id == ''? 0 :client.client_industry_id
 
 
     const query = `
@@ -59,12 +58,15 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 
     if (client_type == "1") {
         const { first_name, last_name, phone, email, residential_address } = client;
+        let phone_code = client.phone_code ==undefined || client.phone_code == '' ? "":client.phone_code
+        let role = client.role == undefined || client.role =='' ? 0:client.role
+
         try {
             const query2 = `
-        INSERT INTO client_contact_details (client_id, first_name, last_name, phone, email, residential_address)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO client_contact_details (client_id, role,first_name, last_name, phone_code,phone, email, residential_address)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
-            const [result2] = await pool.execute(query2, [client_id, first_name, last_name, phone, email, residential_address]);
+            const [result2] = await pool.execute(query2, [client_id, role,first_name, last_name, phone_code,phone, email, residential_address]);
 
         } catch (err) {
             console.error('Error inserting data:', err);
@@ -90,18 +92,19 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 
         try {
             const query2 = `
-        INSERT INTO client_contact_details (client_id,role,first_name,last_name,phone,email)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO client_contact_details (client_id,role,first_name,last_name,phone_code,phone,email)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
 
             for (const detail of contactDetails) {
-                // console.log("detail",detail)
-                let role = detail.role;
+
+                let role = detail.role == undefined || detail.role == ''? 0: detail.role;
                 let first_name = detail.first_name;
                 let last_name = detail.last_name;
-                let phone = detail.phone;
+                let phone_code = detail.phone_code==undefined || detail.phone_code == ''? "":detail.phone_code
+                let phone = detail.phone
                 let email = detail.email;
-                const [result2] = await pool.execute(query2, [client_id, role, first_name, last_name, phone, email]);
+                const [result2] = await pool.execute(query2, [client_id, role, first_name, last_name, phone_code,phone, email]);
 
             }
 
@@ -115,21 +118,23 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         const { contactDetails } = client;
         try {
             const query2 = `
-        INSERT INTO client_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone,alternate_phone,authorised_signatory_status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO client_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone_code,phone,alternate_phone_code,alternate_phone,authorised_signatory_status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
             for (const detail of contactDetails) {
-                // console.log("detail",detail)
-                let role = detail.role;
+
+                let role = detail.role == undefined || detail.role == ''? 0: detail.role;
                 let first_name = detail.first_name;
                 let last_name = detail.last_name;
                 let email = detail.email;
                 let alternate_email = detail.alternate_email;
-                let phone = detail.phone;
+                let phone_code = detail.phone_code==undefined || detail.phone_code == ''? "":detail.phone_code
+                let alternate_phone_code = detail.alternate_phone_code==undefined || detail.alternate_phone_code == ''? "":detail.alternate_phone_code
+                let phone = detail.phone
                 let alternate_phone = detail.alternate_phone;
                 let authorised_signatory_status = detail.authorised_signatory_status;
-                const [result2] = await pool.execute(query2, [client_id, role, first_name, last_name, email, alternate_email, phone, alternate_phone, authorised_signatory_status]);
+                const [result2] = await pool.execute(query2, [client_id, role, first_name, last_name, email, alternate_email, phone_code,phone, alternate_phone_code,alternate_phone, authorised_signatory_status]);
 
             }
 
@@ -146,7 +151,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 
 const getClient = async (client) => {
     const { customer_id } = client;
-    console.log("cutomer_id",customer_id)
+
     const query = `
     SELECT  
         clients.id AS id,
@@ -155,6 +160,7 @@ const getClient = async (client) => {
         clients.status AS status,
         client_types.type AS client_type_name,
         client_contact_details.email AS email,
+        client_contact_details.phone_code AS phone_code,
         client_contact_details.phone AS phone
     FROM 
         clients
@@ -174,10 +180,10 @@ const getClient = async (client) => {
     try {
         const [result] = await pool.execute(query, [customer_id]);
         return { status: true, message: 'success.', data: result };
-       
+
     } catch (err) {
         return { status: false, message: 'Err Client Get' };
-     
+
     }
 
 
@@ -208,6 +214,7 @@ const getByidClient = async (client) => {
     client_contact_details.first_name AS first_name,
     client_contact_details.last_name AS last_name,
     client_contact_details.email AS email,
+    client_contact_details.phone_code AS phone_code,
     client_contact_details.phone AS phone,
     client_contact_details.residential_address AS residential_address,
     customer_contact_person_role.name AS customer_role_contact_name,
@@ -248,6 +255,7 @@ WHERE
                 first_name: row.first_name,
                 last_name: row.last_name,
                 email: row.email,
+                phone_code: row.phone_code,
                 phone: row.phone,
                 residential_address: row.residential_address,
                 // Add other contact detail fields as needed
@@ -261,7 +269,7 @@ WHERE
             return { status: true, message: 'success.', data: result };
             // Return or further process `result` as needed
         } else {
-            // console.log("No customer found with the given ID.");
+
             return { status: false, message: 'No customer found with the given ID.' };
         }
         ;
@@ -284,6 +292,7 @@ WHERE
     client_contact_details.first_name AS first_name,
     client_contact_details.last_name AS last_name,
     client_contact_details.email AS email,
+    client_contact_details.phone_code AS phone_code,
     client_contact_details.phone AS phone,
     client_contact_details.residential_address AS residential_address,
     customer_contact_person_role.name AS customer_role_contact_name,
@@ -337,6 +346,7 @@ WHERE
                 first_name: row.first_name,
                 last_name: row.last_name,
                 email: row.email,
+                phone_code: row.phone_code,
                 phone: row.phone,
                 residential_address: row.residential_address,
                 // Add other contact detail fields as needed
@@ -351,7 +361,7 @@ WHERE
             return { status: true, message: 'success.', data: result };
             // Return or further process `result` as needed
         } else {
-            // console.log("No customer found with the given ID.");
+
             return { status: false, message: 'No customer found with the given ID.' };
         }
         ;
@@ -375,7 +385,9 @@ WHERE
     client_contact_details.last_name AS last_name,
     client_contact_details.email AS email,
     client_contact_details.alternate_email AS alternate_email,
+    client_contact_details.phone_code AS phone_code,
     client_contact_details.phone AS phone,
+    client_contact_details.alternate_phone_code AS alternate_phone_code,
     client_contact_details.alternate_phone AS alternate_phone,
     client_contact_details.authorised_signatory_status AS authorised_signatory_status,
     customer_contact_person_role.name AS customer_role_contact_name,
@@ -419,9 +431,11 @@ WHERE
                 last_name: row.last_name,
                 email: row.email,
                 alternate_email: row.alternate_email,
+                phone_code: row.phone_code,
                 phone: row.phone,
+                alternate_phone_code: row.alternate_phone_code,
                 alternate_phone: row.alternate_phone,
-                authorised_signatory_status: row.authorised_signatory_status=="1"?true:false
+                authorised_signatory_status: row.authorised_signatory_status == "1" ? true : false
                 // Add other contact detail fields as needed
             }));
 
@@ -433,9 +447,9 @@ WHERE
             return { status: true, message: 'success.', data: result };
             // Return or further process `result` as needed
         } else {
-            // console.log("No customer found with the given ID.");
+
             return { status: false, message: 'No customer found with the given ID.' };
-            
+
         }
         ;
     }
@@ -448,7 +462,7 @@ WHERE
 
 const deleteClient = async (client) => {
     const { client_id } = client;
-    console.log("client_id", client_id);
+
     try {
         await pool.execute('DELETE FROM clients WHERE id = ?', [client_id]);
         await pool.execute('DELETE FROM client_company_information WHERE client_id = ?', [client_id]);
@@ -462,8 +476,7 @@ const deleteClient = async (client) => {
 }
 
 const clientUpdate = async (client) => {
-    // Customer Code(cust+CustName+UniqueNo)
-    console.log('client', client)
+
     const { client_id, client_type, customer_id, client_industry_id, trading_name, trading_address, vat_registered, vat_number, website } = client;
 
     const [ExistCustomer] = await pool.execute('SELECT trading_name FROM customers WHERE id = ?', [customer_id]);
@@ -513,23 +526,25 @@ const clientUpdate = async (client) => {
             website,
             client_id
         ]);
-        console.log('Record updated successfully');
+
     } catch (err) {
+      
         return { status: false, message: 'client update Err' };
     }
 
     if (client_type == "1") {
 
-        const { first_name, last_name, phone, email, residential_address } = client;
-
+        const { first_name, last_name ,phone, email, residential_address } = client;
+        let phone_code = client.phone_code == undefined ? "" : client.phone_code
         try {
             const query2 = `
                 UPDATE client_contact_details 
-                SET first_name = ?, last_name = ?, phone = ?, email = ?, residential_address = ?
+                SET first_name = ?, last_name = ?, phone_code = ? ,phone = ?, email = ?, residential_address = ?
                 WHERE client_id = ?
             `;
-            const [result2] = await pool.execute(query2, [first_name, last_name, phone, email, residential_address, client_id]);
+            const [result2] = await pool.execute(query2, [first_name, last_name, phone_code,phone, email, residential_address, client_id]);
         } catch (err) {
+            console.log("err",err)
             return { status: false, message: 'client update Err Client Type 1' };
         }
 
@@ -548,44 +563,45 @@ const clientUpdate = async (client) => {
             const [result1] = await pool.execute(query1, [company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date, incorporation_in, client_id]);
         } catch (err) {
             return { status: false, message: 'client update Err Client Type 1' };
-          
+
         }
 
         try {
 
-           const [existIdResult] = await pool.execute('SELECT id FROM client_contact_details WHERE client_id = ?', [client_id]);
-          const idArray = await existIdResult.map(item => item.id);
-          let arrayInterId = []
-       
+            const [existIdResult] = await pool.execute('SELECT id FROM client_contact_details WHERE client_id = ?', [client_id]);
+            const idArray = await existIdResult.map(item => item.id);
+            let arrayInterId = []
+
             const query2 = `
     UPDATE client_contact_details
-    SET role = ?, first_name = ?, last_name = ?, phone = ?, email = ?
+    SET role = ?, first_name = ?, last_name = ?,phone_code = ? ,phone = ?, email = ?
     WHERE client_id = ? AND id = ?
     `;
-           if(contactDetails.length > 0){
-           for (const detail of contactDetails) {
-               
-                let { customer_contact_person_role_id, first_name, last_name, phone, email, contact_id } = detail; // Assuming each contactDetail has an id
+            if (contactDetails.length > 0) {
+                for (const detail of contactDetails) {
 
-                if(contact_id=="" || contact_id==undefined || contact_id==null){
-                    const [result2] = await pool.execute('INSERT INTO client_contact_details (client_id,role,first_name,last_name,phone,email) VALUES (?, ?, ?, ?, ?, ?)', [client_id, customer_contact_person_role_id, first_name, last_name, phone, email]);
-                }else{
-                arrayInterId.push(contact_id)
-                const [result2] = await pool.execute(query2, [customer_contact_person_role_id, first_name, last_name, phone, email, client_id, contact_id]);
+                    let { customer_contact_person_role_id, first_name, last_name, phone, email, contact_id } = detail; // Assuming each contactDetail has an id
+                     let phone_code = detail.phone_code == undefined || detail.phone_code == ''? "" : detail.phone_code
+
+                    if (contact_id == "" || contact_id == undefined || contact_id == null) {
+                        const [result2] = await pool.execute('INSERT INTO client_contact_details (client_id,role,first_name,last_name,phone,phone_code,email) VALUES (?, ?, ?, ?, ?, ?, ?)', [client_id, customer_contact_person_role_id, first_name, last_name,phone_code, phone, email]);
+                    } else {
+                        arrayInterId.push(contact_id)
+                        const [result2] = await pool.execute(query2, [customer_contact_person_role_id, first_name, last_name,phone_code, phone, email, client_id, contact_id]);
+                    }
                 }
-            }
 
-        
-            let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
-            if(deleteIdArray.length > 0){
-                for (const id of deleteIdArray) {
-                    const query3 = `
+
+                let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
+                if (deleteIdArray.length > 0) {
+                    for (const id of deleteIdArray) {
+                        const query3 = `
                     DELETE FROM client_contact_details WHERE id = ?
                     `;
-                    const [result3] = await pool.execute(query3, [id]);
+                        const [result3] = await pool.execute(query3, [id]);
+                    }
                 }
             }
-           }
 
 
 
@@ -608,7 +624,7 @@ const clientUpdate = async (client) => {
 
             const query2 = `
     UPDATE client_contact_details
-    SET role = ?, first_name = ?, last_name = ?, email = ?, alternate_email = ?, phone = ?, alternate_phone = ?, authorised_signatory_status = ?
+    SET role = ?, first_name = ?, last_name = ?, email = ?, alternate_email = ?, phone_code = ?,phone = ?, alternate_phone_code = ? ,alternate_phone = ?, authorised_signatory_status = ?
     WHERE client_id = ? AND id = ?
     `;
 
@@ -618,31 +634,34 @@ const clientUpdate = async (client) => {
                 let last_name = detail.last_name;
                 let email = detail.email;
                 let alternate_email = detail.alternate_email;
+                let phone_code = detail.phone_code == undefined || detail.phone_code == '' ? "" : detail.phone_code;
                 let phone = detail.phone;
+                let alternate_phone_code = detail.alternate_phone_code == undefined || detail.alternate_phone_code == '' ? "" : detail.alternate_phone_code;
                 let alternate_phone = detail.alternate_phone;
                 let authorised_signatory_status = detail.authorised_signatory_status;
                 let contact_id = detail.contact_id; // Assuming each contactDetail has an id
-                if(contact_id == "" || contact_id == undefined || contact_id==null){
-                    const [result2] = await pool.execute('INSERT INTO client_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone,alternate_phone,authorised_signatory_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [client_id, customer_contact_person_role_id, first_name, last_name, email, alternate_email, phone, alternate_phone, authorised_signatory_status]);
-               
-                }else{
-                arrayInterId.push(contact_id)
-                const [result2] = await pool.execute(query2, [customer_contact_person_role_id, first_name, last_name, email, alternate_email, phone, alternate_phone, authorised_signatory_status, client_id, contact_id]);
+                if (contact_id == "" || contact_id == undefined || contact_id == null) {
+                    const [result2] = await pool.execute('INSERT INTO client_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone_code,phone,alternate_phone_code,alternate_phone,authorised_signatory_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [client_id, customer_contact_person_role_id, first_name, last_name, email, alternate_email, phone_code ,phone, alternate_phone_code,alternate_phone, authorised_signatory_status]);
+
+                } else {
+                    arrayInterId.push(contact_id)
+                    const [result2] = await pool.execute(query2, [customer_contact_person_role_id, first_name, last_name, email, alternate_email, phone_code ,phone, alternate_phone_code,alternate_phone, authorised_signatory_status, client_id, contact_id]);
                 }
 
             }
 
             let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
-                if(deleteIdArray.length > 0){
-                    for (const id of deleteIdArray) {
-                        const query3 = `
+            if (deleteIdArray.length > 0) {
+                for (const id of deleteIdArray) {
+                    const query3 = `
                         DELETE FROM client_contact_details WHERE id = ?
                         `;
-                        const [result3] = await pool.execute(query3, [id]);
-                    }
+                    const [result3] = await pool.execute(query3, [id]);
                 }
+            }
 
         } catch (err) {
+            console.log("err", err)
             return { status: false, message: 'client update Err Client Type 3' };
         }
 

@@ -36,6 +36,7 @@
     "semantic-ui-react": "^2.1.5",
     "sweetalert2": "^11.12.1",
     "web-vitals": "^2.1.4",
+    "xlsx": "^0.18.5",
     "yup": "^1.4.0"
   },
   "scripts": {

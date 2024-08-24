@@ -38,11 +38,11 @@ const Status = () => {
     },
   ];
   function handleEdit(row) {
-    console.log('Editing row:', row);
+
   }
 
   function handleDelete(row) {
-    console.log('Deleting row:', row);
+
   }
   return (
     <div>

@@ -2,7 +2,7 @@ const multer = require('multer');
 const path = require('path');
 
 const Filter = (req, file, cb) => {
-    //console.log('Multer File Data:', file);
+   
 
     const allowedMimeTypes = [
         'application/pdf',       // PDF files

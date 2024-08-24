@@ -4,7 +4,7 @@ import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
 import { JobType } from '../../../../ReduxStore/Slice/Settings/settingSlice'
 import { useDispatch } from 'react-redux';
-import { ADD_SERVICES_CUSTOMERS } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { Edit_Customer } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import { useLocation } from "react-router-dom";
 import { GET_CUSTOMER_DATA } from '../../../../ReduxStore/Slice/Customer/CustomerSlice'
 const checkboxOptions = [
@@ -59,10 +59,10 @@ const Engagement = () => {
         adhoc_admin_staff: "",
     });
     const [jobEntries, setJobEntries] = useState([
-        { minimum_number_of_jobs: '', job_type_id: '', cost_per_job: '' , customised_pricing_id: '' }
+        { minimum_number_of_jobs: '', job_type_id: '', cost_per_job: '', customised_pricing_id: '' }
     ]);
-    
- 
+
+
     const [jobType, setJobType] = useState([])
 
     const GetCustomerData = async () => {
@@ -130,7 +130,7 @@ const Engagement = () => {
                     feePerAdmin: Number(customerDetails.data.fte_dedicated_staffing.fee_per_admin_staff),
                 });
             }
-            if(customer_engagement_model_status.percentage_model === "1") {
+            if (customer_engagement_model_status.percentage_model === "1") {
                 setFormValues2({
                     total_outsourcing: Number(customerDetails.data.percentage_model.total_outsourcing),
                     accountants: Number(customerDetails.data.percentage_model.accountants),
@@ -140,7 +140,7 @@ const Engagement = () => {
                     admin_staff: Number(customerDetails.data.percentage_model.admin_staff),
                 });
             }
-            if(customer_engagement_model_status.adhoc_payg_hourly === "1") {
+            if (customer_engagement_model_status.adhoc_payg_hourly === "1") {
                 setFormValues3({
                     adhoc_accountants: Number(customerDetails.data.adhoc_payg_hourly.adhoc_accountants),
                     adhoc_bookkeepers: Number(customerDetails.data.adhoc_payg_hourly.adhoc_bookkeepers),
@@ -150,17 +150,18 @@ const Engagement = () => {
                 });
             }
 
-          
-            if(customer_engagement_model_status.customised_pricing === "1") {
+
+            if (customer_engagement_model_status.customised_pricing === "1") {
                 setJobEntries(customerDetails.data.customised_pricing);
             }
         }
     }, [customerDetails]);
 
-  
+
 
 
     const handleCheckboxChange = (index) => {
+
         setCheckboxStates(prevStates => {
             const newStates = [...prevStates];
             newStates[index] = newStates[index] === 1 ? 0 : 1;
@@ -218,17 +219,22 @@ const Engagement = () => {
 
     const handleChange4 = (index, e) => {
         const { name, value } = e.target;
-        
+
         if (!/^[0-9+]*$/.test(value)) {
             return;
         }
 
         const newJobEntries = [...jobEntries];
-        newJobEntries[index][name] = value;
+        console.log(name, value)
+        // newJobEntries[0].minimum_number_of_jobs = value
+        // newJobEntries[index][name] = value;
+
+        newJobEntries[index] = { ...newJobEntries[index], [name]: value };
+        console.log("newJobEntries", newJobEntries)
+
         validate4()
         setJobEntries(newJobEntries);
     };
-
 
     const validate1 = () => {
         const newErrors = {};
@@ -247,7 +253,7 @@ const Engagement = () => {
             }
         }
         setErrors1(newErrors)
-        
+
         return Object.keys(newErrors).length === 0 ? true : false;;
     };
 
@@ -285,26 +291,35 @@ const Engagement = () => {
     };
 
 
+
+
     const validate4 = () => {
         const newErrors = [];
-    
+
         jobEntries.forEach((entry, index) => {
             const entryErrors = {};
-    
+
             if (!entry.minimum_number_of_jobs) {
                 entryErrors.minimum_number_of_jobs = 'Please Enter Minimum number of Jobs';
-            }  
-    
+            } else if (entry.minimum_number_of_jobs < 1 || entry.minimum_number_of_jobs > 100) {
+                entryErrors.minimum_number_of_jobs = 'Minimum number of Jobs must be between 1 and 100';
+            }
+
             if (!entry.job_type_id) {
                 entryErrors.job_type_id = 'Please select a job type';
             }
+
             if (!entry.cost_per_job) {
                 entryErrors.cost_per_job = 'Please Enter Cost Per Job';
-            } 
-            if(Object.keys(entryErrors).length !== 0)
+            } else if (entry.cost_per_job < 20 || entry.cost_per_job > 500) {
+                entryErrors.cost_per_job = 'Cost Per Job must be between 20 and 500';
+            }
+
+
+            if (Object.keys(entryErrors).length !== 0)
                 newErrors[index] = entryErrors;
         });
- 
+
         setErrors4(newErrors);
         return newErrors.length > 0 ? false : true;
     };
@@ -333,11 +348,11 @@ const Engagement = () => {
             alert("Please select at least one option.");
             return;
         }
-        const validations = [validate1, validate2, validate3, validate4];
+        const validations = [validate1, validate3, validate2, validate4];
 
         for (let i = 0; i < checkboxStates.length; i++) {
             if (checkboxStates[i] === 1 && !validations[i]()) {
-                
+
                 return;
             }
         }
@@ -403,10 +418,10 @@ const Engagement = () => {
         }
 
 
-       
+
 
         const data = { req: req, authToken: token }
-        await dispatch(ADD_SERVICES_CUSTOMERS(data))
+        await dispatch(Edit_Customer(data))
             .unwrap()
             .then(async (response) => {
                 if (response.status) {
@@ -421,7 +436,7 @@ const Engagement = () => {
     };
 
 
-    
+
 
     useEffect(() => {
 
@@ -455,12 +470,12 @@ const Engagement = () => {
 
                         <div className="card report-data pricing-box  p-0">
                             <div className="card-header step-header-blue">
-                            <h4
-                                className="card-title mb-0 flex-grow-1"
-                                style={{ marginBottom: "20px !important" }}
-                            >
-                                Engagement Model
-                            </h4>
+                                <h4
+                                    className="card-title mb-0 flex-grow-1"
+                                    style={{ marginBottom: "20px !important" }}
+                                >
+                                    Engagement Model
+                                </h4>
                             </div>
 
                             <div className="card-body">
@@ -496,9 +511,9 @@ const Engagement = () => {
                                         <div id="myDiv1" className="row">
                                             <div className="col-xl-12 col-md-12 col-lg-12">
                                                 <div className="card pricing-box p-0">
-                                                <div className="col-lg-12">
+                                                    <div className="col-lg-12">
                                                         <div className="card-header step-card-header card-header-light-blue">
-                                                        <p className=" card-title fs-6 mb-0">FTE/Dedicated Staffing</p>
+                                                            <p className=" card-title fs-6 mb-0">FTE/Dedicated Staffing</p>
                                                         </div>
                                                     </div>
 
@@ -518,7 +533,7 @@ const Engagement = () => {
                                                             <div className="col-lg-6" key={index}>
                                                                 <div className="mb-3">
                                                                     <label className="form-label label-height">{field.label}</label>
-                                                                  
+
                                                                     <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label>
                                                                     <input
                                                                         type="text"
@@ -540,18 +555,59 @@ const Engagement = () => {
                                         </div>
                                     )}
 
-
-
                                     {checkboxStates && checkboxStates[1] === 1 && (
+                                        <div id="myDiv3" className="row">
+                                            <div style={{ marginBottom: "26px !important" }} className="col-xl-12 col-lg-12">
+                                                <div className="card pricing-box ">
+                                                    <div className="col-lg-12">
+                                                        <div className="card-header step-card-header card-header-light-blue">
+                                                            <p className=" card-title fs-6 mb-0">Percentage Model</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="row card-body">
+                                                        {[
+                                                            { label: 'Accountants', name: 'adhoc_accountants', feeName: 'Fee Per Hour' },
+                                                            { label: 'Bookkeepers', name: 'adhoc_bookkeepers', feeName: 'Fee Per Hour' },
+                                                            { label: 'Payroll Experts', name: 'adhoc_payroll_experts', feeName: 'Fee Per Hour' },
+                                                            { label: 'Tax Experts', name: 'adhoc_tax_experts', feeName: 'Fee Per Hour' },
+                                                            { label: 'Admin/Other Staff', name: 'adhoc_admin_staff', feeName: 'Fee Per Hour' },
+                                                        ].map((field, index) => (
+                                                            <div className="col-lg-4" key={index}>
+                                                                <div className="mb-3">
+                                                                    <label className="form-label">{field.label}</label><br />
+                                                                    <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label>
+                                                                    <input
+                                                                        type="text"
+                                                                        className="form-control"
+                                                                        name={field.name}
+                                                                        value={formValues3[field.name]}
+                                                                        onChange={handleChange3}
+                                                                    />
+                                                                    {errors3[field.name] && (
+                                                                        <div className="error-text">{errors3[field.name]}</div>
+                                                                    )}
+
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {checkboxStates && checkboxStates[2] === 1 && (
                                         <div id="myDiv2" className="row">
                                             <div style={{ marginBottom: "26px !important" }} className="col-xl-12 col-lg-12">
                                                 <div className="card pricing-box ">
-                                                <div className="col-lg-12">
+                                                    <div className="col-lg-12">
                                                         <div className="card-header step-card-header card-header-light-blue">
-                                                        <p className="office-name card-title fs-6 mb-0">Adhoc/PAYG/Hourly</p>
+                                                            <p className="office-name card-title fs-6 mb-0">Adhoc/PAYG/Hourly</p>
                                                         </div>
                                                     </div>
-                                     
+
                                                     <div className="row card-body">
                                                         {[
                                                             { label: 'Total Outsourcing', name: 'total_outsourcing', feeName: 'Fee Percentage' },
@@ -588,151 +644,108 @@ const Engagement = () => {
                                     )}
 
 
-
-                                    {checkboxStates && checkboxStates[2] === 1 && (
-                                        <div id="myDiv3" className="row">
-                                            <div style={{ marginBottom: "26px !important" }} className="col-xl-12 col-lg-12">
-                                                <div className="card pricing-box ">
-                                                <div className="col-lg-12">
-                                                        <div className="card-header step-card-header card-header-light-blue">
-                                                        <p className=" card-title fs-6 mb-0">Percentage Model</p>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div className="row card-body">
-                                                        {[
-                                                            { label: 'Accountants', name: 'adhoc_accountants', feeName: 'Fee Per Hour' },
-                                                            { label: 'Bookkeepers', name: 'adhoc_bookkeepers', feeName: 'Fee Per Hour' },
-                                                            { label: 'Payroll Experts', name: 'adhoc_payroll_experts', feeName: 'Fee Per Hour' },
-                                                            { label: 'Tax Experts', name: 'adhoc_tax_experts', feeName: 'Fee Per Hour' },
-                                                            { label: 'Admin/Other Staff', name: 'adhoc_admin_staff', feeName: 'Fee Per Hour' },
-                                                        ].map((field, index) => (
-                                                            <div className="col-lg-4" key={index}>
-                                                                <div className="mb-3">
-                                                                    <label className="form-label">{field.label}</label><br />
-                                                                    <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label>
-                                                                    <input
-                                                                        type="text"
-                                                                        className="form-control"
-                                                                        name={field.name}
-                                                                        value={formValues3[field.name]}
-                                                                        onChange={handleChange3}
-                                                                    />
-                                                                    {errors3[field.name] && (
-                                                                        <div className="error-text">{errors3[field.name]}</div>
-                                                                    )}
-
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-
-
                                     {checkboxStates && checkboxStates[3] === 1 && (
                                         <div id="myDiv4" className="row">
                                             <div className="col-xl-12 col-lg-12">
                                                 <div className="card pricing-box ">
-                                                <div className="col-lg-12">
+                                                    <div className="col-lg-12">
                                                         <div className="card-header step-card-header card-header-light-blue">
-                                                        <p className="office-name card-title fs-6 mb-0">Customised Pricing</p>
+                                                            <p className="office-name card-title fs-6 mb-0">Customised Pricing</p>
                                                         </div>
                                                     </div>
                                                     <div className="card-body">
-                                                    <div id="custprize">
-                                                        {jobEntries.map((job, index) => (
-                                                            <div className="row align-items-center" key={index}>
-                                                                <div className="col-lg-4">
-                                                                    <div className="mb-3">
-                                                                        <label htmlFor={`minimumJobs_${index}`} className="form-label">
-                                                                            Minimum number of Jobs
-                                                                        </label>
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control"
-                                                                            placeholder={1}
-                                                                            name="minimum_number_of_jobs"
-                                                                            id={`minimumJobs_${index}`}
-                                                                            value={job.minimum_number_of_jobs}
-                                                                            onChange={(e) => handleChange4(index, e)}
-                                                                        />
-                                                                        {errors4[index] && (
-                                                                            <div className="error-text">{errors4[index].minimum_number_of_jobs}</div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                                <div className="col-lg-4">
-                                                                <div className="mb-3">
-                                                                    <label htmlFor={`jobType_${index}`} className="form-label">
-                                                                        Types Of Job
-                                                                    </label>
-                                                                    <select
-                                                                        id={`jobType_${index}`}
-                                                                        className="form-select"
-                                                                        name="job_type_id"
-                                                                        value={job.job_type_id}
-                                                                        onChange={(e) => handleChange4(index, e)}
-                                                                    >
-                                                                        <option value="">Select Job Type</option>
-                                                                        {jobType && jobType.map((data) => (
-                                                                            <option key={data.type} value={data.id}>{data.type}</option>
-                                                                        ))}
-                                                                    </select>
-                                                                    {errors4[index] && (
-                                                                        <div className="error-text">{errors4[index].job_type_id}</div>
-                                                                    )}
-
-                                                                   </div>
-                                                                </div>
-
-
-                                                                <div className="col-lg-3">
-                                                                    <div className="mb-3">
-                                                                        <label htmlFor={`costPerJob_${index}`} className="form-label">
-                                                                            Cost Per Job
-                                                                        </label>
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control"
-                                                                            name="cost_per_job"
-                                                                            id={`costPerJob_${index}`}
-                                                                            value={job.cost_per_job}
-                                                                            onChange={(e) => handleChange4(index, e)}
-                                                                        />
-                                                                        {errors4[index] && (
-                                                                            <div className="error-text">{errors4[index].cost_per_job}</div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-
-                                                                {jobEntries.length > 1 &&
-                                                                    <div className="col-lg-1 text-center" >
-                                                                        <a className="add_icon text-decoration-none" onClick={(e) => handleRemoveJob(index)}>
-                                                                            <i
-                                                                                style={{ fontSize: 25, cursor: "pointer",  }}
-                                                                                className="ti-trash text-danger"
-
+                                                        <div id="custprize">
+                                                            {jobEntries.map((job, index) => (
+                                                                <div className="row align-items-center" key={index}>
+                                                                    <div className="col-lg-4">
+                                                                        <div className="mb-3">
+                                                                            <label htmlFor={`minimumJobs_${index}`} className="form-label">
+                                                                                Minimum number of Jobs
+                                                                            </label>
+                                                                            <input
+                                                                                type="text"
+                                                                                className="form-control"
+                                                                                placeholder={"Please Enter Minimum number of Jobs"}
+                                                                                name="minimum_number_of_jobs"
+                                                                                id={`minimumJobs_${index}`}
+                                                                                value={job.minimum_number_of_jobs}
+                                                                                onChange={(e) => handleChange4(index, e)}
                                                                             />
+                                                                            {errors4[index] && (
+                                                                                <div className="error-text">{errors4[index].minimum_number_of_jobs}</div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="col-lg-4">
+                                                                        <div className="mb-3">
+                                                                            <label htmlFor={`jobType_${index}`} className="form-label">
+                                                                                Types Of Job
+                                                                            </label>
+                                                                            <select
+                                                                                id={`jobType_${index}`}
+                                                                                className="form-select"
+                                                                                name="job_type_id"
+                                                                                value={job.job_type_id}
+                                                                                onChange={(e) => handleChange4(index, e)}
+                                                                            >
+                                                                                <option value="">Select Job Type</option>
+                                                                                <option value="1">demo</option>
+                                                                                {jobType && jobType.map((data) => (
+                                                                                    <option key={data.type} value={data.id}>{data.type}</option>
+                                                                                ))}
+                                                                            </select>
+                                                                            {errors4[index] && (
+                                                                                <div className="error-text">{errors4[index].job_type_id}</div>
+                                                                            )}
 
-                                                                        </a>
-                                                                    </div>}
+                                                                        </div>
+                                                                    </div>
 
+
+                                                                    <div className="col-lg-3">
+                                                                        <div className="mb-3">
+                                                                            <label htmlFor={`costPerJob_${index}`} className="form-label">
+                                                                                Cost Per Job
+                                                                            </label>
+                                                                            <input
+                                                                                type="text"
+                                                                                className="form-control"
+                                                                                name="cost_per_job"
+                                                                                placeholder={"Please Enter Cost Per Job"}
+                                                                                id={`costPerJob_${index}`}
+                                                                                value={job.cost_per_job}
+                                                                                onChange={(e) => handleChange4(index, e)}
+                                                                            />
+                                                                            {errors4[index] && (
+                                                                                <div className="error-text">{errors4[index].cost_per_job}</div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {jobEntries.length > 1 &&
+                                                                        <div className="col-lg-1 text-center" >
+                                                                            <a className="add_icon text-decoration-none" onClick={(e) => handleRemoveJob(index)}>
+                                                                                <i
+                                                                                    style={{ fontSize: 25, cursor: "pointer", }}
+                                                                                    className="ti-trash text-danger"
+
+                                                                                />
+
+                                                                            </a>
+                                                                        </div>}
+
+                                                                </div>
+                                                            ))}
+                                                            <div className="col-lg-12 text-end pe-3" >
+                                                                <a className="add_icon" onClick={handleAddJob}>
+                                                                    <i
+                                                                        style={{ fontSize: 28, cursor: "pointer", color: "#00AFEF" }}
+                                                                        className="fa-solid fa-circle-plus"
+                                                                    />
+                                                                </a>
                                                             </div>
-                                                        ))}
-                                                        <div className="col-lg-12 text-end pe-3" >
-                                                            <a className="add_icon" onClick={handleAddJob}>
-                                                                <i
-                                                                    style={{ fontSize: 28, cursor: "pointer", color: "#00AFEF" }}
-                                                                    className="fa-solid fa-circle-plus"
-                                                                />
-                                                            </a>
                                                         </div>
-                                                    </div>
-                                                    <div id="cust_prize"></div>
+                                                        <div id="cust_prize"></div>
                                                     </div>
                                                 </div>
                                             </div>

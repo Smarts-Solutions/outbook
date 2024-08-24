@@ -19,6 +19,10 @@ const handleStatusType = async (req, res) => {
                 result = await statusTypeService.getStatusType();
                 res.status(200).json({ status: true, data: result });
                 break;
+            case 'getAll':
+                result = await statusTypeService.getStatusTypeAll();
+                res.status(200).json({ status: true, data: result });
+                break;    
             case 'delete':
                 await statusTypeService.removeStatusType(StatusType.id);
                 res.status(200).json({ status: true, message: 'StatusType deleted successfully' });

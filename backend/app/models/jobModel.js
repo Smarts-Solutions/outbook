@@ -1,7 +1,7 @@
 const pool = require('../config/database');
 
 const getAddJobData = async (job) => {
-  console.log("job -",job)
+
   const {customer_id} = job;
 
   
@@ -17,6 +17,7 @@ const getAddJobData = async (job) => {
         customers
    JOIN 
         clients ON customers.id = clients.customer_id
+   WHERE customers.id = ?    
    ORDER BY 
     customers.id DESC;
   `;
@@ -27,7 +28,7 @@ const getAddJobData = async (job) => {
      customer = {
         customer_id: rows[0].customer_id,
         customer_trading_name: rows[0].customer_trading_name
-    };
+     };
 
      client = rows.map(row => ({
         client_id: row.client_id,
@@ -47,6 +48,7 @@ const getAddJobData = async (job) => {
         customers
    JOIN 
         customer_contact_details ON customers.id = customer_contact_details.customer_id
+   WHERE customers.id = ?     
    ORDER BY 
     customers.id DESC;
   `;
@@ -72,7 +74,7 @@ const getAddJobData = async (job) => {
          customer_services ON customers.id = customer_services.customer_id
     JOIN 
          job_types ON job_types.service_id = customer_services.service_id
-
+    WHERE customers.id = ?
     ORDER BY 
      customers.id DESC;
    `;
@@ -217,7 +219,7 @@ const getAddJobData = async (job) => {
       return { status: true, message: 'success.', data: {customer:customer,client:client ,customer_account_manager: customer_account_manager , services : services,job_type:job_type ,reviewer:reviewer , allocated : allocated ,engagement_model : engagement_model ,currency :rows8} };
      
   } catch (err) {
-      console.log("err",err)
+
       return { status: false, message: 'Err Customer Get' };
    
   }
@@ -236,7 +238,7 @@ async function generateNextUniqueCode() {
          const lastPart = parts[parts.length - 1];
          const lastCode = lastPart;
          const nextCode = parseInt(lastCode, 10) + 1;
-         console.log("nextCode", nextCode);
+        
          newCode = "0000" + nextCode
          // newCode = nextCode.toString().padStart(5, '0');
      }
@@ -245,7 +247,7 @@ async function generateNextUniqueCode() {
  }
 
 const jobAdd = async (job) => {
- // console.log("job -",job)
+ 
   const {
     account_manager_id,
     customer_id,
@@ -294,14 +296,12 @@ const jobAdd = async (job) => {
 
 
   let UniqueNo = await generateNextUniqueCode()
-  //console.log("UniqueNo ",UniqueNo)
-  // Exist Customer name
+
   const [ExistCustomer] = await pool.execute('SELECT trading_name FROM customers WHERE id =' + customer_id);
   const existCustomerName = ExistCustomer[0].trading_name
   const firstThreeLettersexistCustomerName = existCustomerName.substring(0, 3);
 
-   // Exist Client name
-   const [ExistClient] = await pool.execute('SELECT trading_name FROM Clients WHERE id =' + client_id);
+   const [ExistClient] = await pool.execute('SELECT trading_name FROM clients WHERE id =' + client_id);
    const existClientName = ExistClient[0].trading_name
    const firstThreeLettersexistClientName = existClientName.substring(0, 3);
 
@@ -316,7 +316,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
   
     return { status: true, message: 'job add successfully.', data: result.insertId };
   } catch (err) {
-    console.log("Error:", err);
+
     return { status: false, message: 'Error adding job.' };
   }
   
@@ -370,7 +370,7 @@ const getJobByCustomer = async (job) => {
      const [rows] = await pool.execute(query, [customer_id]);
      return { status: true, message: 'Success.', data: rows };
      } catch (error) {
-     console.log("Error:", error);
+   
      return { status: false, message: 'Error getting job.' };
      }
     
@@ -425,7 +425,7 @@ const getJobByClient = async (job) => {
      const [rows] = await pool.execute(query, [client_id]);
      return { status: true, message: 'Success.', data: rows };
      } catch (error) {
-     console.log("Error:", error);
+     
      return { status: false, message: 'Error getting job.' };
      }
     
@@ -434,7 +434,7 @@ const getJobByClient = async (job) => {
 
 const getJobById = async (job) => {
      const {job_id} = job;
-     console.log("job_id",job_id)
+
      try {
      const query = `
     SELECT 
@@ -519,11 +519,11 @@ const getJobById = async (job) => {
      jobs.id = ?
      `;
 
-     console.log("query",query)
+   
      const [rows] = await pool.execute(query, [job_id]);
      return { status: true, message: 'Success.', data: rows };
      } catch (error) {
-     console.log("Error:", error);
+   
      return { status: false, message: 'Error getting job.' };
      }
     
@@ -531,7 +531,7 @@ const getJobById = async (job) => {
 }
 
 const jobUpdate = async (job) => {
-     // console.log("job -",job)
+     
       const {
         job_id,
         account_manager_id,
@@ -591,7 +591,6 @@ const jobUpdate = async (job) => {
     const firstThreeLettersexistClientName = ExistClient[0].trading_name.substring(0, 3);
     const exit_job_id = firstThreeLettersexistCustomerName+"_"+firstThreeLettersexistClientName+"_"+lastCode;
     
-     console.log("exit_job_id",exit_job_id)
 
     try {
      const query = `
@@ -693,7 +692,7 @@ const jobUpdate = async (job) => {
  
      return { status: true, message: 'job updated successfully', data: result.affectedRows };
  } catch (err) {
-     console.log("Error:", err);
+    
      return { status: false, message: 'Error updating job.' };
  }
       

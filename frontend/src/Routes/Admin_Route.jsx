@@ -24,6 +24,8 @@ import CreateJob from '../layouts/Admin/customer/Client_view/ClientJobs/CreateJo
 import ClientProfile from '../layouts/Admin/customer/Client_view/ClientJob'
 import JobEdit from '../layouts/Admin/customer/Client_view/ClientJobs/EditJob'
 import CreateCheckList from '../layouts/Admin/customer/Client_view/CreateCheckList';
+import EditCheckList from '../layouts/Admin/customer/Client_view/Editchecklist';
+
 
 const Admin_Route = () => {
   const dispatch = useDispatch();
@@ -70,7 +72,7 @@ const Admin_Route = () => {
             <Route path="/createjob" element={<CreateJob />} />
             <Route path="/job/edit" element={<JobEdit />} />
             <Route path="/create/checklist" element={<CreateCheckList />} />
-
+            <Route path="/edit/checklist" element={<EditCheckList />} />
 
 
 

@@ -9,6 +9,9 @@ const addCustomerContactPersonRole = async (CustomerContactPersonRole) => {
 const getCustomerContactPersonRole = async () => {
   return customerContactPersonRoleModel.getCustomerContactPersonRole();
 }
+const getCustomerContactPersonRoleAll = async () => {
+  return customerContactPersonRoleModel.getCustomerContactPersonRoleAll();
+}
 
 const removeCustomerContactPersonRole = async (CustomerContactPersonRoleId) => {
   return customerContactPersonRoleModel.deleteCustomerContactPersonRole(CustomerContactPersonRoleId);
@@ -23,5 +26,6 @@ module.exports = {
   addCustomerContactPersonRole,
   getCustomerContactPersonRole,
   removeCustomerContactPersonRole,
-  modifyCustomerContactPersonRole
+  modifyCustomerContactPersonRole,
+  getCustomerContactPersonRoleAll
 };

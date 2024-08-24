@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE , CLIENTINDUSTRY ,COUNTRY , JOBTYPE } from "../../../Services/Settings/settingService";
+import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE , CLIENTINDUSTRY ,COUNTRY , JOBTYPE,ADDTASK,GetServicesByCustomer,GETTASK,getListAction ,addChecklist,UpdateChecklist} from "../../../Services/Settings/settingService";
 
 
 
@@ -83,9 +83,71 @@ export const JobType = createAsyncThunk("jobType", async (data) => {
   }
 });
 
+export const AddTask = createAsyncThunk("addTask", async (data) => {
+  try {
+    const { req, authToken } = data
+    const res = await ADDTASK(req, authToken);
+    return await res;
+  } catch
+  (err) {
+    return err;
+  }
+});
 
+export const GetServicesByCustomers = createAsyncThunk("customerGetService", async (data) => {
+  try {
+    const { req, authToken } = data
+    const res = await GetServicesByCustomer(req, authToken);
+    return await res;
+  } catch
+  (err) {
+    return err;
+  }
+});
 
+export const GETTASKDATA = createAsyncThunk("getTask", async (data) => {
+  try {
+    const { req, authToken } = data
+    const res = await GETTASK(req, authToken);
+    return await res;
+  } catch
+  (err) {
+    return err;
+  }
+});
 
+export const getList = createAsyncThunk("checklistAction", async (data) => {
+  try {
+    const { req, authToken } = data
+    const res = await getListAction(req, authToken);
+    return await res;
+  } catch
+  (err) {
+    return err;
+  }
+});
+
+export const addChecklists = createAsyncThunk("addChecklist", async (data) => {
+  try {
+    const { req, authToken } = data
+    const res = await addChecklist(req, authToken);
+    return await res;
+  } catch
+  (err) {
+    return err;
+  }
+});
+
+export const UpdateChecklistData = createAsyncThunk("updateChecklist", async (data) => {
+  try {
+    const { req, authToken } = data
+    const res = await UpdateChecklist(req, authToken);
+    return await res;
+  } catch
+  (err) {
+    return err;
+  }
+});
 
 //Setting Slice
 const SettingSlice = createSlice({
@@ -99,7 +161,13 @@ const SettingSlice = createSlice({
     personrole: [],
     clientIndustry: [],
     country: [],
-    jobtype:[]
+    jobtype:[],
+    addtak:[],
+    customergetervices:[],
+    gettask:[],
+    list:[],
+    addChecklistData:[],
+    updatecheckdata:[]
   },
 
   reducers: {},
@@ -180,6 +248,72 @@ const SettingSlice = createSlice({
         state.jobtype = action.payload;
       })
       .addCase(JobType.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(AddTask.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(AddTask.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.addtak = action.payload;
+      })
+      .addCase(AddTask.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(GetServicesByCustomers.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(GetServicesByCustomers.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.customergetervices = action.payload;
+      })
+      .addCase(GetServicesByCustomers.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(GETTASKDATA.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(GETTASKDATA.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.gettask = action.payload;
+      })
+      .addCase(GETTASKDATA.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(getList.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(getList.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.list = action.payload;
+      })
+      .addCase(getList.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(addChecklists.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(addChecklists.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.addChecklistData = action.payload;
+      })
+      .addCase(addChecklists.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(UpdateChecklistData.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(UpdateChecklistData.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.updatecheckdata = action.payload;
+      })
+      .addCase(UpdateChecklistData.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
       });

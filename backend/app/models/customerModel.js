@@ -11,7 +11,7 @@ async function generateNextUniqueCode() {
         const lastPart = parts[parts.length - 1];
         const lastCode = lastPart;
         const nextCode = parseInt(lastCode, 10) + 1;
-        console.log("nextCode", nextCode);
+    
         newCode = "0000" + nextCode
         // newCode = nextCode.toString().padStart(5, '0');
     }
@@ -21,14 +21,19 @@ async function generateNextUniqueCode() {
 
 const createCustomer = async (customer) => {
     // Customer Code(cust+CustName+UniqueNo)
+    const { customer_id } = customer;
+
+   if(customer_id == undefined || customer_id == null || customer_id == ""){
     let UniqueNo = await generateNextUniqueCode()
 
+   console.log("customer",customer)
+   
+
     if (customer.CustomerType == "1") {
-        // console.log("customer model", customer)
-        const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, First_Name, Last_Name, Phone, Email, Residential_Address } = customer;
+        const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, First_Name, Last_Name, Phone, Email, Residential_Address  } = customer;
         const firstThreeLetters = Trading_Name.substring(0, 3)
         const customer_code = "cust_" + firstThreeLetters + "_" + UniqueNo;
-
+      
 
         const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
 
@@ -37,8 +42,7 @@ const createCustomer = async (customer) => {
             return { status: false, message: 'Customer Trading Name Already Exists.' };
         }
 
-
-
+        
         const query = `
     INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -49,10 +53,12 @@ const createCustomer = async (customer) => {
             const customer_id = result.insertId;
 
             const query2 = `
-        INSERT INTO customer_contact_details (customer_id,first_name,last_name,phone,email,residential_address)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO customer_contact_details (customer_id,first_name,last_name,phone_code,phone,email,residential_address)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
-            const [result2] = await pool.execute(query2, [customer_id, First_Name, Last_Name, Phone, Email, Residential_Address]);
+           let phone_code = customer.phone_code == undefined ? "": customer.phone_code
+       
+            const [result2] = await pool.execute(query2, [customer_id, First_Name, Last_Name,phone_code ,Phone, Email, Residential_Address]);
             return { status: true, message: 'customer add successfully.', data: customer_id };
         } catch (err) {
             console.error('Error inserting data:', err);
@@ -61,7 +67,7 @@ const createCustomer = async (customer) => {
     }
 
     else if (customer.CustomerType == "2") {
-        //console.log("customer model", customer)
+
         const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, company_name, entity_type, company_status, company_number, Registered_Office_Addres, Incorporation_Date, Incorporation_in, contactDetails } = customer;
 
         const firstThreeLetters = Trading_Name.substring(0, 3)
@@ -92,23 +98,20 @@ const createCustomer = async (customer) => {
 
 
             const query3 = `
-        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone,email)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
 
             for (const detail of contactDetails) {
-                // console.log("detail",detail)
+            
                 let role = detail.role;
                 let first_name = detail.firstName;
                 let last_name = detail.lastName;
+                let phone_code = detail.phone_code == undefined ? "": detail.phone_code;
                 let phone = detail.phoneNumber;
                 let email = detail.email;
-                //   console.log("first_name",first_name)
-                //   console.log("last_name",last_name)
-                //   console.log("role",role)
-                //   console.log("phone_number",phone_number)
-                //   console.log("email",email)
-                const [result3] = await pool.execute(query3, [customer_id, role, first_name, last_name, phone, email]);
+
+                const [result3] = await pool.execute(query3, [customer_id, role, first_name, last_name, phone_code,phone, email]);
 
             }
 
@@ -121,7 +124,7 @@ const createCustomer = async (customer) => {
     }
 
     else if (customer.CustomerType == "3") {
-        //console.log("customer model", customer)
+
         const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, contactDetails } = customer;
 
         const firstThreeLetters = Trading_Name.substring(0, 3)
@@ -148,25 +151,21 @@ const createCustomer = async (customer) => {
 
 
             const query2 = `
-        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone,email,authorised_signatory_status)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email,authorised_signatory_status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
             for (const detail of contactDetails) {
-                // console.log("detail",detail)
+              
                 let role = detail.role;
                 let first_name = detail.firstName;
                 let last_name = detail.lastName;
+                let phone_code = detail.phone_code == undefined ? "": detail.phone_code;
                 let phone = detail.phoneNumber;
                 let email = detail.email;
                 let authorised_signatory_status = detail.authorised_signatory_status == true ? "1" : "0";
-                //   console.log("first_name",first_name)
-                //   console.log("last_name",last_name)
-                //   console.log("role",role)
-                //   console.log("phone_number",phone_number)
-                //   console.log("email",email)
-                //   console.log("authorised_signatory_status",authorised_signatory_status)
-                const [result3] = await pool.execute(query2, [customer_id, role, first_name, last_name, phone, email, authorised_signatory_status]);
+ 
+                const [result3] = await pool.execute(query2, [customer_id, role, first_name, last_name, phone_code,phone, email, authorised_signatory_status]);
 
             }
 
@@ -177,10 +176,208 @@ const createCustomer = async (customer) => {
             throw err;
         }
     }
+   }
+
+else{
+    
+    const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, contactDetails } = customer;
+
+      
+
+    const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ? AND id != ?`;
+    const [check] = await pool.execute(checkQuery, [Trading_Name, customer_id]);
+
+    if (check.length > 0) {
+        return { status: false, message: 'Customers Trading Name Already Exists.' };
+    }
+
+    const query = `
+    UPDATE customers
+    SET customer_type = ?, staff_id = ?, account_manager_id = ?, trading_name = ?, trading_address = ?, vat_registered = ?, vat_number = ?, website = ?
+    WHERE id = ?
+    `;
+
+    const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, customer_id]);
+
+    //Solo Traders Details
+    if (CustomerType == "1") {
+        const {First_Name,Last_Name,Phone,Email,Residential_Address,contact_id} = customer;
+  
+        const query2 = `
+    UPDATE customer_contact_details
+    SET first_name = ?, last_name = ?, phone = ?,phone_code = ?, email = ?, residential_address = ?
+    WHERE customer_id = ? AND id = ?
+     `;
+        
+     let phone_code = customer.phone_code == undefined ? "": customer.phone_code
+        try {
+            const [result2] = await pool.execute(query2, [First_Name,Last_Name,phone_code,Phone,Email,Residential_Address, customer_id, contact_id]);
+            return { status: true, message: 'Customer updated successfully.', data: customer_id };
+        } catch (err) {
+     
+            return { status: false, message: 'Update Error Customer Type 1' };
+        }
+
+
+    }
+
+    // Company Details
+    else if (CustomerType == "2") {
+        const { company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date, incorporation_in } = customer;
+        try {
+            // Update customer_company_information
+
+         
+
+
+            const [incorporation_date_s] = incorporation_date.split('T');
+
+
+            const query2 = `
+                UPDATE customer_company_information
+                SET company_name = ?, entity_type = ?, company_status = ?, company_number = ?, registered_office_address = ?, incorporation_date = ?, incorporation_in = ?
+                WHERE customer_id = ?
+            `;
+            const [result2] = await pool.execute(query2, [company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date_s, incorporation_in, customer_id]);
+
+
+          
+
+            const [existIdResult] = await pool.execute('SELECT id FROM customer_contact_details WHERE customer_id = ?', [customer_id]);
+            const idArray = await existIdResult.map(item => item.id);
+            let arrayInterId = []
+
+       
+
+            // Update customer_contact_details
+            const query3 = `
+                UPDATE customer_contact_details
+                SET contact_person_role_id = ?, first_name = ?, last_name = ?, phone_code = ?, phone = ?, email = ? ,residential_address = ?
+                WHERE customer_id = ? AND id = ?
+            `;
+
+            for (const detail of contactDetails) {
+
+                let contact_id = detail.contact_id;
+                let customer_contact_person_role_id = detail.customer_contact_person_role_id;
+                let first_name = detail.first_name;
+                let last_name = detail.last_name;
+                let email = detail.email;
+                let phone_code = detail.phone_code == undefined ? "": detail.phone_code;
+                let phone = detail.phone;
+                let residential_address = detail.residential_address;
+                if (contact_id == "" || contact_id == undefined || contact_id == null) {
+               
+
+                    const query4 = `
+                    INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email,residential_address)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    `;
+                    const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone_code,phone, email, residential_address]);
+
+                }
+                else {
+          
+                    arrayInterId.push(contact_id)
+                    const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone_code,phone, email, residential_address, customer_id, contact_id]);
+                }
+            }
+
+            let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
+          
+
+            if (deleteIdArray.length > 0) {
+                for (const id of deleteIdArray) {
+
+                    const query3 = `
+                    DELETE FROM customer_contact_details WHERE id = ?
+                    `;
+                    const [result3] = await pool.execute(query3, [id]);
+                }
+            }
+
+
+            return { status: true, message: 'Customer updated successfully.', data: customer_id };
+
+        } catch (err) {
+        
+            return { status: false, message: 'Update Error Customer Type 2' };
+        }
+
+
+    }
+
+    // Partnership Details
+    else if (CustomerType == "3") {
+
+        try {
+
+
+            const [existIdResult] = await pool.execute('SELECT id FROM customer_contact_details WHERE customer_id = ?', [customer_id]);
+            const idArray = await existIdResult.map(item => item.id);
+            let arrayInterId = []
+
+
+            const query3 = `
+            UPDATE customer_contact_details
+            SET contact_person_role_id = ?, first_name = ?, last_name = ?,phone_code = ? ,phone = ?, email = ? ,residential_address = ? ,authorised_signatory_status = ?
+            WHERE customer_id = ? AND id = ?
+           `;
+
+
+
+            for (const detail of contactDetails) {
+
+                let contact_id = detail.contact_id;
+                let customer_contact_person_role_id = detail.customer_contact_person_role_id;
+                let first_name = detail.first_name;
+                let last_name = detail.last_name;
+                let email = detail.email;
+                let phone_code = detail.phone_code == undefined ? "": detail.phone_code;
+                let phone = detail.phone;
+                let residential_address = detail.residential_address;
+                let authorised_signatory_status = detail.authorised_signatory_status;
+                if (contact_id == "" || contact_id == undefined || contact_id == null) {
+                    const query4 = `
+                    INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email,residential_address,authorised_signatory_status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    `;
+                    const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone_code,phone, email, residential_address, authorised_signatory_status]);
+                } else {
+
+                    arrayInterId.push(contact_id)
+                    const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone_code,phone, email, residential_address, authorised_signatory_status, customer_id, contact_id]);
+                }
+
+            }
+
+            let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
+            if (deleteIdArray.length > 0) {
+                for (const id of deleteIdArray) {
+                    const query3 = `
+                    DELETE FROM customer_contact_details WHERE id = ?
+                    `;
+                    const [result3] = await pool.execute(query3, [id]);
+                }
+            }
+
+            return { status: true, message: 'Customer updated successfully.', data: customer_id };
+
+        } catch (err) {
+            return { status: false, message: 'Update Error Customer Type 3' };
+        }
+
+    }
+
+}
+
+
+
 
 };
 
 const getCustomer = async (customer) => {
+   const {staff_id} = customer
     const query = `
     SELECT 
     customers.*, 
@@ -198,12 +395,13 @@ JOIN
     staffs AS staff2 ON customers.account_manager_id = staff2.id
 LEFT JOIN 
     customer_company_information ON customers.id = customer_company_information.customer_id
+WHERE staff1.id = ?   
 ORDER BY 
     customers.id DESC;
     `;
 
     try {
-        const [result] = await pool.execute(query);
+        const [result] = await pool.execute(query,[staff_id]);
         return { status: true, message: 'Success..', data: result };
 
     } catch (err) {
@@ -215,7 +413,7 @@ ORDER BY
 
 const deleteCustomer = async (customer) => {
     // const { customer_id } = customer;
-    // console.log("customer_id", customer_id);
+  
     // try {
     //     await pool.execute('DELETE FROM customers WHERE id = ?', [customer_id]);
     //     await pool.execute('DELETE FROM customer_company_information WHERE customer_id = ?', [customer_id]);
@@ -227,13 +425,12 @@ const deleteCustomer = async (customer) => {
 }
 
 const updateProcessCustomerServices = async (customerProcessData) => {
-    //console.log("customerProcessData",customerProcessData)
-    const { customer_id, services } = customerProcessData;
+
+    const { customer_id,services } = customerProcessData;
     const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
 
     var account_manager_id_exit = ExistCustomer[0].account_manager_id;
-    // console.log("customer_id",customer_id);
-    // console.log("services",services);
+
     for (const serVal of services) {
         let service_id = serVal.service_id;
         let account_manager_id = serVal.account_manager_id;
@@ -349,14 +546,18 @@ const updateProcessCustomerServices = async (customerProcessData) => {
             throw err;
         }
     }
+    // Update customer process page
+     let pageStatus = "2";
+     await pool.execute('UPDATE customers SET form_process = ? WHERE id = ?', [pageStatus,customer_id]);
+
     return customer_id;
 
 }
 
 const updateProcessCustomerEngagementModel = async (customerProcessData) => {
-    // console.log("customerProcessData", customerProcessData)
-    const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing } = customerProcessData;
-    console.log("customer_id", customer_id);
+
+    const { customer_id ,fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing } = customerProcessData;
+   
 
     const checkQuery = `SELECT id FROM customer_engagement_model WHERE customer_id = ? `;
     const [existCustomer] = await pool.execute(checkQuery, [customer_id]);
@@ -371,15 +572,12 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
 
 
 
-    console.log("customer_engagement_model_id", customer_engagement_model_id)
 
 
 
     if (fte_dedicated_staffing === "1") {
 
         const { customer_id, fte_dedicated_staffing, number_of_accountants, fee_per_accountant, number_of_bookkeepers, fee_per_bookkeeper, number_of_payroll_experts, fee_per_payroll_expert, number_of_tax_experts, fee_per_tax_expert, number_of_admin_staff, fee_per_admin_staff } = customerProcessData;
-
-        console.log("fte_dedicated_staffing", fte_dedicated_staffing);
 
         const checkQuery1 = `SELECT id FROM customer_engagement_fte WHERE customer_engagement_model_id  = ?`;
         const [exist1] = await pool.execute(checkQuery1, [customer_engagement_model_id]);
@@ -455,13 +653,15 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
             await pool.execute(updateQueryEngagementModel, [fte_dedicated_staffing, customer_id]);
         }
 
+        
+
 
     }
 
     if (percentage_model === "1") {
 
         const { customer_id, percentage_model, total_outsourcing, accountants, bookkeepers, payroll_experts, tax_experts, admin_staff } = customerProcessData;
-        console.log("percentage_model", percentage_model);
+       
 
         const checkQuery2 = `SELECT id FROM customer_engagement_percentage WHERE customer_engagement_model_id  = ?`;
         const [exist2] = await pool.execute(checkQuery2, [customer_engagement_model_id]);
@@ -526,7 +726,7 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
 
         const { customer_id, adhoc_payg_hourly, adhoc_accountants, adhoc_bookkeepers, adhoc_payroll_experts, adhoc_tax_experts, adhoc_admin_staff } = customerProcessData;
 
-        console.log("adhoc_payg_hourly", adhoc_payg_hourly);
+
         const checkQuery3 = `SELECT id FROM customer_engagement_adhoc_hourly WHERE customer_engagement_model_id  = ?`;
         const [exist3] = await pool.execute(checkQuery3, [customer_engagement_model_id]);
         let customer_engagement_adhoc_hourly_id;
@@ -589,7 +789,7 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
 
         if (customised_pricing_data.length > 0) {
             for (const customisedVal of customised_pricing_data) {
-                console.log("customised_pricing", customised_pricing);
+       
                 let minimum_number_of_jobs = customisedVal.minimum_number_of_jobs
                 let job_type_id = customisedVal.job_type_id
                 let cost_per_job = customisedVal.cost_per_job
@@ -597,7 +797,7 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
                 const checkQuery4 = `SELECT id FROM customer_engagement_customised_pricing WHERE customer_engagement_model_id = ? AND minimum_number_of_jobs = ? AND job_type_id = ? AND cost_per_job = ?`;
                 const [exist4] = await pool.execute(checkQuery4, [customer_engagement_model_id, minimum_number_of_jobs, job_type_id, cost_per_job]);
                 let customer_engagement_customised_pricing_id;
-                console.log("exist4", exist4[0])
+              
                 if (exist4.length === 0) {
                     const insertQuery = `
             INSERT INTO customer_engagement_customised_pricing (
@@ -689,12 +889,15 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
 
     }
 
+    // Update customer process page
+    let pageStatus = "3";
+    await pool.execute('UPDATE customers SET form_process = ? WHERE id = ?', [ pageStatus,customer_id]);
+
     return customer_id;
 }
 
 const updateProcessCustomerFile = async (customerProcessDataFiles, customer_id) => {
-    console.log("customerProcessDataFiles", customerProcessDataFiles);
-    console.log("customer_id", customer_id);
+
     if (customerProcessDataFiles.length > 0) {
 
         for (let file of customerProcessDataFiles) {
@@ -719,18 +922,21 @@ const updateProcessCustomerFile = async (customerProcessDataFiles, customer_id) 
                     file_size
                 ]);
 
-                console.log(`File inserted with ID: ${result.insertId}`);
             } catch (error) {
                 console.error('Error inserting file:', error);
             }
         }
     }
+     
+    // Update customer process page
+    let pageStatus = "4"
+    await pool.execute('UPDATE customers SET form_process = ? WHERE id = ?', [ pageStatus,customer_id]);
     return customer_id
 }
 
 const updateProcessCustomerFileGet = async (customerProcessData) => {
     const { customer_id } = customerProcessData;
-    console.log("customer_id", customer_id);
+  
     try {
         const query = `SELECT * FROM customer_paper_work WHERE customer_id = ?`
         const [result] = await pool.execute(query, [customer_id]);
@@ -762,6 +968,7 @@ const updateProcessCustomerFileDelete = async (customerProcessData) => {
 const getSingleCustomer = async (customer) => {
     let customerDetals = {}
     const { customer_id, pageStatus } = customer;
+   
     const [ExistCustomer] = await pool.execute('SELECT customer_type FROM `customers` WHERE id =' + customer_id);
 
     const customer_type = ExistCustomer[0].customer_type;
@@ -770,7 +977,7 @@ const getSingleCustomer = async (customer) => {
     if (pageStatus === "1") {
         //Solo Traders Details
         if (customer_type == "1") {
-            const query = `
+        const query = `
         SELECT 
         customers.id AS customer_id,
         customers.customer_type AS customer_type,
@@ -788,6 +995,7 @@ const getSingleCustomer = async (customer) => {
         customer_contact_details.first_name AS first_name,
         customer_contact_details.last_name AS last_name,
         customer_contact_details.email AS email,
+        customer_contact_details.phone_code AS phone_code,
         customer_contact_details.phone AS phone,
         customer_contact_details.residential_address AS residential_address,
         customer_contact_person_role.name AS customer_role_contact_name,
@@ -830,6 +1038,7 @@ const getSingleCustomer = async (customer) => {
                     first_name: row.first_name,
                     last_name: row.last_name,
                     email: row.email,
+                    phone_code: row.phone_code,
                     phone: row.phone,
                     residential_address: row.residential_address,
                     // Add other contact detail fields as needed
@@ -844,7 +1053,7 @@ const getSingleCustomer = async (customer) => {
                 return customerDetals
                 // Return or further process `result` as needed
             } else {
-                // console.log("No customer found with the given ID.");
+     
                 return []
             }
             ;
@@ -870,6 +1079,7 @@ const getSingleCustomer = async (customer) => {
             customer_contact_details.first_name AS first_name,
             customer_contact_details.last_name AS last_name,
             customer_contact_details.email AS email,
+            customer_contact_details.phone_code AS phone_code,
             customer_contact_details.phone AS phone,
             customer_contact_details.residential_address AS residential_address,
             customer_company_information.*,
@@ -923,6 +1133,7 @@ const getSingleCustomer = async (customer) => {
                     first_name: row.first_name,
                     last_name: row.last_name,
                     email: row.email,
+                    phone_code: row.phone_code,
                     phone: row.phone,
                     residential_address: row.residential_address,
                     // Add other contact detail fields as needed
@@ -938,7 +1149,7 @@ const getSingleCustomer = async (customer) => {
                 return customerDetals
                 // Return or further process `result` as needed
             } else {
-                // console.log("No customer found with the given ID.");
+             
                 return []
             }
             ;
@@ -964,6 +1175,7 @@ const getSingleCustomer = async (customer) => {
             customer_contact_details.first_name AS first_name,
             customer_contact_details.last_name AS last_name,
             customer_contact_details.email AS email,
+            customer_contact_details.phone_code AS phone_code,
             customer_contact_details.phone AS phone,
             customer_contact_details.residential_address AS residential_address,
             customer_contact_details.authorised_signatory_status AS authorised_signatory_status,
@@ -1006,6 +1218,7 @@ const getSingleCustomer = async (customer) => {
                     first_name: row.first_name,
                     last_name: row.last_name,
                     email: row.email,
+                    phone_code: row.phone_code,
                     phone: row.phone,
                     residential_address: row.residential_address,
                     authorised_signatory_status: row.authorised_signatory_status
@@ -1021,7 +1234,7 @@ const getSingleCustomer = async (customer) => {
                 return customerDetals
                 // Return or further process `result` as needed
             } else {
-                // console.log("No customer found with the given ID.");
+              
                 return []
             }
             ;
@@ -1088,7 +1301,7 @@ const getSingleCustomer = async (customer) => {
 
             return result;
         } else {
-            // console.log("No customer found with the given ID.");
+
             return [];
         }
 
@@ -1299,7 +1512,8 @@ const getSingleCustomer = async (customer) => {
 }
 
 const customerUpdate = async (customer) => {
-
+   
+   
     const { customer_id, pageStatus } = customer;
     const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
     var account_manager_id = ExistCustomer[0].account_manager_id;
@@ -1309,7 +1523,7 @@ const customerUpdate = async (customer) => {
     // Page Status 1 
     if (pageStatus === "1") {
 
-        console.log("customer", customer)
+       
         const { customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website, contactDetails } = customer;
 
 
@@ -1338,17 +1552,18 @@ const customerUpdate = async (customer) => {
             let first_name = contactDetails[0].first_name;
             let last_name = contactDetails[0].last_name;
             let email = contactDetails[0].email;
+            let phone_code = contactDetails[0].phone_code;
             let phone = contactDetails[0].phone;
             let residential_address = contactDetails[0].residential_address;
 
             const query2 = `
         UPDATE customer_contact_details
-        SET first_name = ?, last_name = ?, phone = ?, email = ?, residential_address = ?
+        SET first_name = ?, last_name = ?, phone_code = ?, phone = ?, email = ?, residential_address = ?
         WHERE customer_id = ? AND id = ?
          `;
 
             try {
-                const [result2] = await pool.execute(query2, [first_name, last_name, phone, email, residential_address, customer_id, contact_id]);
+                const [result2] = await pool.execute(query2, [first_name, last_name, phone_code,phone, email, residential_address, customer_id, contact_id]);
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
             } catch (err) {
                 return { status: false, message: 'Update Error Customer Type 1' };
@@ -1361,13 +1576,7 @@ const customerUpdate = async (customer) => {
         else if (customer_type == "2") {
             const { company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date, incorporation_in } = customer;
             try {
-                // Update customer_company_information
-
-                console.log("registered_office_address", registered_office_address)
-                console.log("incorporation_date", incorporation_date)
-                console.log("incorporation_in", incorporation_in)
-                console.log('customer', customer)
-
+          
 
                 const [incorporation_date_s] = incorporation_date.split('T');
 
@@ -1381,18 +1590,16 @@ const customerUpdate = async (customer) => {
                 const [result2] = await pool.execute(query2, [company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date_s, incorporation_in, customer_id]);
 
 
-                console.log("CP 2")
 
                 const [existIdResult] = await pool.execute('SELECT id FROM customer_contact_details WHERE customer_id = ?', [customer_id]);
                 const idArray = await existIdResult.map(item => item.id);
                 let arrayInterId = []
 
-                console.log("CP 3")
 
                 // Update customer_contact_details
                 const query3 = `
                     UPDATE customer_contact_details
-                    SET contact_person_role_id = ?, first_name = ?, last_name = ?, phone = ?, email = ? ,residential_address = ?
+                    SET contact_person_role_id = ?, first_name = ?, last_name = ?, phone_code = ?, phone = ?, email = ? ,residential_address = ?
                     WHERE customer_id = ? AND id = ?
                 `;
 
@@ -1403,27 +1610,27 @@ const customerUpdate = async (customer) => {
                     let first_name = detail.first_name;
                     let last_name = detail.last_name;
                     let email = detail.email;
+                    let phone_code = detail.phone_code;
                     let phone = detail.phone;
                     let residential_address = detail.residential_address;
                     if (contact_id == "" || contact_id == undefined || contact_id == null) {
-                        console.log("CP 4")
+                
 
                         const query4 = `
-                        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone,email,residential_address)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email,residential_address)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                         `;
-                        const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone, email, residential_address]);
+                        const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name,phone_code, phone, email, residential_address]);
 
                     }
                     else {
-                        console.log("CP 5")
                         arrayInterId.push(contact_id)
-                        const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone, email, residential_address, customer_id, contact_id]);
+                        const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone_code,phone, email, residential_address, customer_id, contact_id]);
                     }
                 }
 
                 let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
-                console.log("CP 6")
+           
 
                 if (deleteIdArray.length > 0) {
                     for (const id of deleteIdArray) {
@@ -1439,7 +1646,7 @@ const customerUpdate = async (customer) => {
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
-                console.log("err ", err)
+     
                 return { status: false, message: 'Update Error Customer Type 2' };
             }
 
@@ -1459,7 +1666,7 @@ const customerUpdate = async (customer) => {
 
                 const query3 = `
                 UPDATE customer_contact_details
-                SET contact_person_role_id = ?, first_name = ?, last_name = ?, phone = ?, email = ? ,residential_address = ? ,authorised_signatory_status = ?
+                SET contact_person_role_id = ?, first_name = ?, last_name = ?,phone_code = ? ,phone = ?, email = ? ,residential_address = ? ,authorised_signatory_status = ?
                 WHERE customer_id = ? AND id = ?
                `;
 
@@ -1472,19 +1679,20 @@ const customerUpdate = async (customer) => {
                     let first_name = detail.first_name;
                     let last_name = detail.last_name;
                     let email = detail.email;
+                    let phone_code = detail.phone_code;
                     let phone = detail.phone;
                     let residential_address = detail.residential_address;
                     let authorised_signatory_status = detail.authorised_signatory_status;
                     if (contact_id == "" || contact_id == undefined || contact_id == null) {
                         const query4 = `
-                        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone,email,residential_address,authorised_signatory_status)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email,residential_address,authorised_signatory_status)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                         `;
-                        const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone, email, residential_address, authorised_signatory_status]);
+                        const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name,phone_code, phone, email, residential_address, authorised_signatory_status]);
                     } else {
 
                         arrayInterId.push(contact_id)
-                        const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone, email, residential_address, authorised_signatory_status, customer_id, contact_id]);
+                        const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone_code,phone, email, residential_address, authorised_signatory_status, customer_id, contact_id]);
                     }
 
                 }
@@ -1595,7 +1803,7 @@ const customerUpdate = async (customer) => {
                 }
 
             } catch (err) {
-                console.log("err", err)
+   
                 return { status: false, message: 'Customer Services Err update.' };
             }
         }
@@ -1629,10 +1837,8 @@ const customerUpdate = async (customer) => {
     //  Page Status 3 Customer engagement model Part
     else if (pageStatus === "3") {
 
-        // console.log("customer", customer)
         const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing } = customer;
-        console.log("customer_id", customer_id);
-
+    
         const checkQuery = `SELECT id FROM customer_engagement_model WHERE customer_id = ? `;
         const [existCustomer] = await pool.execute(checkQuery, [customer_id]);
         let customer_engagement_model_id;
@@ -1646,14 +1852,12 @@ const customerUpdate = async (customer) => {
 
 
 
-        console.log("customer_engagement_model_id", customer_engagement_model_id)
 
 
         if (fte_dedicated_staffing === "1") {
 
             const { customer_id, fte_dedicated_staffing, number_of_accountants, fee_per_accountant, number_of_bookkeepers, fee_per_bookkeeper, number_of_payroll_experts, fee_per_payroll_expert, number_of_tax_experts, fee_per_tax_expert, number_of_admin_staff, fee_per_admin_staff } = customer;
 
-            console.log("fte_dedicated_staffing", fte_dedicated_staffing);
 
             const checkQuery1 = `SELECT id FROM customer_engagement_fte WHERE customer_engagement_model_id  = ?`;
             const [exist1] = await pool.execute(checkQuery1, [customer_engagement_model_id]);
@@ -1735,7 +1939,7 @@ const customerUpdate = async (customer) => {
         if (percentage_model === "1") {
 
             const { customer_id, percentage_model, total_outsourcing, accountants, bookkeepers, payroll_experts, tax_experts, admin_staff } = customer;
-            console.log("percentage_model", percentage_model);
+     
 
             const checkQuery2 = `SELECT id FROM customer_engagement_percentage WHERE customer_engagement_model_id  = ?`;
             const [exist2] = await pool.execute(checkQuery2, [customer_engagement_model_id]);
@@ -1800,7 +2004,6 @@ const customerUpdate = async (customer) => {
 
             const { customer_id, adhoc_payg_hourly, adhoc_accountants, adhoc_bookkeepers, adhoc_payroll_experts, adhoc_tax_experts, adhoc_admin_staff } = customer;
 
-            console.log("adhoc_payg_hourly", adhoc_payg_hourly);
             const checkQuery3 = `SELECT id FROM customer_engagement_adhoc_hourly WHERE customer_engagement_model_id  = ?`;
             const [exist3] = await pool.execute(checkQuery3, [customer_engagement_model_id]);
             let customer_engagement_adhoc_hourly_id;
@@ -1858,19 +2061,16 @@ const customerUpdate = async (customer) => {
         }
 
         if (customised_pricing === "1") {
-
             const { customer_id, customised_pricing, customised_pricing_data } = customer;
 
             const [existPricingData] = await pool.execute('SELECT id FROM customer_engagement_customised_pricing WHERE customer_engagement_model_id = ?', [customer_engagement_model_id]);
 
-            console.log("existPricingData", existPricingData);
 
             const idArray = existPricingData.map(item => item.id);
             let arrayInterId = [];
 
             if (customised_pricing_data.length > 0) {
                 for (const customisedVal of customised_pricing_data) {
-                    console.log("customised_pricing", customised_pricing);
                     let customised_pricing_id = customisedVal.customised_pricing_id;
                     let minimum_number_of_jobs = customisedVal.minimum_number_of_jobs;
                     let job_type_id = customisedVal.job_type_id;
@@ -1995,16 +2195,10 @@ const customerUpdate = async (customer) => {
 
     //  Page Status 4 Paper Work Part
     // else if (pageStatus === "4") {
-    //     console.log("Done")
+
     //     const { customer_id, customer_paper_work } = customer;
 
     //     const [ExistPaperWorkIds] = await pool.execute('SELECT id  FROM `customer_paper_work` WHERE customer_id =' + customer_id);
-    //     console.log("customer_id", customer_id);
-    //     console.log("customer_paper_work", customer_paper_work);
-      
-
-
-
         
     // }
     else {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { JobType } from '../../ReduxStore/Slice/Settings/settingSlice'
+import { JobType, AddTask } from '../../ReduxStore/Slice/Settings/settingSlice'
 import Datatable from '../../Components/ExtraComponents/Datatable';
 import Modal from '../../Components/ExtraComponents/Modals/Modal';
 import sweatalert from 'sweetalert2';
@@ -8,6 +8,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import CommanModal from '../../Components/ExtraComponents/Modals/CommanModal';
 import Formicform from '../../Components/ExtraComponents/Forms/Comman.form';
 import { useFormik } from 'formik';
+import * as XLSX from 'xlsx';
+
+
 const Setting = () => {
     const token = JSON.parse(localStorage.getItem("token"));
     const location = useLocation()
@@ -18,6 +21,8 @@ const Setting = () => {
     const [modalData, setModalData] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [showAddTask, setShowAddTask] = useState(false);
+    const [getJobTypeId, setJobTypeId] = useState('');
+
 
     const [isEdit, setIsEdit] = useState(false);
     const [taskInput, setTaskInput] = useState(''); // State to store the input value
@@ -82,14 +87,14 @@ const Setting = () => {
     }
 
     const columnJobType = [
-        { name: 'Job Type', selector: row => row.type, sortable: true,width:"85%" },
+        { name: 'Job Type', selector: row => row.type, sortable: true, width: "85%" },
         {
             name: 'Actions',
             cell: row => (
                 <div>
                     <button className='edit-icon' onClick={() => handleEdit(row)}> <i className="ti-pencil" /></button>
                     <button className='delete-icon' onClick={() => handleDelete(row)}> <i className="ti-trash" /></button>
-                    <button className='btn btn-info text-white' onClick={(e) => setShowAddTask(true)}>Add Task</button>
+                    <button className='btn btn-info text-white' onClick={(e) => { setShowAddTask(true); setJobTypeId(row) }}>Add Task</button>
 
                 </div>
             ),
@@ -268,14 +273,72 @@ const Setting = () => {
         }
     };
 
+    const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+            const data = event.target.result;
+            const workbook = XLSX.read(data, { type: 'binary' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+            const extractedTasks = jsonData.map(row => row.Task || row.task || row['Task Name']); // Adjust this line based on the column name in your Excel file
+            setTasks([...tasks, ...extractedTasks]); // Add the tasks from the file to the existing tasks
+        };
+
+        reader.readAsBinaryString(file);
+    };
+
+
+    const handleSaveTask = async () => {
+
+        let req = {
+            "name": tasks,
+            "job_type_id": getJobTypeId.id,
+            "service_id": location.state.Id
+        }
+
+        await dispatch(AddTask({ req, authToken: token }))
+            .unwrap()
+            .then(async (response) => {
+                if (response.status) {
+                    sweatalert.fire({
+                        title: response.message,
+                        icon: 'success',
+                        timer: 2000,
+                    });
+                    setTimeout(() => {
+                        setShowAddTask(false);
+                        setTasks([]);
+                        formik.resetForm();
+                    }, 2000);
+                } else {
+                    sweatalert.fire({
+                        title: response.message,
+                        icon: 'error',
+                        timer: 2000,
+                    });
+                }
+
+
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+
+    }
+
+
 
     return (
         <div>
             <div className='container-fluid'>
-            <div className='content-title'>
-                <div className='tab-title'>
-                            <h3 className='mt-0'>Job Type</h3>
-                        </div>
+                <div className='content-title'>
+                    <div className='tab-title'>
+                        <h3 className='mt-0'>Job Type</h3>
+                    </div>
                 </div>
                 <div className="tab-content mt-4" id="pills-tabContent">
                     {/* {/ Staff Role Start /} */}
@@ -333,8 +396,7 @@ const Setting = () => {
                 hideBtn={true}
                 handleClose={() => { setShowAddTask(false); formik.resetForm(); }}
             >
-                {/* <Formicform fieldtype={fields.filter(field => !field.showWhen || field.showWhen(formik.values))} formik={formik} btn_name="Add"
-                /> */}
+
 
 
                 <div className="modal-body">
@@ -363,62 +425,78 @@ const Setting = () => {
                                         className="btn btn-secondary btn-sm add-btn-job_type add-btn-new"
                                         onClick={handleAddTask} // Call handleAddTask when clicked
                                     >
-                                       ADD
+                                        ADD
                                     </a>
                                 </div>
                             </div>
                         </div>
                         <h6 className='or text-center'>OR</h6>
                         <div className='row align-items-center'>
-                        <div className="mb-3 col-lg-9">
-                            <label htmlFor="firstNameinput" className="form-label">Import Excel</label>
+                            <div className="mb-3 col-lg-9">
+                                <label htmlFor="firstNameinput" className="form-label">Import Excel</label>
+                                <input
+                                    type="file"
+                                    className="form-control"
+                                    placeholder="Job Name"
+                                    id="firstNameinput"
+                                    accept=".xlsx, .xls, .csv"
+                                    onChange={handleFileUpload} // Handle file upload
+                                />
+                            </div>
+
                             <input type="file" className="form-control" placeholder="Job Name" id="firstNameinput" />
                         </div>
                         <div className="col-lg-3">
                             <div className="remove" style={{ float: 'right' }}>
-                                <a className="btn btn-secondary add-btn-job_type add-btn-new">
+                                <a className="btn btn-sm add-btn-job_type add-btn-new">
                                     UPLOAD
                                 </a>
                             </div>
                         </div>
-                        </div>
-                        <br />
-                        <div style={{ border: '2px hidden black', margin: '5px' }} className="table-responsive table-card mt-3 mb-1">
-                            <table className="table align-middle table-nowrap" id="customerTable">
-                                <thead className="table-light">
-                                    <tr>
-                                        <th className="">Task</th>
-                                        <th className="">&nbsp;&nbsp;</th>
-                                        <th className="">&nbsp;&nbsp;</th>
-                                        <th className="">&nbsp;&nbsp;</th>
-                                        <th className="">&nbsp;&nbsp;</th>
-                                        <th className="tabel_left">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="list form-check-all">
-                                    {tasks.map((task, index) => (
-                                        <tr className="tabel_new" key={index}>
-                                            <td>{task}</td>
-                                            <td>&nbsp;&nbsp;</td>
-                                            <td>&nbsp;&nbsp;</td>
-                                            <td>&nbsp;&nbsp;</td>
-                                            <td>&nbsp;&nbsp;</td>
-                                            <td className="tabel_left">
-                                                <div className="d-flex gap-2">
-                                                    <div className="remove">
-                                                        <a
-                                                            style={{ backgroundColor: 'rgb(75, 175, 75)', color: 'white', width: '60px' }}
-                                                            className="btn btn-sm"
-                                                        >
-                                                            Enable
-                                                        </a>
-                                                    </div>
+                    </div>
+                    <br />
+                    <div style={{ border: '2px hidden black', margin: '5px' }} className="table-responsive table-card mt-3 mb-1">
+                        <table className="table align-middle table-nowrap" id="customerTable">
+                            <thead className="table-light">
+                                <tr>
+                                    <th className="">Task</th>
+                                    <th className="">&nbsp;&nbsp;</th>
+                                    <th className="">&nbsp;&nbsp;</th>
+                                    <th className="">&nbsp;&nbsp;</th>
+                                    <th className="">&nbsp;&nbsp;</th>
+                                    <th className="tabel_left">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody className="list form-check-all">
+                                {tasks.map((task, index) => (
+                                    <tr className="tabel_new" key={index}>
+                                        <td>{task}</td>
+                                        <td>&nbsp;&nbsp;</td>
+                                        <td>&nbsp;&nbsp;</td>
+                                        <td>&nbsp;&nbsp;</td>
+                                        <td>&nbsp;&nbsp;</td>
+                                        <td className="tabel_left">
+                                            <div className="d-flex gap-2">
+                                                <div className="remove">
+                                                    <a
+                                                        style={{ backgroundColor: 'rgb(75, 175, 75)', color: 'white', width: '60px' }}
+                                                        className="btn btn-sm"
+                                                    >
+                                                        Enable
+                                                    </a>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="col-lg-12">
+                        <div className="remove" style={{ float: 'right' }}>
+                            <a className="btn btn-sm add-btn-job_type add-btn-new" onClick={(e) => handleSaveTask()}>
+                                Submit
+                            </a>
                         </div>
                     </div>
                 </div>

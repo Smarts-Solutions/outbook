@@ -30,7 +30,6 @@ const modifyStaff = async (staff) => {
       fieldsToUpdate.password = await bcrypt.hash(password, 10);
   }
 
-  // console.log(fieldsToUpdate);
   // Pass the fields to be updated to the updateStaff function
   return staffModel.updateStaff({ id, ...fieldsToUpdate });
 };
@@ -47,14 +46,18 @@ const profile = async (staff) => {
 const login = async (credentials) => {
     const { email, password } = credentials;
     const user = await staffModel.getStaffByEmail(email);
-    console.log("user",user)
+
     if (!user) {
       return {status:false,message:"Invalid Email."}
     }
-  
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return {status:false,message:"Password Incorrect."}
+    }
+
+    if (user.status == '0') {
+      return {status:false,message:"Your account has been deactivated. Please contact the admin."}
     }
   
     const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '10h' });
@@ -67,10 +70,15 @@ const login = async (credentials) => {
   const loginWithAzure = async (credentials) => {
     const { email } = credentials;
     const user = await staffModel.getStaffByEmail(email);
-    console.log("user",user)
+   
     if (!user) {
       return {status:false,message:"User not exist."}
     }
+
+    if (user.status == '0') {
+      return {status:false,message:"Your account has been deactivated. Please contact the admin."}
+    }
+    
     const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '10h' });
     const fieldsToUpdate = { login_auth_token: token };
     const id = user.id;

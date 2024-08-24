@@ -23,6 +23,21 @@ const createServices = async (Services) => {
 
 const getServices = async () => { 
     const query = `
+    SELECT * FROM services WHERE status = '1'
+    ORDER BY id DESC 
+    `;
+
+    try {
+        const [result] = await pool.execute(query);
+        return result;
+    } catch (err) {
+        console.error('Error selecting data:', err);
+        throw err;
+    }
+}
+
+const getServicesAll = async () => { 
+    const query = `
     SELECT * FROM services
     ORDER BY id DESC 
     `;
@@ -90,6 +105,7 @@ module.exports = {
     createServices,
     deleteServices,
     updateServices,
-    getServices
+    getServices,
+    getServicesAll
   
 };

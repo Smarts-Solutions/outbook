@@ -174,68 +174,96 @@ const CreateJob = () => {
 
     const HandleChange = (e) => {
         const { name, value } = e.target;
-        validate()
         setJobData(prevState => ({
             ...prevState,
             [name]: value
         }));
+        validate(name, value);
     }
 
 
-    const validate = () => {
-        const newErrors = {};
-        for (const key in jobData) {
-            if (!jobData[key]) {
-                if (key == 'AccountManager') newErrors[key] = 'Please Enter Account Manager';
-                if (key == 'Customer') newErrors[key] = 'Please Enter Customer';
-                if (key == 'Client') newErrors[key] = 'Please Select Client';
-                if (key == 'ClientJobCode') newErrors[key] = 'Please Enter Client Job Code';
-                if (key == 'CustomerAccountManager') newErrors[key] = 'Please Select Customer Account Manager';
-                if (key == 'Service') newErrors[key] = 'Please Select Service';
-                if (key == 'JobType') newErrors[key] = 'Please Select Job Type';
-                if (key == 'BudgetedHours') newErrors[key] = 'Please Enter Budgeted Hours';
-                if (key == 'Reviewer') newErrors[key] = 'Please Select Reviewer';
-                if (key == 'AllocatedTo') newErrors[key] = 'Please Select Allocated To';
-                if (key == 'AllocatedOn') newErrors[key] = 'Please Enter Allocated On';
-                if (key == 'DateReceivedOn') newErrors[key] = 'Please Enter Date Received On';
-                if (key == 'YearEnd') newErrors[key] = 'Please Enter Year End';
-                if (key == 'TotalPreparationTime') newErrors[key] = 'Please Enter Total Preparation Time';
-                if (key == 'ReviewTime') newErrors[key] = 'Please Enter Review Time';
-                if (key == 'FeedbackIncorporationTime') newErrors[key] = 'Please Enter Feedback Incorporation Time';
-                if (key == 'TotalTime') newErrors[key] = 'Please Enter Total Time';
-                if (key == 'EngagementModel') newErrors[key] = 'Please Select Engagement Model';
-                if (key == 'ExpectedDeliveryDate') newErrors[key] = 'Please Enter Expected Delivery Date';
-                if (key == 'DueOn') newErrors[key] = 'Please Enter Due On';
-                if (key == 'SubmissionDeadline') newErrors[key] = 'Please Enter Submission Deadline';
-                if (key == 'CustomerDeadlineDate') newErrors[key] = 'Please Enter Customer Deadline Date';
-                if (key == 'SLADeadlineDate') newErrors[key] = 'Please Enter SLA Deadline Date';
-                if (key == 'InternalDeadlineDate') newErrors[key] = 'Please Enter Internal Deadline Date';
-                if (key == 'FilingWithCompaniesHouseRequired') newErrors[key] = 'Please Select Filing With Companies House Required';
-                if (key == 'CompaniesHouseFilingDate') newErrors[key] = 'Please Enter Companies House Filing Date';
-                if (key == 'FilingWithHMRCRequired') newErrors[key] = 'Please Select Filing With HMRC Required';
-                if (key == 'HMRCFilingDate') newErrors[key] = 'Please Enter HMRC Filing Date';
-                if (key == 'OpeningBalanceAdjustmentRequired') newErrors[key] = 'Please Select Opening Balance Adjustment Required';
-                if (key == 'OpeningBalanceAdjustmentDate') newErrors[key] = 'Please Enter Opening Balance Adjustment Date';
-                if (key == 'NumberOfTransactions') newErrors[key] = 'Please Enter Number Of Transactions';
-                if (key == 'NumberOfTrialBalanceItems') newErrors[key] = 'Please Enter Number Of Trial Balance Items';
-                if (key == 'Turnover') newErrors[key] = 'Please Enter Turnover';
-                if (key == 'NoOfEmployees') newErrors[key] = 'Please Enter No Of Employees';
-                if (key == 'VATReconciliation') newErrors[key] = 'Please Select VAT Reconciliation';
-                if (key == 'Bookkeeping') newErrors[key] = 'Please Select Bookkeeping';
-                if (key == 'ProcessingType') newErrors[key] = 'Please Select Processing Type';
-                if (key == 'Invoiced' && jobData.EngagementModel != "fte_dedicated_staffing") newErrors[key] = 'Please Select Invoiced';
-                if (key == 'Currency' && jobData.EngagementModel != "fte_dedicated_staffing") newErrors[key] = 'Please Select Currency';
-                if (key == 'InvoiceValue' && jobData.EngagementModel != "fte_dedicated_staffing") newErrors[key] = 'Please Enter Invoice Value';
-                if (key == 'InvoiceDate' && jobData.EngagementModel != "fte_dedicated_staffing") newErrors[key] = 'Please Enter Invoice Date';
-                if (key == 'InvoiceHours' && jobData.EngagementModel != "fte_dedicated_staffing") newErrors[key] = 'Please Enter Invoice Hours';
-                if (key == 'InvoiceRemark' && jobData.EngagementModel != "fte_dedicated_staffing") newErrors[key] = 'Please Enter Invoice Remark';
+    
+
+
+    const fieldErrors = {
+        'AccountManager': 'Please Enter Account Manager',
+        'Customer': 'Please Enter Customer',
+        'Client': 'Please Select Client',
+        'ClientJobCode': 'Please Enter Client Job Code',
+        'CustomerAccountManager': 'Please Select Customer Account Manager',
+        'Service': 'Please Select Service',
+        'JobType': 'Please Select Job Type',
+        'BudgetedHours': 'Please Enter Budgeted Hours',
+        'Reviewer': 'Please Select Reviewer',
+        'AllocatedTo': 'Please Select Allocated To',
+        'AllocatedOn': 'Please Enter Allocated On',
+        'DateReceivedOn': 'Please Enter Date Received On',
+        'YearEnd': 'Please Enter Year End',
+        'TotalPreparationTime': 'Please Enter Total Preparation Time',
+        'ReviewTime': 'Please Enter Review Time',
+        'FeedbackIncorporationTime': 'Please Enter Feedback Incorporation Time',
+        'TotalTime': 'Please Enter Total Time',
+        'EngagementModel': 'Please Select Engagement Model',
+        'ExpectedDeliveryDate': 'Please Enter Expected Delivery Date',
+        'DueOn': 'Please Enter Due On',
+        'SubmissionDeadline': 'Please Enter Submission Deadline',
+        'CustomerDeadlineDate': 'Please Enter Customer Deadline Date',
+        'SLADeadlineDate': 'Please Enter SLA Deadline Date',
+        'InternalDeadlineDate': 'Please Enter Internal Deadline Date',
+        'FilingWithCompaniesHouseRequired': 'Please Select Filing With Companies House Required',
+        'CompaniesHouseFilingDate': 'Please Enter Companies House Filing Date',
+        'FilingWithHMRCRequired': 'Please Select Filing With HMRC Required',
+        'HMRCFilingDate': 'Please Enter HMRC Filing Date',
+        'OpeningBalanceAdjustmentRequired': 'Please Select Opening Balance Adjustment Required',
+        'OpeningBalanceAdjustmentDate': 'Please Enter Opening Balance Adjustment Date',
+        'NumberOfTransactions': 'Please Enter Number Of Transactions',
+        'NumberOfTrialBalanceItems': 'Please Enter Number Of Trial Balance Items',
+        'Turnover': 'Please Enter Turnover',
+        'NoOfEmployees': 'Please Enter No Of Employees',
+        'VATReconciliation': 'Please Select VAT Reconciliation',
+        'Bookkeeping': 'Please Select Bookkeeping',
+        'ProcessingType': 'Please Select Processing Type',
+        'Invoiced': 'Please Select Invoiced',
+        'Currency': 'Please Select Currency',
+        'InvoiceValue': 'Please Enter Invoice Value',
+        'InvoiceDate': 'Please Enter Invoice Date',
+        'InvoiceHours': 'Please Enter Invoice Hours',
+        'InvoiceRemark': 'Please Enter Invoice Remark'
+    };
+
+    const validate = (name, value, isSubmitting = false) => {
+        const newErrors = { ...errors };
+
+        if (isSubmitting) {
+            for (const key in fieldErrors) {
+                if (!jobData[key]) {
+                    newErrors[key] = fieldErrors[key];
+                }
             }
         }
-        setErrors(newErrors)
-        return Object.keys(newErrors).length === 0 ? true : false;
+        else {
+            if (!value) {
+                if (fieldErrors[name]) {
+                    newErrors[name] = fieldErrors[name];
+                }
+            } else {
+                delete newErrors[name];
+            }
+        }
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
 
+    const validateAllFields = () => {
+        let isValid = true;
+        for (const key in jobData) {
+            if (!validate(key, jobData[key], true)) {
+                isValid = false;
+            }
+        }
+        return isValid;
+    };
 
 
 
@@ -306,7 +334,7 @@ const CreateJob = () => {
                             }, 1500);
                         }, 1500);
                     } else {
-                        console.log("response", response)
+                       
                     }
                 })
                 .catch((error) => {
@@ -338,8 +366,10 @@ const CreateJob = () => {
                 <div className="row mt-4">
                     <div className="col-xl-12">
                         <div className="card">
-                            <div className="card-header">
-                                <h4 className="card-title mb-0">Update Job</h4>
+                          
+                            <div className="card-header d-flex justify-content-between">
+                                <h3 className="card-title mb-0">Update Job</h3>
+                                <button type="button" className="btn btn-info text-white blue-btn" onClick={() => navigate('/admin/Clientlist', { state: { id: location.state.details.id, route: "job" } })}>Back</button>
                             </div>
 
                             <div className="card-body form-steps">
@@ -854,7 +884,7 @@ const CreateJob = () => {
                                                                     <div style={{ marginTop: 15 }}>
                                                                         <div className="row">
                                                                             <div className="col-lg-3">
-                                                                                <label className="form-label">Invoiced?</label>
+                                                                                <label className="form-label">Invoiced</label>
                                                                                 <select className="invoiced_dropdown form-select mb-3"
                                                                                     name="Invoiced" onChange={HandleChange} value={jobData.Invoiced}
                                                                                 >

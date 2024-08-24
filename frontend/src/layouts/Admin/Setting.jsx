@@ -97,7 +97,7 @@ const Setting = () => {
     await dispatch(Role(data))
       .unwrap()
       .then(async (response) => {
-        if (req.action == "get") {
+        if (req.action == "getAll") {
           if (response.status) {
             setRoleDataAll({ loading: false, data: response.data });
           } else {
@@ -111,7 +111,7 @@ const Setting = () => {
               timer: 2000,
             });
             setTimeout(() => {
-              roleData({ action: "get" });
+              roleData({ action: "getAll" });
             }, 2000);
           } else {
             sweatalert.fire({
@@ -132,7 +132,7 @@ const Setting = () => {
     await dispatch(StatusType(data))
       .unwrap()
       .then(async (response) => {
-        if (req.action == "get") {
+        if (req.action == "getAll") {
           if (response.status) {
             setStatusTypeDataAll({ loading: false, data: response.data });
           } else {
@@ -146,7 +146,7 @@ const Setting = () => {
               timer: 2000,
             });
             setTimeout(() => {
-              statusTypeData({ action: "get" });
+              statusTypeData({ action: "getAll" });
             }, 2000);
           } else {
             sweatalert.fire({
@@ -166,7 +166,7 @@ const Setting = () => {
     await dispatch(Service({ req: req, authToken: token }))
       .unwrap()
       .then(async (response) => {
-        if (req.action == "get") {
+        if (req.action == "getAll") {
           if (response.status) {
             setServiceDataAll({ loading: false, data: response.data });
           } else {
@@ -180,7 +180,7 @@ const Setting = () => {
               timer: 2000,
             });
             setTimeout(() => {
-              serviceData({ action: "get" });
+              serviceData({ action: "getAll" });
             }, 2000);
           } else {
             sweatalert.fire({
@@ -200,7 +200,7 @@ const Setting = () => {
     await dispatch(PersonRole(data))
       .unwrap()
       .then(async (response) => {
-        if (req.action == "get") {
+        if (req.action == "getAll") {
           if (response.status) {
             setPersonRoleDataAll({ loading: false, data: response.data });
           } else {
@@ -214,7 +214,7 @@ const Setting = () => {
               timer: 2000,
             });
             setTimeout(() => {
-              PersonRoleData({ action: "get" });
+              PersonRoleData({ action: "getAll" });
             }, 2000);
           } else {
             sweatalert.fire({
@@ -235,7 +235,7 @@ const Setting = () => {
     await dispatch(ClientIndustry(data))
       .unwrap()
       .then(async (response) => {
-        if (req.action == "get") {
+        if (req.action == "getAll") {
           if (response.status) {
             setClientIndustryDataAll({ loading: false, data: response.data });
           } else {
@@ -249,7 +249,7 @@ const Setting = () => {
               timer: 2000,
             });
             setTimeout(() => {
-              ClientIndustryData({ action: "get" });
+              ClientIndustryData({ action: "getAll" });
             }, 2000);
           } else {
             sweatalert.fire({
@@ -270,7 +270,7 @@ const Setting = () => {
     await dispatch(Country(data))
       .unwrap()
       .then(async (response) => {
-        if (req.action == "get") {
+        if (req.action == "getAll") {
           if (response.status) {
             setCountryDataAll({ loading: false, data: response.data });
           } else {
@@ -284,7 +284,7 @@ const Setting = () => {
               timer: 2000,
             });
             setTimeout(() => {
-              CountryData({ action: "get" });
+              CountryData({ action: "getAll" });
             }, 2000);
           } else {
             sweatalert.fire({
@@ -312,7 +312,7 @@ const Setting = () => {
 
   const fetchApiData = (status) => {
     const req = {
-      action: "get",
+      action: "getAll",
     };
     switch (status) {
       case "1":
@@ -339,7 +339,12 @@ const Setting = () => {
   };
 
   const columnRoles = [
+    
     { name: "Role Name", selector: (row) => row.role_name, sortable: true },
+
+    { name: 'Status', cell: row => (<div><span className={`badge ${row.status === '1' ? 'bg-success' : 'bg-danger'}`}>{row.status === '1' ? 'Active' : 'Deactive'}</span></div>), width: '80px', },
+
+
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
           {
@@ -376,6 +381,7 @@ const Setting = () => {
 
   const columnStatusType = [
     { name: "Status", selector: (row) => row.type, sortable: true },
+    { name: 'Status', cell: row => (<div><span className={`badge ${row.status === '1' ? 'bg-success' : 'bg-danger'}`}>{row.status === '1' ? 'Active' : 'Deactive'}</span></div>), width: '80px', },
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
           {
@@ -412,6 +418,8 @@ const Setting = () => {
 
   const columnService = [
     { name: "Service Name", selector: (row) => row.name, sortable: true,width:'80%' },
+    { name: 'Status', cell: row => (<div><span className={`badge ${row.status === '1' ? 'bg-success' : 'bg-danger'}`}>{row.status === '1' ? 'Active' : 'Deactive'}</span></div>), width: 'auto', },
+
     ...(showSettingUpdateTab || showSettingDeleteTab || showSettingInsertTab
       ? [
           {
@@ -456,6 +464,7 @@ const Setting = () => {
 
   const columnPersonRole = [
     { name: "Service Name", selector: (row) => row.name, sortable: true },
+    { name: 'Status', cell: row => (<div><span className={`badge ${row.status === '1' ? 'bg-success' : 'bg-danger'}`}>{row.status === '1' ? 'Active' : 'Deactive'}</span></div>), width: '80px', },
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
           {
@@ -496,6 +505,7 @@ const Setting = () => {
       selector: (row) => row.business_type,
       sortable: true,
     },
+    { name: 'Status', cell: row => (<div><span className={`badge ${row.status === '1' ? 'bg-success' : 'bg-danger'}`}>{row.status === '1' ? 'Active' : 'Deactive'}</span></div>), width: '80px', },
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
           {
@@ -539,6 +549,7 @@ const Setting = () => {
       selector: (row) => (row.status == 1 ? "Yes" : "No"),
       sortable: true,
     },
+    { name: 'Status', cell: row => (<div><span className={`badge ${row.status === '1' ? 'bg-success' : 'bg-danger'}`}>{row.status === '1' ? 'Active' : 'Deactive'}</span></div>), width: '80px', },
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
           {
@@ -976,7 +987,7 @@ const Setting = () => {
               CountryData(req);
               break;
             default:
-              console.log("Invalid tabStatus");
+            
               break;
           }
           sweatalert.fire({
