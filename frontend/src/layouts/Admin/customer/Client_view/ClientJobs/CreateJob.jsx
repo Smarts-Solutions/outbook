@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
 import { GetAllJabData, AddAllJobType } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
@@ -62,6 +62,9 @@ const CreateJob = () => {
         InvoiceRemark: "",
     });
 
+
+    console.log("location",jobData)
+
     useEffect(() => {
         setJobData(prevState => ({
             ...prevState,
@@ -112,8 +115,6 @@ const CreateJob = () => {
         }));
 
         validate(name, value);
-
-
     }
 
     const fieldErrors = {
@@ -297,6 +298,56 @@ const CreateJob = () => {
     }
 
 
+
+
+    const [time, setTime] = useState('');
+    console.log("time", time)
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [customHours, setCustomHours] = useState('');
+    const [customMinutes, setCustomMinutes] = useState('');
+    const dropdownRef = useRef(null);
+    const inputRef = useRef(null);
+
+    const openTimePicker = () => { 
+        console.log("CPPPPP")
+        setShowDropdown(true);
+    };
+
+    const setTimeFromDropdown = (selectedTime) => {
+        setTime(selectedTime);
+        setShowDropdown(false);
+    };
+
+    const applyCustomTime = (e) => {
+        console.log("e", e.target.value)
+        if (customHours !== '' && customMinutes !== '') {
+            const customTime = `${customHours.padStart(2, '0')}:${customMinutes.padStart(2, '0')}`;
+            setTime(customTime);
+            setJobData(prevState => ({
+                ...prevState,
+                TotalPreparationTime: customTime
+            }));
+            setShowDropdown(false);
+        }
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target) &&
+                inputRef.current &&
+                !inputRef.current.contains(event.target)
+            ) {
+                setShowDropdown(false);
+            }
+        };
+
+        document.addEventListener('click', handleClickOutside);
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, []);
     let totalTime = Number(jobData.TotalPreparationTime) + Number(jobData.ReviewTime) + Number(jobData.FeedbackIncorporationTime)
     totalTime = totalTime.toString();
 
@@ -516,7 +567,7 @@ const CreateJob = () => {
                                                                             <input
                                                                                 type="month"
                                                                                 className="form-control"
-                                                                                placeholder="MM/YYYY"  
+                                                                                placeholder="MM/YYYY"
                                                                                 name="YearEnd"
                                                                                 onChange={HandleChange}
                                                                                 value={jobData.YearEnd}
@@ -528,26 +579,132 @@ const CreateJob = () => {
                                                                         </div>
                                                                     </div>
 
+ 
+
+
                                                                     <div className="col-lg-4">
-                                                                        <div className="mb-3">
+
+                                                                        <div style={{ textAlign: 'left', margin: '10px auto' }} className="dateselecter">
                                                                             <label className="form-label">Total Preparation Time</label>
-
-                                                                            <input type="time"
-                                                                                name="TotalPreparationTime"
+                                                                            <input
+                                                                                type="text"
+                                                                                name='TotalPreparationTime'
+                                                                                id="customTimePicker"
                                                                                 className="form-control"
-
-                                                                                onChange={HandleChange}
-                                                                                defaultValue={jobData.TotalPreparationTime.substring(0, 2) + ":" + jobData.TotalPreparationTime.substring(2)}
+                                                                                style={{ width: '100%' }}
+                                                                                placeholder="HH:MM"
+                                                                                value={time}
+                                                                                onClick={openTimePicker}
+                                                                                readOnly
+                                                                                ref={inputRef}
                                                                             />
 
-                                                                            {errors['TotalPreparationTime'] && (
-                                                                                <div className="error-text">{errors['TotalPreparationTime']}</div>
+                                                                            {showDropdown && (
+                                                                                <div
+                                                                                    ref={dropdownRef}
+                                                                                    style={{
+                                                                                        position: 'absolute',
+                                                                                        backgroundColor: 'white',
+                                                                                        border: '1px solid #ccc',
+                                                                                        width: '150px',
+                                                                                        marginTop: '5px',
+                                                                                    }}
+                                                                                >
+                                                                                    {/* Standard 24-hour format options */}
+                                                                                    <div onClick={() => setTimeFromDropdown('00:00')}>00:00</div>
+                                                                                    <div onClick={() => setTimeFromDropdown('01:00')}>01:00</div>
+                                                                                    <div onClick={() => setTimeFromDropdown('02:00')}>02:00</div>
+                                                                                    <div onClick={() => setTimeFromDropdown('03:00')}>03:00</div>
+                                                                                    
+                                                                                    <div onClick={() => setTimeFromDropdown('23:00')}>23:00</div>
+ 
+                                                                                    <div style={{ borderTop: '1px solid #ccc', paddingTop: '5px', paddingBottom: '5px' }}>
+                                                                                        <input
+                                                                                            type="number"
+                                                                                            placeholder="Hours"
+                                                                                            style={{ width: '60px', marginRight: '5px' }}
+                                                                                            value={customHours}
+                                                                                            onChange={(e) => setCustomHours(e.target.value)}
+                                                                                        />
+                                                                                        <input
+                                                                                            type="number"
+                                                                                            placeholder="Minutes"
+                                                                                            style={{ width: '60px' }}
+                                                                                            value={customMinutes}
+                                                                                            onChange={(e) => setCustomMinutes(e.target.value)}
+                                                                                        />
+                                                                                        <button onClick={(e)=>applyCustomTime(e)}>Set</button>
+                                                                                    </div>
+                                                                                </div>
                                                                             )}
-
                                                                         </div>
+
                                                                     </div>
 
-                                                                    <div className="col-lg-4">
+                                                                    {/* <div className="col-lg-4">
+
+                                                                        <div style={{ textAlign: 'left', margin: '10px auto' }} className="dateselecter">
+                                                                            <label className="form-label">Review Time</label>
+                                                                            <input
+                                                                                type="text"
+                                                                                name='ReviewTime'
+                                                                                id="customTimePicker"
+                                                                                className="form-control"
+                                                                                style={{ width: '100%' }}
+                                                                                placeholder="HH:MM"
+                                                                                value={time}
+                                                                                onClick={openTimePicker}
+                                                                                readOnly
+                                                                                ref={inputRef}
+                                                                            />
+
+                                                                            {showDropdown && (
+                                                                                <div
+                                                                                    ref={dropdownRef}
+                                                                                    style={{
+                                                                                        position: 'absolute',
+                                                                                        backgroundColor: 'white',
+                                                                                        border: '1px solid #ccc',
+                                                                                        width: '150px',
+                                                                                        marginTop: '5px',
+                                                                                    }}
+                                                                                >
+                                                                                    
+                                                                                    <div onClick={() => setTimeFromDropdown('00:00')}>00:00</div>
+                                                                                    <div onClick={() => setTimeFromDropdown('01:00')}>01:00</div>
+                                                                                    <div onClick={() => setTimeFromDropdown('02:00')}>02:00</div>
+                                                                                    <div onClick={() => setTimeFromDropdown('03:00')}>03:00</div>
+                                                                                     
+                                                                                    <div onClick={() => setTimeFromDropdown('23:00')}>23:00</div>
+
+                                                                                    
+                                                                                    <div style={{ borderTop: '1px solid #ccc', paddingTop: '5px', paddingBottom: '5px' }}>
+                                                                                        <input
+                                                                                            type="number"
+                                                                                            placeholder="Hours"
+                                                                                            style={{ width: '60px', marginRight: '5px' }}
+                                                                                            value={customHours}
+                                                                                            onChange={(e) => setCustomHours(e.target.value)}
+                                                                                        />
+                                                                                        <input
+                                                                                            type="number"
+                                                                                            placeholder="Minutes"
+                                                                                            name='ReviewTime'
+                                                                                            style={{ width: '60px' }}
+                                                                                            value={customMinutes}
+                                                                                            onChange={(e) => setCustomMinutes(e.target.value)}
+                                                                                        />
+                                                                                        <button onClick={(e)=>applyCustomTime(e)}>Set</button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+
+                                                                    </div> */}
+
+
+                                                                    
+                                                                   <div className="col-lg-4">
                                                                         <div className="mb-3">
                                                                             <label className="form-label" >Review Time</label>
                                                                             <input type="time"
@@ -561,7 +718,7 @@ const CreateJob = () => {
                                                                                 <div className="error-text">{errors['ReviewTime']}</div>
                                                                             )}
                                                                         </div>
-                                                                    </div>
+                                                                    </div> 
 
                                                                     <div className="col-lg-4">
                                                                         <div className="mb-3">
