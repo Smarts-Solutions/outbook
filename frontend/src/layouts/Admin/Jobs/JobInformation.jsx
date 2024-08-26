@@ -5,6 +5,8 @@ import MissingLogs from './MissingLogs';
 import Queries from './Queries';
 import Drafts from './Drafts';
 import Documents from './Documents';
+import JobTimeline from './JobTimeline'
+import CommonModal from '../../../Components/ExtraComponents/Modals/Modal';
 
 const data = [
     { TradingName: 'W120', Code: '012_BlaK_T_1772', CustomerName: 'The Black T', AccountManager: 'Ajeet Aggarwal',  ServiceType: 'Admin/Support Tasks', JobType: 'Year End' },
@@ -126,12 +128,12 @@ const JobInformation = () => {
       <li className="nav-item" role="presentation">
         <button
           className="nav-link"
-          id="last-6-months-tab"
+          id="documents-tab"
           data-bs-toggle="pill"
-          data-bs-target="#last-6-months"
+          data-bs-target="#documents"
           type="button"
           role="tab"
-          aria-controls="last-6-months"
+          aria-controls="documents"
           aria-selected="false"
         >
           Documents
@@ -712,6 +714,14 @@ const JobInformation = () => {
       </div>
       <div
         className="tab-pane fade"
+        id="job-timeline"
+        role="tabpanel"
+        aria-labelledby="job-timeline-tab"
+      >
+        <JobTimeline/>
+      </div>
+      <div
+        className="tab-pane fade"
         id="task-timesheet"
         role="tabpanel"
         aria-labelledby="task-timesheet-tab"
@@ -750,23 +760,9 @@ const JobInformation = () => {
       >
         <Documents/>
       </div>
-      <div
-        className="tab-pane fade"
-        id="last-year"
-        role="tabpanel"
-        aria-labelledby="last-year-tab"
-      >
-        Last year's content...
-      </div>
-      <div
-        className="tab-pane fade"
-        id="custom"
-        role="tabpanel"
-        aria-labelledby="custom-tab"
-      >
-        Custom content...
-      </div>
+      
     </div>
+  
     </div>
   )
 }

@@ -26,16 +26,16 @@ const Documents = () => {
   return (
     <div className=''>
     <div className='row'>
-        <div className='col-md-8'>
+        <div className='col-md-7'>
             <div className='tab-title'>
                 <h3>Documents</h3>
             </div>
         </div>
-        <div className='col-md-4'>
+        <div className='col-md-5'>
         <div>
-            {/* <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-info text-white float-end ms-2"> <i class="fa fa-plus pe-1"></i>  Add Timesheet</button> */}
+            <button type="button"  class="btn btn-info text-white float-end ms-2"> <i class="ti-trash pe-1"></i>  Delete Selected</button> 
             <button type="button" class="btn btn-info text-white float-end ">  
-             <i class="fa-regular fa-plus pe-1"></i> Add Query</button>
+            <i className="fa-solid fa-upload pe-1"></i> Upload Files</button>
              </div>    
         
         </div>
