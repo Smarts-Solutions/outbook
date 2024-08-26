@@ -26,6 +26,14 @@ import ClientProfile from '../layouts/Admin/customer/Client_view/ClientJob'
 import JobEdit from '../layouts/Admin/customer/Client_view/ClientJobs/EditJob'
 import CreateCheckList from '../layouts/Admin/customer/Client_view/CreateCheckList';
 import EditCheckList from '../layouts/Admin/customer/Client_view/Editchecklist';
+import JobInformation from '../layouts/Admin/Jobs/JobInformation';
+import TaskTimesheet from '../layouts/Admin/Jobs/TaskTimesheet';
+import JobTimeline from '../layouts/Admin/Jobs/JobTimeline';
+import MissingLogs from '../layouts/Admin/Jobs/MissingLogs';
+import Queries from '../layouts/Admin/Jobs/Queries';
+import Drafts from '../layouts/Admin/Jobs/Drafts';
+import Documents from '../layouts/Admin/Jobs/Documents';
+
 
 
 const Admin_Route = () => {
@@ -75,8 +83,13 @@ const Admin_Route = () => {
             <Route path="/job/edit" element={<JobEdit />} />
             <Route path="/create/checklist" element={<CreateCheckList />} />
             <Route path="/edit/checklist" element={<EditCheckList />} />
-
-
+            <Route path="/job/jobinformation" element={<JobInformation />} />
+            <Route path="/job/tasktimesheet" element={<TaskTimesheet />} />
+            <Route path="/job/missinglogs" element={<MissingLogs />} />
+            <Route path="/job/queries" element={<Queries />} />
+            <Route path="/job/drafts" element={<Drafts />} />
+            <Route path="/job/documents" element={<Documents />} />
+            <Route path="/job/jobtimeline" element={<JobTimeline />} />
 
           </Routes>
         </div>
