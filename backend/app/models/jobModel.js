@@ -584,7 +584,7 @@ const getJobById = async (job) => {
 
 }
 
-const jobUpdate = async (job) => {
+const jobUpdate1 = async (job) => {
      
       const {
         job_id,
@@ -743,6 +743,74 @@ const jobUpdate = async (job) => {
            invoice_remark,
            job_id
      ]);
+
+
+     // if (tasks.task.length > 0) {
+     //      const checklist_id = tasks.checklist_id;
+     //      const providedTaskIds = tasks.task.map(tsk => tsk.task_id).filter(id => id);
+        
+     //      // Get existing task IDs for the checklist
+     //      const getExistingTasksQuery = `
+     //        SELECT task_id FROM checklist_tasks WHERE checklist_id = ?
+     //      `;
+     //      const [existingTasks] = await pool.execute(getExistingTasksQuery, [checklist_id]);
+     //      const existingTaskIds = existingTasks.map(task => task.task_id);
+        
+     //      // Find task IDs that need to be deleted
+     //      const tasksToDelete = existingTaskIds.filter(id => !providedTaskIds.includes(id));
+        
+     //      if (tasksToDelete.length > 0) {
+     //        const deleteQuery = `
+     //          DELETE FROM checklist_tasks WHERE checklist_id = ? AND task_id IN (?)
+     //        `;
+     //        await pool.execute(deleteQuery, [checklist_id, tasksToDelete]);
+     //      }
+        
+     //      // Insert or update tasks
+     //      for (const tsk of tasks.task) {
+     //        let task_id = tsk.task_id;
+     //        let task_name = tsk.task_name;
+     //        let budgeted_hour = tsk.budgeted_hour;
+        
+     //        if (task_id == "" || task_id == undefined || task_id == null) {
+     //          const checkQuery = `
+     //            SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?
+     //          `;
+     //          const [existing] = await pool.execute(checkQuery, [task_name, service_id, job_type_id]);
+        
+     //          if (existing.length === 0) {
+     //            const query = `
+     //              INSERT INTO task (name, service_id, job_type_id) VALUES (?, ?, ?)
+     //            `;
+     //            const [result] = await pool.execute(query, [task_name, service_id, job_type_id]);
+        
+     //            if (result.insertId > 0) {
+     //              let task_id_new = result.insertId;
+     //              const checklistAddTasksQuery = `
+     //                INSERT INTO checklist_tasks (checklist_id, task_id, task_name, budgeted_hour)
+     //                VALUES (?, ?, ?, ?)
+     //              `;
+     //              await pool.execute(checklistAddTasksQuery, [checklist_id, task_id_new, task_name, budgeted_hour]);
+        
+     //              const query3 = `
+     //                INSERT INTO client_job_task (job_id, client_id, checklist_id, task_id)
+     //                VALUES (?, ?, ?, ?)
+     //              `;
+     //              await pool.execute(query3, [job_id, client_id, checklist_id, task_id_new]);
+     //            }
+     //          }
+     //        } else {
+     //          // Update existing task or add to the job
+     //          const query = `
+     //            INSERT INTO client_job_task (job_id, client_id, checklist_id, task_id)
+     //            VALUES (?, ?, ?, ?)
+     //            ON DUPLICATE KEY UPDATE task_id = VALUES(task_id), checklist_id = VALUES(checklist_id);
+     //          `;
+     //          await pool.execute(query, [job_id, client_id, checklist_id, task_id]);
+     //        }
+     //      }
+     //    }
+        
  
      return { status: true, message: 'job updated successfully', data: result.affectedRows };
  } catch (err) {
@@ -750,7 +818,177 @@ const jobUpdate = async (job) => {
      return { status: false, message: 'Error updating job.' };
  }
       
-    }
+}
+
+const jobUpdate = async (job) => {
+     const {
+       job_id, // Assuming job_id is provided for the update
+       account_manager_id,
+       customer_id,
+       client_id,
+       client_job_code,
+       customer_contact_details_id,
+       service_id,
+       job_type_id,
+       tasks,
+       budgeted_hours,
+       reviewer,
+       allocated_to,
+       allocated_on,
+       date_received_on,
+       year_end,
+       total_preparation_time,
+       review_time,
+       feedback_incorporation_time,
+       total_time,
+       engagement_model,
+       expected_delivery_date,
+       due_on,
+       submission_deadline,
+       customer_deadline_date,
+       sla_deadline_date,
+       internal_deadline_date,
+       filing_Companies_required,
+       filing_Companies_date,
+       filing_hmrc_required,
+       filing_hmrc_date,
+       opening_balance_required,
+       opening_balance_date,
+       number_of_transaction,
+       number_of_balance_items,
+       turnover,
+       number_of_employees,
+       vat_reconciliation,
+       bookkeeping,
+       processing_type,
+       invoiced,
+       currency,
+       invoice_value,
+       invoice_date,
+       invoice_hours,
+       invoice_remark
+     } = job;
+
+
+     const [ExistCustomer] = await pool.execute('SELECT trading_name FROM customers WHERE id = ?', [customer_id]);
+     const [ExistClient] = await pool.execute('SELECT trading_name FROM clients WHERE id = ?', [client_id]);
+     const [ExistJob] = await pool.execute('SELECT job_id FROM jobs WHERE id = ?', [job_id]);
+ 
+     const lastCode = ExistJob[0].job_id.slice(ExistJob[0].job_id.lastIndexOf('_') + 1);
+ 
+     const firstThreeLettersexistCustomerName = ExistCustomer[0].trading_name.substring(0, 3);
+     const firstThreeLettersexistClientName = ExistClient[0].trading_name.substring(0, 3);
+     const exit_job_id = firstThreeLettersexistCustomerName+"_"+firstThreeLettersexistClientName+"_"+lastCode;
+   
+     try {
+       const query = `
+         UPDATE jobs 
+         SET account_manager_id = ?, customer_id = ?, client_id = ?, client_job_code = ?, customer_contact_details_id = ?, 
+             service_id = ?, job_type_id = ?, budgeted_hours = ?, reviewer = ?, allocated_to = ?, allocated_on = ?, 
+             date_received_on = ?, year_end = ?, total_preparation_time = ?, review_time = ?, 
+             feedback_incorporation_time = ?, total_time = ?, engagement_model = ?, expected_delivery_date = ?, due_on = ?, 
+             submission_deadline = ?, customer_deadline_date = ?, sla_deadline_date = ?, internal_deadline_date = ?, 
+             filing_Companies_required = ?, filing_Companies_date = ?, filing_hmrc_required = ?, filing_hmrc_date = ?, 
+             opening_balance_required = ?, opening_balance_date = ?, number_of_transaction = ?, number_of_balance_items = ?, 
+             turnover = ?, number_of_employees = ?, vat_reconciliation = ?, bookkeeping = ?, processing_type = ?, 
+             invoiced = ?, currency = ?, invoice_value = ?, invoice_date = ?, invoice_hours = ?, invoice_remark = ?
+         WHERE job_id = ?
+       `;
+       const [result] = await pool.execute(query, [
+         account_manager_id, customer_id, client_id, client_job_code, customer_contact_details_id, 
+         service_id, job_type_id, budgeted_hours, reviewer, allocated_to, allocated_on, 
+         date_received_on, year_end, total_preparation_time, review_time, 
+         feedback_incorporation_time, total_time, engagement_model, expected_delivery_date, due_on, 
+         submission_deadline, customer_deadline_date, sla_deadline_date, internal_deadline_date, 
+         filing_Companies_required, filing_Companies_date, filing_hmrc_required, filing_hmrc_date, 
+         opening_balance_required, opening_balance_date, number_of_transaction, number_of_balance_items, 
+         turnover, number_of_employees, vat_reconciliation, bookkeeping, processing_type, 
+         invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark, job_id
+       ]);
+   
+       if (result.affectedRows > 0) {
+         
+       if (tasks.task.length > 0) {
+          const checklist_id = tasks.checklist_id;
+          const providedTaskIds = tasks.task.map(tsk => tsk.task_id).filter(task_id !== undefined || task_id !== null || task_id !== "");
+
+          console.log("providedTaskIds",providedTaskIds)
+          
+
+
+          // Working progresss.................
+
+          // Get existing task IDs for the checklist
+          const getExistingTasksQuery = `
+            SELECT task_id FROM client_job_task WHERE checklist_id = ?
+          `;
+          const [existingTasks] = await pool.execute(getExistingTasksQuery, [checklist_id]);
+          const existingTaskIds = existingTasks.map(task => task.task_id);
+        
+          // Find task IDs that need to be deleted
+          const tasksToDelete = existingTaskIds.filter(id => !providedTaskIds.includes(id));
+        
+          if (tasksToDelete.length > 0) {
+            const deleteQuery = `
+              DELETE FROM checklist_tasks WHERE checklist_id = ? AND task_id IN (?)
+            `;
+            await pool.execute(deleteQuery, [checklist_id, tasksToDelete]);
+          }
+        
+          // Insert or update tasks
+          for (const tsk of tasks.task) {
+            let task_id = tsk.task_id;
+            let task_name = tsk.task_name;
+            let budgeted_hour = tsk.budgeted_hour;
+        
+            if (task_id == "" || task_id == undefined || task_id == null) {
+              const checkQuery = `
+                SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?
+              `;
+              const [existing] = await pool.execute(checkQuery, [task_name, service_id, job_type_id]);
+        
+              if (existing.length === 0) {
+                const query = `
+                  INSERT INTO task (name, service_id, job_type_id) VALUES (?, ?, ?)
+                `;
+                const [result] = await pool.execute(query, [task_name, service_id, job_type_id]);
+        
+                if (result.insertId > 0) {
+                  let task_id_new = result.insertId;
+                  const checklistAddTasksQuery = `
+                    INSERT INTO checklist_tasks (checklist_id, task_id, task_name, budgeted_hour)
+                    VALUES (?, ?, ?, ?)
+                  `;
+                  await pool.execute(checklistAddTasksQuery, [checklist_id, task_id_new, task_name, budgeted_hour]);
+        
+                  const query3 = `
+                    INSERT INTO client_job_task (job_id, client_id, checklist_id, task_id)
+                    VALUES (?, ?, ?, ?)
+                  `;
+                  await pool.execute(query3, [job_id, client_id, checklist_id, task_id_new]);
+                }
+              }
+            } else {
+              // Update existing task or add to the job
+              const query = `
+                INSERT INTO client_job_task (job_id, client_id, checklist_id, task_id)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE task_id = VALUES(task_id), checklist_id = VALUES(checklist_id);
+              `;
+              await pool.execute(query, [job_id, client_id, checklist_id, task_id]);
+            }
+          }
+        }
+         return { status: true, message: 'Job updated successfully.', data: job_id };
+       } else {
+         return { status: false, message: 'No job found with the given job_id.' };
+       }
+     } catch (err) {
+       console.log("err -", err);
+       return { status: false, message: 'Error updating job.' };
+     }
+   }
+   
 
 
 
