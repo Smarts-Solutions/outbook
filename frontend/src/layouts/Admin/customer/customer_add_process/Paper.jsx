@@ -266,7 +266,7 @@ const Paper = () => {
                                   className="btn btn-secondary text-decoration-none previestab"
                                   onClick={prev}
                                 >
-                                  Previous
+                                  <i className="pe-2 fa-regular fa-arrow-left-long"></i> Previous
                                 </button>
                                 {/* <Button
                                   className="btn btn-secondary"
@@ -280,7 +280,7 @@ const Paper = () => {
                                   type="submit"
                                   onClick={() => handleSubmit()}
                                 >
-                                  Save
+                                  Save <i className="ps-2 fa-regular fa-arrow-right-long"></i>
                                 </Button>
                               </div>
                             </div>
