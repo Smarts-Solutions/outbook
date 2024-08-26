@@ -316,7 +316,56 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
     const [result] = await pool.execute(query, [job_id,account_manager_id,customer_id,client_id,client_job_code,customer_contact_details_id, service_id,job_type_id, budgeted_hours,reviewer, allocated_to,allocated_on,date_received_on,year_end,total_preparation_time, review_time, feedback_incorporation_time,total_time, engagement_model, expected_delivery_date,due_on,submission_deadline, customer_deadline_date, sla_deadline_date,internal_deadline_date, filing_Companies_required, filing_Companies_date,filing_hmrc_required, filing_hmrc_date, opening_balance_required,opening_balance_date, number_of_transaction, number_of_balance_items,turnover, number_of_employees, vat_reconciliation, bookkeeping,processing_type, invoiced, currency, invoice_value, invoice_date,invoice_hours, invoice_remark]);
     if(result.insertId > 0){
       if(tasks.task.length > 0){
-        
+          const job_id = result.insertId;
+          const checklist_id = tasks.checklist_id;
+           for (const tsk of tasks.task) {
+
+               let task_id = tsk.task_id;
+               let task_name = tsk.task_name;
+               let budgeted_hour = tsk.budgeted_hour;
+        if (task_id == "" || task_id == undefined || task_id == null) {
+               
+                
+           const checkQuery = `
+                    SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?
+                `;
+          const [existing] = await pool.execute(checkQuery, [task_name,service_id,job_type_id]);
+          if (existing.length === 0) {
+          const query = `INSERT INTO task (name,service_id,job_type_id) VALUES (?, ?, ?) `;
+          const [result] = await pool.execute(query, [task_name,service_id,job_type_id]);
+             if(result.insertId > 0){
+              let task_id_new = result.insertId;
+              const checklistAddTasksQuery = `
+               INSERT INTO checklist_tasks (checklist_id,task_id,task_name,budgeted_hour)
+               VALUES (?, ?, ?, ?)
+               `;
+               const [result2] = await pool.execute(checklistAddTasksQuery, [checklist_id,task_id_new,task_name,budgeted_hour]);
+              
+               if(result2.insertId > 0){
+               const query3 = `
+               INSERT INTO client_job_task (job_id,client_id,checklist_id,task_id)
+               VALUES (?, ?, ?, ?)
+               `;
+               const [result3] = await pool.execute(query3, [job_id,client_id,checklist_id,task_id_new]);
+               }
+                 
+
+             }
+
+
+           }     
+
+
+               }
+               else {
+                   
+               const query = `
+               INSERT INTO client_job_task (job_id,client_id,checklist_id,task_id)
+               VALUES (?, ?, ?, ?)
+               `;
+               const [result] = await pool.execute(query, [job_id,client_id,checklist_id,task_id]);
+               }
+           }
       }
     }
     return { status: true, message: 'job add successfully.', data: result.insertId };

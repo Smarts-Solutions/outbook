@@ -551,7 +551,22 @@ CREATE TABLE jobs (
     ('WIP - Fixing Errors','1'),
     ('Draft Sent for Approval','1');
 
-
+    
+     /*--TABLE:- CLIENTS JOBS TASKS  */  
+    CREATE TABLE client_job_task (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        job_id INT NOT NULL,
+        client_id INT NOT NULL,
+        checklist_id INT NOT NULL,
+        task_id INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (job_id) REFERENCES jobs(id),
+        FOREIGN KEY (client_id) REFERENCES clients(id),
+        FOREIGN KEY (checklist_id) REFERENCES checklists(id),
+        FOREIGN KEY (task_id) REFERENCES task(id),
+        UNIQUE (job_id,client_id,checklist_id,task_id)
+    );
     
      /*--TABLE:- CHECKLIST  */  
     CREATE TABLE statuses (
