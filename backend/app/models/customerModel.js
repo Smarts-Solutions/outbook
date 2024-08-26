@@ -968,6 +968,7 @@ const updateProcessCustomerFileDelete = async (customerProcessData) => {
 
 const getSingleCustomer = async (customer) => {
     let customerDetals = {}
+    console.log("customer",customer)
     const { customer_id, pageStatus } = customer;
 
     const [ExistCustomer] = await pool.execute('SELECT customer_type FROM `customers` WHERE id =' + customer_id);
@@ -1444,6 +1445,7 @@ const getSingleCustomer = async (customer) => {
 
     //  Page Status 4 Paper Work Part
     else if (pageStatus === "4") {
+        console.log("INSIDE")
         const query = `
         SELECT 
             customers.id AS customer_id,
