@@ -6,7 +6,7 @@ import axios from "axios";
 
 const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 
-console.log("StaffUserId", StaffUserId.id);
+ 
 export async function GET_IP(data, token) {
   try {
     const res = await axios.get(`https://api.ipify.org?format=json`)

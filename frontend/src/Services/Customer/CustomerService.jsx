@@ -198,6 +198,19 @@ export async function UPDATE_JOB(data, token) {
   }
 }
 
+export async function GETALLCHECKLIST(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}checklistAction`, data, {
+      headers: header(token),
+      data: {}
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+
 
 
 

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { GETALLCOMPANY, ADD_CUSTOMER, GET_SERVICE, ADD_SERVICES, ADD_PEPPER_WORK, GET_ALL_CUSTOMER, GET_CUSTOMER, EDIT_CUSTOMER, Delete_Customer_File, GET_ALL_JOB_DATA, Add_Job_Type, GET_ALL_JOB_LIST, UPDATE_JOB } from "../../../Services/Customer/CustomerService";
+import { GETALLCOMPANY, ADD_CUSTOMER, GET_SERVICE, ADD_SERVICES, ADD_PEPPER_WORK, GET_ALL_CUSTOMER, GET_CUSTOMER, EDIT_CUSTOMER, Delete_Customer_File, GET_ALL_JOB_DATA, Add_Job_Type, GET_ALL_JOB_LIST, UPDATE_JOB , GETALLCHECKLIST } from "../../../Services/Customer/CustomerService";
 
 import axios from "axios";
 const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -175,8 +175,6 @@ export const Get_All_Job_List = createAsyncThunk("jobAction", async (data) => {
     let IP_Data = await GET_IP();
     const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
     const res = await GET_ALL_JOB_LIST(updatedReq, authToken);
-
-
     return await res;
   } catch (err) {
     throw err;
@@ -189,17 +187,23 @@ export const UpdateJob = createAsyncThunk("jobUpdate", async (data) => {
     let IP_Data = await GET_IP();
     const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
     const res = await UPDATE_JOB(updatedReq, authToken);
-
-
     return await res;
   } catch (err) {
     throw err;
   }
 });
 
-
-
-
+export const GET_ALL_CHECKLIST = createAsyncThunk("checklistAction", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await GETALLCHECKLIST(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
 
 
 const CustomerSlice = createSlice({
@@ -220,6 +224,7 @@ const CustomerSlice = createSlice({
     addjobtype: [],
     getalljoblist: [],
     updatejob: [],
+    getallchecklist: []
 
   },
   reducers: {},
@@ -368,6 +373,18 @@ const CustomerSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
       })
+      .addCase(GET_ALL_CHECKLIST.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(GET_ALL_CHECKLIST.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.getallchecklist = action.payload;
+      })
+      .addCase(GET_ALL_CHECKLIST.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+
 
 
 

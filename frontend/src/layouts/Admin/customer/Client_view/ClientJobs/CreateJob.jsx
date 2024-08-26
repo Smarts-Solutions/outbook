@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
-import { GetAllJabData, AddAllJobType } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { GetAllJabData, AddAllJobType , GET_ALL_CHECKLIST } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import sweatalert from 'sweetalert2';
 import * as bootstrap from 'bootstrap';
 import { JobType } from '../../../../../ReduxStore/Slice/Settings/settingSlice'
@@ -21,6 +21,7 @@ const CreateJob = () => {
     const [reviewTime, setReviewTime] = useState({ hours: "", minutes: "" })
     const [budgetedHours, setBudgetedHours] = useState({ hours: "", minutes: "" })
     const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" })
+    const [AllChecklist, setAllChecklist] = useState({ loading: false, data: [] })
 
     const [jobModalStatus, jobModalSetStatus] = useState(false);
 
@@ -70,11 +71,6 @@ const CreateJob = () => {
         InvoiceRemark: "",
     });
 
-
-
-
-
-
     useEffect(() => {
         setJobData(prevState => ({
             ...prevState,
@@ -112,6 +108,39 @@ const CreateJob = () => {
     useEffect(() => {
         GetJobData()
     }, []);
+
+    // {
+    //     "action" : "getByServiceWithJobType",
+    //     "customer_id":40,
+    //     "service_id":3,
+    //     "job_type_id":4
+    // }
+    const getAllChecklist = async () => {
+        const req = { action: "getByServiceWithJobType", service_id: 2 , customer_id: location.state.goto == "Customer" ? location.state.details.id : location.state.details.customer_id.id , job_type_id: jobData.JobType }
+        const data = { req: req, authToken: token }
+        await dispatch(GET_ALL_CHECKLIST(data))
+            .unwrap()
+            .then(async (response) => {
+                if (response.status) {
+                    setAllChecklist({
+                        loading: true,
+                        data: response.data
+                    })
+                } else {
+                    setAllChecklist({
+                        loading: true,
+                        data: []
+                    })
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    }
+
+    useEffect(() => {
+        getAllChecklist()
+    }, [jobData.JobType]);
 
     const GetJobType = async () => {
         const req = { action: "get", service_id: 2 }

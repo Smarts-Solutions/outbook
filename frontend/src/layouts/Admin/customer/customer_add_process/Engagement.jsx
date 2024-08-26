@@ -4,9 +4,9 @@ import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
 import { JobType } from '../../../../ReduxStore/Slice/Settings/settingSlice'
 import { useDispatch } from 'react-redux';
-import { Edit_Customer } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
-
-
+ 
+import { ADD_SERVICES_CUSTOMERS } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
+ 
 
 const Engagement = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
@@ -259,7 +259,7 @@ const Engagement = () => {
     console.log("checkboxStates", checkboxStates)
 
     for (let i = 0; i < checkboxStates.length; i++) {
-      console.log("i", checkboxStates[i])
+    
       if (checkboxStates[i] == 1 && !validations[i]()) {
 
         return;
@@ -320,10 +320,10 @@ const Engagement = () => {
         customised_pricing_data: jobEntries
       };
     }
-
+    
 
     const data = { req: req, authToken: token }
-    await dispatch(Edit_Customer(data))
+    await dispatch(ADD_SERVICES_CUSTOMERS(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
