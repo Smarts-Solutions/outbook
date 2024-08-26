@@ -86,6 +86,7 @@ const CreateJob = () => {
         await dispatch(GetAllJabData(data))
             .unwrap()
             .then(async (response) => {
+                
                 if (response.status) {
                     setAllJobData({
                         loading: true,
@@ -108,7 +109,7 @@ const CreateJob = () => {
     }, []);
 
     const HandleChange = (e) => {
-        console.log("e.target", e.target.value)
+      
         let name = e.target.name
         let value = e.target.value
         if (name == "NumberOfTransactions" || name == "NumberOfTrialBalanceItems" || name == "Turnover") {
@@ -371,7 +372,7 @@ const CreateJob = () => {
                                                                                     <option value="">Select Client</option>
                                                                                     {AllJobData.loading &&
                                                                                         AllJobData.data.client.map((client) => (
-                                                                                            <option value={client.client_id} key={client.client_id}>{client.client_trading_name}</option>
+                                                                                        <option value={client.client_id} key={client.client_id}>{client.client_trading_name}</option>
                                                                                         ))
                                                                                     }
                                                                                 </select>
@@ -987,9 +988,9 @@ const CreateJob = () => {
                                                                                 >
                                                                                     <option value="">Please Select Currency</option>
                                                                                     {
-                                                                                        AllJobData.loading &&
-                                                                                        AllJobData.data.currency.map((currency) => (
-                                                                                            <option value={currency.currency_id} key={currency.currency_id}>{currency.currency_name}</option>
+                                                                                       AllJobData.loading &&
+                                                               AllJobData.data.currency.map((currency) => (
+                                                               <option value={currency.country_id} key={currency.country_id}>{currency.currency_name}</option>
                                                                                         ))
                                                                                     }
                                                                                 </select>
