@@ -188,7 +188,7 @@ const JobInformation = () => {
       <div className="card-body">
         <div className="row">
           <div className="mb-3 col-lg-4">
-            <label className="form-label"> Outbook Account Manager</label>
+            <label className="form-label"> Outbook Account Manager<span className='text-danger'>*</span></label>
             <input
               type="text"
               className="form-control"
@@ -199,7 +199,7 @@ const JobInformation = () => {
             />
           </div>
           <div id="invoiceremark" className="mb-3 col-lg-4">
-            <label className="form-label">Customer</label>
+            <label className="form-label">Customer<span className='text-danger'>*</span></label>
             <input
               type="text"
               className="form-control"
@@ -210,7 +210,7 @@ const JobInformation = () => {
             />
           </div>
           <div className="col-lg-4">
-            <label className="form-label">Client</label>
+            <label className="form-label">Client<span className='text-danger'>*</span></label>
             <input
               type="text"
               className="form-control"
@@ -232,7 +232,7 @@ const JobInformation = () => {
           </div>
           <div className="col-lg-4">
             <label className="form-label">
-              Customer Account Manager(Officer)
+              Customer Account Manager(Officer)<span className='text-danger'>*</span>
             </label>
             <select className="form-select" name="CustomerAccountManager">
               <option value="">Select Customer Account Manager</option>
@@ -240,14 +240,14 @@ const JobInformation = () => {
             </select>
           </div>
           <div className="col-lg-4">
-            <label className="form-label">Service</label>
+            <label className="form-label">Service<span className='text-danger'>*</span></label>
             <select className="form-select" name="Service">
               <option value="">Select Service</option>
               <option value={6}>Onboarding/Setup </option>
             </select>
           </div>
           <div className="col-lg-4 mb-3">
-            <label className="form-label">Job Type</label>
+            <label className="form-label">Job Type<span className='text-danger'>*</span></label>
             <select className="form-select mb-3 jobtype" name="JobType">
               <option value="">Select Job Type</option>
               <option value={3}>VAT1</option>
@@ -378,13 +378,38 @@ const JobInformation = () => {
           <div className="col-lg-4">
             <div className="mb-3">
               <label className="form-label"> Total Time</label>
-              <input
+              <div className="row">
+                <div className="col-md-6 pe-0">
+                  <div className="input-group">
+                <input
                 type="text"
-                name="TotalTime"
                 className="form-control"
-                disabled=""
-                defaultValue="0:0"
+                placeholder={10}
+                aria-label="Recipient's username"
+                aria-describedby="basic-addon2"
               />
+              <span className="input-group-text" id="basic-addon2">
+                Hours
+              </span>
+              </div>
+                </div>
+                <div className="col-md-6 ps-0">
+                <div className="input-group">
+                <input
+                type="text"
+                className="form-control"
+                placeholder={10}
+                aria-label="Recipient's username"
+                aria-describedby="basic-addon2"
+              />
+              <span className="input-group-text" id="basic-addon2">
+                Minutes
+              </span>
+              </div>
+                </div>
+            
+              
+            </div>
             </div>
           </div>
           <div id="invoice_type" className="col-lg-4">

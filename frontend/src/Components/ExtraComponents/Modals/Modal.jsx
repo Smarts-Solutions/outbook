@@ -2,7 +2,7 @@ import React from 'react';
 
 const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange, buttonName }) => {
 
-  const columnClass = fields.length === 1 ? 'col-12' : 'col-md-12';
+  const columnClass = fields && fields.length === 1 ? 'col-12' : 'col-md-12';
 
   return (
     <div
