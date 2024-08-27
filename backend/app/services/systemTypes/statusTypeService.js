@@ -23,10 +23,32 @@ const modifyStatusType = async (StatusType) => {
 };
 
 
+// Master Status
+const addMasterStatus = async(masterStatus) => {
+  return statusTypeModel.createMasterStatus(masterStatus);
+}
+
+const getMasterStatus = async(masterStatus) => {
+  return statusTypeModel.getMasterStatus(masterStatus);
+}
+
+const removeMasterStatus = async(masterStatus) => {
+  return statusTypeModel.deleteMasterStatus(masterStatus);
+}
+
+const modifyMasterStatus = async(masterStatus)=>{
+  return statusTypeModel.updateMasterStatus(masterStatus);
+}
+
+
 module.exports = {
   addStatusType,
   getStatusType,
   removeStatusType,
   modifyStatusType,
-  getStatusTypeAll
+  getStatusTypeAll,
+  addMasterStatus,
+  getMasterStatus,
+  removeMasterStatus,
+  modifyMasterStatus
 };

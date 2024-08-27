@@ -20,7 +20,7 @@ const getAddJobData = async (req, res) => {
 const jobAdd = async (req, res) => {
   try {
      const { ...job } = req.body;
-    
+     
        const result = await jobService.jobAdd(job);
        if(!result.status){
         return  res.status(200).json({ status: false, message: result.message });  

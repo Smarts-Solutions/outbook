@@ -7,6 +7,9 @@ const router = express.Router();
 // Status Type
 router.post('/statusType',verifyToken, controllers.statusTypeController.handleStatusType);
 
+// Master Status
+router.post('/masterStatus',verifyToken, controllers.statusTypeController.handleMasterStatus);
+
 //Client Industry
 router.post('/clientIndustry',verifyToken, controllers.clientIndustryController.handleClientIndustry);
 

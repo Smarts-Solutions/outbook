@@ -443,6 +443,7 @@ CREATE TABLE client_contact_details (
 /*--TABLE:- CREATE JOB   */
 CREATE TABLE jobs (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    staff_created_id INT NOT NULL,
     job_id VARCHAR(100) NOT NULL UNIQUE,
     account_manager_id INT NOT NULL COMMENT 'Only staff members who are account managers',
     customer_id INT NOT NULL,
@@ -490,6 +491,7 @@ CREATE TABLE jobs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (account_manager_id) REFERENCES staffs(id),
+    FOREIGN KEY (staff_created_id) REFERENCES staffs(id),
     FOREIGN KEY (reviewer) REFERENCES staffs(id),
     FOREIGN KEY (allocated_to) REFERENCES staffs(id),
     FOREIGN KEY (customer_id) REFERENCES customers(id),
@@ -537,9 +539,11 @@ CREATE TABLE jobs (
     CREATE TABLE master_status (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(100) NOT NULL UNIQUE,
+        status_type_id INT NOT NULL
         status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (status_type_id) REFERENCES status_types(id)
     );
 
     INSERT INTO master_status (name, status) VALUES
