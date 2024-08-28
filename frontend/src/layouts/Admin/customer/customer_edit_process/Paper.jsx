@@ -161,8 +161,8 @@ const Paper = () => {
                                                                                 Array.from(newFiles).map((file, index) => (
 
                                                                                     <tr key={`new-${index}`}>
-                                                                                        <td className="file_name">  <img src={previews[index]} alt="preview" style={{ width: "50px", height: "50px" }} /> </td>
-                                                                                        <td className="file_name">{file.name}</td>
+                                                                                        <td className="file_name">  <img src={previews[index]} alt="preview" style={{ width: "50px", height: "50px" }} />{file.name} </td>
+                                                                                   
                                                                                         <td className="file_type">{file.type}</td>
                                                                                         <td className="size">
                                                                                             {file.size < 1024 * 1024
