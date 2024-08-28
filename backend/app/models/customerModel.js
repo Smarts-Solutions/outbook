@@ -899,7 +899,8 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
 
 const updateProcessCustomerFile = async (customerProcessDataFiles, customer_id) => {
 
-    if (customerProcessDataFiles.length > 0) {
+
+    if (customerProcessDataFiles && customerProcessDataFiles.length > 0) {
 
         for (let file of customerProcessDataFiles) {
             const file_name = file.filename;
@@ -924,7 +925,7 @@ const updateProcessCustomerFile = async (customerProcessDataFiles, customer_id) 
                 ]);
 
             } catch (error) {
-                console.error('Error inserting file:', error);
+                console.log('Error inserting file:', error);
             }
         }
     }
