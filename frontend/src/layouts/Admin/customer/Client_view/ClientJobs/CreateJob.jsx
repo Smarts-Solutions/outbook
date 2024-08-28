@@ -24,6 +24,12 @@ const CreateJob = () => {
     const [AllChecklist, setAllChecklist] = useState({ loading: false, data: [] })
     const [AllChecklistData, setAllChecklistData] = useState({ loading: false, data: [] })
     const [getChecklistId, setChecklistId] = useState('')
+    const [AddTaskArr, setAddTaskArr] = useState([])
+    const [showAddJobModal, setShowAddJobModal] = useState(true);
+
+
+    console.log("AddTaskArr", AddTaskArr)
+
  
 
     const [jobModalStatus, jobModalSetStatus] = useState(false);
@@ -415,15 +421,39 @@ const CreateJob = () => {
 
     }
 
-    console.log("AllChecklistData.data", AllChecklistData.data)
-    const AddTaskArr = [{checklist_tasks_id: 1, task_id: 8, task_name: 'dfgdgdg', budgeted_hour: '22.00'}]
+    
+    
     const AddTask = (id) => {
-        
-        const filterData = AllChecklistData.data.task.filter((data) => data.task_id == id)
-        
-        AddTaskArr.push(filterData[0])
-        console.log("AddTaskArr", AddTaskArr)  
+        const filterData = AllChecklistData.data.task.find((data) => data.task_id == id);  
+    
+        if (!filterData) {
+            return;  
+        }
+    
+        setAddTaskArr((prevTasks) => { 
+            const taskExists = prevTasks.some((task) => task.task_id === filterData.task_id);
+    
+            if (taskExists) {
+                return prevTasks;  
+            } else {
+                return [...prevTasks, filterData];  
+            }
+        });
+    
+    };
+  
+    const RemoveTask = (id) => {
+        setAddTaskArr((prevTasks) => prevTasks.filter((task) => task.task_id !== id));  
+    
     }
+
+     
+     
+    
+    
+     
+      
+    
 
 
 
@@ -1220,7 +1250,7 @@ const CreateJob = () => {
                                                                     <div className="col-lg-6">
                                                                         <div className="col-sm-auto" style={{ marginLeft: 250 }}>
                                                                             <a id="open-add-task-modal" className="btn btn-success add-btn">
-                                                                                <i className="ri-add-fill align-bottom me-1" />
+                                                                                <i className="ri-add-fill align-bottom me-1" onClick={()=>setShowAddJobModal(true)}/>
                                                                                 Add Task
                                                                             </a>
                                                                         </div>
@@ -1289,7 +1319,7 @@ const CreateJob = () => {
                                                                                                         <td>{checklist.budgeted_hour} hr</td>
                                                                                                         <td>
                                                                                                             <div className="add">
-                                                                                                            <button class="delete-icon"><i class="ti-trash"></i></button>
+                                                                                                            <button class="delete-icon"><i class="ti-trash" onClick={()=>RemoveTask(checklist.task_id)}></i></button>
                                                                                                             </div>
                                                                                                         </td>
                                                                                                     </tr>
@@ -1308,6 +1338,19 @@ const CreateJob = () => {
                                                 </Modal.Body>
                                             </Modal>
                                         )}
+
+                                        {showAddJobModal && (
+                                            <Modal show={showAddJobModal} onHide={(e) => setShowAddJobModal(false)} centered size="sm">
+                                            <Modal.Header closeButton>
+                                                <Modal.Title>Tasks</Modal.Title>
+                                            </Modal.Header>
+                                            <Modal.Body>
+                                                cpppp
+                                            </Modal.Body>
+                                        </Modal>
+                                        )}
+
+
 
 
                                         <div className="hstack gap-2 justify-content-end">
