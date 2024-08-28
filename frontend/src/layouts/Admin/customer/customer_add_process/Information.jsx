@@ -1131,7 +1131,7 @@ const Information = () => {
                           </option>
                           {staffDataAll.data.map((data) => (
                             <option key={data.id} value={data.id}>
-                              {data.first_name}
+                              {data.first_name+" "+data.last_name}
                             </option>
                           ))}
                         </Field>
