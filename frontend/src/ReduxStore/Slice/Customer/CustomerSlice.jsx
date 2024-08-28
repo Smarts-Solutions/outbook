@@ -14,9 +14,6 @@ export async function GET_IP(data, token) {
   }
 }
 
-
-
-
 export const GetAllCompany = createAsyncThunk("seachCompany", async (data) => {
   try {
     const { req } = data;
@@ -83,7 +80,6 @@ export const ADD_PEPPER_WORKS = createAsyncThunk("updateProcessCustomerFile", as
   }
 });
 
-
 export const GET_ALL_CUSTOMERS = createAsyncThunk("customerAction", async (data) => {
   try {
     const { req, authToken } = data
@@ -98,7 +94,6 @@ export const GET_ALL_CUSTOMERS = createAsyncThunk("customerAction", async (data)
     throw err;
   }
 });
-
 
 export const GET_CUSTOMER_DATA = createAsyncThunk("getSingleCustomer", async (data) => {
   try {
@@ -205,6 +200,8 @@ export const GET_ALL_CHECKLIST = createAsyncThunk("checklistAction", async (data
   }
 });
 
+
+ 
 
 const CustomerSlice = createSlice({
   name: "CustomerSlice",
@@ -384,14 +381,6 @@ const CustomerSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
       })
-
-
-
-
-
-
-
-
   },
 });
 

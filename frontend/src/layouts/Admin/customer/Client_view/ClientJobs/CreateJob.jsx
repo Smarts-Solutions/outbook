@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
-import { GetAllJabData, AddAllJobType , GET_ALL_CHECKLIST } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { GetAllJabData, AddAllJobType, GET_ALL_CHECKLIST } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import sweatalert from 'sweetalert2';
 import * as bootstrap from 'bootstrap';
 import { JobType } from '../../../../../ReduxStore/Slice/Settings/settingSlice'
@@ -22,6 +22,15 @@ const CreateJob = () => {
     const [budgetedHours, setBudgetedHours] = useState({ hours: "", minutes: "" })
     const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" })
     const [AllChecklist, setAllChecklist] = useState({ loading: false, data: [] })
+    const [AllChecklistData, setAllChecklistData] = useState({ loading: false, data: [] })
+    const [getChecklistId, setChecklistId] = useState('')
+    const [AddTaskArr, setAddTaskArr] = useState([])
+    const [showAddJobModal, setShowAddJobModal] = useState(false);
+
+
+    console.log("AddTaskArr", AddTaskArr)
+
+
 
     const [jobModalStatus, jobModalSetStatus] = useState(false);
 
@@ -109,14 +118,9 @@ const CreateJob = () => {
         GetJobData()
     }, []);
 
-    // {
-    //     "action" : "getByServiceWithJobType",
-    //     "customer_id":40,
-    //     "service_id":3,
-    //     "job_type_id":4
-    // }
+
     const getAllChecklist = async () => {
-        const req = { action: "getByServiceWithJobType", service_id: 2 , customer_id: location.state.goto == "Customer" ? location.state.details.id : location.state.details.customer_id.id , job_type_id: jobData.JobType }
+        const req = { action: "getByServiceWithJobType", service_id: jobData.Service, customer_id: location.state.goto == "Customer" ? location.state.details.id : location.state.details.customer_id.id, job_type_id: jobData.JobType }
         const data = { req: req, authToken: token }
         await dispatch(GET_ALL_CHECKLIST(data))
             .unwrap()
@@ -143,7 +147,7 @@ const CreateJob = () => {
     }, [jobData.JobType]);
 
     const GetJobType = async () => {
-        const req = { action: "get", service_id: 2 }
+        const req = { action: "get", service_id: jobData.Service }
         const data = { req: req, authToken: token }
         await dispatch(JobType(data))
             .unwrap()
@@ -171,8 +175,36 @@ const CreateJob = () => {
 
 
 
+    const getChecklistData = async () => {
+        const req = { action: "getById", checklist_id: 1 }
+        const data = { req: req, authToken: token }
+        await dispatch(GET_ALL_CHECKLIST(data))
+            .unwrap()
+            .then(async (response) => {
+                if (response.status) {
+                    setAllChecklistData({
+                        loading: true,
+                        data: response.data
+                    })
+                } else {
+                    setAllChecklistData({
+                        loading: true,
+                        data: []
+                    })
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    }
+
+    useEffect(() => {
+        getChecklistData()
+    }, [getChecklistId])
+
+
     const HandleChange = (e) => {
-        console.log("e.target", e.target.value)
+
         let name = e.target.name
         let value = e.target.value
         if (name == "NumberOfTransactions" || name == "NumberOfTrialBalanceItems" || name == "Turnover") {
@@ -382,12 +414,46 @@ const CreateJob = () => {
 
 
     const openJobModal = (e) => {
-        console.log("e.target.value", e.target.value)
+
         if (e.target.value != "") {
             jobModalSetStatus(true)
         }
 
     }
+
+
+
+    const AddTask = (id) => {
+        const filterData = AllChecklistData.data.task.find((data) => data.task_id == id);
+
+        if (!filterData) {
+            return;
+        }
+
+        setAddTaskArr((prevTasks) => {
+            const taskExists = prevTasks.some((task) => task.task_id === filterData.task_id);
+
+            if (taskExists) {
+                return prevTasks;
+            } else {
+                return [...prevTasks, filterData];
+            }
+        });
+
+    };
+
+    const RemoveTask = (id) => {
+        setAddTaskArr((prevTasks) => prevTasks.filter((task) => task.task_id !== id));
+
+    }
+
+
+
+
+
+
+
+
 
 
 
@@ -1167,22 +1233,23 @@ const CreateJob = () => {
                                                                             className="form-select mb-3"
                                                                             aria-label="Default select example"
                                                                             style={{ color: "#8a8c8e !important" }}
+                                                                            onChange={(e) => { setChecklistId(e.target.value) }}
+                                                                            value={getChecklistId}
+
                                                                         >
-                                                                            <option value="" selected="">
-                                                                                {" "}
-                                                                                Select Checklist Name
-                                                                            </option>
-                                                                            <option value="">Checklist 1</option>
-                                                                            <option value="">Checklist 2</option>
-                                                                            <option value="">Checklist 3</option>
+                                                                            <option value="">Select Checklist Name</option>
+                                                                            {
+                                                                                AllChecklist && AllChecklist.data.map((checklist) => (
+                                                                                    <option value={checklist.checklists_id} key={checklist.checklists_id}>{checklist.check_list_name}</option>
+                                                                                ))
+                                                                            }
+
+
                                                                         </select>
                                                                     </div>
                                                                     <div className="col-lg-6">
                                                                         <div className="col-sm-auto" style={{ marginLeft: 250 }}>
-                                                                            <a id="open-add-task-modal" className="btn btn-success add-btn">
-                                                                                <i className="ri-add-fill align-bottom me-1" />
-                                                                                Add Task
-                                                                            </a>
+                                                                            <button className="btn btn-info text-white float-end blue-btn" onClick={() => setShowAddJobModal(true)}>Add Task</button>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -1197,26 +1264,25 @@ const CreateJob = () => {
                                                                                     >
                                                                                         <thead className="table-light">
                                                                                             <tr>
-                                                                                                <th className="" data-="status">
-                                                                                                    Task Name{" "}
-                                                                                                </th>
-                                                                                                <th className="" data-="status">
-                                                                                                    Budgeted Hour
-                                                                                                </th>
+                                                                                                <th>Task Name</th>
+                                                                                                <th>Budgeted Hour</th>
                                                                                                 <th>Action</th>
                                                                                             </tr>
                                                                                         </thead>
                                                                                         <tbody className="list form-check-all">
-                                                                                            <tr className="">
-                                                                                                <td>Task 1 </td>
-                                                                                                <td>10 hr</td>
-                                                                                                <td>
-                                                                                                    <div className="add">
-                                                                                                        <button className="btn btn-sm btn-success add-item-btn">+</button>
-                                                                                                    </div>
-                                                                                                </td>
-                                                                                            </tr>
-
+                                                                                            {
+                                                                                                AllChecklistData && AllChecklistData.data.task.map((checklist) => (
+                                                                                                    <tr className="">
+                                                                                                        <td>{checklist.task_name} </td>
+                                                                                                        <td>{checklist.budgeted_hour} hr</td>
+                                                                                                        <td>
+                                                                                                            <div className="add">
+                                                                                                                <button className=" btn-info text-white blue-btn" onClick={() => AddTask(checklist.task_id)}>+</button>
+                                                                                                            </div>
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                ))
+                                                                                            }
                                                                                         </tbody>
                                                                                     </table>
                                                                                 </div>
@@ -1235,28 +1301,30 @@ const CreateJob = () => {
                                                                                     >
                                                                                         <thead className="table-light">
                                                                                             <tr>
-                                                                                                <th className="" data-="status">
-                                                                                                    Task Name{" "}
-                                                                                                </th>
-                                                                                                <th className="" data-="status">
-                                                                                                    Budgeted Hour
-                                                                                                </th>
+                                                                                                <th>Task Name</th>
+                                                                                                <th>Budgeted Hour</th>
                                                                                                 <th>Action</th>
                                                                                             </tr>
                                                                                         </thead>
                                                                                         <tbody className="list form-check-all">
-                                                                                            <tr className="">
-                                                                                                <td>Task 1 </td>
-                                                                                                <td>10 hr </td>
-                                                                                                <td>
-                                                                                                    <div className="remove">
-                                                                                                        <button class="delete-icon"><i class="ti-trash"></i></button>
-                                                                                                    </div>
-                                                                                                </td>
-                                                                                            </tr>
+                                                                                            {
+                                                                                                AddTaskArr && AddTaskArr.map((checklist) => (
+
+                                                                                                    <tr className="">
+                                                                                                        {console.log("checklist", checklist)}
+                                                                                                        <td>{checklist.task_name} </td>
+                                                                                                        <td>{checklist.budgeted_hour} hr</td>
+                                                                                                        <td>
+                                                                                                            <div className="add">
+                                                                                                                <button class="delete-icon"><i class="ti-trash" onClick={() => RemoveTask(checklist.task_id)}></i></button>
+                                                                                                            </div>
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                ))
+                                                                                            }
                                                                                         </tbody>
                                                                                     </table>
-                                                                                </div>  
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -1267,6 +1335,37 @@ const CreateJob = () => {
                                                 </Modal.Body>
                                             </Modal>
                                         )}
+
+                                        {showAddJobModal && (
+                                            <Modal show={showAddJobModal} onHide={(e) => setShowAddJobModal(false)} centered size="sm">
+                                                <Modal.Header closeButton>
+                                                    <Modal.Title>Add Task</Modal.Title>
+                                                </Modal.Header>
+                                                <Modal.Body>
+                                                    <div className='row'>
+                                                        <div className='col-lg-12'>
+                                                            <label className="form-label">Task Name</label>
+                                                            <div>
+                                                                <input type="text" placeholder="Enter Task name" className='p-1 w-100 mb-2 rounded' />
+                                                            </div>
+                                                        </div>
+                                                        <div className='col-lg-12'>
+                                                            <label className="form-label">Budgeted Hour</label>
+                                                            <div>
+                                                                <input type="text" placeholder='Enter Budgeted Hour' className='p-1 mb-2 w-100 rounded' />
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </Modal.Body>
+                                                <Modal.Footer>
+                                                    <Button variant="secondary">Close</Button>
+                                                    <Button variant="btn btn-info text-white float-end blue-btn">Add</Button>
+                                                </Modal.Footer>
+                                            </Modal>
+                                        )}
+
+
 
 
                                         <div className="hstack gap-2 justify-content-end">

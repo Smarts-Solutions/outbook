@@ -417,8 +417,8 @@ const Setting = () => {
   ];
 
   const columnService = [
-    { name: "Service Name", selector: (row) => row.name, sortable: true,width:'80%' },
-    { name: 'Status', cell: row => (<div><span className={`badge ${row.status === '1' ? 'bg-success' : 'bg-danger'}`}>{row.status === '1' ? 'Active' : 'Deactive'}</span></div>), width: 'auto', },
+    { name: "Service Name", selector: (row) => row.name, sortable: true, },
+    { name: 'Status', cell: row => (<div><span className={`badge ${row.status === '1' ? 'bg-success' : 'bg-danger'}`}>{row.status === '1' ? 'Active' : 'Deactive'}</span></div>),  },
 
     ...(showSettingUpdateTab || showSettingDeleteTab || showSettingInsertTab
       ? [
@@ -457,6 +457,7 @@ const Setting = () => {
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
+            width:'20%' 
           },
         ]
       : []),

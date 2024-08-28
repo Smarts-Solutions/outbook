@@ -760,10 +760,10 @@ const Engagement = () => {
 
                         <div className="form__item button__items d-flex justify-content-between">
                             <Button className="btn btn-secondary" type="default" onClick={prev}>
-                                Previous
+                            <i className="pe-2 fa-regular fa-arrow-left-long"></i>  Previous
                             </Button>
                             <Button className="btn btn-info text-white blue-btn" onClick={handleSubmit}>
-                                Next
+                                Next <i className="ps-2 fa-regular fa-arrow-right-long"></i>
                             </Button>
                         </div>
 

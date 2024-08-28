@@ -1554,22 +1554,23 @@ const Information = ({ id, pageStatus }) => {
                                                     </div>
                                                 </div>
                                             </div>
-                                            : ""
-                            }
-                        </section>
-                        <div className="form__item button__items d-flex justify-content-between">
-                            <Button className="white-btn" type="default" onClick={prev}>
-                                Back
-                            </Button>
-                            <Button className="btn btn-info text-white blue-btn" type="submit" onClick={handleSubmit}>
-                                Next
-                            </Button>
-                        </div>
-
-                    </Form>
-
-                )}
-            </Formik>
+                                       
+                                        : ""
+                        }
+                    </section>
+                    <div className="form__item button__items d-flex justify-content-between">
+                        <Button className="btn btn-secondary" type="default" onClick={prev}>
+                        <i className="pe-2 fa-regular fa-arrow-left-long"></i>Previous
+                        </Button>
+                        <Button className="btn btn-info text-white blue-btn" type="submit" onClick={handleSubmit}>
+                        Next<i className="ps-2 fa-regular fa-arrow-right-long"></i>
+                        </Button>
+                    </div>
+                  
+                </Form>
+                
+            )}
+        </Formik>
         </>
     );
 };

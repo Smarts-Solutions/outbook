@@ -647,7 +647,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
               className="btn btn-secondary m-2"
               onClick={closeBtn}
             >
-              Previous
+                <i className="pe-2 fa-regular fa-arrow-left-long"></i> Previous
             </button>
 
             <button
@@ -655,7 +655,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
               type="submit"
               disabled={formik.isSubmitting}
             >
-              {btn_name}
+              {btn_name} <i className="ps-2 fa-regular fa-arrow-right-long"></i>
             </button>
           </div>
         ) : (
@@ -665,7 +665,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
               className="btn btn-secondary m-2"
               onClick={closeBtn}
             >
-              Cancel
+              <i className="pe-2 fa-regular fa-arrow-left-long"></i> Cancel
             </button>
 
             <button
@@ -674,7 +674,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
               type="submit"
               disabled={formik.isSubmitting}
             >
-              {btn_name}
+              {btn_name} <i className="ps-2 fa-regular fa-arrow-right-long"></i>
             </button>
           </div>
         )}
