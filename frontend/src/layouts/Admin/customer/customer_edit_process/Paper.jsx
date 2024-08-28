@@ -32,23 +32,26 @@ const Paper = () => {
     const GetCustomerData = async () => {
         const req = { customer_id: location.state.id, pageStatus: "4" };
         const data1 = { req: req, authToken: token };
-
+        console.log("data1",data1)
         await dispatch(GET_CUSTOMER_DATA(data1))
             .unwrap()
             .then((response) => {
+                console.log("response.status",response)
                 if (response.status) {
                     setCustomerDetails({
                         loading: false,
                         data: response.data
                     });
-
+                    
+                  if(response.data.length > 0){
                     // Clear the FormData before appending new files
                     data = new FormData();
-
+                    console.log("response.data ",response.data)
                     // Append files to FormData
                     Array.from(response.data.customer_paper_work).forEach((file, index) => {
                         data.append("files", file);
                     });
+                   }
 
                 } else {
                     setCustomerDetails({
@@ -69,20 +72,21 @@ const Paper = () => {
 
     const handleSubmit = async () => {
         data = new FormData();
-
-        if (fileState && typeof fileState[Symbol.iterator] === 'function') {
-            Array.from(fileState).forEach((file, index) => {
+        console.log("address",address);
+        data.append('customer_id', address);
+        // if (fileState && typeof fileState[Symbol.iterator] === 'function') {
+        //     Array.from(fileState).forEach((file, index) => {
       
 
-                data.append("files", file);
-            });
-        } else {
-            console.error("fileState is not iterable or not correctly set.");
-            return;
-        }
+        //         data.append("files", file);
+        //     });
+        // } else {
+        //     console.error("fileState is not iterable or not correctly set.");
+        //     return;
+        // }
 
-        data.append('customer_id', address);
-
+        
+        console.log("data",data);
 
         const data1 = { req: data, authToken: token }
         await dispatch(ADD_PEPPER_WORKS(data1))

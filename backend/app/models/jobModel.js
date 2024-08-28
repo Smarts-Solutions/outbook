@@ -256,6 +256,7 @@ const jobAdd = async (job) => {
     customer_contact_details_id,
     service_id,
     job_type_id,
+    tasks,
     budgeted_hours,
     reviewer,
     allocated_to,
@@ -313,10 +314,63 @@ INSERT INTO jobs (job_id,account_manager_id,customer_id,client_id,client_job_cod
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `;
     const [result] = await pool.execute(query, [job_id,account_manager_id,customer_id,client_id,client_job_code,customer_contact_details_id, service_id,job_type_id, budgeted_hours,reviewer, allocated_to,allocated_on,date_received_on,year_end,total_preparation_time, review_time, feedback_incorporation_time,total_time, engagement_model, expected_delivery_date,due_on,submission_deadline, customer_deadline_date, sla_deadline_date,internal_deadline_date, filing_Companies_required, filing_Companies_date,filing_hmrc_required, filing_hmrc_date, opening_balance_required,opening_balance_date, number_of_transaction, number_of_balance_items,turnover, number_of_employees, vat_reconciliation, bookkeeping,processing_type, invoiced, currency, invoice_value, invoice_date,invoice_hours, invoice_remark]);
-  
+    if(result.insertId > 0){
+      if(tasks.task.length > 0){
+          const job_id = result.insertId;
+          const checklist_id = tasks.checklist_id;
+           for (const tsk of tasks.task) {
+
+               let task_id = tsk.task_id;
+               let task_name = tsk.task_name;
+               let budgeted_hour = tsk.budgeted_hour;
+        if (task_id == "" || task_id == undefined || task_id == null) {
+               
+                
+           const checkQuery = `
+                    SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?
+                `;
+          const [existing] = await pool.execute(checkQuery, [task_name,service_id,job_type_id]);
+          if (existing.length === 0) {
+          const query = `INSERT INTO task (name,service_id,job_type_id) VALUES (?, ?, ?) `;
+          const [result] = await pool.execute(query, [task_name,service_id,job_type_id]);
+             if(result.insertId > 0){
+              let task_id_new = result.insertId;
+              const checklistAddTasksQuery = `
+               INSERT INTO checklist_tasks (checklist_id,task_id,task_name,budgeted_hour)
+               VALUES (?, ?, ?, ?)
+               `;
+               const [result2] = await pool.execute(checklistAddTasksQuery, [checklist_id,task_id_new,task_name,budgeted_hour]);
+              
+               if(result2.insertId > 0){
+               const query3 = `
+               INSERT INTO client_job_task (job_id,client_id,checklist_id,task_id)
+               VALUES (?, ?, ?, ?)
+               `;
+               const [result3] = await pool.execute(query3, [job_id,client_id,checklist_id,task_id_new]);
+               }
+                 
+
+             }
+
+
+           }     
+
+
+               }
+               else {
+                   
+               const query = `
+               INSERT INTO client_job_task (job_id,client_id,checklist_id,task_id)
+               VALUES (?, ?, ?, ?)
+               `;
+               const [result] = await pool.execute(query, [job_id,client_id,checklist_id,task_id]);
+               }
+           }
+      }
+    }
     return { status: true, message: 'job add successfully.', data: result.insertId };
   } catch (err) {
-
+     console.log("err -",err)
     return { status: false, message: 'Error adding job.' };
   }
   
@@ -370,7 +424,7 @@ const getJobByCustomer = async (job) => {
      const [rows] = await pool.execute(query, [customer_id]);
      return { status: true, message: 'Success.', data: rows };
      } catch (error) {
-   
+     console.log("err -",error)
      return { status: false, message: 'Error getting job.' };
      }
     
@@ -422,6 +476,14 @@ const getJobByClient = async (job) => {
      WHERE 
      jobs.client_id = ?
      `;
+
+    //  WHERE 
+    //   jobs.client_id = ? 
+    //   AND (
+    //     jobs.staff_created_id = ? 
+    //     OR jobs.reviewer_id = ? 
+    //     OR jobs.allocated_id = ?
+    //   )
      const [rows] = await pool.execute(query, [client_id]);
      return { status: true, message: 'Success.', data: rows };
      } catch (error) {
@@ -434,7 +496,7 @@ const getJobByClient = async (job) => {
 
 const getJobById = async (job) => {
      const {job_id} = job;
-
+    console.log(" job BY ID ",job)
      try {
      const query = `
     SELECT 
@@ -461,26 +523,26 @@ const getJobById = async (job) => {
      staffs.id AS allocated_id,
      staffs.first_name AS allocated_first_name,
      staffs.last_name AS allocated_last_name,
-     jobs.allocated_on AS allocated_on,
-     jobs.date_received_on AS date_received_on,
+     DATE_FORMAT(jobs.allocated_on, '%Y-%m-%d') AS allocated_on,
+     DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
      jobs.year_end AS year_end,
      jobs.total_preparation_time AS total_preparation_time,
      jobs.review_time AS review_time,
      jobs.feedback_incorporation_time AS feedback_incorporation_time,
      jobs.total_time AS total_time,
      jobs.engagement_model AS engagement_model,
-     jobs.expected_delivery_date AS expected_delivery_date,
-     jobs.due_on AS due_on,
-     jobs.submission_deadline AS submission_deadline,
-     jobs.customer_deadline_date AS customer_deadline_date,
-     jobs.sla_deadline_date AS sla_deadline_date,
-     jobs.internal_deadline_date AS internal_deadline_date,
+     DATE_FORMAT(jobs.expected_delivery_date, '%Y-%m-%d') AS expected_delivery_date,
+     DATE_FORMAT(jobs.due_on, '%Y-%m-%d') AS due_on,
+     DATE_FORMAT(jobs.submission_deadline, '%Y-%m-%d') AS submission_deadline,
+     DATE_FORMAT(jobs.customer_deadline_date, '%Y-%m-%d') AS customer_deadline_date,
+     DATE_FORMAT(jobs.sla_deadline_date, '%Y-%m-%d') AS sla_deadline_date,
+     DATE_FORMAT(jobs.internal_deadline_date, '%Y-%m-%d') AS internal_deadline_date,
      jobs.filing_Companies_required AS filing_Companies_required,
-     jobs.filing_Companies_date AS filing_Companies_date,
+     DATE_FORMAT(jobs.filing_Companies_date, '%Y-%m-%d') AS filing_Companies_date,
      jobs.filing_hmrc_required AS filing_hmrc_required,
-     jobs.filing_hmrc_date AS filing_hmrc_date,
+     DATE_FORMAT(jobs.filing_hmrc_date, '%Y-%m-%d') AS filing_hmrc_date,
      jobs.opening_balance_required AS opening_balance_required,
-     jobs.opening_balance_date AS opening_balance_date,
+     DATE_FORMAT(jobs.opening_balance_date, '%Y-%m-%d') AS opening_balance_date,
      jobs.number_of_transaction AS number_of_transaction,
      jobs.number_of_balance_items AS number_of_balance_items,
      jobs.turnover AS turnover,
@@ -492,9 +554,13 @@ const getJobById = async (job) => {
      countries.id AS currency_id,
      countries.currency AS currency,
      jobs.invoice_value AS invoice_value,
-     jobs.invoice_date AS invoice_date,
+     DATE_FORMAT(jobs.invoice_date, '%Y-%m-%d') AS invoice_date,
      jobs.invoice_hours AS invoice_hours,
-     jobs.invoice_remark AS invoice_remark
+     jobs.invoice_remark AS invoice_remark,
+     client_job_task.checklist_id AS checklist_id,
+     checklist_tasks.budgeted_hour AS task_budgeted_hour,
+     task.id AS task_id,
+     task.name AS task_name
      FROM 
      jobs
      JOIN 
@@ -507,23 +573,103 @@ const getJobById = async (job) => {
      job_types ON jobs.job_type_id = job_types.id
      JOIN 
      services ON jobs.service_id = services.id
-     JOIN 
+     LEFT JOIN 
      staffs ON jobs.allocated_to = staffs.id
-     JOIN 
+     LEFT JOIN 
      staffs AS staffs2 ON jobs.reviewer = staffs2.id
-     JOIN 
+     LEFT JOIN 
      staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
      LEFT JOIN 
      countries ON jobs.currency = countries.id
-     WHERE 
+     JOIN 
+     client_job_task ON client_job_task.job_id = jobs.id
+     JOIN
+     task ON client_job_task.task_id = task.id
+     JOIN
+     checklist_tasks ON checklist_tasks.checklist_id = client_job_task.checklist_id
+     WHERE
+     checklist_tasks.checklist_id = client_job_task.checklist_id AND checklist_tasks.task_id = client_job_task.task_id AND
      jobs.id = ?
      `;
 
    
      const [rows] = await pool.execute(query, [job_id]);
-     return { status: true, message: 'Success.', data: rows };
+     let result = {}
+     if(rows.length > 0){
+
+       const tasks = await rows.map(row => ({
+        task_id: row.task_id,
+        task_name: row.task_name,
+        budgeted_hour: row.task_budgeted_hour,
+       }));
+
+       result = {
+        job_id: rows[0].job_id,
+        job_code_id: rows[0].job_code_id,
+        customer_id: rows[0].customer_id,
+        customer_trading_name: rows[0].customer_trading_name,
+        client_id: rows[0].client_id,
+        client_trading_name: rows[0].client_trading_name,
+        client_job_code: rows[0].client_job_code,
+        account_manager_officer_id: rows[0].account_manager_officer_id,
+        account_manager_officer_first_name: rows[0].account_manager_officer_first_name,
+        account_manager_officer_last_name: rows[0].account_manager_officer_last_name,
+        service_id: rows[0].service_id,
+        service_name: rows[0].service_name,
+        job_type_id: rows[0].job_type_id,
+        job_type_name: rows[0].job_type_name,
+        budgeted_hours: rows[0].budgeted_hours,
+        reviewer_id: rows[0].reviewer_id,
+        reviewer_first_name: rows[0].reviewer_first_name,
+        reviewer_last_name: rows[0].reviewer_last_name,
+        allocated_id: rows[0].allocated_id,
+        allocated_first_name: rows[0].allocated_first_name,
+        allocated_last_name: rows[0].allocated_last_name,
+        allocated_on: rows[0].allocated_on,
+        date_received_on: rows[0].date_received_on,
+        year_end: rows[0].year_end,
+        total_preparation_time: rows[0].total_preparation_time,
+        review_time: rows[0].review_time,
+        feedback_incorporation_time: rows[0].feedback_incorporation_time,
+        total_time: rows[0].total_time,
+        engagement_model: rows[0].engagement_model,
+        expected_delivery_date: rows[0].expected_delivery_date,
+        due_on: rows[0].due_on,
+        submission_deadline: rows[0].submission_deadline,
+        customer_deadline_date: rows[0].customer_deadline_date,
+        sla_deadline_date: rows[0].sla_deadline_date,
+        internal_deadline_date: rows[0].internal_deadline_date,
+        filing_Companies_required: rows[0].filing_Companies_required,
+        filing_Companies_date: rows[0].filing_Companies_date,
+        filing_hmrc_required: rows[0].filing_hmrc_required,
+        filing_hmrc_date: rows[0].filing_hmrc_date,
+        opening_balance_required: rows[0].opening_balance_required,
+        opening_balance_date: rows[0].opening_balance_date,
+        number_of_transaction: rows[0].number_of_transaction,
+        number_of_balance_items: rows[0].number_of_balance_items,
+        turnover: rows[0].turnover,
+        number_of_employees: rows[0].number_of_employees,
+        vat_reconciliation: rows[0].vat_reconciliation,
+        bookkeeping: rows[0].bookkeeping,
+        processing_type: rows[0].processing_type,
+        invoiced: rows[0].invoiced,
+        currency_id: rows[0].currency_id,
+        currency: rows[0].currency,
+        invoice_value: rows[0].invoice_value,
+        invoice_date: rows[0].invoice_date,
+        invoice_hours: rows[0].invoice_hours,
+        invoice_remark: rows[0].invoice_remark,
+        tasks : {
+          checklist_id: rows[0].checklist_id,
+          task : tasks 
+        }
+       }
+
+       
+     }
+     return { status: true, message: 'Success.', data: result };
      } catch (error) {
-   
+     console.log("error ",error)
      return { status: false, message: 'Error getting job.' };
      }
     
@@ -531,172 +677,184 @@ const getJobById = async (job) => {
 }
 
 const jobUpdate = async (job) => {
-     
-      const {
-        job_id,
-        account_manager_id,
-        customer_id,
-        client_id,
-        client_job_code,
-        customer_contact_details_id,
-        service_id,
-        job_type_id,
-        budgeted_hours,
-        reviewer,
-        allocated_to,
-        allocated_on,
-        date_received_on,
-        year_end,
-        total_preparation_time,
-        review_time,
-        feedback_incorporation_time,
-        total_time,
-        engagement_model,
-        expected_delivery_date,
-        due_on,
-        submission_deadline,
-        customer_deadline_date,
-        sla_deadline_date,
-        internal_deadline_date,
-        filing_Companies_required,
-        filing_Companies_date,
-        filing_hmrc_required,
-        filing_hmrc_date,
-        opening_balance_required,
-        opening_balance_date,
-        number_of_transaction,
-        number_of_balance_items,
-        turnover,
-        number_of_employees,
-        vat_reconciliation,
-        bookkeeping,
-        processing_type,
-        invoiced,
-        currency,
-        invoice_value,
-        invoice_date,
-        invoice_hours,
-        invoice_remark
-      } = job;
 
-    
+ // console.log("job",job)
 
-    const [ExistCustomer] = await pool.execute('SELECT trading_name FROM customers WHERE id = ?', [customer_id]);
-    const [ExistClient] = await pool.execute('SELECT trading_name FROM clients WHERE id = ?', [client_id]);
-    const [ExistJob] = await pool.execute('SELECT job_id FROM jobs WHERE id = ?', [job_id]);
+     const {
+       job_id, // Assuming job_id is provided for the update
+       account_manager_id,
+       customer_id,
+       client_id,
+       client_job_code,
+       customer_contact_details_id,
+       service_id,
+       job_type_id,
+       tasks,
+       budgeted_hours,
+       reviewer,
+       allocated_to,
+       allocated_on,
+       date_received_on,
+       year_end,
+       total_preparation_time,
+       review_time,
+       feedback_incorporation_time,
+       total_time,
+       engagement_model,
+       expected_delivery_date,
+       due_on,
+       submission_deadline,
+       customer_deadline_date,
+       sla_deadline_date,
+       internal_deadline_date,
+       filing_Companies_required,
+       filing_Companies_date,
+       filing_hmrc_required,
+       filing_hmrc_date,
+       opening_balance_required,
+       opening_balance_date,
+       number_of_transaction,
+       number_of_balance_items,
+       turnover,
+       number_of_employees,
+       vat_reconciliation,
+       bookkeeping,
+       processing_type,
+       invoiced,
+       currency,
+       invoice_value,
+       invoice_date,
+       invoice_hours,
+       invoice_remark
+     } = job;
 
-    const lastCode = ExistJob[0].job_id.slice(ExistJob[0].job_id.lastIndexOf('_') + 1);
 
-    const firstThreeLettersexistCustomerName = ExistCustomer[0].trading_name.substring(0, 3);
-    const firstThreeLettersexistClientName = ExistClient[0].trading_name.substring(0, 3);
-    const exit_job_id = firstThreeLettersexistCustomerName+"_"+firstThreeLettersexistClientName+"_"+lastCode;
-    
-
-    try {
-     const query = `
-         UPDATE jobs 
-         SET 
-             job_id = ?,
-             account_manager_id = ?,
-             customer_id = ?,
-             client_id = ?,
-             client_job_code = ?,
-             customer_contact_details_id = ?,
-             service_id = ?,
-             job_type_id = ?,
-             budgeted_hours = ?,
-             reviewer = ?,
-             allocated_to = ?,
-             allocated_on = ?,
-             date_received_on = ?,
-             year_end = ?,
-             total_preparation_time = ?,
-             review_time = ?,
-             feedback_incorporation_time = ?,
-             total_time = ?,
-             engagement_model = ?,
-             expected_delivery_date = ?,
-             due_on = ?,
-             submission_deadline = ?,
-             customer_deadline_date = ?,
-             sla_deadline_date = ?,
-             internal_deadline_date = ?,
-             filing_Companies_required = ?,
-             filing_Companies_date = ?,
-             filing_hmrc_required = ?,
-             filing_hmrc_date = ?,
-             opening_balance_required = ?,
-             opening_balance_date = ?,
-             number_of_transaction = ?,
-             number_of_balance_items = ?,
-             turnover = ?,
-             number_of_employees = ?,
-             vat_reconciliation = ?,
-             bookkeeping = ?,
-             processing_type = ?,
-             invoiced = ?,
-             currency = ?,
-             invoice_value = ?,
-             invoice_date = ?,
-             invoice_hours = ?,
-             invoice_remark = ?
-         WHERE id = ?
-     `;
-     const [result] = await pool.execute(query, [
-           exit_job_id,
-           account_manager_id,
-           customer_id,
-           client_id,
-           client_job_code,
-           customer_contact_details_id,
-           service_id,
-           job_type_id,
-           budgeted_hours,
-           reviewer,
-           allocated_to,
-           allocated_on,
-           date_received_on,
-           year_end,
-           total_preparation_time,
-           review_time,
-           feedback_incorporation_time,
-           total_time,
-           engagement_model,
-           expected_delivery_date,
-           due_on,
-           submission_deadline,
-           customer_deadline_date,
-           sla_deadline_date,
-           internal_deadline_date,
-           filing_Companies_required,
-           filing_Companies_date,
-           filing_hmrc_required,
-           filing_hmrc_date,
-           opening_balance_required,
-           opening_balance_date,
-           number_of_transaction,
-           number_of_balance_items,
-           turnover,
-           number_of_employees,
-           vat_reconciliation,
-           bookkeeping,
-           processing_type,
-           invoiced,
-           currency,
-           invoice_value,
-           invoice_date,
-           invoice_hours,
-           invoice_remark,
-           job_id
-     ]);
+     const [ExistCustomer] = await pool.execute('SELECT trading_name FROM customers WHERE id = ?', [customer_id]);
+     const [ExistClient] = await pool.execute('SELECT trading_name FROM clients WHERE id = ?', [client_id]);
+     const [ExistJob] = await pool.execute('SELECT job_id FROM jobs WHERE id = ?', [job_id]);
  
-     return { status: true, message: 'job updated successfully', data: result.affectedRows };
- } catch (err) {
-    
-     return { status: false, message: 'Error updating job.' };
- }
-      
-    }
+     const lastCode = ExistJob[0].job_id.slice(ExistJob[0].job_id.lastIndexOf('_') + 1);
+ 
+     const firstThreeLettersexistCustomerName = ExistCustomer[0].trading_name.substring(0, 3);
+     const firstThreeLettersexistClientName = ExistClient[0].trading_name.substring(0, 3);
+     const exit_job_id = firstThreeLettersexistCustomerName+"_"+firstThreeLettersexistClientName+"_"+lastCode;
+   
+     try {
+       const query = `
+         UPDATE jobs 
+         SET job_id = ? ,account_manager_id = ?, customer_id = ?, client_id = ?, client_job_code = ?, customer_contact_details_id = ?, 
+             service_id = ?, job_type_id = ?, budgeted_hours = ?, reviewer = ?, allocated_to = ?, allocated_on = ?, 
+             date_received_on = ?, year_end = ?, total_preparation_time = ?, review_time = ?, 
+             feedback_incorporation_time = ?, total_time = ?, engagement_model = ?, expected_delivery_date = ?, due_on = ?, 
+             submission_deadline = ?, customer_deadline_date = ?, sla_deadline_date = ?, internal_deadline_date = ?, 
+             filing_Companies_required = ?, filing_Companies_date = ?, filing_hmrc_required = ?, filing_hmrc_date = ?, 
+             opening_balance_required = ?, opening_balance_date = ?, number_of_transaction = ?, number_of_balance_items = ?, 
+             turnover = ?, number_of_employees = ?, vat_reconciliation = ?, bookkeeping = ?, processing_type = ?, 
+             invoiced = ?, currency = ?, invoice_value = ?, invoice_date = ?, invoice_hours = ?, invoice_remark = ?
+         WHERE id = ?
+       `;
+       const [result] = await pool.execute(query, [
+         exit_job_id,account_manager_id, customer_id, client_id, client_job_code, customer_contact_details_id, 
+         service_id, job_type_id, budgeted_hours, reviewer, allocated_to, allocated_on, 
+         date_received_on, year_end, total_preparation_time, review_time, 
+         feedback_incorporation_time, total_time, engagement_model, expected_delivery_date, due_on, 
+         submission_deadline, customer_deadline_date, sla_deadline_date, internal_deadline_date, 
+         filing_Companies_required, filing_Companies_date, filing_hmrc_required, filing_hmrc_date, 
+         opening_balance_required, opening_balance_date, number_of_transaction, number_of_balance_items, 
+         turnover, number_of_employees, vat_reconciliation, bookkeeping, processing_type, 
+         invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark, job_id
+       ]);
+   
+       if (result.affectedRows > 0) {
+         
+       if (tasks.task.length > 0) {
+          const checklist_id = tasks.checklist_id;
+          const providedTaskIds = tasks.task
+          .filter(tsk => tsk.task_id !== null && tsk.task_id !== "")
+          .map(tsk => tsk.task_id);
+
+          console.log("providedTaskIds",providedTaskIds)
+          
+
+
+          // Working progresss.................
+
+          // Get existing task IDs for the checklist
+          const getExistingTasksQuery = `
+            SELECT task_id FROM client_job_task WHERE checklist_id = ?
+          `;
+          const [existingTasks] = await pool.execute(getExistingTasksQuery, [checklist_id]);
+          const existingTaskIds = existingTasks.map(task => task.task_id);
+         
+          console.log("existingTaskIds ",existingTaskIds)
+
+        
+          // Find task IDs that need to be deleted
+          const tasksToDelete = existingTaskIds.filter(id => !providedTaskIds.includes(id));
+          console.log("tasksToDelete ",tasksToDelete)
+        
+          if (tasksToDelete.length > 0) {
+            const deleteQuery = `
+              DELETE FROM client_job_task WHERE job_id = ? checklist_id = ? AND task_id IN (?)
+            `;
+            await pool.execute(deleteQuery, [job_id,checklist_id, tasksToDelete]);
+          }
+        
+          // Insert or update tasks
+          for (const tsk of tasks.task) {
+            let task_id = tsk.task_id;
+            let task_name = tsk.task_name;
+            let budgeted_hour = tsk.budgeted_hour;
+        
+            if (task_id == "" || task_id == undefined || task_id == null) {
+              const checkQuery = `
+                SELECT id FROM task WHERE name = ?
+              `;
+              const [existing] = await pool.execute(checkQuery, [task_name]);
+        
+              if (existing.length === 0) {
+                const query = `
+                  INSERT INTO task (name, service_id, job_type_id) VALUES (?, ?, ?)
+                `;
+                console.log()
+                const [result] = await pool.execute(query, [task_name, service_id, job_type_id]);
+        
+                if (result.insertId > 0) {
+                  let task_id_new = result.insertId;
+                  const checklistAddTasksQuery = `
+                    INSERT INTO checklist_tasks (checklist_id, task_id, task_name, budgeted_hour)
+                    VALUES (?, ?, ?, ?)
+                  `;
+                  await pool.execute(checklistAddTasksQuery, [checklist_id, task_id_new, task_name, budgeted_hour]);
+        
+                  const query3 = `
+                    INSERT INTO client_job_task (job_id, client_id, checklist_id, task_id)
+                    VALUES (?, ?, ?, ?)
+                  `;
+                  await pool.execute(query3, [job_id, client_id, checklist_id, task_id_new]);
+                }
+              }
+            } else {
+              // Update existing task or add to the job
+              const query = `
+                INSERT INTO client_job_task (job_id, client_id, checklist_id, task_id)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE task_id = VALUES(task_id), checklist_id = VALUES(checklist_id);
+              `;
+              await pool.execute(query, [job_id, client_id, checklist_id, task_id]);
+            }
+          }
+        }
+         return { status: true, message: 'Job updated successfully.', data: job_id };
+       } else {
+         return { status: false, message: 'No job found with the given job_id.' };
+       }
+     } catch (err) {
+       console.log("err -", err);
+       return { status: false, message: 'Error updating job.' };
+     }
+   }
+   
 
 
 

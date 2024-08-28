@@ -443,6 +443,7 @@ CREATE TABLE client_contact_details (
 /*--TABLE:- CREATE JOB   */
 CREATE TABLE jobs (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    staff_created_id INT NOT NULL,
     job_id VARCHAR(100) NOT NULL UNIQUE,
     account_manager_id INT NOT NULL COMMENT 'Only staff members who are account managers',
     customer_id INT NOT NULL,
@@ -490,6 +491,7 @@ CREATE TABLE jobs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (account_manager_id) REFERENCES staffs(id),
+    FOREIGN KEY (staff_created_id) REFERENCES staffs(id),
     FOREIGN KEY (reviewer) REFERENCES staffs(id),
     FOREIGN KEY (allocated_to) REFERENCES staffs(id),
     FOREIGN KEY (customer_id) REFERENCES customers(id),
@@ -537,9 +539,11 @@ CREATE TABLE jobs (
     CREATE TABLE master_status (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(100) NOT NULL UNIQUE,
+        status_type_id INT NOT NULL
         status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (status_type_id) REFERENCES status_types(id)
     );
 
     INSERT INTO master_status (name, status) VALUES
@@ -551,7 +555,22 @@ CREATE TABLE jobs (
     ('WIP - Fixing Errors','1'),
     ('Draft Sent for Approval','1');
 
-
+    
+     /*--TABLE:- CLIENTS JOBS TASKS  */  
+    CREATE TABLE client_job_task (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        job_id INT NOT NULL,
+        client_id INT NOT NULL,
+        checklist_id INT NOT NULL,
+        task_id INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (job_id) REFERENCES jobs(id),
+        FOREIGN KEY (client_id) REFERENCES clients(id),
+        FOREIGN KEY (checklist_id) REFERENCES checklists(id),
+        FOREIGN KEY (task_id) REFERENCES task(id),
+        UNIQUE (job_id,client_id,checklist_id,task_id)
+    );
     
      /*--TABLE:- CHECKLIST  */  
     CREATE TABLE statuses (
@@ -577,7 +596,7 @@ CREATE TABLE jobs (
 
 
 
-     /*--TABLE:- JOB TIMELINE PENDING */  
+  /*--TABLE:- JOB TIMELINE PENDING */  
 
 
     /*--TABLE:- MISSING LOGS  */  
@@ -648,6 +667,21 @@ CREATE TABLE jobs (
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (job_id) REFERENCES jobs(id)
     );
+
+
+   /*--TABLE:- STAFF LOGS DOCUMENTS  */
+ CREATE TABLE staff_logs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  staff_id INT NOT NULL,
+  date DATE NOT NULL,
+  module_name VARCHAR(100) NOT NULL,
+  log_message TEXT NOT NULL,
+  permission_type VARCHAR(50) NOT NULL,
+  ip VARCHAR(50) DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (staff_id) REFERENCES staffs(id)
+);
 
     
 

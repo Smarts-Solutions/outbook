@@ -39,7 +39,7 @@ const getSingleCustomer = async (req, res) => {
       if(data != undefined){
        return res.status(200).json({ status:true,message: "Success..",data : data});
       }else{
-       return res.status(400).json({ status:false, message: "Invalid..."});
+       return res.status(200).json({ status:false, message: "Invalid..."});
       }
     } catch (error) {
       res.status(500).json({ status:false, message: error.message});
