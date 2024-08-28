@@ -43,7 +43,7 @@ const Access = () => {
             <div className="mb-3">
                 <div className="form-check form-check-outline form-check-dark">
                     <input
-                        className="form-check-input"
+                        className="form-check-input "
                         type="checkbox"
                         id={id}
                         checked={isChecked}
@@ -98,6 +98,7 @@ const Access = () => {
                             title={section.title}
                             TradingName={TradingName}
                             role_id={role_id}
+                            
                         />
                     ))}
                 </div>
@@ -211,7 +212,7 @@ const Access = () => {
                                                 <div className="accordion-body">
                                                     <div className="row">
                                                         {accessData && accessData.data.map((section, index) => (
-                                                            <div key={index} className="col-lg-4">
+                                                            <div key={index} className="col-lg-2">
                                                                 <AccordionItem section={section} TradingName={val.role_name} role_id={val.id} />
                                                             </div>
                                                         ))}
