@@ -34,6 +34,7 @@ import MissingLogs from '../layouts/Admin/Jobs/MissingLogs';
 import Queries from '../layouts/Admin/Jobs/Queries';
 import Drafts from '../layouts/Admin/Jobs/Drafts';
 import Documents from '../layouts/Admin/Jobs/Documents';
+import Statuses from '../layouts/Admin/customer/Client_view/Statuses';
 
 
 
@@ -91,6 +92,7 @@ const Admin_Route = () => {
             <Route path="/createjob" element={<CreateJob />} />
             <Route path="/job/edit" element={<JobEdit />} />
             <Route path="/create/checklist" element={<CreateCheckList />} />
+            <Route path="/create/statuses" element={<Statuses />} />
             <Route path="/edit/checklist" element={<EditCheckList />} />
             <Route path="/job/jobinformation" element={<JobInformation />} />
             <Route path="/job/tasktimesheet" element={<TaskTimesheet />} />

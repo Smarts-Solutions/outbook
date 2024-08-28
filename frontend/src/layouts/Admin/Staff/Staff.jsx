@@ -428,7 +428,7 @@ const StaffPage = () => {
             >
                 <div className="modal-body px-0">
                     <div className="row w-100">
-                        <div className="col-10">
+                        <div className="col-9">
                             <div className="search-box ms-2">
                                 <i className="ri-search-line search-icon" />
                                 <input
@@ -438,7 +438,7 @@ const StaffPage = () => {
                                 />
                             </div>
                         </div>
-                        <div className="col-2">
+                        <div className="col-3">
                             <div>
                                 <button
                                     type="button"
@@ -447,7 +447,7 @@ const StaffPage = () => {
                                     id="create-btn"
                                     data-bs-target="#showModal123"
                                 >
-                                    Add
+                                  <i className='fa fa-plus'></i>  Add
                                 </button>
                             </div>
                         </div>
