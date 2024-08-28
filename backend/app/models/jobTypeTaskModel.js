@@ -381,6 +381,40 @@ const getClientTypeChecklist = async(checklist) => {
     }
 }
 
+const getByServiceWithJobType = async(checklist) => {
+    console.log("model",checklist);
+    const {customer_id,service_id,job_type_id} = checklist;
+    const query = `
+    SELECT 
+    checklists.id AS checklists_id,
+    checklists.check_list_name AS check_list_name,
+    checklists.status AS status,
+    customers.id AS customer_id,
+    services.id AS service_id,
+    services.name AS service_name,
+    job_types.id AS job_type_id,
+    job_types.type AS job_type_type
+    FROM checklists 
+    JOIN 
+         customers ON customers.id = checklists.customer_id
+    JOIN 
+         services ON services.id = checklists.service_id
+    JOIN
+         job_types ON job_types.id = checklists.job_type_id
+
+    WHERE checklists.service_id = ? AND checklists.job_type_id = ? AND checklists.customer_id = ?
+    ORDER BY checklists.id DESC
+    `;
+    try {
+    const [result] = await pool.execute(query, [service_id,job_type_id , customer_id]);
+    return { status: true, message: 'checklist get successfully.', data: result };
+    }
+    catch (err) {
+        console.log(err);
+     return { status: false, message: 'Error get checklist.' };
+    }
+}
+
 
 
 module.exports = {
@@ -396,6 +430,7 @@ module.exports = {
     deleteChecklist,
     updateChecklist,
     customerGetService,
-    getClientTypeChecklist
+    getClientTypeChecklist,
+    getByServiceWithJobType
   
 };

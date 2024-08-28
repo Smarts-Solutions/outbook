@@ -32,7 +32,7 @@ const addChecklist = async (checklist) => {
 };
 
 const checklistAction = async (checklist) => {
-
+ console.log("ff",checklist);
   const {action} = checklist
   if(action === "get"){
     return jobTypeTaskModel.getChecklist(checklist);
@@ -45,6 +45,9 @@ const checklistAction = async (checklist) => {
   }
   else if(action === "getClientType"){
     return jobTypeTaskModel.getClientTypeChecklist(checklist);
+  }
+  else if(action === "getByServiceWithJobType"){
+    return jobTypeTaskModel.getByServiceWithJobType(checklist);
   }
   else{
     return { status: false, message: 'Error getting checklist.' };

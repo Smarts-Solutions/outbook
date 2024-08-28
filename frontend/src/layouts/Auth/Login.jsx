@@ -147,7 +147,7 @@ const Login = () => {
                         <div className="input-group "><input type="password" className="form-control" name="password" id="userpassword" placeholder="Enter password"
                           onChange={(e) => setPassword(e.target.value)} /></div>
                         {errorPassword ?
-                          <span  className='error-text' >{errorPassword}</span> : ""
+                          <span  className='error-text'>{errorPassword}</span> : ""
                         }
                       </div>
                       <div className="form-group row my-2 text-center">

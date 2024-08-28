@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch ,useSelector   } from 'react-redux';
-import { Staff, Competency } from '../../ReduxStore/Slice/Staff/staffSlice';
-import { Role } from '../../ReduxStore/Slice/Settings/settingSlice';
+import { Staff, Competency } from '../../../ReduxStore/Slice/Staff/staffSlice';
+import { Role } from '../../../ReduxStore/Slice/Settings/settingSlice';
 import { FormGroup, Label, Input, Row, Col, Button } from 'reactstrap';
-import Datatable from '../../Components/ExtraComponents/Datatable';
-import CommanModal from '../../Components/ExtraComponents/Modals/CommanModal';
+import Datatable from '../../../Components/ExtraComponents/Datatable';
+import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
 import sweatalert from 'sweetalert2';
-import Formicform from '../../Components/ExtraComponents/Forms/Comman.form';
+import Formicform from '../../../Components/ExtraComponents/Forms/Comman.form';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import Validation_Message from '../../Utils/Validation_Message';
+import Validation_Message from '../../../Utils/Validation_Message';
+import { Link } from 'react-router-dom';
 
 
 const StaffPage = () => {

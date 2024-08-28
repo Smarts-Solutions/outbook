@@ -65,30 +65,45 @@ export async function ADD_SERVICES(data, token) {
   }
 }
 
-
-// // Create New Customer For Update Pepper Work
+// Get All Customer Services
 export async function ADD_PEPPER_WORK(data, token) {
   try {
+
+    const formData = new FormData();
+
+    console.log("fileData:--", data);
+
+    data.fileData.forEach((file, index) => {
+      formData.append("files[]", file);
+    });
+
+
+    for (const key in data) {
+      if (key !== 'fileData' && data[key] !== undefined) {
+        formData.append(key, data[key]);
+      }
+    }
+
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
       url: `${Config.base_url}updateProcessCustomerFile`,
       headers: {
         'Authorization': token,
-        ...data
+        "Content-Type": "multipart/form-data",
       },
-      data: data
+      data: formData
     };
 
     const res = await axios.request(config);
-
-
-    return await res?.data;
-  }
-  catch (err) {
-    return await err;
+    return res?.data;
+  } catch (err) {
+    console.log("Error in ADD_PEPPER_WORK:", err);
+    return err;
   }
 }
+
+
 
 // Get All Customer KE LITE
 export async function GET_ALL_CUSTOMER(data, token) {
@@ -197,6 +212,19 @@ export async function UPDATE_JOB(data, token) {
     return await err;
   }
 }
+
+export async function GETALLCHECKLIST(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}checklistAction`, data, {
+      headers: header(token),
+      data: {}
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
 
 
 

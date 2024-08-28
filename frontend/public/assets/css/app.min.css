@@ -9443,6 +9443,9 @@ span.sidebar-icons {
   font-weight: 600;
   text-transform: none;
 }
+.datatable-container .rdt_TableCell div a {
+white-space: break-spaces;
+}
 
 .datatable-container .rdt_TableRow {
   box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
@@ -9761,12 +9764,10 @@ margin: 0px auto;
   scrollbar-width: thin;
 }
 
-.trading-details,
-.trading-details p,
-.personal-detail {
+.trading-details, .trading-details p, .personal-detail {
   font-size: 14px;
+  word-wrap: break-word;
 }
-
 .mt-minus {
   margin-top: -45px;
 }
@@ -9830,8 +9831,11 @@ thead.table-striped th,
   background-color: #fff !important;
 }
 
-body .bg-info.modal-header {
+body .bg-info.modal-header, .modal-header {
   background-color: #01afef !important;
+}
+body .bg-info.modal-header .modal-title, .modal-header .modal-title{
+  color: #fff !important;
 }
 .search-results .search-result-item {
   padding: 4px;
@@ -9894,4 +9898,39 @@ body .accordion-button:not(.collapsed)::after {
   font-size: 12px;
   padding: 0px 10px;
   margin-top: 4px;
+}
+.upload-box {
+  border: 1px dotted #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+.upload__input {
+  font-size: 100px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.upload__btn{
+  border: 2px solid #4a566e;
+  color: #4a566e;
+  background-color: white;
+  padding: 8px 20px 8px 32px;
+  font-size: 20px;
+  font-weight: bold;
+  background: url(http://annavlasenko.com/files-for-codepen/upload.png);
+  background-position: 8px 8px;
+  background-repeat: no-repeat;
+}
+.form-select:focus,.form-control:focus {
+ 
+    box-shadow: none !important;
 }

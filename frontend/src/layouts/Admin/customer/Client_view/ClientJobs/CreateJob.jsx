@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
-import { GetAllJabData, AddAllJobType } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { GetAllJabData, AddAllJobType, GET_ALL_CHECKLIST } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import sweatalert from 'sweetalert2';
 import * as bootstrap from 'bootstrap';
-
+import { JobType } from '../../../../../ReduxStore/Slice/Settings/settingSlice'
+import { Modal, Button } from 'react-bootstrap';
 
 const CreateJob = () => {
     const location = useLocation()
@@ -12,6 +13,7 @@ const CreateJob = () => {
     const token = JSON.parse(localStorage.getItem("token"));
     const dispatch = useDispatch();
     const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
+    const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] })
     const [errors, setErrors] = useState({})
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [PreparationTimne, setPreparationTimne] = useState({ hours: "", minutes: "" })
@@ -19,7 +21,18 @@ const CreateJob = () => {
     const [reviewTime, setReviewTime] = useState({ hours: "", minutes: "" })
     const [budgetedHours, setBudgetedHours] = useState({ hours: "", minutes: "" })
     const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" })
+    const [AllChecklist, setAllChecklist] = useState({ loading: false, data: [] })
+    const [AllChecklistData, setAllChecklistData] = useState({ loading: false, data: [] })
+    const [getChecklistId, setChecklistId] = useState('')
+    const [AddTaskArr, setAddTaskArr] = useState([])
+    const [showAddJobModal, setShowAddJobModal] = useState(false);
 
+
+    console.log("AddTaskArr", AddTaskArr)
+
+
+
+    const [jobModalStatus, jobModalSetStatus] = useState(false);
 
     const [jobData, setJobData] = useState({
         AccountManager: "",
@@ -67,9 +80,6 @@ const CreateJob = () => {
         InvoiceRemark: "",
     });
 
-
-
-
     useEffect(() => {
         setJobData(prevState => ({
             ...prevState,
@@ -104,12 +114,97 @@ const CreateJob = () => {
             });
 
     }
+
     useEffect(() => {
         GetJobData()
     }, []);
 
+
+    const getAllChecklist = async () => {
+        const req = { action: "getByServiceWithJobType", service_id: jobData.Service, customer_id: location.state.goto == "Customer" ? location.state.details.id : location.state.details.customer_id.id, job_type_id: jobData.JobType }
+        const data = { req: req, authToken: token }
+        await dispatch(GET_ALL_CHECKLIST(data))
+            .unwrap()
+            .then(async (response) => {
+                if (response.status) {
+                    setAllChecklist({
+                        loading: true,
+                        data: response.data
+                    })
+                } else {
+                    setAllChecklist({
+                        loading: true,
+                        data: []
+                    })
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    }
+
+    useEffect(() => {
+        getAllChecklist()
+    }, [jobData.JobType]);
+
+    const GetJobType = async () => {
+        const req = { action: "get", service_id: jobData.Service }
+        const data = { req: req, authToken: token }
+        await dispatch(JobType(data))
+            .unwrap()
+            .then(async (response) => {
+                if (response.status) {
+                    setJob_Type({
+                        loading: true,
+                        data: response.data
+                    })
+                } else {
+                    setJob_Type({
+                        loading: true,
+                        data: []
+                    })
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    }
+
+    useEffect(() => {
+        GetJobType()
+    }, [jobData.Service]);
+
+
+
+    const getChecklistData = async () => {
+        const req = { action: "getById", checklist_id: 1 }
+        const data = { req: req, authToken: token }
+        await dispatch(GET_ALL_CHECKLIST(data))
+            .unwrap()
+            .then(async (response) => {
+                if (response.status) {
+                    setAllChecklistData({
+                        loading: true,
+                        data: response.data
+                    })
+                } else {
+                    setAllChecklistData({
+                        loading: true,
+                        data: []
+                    })
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    }
+
+    useEffect(() => {
+        getChecklistData()
+    }, [getChecklistId])
+
+
     const HandleChange = (e) => {
-      
         let name = e.target.name
         let value = e.target.value
         if (name == "NumberOfTransactions" || name == "NumberOfTrialBalanceItems" || name == "Turnover") {
@@ -318,6 +413,46 @@ const CreateJob = () => {
 
 
 
+    const openJobModal = (e) => {
+
+        if (e.target.value != "") {
+            jobModalSetStatus(true)
+        }
+
+    }
+
+
+
+    const AddTask = (id) => {
+        const filterData = AllChecklistData.data.task.find((data) => data.task_id == id);
+
+        if (!filterData) {
+            return;
+        }
+
+        setAddTaskArr((prevTasks) => {
+            const taskExists = prevTasks.some((task) => task.task_id === filterData.task_id);
+
+            if (taskExists) {
+                return prevTasks;
+            } else {
+                return [...prevTasks, filterData];
+            }
+        });
+
+    };
+
+    const RemoveTask = (id) => {
+        setAddTaskArr((prevTasks) => prevTasks.filter((task) => task.task_id !== id));
+
+    }
+
+
+
+
+
+
+
 
 
 
@@ -442,15 +577,15 @@ const CreateJob = () => {
                                                                     <div className="col-lg-4 mb-3">
                                                                         <label className="form-label">Job Type</label>
                                                                         <select className="form-select mb-3 jobtype"
-                                                                            name="JobType" onChange={HandleChange} value={jobData.JobType}>
+                                                                            name="JobType" onChange={(e) => { HandleChange(e); openJobModal(e) }} value={jobData.JobType}>
                                                                             <option value="">Select Job Type</option>
-                                                                            {AllJobData.loading &&
-                                                                                AllJobData.data.job_type.map((jobtype) => (
+                                                                            {get_Job_Type.loading &&
+                                                                                get_Job_Type.data.map((jobtype) => (
                                                                                     <option
-                                                                                        value={jobtype.job_type_id}
-                                                                                        key={jobtype.job_type_id}
+                                                                                        value={jobtype.id}
+                                                                                        key={jobtype.id}
                                                                                     >
-                                                                                        {jobtype.job_type_name}
+                                                                                        {jobtype.type}
                                                                                     </option>
                                                                                 ))}
                                                                         </select>
@@ -1080,6 +1215,159 @@ const CreateJob = () => {
                                                 </div>
                                             </div>
                                         </div>
+
+
+                                        {jobModalStatus && (
+                                            <Modal show={jobModalStatus} onHide={(e) => jobModalSetStatus(false)} centered size="lg">
+                                                <Modal.Header closeButton>
+                                                    <Modal.Title>Tasks</Modal.Title>
+                                                </Modal.Header>
+                                                <Modal.Body>
+                                                    <div className="tablelist-form">
+                                                        <div className="modal-body">
+                                                            <div className="row">
+                                                                <div className="col-md-12" style={{ display: "flex" }}>
+                                                                    <div className="col-lg-6">
+                                                                        <select
+                                                                            id="search-select"
+                                                                            className="form-select mb-3"
+                                                                            aria-label="Default select example"
+                                                                            style={{ color: "#8a8c8e !important" }}
+                                                                            onChange={(e) => { setChecklistId(e.target.value) }}
+                                                                            value={getChecklistId}
+
+                                                                        >
+                                                                            <option value="">Select Checklist Name</option>
+                                                                            {
+                                                                                AllChecklist && AllChecklist.data.map((checklist) => (
+                                                                                    <option value={checklist.checklists_id} key={checklist.checklists_id}>{checklist.check_list_name}</option>
+                                                                                ))
+                                                                            }
+
+
+                                                                        </select>
+                                                                    </div>
+                                                                    <div className="col-lg-6">
+                                                                        <div className="col-sm-auto" style={{ marginLeft: 250 }}>
+                                                                            <button className="btn btn-info text-white float-end blue-btn" onClick={() => setShowAddJobModal(true)}>Add Task</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-lg-6 column" id="column1">
+                                                                    <div className="card">
+                                                                        <div className="card-body">
+                                                                            <div id="customerList">
+                                                                                <div className="table-responsive table-card mt-3 mb-1">
+                                                                                    <table
+                                                                                        className="table align-middle table-nowrap"
+                                                                                        id="customerTable"
+                                                                                    >
+                                                                                        <thead className="table-light">
+                                                                                            <tr>
+                                                                                                <th>Task Name</th>
+                                                                                                <th>Budgeted Hour</th>
+                                                                                                <th>Action</th>
+                                                                                            </tr>
+                                                                                        </thead>
+                                                                                        <tbody className="list form-check-all">
+                                                                                            {
+                                                                                                AllChecklistData && AllChecklistData.data.task.map((checklist) => (
+                                                                                                    <tr className="">
+                                                                                                        <td>{checklist.task_name} </td>
+                                                                                                        <td>{checklist.budgeted_hour} hr</td>
+                                                                                                        <td>
+                                                                                                            <div className="add">
+                                                                                                                <button className=" btn-info text-white blue-btn" onClick={() => AddTask(checklist.task_id)}>+</button>
+                                                                                                            </div>
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                ))
+                                                                                            }
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-lg-6 " id="column2">
+                                                                    <div className="card">
+                                                                        <div className="card-body">
+                                                                            <div id="customerList">
+                                                                                <div className="table-responsive table-card mt-3 mb-1">
+                                                                                    <table
+                                                                                        className="table align-middle table-nowrap"
+                                                                                        id="customerTable"
+                                                                                    >
+                                                                                        <thead className="table-light">
+                                                                                            <tr>
+                                                                                                <th>Task Name</th>
+                                                                                                <th>Budgeted Hour</th>
+                                                                                                <th>Action</th>
+                                                                                            </tr>
+                                                                                        </thead>
+                                                                                        <tbody className="list form-check-all">
+                                                                                            {
+                                                                                                AddTaskArr && AddTaskArr.map((checklist) => (
+
+                                                                                                    <tr className="">
+                                                                                                        {console.log("checklist", checklist)}
+                                                                                                        <td>{checklist.task_name} </td>
+                                                                                                        <td>{checklist.budgeted_hour} hr</td>
+                                                                                                        <td>
+                                                                                                            <div className="add">
+                                                                                                                <button class="delete-icon"><i class="ti-trash" onClick={() => RemoveTask(checklist.task_id)}></i></button>
+                                                                                                            </div>
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                ))
+                                                                                            }
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </Modal.Body>
+                                            </Modal>
+                                        )}
+
+                                        {showAddJobModal && (
+                                            <Modal show={showAddJobModal} onHide={(e) => setShowAddJobModal(false)} centered size="sm">
+                                                <Modal.Header closeButton>
+                                                    <Modal.Title>Add Task</Modal.Title>
+                                                </Modal.Header>
+                                                <Modal.Body>
+                                                    <div className='row'>
+                                                        <div className='col-lg-12'>
+                                                            <label className="form-label">Task Name</label>
+                                                            <div>
+                                                                <input type="text" placeholder="Enter Task name" className='p-1 w-100 mb-2 rounded' />
+                                                            </div>
+                                                        </div>
+                                                        <div className='col-lg-12'>
+                                                            <label className="form-label">Budgeted Hour</label>
+                                                            <div>
+                                                                <input type="text" placeholder='Enter Budgeted Hour' className='p-1 mb-2 w-100 rounded' />
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </Modal.Body>
+                                                <Modal.Footer>
+                                                    <Button variant="secondary">Close</Button>
+                                                    <Button variant="btn btn-info text-white float-end blue-btn">Add</Button>
+                                                </Modal.Footer>
+                                            </Modal>
+                                        )}
+
+
+
+
                                         <div className="hstack gap-2 justify-content-end">
 
                                             <button type="button" className="btn btn-info text-white float-end blue-btn" onClick={handleSubmit}>Add Job</button>

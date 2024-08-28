@@ -4,9 +4,9 @@ import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
 import { JobType } from '../../../../ReduxStore/Slice/Settings/settingSlice'
 import { useDispatch } from 'react-redux';
-import { Edit_Customer } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
-
-
+ 
+import { ADD_SERVICES_CUSTOMERS } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
+ 
 
 const Engagement = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
@@ -262,7 +262,7 @@ const Engagement = () => {
      
 
     for (let i = 0; i < checkboxStates.length; i++) {
-      console.log("i", checkboxStates[i])
+    
       if (checkboxStates[i] == 1 && !validations[i]()) {
 
         return;
@@ -323,10 +323,10 @@ const Engagement = () => {
         customised_pricing_data: jobEntries
       };
     }
-
+    
 
     const data = { req: req, authToken: token }
-    await dispatch(Edit_Customer(data))
+    await dispatch(ADD_SERVICES_CUSTOMERS(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
@@ -677,9 +677,10 @@ const Engagement = () => {
             </div>
 
             <div className="form__item button__items d-flex justify-content-between">
-              <Button className="white-btn" type="default" onClick={prev}>
-                Back
+              <Button className="btn btn-secondary" type="default" onClick={prev}>
+              <i className="pe-2 fa-regular fa-arrow-left-long"></i> Previous
               </Button>
+              
               <Button className="btn btn-info text-white blue-btn" onClick={handleSubmit}>
                 Next
               </Button>
