@@ -597,11 +597,11 @@ const CreateClient = () => {
     return (
         <div>
             <div className="container-fluid mt-4">
-
+               
                 <div className="row">
                     <div className="col-xl-12">
                         <div className="card">
-                            <div className="card-header">
+                            <div className="card-header step-header-blue">
                                 <h4 className="card-title mb-0">Create New Client</h4>
                             </div>
                             {/* end card header */}
@@ -750,9 +750,16 @@ const CreateClient = () => {
 
                                                                                     </div>
                                                                                 </div>
-                                                                                <h4 className="card-title mb-3 border-bottom flex-grow-1 fs-14 mb-2">
+                                                                                </div>
+                                                                                </div>
+                                                                                </div>
+                                                                                <div className='card'>
+                                                                                <div className='card-header card-header-light-blue'>
+                                                                                <h4 className="card-title mb-0 fs-16 ">
                                                                                     Sole Trader Details
                                                                                 </h4>
+                                                                                </div>
+                                                                                <div className='card-body row'>
                                                                                 <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label"  >First Name<span style={{ color: "red" }}>*</span></label>
@@ -785,7 +792,7 @@ const CreateClient = () => {
                                                                                     <div class="mb-3">
                                                                                         <label for="firstNameinput" class="form-label">Phone</label>
                                                                                         <div class="row">
-                                                                                            <div class="col-md-4">
+                                                                                            <div class="col-md-4 pe-0">
                                                                                                 <select class="form-select" onChange={(e) => handleChange1(e)} name="phone_code"
                                                                                                     value={getSoleTraderDetails.phone_code}
                                                                                                 >
@@ -796,7 +803,7 @@ const CreateClient = () => {
                                                                                                     ))}
                                                                                                 </select>
                                                                                             </div>
-                                                                                            <div className="mb-3 col-md-8">
+                                                                                            <div className="mb-3 col-md-8 ps-1">
                                                                                                 <input type="text" className="form-control"
                                                                                                     placeholder="Phone Number"
                                                                                                     name="phone"
@@ -845,7 +852,7 @@ const CreateClient = () => {
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
+                                                           
                                                             :
                                                             selectClientType == 2 ?
                                                                 <div className="row">
@@ -1140,7 +1147,7 @@ const CreateClient = () => {
                                                                                                                 <div class="mb-3">
                                                                                                                     <label for="firstNameinput" class="form-label">Phone</label>
                                                                                                                     <div class="row">
-                                                                                                                        <div class="col-md-4">
+                                                                                                                        <div class="col-md-4 pe-0">
                                                                                                                             <select class="form-select" onChange={(e) => handleChange(e)} name="phone_code"
                                                                                                                                 value={getSoleTraderDetails.phone_code}
                                                                                                                             >
@@ -1151,7 +1158,7 @@ const CreateClient = () => {
                                                                                                                                 ))}
                                                                                                                             </select>
                                                                                                                         </div>
-                                                                                                                        <div className="mb-3 col-md-8">
+                                                                                                                        <div className="mb-3 col-md-8 ps-1">
                                                                                                                             <input type="number"
                                                                                                                                 className="form-control"
                                                                                                                                 placeholder="Phone Number"
@@ -1186,8 +1193,8 @@ const CreateClient = () => {
                                                                                                     </div>
                                                                                                 </div>
                                                                                             ))}
-                                                                                            <div className="card-header d-flex align-items-center">
-                                                                                                <h5 className="card-title mb-0 flex-grow-1"></h5>
+                                                                                            <div className="justify-content-end d-flex align-items-center">
+                                                                                               
                                                                                                 <button className="btn btn-info text-white blue-btn" onClick={handleAddContact}>
                                                                                                     Add Contact
                                                                                                 </button>
@@ -1392,7 +1399,7 @@ const CreateClient = () => {
                                                                                                                 <div class="mb-3">
                                                                                                                     <label className="form-label">Phone</label>
                                                                                                                     <div class="row">
-                                                                                                                        <div class="col-md-4">
+                                                                                                                        <div class="col-md-4 pe-0">
                                                                                                                             <select class="form-select"
                                                                                                                                 onChange={(e) => handleChange4(index, 'phone_code', e.target.value)}
                                                                                                                                 name="phone_code"
@@ -1405,7 +1412,7 @@ const CreateClient = () => {
                                                                                                                                 ))}
                                                                                                                             </select>
                                                                                                                         </div>
-                                                                                                                        <div className="mb-3 col-md-8">
+                                                                                                                        <div className="mb-3 col-md-8 ps-1">
                                                                                                                             <input type="text" className="form-control"
                                                                                                                                 placeholder="Phone Number"
                                                                                                                                 name="phone"
@@ -1425,7 +1432,7 @@ const CreateClient = () => {
                                                                                                             <div class="mb-3">
                                                                                                                 <label className="form-label">Alternate Phone Number</label>
                                                                                                                 <div class="row">
-                                                                                                                    <div class="col-md-4">
+                                                                                                                    <div class="col-md-4 pe-0">
                                                                                                                         <select class="form-select"
                                                                                                                             onChange={(e) => handleChange4(index, 'alternate_phone_code', e.target.value)}
                                                                                                                             name="alternate_phone_code"
@@ -1438,7 +1445,7 @@ const CreateClient = () => {
                                                                                                                             ))}
                                                                                                                         </select>
                                                                                                                     </div>
-                                                                                                                    <div className="mb-3 col-md-8">
+                                                                                                                    <div className="mb-3 col-md-8 ps-1">
                                                                                                                         <input type="number" className="form-control" placeholder=" Alternate Phone"
                                                                                                                             name="alternate_phone" value={contacts1.alternate_phone} onChange={(e) => handleChange4(index, 'alternate_phone', e.target.value)}
                                                                                                                         />
@@ -1476,8 +1483,7 @@ const CreateClient = () => {
                                                                                                 </div>
                                                                                                 </div>
                                                                                             ))}
-                                                                                        <div className="card-header d-flex align-items-center">
-                                                                                            <h5 className="card-title mb-0 flex-grow-1"></h5>
+                                                                                        <div className=" d-flex align-items-center justify-content-end">
                                                                                             <div>
                                                                                                 <button className="btn btn-info text-white blue-btn" onClick={handleAddContact1}>Add Partner</button>
                                                                                             </div>
@@ -1493,7 +1499,7 @@ const CreateClient = () => {
                                         </section>
                                     </div>
                                     <div className="hstack gap-2 justify-content-end">
-                                        <button type="button" className="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                                         <button className="btn btn-info text-white blue-btn" onClick={handleSubmit}>Create Client</button>
                                     </div>
                                 </div>

@@ -698,8 +698,8 @@ const ClientEdit = () => {
                 <div className="row">
                     <div className="col-xl-12">
                         <div className="card">
-                            <div className="card-header d-flex justify-content-between">
-                                <h4 className="card-title mb-0">Edit Client</h4>
+                            <div className="card-header align-items-center step-header-blue d-flex justify-content-between">
+                                <h4 className="card-title  mb-0">Edit Client</h4>
                                 <button type="button" className="btn btn-info text-white blue-btn" onClick={HandleCancel}>Back</button>
                             </div>
 
@@ -715,7 +715,7 @@ const ClientEdit = () => {
                                         >
                                             <div>
                                                 <div className="row">
-                                                    <div className="col-lg-7">
+                                                    <div className="col-lg-12">
                                                         <div className="card card_shadow">
                                                             <div className="card-body">
                                                                 <div className="row">
@@ -752,15 +752,15 @@ const ClientEdit = () => {
 
                                                                 <div className="col-lg-12">
                                                                     <div className="card card_shadow ">
-                                                                        <div className="card-header align-items-center d-flex">
-                                                                            <h4 className="card-title mb-0 flex-grow-1">
+                                                                        <div className="card-header card-header-light-blue align-items-center d-flex">
+                                                                            <h4 className="card-title fs-16 mb-0 fs-16">
                                                                                 Sole Trader
                                                                             </h4>
                                                                         </div>
                                                                         {/* end card header */}
                                                                         <div className="card-body">
                                                                             <div className="row">
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label">Client Industry</label>
                                                                                         <select className="form-select mb-3" aria-label="Default select example"
@@ -777,7 +777,7 @@ const ClientEdit = () => {
 
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label">Trading Name<span style={{ color: "red" }}>*</span></label>
                                                                                         <input type="text" name="tradingName" className="form-control" placeholder="Trading Name"
@@ -790,7 +790,7 @@ const ClientEdit = () => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label">Trading Address<span style={{ color: "red" }}>*</span></label>
                                                                                         <input type="text" className="form-control" placeholder="Trading Address" name="tradingAddress"
@@ -803,7 +803,7 @@ const ClientEdit = () => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label" >VAT Registered</label>
                                                                                         <select className="form-select mb-3" aria-label="Default select example"
@@ -822,7 +822,7 @@ const ClientEdit = () => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label">VAT Number<span style={{ color: "red" }}>*</span></label>
                                                                                         <input type="text" className="form-control" placeholder="VAT Number"
@@ -834,7 +834,7 @@ const ClientEdit = () => {
 
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label">Website<span style={{ color: "red" }}>*</span></label>
                                                                                         <input type="text" className="form-control"
@@ -848,10 +848,16 @@ const ClientEdit = () => {
 
                                                                                     </div>
                                                                                 </div>
-                                                                                <h4 className="card-title mb-0 flex-grow-1" style={{ marginBottom: "15px !important" }}>
-                                                                                    Sole Trader Details
-                                                                                </h4>
-                                                                                <div className="col-lg-3">
+                                                                                </div>
+                                                                                </div>
+                                                                                </div>
+                                                                                <div className="card ">
+                                                                                    <div className="card-header card-header-light-blue ">
+                                                                                        <h4 className="card-title fs-16 mb-0">Sole Trader Details</h4>
+                                                                                        </div>
+                                                                                <div className="card-body row">
+                                                                               
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label"  >First Name<span style={{ color: "red" }}>*</span></label>
                                                                                         <input type="text" className="form-control"
@@ -866,7 +872,7 @@ const ClientEdit = () => {
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label" >Last Name<span style={{ color: "red" }}>*</span></label>
                                                                                         <input type="text" className="form-control" placeholder="Last Name"
@@ -886,7 +892,7 @@ const ClientEdit = () => {
                                                                                     <div class="mb-3">
                                                                                         <label for="firstNameinput" class="form-label">Phone</label>
                                                                                         <div class="row">
-                                                                                            <div class="col-md-4">
+                                                                                            <div class="col-md-4 pe-0">
                                                                                                 <select class="form-select" onChange={(e) => handleChange1(e)} name="phone_code"
                                                                                                     value={getSoleTraderDetails.phone_code}
                                                                                                 >
@@ -897,7 +903,7 @@ const ClientEdit = () => {
                                                                                                     ))}
                                                                                                 </select>
                                                                                             </div>
-                                                                                            <div className="mb-3 col-md-8">
+                                                                                            <div className="mb-3 col-md-8 ps-1">
                                                                                                 <input type="text" className="form-control"
                                                                                                     placeholder="Phone Number"
                                                                                                     name="phone"
@@ -914,7 +920,7 @@ const ClientEdit = () => {
                                                                                     </div>
                                                                                 </div>
 
-                                                                                <div className="col-lg-3">
+                                                                                <div className="col-lg-4">
                                                                                     <div className="mb-3">
                                                                                         <label className="form-label" >Email<span style={{ color: "red" }}>*</span></label>
                                                                                         <input type="text" className="form-control" placeholder="Enter Email ID"
@@ -945,21 +951,21 @@ const ClientEdit = () => {
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
+                                                            
                                                             :
                                                             selectClientType == 2 ?
                                                                 <div className="row">
                                                                     <div className="col-lg-12">
                                                                         <div className="card card_shadow ">
-                                                                            <div className="card-header align-items-center d-flex">
-                                                                                <h4 className="card-title mb-0 flex-grow-1">Company</h4>
+                                                                            <div className="card-header card-header-light-blue align-items-center d-flex">
+                                                                                <h4 className="card-title fs-16 mb-0 flex-grow-1">Company</h4>
                                                                             </div>
                                                                             {/* end card header */}
                                                                             <div className="card-body">
                                                                                 <div className="row">
 
                                                                                     <div className="row">
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <div className='position-relative'>
                                                                                                     <label className="form-label">Search Company</label>
@@ -984,7 +990,7 @@ const ClientEdit = () => {
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label" >Company Name<span style={{ color: "red" }}>*</span>  </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Outbooks Quality & Certainty LTD"
@@ -997,7 +1003,7 @@ const ClientEdit = () => {
 
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Entity Type<span style={{ color: "red" }}>*</span>   </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="LTD"
@@ -1007,7 +1013,7 @@ const ClientEdit = () => {
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  >Company Status<span style={{ color: "red" }}>*</span> </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Active"
@@ -1016,7 +1022,7 @@ const ClientEdit = () => {
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['CompanyStatus']}</div>)}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Company Number<span style={{ color: "red" }}>*</span></label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Company Number"
@@ -1024,6 +1030,17 @@ const ClientEdit = () => {
                                                                                                 />
                                                                                                 {errors2['CompanyNumber'] && (
                                                                                                     <div style={{ 'color': 'red' }}>{errors2['CompanyNumber']}</div>
+                                                                                                )}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div className="col-lg-4">
+                                                                                            <div className="mb-3">
+                                                                                                <label className="form-label">Incorporation Date</label>
+                                                                                                <input type="text" className="form-control input_bg" placeholder="07-01-2023"
+                                                                                                    name="IncorporationDate" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationDate} disabled
+                                                                                                />
+                                                                                                {errors2['IncorporationDate'] && (
+                                                                                                    <div style={{ 'color': 'red' }}>{errors2['IncorporationDate']}</div>
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
@@ -1038,18 +1055,8 @@ const ClientEdit = () => {
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
-                                                                                            <div className="mb-3">
-                                                                                                <label className="form-label">Incorporation Date</label>
-                                                                                                <input type="text" className="form-control input_bg" placeholder="07-01-2023"
-                                                                                                    name="IncorporationDate" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationDate} disabled
-                                                                                                />
-                                                                                                {errors2['IncorporationDate'] && (
-                                                                                                    <div style={{ 'color': 'red' }}>{errors2['IncorporationDate']}</div>
-                                                                                                )}
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <div className="col-lg-3">
+                                                                                      
+                                                                                        <div className="col-lg-6">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  > Incorporation in  <span style={{ color: "red" }}>*</span> </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Please Enter Incorporation In"
@@ -1061,7 +1068,7 @@ const ClientEdit = () => {
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  >VAT Registered</label>
                                                                                                 <select className="form-select mb-3" name="VATRegistered" onChange={(e) => handleChange2(e)} value={getCompanyDetails.VATRegistered}>
@@ -1074,7 +1081,7 @@ const ClientEdit = () => {
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3" >
+                                                                                        <div className="col-lg-4" >
                                                                                             <div className="mb-3">
                                                                                                 <div className="mb-3">
                                                                                                     <label className="form-label">VAT Number</label>
@@ -1088,7 +1095,7 @@ const ClientEdit = () => {
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Website</label>
                                                                                                 <input type="text" className="form-control " placeholder="URL"
@@ -1159,8 +1166,8 @@ const ClientEdit = () => {
                                                                     <div className="row">
                                                                         <div className="col-lg-12">
                                                                             <div className="card card_shadow">
-                                                                                <div className="card-header align-items-center d-flex">
-                                                                                    <h4 className="card-title mb-0 flex-grow-1">
+                                                                                <div className="card-header card-header-light-blue align-items-center d-flex">
+                                                                                    <h4 className="card-title fs-16 mb-0 flex-grow-1">
                                                                                         Officer Details
                                                                                     </h4>
                                                                                 </div>
@@ -1184,7 +1191,7 @@ const ClientEdit = () => {
                                                                                                                     </div>
                                                                                                                 </div>
                                                                                                             )}
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label htmlFor={`first_name-${index}`} className="form-label">
                                                                                                                         First Name<span style={{ color: 'red' }}>*</span>
@@ -1203,7 +1210,7 @@ const ClientEdit = () => {
                                                                                                                     )}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label htmlFor={`last_name-${index}`} className="form-label">
                                                                                                                         Last Name<span style={{ color: 'red' }}>*</span>
@@ -1222,7 +1229,7 @@ const ClientEdit = () => {
                                                                                                                     )}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label htmlFor={`customer_contact_person_role_id-${index}`} className="form-label">
                                                                                                                         Role<span style={{ color: 'red' }}>*</span>
@@ -1252,7 +1259,7 @@ const ClientEdit = () => {
                                                                                                                 <div class="mb-3">
                                                                                                                     <label for="firstNameinput" class="form-label">Phone</label>
                                                                                                                     <div class="row">
-                                                                                                                        <div class="col-md-4">
+                                                                                                                        <div class="col-md-4 pe-0">
                                                                                                                             <select class="form-select"
                                                                                                                                 onChange={(e) => handleChange(index, 'phone_code', e.target.value)}
                                                                                                                                 name="phone_code"
@@ -1265,7 +1272,7 @@ const ClientEdit = () => {
                                                                                                                                 ))}
                                                                                                                             </select>
                                                                                                                         </div>
-                                                                                                                        <div className="mb-3 col-md-8">
+                                                                                                                        <div className="mb-3 col-md-8 ps-1">
                                                                                                                             <input
                                                                                                                                 type="number"
                                                                                                                                 className="form-control"
@@ -1286,7 +1293,7 @@ const ClientEdit = () => {
 
 
  
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label htmlFor={`email-${index}`} className="form-label">
                                                                                                                         Email<span style={{ color: 'red' }}>*</span>
@@ -1308,8 +1315,8 @@ const ClientEdit = () => {
                                                                                                     </div>
                                                                                                 </div>
                                                                                             ))}
-                                                                                            <div className="card-header d-flex align-items-center">
-                                                                                                <h5 className="card-title mb-0 flex-grow-1"></h5>
+                                                                                            <div className="justify-content-end d-flex align-items-center">
+                                                                                               
                                                                                                 <button className="btn btn-info text-white blue-btn" onClick={handleAddContact}>
                                                                                                     Add Contact
                                                                                                 </button>
@@ -1327,13 +1334,13 @@ const ClientEdit = () => {
                                                                     <div className="row " >
                                                                         <div className="col-lg-12">
                                                                             <div className="card card_shadow ">
-                                                                                <div className="card-header align-items-center d-flex">
-                                                                                    <h4 className="card-title mb-0 flex-grow-1">Partnership</h4>
+                                                                                <div className="card-header card-header-light-blue align-items-center d-flex">
+                                                                                    <h4 className="card-title fs-16 mb-0 flex-grow-1">Partnership</h4>
                                                                                 </div>
                                                                                 {/* end card header */}
                                                                                 <div className="card-body">
                                                                                     <div className="row">
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Client Industry</label>
                                                                                                 <select className="form-select mb-3"
@@ -1351,7 +1358,7 @@ const ClientEdit = () => {
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Trading Name<span style={{ color: "red" }}>*</span></label>
                                                                                                 <input type="text" className="form-control" placeholder="Trading Name"
@@ -1362,7 +1369,7 @@ const ClientEdit = () => {
                                                                                                     <div style={{ 'color': 'red' }}>{errors3['TradingName']}</div>)}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Trading Address<span style={{ color: "red" }}>*</span> </label>
                                                                                                 <input type="text" className="form-control" placeholder="Trading Address"
@@ -1373,7 +1380,7 @@ const ClientEdit = () => {
                                                                                                     <div style={{ 'color': 'red' }}>{errors3['TradingAddress']}</div>)}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <div className="mb-3">
                                                                                                     <label className="form-label">VAT Registered</label>
@@ -1390,7 +1397,7 @@ const ClientEdit = () => {
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <div className="mb-3">
                                                                                                     <label className="form-label"> VAT Number</label>
@@ -1403,7 +1410,7 @@ const ClientEdit = () => {
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-3">
+                                                                                        <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">
                                                                                                     Website
@@ -1424,8 +1431,8 @@ const ClientEdit = () => {
                                                                         <div className="row">
                                                                             <div className="col-lg-12">
                                                                                 <div className="card card_shadow">
-                                                                                    <div className="card-header align-items-center d-flex">
-                                                                                        <h4 className="card-title mb-0 flex-grow-1">
+                                                                                    <div className="card-header card-header-light-blue align-items-center d-flex">
+                                                                                        <h4 className="card-title fs-16 mb-0 flex-grow-1">
                                                                                             Contact Details
                                                                                         </h4>
                                                                                     </div>
@@ -1589,7 +1596,7 @@ const ClientEdit = () => {
                                                                                                                     </div>
                                                                                                                 </div>
                                                                                                             </div> 
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label">Email<span style={{ color: "red" }}>*</span></label>
                                                                                                                     <input
@@ -1605,7 +1612,7 @@ const ClientEdit = () => {
                                                                                                                     )}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div className="col-lg-3">
+                                                                                                            <div className="col-lg-4">
                                                                                                                 <div className="mb-3">
                                                                                                                     <label className="form-label">Alternate Email<span style={{ color: "red" }}>*</span></label>
                                                                                                                     <input
@@ -1626,8 +1633,8 @@ const ClientEdit = () => {
                                                                                                 </div>
                                                                                             ))}
 
-                                                                                            <div className="card-header d-flex align-items-center">
-                                                                                                <h5 className="card-title mb-0 flex-grow-1"></h5>
+                                                                                            <div className="justify-content-end d-flex align-items-center">
+                                                                                                
                                                                                                 <div>
                                                                                                     <button className="btn btn-info text-white blue-btn" onClick={handleAddContact1}>Add Partner</button>
                                                                                                 </div>
@@ -1643,7 +1650,7 @@ const ClientEdit = () => {
                                                 </section>
                                             </div>
                                             <div className="hstack gap-2 justify-content-end">
-                                                <button type="button" className="btn btn-light" onClick={HandleCancel}>Cancel</button>
+                                                <button type="button" className="btn btn-secondary" onClick={HandleCancel}>Cancel</button>
                                                 <button className="btn btn-info text-white blue-btn" onClick={handleUpdate}>Update Client</button>
                                             </div>
                                         </div>

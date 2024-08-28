@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import { useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import Sidebar from '../Components/Dashboard/Sidebar';
@@ -41,7 +42,15 @@ const Admin_Route = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
 
+  const { pathname } = useLocation();
 
+  useEffect(() => {
+    window.scroll({
+      top: 0,
+      left: 0,
+      behavior: 'smooth' // Smooth transition ke liye behavior 'smooth' set karein
+    });
+  }, [pathname]);
   const accessDataFetch = async () => {
     try {
       const response = await dispatch(RoleAccess({ req: { "role_id": staffDetails.role_id, "action": "get" }, authToken: token })).unwrap();
