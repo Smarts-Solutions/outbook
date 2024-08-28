@@ -25,12 +25,12 @@ const CreateJob = () => {
     const [AllChecklistData, setAllChecklistData] = useState({ loading: false, data: [] })
     const [getChecklistId, setChecklistId] = useState('')
     const [AddTaskArr, setAddTaskArr] = useState([])
-    const [showAddJobModal, setShowAddJobModal] = useState(true);
+    const [showAddJobModal, setShowAddJobModal] = useState(false);
 
 
     console.log("AddTaskArr", AddTaskArr)
 
- 
+
 
     const [jobModalStatus, jobModalSetStatus] = useState(false);
 
@@ -204,7 +204,7 @@ const CreateJob = () => {
 
 
     const HandleChange = (e) => {
- 
+
         let name = e.target.name
         let value = e.target.value
         if (name == "NumberOfTransactions" || name == "NumberOfTrialBalanceItems" || name == "Turnover") {
@@ -414,46 +414,46 @@ const CreateJob = () => {
 
 
     const openJobModal = (e) => {
-        
+
         if (e.target.value != "") {
             jobModalSetStatus(true)
         }
 
     }
 
-    
-    
+
+
     const AddTask = (id) => {
-        const filterData = AllChecklistData.data.task.find((data) => data.task_id == id);  
-    
+        const filterData = AllChecklistData.data.task.find((data) => data.task_id == id);
+
         if (!filterData) {
-            return;  
+            return;
         }
-    
-        setAddTaskArr((prevTasks) => { 
+
+        setAddTaskArr((prevTasks) => {
             const taskExists = prevTasks.some((task) => task.task_id === filterData.task_id);
-    
+
             if (taskExists) {
-                return prevTasks;  
+                return prevTasks;
             } else {
-                return [...prevTasks, filterData];  
+                return [...prevTasks, filterData];
             }
         });
-    
+
     };
-  
+
     const RemoveTask = (id) => {
-        setAddTaskArr((prevTasks) => prevTasks.filter((task) => task.task_id !== id));  
-    
+        setAddTaskArr((prevTasks) => prevTasks.filter((task) => task.task_id !== id));
+
     }
 
-     
-     
-    
-    
-     
-      
-    
+
+
+
+
+
+
+
 
 
 
@@ -1249,10 +1249,7 @@ const CreateJob = () => {
                                                                     </div>
                                                                     <div className="col-lg-6">
                                                                         <div className="col-sm-auto" style={{ marginLeft: 250 }}>
-                                                                            <a id="open-add-task-modal" className="btn btn-success add-btn">
-                                                                                <i className="ri-add-fill align-bottom me-1" onClick={()=>setShowAddJobModal(true)}/>
-                                                                                Add Task
-                                                                            </a>
+                                                                            <button className="btn btn-info text-white float-end blue-btn" onClick={() => setShowAddJobModal(true)}>Add Task</button>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -1280,7 +1277,7 @@ const CreateJob = () => {
                                                                                                         <td>{checklist.budgeted_hour} hr</td>
                                                                                                         <td>
                                                                                                             <div className="add">
-                                                                                                                <button className="btn btn-sm btn-success add-item-btn" onClick={()=>AddTask(checklist.task_id)}>+</button>
+                                                                                                                <button className=" btn-info text-white blue-btn" onClick={() => AddTask(checklist.task_id)}>+</button>
                                                                                                             </div>
                                                                                                         </td>
                                                                                                     </tr>
@@ -1312,14 +1309,14 @@ const CreateJob = () => {
                                                                                         <tbody className="list form-check-all">
                                                                                             {
                                                                                                 AddTaskArr && AddTaskArr.map((checklist) => (
-                                                                                                 
+
                                                                                                     <tr className="">
-                                                                                                           {console.log("checklist",checklist)}
+                                                                                                        {console.log("checklist", checklist)}
                                                                                                         <td>{checklist.task_name} </td>
                                                                                                         <td>{checklist.budgeted_hour} hr</td>
                                                                                                         <td>
                                                                                                             <div className="add">
-                                                                                                            <button class="delete-icon"><i class="ti-trash" onClick={()=>RemoveTask(checklist.task_id)}></i></button>
+                                                                                                                <button class="delete-icon"><i class="ti-trash" onClick={() => RemoveTask(checklist.task_id)}></i></button>
                                                                                                             </div>
                                                                                                         </td>
                                                                                                     </tr>
@@ -1341,13 +1338,31 @@ const CreateJob = () => {
 
                                         {showAddJobModal && (
                                             <Modal show={showAddJobModal} onHide={(e) => setShowAddJobModal(false)} centered size="sm">
-                                            <Modal.Header closeButton>
-                                                <Modal.Title>Tasks</Modal.Title>
-                                            </Modal.Header>
-                                            <Modal.Body>
-                                                cpppp
-                                            </Modal.Body>
-                                        </Modal>
+                                                <Modal.Header closeButton>
+                                                    <Modal.Title>Add Task</Modal.Title>
+                                                </Modal.Header>
+                                                <Modal.Body>
+                                                    <div className='row'>
+                                                        <div className='col-lg-12'>
+                                                            <label className="form-label">Task Name</label>
+                                                            <div>
+                                                                <input type="text" placeholder="Enter Task name" className='p-1 w-100 mb-2 rounded' />
+                                                            </div>
+                                                        </div>
+                                                        <div className='col-lg-12'>
+                                                            <label className="form-label">Budgeted Hour</label>
+                                                            <div>
+                                                                <input type="text" placeholder='Enter Budgeted Hour' className='p-1 mb-2 w-100 rounded' />
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </Modal.Body>
+                                                <Modal.Footer>
+                                                    <Button variant="secondary">Close</Button>
+                                                    <Button variant="btn btn-info text-white float-end blue-btn">Add</Button>
+                                                </Modal.Footer>
+                                            </Modal>
                                         )}
 
 
