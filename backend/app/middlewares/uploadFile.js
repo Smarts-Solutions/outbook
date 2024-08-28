@@ -33,6 +33,6 @@ const storage = multer.diskStorage({
 const uploadFile = multer({ storage: storage, fileFilter: Filter });
 
 // Middleware to handle multiple files
-const uploadMultiple = uploadFile.array('files', 20); // 'files' is the field name, 5 is the max file count
+const uploadMultiple = uploadFile.array('files[]', 20); // 'files' is the field name, 5 is the max file count
 
 module.exports = uploadMultiple;

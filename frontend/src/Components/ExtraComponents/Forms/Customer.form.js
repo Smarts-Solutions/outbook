@@ -47,7 +47,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         htmlFor={field.name}
                       >
                         {field.label}
-                        {/* <span className="text-danger">*</span> */}
+                      
                       </label>
                       <div
                         className={`col-lg-${title === "addgroup" ? 12 : 12}`}

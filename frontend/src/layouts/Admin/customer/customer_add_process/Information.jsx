@@ -167,7 +167,7 @@ const Information = () => {
       else if (values.Website && values.Website.length > 200) {
         errors.Website = "Website cannot exceed 200 characters";
       }
-      else if (!values.Trading_Name) {
+      else if (!values.Trading_Name.trim()) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
       //  else if (!values.Trading_Address) {
@@ -260,10 +260,10 @@ const Information = () => {
         setAccountMangerIdErr("Please select an Account Manager")
         return
       }
-      if (!values.Trading_Name) {
+      if (!values.Trading_Name.trim()) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
-      if (values.Trading_Name && values.Trading_Name.length > 100) {
+      if (values.Trading_Name && values.Trading_Name.trim().length > 100) {
         errors.Trading_Name = "Trading Name cannot exceed 100 characters";
       }
       if(values.Phone && values.Phone.toString().length > 12){
@@ -372,7 +372,7 @@ const Information = () => {
         return
       }
 
-      if (!values.Trading_Name) {
+      if (!values.Trading_Name.trim()) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
 

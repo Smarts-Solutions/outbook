@@ -73,7 +73,7 @@ export const ADD_PEPPER_WORKS = createAsyncThunk("updateProcessCustomerFile", as
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const updatedReq = { ...req, ip: IP_Data.data.ip,customer_id:data.customer_id, StaffUserId: StaffUserId.id };
     const res = await ADD_PEPPER_WORK(updatedReq, authToken);
 
 
