@@ -110,8 +110,7 @@ const StaffPage = () => {
         { id: 'this-6-months', label: 'This 6 months' },
         { id: 'last-6-months', label: 'Last 6 months' },
         { id: 'this-year', label: 'This year' },
-        { id: 'last-year', label: 'Last year' },
-        { id: 'custom', label: 'Custom' },
+        { id: 'last-year', label: 'Last year' }
     ];
 
     const columns = [
