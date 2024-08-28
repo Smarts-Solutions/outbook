@@ -9830,8 +9830,11 @@ thead.table-striped th,
   background-color: #fff !important;
 }
 
-body .bg-info.modal-header {
+body .bg-info.modal-header, .modal-header {
   background-color: #01afef !important;
+}
+body .bg-info.modal-header .modal-title, .modal-header .modal-title{
+  color: #fff !important;
 }
 .search-results .search-result-item {
   padding: 4px;
@@ -9894,4 +9897,35 @@ body .accordion-button:not(.collapsed)::after {
   font-size: 12px;
   padding: 0px 10px;
   margin-top: 4px;
+}
+.upload-box {
+  border: 1px dotted #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+.upload__input {
+  font-size: 100px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.upload__btn{
+  border: 2px solid #4a566e;
+  color: #4a566e;
+  background-color: white;
+  padding: 8px 20px 8px 32px;
+  font-size: 20px;
+  font-weight: bold;
+  background: url(http://annavlasenko.com/files-for-codepen/upload.png);
+  background-position: 8px 8px;
+  background-repeat: no-repeat;
 }
