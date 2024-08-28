@@ -47,10 +47,11 @@ const Paper = () => {
     const GetCustomerData = async () => {
         const req = { customer_id: location.state.id, pageStatus: "4" };
         const data1 = { req: req, authToken: token };
-
+        console.log("data1",data1)
         await dispatch(GET_CUSTOMER_DATA(data1))
             .unwrap()
             .then((response) => {
+                console.log("response.status",response)
                 if (response.status) {
                     const existingFiles = response.data.customer_paper_work || [];
                     setCustomerDetails({
