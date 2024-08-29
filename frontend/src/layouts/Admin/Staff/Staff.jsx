@@ -458,7 +458,7 @@ const StaffPage = () => {
                                         <th className="" data-="customer_name">
                                             Company Name
                                         </th>
-                                        {/* <th class="" data-="customer_name">Access</th> */}
+                                  
                                         <th className="tabel_left" data-="action">
                                             Action
                                         </th>
@@ -466,9 +466,9 @@ const StaffPage = () => {
                                 </thead>
                                 <tbody className="list form-check-all">
                                     <tr className="tabel_new">
-                                        {/* <td class="id" style="display:none;"><a href="javascript:void(0);" class="fw-medium link-primary">#VZ2101</a></td> */}
+                                    
                                         <td>Outbooks Outsourcing Pvt Ltd</td>
-                                        {/* <td>VAT Return</td> */}
+                                     
                                         <td className="tabel_left">
                                             <div className=" gap-2">
                                                 <div className="remove">

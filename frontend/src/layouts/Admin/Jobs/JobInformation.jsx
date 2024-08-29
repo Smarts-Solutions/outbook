@@ -171,9 +171,9 @@ const JobInformation = () => {
                 </div>
                 <div className='col-md-4'>
                 <div>
-                    <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-info text-white float-end ms-2"> <i class="ti-trash pe-1"></i>  Delete</button>
-                    <button type="button" class="btn btn-info text-white float-end ">  
-                     <i class="fa-regular fa-pencil pe-1"></i> Edit</button>
+                    <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" className="btn btn-info text-white float-end ms-2"> <i className="ti-trash pe-1"></i>  Delete</button>
+                    <button type="button" className="btn btn-info text-white float-end ">  
+                     <i className="fa-regular fa-pencil pe-1"></i> Edit</button>
                      </div>    
                 
                 </div>

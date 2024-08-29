@@ -61,10 +61,10 @@ const Dashboard = () => {
                   <h2 className="page-title mt-1">{staffDetails.role_name}</h2>
                 </div>
 
-                <div className="col-auto align-self-center">
+                {/* <div className="col-auto align-self-center">
                   <p className="mb-0 page-subtitle text-end">{currentTime}</p>
                   <h2 className="page-title mt-1">{formattedDate}</h2>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

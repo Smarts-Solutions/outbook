@@ -3,10 +3,16 @@ import { useDispatch } from "react-redux";
 import { Formik, Field, Form, useFormik } from "formik";
 import AddFrom from "../../../../Components/ExtraComponents/Forms/Customer.form";
 import { Email_regex } from "../../../../Utils/Common_regex";
-import { GetAllCompany, AddCustomer } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import {
+  GetAllCompany,
+  AddCustomer,
+} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import MultiStepFormContext from "./MultiStepFormContext";
 import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
-import { PersonRole, Country } from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import {
+  PersonRole,
+  Country,
+} from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import { GET_CUSTOMER_DATA } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 
@@ -21,11 +27,22 @@ const Information = () => {
   const [getAccountMangerIdErr, setAccountMangerIdErr] = useState("");
   const [CustomerType, setCustomerType] = useState("1");
   const [getNextStatus, setNextStatus] = useState("0");
-  const [customerDetails, setCustomerDetails] = useState({loading: true,data: []});
-  const [personRoleDataAll, setPersonRoleDataAll] = useState({loading: true,data: []});
-  const [errors, setErrors] = useState([{ firstName: "", lastName: "", role: "", phoneNumber: "", email: "" } ]);
+  const [customerDetails, setCustomerDetails] = useState({
+    loading: true,
+    data: [],
+  });
+  const [personRoleDataAll, setPersonRoleDataAll] = useState({
+    loading: true,
+    data: [],
+  });
+  const [errors, setErrors] = useState([
+    { firstName: "", lastName: "", role: "", phoneNumber: "", email: "" },
+  ]);
   const [getAllSearchCompany, setGetAllSearchCompany] = useState([]);
-  const [countryDataAll, setCountryDataAll] = useState({loading: true, data: []});
+  const [countryDataAll, setCountryDataAll] = useState({
+    loading: true,
+    data: [],
+  });
   const [contacts, setContacts] = useState([
     {
       authorised_signatory_status: false,
@@ -1047,7 +1064,6 @@ const Information = () => {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   };
 
-
   return (
     <Formik
       initialValues={address}
@@ -1205,6 +1221,20 @@ const Information = () => {
                                             )}
                                             <div className="col-lg-4 ps-1">
                                               <div className="mb-3">
+                                                <label
+                                                  htmlFor={`firstName-${index}`}
+                                                  className="form-label"
+                                                >
+                                                  First Name
+                                                  <span
+                                                    style={{
+                                                      color: "red",
+                                                    }}
+                                                  >
+                                                    {" "}
+                                                    *{" "}
+                                                  </span>
+                                                </label>
                                                 <input
                                                   type="text"
                                                   className="form-control"
@@ -1228,6 +1258,19 @@ const Information = () => {
                                             </div>
                                             <div className="col-lg-4">
                                               <div className="mb-3">
+                                                <label
+                                                  htmlFor={`lastName-${index}`}
+                                                  className="form-label"
+                                                >
+                                                  Last Name
+                                                  <span
+                                                    style={{
+                                                      color: "red",
+                                                    }}
+                                                  >
+                                                    *
+                                                  </span>
+                                                </label>
                                                 <input
                                                   type="text"
                                                   className="form-control"
@@ -1251,6 +1294,19 @@ const Information = () => {
                                             </div>
                                             <div className="col-lg-4">
                                               <div className="mb-3">
+                                                <label
+                                                  htmlFor={`role-${index}`}
+                                                  className="form-label"
+                                                >
+                                                  Role
+                                                  <span
+                                                    style={{
+                                                      color: "red",
+                                                    }}
+                                                  >
+                                                    *
+                                                  </span>
+                                                </label>
                                                 <select
                                                   className="form-select"
                                                   id={`role-${index}`}
@@ -1286,12 +1342,15 @@ const Information = () => {
                                               </div>
                                             </div>
 
-                                            <div class="col-lg-4">
-                                              <div class="mb-3">
-                                                <div class="row">
-                                                  <div class="col-md-4">
+                                            <div className="col-lg-4">
+                                              <div className="mb-3">
+                                                <div className="row">
+                                                  <div className="col-md-4">
+                                                    <label className="form-label">
+                                                      Phone
+                                                    </label>
                                                     <select
-                                                      class="form-select"
+                                                      className="form-select"
                                                       onChange={(e) =>
                                                         handleChange(
                                                           index,
@@ -1349,6 +1408,19 @@ const Information = () => {
                                             </div>
                                             <div className="col-lg-4 ">
                                               <div className="mb-3">
+                                                <label
+                                                  htmlFor={`email-${index}`}
+                                                  className="form-label"
+                                                >
+                                                  Email
+                                                  <span
+                                                    style={{
+                                                      color: "red",
+                                                    }}
+                                                  >
+                                                    *
+                                                  </span>
+                                                </label>
                                                 <input
                                                   type="text"
                                                   className="form-control"
@@ -1610,18 +1682,15 @@ const Information = () => {
                                                     </div>
                                                   </div>
 
-                                                  <div class="col-lg-4">
-                                                    <div class="mb-3">
-                                                      <label
-                                                        for="firstNameinput"
-                                                        class="form-label"
-                                                      >
+                                                  <div className="col-lg-4">
+                                                    <div className="mb-3">
+                                                      <label className="form-label">
                                                         Phone
                                                       </label>
-                                                      <div class="row">
-                                                        <div class="col-md-4">
+                                                      <div className="row">
+                                                        <div className="col-md-4">
                                                           <select
-                                                            class="form-select"
+                                                            className="form-select"
                                                             onChange={(e) =>
                                                               handleChange(
                                                                 index,

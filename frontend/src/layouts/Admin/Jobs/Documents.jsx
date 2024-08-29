@@ -46,9 +46,9 @@ const Documents = () => {
         </div>
         <div className='col-md-5'>
         <div>
-             <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-info text-white float-end ms-2"> <i class="ti-trash pe-1"></i>  Delete Selected</button> 
-            <button type="button" class="btn btn-info text-white float-end " onClick={() => setUploadfiles(true)}>  
-             <i class="fa-regular fa-plus pe-1"></i> Upload Files</button>
+             <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" className="btn btn-info text-white float-end ms-2"> <i className="ti-trash pe-1"></i>  Delete Selected</button> 
+            <button type="button" className="btn btn-info text-white float-end " onClick={() => setUploadfiles(true)}>  
+             <i className="fa-regular fa-plus pe-1"></i> Upload Files</button>
              </div>    
         
         </div>

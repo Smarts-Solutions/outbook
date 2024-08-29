@@ -44,9 +44,8 @@ const Drafts = () => {
         </div>
         <div className='col-md-4'>
         <div>
-            {/* <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-info text-white float-end ms-2"> <i class="fa fa-plus pe-1"></i>  Add Timesheet</button> */}
-            <button type="button" class="btn btn-info text-white float-end " onClick={() => setAdddraft(true)}>  
-             <i class="fa-regular fa-plus pe-1"></i> Add Drafts</button>
+           <button type="button" className="btn btn-info text-white float-end " onClick={() => setAdddraft(true)}>  
+             <i className="fa-regular fa-plus pe-1"></i> Add Drafts</button>
              </div>    
         
         </div>

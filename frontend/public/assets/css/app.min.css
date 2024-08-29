@@ -9950,3 +9950,8 @@ body .accordion-button:not(.collapsed)::after {
   left: 20px;
   z-index: 1;
 }
+ .data-table-header {
+     background-color: #f0f0f0;
+     font-weight: bold;
+     text-align: center;
+   }
