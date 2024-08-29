@@ -9,6 +9,7 @@ const CreateCheckList = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem('token'));
   const navigate = useNavigate();
+  const [budgetedHours, setBudgetedHours] = useState({ hours: "", minutes: "" })
 
   const [formData, setFormData] = useState({
     customer_id: location.state?.id || '',
@@ -65,12 +66,62 @@ const CreateCheckList = () => {
     setFormData1(prev => ({ ...prev, [name]: value }));
   };
 
+
   const handleTaskChange = (index, e) => {
     const { name, value } = e.target;
     const newTasks = [...tasks];
-    newTasks[index][name] = value;
+  
+    // If the name is hours or minutes, handle them separately
+    if (name === "hours" || name === "minutes") {
+      const hours = newTasks[index].budgeted_hour?.hours || "";
+      const minutes = newTasks[index].budgeted_hour?.minutes || "";
+  
+      // Ensure the value is a number and update accordingly
+      if (name === "hours") {
+        const numericValue = Number(value);
+        // Update only if numeric and non-negative
+        if (!isNaN(numericValue) && numericValue >= 0) {
+          newTasks[index].budgeted_hour = {
+            hours: value === '' ? '' : numericValue.toString().padStart(2, "0"),
+            minutes
+          };
+        }
+      } else if (name === "minutes") {
+        const numericValue = Number(value);
+        // Update if numeric and within range 0-59
+        if (value === '' || (numericValue >= 0 && numericValue <= 59)) {
+          newTasks[index].budgeted_hour = {
+            hours,
+            minutes: value === '' ? '' : numericValue.toString().padStart(2, "0"),
+          };
+        }
+        // If value is greater than 59 or not a number, do nothing (ignore the input)
+      }
+    } else {
+      // Handle other changes, e.g., task_name
+      newTasks[index][name] = value;
+    }
+  
     setTasks(newTasks);
   };
+  
+
+
+
+
+  const formatBudgetedHours = () => {
+    return tasks.map((task) => {
+      const hours = task.budgeted_hour?.hours || "";  // Fallback to "00" if empty
+      const minutes = task.budgeted_hour?.minutes || "";  // Fallback to "00" if empty
+      return {
+        ...task,
+        budgeted_hour: `${hours}:${minutes}`,  // Combine into HH:MM format
+      };
+    });
+  };
+
+
+
 
   const addTask = () => {
     setTasks([...tasks, { task_name: '', budgeted_hour: '', task_id: null }]);
@@ -115,36 +166,49 @@ const CreateCheckList = () => {
       })
       .catch((error) => console.log("Error fetching job types:", error));
   };
-
-  // Handle form submission with validation
   const handleSubmit = async () => {
     let validationErrors = {};
 
+    // Validate form-level fields
     if (!formData1.service_id) validationErrors.service_id = "Service Type is required";
     if (!formData1.job_type_id) validationErrors.job_type_id = "Job Type is required";
     if (!formData1.client_type_id) validationErrors.client_type_id = "Client Type is required";
     if (!formData1.check_list_name) validationErrors.check_list_name = "Check List Name is required";
     if (!formData1.status) validationErrors.status = "Status is required";
 
+    // Validate tasks-level fields
     tasks.forEach((task, index) => {
-      if (!task.task_name) validationErrors[`task_name_${index}`] = "Task Name is required";
-      if (!task.budgeted_hour) validationErrors[`budgeted_hour_${index}`] = "Budgeted Hour is required";
+      if (!task.task_name) {
+        validationErrors[`task_name_${index}`] = "Task Name is required";
+      }
+      if (!task.budgeted_hour || task.budgeted_hour.hours === '' || task.budgeted_hour.minutes === '') {
+        validationErrors[`budgeted_hour_${index}`] = "Budgeted Hour is required";
+      }
     });
 
+    // If there are validation errors, set them and stop submission
     if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+      setErrors(validationErrors); // Display errors to the user
       return;
     }
 
+    // Format the budgeted hours into HH:MM format
+    const formattedTasks = formatBudgetedHours();
+
+    // Create the request object
     const req = {
       ...formData1,
-      task: tasks.map(task => ({
+      task: formattedTasks.map(task => ({
         task_name: task.task_name,
-        budgeted_hour: task.budgeted_hour,
-        task_id: task.task_id
+        budgeted_hour: task.budgeted_hour,  // Now in HH:MM format
+        task_id: task.task_id,
       })),
     };
 
+    console.log("req", req);  // You can remove this once tested
+    return; // Remove this return when ready to actually submit
+
+    // Dispatch the request
     const data = { req, authToken: token };
     await dispatch(addChecklists(data))
       .unwrap()
@@ -156,6 +220,8 @@ const CreateCheckList = () => {
             icon: 'success',
             confirmButtonText: 'Ok',
           });
+
+          // Reset form and tasks after successful submission
           setFormData({
             customer_id: location.state?.id || '',
             service_id: '',
@@ -165,6 +231,8 @@ const CreateCheckList = () => {
             status: '',
           });
           setTasks([{ task_id: "", task_name: '', budgeted_hour: '' }]);
+
+          // Redirect to Clientlist
           navigate('/admin/Clientlist', { state: { id: location.state.id, route: "Checklist" } });
         }
       })
@@ -173,14 +241,18 @@ const CreateCheckList = () => {
       );
   };
 
+
+
+
+
   return (
     <div className="container-fluid">
       <div className="content-title">
-  
+
 
         <div className="card-header d-flex justify-content-between">
           <h3 className="card-title mb-0">Create New Checklist</h3>
-          <button type="button" className="btn btn-info text-white blue-btn" onClick={()=> navigate('/admin/Clientlist', { state: { id: location.state.id, route: "Checklist" } })}>Back</button>
+          <button type="button" className="btn btn-info text-white blue-btn" onClick={() => navigate('/admin/Clientlist', { state: { id: location.state.id, route: "Checklist" } })}>Back</button>
         </div>
 
 
@@ -293,31 +365,63 @@ const CreateCheckList = () => {
             {tasks.map((task, index) => (
               <div key={index} className="d-flex gap-3 mt-4">
                 <div className="col-lg-5">
-                  <input
-                    type="text"
-                    name="task_name"
-                    className="form-control"
-                    value={task.task_name}
-                    onChange={(e) => handleTaskChange(index, e)}
-                    placeholder="Task Name"
-                    disabled={task.task_id}
-                  />
-                  {errors[`task_name_${index}`] && <p className="text-danger">{errors[`task_name_${index}`]}</p>}
+                  <div>
+                    <label className="form-label">Task Name</label>
+                    <input
+                      type="text"
+                      name="task_name"
+                      className="form-control"
+                      defaultValue={task.task_name}
+                      onChange={(e) => handleTaskChange(index, e)}
+                      placeholder="Task Name"
+                      disabled={task.task_id}
+                    />
+                    {errors[`task_name_${index}`] && (
+                      <p className="text-danger">{errors[`task_name_${index}`]}</p>
+                    )}
+                  </div>
                 </div>
+
                 <div className="col-lg-5">
-                  <input
-                    type="Number"
-                    name="budgeted_hour"
-                    className="form-control"
-                    value={task.budgeted_hour}
-                    onChange={(e) => handleTaskChange(index, e)}
-                    placeholder="Budgeted Hour"
-                  />
-                  {errors[`budgeted_hour_${index}`] && <p className="text-danger">{errors[`budgeted_hour_${index}`]}</p>}
+                  <div className="mb-3">
+                    <label className="form-label">Budgeted Hours</label>
+                    <div className="input-group">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Hours"
+                        name="hours"
+                        defaultValue={task.budgeted_hour?.hours || ""}
+                        onChange={(e) => handleTaskChange(index, e)}
+                      />
+                      {errors[`budgeted_hour_${index}`] && (
+                        <p className="text-danger">{errors[`budgeted_hour_${index}`]}</p>
+                      )}
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Minutes"
+                        name="minutes"
+                        defaultValue={task.budgeted_hour?.minutes || ""}
+                        onChange={(e) => {
+                          handleTaskChange(index, e)
+                        }}
+                        
+                      />
+                      {errors[`budgeted_minutes_${index}`] && (
+                        <p className="text-danger">{errors[`budgeted_minutes_${index}`]}</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <button  className="btn" onClick={() => removeTask(index)}><i className='ti-trash text-danger fs-4'></i></button>
+
+                <button className="btn" onClick={() => removeTask(index)}>
+                  <i className="ti-trash text-danger fs-4"></i>
+                </button>
               </div>
             ))}
+
+
 
           </div>
 
