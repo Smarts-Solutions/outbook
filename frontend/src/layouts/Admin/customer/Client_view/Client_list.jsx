@@ -7,6 +7,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Get_All_Job_List } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getList } from '../../../../ReduxStore/Slice/Settings/settingSlice';
 import sweatalert from 'sweetalert2';
+import Statuses from './Statuses';
 
 
 const ClientList = () => {
@@ -326,7 +327,7 @@ const ClientList = () => {
                           : handleAddJob
                     }
                   >
-                    <i className="fa fa-plus" />
+                    <i className="fa fa-plus pe-1" />
                     {activeTab === "client" ? "Add Client" : activeTab === "checklist" ? "Add Checklist" : "Create Job"}
                   </div>
                 ) : null}
@@ -417,6 +418,7 @@ const ClientList = () => {
             role="tabpanel"
 
           >
+            <Statuses/>
             {getJobDetails && getJobDetails && (
               <Datatable columns={JobColumns} data={getJobDetails.data} filter={false} />
             )}

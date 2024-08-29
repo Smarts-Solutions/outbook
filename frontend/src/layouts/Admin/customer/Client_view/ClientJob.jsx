@@ -189,7 +189,7 @@ const ClientList = () => {
                     className="btn btn-info text-white float-end blue-btn"
                     onClick={handleAddClient}
                   >
-                    <i className="fa fa-plus" /> Create Job
+                    <i className="fa fa-plus pe-1" /> Create Job
                   </div>
                 </div>
               </>

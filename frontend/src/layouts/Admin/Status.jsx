@@ -20,7 +20,7 @@ const Status = () => {
     { name: 'Customer Name', selector: row => row.CustomerName, sortable: true },
     { name: 'Company Number', selector: row => row.AccountManager, sortable: true },
     { name: 'Service Type', selector: row => row.ServiceType, sortable: true },
-    { name: 'Account Manager', selector: row => row.JobType, sortable: true },
+    { name: 'Account Manager', selector: row => row.JobType, sortable: true,},
 
 
     {

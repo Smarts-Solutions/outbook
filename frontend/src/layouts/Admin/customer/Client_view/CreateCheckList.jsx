@@ -189,7 +189,7 @@ const CreateCheckList = () => {
       <div className="report-data mt-4">
         <div>
           <div className="row">
-            <div className="col-lg-4 mt-4">
+            <div className="col-lg-4">
               <div className="row">
                 <div className="col-lg-12">
                   <select
@@ -212,7 +212,7 @@ const CreateCheckList = () => {
                 </div>
               </div>
             </div>
-            <div className="col-lg-4 mt-4">
+            <div className="col-lg-4">
               <div className="row">
                 <div className="col-lg-12">
                   <select
@@ -235,7 +235,7 @@ const CreateCheckList = () => {
                 </div>
               </div>
             </div>
-            <div className="col-lg-4 mt-4">
+            <div className="col-lg-4">
               <div className="row">
                 <div className="col-lg-12">
                   <select
@@ -255,7 +255,7 @@ const CreateCheckList = () => {
                 </div>
               </div>
             </div>
-            <div className="col-lg-4 mt-4">
+            <div className="col-lg-4 mt-3">
               <div className="mb-3 row flex-column">
                 <div>
                   <input
@@ -270,7 +270,7 @@ const CreateCheckList = () => {
                 </div>
               </div>
             </div>
-            <div className="col-lg-4 mt-4">
+            <div className="col-lg-4 mt-3">
               <div className="row">
                 <div className="col-lg-12">
                   <select
@@ -288,11 +288,11 @@ const CreateCheckList = () => {
               </div>
             </div>
           </div>
-          <button className="btn btn-primary mt-3" onClick={addTask}>Add Task</button>
+          <button className="btn btn-secondary mt-3" onClick={addTask}><i className='fa fa-plus'></i>Add Task</button>
           <div className="mt-4">
             {tasks.map((task, index) => (
               <div key={index} className="d-flex gap-3 mt-4">
-                <div className="col-lg-4">
+                <div className="col-lg-5">
                   <input
                     type="text"
                     name="task_name"
@@ -304,7 +304,7 @@ const CreateCheckList = () => {
                   />
                   {errors[`task_name_${index}`] && <p className="text-danger">{errors[`task_name_${index}`]}</p>}
                 </div>
-                <div className="col-lg-4">
+                <div className="col-lg-5">
                   <input
                     type="Number"
                     name="budgeted_hour"
@@ -315,7 +315,7 @@ const CreateCheckList = () => {
                   />
                   {errors[`budgeted_hour_${index}`] && <p className="text-danger">{errors[`budgeted_hour_${index}`]}</p>}
                 </div>
-                <button className="btn btn-danger" onClick={() => removeTask(index)}>Remove</button>
+                <button  className="btn" onClick={() => removeTask(index)}><i className='ti-trash text-danger fs-4'></i></button>
               </div>
             ))}
 
@@ -323,7 +323,7 @@ const CreateCheckList = () => {
 
           <div className="col-lg-12 mt-4">
             <button className="btn btn-secondary " onClick={(e) => navigate('/admin/Clientlist', { state: { id: location.state.id, route: "Checklist" } })}>Cancel</button>
-            <button className="btn btn-primary ms-2" onClick={handleSubmit}>Submit</button>
+            <button className="btn btn-info ms-2" onClick={handleSubmit}>Submit</button>
           </div>
         </div>
       </div>

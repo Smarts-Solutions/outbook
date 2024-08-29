@@ -948,7 +948,7 @@ const CreateClient = () => {
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div className="col-lg-6">
+                                                                                        <div className="col-lg-7">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Registered Office Address<span style={{ color: "red" }}>*</span>  </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Suite Winsor & Netwon Building, White Fridrs Avenue, England,HA3 5RN"
@@ -960,7 +960,7 @@ const CreateClient = () => {
                                                                                             </div>
                                                                                         </div>
 
-                                                                                        <div className="col-lg-4">
+                                                                                        <div className="col-lg-5">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  > Incorporation in  <span style={{ color: "red" }}>*</span> </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Please Enter Incorporation In"
