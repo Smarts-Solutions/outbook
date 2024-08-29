@@ -70,16 +70,14 @@ const CreateCheckList = () => {
   const handleTaskChange = (index, e) => {
     const { name, value } = e.target;
     const newTasks = [...tasks];
-  
+
     // If the name is hours or minutes, handle them separately
     if (name === "hours" || name === "minutes") {
       const hours = newTasks[index].budgeted_hour?.hours || "";
       const minutes = newTasks[index].budgeted_hour?.minutes || "";
-  
-      // Ensure the value is a number and update accordingly
+
       if (name === "hours") {
         const numericValue = Number(value);
-        // Update only if numeric and non-negative
         if (!isNaN(numericValue) && numericValue >= 0) {
           newTasks[index].budgeted_hour = {
             hours: value === '' ? '' : numericValue.toString().padStart(2, "0"),
@@ -88,11 +86,17 @@ const CreateCheckList = () => {
         }
       } else if (name === "minutes") {
         const numericValue = Number(value);
-        // Update if numeric and within range 0-59
+
         if (value === '' || (numericValue >= 0 && numericValue <= 59)) {
           newTasks[index].budgeted_hour = {
             hours,
             minutes: value === '' ? '' : numericValue.toString().padStart(2, "0"),
+          };
+        } else {
+          e.target.value = '59';
+          newTasks[index].budgeted_hour = {
+            hours,
+            minutes: '59'
           };
         }
         // If value is greater than 59 or not a number, do nothing (ignore the input)
@@ -101,10 +105,10 @@ const CreateCheckList = () => {
       // Handle other changes, e.g., task_name
       newTasks[index][name] = value;
     }
-  
+
     setTasks(newTasks);
   };
-  
+
 
 
 
@@ -186,28 +190,24 @@ const CreateCheckList = () => {
       }
     });
 
-    // If there are validation errors, set them and stop submission
     if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors); // Display errors to the user
+      setErrors(validationErrors);
       return;
     }
 
     // Format the budgeted hours into HH:MM format
     const formattedTasks = formatBudgetedHours();
 
-    // Create the request object
     const req = {
       ...formData1,
       task: formattedTasks.map(task => ({
         task_name: task.task_name,
-        budgeted_hour: task.budgeted_hour,  // Now in HH:MM format
+        budgeted_hour: task.budgeted_hour,
         task_id: task.task_id,
       })),
     };
 
-    console.log("req", req);  // You can remove this once tested
-    return; // Remove this return when ready to actually submit
-
+    
     // Dispatch the request
     const data = { req, authToken: token };
     await dispatch(addChecklists(data))
@@ -386,33 +386,35 @@ const CreateCheckList = () => {
                   <div className="mb-3">
                     <label className="form-label">Budgeted Hours</label>
                     <div className="input-group">
+                      {/* Hours Input */}
                       <input
-                        type="text"
+                        type="number"
                         className="form-control"
                         placeholder="Hours"
                         name="hours"
                         defaultValue={task.budgeted_hour?.hours || ""}
                         onChange={(e) => handleTaskChange(index, e)}
                       />
-                      {errors[`budgeted_hour_${index}`] && (
-                        <p className="text-danger">{errors[`budgeted_hour_${index}`]}</p>
-                      )}
+                      {/* Hours Error */}
+                      
+
+                      {/* Minutes Input */}
                       <input
-                        type="text"
+                        type="number"
                         className="form-control"
                         placeholder="Minutes"
                         name="minutes"
+                        min="0"
+                        max="59"
                         defaultValue={task.budgeted_hour?.minutes || ""}
-                        onChange={(e) => {
-                          handleTaskChange(index, e)
-                        }}
-                        
+                        onChange={(e) => handleTaskChange(index, e)}
                       />
-                      {errors[`budgeted_minutes_${index}`] && (
-                        <p className="text-danger">{errors[`budgeted_minutes_${index}`]}</p>
-                      )}
+                      {/* Minutes Error */}
+                    
                     </div>
+                     
                   </div>
+
                 </div>
 
                 <button className="btn" onClick={() => removeTask(index)}>
