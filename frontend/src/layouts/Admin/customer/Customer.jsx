@@ -86,11 +86,11 @@ const Customer = () => {
     {
       name: "Type",
       selector: (row) =>
-        row.customer_type === 1
+        row.customer_type == 1
           ? "Sole Trader"
-          : row.customer_type === 2
+          : row.customer_type == 2
           ? "Company"
-          : row.customer_type === 3
+          : row.customer_type == 3
           ? "Partnership"
           : "-",
       sortable: true,
@@ -101,7 +101,7 @@ const Customer = () => {
       selector: (row) =>
         row.account_manager_firstname + " " + row.account_manager_lastname,
       sortable: true,
-      width: "200px",
+      width: "180px",
     },
     {
       name: "Status",
@@ -115,7 +115,7 @@ const Customer = () => {
         </div>
       ),
       sortable: true,
-      width: "150px",
+      width: "120px",
     },
     {
       name: "Actions",

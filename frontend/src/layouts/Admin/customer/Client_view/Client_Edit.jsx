@@ -882,7 +882,7 @@ const ClientEdit = () => {
     }
   }, [getSearchDetails]);
 
-  // Filter out selected details
+
   const FilterSearchDetails = () => {
     const filterData = getAllSearchCompany.filter(
       (data) => data.title === searchItem

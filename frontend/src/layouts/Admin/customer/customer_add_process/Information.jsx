@@ -250,7 +250,7 @@ const Information = () => {
     validate: (values) => {
       let errors = {};
 
-      if (getAccountMangerId == "") {
+      if (formik1.touched.Trading_Name == true && getAccountMangerId == "") {
         setAccountMangerIdErr("Please select an Account Manager");
         return;
       } else if (!values.Trading_Name.trim()) {
@@ -1063,6 +1063,9 @@ const Information = () => {
     if (!string) return "";
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   };
+
+  console.log("getAccountMangerIdErr", getAccountMangerIdErr);
+
 
   return (
     <Formik
