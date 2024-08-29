@@ -78,6 +78,10 @@ const CreateJob = () => {
         InvoiceRemark: "",
     });
 
+    console.log("AllChecklist", AllChecklist)
+    console.log("getChecklistId", getChecklistId)
+
+
     useEffect(() => {
         setJobData(prevState => ({
             ...prevState,
@@ -175,7 +179,7 @@ const CreateJob = () => {
 
 
     const getChecklistData = async () => {
-        const req = { action: "getById", checklist_id: location.state.details.customer_id.id}
+        const req = { action: "getById", checklist_id: getChecklistId && getChecklistId}
         const data = { req: req, authToken: token }
         await dispatch(GET_ALL_CHECKLIST(data))
             .unwrap()
@@ -1161,7 +1165,7 @@ const CreateJob = () => {
                                                                                 )}
                                                                             </div>
                                                                             <div className="col-lg-4">
-                                                                                <label className="form-label" > Invoice Value </label>
+                                                                                <label className="form-label">Invoice Value</label>
                                                                                 <input type="text" className="form-control" placeholder="Invoice Value"
                                                                                     name="InvoiceValue" onChange={HandleChange} value={jobData.InvoiceValue}
                                                                                 />
@@ -1189,7 +1193,7 @@ const CreateJob = () => {
 
                                                                             <div className="col-lg-4">
                                                                                 <div className="mb-3">
-                                                                                    <label className="form-label" >Invoice Date</label>
+                                                                                    <label className="form-label" >Invoice Hours</label>
                                                                                     <div className="input-group">
                                                                                         <input
                                                                                             type="text"

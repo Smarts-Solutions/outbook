@@ -26,6 +26,13 @@ const CreateJob = () => {
     const [taskName, setTaskName] = useState('')
     const [Budgeted, setBudgeted] = useState('')
 
+    const [PreparationTimne, setPreparationTimne] = useState({ hours: "", minutes: "" })
+    const [FeedbackIncorporationTime, setFeedbackIncorporationTime] = useState({ hours: "", minutes: "" })
+    const [reviewTime, setReviewTime] = useState({ hours: "", minutes: "" })
+    const [budgetedHours, setBudgetedHours] = useState({ hours: "", minutes: "" })
+    const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" })
+
+    console.log("budgetedHours", budgetedHours)
 
 
     const JobDetails = async () => {
@@ -134,6 +141,33 @@ const CreateJob = () => {
         getAllChecklist()
     }, [jobData.JobType]);
 
+    const getChecklistData = async () => {
+        const req = { action: "getById", checklist_id: getChecklistId && getChecklistId}
+        const data = { req: req, authToken: token }
+        await dispatch(GET_ALL_CHECKLIST(data))
+            .unwrap()
+            .then(async (response) => {
+                if (response.status) {
+                    setAllChecklistData({
+                        loading: true,
+                        data: response.data.task || []
+                    })
+                } else {
+                    setAllChecklistData({
+                        loading: true,
+                        data: []
+                    })
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    }
+
+    useEffect(() => {
+        getChecklistData()
+    }, [getChecklistId])
+
 
 
 
@@ -231,46 +265,46 @@ const CreateJob = () => {
         'AccountManager': 'Please Enter Account Manager',
         'Customer': 'Please Enter Customer',
         'Client': 'Please Select Client',
-        'ClientJobCode': 'Please Enter Client Job Code',
-        'CustomerAccountManager': 'Please Select Customer Account Manager',
-        'Service': 'Please Select Service',
-        'JobType': 'Please Select Job Type',
-        'BudgetedHours': 'Please Enter Budgeted Hours',
-        'Reviewer': 'Please Select Reviewer',
-        'AllocatedTo': 'Please Select Allocated To',
-        'AllocatedOn': 'Please Enter Allocated On',
-        'DateReceivedOn': 'Please Enter Date Received On',
-        'YearEnd': 'Please Enter Year End',
-        'TotalPreparationTime': 'Please Enter Total Preparation Time',
-        'ReviewTime': 'Please Enter Review Time',
-        'FeedbackIncorporationTime': 'Please Enter Feedback Incorporation Time',
-        'TotalTime': 'Please Enter Total Time',
-        'EngagementModel': 'Please Select Engagement Model',
-        'ExpectedDeliveryDate': 'Please Enter Expected Delivery Date',
-        'DueOn': 'Please Enter Due On',
-        'SubmissionDeadline': 'Please Enter Submission Deadline',
-        'CustomerDeadlineDate': 'Please Enter Customer Deadline Date',
-        'SLADeadlineDate': 'Please Enter SLA Deadline Date',
-        'InternalDeadlineDate': 'Please Enter Internal Deadline Date',
-        'FilingWithCompaniesHouseRequired': 'Please Select Filing With Companies House Required',
-        'CompaniesHouseFilingDate': 'Please Enter Companies House Filing Date',
-        'FilingWithHMRCRequired': 'Please Select Filing With HMRC Required',
-        'HMRCFilingDate': 'Please Enter HMRC Filing Date',
-        'OpeningBalanceAdjustmentRequired': 'Please Select Opening Balance Adjustment Required',
-        'OpeningBalanceAdjustmentDate': 'Please Enter Opening Balance Adjustment Date',
-        'NumberOfTransactions': 'Please Enter Number Of Transactions',
-        'NumberOfTrialBalanceItems': 'Please Enter Number Of Trial Balance Items',
-        'Turnover': 'Please Enter Turnover',
-        'NoOfEmployees': 'Please Enter No Of Employees',
-        'VATReconciliation': 'Please Select VAT Reconciliation',
-        'Bookkeeping': 'Please Select Bookkeeping',
-        'ProcessingType': 'Please Select Processing Type',
-        'Invoiced': 'Please Select Invoiced',
-        'Currency': 'Please Select Currency',
-        'InvoiceValue': 'Please Enter Invoice Value',
-        'InvoiceDate': 'Please Enter Invoice Date',
-        'InvoiceHours': 'Please Enter Invoice Hours',
-        'InvoiceRemark': 'Please Enter Invoice Remark'
+        // 'ClientJobCode': 'Please Enter Client Job Code',
+        // 'CustomerAccountManager': 'Please Select Customer Account Manager',
+        // 'Service': 'Please Select Service',
+        // 'JobType': 'Please Select Job Type',
+        // 'BudgetedHours': 'Please Enter Budgeted Hours',
+        // 'Reviewer': 'Please Select Reviewer',
+        // 'AllocatedTo': 'Please Select Allocated To',
+        // 'AllocatedOn': 'Please Enter Allocated On',
+        // 'DateReceivedOn': 'Please Enter Date Received On',
+        // 'YearEnd': 'Please Enter Year End',
+        // 'TotalPreparationTime': 'Please Enter Total Preparation Time',
+        // 'ReviewTime': 'Please Enter Review Time',
+        // 'FeedbackIncorporationTime': 'Please Enter Feedback Incorporation Time',
+        // 'TotalTime': 'Please Enter Total Time',
+        // 'EngagementModel': 'Please Select Engagement Model',
+        // 'ExpectedDeliveryDate': 'Please Enter Expected Delivery Date',
+        // 'DueOn': 'Please Enter Due On',
+        // 'SubmissionDeadline': 'Please Enter Submission Deadline',
+        // 'CustomerDeadlineDate': 'Please Enter Customer Deadline Date',
+        // 'SLADeadlineDate': 'Please Enter SLA Deadline Date',
+        // 'InternalDeadlineDate': 'Please Enter Internal Deadline Date',
+        // 'FilingWithCompaniesHouseRequired': 'Please Select Filing With Companies House Required',
+        // 'CompaniesHouseFilingDate': 'Please Enter Companies House Filing Date',
+        // 'FilingWithHMRCRequired': 'Please Select Filing With HMRC Required',
+        // 'HMRCFilingDate': 'Please Enter HMRC Filing Date',
+        // 'OpeningBalanceAdjustmentRequired': 'Please Select Opening Balance Adjustment Required',
+        // 'OpeningBalanceAdjustmentDate': 'Please Enter Opening Balance Adjustment Date',
+        // 'NumberOfTransactions': 'Please Enter Number Of Transactions',
+        // 'NumberOfTrialBalanceItems': 'Please Enter Number Of Trial Balance Items',
+        // 'Turnover': 'Please Enter Turnover',
+        // 'NoOfEmployees': 'Please Enter No Of Employees',
+        // 'VATReconciliation': 'Please Select VAT Reconciliation',
+        // 'Bookkeeping': 'Please Select Bookkeeping',
+        // 'ProcessingType': 'Please Select Processing Type',
+        // 'Invoiced': 'Please Select Invoiced',
+        // 'Currency': 'Please Select Currency',
+        // 'InvoiceValue': 'Please Enter Invoice Value',
+        // 'InvoiceDate': 'Please Enter Invoice Date',
+        // 'InvoiceHours': 'Please Enter Invoice Hours',
+        // 'InvoiceRemark': 'Please Enter Invoice Remark'
     };
 
     const validate = (name, value, isSubmitting = false) => {
@@ -463,12 +497,16 @@ const CreateJob = () => {
 
 
 
+
     const handleAddTask = () => {
         const req = { task_id: "", task_name: taskName, budgeted_hour: Budgeted }
         setAddTaskArr([...AddTaskArr, req])
         console.log("req", req)
         setShowAddJobModal(false)
     }
+
+    const totalHours = Number(PreparationTimne.hours) * 60 + Number(PreparationTimne.minutes) + Number(reviewTime.hours) * 60 + Number(reviewTime.minutes) + Number(FeedbackIncorporationTime.hours) * 60 + Number(FeedbackIncorporationTime.minutes)
+
 
 
     return (
@@ -605,7 +643,45 @@ const CreateJob = () => {
                                                                         )}
                                                                     </div>
 
+
                                                                     <div className="col-lg-4">
+                                                                        <div className="mb-3">
+                                                                            <label className="form-label" >Budgeted Hours</label>
+                                                                            <div className="input-group">
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    placeholder="Hours"
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || Number(value) >= 0) {
+                                                                                            setBudgetedHours({ ...budgetedHours, hours: value });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={budgetedHours.hours}
+                                                                                />
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    placeholder="Minutes"
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                                                                                            setBudgetedHours({
+                                                                                                ...budgetedHours,
+                                                                                                minutes: value
+                                                                                            });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={budgetedHours.minutes}
+                                                                                />
+                                                                            </div>
+
+                                                                        </div>
+                                                                    </div>
+
+
+                                                                    {/* <div className="col-lg-4">
                                                                         <label className="form-label">Budgeted Hours</label>
                                                                         <div className="input-group">
                                                                             <input type="text" className="form-control" placeholder='Enter Budgeted Hours'
@@ -617,9 +693,9 @@ const CreateJob = () => {
                                                                                 <div style={{ 'color': 'red' }}>{errors['BudgetedHours']}</div>
                                                                             )}
                                                                         </div>
-                                                                    </div>
+                                                                    </div> */}
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
                                                                         <label className="form-label">Reviewer</label>
                                                                         <select className="form-select mb-3"
                                                                             name="Reviewer" onChange={HandleChange} value={jobData.Reviewer}>
@@ -636,7 +712,7 @@ const CreateJob = () => {
                                                                         )}
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
                                                                         <label className="form-label">Allocated To</label>
                                                                         <select className="form-select mb-3"
                                                                             name="AllocatedTo" onChange={HandleChange} value={jobData.AllocatedTo}>
@@ -651,7 +727,7 @@ const CreateJob = () => {
                                                                         )}
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
                                                                         <label className="form-label"  > Allocated On </label>
                                                                         <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
                                                                             name="AllocatedOn" onChange={HandleChange} value={jobData.AllocatedOn} />
@@ -660,7 +736,7 @@ const CreateJob = () => {
                                                                         )}
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
                                                                         <label className="form-label">Date Received On</label>
                                                                         <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
                                                                             name="DateReceivedOn" onChange={HandleChange} value={jobData.DateReceivedOn} />
@@ -669,7 +745,7 @@ const CreateJob = () => {
                                                                         )}
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    {/* <div className="col-lg-4">
                                                                         <div className="mb-3">
                                                                             <label className="form-label"  > Year End </label>
                                                                             <input type="text" className="form-control" placeholder="Year End"
@@ -679,9 +755,67 @@ const CreateJob = () => {
                                                                             )}
 
                                                                         </div>
+                                                                    </div> */}
+
+
+                                                                    <div className="col-lg-4">
+                                                                        <div className="mb-3">
+                                                                            <label className="form-label">Year End</label>
+                                                                            <input
+                                                                                type="month"
+                                                                                className="form-control"
+                                                                                placeholder="MM/YYYY"
+                                                                                name="YearEnd"
+                                                                                onChange={HandleChange}
+                                                                                value={jobData.YearEnd}
+                                                                            />
+                                                                            {errors['YearEnd'] && (
+                                                                                <div className="error-text">{errors['YearEnd']}</div>
+                                                                            )}
+
+                                                                        </div>
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
+                                                                        <div className="mb-3">
+                                                                            <label className="form-label" >Total Preparation Time</label>
+                                                                            <div className="input-group">
+                                                                                <input
+                                                                                    type="number"
+                                                                                    className="form-control"
+                                                                                    placeholder="Hours"
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || Number(value) >= 0) {
+                                                                                            setPreparationTimne({ ...PreparationTimne, hours: value });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={PreparationTimne.hours}
+                                                                                />
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    placeholder="Minutes"
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                                                                                            setPreparationTimne({
+                                                                                                ...PreparationTimne,
+                                                                                                minutes: value
+                                                                                            });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={PreparationTimne.minutes}
+                                                                                />
+                                                                            </div>
+                                                                            {errors['TotalPreparationTime'] && (
+                                                                                <div className="error-text">{errors['TotalPreparationTime']}</div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+
+
+                                                                    {/* <div className="col-lg-4">
                                                                         <div className="mb-3">
                                                                             <label className="form-label">Total Preparation Time</label>
                                                                             <input type="text" className="form-control" placeholder="Total Preparation Time"
@@ -691,9 +825,9 @@ const CreateJob = () => {
                                                                             )}
 
                                                                         </div>
-                                                                    </div>
+                                                                    </div> */}
 
-                                                                    <div className="col-lg-3">
+                                                                    {/* <div className="col-lg-4">
                                                                         <div className="mb-3">
                                                                             <label className="form-label" >Review Time</label>
                                                                             <input type="text" className="form-control" placeholder="Review Time"
@@ -702,9 +836,49 @@ const CreateJob = () => {
                                                                                 <div style={{ 'color': 'red' }}>{errors['ReviewTime']}</div>
                                                                             )}
                                                                         </div>
+                                                                    </div> */}
+
+                                                                    <div className="col-lg-4">
+                                                                        <div className="mb-3">
+                                                                            <label className="form-label" >Review Time</label>
+                                                                            <div className="input-group">
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    placeholder="Hours"
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || Number(value) >= 0) {
+                                                                                            setReviewTime({ ...reviewTime, hours: value });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={reviewTime.hours}
+                                                                                />
+
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    placeholder="Minutes"
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                                                                                            setReviewTime({
+                                                                                                ...reviewTime,
+                                                                                                minutes: value
+                                                                                            });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={reviewTime.minutes}
+                                                                                />
+
+                                                                            </div>
+                                                                            {errors['TotalPreparationTime'] && (
+                                                                                <div className="error-text">{errors['TotalPreparationTime']}</div>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    {/* <div className="col-lg-4">
                                                                         <div className="mb-3">
                                                                             <label className="form-label">Feedback Incorporation Time</label>
                                                                             <input type="text" className="form-control" placeholder="Feedback Incorporation Time"
@@ -714,9 +888,67 @@ const CreateJob = () => {
                                                                             )}
 
                                                                         </div>
+                                                                    </div> */}
+
+                                                                    <div className="col-lg-4">
+                                                                        <div className="mb-3">
+                                                                            <label className="form-label" >Feedback Incorporation Time</label>
+                                                                            <div className="input-group">
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    placeholder="Hours"
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || /^[0-9]*$/.test(value)) {
+                                                                                            setFeedbackIncorporationTime({ ...FeedbackIncorporationTime, hours: value });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={FeedbackIncorporationTime.hours}
+                                                                                />
+
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    placeholder="Minutes"
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                                                                                            setFeedbackIncorporationTime({
+                                                                                                ...FeedbackIncorporationTime,
+                                                                                                minutes: value
+                                                                                            });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={FeedbackIncorporationTime.minutes}
+                                                                                />
+                                                                            </div>
+                                                                            {errors['TotalPreparationTime'] && (
+                                                                                <div className="error-text">{errors['TotalPreparationTime']}</div>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+
+                                                                    <div className="col-lg-4">
+                                                                        <div className="mb-3">
+                                                                            <label className="form-label" > Total Time</label>
+
+                                                                            <input type="text"
+                                                                                name="TotalTime"
+                                                                                className="form-control"
+                                                                                value={Math.floor(totalHours / 60) + ":" + totalHours % 60}
+                                                                                onChange={HandleChange}
+                                                                                disabled
+                                                                            />
+                                                                            {errors['TotalTime'] && (
+                                                                                <div className="error-text">{errors['TotalTime']}</div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+
+
+                                                                    {/* <div className="col-lg-4">
                                                                         <div className="mb-3">
                                                                             <label className="form-label" > Total Time</label>
                                                                             <input type="text" className="form-control" placeholder="Total Time"
@@ -726,9 +958,9 @@ const CreateJob = () => {
                                                                                 <div style={{ 'color': 'red' }}>{errors['TotalTime']}</div>
                                                                             )}
                                                                         </div>
-                                                                    </div>
+                                                                    </div> */}
 
-                                                                    <div id="invoice_type" className="col-lg-3">
+                                                                    <div id="invoice_type" className="col-lg-4">
                                                                         <label htmlFor="firstNameinput" className="form-label">
                                                                             Engagement Model
                                                                         </label>
@@ -828,8 +1060,8 @@ const CreateJob = () => {
                                                                                 <select className="form-select mb-3"
                                                                                     name="FilingWithCompaniesHouseRequired" onChange={HandleChange} value={jobData.FilingWithCompaniesHouseRequired}>
                                                                                     <option value="">Please Select Companies House Required</option>
-                                                                                    <option value="0">No</option>
                                                                                     <option value="1">Yes</option>
+                                                                                    <option value="0">No</option>
                                                                                 </select>
                                                                                 {errors['FilingWithCompaniesHouseRequired'] && (
                                                                                     <div style={{ 'color': 'red' }}>{errors['FilingWithCompaniesHouseRequired']}</div>
@@ -852,8 +1084,8 @@ const CreateJob = () => {
                                                                             <select className="form-select mb-3 invoice_type_dropdown"
                                                                                 name="FilingWithHMRCRequired" onChange={HandleChange} value={jobData.FilingWithHMRCRequired}>
                                                                                 <option value="">Please Select HMRC Required</option>
-                                                                                <option value="0">No</option>
                                                                                 <option value="1">Yes</option>
+                                                                                <option value="0">No</option>
                                                                             </select>
                                                                             {errors['FilingWithHMRCRequired'] && (
                                                                                 <div style={{ 'color': 'red' }}>{errors['FilingWithHMRCRequired']}</div>
@@ -905,7 +1137,7 @@ const CreateJob = () => {
                                                             <div className="card-body">
                                                                 <div className="" style={{ marginTop: 15 }}>
                                                                     <div className="row">
-                                                                        <div className="col-lg-3">
+                                                                        <div className="col-lg-4">
                                                                             <label className="form-label" >Number of Transactions </label>
                                                                             <input type="text" className="form-control" placeholder="Number of Transactions"
                                                                                 name="NumberOfTransactions" onChange={HandleChange} value={jobData.NumberOfTransactions}
@@ -914,7 +1146,7 @@ const CreateJob = () => {
                                                                                 <div style={{ 'color': 'red' }}>{errors['NumberOfTransactions']}</div>
                                                                             )}
                                                                         </div>
-                                                                        <div className="col-lg-3">
+                                                                        <div className="col-lg-4">
                                                                             <label className="form-label" >Number of Trial Balance Items</label>
                                                                             <input type="text" className="form-control" placeholder="Number of Trial Balance Items"
                                                                                 name="NumberOfTrialBalanceItems" onChange={HandleChange} value={jobData.NumberOfTrialBalanceItems}
@@ -923,7 +1155,7 @@ const CreateJob = () => {
                                                                                 <div style={{ 'color': 'red' }}>{errors['NumberOfTrialBalanceItems']}</div>
                                                                             )}
                                                                         </div>
-                                                                        <div className="col-lg-3">
+                                                                        <div className="col-lg-4">
                                                                             <label className="form-label" >Turnover</label>
                                                                             <input type="text" className="form-control" placeholder="Turnover"
                                                                                 name="Turnover" onChange={HandleChange} value={jobData.Turnover}
@@ -932,7 +1164,7 @@ const CreateJob = () => {
                                                                                 <div style={{ 'color': 'red' }}>{errors['Turnover']}</div>
                                                                             )}
                                                                         </div>
-                                                                        <div className="col-lg-3">
+                                                                        <div className="col-lg-4">
                                                                             <label className="form-label"  >  No.Of Employees  </label>
                                                                             <input type="text" className="form-control" placeholder="No.Of Employees"
                                                                                 name="NoOfEmployees" onChange={HandleChange} value={jobData.NoOfEmployees}
@@ -942,7 +1174,7 @@ const CreateJob = () => {
                                                                             )}
 
                                                                         </div>
-                                                                        <div className="col-lg-3">
+                                                                        <div className="col-lg-4">
                                                                             <label className="form-label" >VAT Reconciliation</label>
                                                                             <select className="form-select mb-3 invoice_type_dropdown"
                                                                                 name="VATReconciliation" onChange={HandleChange} value={jobData.VATReconciliation}>
@@ -955,7 +1187,7 @@ const CreateJob = () => {
                                                                                 <div style={{ 'color': 'red' }}>{errors['VATReconciliation']}</div>
                                                                             )}
                                                                         </div>
-                                                                        <div className="col-lg-3">
+                                                                        <div className="col-lg-4">
                                                                             <label className="form-label"  >Bookkeeping?</label>
                                                                             <select className="form-select mb-3 invoice_type_dropdown"
                                                                                 name="Bookkeeping" onChange={HandleChange} value={jobData.Bookkeeping}
@@ -968,7 +1200,7 @@ const CreateJob = () => {
                                                                                 <div style={{ 'color': 'red' }}>{errors['Bookkeeping']}</div>
                                                                             )}
                                                                         </div>
-                                                                        <div className="col-lg-3">
+                                                                        <div className="col-lg-4">
                                                                             <label className="form-label" >Processing Type</label>
                                                                             <select className="form-select mb-3 invoice_type_dropdown"
                                                                                 name="ProcessingType" onChange={HandleChange} value={jobData.ProcessingType}
@@ -995,7 +1227,7 @@ const CreateJob = () => {
                                                                 <div className="card-body">
                                                                     <div style={{ marginTop: 15 }}>
                                                                         <div className="row">
-                                                                            <div className="col-lg-3">
+                                                                            <div className="col-lg-4">
                                                                                 <label className="form-label">Invoiced</label>
                                                                                 <select className="invoiced_dropdown form-select mb-3"
                                                                                     name="Invoiced" onChange={HandleChange} value={jobData.Invoiced}
@@ -1009,7 +1241,7 @@ const CreateJob = () => {
                                                                                 )}
 
                                                                             </div>
-                                                                            <div className="col-lg-3">
+                                                                            <div className="col-lg-4">
                                                                                 <label className="form-label" >Currency</label>
                                                                                 <select className="invoiced_dropdown form-select mb-3"
                                                                                     name="Currency" onChange={HandleChange} value={jobData.Currency}
@@ -1026,7 +1258,7 @@ const CreateJob = () => {
                                                                                     <div style={{ 'color': 'red' }}>{errors['Currency']}</div>
                                                                                 )}
                                                                             </div>
-                                                                            <div className="col-lg-3">
+                                                                            <div className="col-lg-4">
                                                                                 <label className="form-label" > Invoice Value </label>
                                                                                 <input type="text" className="form-control" placeholder="Invoice Value"
                                                                                     name="InvoiceValue" onChange={HandleChange} value={jobData.InvoiceValue}
@@ -1035,7 +1267,7 @@ const CreateJob = () => {
                                                                                     <div style={{ 'color': 'red' }}>{errors['InvoiceValue']}</div>
                                                                                 )}
                                                                             </div>
-                                                                            <div className="col-lg-3">
+                                                                            <div className="col-lg-4">
                                                                                 <label className="form-label" > Invoice Date </label>
                                                                                 <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
                                                                                     name="InvoiceDate" onChange={HandleChange} value={jobData.InvoiceDate}
@@ -1044,7 +1276,7 @@ const CreateJob = () => {
                                                                                     <div style={{ 'color': 'red' }}>{errors['InvoiceDate']}</div>
                                                                                 )}
                                                                             </div>
-                                                                            <div className="col-lg-3">
+                                                                            <div className="col-lg-4">
                                                                                 <label className="form-label" >Invoice Hours </label>
                                                                                 <div className="input-group">
                                                                                     <input type="text" className="form-control"
