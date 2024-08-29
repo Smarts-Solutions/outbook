@@ -436,7 +436,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                     <label
                       className={`col-lg-${field.label_size}`}
                       htmlFor={field.name}
-                      style={{ width: "15%" }}
+                      
                     >
                       {field.label}
                       <span className="text-danger">*</span>
@@ -444,7 +444,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                     <div className="mb-3 row align-items-center">
 
 
-                      <div className="d-flex align-items-center" style={{ width: "85%" }}>
+                      <div className="d-flex align-items-center" >
 
                         <select
                           className="form-select me-2"
@@ -470,9 +470,10 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                           autoComplete="new-email"
 
                         />
+                        
                       </div>
 
-                      <div style={{ color: "red", marginTop: "0.25rem", width: "100%" }}>
+                      <div className="error-text">
                         {formik.touched[field.name] && formik.errors[field.name] && (
                           <div>{formik.errors[field.name]}</div>
                         )}
