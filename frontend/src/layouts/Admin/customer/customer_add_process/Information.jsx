@@ -1343,12 +1343,13 @@ const Information = () => {
                                             </div>
 
                                             <div className="col-lg-4">
-                                              <div className="mb-3">
-                                                <div className="row">
-                                                  <div className="col-md-4">
-                                                    <label className="form-label">
+                                            <label className="form-label">
                                                       Phone
                                                     </label>
+                                              <div className="mb-3">
+                                                <div className="row">
+                                                  <div className="col-md-4 pe-0">
+                                                   
                                                     <select
                                                       className="form-select"
                                                       onChange={(e) =>
@@ -1373,7 +1374,7 @@ const Information = () => {
                                                       )}
                                                     </select>
                                                   </div>
-                                                  <div className="mb-3 col-md-8">
+                                                  <div className="mb-3 col-md-8 ps-1">
                                                     <input
                                                       type="text"
                                                       className="form-control"
