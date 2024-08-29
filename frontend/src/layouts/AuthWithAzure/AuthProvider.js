@@ -23,7 +23,6 @@ const loginRequest = {
 export const initializeMsal = async () => {
     try {
         await pca.initialize();
-        // console.log('MSAL initialized successfully');
     } catch (error) {
         console.error('Error initializing MSAL:', error);
     }

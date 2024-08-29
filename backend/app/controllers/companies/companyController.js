@@ -3,7 +3,7 @@ const axios = require('axios');
 const seachCompany = async (req, res) => {
   try {
 
-    if (req.body.search != "") {
+    if (req.body.search != "" && req.body.search != null && req.body.search != undefined ) {
 
       let config = {
         method: 'get',

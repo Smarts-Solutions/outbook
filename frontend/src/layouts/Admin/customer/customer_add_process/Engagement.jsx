@@ -16,10 +16,7 @@ const Engagement = () => {
   const [errors2, setErrors2] = useState({});
   const [errors3, setErrors3] = useState({});
   const [errors4, setErrors4] = useState([]);
-  console.log("errors1",errors1)
-  console.log("errors2",errors2)
-  console.log("errors3",errors3)
-  console.log("errors4",errors4)
+
 
   const [formValues1, setFormValues1] = useState({
     accountants: '',

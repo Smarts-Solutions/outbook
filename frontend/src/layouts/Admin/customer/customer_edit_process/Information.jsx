@@ -2,12 +2,10 @@ import React, { useState, useEffect, useContext } from "react";
 import { useDispatch } from 'react-redux';
 import { Formik, Field, Form } from "formik";
 import { Button } from "antd";
-import { Input } from "formik-antd";
 import MultiStepFormContext from "./MultiStepFormContext";
 import { GET_CUSTOMER_DATA, Edit_Customer, GetAllCompany } from '../../../../ReduxStore/Slice/Customer/CustomerSlice'
 import { Staff } from '../../../../ReduxStore/Slice/Staff/staffSlice';
 import { Email_regex } from '../../../../Utils/Common_regex'
-
 import Swal from 'sweetalert2'
 import { useNavigate } from "react-router-dom";
 import { PersonRole, Country } from '../../../../ReduxStore/Slice/Settings/settingSlice'
@@ -214,7 +212,6 @@ const Information = ({ id, pageStatus }) => {
 
 
 
-    //  for sole trader
     const handleChange1 = (e) => {
         const { name, value } = e.target;
         if (name === "vatNumber" || name === "phone") {
@@ -232,15 +229,9 @@ const Information = ({ id, pageStatus }) => {
             if (!getSoleTraderDetails[key]) {
                 if (key == 'IndustryType') newErrors[key] = 'Select Client Industry';
                 else if (key == 'tradingName') newErrors[key] = 'Please enter Trading Name';
-
-                else if (key == 'vatRegistered') newErrors[key] = 'Please select VAT Registered';
-                // else if (key == 'vatNumber') newErrors[key] = 'Please enter VAT Number';
-                // else if (key == 'website') newErrors[key] = 'Please enter Website';
+                else if (key == 'vatRegistered') newErrors[key] = 'Please select VAT Registered';  
                 else if (key == 'first_name') newErrors[key] = 'Please enter First Name';
                 else if (key == 'last_name') newErrors[key] = 'Please enter Last Name';
-                // else if (key == 'phone') newErrors[key] = 'Please enter Phone';
-
-
                 else if (key == 'email') newErrors[key] = 'Please enter Email';
                 else if (key == 'residentialAddress') newErrors[key] = 'Please enter Residential Address';
             }
@@ -257,8 +248,6 @@ const Information = ({ id, pageStatus }) => {
 
 
 
-
-    // Handle Submit
     const handleSubmit = async () => {
         if (customerType == 1 && validate1() && ManagerType != "") {
 
@@ -441,12 +430,8 @@ const Information = ({ id, pageStatus }) => {
                 else if (key == 'RegisteredOfficeAddress') newErrors[key] = 'Please Enter Registered Office Address';
                 else if (key == 'IncorporationDate') newErrors[key] = 'Please Enter Incorporation Date';
                 else if (key == 'IncorporationIn') newErrors[key] = 'Please Enter Incorporation In';
-                else if (key == 'VATRegistered') newErrors[key] = 'Please Enter VAT Registered';
-                // else if (key == 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
-                // else if (key == 'Website') newErrors[key] = 'Please Enter Website';
-
+                else if (key == 'VATRegistered') newErrors[key] = 'Please Enter VAT Registered';           
                 else if (key == 'TradingName') newErrors[key] = 'Please Enter Trading Name';
-                // else if (key == 'TradingAddress') newErrors[key] = 'Please Enter Trading Address';
             }
         }
         setErrors2(newErrors)
@@ -718,6 +703,7 @@ const Information = ({ id, pageStatus }) => {
                                                         className="form-select "
                                                         onChange={(e) => setCustomerType(e.target.value)}
                                                         value={customerType}
+                                                        disabled={true}
                                                     >
                                                         <option value="1">Sole Trader</option>
                                                         <option value="2">Company</option>
@@ -1002,7 +988,7 @@ const Information = ({ id, pageStatus }) => {
                                                                         <label className="form-label" >Company Name<span style={{ color: "red" }}>*</span>  </label>
                                                                         <input type="text" className="form-control input_bg" placeholder="Outbooks Quality & Certainty LTD"
                                                                             name="CompanyName" onChange={(e) => handleChange2(e)} value={getCompanyDetails.CompanyName}
-                                                                            disabled
+                                                                            
                                                                         />
                                                                         {errors2['CompanyName'] && (
                                                                             <div className="error-text">{errors2['CompanyName']}</div>
@@ -1014,7 +1000,7 @@ const Information = ({ id, pageStatus }) => {
                                                                     <div className="mb-3">
                                                                         <label className="form-label">Entity Type<span style={{ color: "red" }}>*</span>   </label>
                                                                         <input type="text" className="form-control input_bg" placeholder="LTD"
-                                                                            name="EntityType" onChange={(e) => handleChange2(e)} value={getCompanyDetails.EntityType} disabled />
+                                                                            name="EntityType" onChange={(e) => handleChange2(e)} value={getCompanyDetails.EntityType}  />
                                                                         {errors2['EntityType'] && (
                                                                             <div className="error-text">{errors2['EntityType']}</div>
                                                                         )}
@@ -1024,7 +1010,7 @@ const Information = ({ id, pageStatus }) => {
                                                                     <div className="mb-3">
                                                                         <label className="form-label"  >Company Status<span style={{ color: "red" }}>*</span> </label>
                                                                         <input type="text" className="form-control input_bg" placeholder="Active"
-                                                                            name="CompanyStatus" onChange={(e) => handleChange2(e)} value={getCompanyDetails.CompanyStatus} disabled />
+                                                                            name="CompanyStatus" onChange={(e) => handleChange2(e)} value={getCompanyDetails.CompanyStatus}  />
                                                                         {errors2['CompanyStatus'] && (
                                                                             <div className="error-text">{errors2['CompanyStatus']}</div>)}
                                                                     </div>
@@ -1033,29 +1019,19 @@ const Information = ({ id, pageStatus }) => {
                                                                     <div className="mb-3">
                                                                         <label className="form-label">Company Number<span style={{ color: "red" }}>*</span></label>
                                                                         <input type="text" className="form-control input_bg" placeholder="Company Number"
-                                                                            name="CompanyNumber" onChange={(e) => handleChange2(e)} value={getCompanyDetails.CompanyNumber} disabled
+                                                                            name="CompanyNumber" onChange={(e) => handleChange2(e)} value={getCompanyDetails.CompanyNumber} 
                                                                         />
                                                                         {errors2['CompanyNumber'] && (
                                                                             <div className="error-text">{errors2['CompanyNumber']}</div>
                                                                         )}
                                                                     </div>
                                                                 </div>
-                                                                <div className="col-lg-4">
-                                                                    <div className="mb-3">
-                                                                        <label className="form-label">Registered Office Address<span style={{ color: "red" }}>*</span>  </label>
-                                                                        <input type="text" className="form-control input_bg" placeholder="Suite Winsor & Netwon Building, White Fridrs Avenue, England,HA3 5RN"
-                                                                            name="RegisteredOfficeAddress" onChange={(e) => handleChange2(e)} value={getCompanyDetails.RegisteredOfficeAddress} disabled
-                                                                        />
-                                                                        {errors2['RegisteredOfficeAddress'] && (
-                                                                            <div className="error-text">{errors2['RegisteredOfficeAddress']}</div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
+                                                            
                                                                 <div className="col-lg-4">
                                                                     <div className="mb-3">
                                                                         <label className="form-label">Incorporation Date</label>
                                                                         <input type="text" className="form-control input_bg" placeholder="07-01-2023"
-                                                                            name="IncorporationDate" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationDate} disabled
+                                                                            name="IncorporationDate" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationDate} 
                                                                         />
                                                                         {errors2['IncorporationDate'] && (
                                                                             <div className="error-text">{errors2['IncorporationDate']}</div>
@@ -1066,11 +1042,22 @@ const Information = ({ id, pageStatus }) => {
                                                                     <div className="mb-3">
                                                                         <label className="form-label"  > Incorporation in  <span style={{ color: "red" }}>*</span> </label>
                                                                         <input type="text" className="form-control input_bg" placeholder="Please Enter Incorporation In"
-                                                                            name="IncorporationIn" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationIn} disabled
+                                                                            name="IncorporationIn" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationIn} 
                                                                         />
 
                                                                         {errors2['IncorporationIn'] && (
                                                                             <div className="error-text">{errors2['IncorporationIn']}</div>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-lg-8">
+                                                                    <div className="mb-3">
+                                                                        <label className="form-label">Registered Office Address<span style={{ color: "red" }}>*</span>  </label>
+                                                                        <input type="text" className="form-control input_bg" placeholder="Suite Winsor & Netwon Building, White Fridrs Avenue, England,HA3 5RN"
+                                                                            name="RegisteredOfficeAddress" onChange={(e) => handleChange2(e)} value={getCompanyDetails.RegisteredOfficeAddress} 
+                                                                        />
+                                                                        {errors2['RegisteredOfficeAddress'] && (
+                                                                            <div className="error-text">{errors2['RegisteredOfficeAddress']}</div>
                                                                         )}
                                                                     </div>
                                                                 </div>

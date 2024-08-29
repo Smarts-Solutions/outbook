@@ -3,16 +3,10 @@ import { useDispatch } from "react-redux";
 import { Formik, Field, Form, useFormik } from "formik";
 import AddFrom from "../../../../Components/ExtraComponents/Forms/Customer.form";
 import { Email_regex } from "../../../../Utils/Common_regex";
-import {
-  GetAllCompany,
-  AddCustomer,
-} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { GetAllCompany, AddCustomer } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import MultiStepFormContext from "./MultiStepFormContext";
 import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
-import {
-  PersonRole,
-  Country,
-} from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import { PersonRole, Country } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import { GET_CUSTOMER_DATA } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 
@@ -27,22 +21,11 @@ const Information = () => {
   const [getAccountMangerIdErr, setAccountMangerIdErr] = useState("");
   const [CustomerType, setCustomerType] = useState("1");
   const [getNextStatus, setNextStatus] = useState("0");
-  const [customerDetails, setCustomerDetails] = useState({
-    loading: true,
-    data: [],
-  });
-  const [personRoleDataAll, setPersonRoleDataAll] = useState({
-    loading: true,
-    data: [],
-  });
-  const [errors, setErrors] = useState([
-    { firstName: "", lastName: "", role: "", phoneNumber: "", email: "" },
-  ]);
+  const [customerDetails, setCustomerDetails] = useState({loading: true,data: []});
+  const [personRoleDataAll, setPersonRoleDataAll] = useState({loading: true,data: []});
+  const [errors, setErrors] = useState([{ firstName: "", lastName: "", role: "", phoneNumber: "", email: "" } ]);
   const [getAllSearchCompany, setGetAllSearchCompany] = useState([]);
-  const [countryDataAll, setCountryDataAll] = useState({
-    loading: true,
-    data: [],
-  });
+  const [countryDataAll, setCountryDataAll] = useState({loading: true, data: []});
   const [contacts, setContacts] = useState([
     {
       authorised_signatory_status: false,
@@ -144,9 +127,7 @@ const Information = () => {
       if (formik.touched.Trading_Name == true && getAccountMangerId == "") {
         setAccountMangerIdErr("Please select an Account Manager");
         return;
-      }
-
-      if (!values.company_name) {
+      } else if (!values.company_name) {
         errors.company_name = "Please Enter Company Name";
       } else if (!values.entity_type) {
         errors.entity_type = "Please Enter Entity Type";
@@ -161,22 +142,18 @@ const Information = () => {
         errors.Incorporation_Date = "Please Enter Incorporation Date";
       } else if (!values.Incorporation_in) {
         errors.Incorporation_in = "Please Enter Incorporation in";
-      }
-      //  else if (!values.VAT_Registered) {
-      //     errors.VAT_Registered = "Please Enter VAT Registered";
-      //   }
-      else if (values.VAT_Registered === "1" && !values.VAT_Number) {
+      } else if (values.VAT_Registered === "1" && !values.VAT_Number) {
         errors.VAT_Number = "Please Enter VAT Number";
       } else if (values.VAT_Number && values.VAT_Number.length > 9) {
         errors.VAT_Number = "VAT Number cannot exceed 9 Numbers";
       } else if (values.Website && values.Website.length > 200) {
         errors.Website = "Website cannot exceed 200 characters";
-      } else if (!values.Trading_Name.trim()) {
+      } else if (
+        values.Trading_Name != undefined &&
+        !values.Trading_Name.trim()
+      ) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
-      //  else if (!values.Trading_Address) {
-      //     errors.Trading_Address = "Please Enter Trading Address";
-      //   }
 
       return errors;
     },
@@ -256,17 +233,15 @@ const Information = () => {
     validate: (values) => {
       let errors = {};
 
-      if (formik1.touched.Email == true && getAccountMangerId == "") {
+      if (getAccountMangerId == "") {
         setAccountMangerIdErr("Please select an Account Manager");
         return;
-      }
-      if (!values.Trading_Name.trim()) {
+      } else if (!values.Trading_Name.trim()) {
         errors.Trading_Name = "Please Enter Trading Name";
       }
       if (values.Trading_Name && values.Trading_Name.trim().length > 100) {
         errors.Trading_Name = "Trading Name cannot exceed 100 characters";
-      }
-      if (values.Phone && values.Phone.toString().length > 12) {
+      } else if (values.Phone && values.Phone.toString().length > 12) {
         errors.Phone = "Phone Number cannot exceed 12 digits";
       } else if (values.Phone && values.Phone.toString().length < 9) {
         errors.Phone = "Phone Number cannot be less than 9 digits";
@@ -349,9 +324,7 @@ const Information = () => {
       if (formik2.touched.Trading_Name == true && getAccountMangerId == "") {
         setAccountMangerIdErr("Please select an Account Manager");
         return;
-      }
-
-      if (!values.Trading_Name.trim()) {
+      } else if (!values.Trading_Name.trim()) {
         errors.Trading_Name = "Please Enter Trading Name";
       } else if (!values.VAT_Registered) {
         errors.VAT_Registered = "Please Enter VAT Registered";
@@ -458,6 +431,7 @@ const Information = () => {
       "Trading_Address",
       getCompanyDetails[0]?.address_snippet
     );
+
     if (formik.values.search_company_name == "") {
       formik.setFieldValue("company_name", "");
       formik.setFieldValue("entity_type", "");
@@ -466,8 +440,6 @@ const Information = () => {
       formik.setFieldValue("Registered_Office_Addres", "");
       formik.setFieldValue("Incorporation_Date", "");
       formik.setFieldValue("Incorporation_in", "");
-      formik.setFieldValue("Trading_Name", "");
-      formik.setFieldValue("Trading_Address", "");
     }
   }, [formik.values.search_company_name]);
 
@@ -583,7 +555,7 @@ const Information = () => {
       type: "text",
       label_size: 12,
       col_size: 4,
-      disable: true,
+      disable: false,
     },
     {
       name: "entity_type",
@@ -591,7 +563,7 @@ const Information = () => {
       type: "text",
       label_size: 12,
       col_size: 4,
-      disable: true,
+      disable: false,
     },
     {
       name: "company_status",
@@ -599,7 +571,7 @@ const Information = () => {
       type: "text",
       label_size: 12,
       col_size: 4,
-      disable: true,
+      disable: false,
     },
     {
       name: "company_number",
@@ -607,23 +579,16 @@ const Information = () => {
       type: "number",
       label_size: 12,
       col_size: 4,
-      disable: true,
+      disable: false,
     },
-    {
-      name: "Registered_Office_Addres",
-      label: "Registered Office Address",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: true,
-    },
+
     {
       name: "Incorporation_Date",
       label: "Incorporation Date",
       type: "text",
       label_size: 12,
       col_size: 4,
-      disable: true,
+      disable: false,
     },
 
     {
@@ -632,7 +597,15 @@ const Information = () => {
       type: "text",
       label_size: 12,
       col_size: 4,
-      disable: true,
+      disable: false,
+    },
+    {
+      name: "Registered_Office_Addres",
+      label: "Registered Office Address",
+      type: "text",
+      label_size: 12,
+      col_size: 8,
+      disable: false,
     },
     {
       name: "VAT_Registered",
@@ -752,6 +725,10 @@ const Information = () => {
       });
   };
 
+  useEffect(() => {
+    Get_Company();
+  }, [formik.values.search_company_name]);
+
   const CountryData = async (req) => {
     const data = { req: { action: "get" }, authToken: token };
     await dispatch(Country(data))
@@ -770,10 +747,6 @@ const Information = () => {
         console.log("Error", error);
       });
   };
-
-  useEffect(() => {
-    Get_Company();
-  }, [formik.values.search_company_name]);
 
   const fetchStaffData = async () => {
     try {
@@ -1048,7 +1021,7 @@ const Information = () => {
         }
       })
       .catch((error) => {
-        console.log("Error 11", error);
+        console.log("Error ", error);
       });
   };
 
@@ -1068,6 +1041,12 @@ const Information = () => {
       }
     }
   }, [errors, contacts]);
+
+  const capitalizeFirstLetter = (string) => {
+    if (!string) return "";
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+  };
+
 
   return (
     <Formik
@@ -1131,7 +1110,9 @@ const Information = () => {
                           </option>
                           {staffDataAll.data.map((data) => (
                             <option key={data.id} value={data.id}>
-                              {data.first_name+" "+data.last_name}
+                              {capitalizeFirstLetter(data.first_name) +
+                                " " +
+                                capitalizeFirstLetter(data.last_name)}
                             </option>
                           ))}
                         </Field>

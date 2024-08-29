@@ -382,7 +382,7 @@ const getClientTypeChecklist = async(checklist) => {
 }
 
 const getByServiceWithJobType = async(checklist) => {
-    console.log("model",checklist);
+
     const {customer_id,service_id,job_type_id} = checklist;
     const query = `
     SELECT 
@@ -410,7 +410,7 @@ const getByServiceWithJobType = async(checklist) => {
     return { status: true, message: 'checklist get successfully.', data: result };
     }
     catch (err) {
-        console.log(err);
+        console.log("Error",err);
      return { status: false, message: 'Error get checklist.' };
     }
 }

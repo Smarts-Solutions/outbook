@@ -218,7 +218,6 @@ const Service = () => {
       pageStatus: "2",
       services: filteredMatchData,
     };
-    console.log("req", req);
 
     try {
       const response = await dispatch(

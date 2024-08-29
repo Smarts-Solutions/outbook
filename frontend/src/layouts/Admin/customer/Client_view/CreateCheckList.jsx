@@ -113,7 +113,7 @@ const CreateCheckList = () => {
           }
         }
       })
-      .catch(error => console.log("Error fetching job types:", error));
+      .catch((error) => console.log("Error fetching job types:", error));
   };
 
   // Handle form submission with validation

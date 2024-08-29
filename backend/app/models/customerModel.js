@@ -27,9 +27,6 @@ const createCustomer = async (customer) => {
     if (customer_id == undefined || customer_id == null || customer_id == "") {
         let UniqueNo = await generateNextUniqueCode()
 
-        console.log("customer", customer)
-
-
         if (customer.CustomerType == "1") {
             const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, First_Name, Last_Name, Phone, Email, Residential_Address } = customer;
             const firstThreeLetters = Trading_Name.substring(0, 3)
@@ -104,7 +101,7 @@ const createCustomer = async (customer) => {
         `;
 
                 for (const detail of contactDetails) {
-                    console.log("detail.role",detail.role)
+           
                     let role = detail.role==''?0:detail.role;
                     let first_name = detail.firstName;
                     let last_name = detail.lastName;
@@ -365,6 +362,7 @@ const createCustomer = async (customer) => {
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
+                console.log('Error inserting data:', err);
                 return { status: false, message: 'Update Error Customer Type 3' };
             }
 
@@ -969,7 +967,7 @@ const updateProcessCustomerFileDelete = async (customerProcessData) => {
 
 const getSingleCustomer = async (customer) => {
     let customerDetals = {}
-    console.log("customer",customer)
+  
     const { customer_id, pageStatus } = customer;
 
     const [ExistCustomer] = await pool.execute('SELECT customer_type FROM `customers` WHERE id =' + customer_id);
@@ -1446,7 +1444,7 @@ const getSingleCustomer = async (customer) => {
 
     //  Page Status 4 Paper Work Part
     else if (pageStatus === "4") {
-        console.log("INSIDE")
+   
         const query = `
         SELECT 
             customers.id AS customer_id,
@@ -1516,7 +1514,7 @@ const getSingleCustomer = async (customer) => {
 }
 
 const customerUpdate = async (customer) => {
-    console.log("customer",customer)
+
     const { customer_id, pageStatus } = customer;
     const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
     var account_manager_id = ExistCustomer[0].account_manager_id;
@@ -1630,7 +1628,6 @@ const customerUpdate = async (customer) => {
                 `;
                 const [result2] = await pool.execute(query2, [company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date_s, incorporation_in, customer_id]);
 
-                console.log("result2 ",result2)
 
                 // if(result2.changedRows > 0){
                 //     // Add Query Satff Logs
@@ -1800,7 +1797,8 @@ const customerUpdate = async (customer) => {
 
                         arrayInterId.push(contact_id)
                         const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, residential_address, authorised_signatory_status, customer_id, contact_id]);
-                        if (result3[0].changedRows > 0) {
+                      
+                        if (result3.changedRows > 0) {
                             logUpdateRequired = true;
                         }
 
@@ -1857,6 +1855,7 @@ const customerUpdate = async (customer) => {
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
+                console.log("Error",err)
                 return { status: false, message: 'Update Error Customer Type 3' };
             }
 
