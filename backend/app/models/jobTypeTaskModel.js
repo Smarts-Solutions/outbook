@@ -143,7 +143,7 @@ const addChecklist = async (checklist) => {
             VALUES (?, ?, ?)
             `;  
 
-            const checkQuery = `
+        const checkQuery = `
                 SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?
             `;
          const [existing] = await pool.execute(checkQuery, [task_name,service_id,job_type_id]);
