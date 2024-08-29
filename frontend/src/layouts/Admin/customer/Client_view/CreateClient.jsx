@@ -788,12 +788,12 @@ const CreateClient = () => {
                                                                                     </div>
                                                                                 </div>
 
-                                                                                <div class="col-lg-4">
-                                                                                    <div class="mb-3">
-                                                                                        <label for="firstNameinput" class="form-label">Phone</label>
-                                                                                        <div class="row">
-                                                                                            <div class="col-md-4 pe-0">
-                                                                                                <select class="form-select" onChange={(e) => handleChange1(e)} name="phone_code"
+                                                                                <div className="col-lg-4">
+                                                                                    <div className="mb-3">
+                                                                                        <label className="form-label">Phone</label>
+                                                                                        <div className="row">
+                                                                                            <div className="col-md-4 pe-0">
+                                                                                                <select className="form-select" onChange={(e) => handleChange1(e)} name="phone_code"
                                                                                                     value={getSoleTraderDetails.phone_code}
                                                                                                 >
                                                                                                     {countryDataAll.data.map((data) => (
@@ -1143,12 +1143,12 @@ const CreateClient = () => {
                                                                                                                     {errors[index].role && <div style={{ color: 'red' }}>{errors[index].role}</div>}
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div class="col-lg-4">
-                                                                                                                <div class="mb-3">
-                                                                                                                    <label for="firstNameinput" class="form-label">Phone</label>
-                                                                                                                    <div class="row">
-                                                                                                                        <div class="col-md-4 pe-0">
-                                                                                                                            <select class="form-select" onChange={(e) => handleChange(e)} name="phone_code"
+                                                                                                            <div className="col-lg-4">
+                                                                                                                <div className="mb-3">
+                                                                                                                    <label  className="form-label">Phone</label>
+                                                                                                                    <div className="row">
+                                                                                                                        <div className="col-md-4 pe-0">
+                                                                                                                            <select className="form-select" onChange={(e) => handleChange(e)} name="phone_code"
                                                                                                                                 value={getSoleTraderDetails.phone_code}
                                                                                                                             >
                                                                                                                                 {countryDataAll.data.map((data) => (
@@ -1395,12 +1395,12 @@ const CreateClient = () => {
                                                                                                             </div>
 
 
-                                                                                                            <div class="col-lg-4">
-                                                                                                                <div class="mb-3">
-                                                                                                                    <label className="form-label">Phone</label>
-                                                                                                                    <div class="row">
-                                                                                                                        <div class="col-md-4 pe-0">
-                                                                                                                            <select class="form-select"
+                                                                                                            <div className="col-lg-4">
+                                                                                                                <div className="mb-3">
+                                                                                                                    <label classNameName="form-label">Phone</label>
+                                                                                                                    <div className="row">
+                                                                                                                        <div className="col-md-4 pe-0">
+                                                                                                                            <select className="form-select"
                                                                                                                                 onChange={(e) => handleChange4(index, 'phone_code', e.target.value)}
                                                                                                                                 name="phone_code"
                                                                                                                                 value={contact.phone_code}
@@ -1428,12 +1428,12 @@ const CreateClient = () => {
                                                                                                                     </div>
                                                                                                                 </div>
                                                                                                             </div>
-                                                                                                            <div class="col-lg-4">
-                                                                                                            <div class="mb-3">
-                                                                                                                <label className="form-label">Alternate Phone Number</label>
-                                                                                                                <div class="row">
-                                                                                                                    <div class="col-md-4 pe-0">
-                                                                                                                        <select class="form-select"
+                                                                                                            <div className="col-lg-4">
+                                                                                                            <div className="mb-3">
+                                                                                                                <label classNameName="form-label">Alternate Phone Number</label>
+                                                                                                                <div className="row">
+                                                                                                                    <div className="col-md-4 pe-0">
+                                                                                                                        <select className="form-select"
                                                                                                                             onChange={(e) => handleChange4(index, 'alternate_phone_code', e.target.value)}
                                                                                                                             name="alternate_phone_code"
                                                                                                                             value={contact.alternate_phone_code}

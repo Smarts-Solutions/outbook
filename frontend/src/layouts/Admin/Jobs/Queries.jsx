@@ -44,9 +44,8 @@ const Queries = () => {
         </div>
         <div className='col-md-4'>
         <div>
-            {/* <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-info text-white float-end ms-2"> <i class="fa fa-plus pe-1"></i>  Add Timesheet</button> */}
-            <button type="button" class="btn btn-info text-white float-end " onClick={() => setAddquery(true)}>  
-             <i class="fa-regular fa-plus pe-1"></i> Add Query</button>
+            <button type="button" className="btn btn-info text-white float-end " onClick={() => setAddquery(true)}>  
+             <i className="fa-regular fa-plus pe-1"></i> Add Query</button>
              </div>    
         
         </div>
@@ -190,21 +189,7 @@ columns={columns} data={data} />
       />
     </div>
   </div>
-  {/* <div class="col-lg-6">
-                              <div class="mb-3">
-                                  <label for="firstNameinput" class="form-label">Was It Complete</label>
-                                  <select id="search-select"
-                                  class="form-select QueryWasItComplete mb-3"
-                                  aria-label="Default select example"
-                                  style="color: #8a8c8e !important;">
 
-                                  <option value="" selected> Yes
-                                  </option>
-                               
-                                  <option value="">No</option>
-                              </select>
-                              </div>
-                          </div> */}
   <div className="col-lg-6">
     <div className="mb-3">
       <label htmlFor="firstNameinput" className="form-label">

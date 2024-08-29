@@ -175,20 +175,8 @@ const Access = () => {
            
                 
                 <div className='report-data mt-4'>
-                <div class="tab-title"><h3>Set Default Access</h3></div>
-                    {/* <div className='d-flex justify-content-end align-items-center'>
-
-                        <div>
-                            <button
-                                type="button"
-                                data-bs-toggle="modal"
-                                data-bs-target="#exampleModal"
-                                onClick={(e) => setOpenModalOpen(true)}
-                                className='btn btn-info text-white float-end'>
-                                <i className="fa fa-plus" /> Set Default Access
-                            </button>
-                        </div>
-                    </div> */}
+                <div className="tab-title"><h3>Set Default Access</h3></div>
+                  
                     <div className='mt-3'>
                     <div className="accordion" id="default-accordion-example">
                                     {roleDataAll.data && roleDataAll.data.map((val, index) => (

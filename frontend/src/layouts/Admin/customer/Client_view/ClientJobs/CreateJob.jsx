@@ -1312,7 +1312,7 @@ const CreateJob = () => {
                                                                                                         <td>{checklist.budgeted_hour} hr</td>
                                                                                                         <td>
                                                                                                             <div className="add">
-                                                                                                                <button class="delete-icon"><i class="ti-trash" onClick={() => RemoveTask(checklist.task_id)}></i></button>
+                                                                                                                <button className="delete-icon"><i className="ti-trash" onClick={() => RemoveTask(checklist.task_id)}></i></button>
                                                                                                             </div>
                                                                                                         </td>
                                                                                                     </tr>
