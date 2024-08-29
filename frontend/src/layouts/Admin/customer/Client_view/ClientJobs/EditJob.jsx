@@ -33,7 +33,7 @@ const CreateJob = () => {
 
     const JobDetails = async () => {
         const req = { action: "getByJobId", job_id: location.state.row.job_id }
-        console.log("req", req)
+         
         const data = { req: req, authToken: token }
         await dispatch(Get_All_Job_List(data))
             .unwrap()
@@ -167,9 +167,7 @@ const CreateJob = () => {
         getChecklistData()
     }, [getChecklistId])
 
-
-    console.log("getJobDetails", getJobDetails.data)
-
+ 
     useEffect(() => {
 
         setBudgetedHours({
@@ -479,7 +477,7 @@ const CreateJob = () => {
     const handleAddTask = () => {
         const req = { task_id: "", task_name: taskName, budgeted_hour: Budgeted }
         setAddTaskArr([...AddTaskArr, req])
-        console.log("req", req)
+         
         setShowAddJobModal(false)
     }
 
@@ -1316,7 +1314,7 @@ const CreateJob = () => {
                                                                                                 AddTaskArr && AddTaskArr.map((checklist) => (
 
                                                                                                     <tr className="">
-                                                                                                        {console.log("checklist", checklist)}
+                                                                                                        
                                                                                                         <td>{checklist.task_name} </td>
                                                                                                         <td>{checklist.budgeted_hour} hr</td>
                                                                                                         <td>
