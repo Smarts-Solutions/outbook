@@ -368,8 +368,7 @@ const CreateJob = () => {
                 task: AddTaskArr
             }
         }
-        console.log("req", req)
-        return
+         
         const data = { req: req, authToken: token }
         if (validate()) {
             await dispatch(UpdateJob(data))
