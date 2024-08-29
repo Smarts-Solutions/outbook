@@ -26,12 +26,6 @@ const CreateJob = () => {
     const [getChecklistId, setChecklistId] = useState('')
     const [AddTaskArr, setAddTaskArr] = useState([])
     const [showAddJobModal, setShowAddJobModal] = useState(false);
-
-
-    console.log("AddTaskArr", AddTaskArr)
-
-
-
     const [jobModalStatus, jobModalSetStatus] = useState(false);
 
     const [jobData, setJobData] = useState({
@@ -370,8 +364,7 @@ const CreateJob = () => {
         const data = { req: req, authToken: token }
         setIsSubmitted(true);
         const isValid = validateAllFields();
-        console.log("isValid", isValid)
-        console.log("req", req)
+      
         return
         if (isValid) {
             await dispatch(AddAllJobType(data))
@@ -1311,7 +1304,7 @@ const CreateJob = () => {
                                                                                                 AddTaskArr && AddTaskArr.map((checklist) => (
 
                                                                                                     <tr className="">
-                                                                                                        {console.log("checklist", checklist)}
+                                                                                                     
                                                                                                         <td>{checklist.task_name} </td>
                                                                                                         <td>{checklist.budgeted_hour} hr</td>
                                                                                                         <td>

@@ -496,7 +496,7 @@ const getJobByClient = async (job) => {
 
 const getJobById = async (job) => {
      const {job_id} = job;
-    console.log(" job BY ID ",job)
+
      try {
      const query = `
     SELECT 
@@ -678,7 +678,6 @@ const getJobById = async (job) => {
 
 const jobUpdate = async (job) => {
 
- // console.log("job",job)
 
      const {
        job_id, // Assuming job_id is provided for the update
@@ -773,7 +772,7 @@ const jobUpdate = async (job) => {
           .filter(tsk => tsk.task_id !== null && tsk.task_id !== "")
           .map(tsk => tsk.task_id);
 
-          console.log("providedTaskIds",providedTaskIds)
+      
           
 
 
@@ -786,12 +785,12 @@ const jobUpdate = async (job) => {
           const [existingTasks] = await pool.execute(getExistingTasksQuery, [checklist_id]);
           const existingTaskIds = existingTasks.map(task => task.task_id);
          
-          console.log("existingTaskIds ",existingTaskIds)
+     
 
         
           // Find task IDs that need to be deleted
           const tasksToDelete = existingTaskIds.filter(id => !providedTaskIds.includes(id));
-          console.log("tasksToDelete ",tasksToDelete)
+      
         
           if (tasksToDelete.length > 0) {
             const deleteQuery = `
@@ -816,7 +815,7 @@ const jobUpdate = async (job) => {
                 const query = `
                   INSERT INTO task (name, service_id, job_type_id) VALUES (?, ?, ?)
                 `;
-                console.log()
+           
                 const [result] = await pool.execute(query, [task_name, service_id, job_type_id]);
         
                 if (result.insertId > 0) {

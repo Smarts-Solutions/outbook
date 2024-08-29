@@ -16,15 +16,9 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
     );
   }, [formik.values.search_company_name]);
 
-
-
-
-
-
-
   return (
     <form className="w-100" onSubmit={formik.handleSubmit}>
-      
+
       <div
         className="w-100"
         style={{
@@ -47,7 +41,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         htmlFor={field.name}
                       >
                         {field.label}
-                      
+
                       </label>
                       <div
                         className={`col-lg-${title === "addgroup" ? 12 : 12}`}
@@ -112,7 +106,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         </select>
                         {formik.touched[field.name] &&
                           formik.errors[field.name] && (
-                            <div className="error-text"  style={{color:"red"}}>
+                            <div className="error-text" style={{ color: "red" }}>
                               {formik.errors[field.name]}
                             </div>
                           )}
@@ -378,13 +372,19 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                           defaultValue=""
                           readOnly={field.disable}
                           autoComplete="new-email"
+                          required={false}
+                          // ref={(input) => {
+                          //   if (formik.touched[field.name] && formik.errors[field.name] && input) {
+                          //     input.focus();
+                          //   }
+                          // }}
                         />
                         <div className="invalid-feedback">
                           Please enter {field.label}
                         </div>
                         {formik.touched[field.name] &&
                           formik.errors[field.name] && (
-                            <div className="error-text" style={{color:"red"}}>
+                            <div className="error-text" style={{ color: "red" }}>
                               {formik.errors[field.name]}
                             </div>
                           )}
@@ -432,20 +432,20 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                 <>
                   <div className={`col-lg-${field.col_size}`}>
 
-                    
-                  <label
-                        className={`col-lg-${field.label_size}`}
-                        htmlFor={field.name}
-                        style={{ width: "15%" }}
-                      >
-                        {field.label}
-                        <span className="text-danger">*</span>
-                      </label>
+
+                    <label
+                      className={`col-lg-${field.label_size}`}
+                      htmlFor={field.name}
+                      style={{ width: "15%" }}
+                    >
+                      {field.label}
+                      <span className="text-danger">*</span>
+                    </label>
                     <div className="mb-3 row align-items-center">
-               
+
 
                       <div className="d-flex align-items-center" style={{ width: "85%" }}>
-                      
+
                         <select
                           className="form-select me-2"
                           style={{ width: "30%" }}
@@ -468,7 +468,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                           defaultValue=""
                           readOnly={field.disable}
                           autoComplete="new-email"
-                      
+
                         />
                       </div>
 
@@ -518,7 +518,8 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                     setSelectSearchItem(company.title)
                                   }
                                 >
-                                
+                            
+
                                   {company.title}
                                 </div>
                               ))}
@@ -624,13 +625,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                     <div className={`col-lg-${field.col_size} px-2`}>
                       <div className="mb-3  mt-4 row flex-column">
                         <div className="card-header card-header-light-blue step-card-header" ><h6 className="my-0 fw-bold">Sole Trading </h6></div>
-                        {/* <label
-                        className={`col-lg-${field.label_size}`}
-                        htmlFor={field.name}
-                      >
-                        Sole Trading
-                      </label> */}
-                        <div></div>
+                       
                       </div>
                     </div>
                   </>
@@ -647,7 +642,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
               className="btn btn-secondary m-2"
               onClick={closeBtn}
             >
-                <i className="pe-2 fa-regular fa-arrow-left-long"></i> Previous
+              <i className="pe-2 fa-regular fa-arrow-left-long"></i> Previous
             </button>
 
             <button

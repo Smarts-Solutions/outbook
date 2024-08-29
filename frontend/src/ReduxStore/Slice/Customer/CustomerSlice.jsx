@@ -1,24 +1,38 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { GETALLCOMPANY, ADD_CUSTOMER, GET_SERVICE, ADD_SERVICES, ADD_PEPPER_WORK, GET_ALL_CUSTOMER, GET_CUSTOMER, EDIT_CUSTOMER, Delete_Customer_File, GET_ALL_JOB_DATA, Add_Job_Type, GET_ALL_JOB_LIST, UPDATE_JOB , GETALLCHECKLIST } from "../../../Services/Customer/CustomerService";
+import {
+  GETALLCOMPANY,
+  ADD_CUSTOMER,
+  GET_SERVICE,
+  ADD_SERVICES,
+  ADD_PEPPER_WORK,
+  GET_ALL_CUSTOMER,
+  GET_CUSTOMER,
+  EDIT_CUSTOMER,
+  Delete_Customer_File,
+  GET_ALL_JOB_DATA,
+  Add_Job_Type,
+  GET_ALL_JOB_LIST,
+  UPDATE_JOB,
+  GETALLCHECKLIST,
+} from "../../../Services/Customer/CustomerService";
 
 import axios from "axios";
 const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 
-
 export async function GET_IP(data, token) {
   try {
-    const res = await axios.get(`https://api.ipify.org?format=json`)
+    const res = await axios.get(`https://api.ipify.org?format=json`);
     return await res;
-  }
-  catch (err) {
-  }
+  } catch (err) {}
 }
 
 export const GetAllCompany = createAsyncThunk("seachCompany", async (data) => {
   try {
-    const { req } = data;
-    let IP_Data = await GET_IP();
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const updatedReq = {
+      search: data.search,
+      StaffUserId: StaffUserId.id,
+    };
+
     const res = await GETALLCOMPANY(updatedReq);
 
     return await res;
@@ -29,10 +43,13 @@ export const GetAllCompany = createAsyncThunk("seachCompany", async (data) => {
 
 export const AddCustomer = createAsyncThunk("addCustomer", async (data) => {
   try {
-
-    const { req, authToken } = data
+    const { req, authToken } = data;
     let IP_Data = await GET_IP();
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
     const res = await ADD_CUSTOMER(updatedReq, authToken);
 
     return await res;
@@ -45,7 +62,11 @@ export const Get_Service = createAsyncThunk("service", async (data) => {
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
     const res = await GET_SERVICE(updatedReq, authToken);
     return await res;
   } catch (err) {
@@ -53,96 +74,140 @@ export const Get_Service = createAsyncThunk("service", async (data) => {
   }
 });
 
-export const ADD_SERVICES_CUSTOMERS = createAsyncThunk("updateProcessCustomer", async (data) => {
-  try {
-    const { req, authToken } = data;
-    let IP_Data = await GET_IP();
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
-    const res = await ADD_SERVICES(updatedReq, authToken);
+export const ADD_SERVICES_CUSTOMERS = createAsyncThunk(
+  "updateProcessCustomer",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      let IP_Data = await GET_IP();
+      const updatedReq = {
+        ...req,
+        ip: IP_Data.data.ip,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await ADD_SERVICES(updatedReq, authToken);
 
-    return await res;
-  } catch (err) {
-    throw err;
+      return await res;
+    } catch (err) {
+      throw err;
+    }
   }
-});
+);
 
-export const ADD_PEPPER_WORKS = createAsyncThunk("updateProcessCustomerFile", async (data) => {
-  try {
-    const { req, authToken } = data;
-    let IP_Data = await GET_IP();
-    const updatedReq = { ...req, ip: IP_Data.data.ip,customer_id:data.customer_id, StaffUserId: StaffUserId.id };
-    const res = await ADD_PEPPER_WORK(updatedReq, authToken);
+export const ADD_PEPPER_WORKS = createAsyncThunk(
+  "updateProcessCustomerFile",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+    
 
+      let IP_Data = await GET_IP();
+      const updatedReq = {
+        ...req,
+        ip: IP_Data.data.ip,
+        customer_id: req.customer_id,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await ADD_PEPPER_WORK(updatedReq, req.authToken);
 
-    return await res;
-  } catch (err) {
-    throw err;
+      return await res;
+    } catch (err) {
+      throw err;
+    }
   }
-});
+);
 
-export const GET_ALL_CUSTOMERS = createAsyncThunk("customerAction", async (data) => {
-  try {
-    const { req, authToken } = data
+export const GET_ALL_CUSTOMERS = createAsyncThunk(
+  "customerAction",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
 
-    let IP_Data = await GET_IP();
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
-    const res = await GET_ALL_CUSTOMER(updatedReq, authToken);
+      let IP_Data = await GET_IP();
+      const updatedReq = {
+        ...req,
+        ip: IP_Data.data.ip,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await GET_ALL_CUSTOMER(updatedReq, authToken);
 
-
-    return await res;
-  } catch (err) {
-    throw err;
+      return await res;
+    } catch (err) {
+      throw err;
+    }
   }
-});
+);
 
-export const GET_CUSTOMER_DATA = createAsyncThunk("getSingleCustomer", async (data) => {
-  try {
-    const { req, authToken } = data;
-    let IP_Data = await GET_IP();
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
-    const res = await GET_CUSTOMER(updatedReq, authToken);
+export const GET_CUSTOMER_DATA = createAsyncThunk(
+  "getSingleCustomer",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      let IP_Data = await GET_IP();
+      const updatedReq = {
+        ...req,
+        ip: IP_Data.data.ip,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await GET_CUSTOMER(updatedReq, authToken);
 
-
-    return await res;
-  } catch (err) {
-    throw err;
+      return await res;
+    } catch (err) {
+      throw err;
+    }
   }
-});
+);
 
-export const Edit_Customer = createAsyncThunk("customerUpdate", async (data) => {
-  try {
-    const { req, authToken } = data;
-    let IP_Data = await GET_IP();
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
-    const res = await EDIT_CUSTOMER(updatedReq, authToken);
+export const Edit_Customer = createAsyncThunk(
+  "customerUpdate",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      let IP_Data = await GET_IP();
+      const updatedReq = {
+        ...req,
+        ip: IP_Data.data.ip,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await EDIT_CUSTOMER(updatedReq, authToken);
 
-    return await res;
-  } catch (err) {
-    throw err;
+      return await res;
+    } catch (err) {
+      throw err;
+    }
   }
-});
+);
 
-export const DELETE_CUSTOMER_FILE = createAsyncThunk("updateProcessCustomerFileAction", async (data) => {
-  try {
-    const { req, authToken } = data;
-    let IP_Data = await GET_IP();
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
-    const res = await Delete_Customer_File(updatedReq, authToken);
+export const DELETE_CUSTOMER_FILE = createAsyncThunk(
+  "updateProcessCustomerFileAction",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      let IP_Data = await GET_IP();
+      const updatedReq = {
+        ...req,
+        ip: IP_Data.data.ip,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await Delete_Customer_File(updatedReq, authToken);
 
-
-    return await res;
-  } catch (err) {
-    throw err;
+      return await res;
+    } catch (err) {
+      throw err;
+    }
   }
-});
+);
 
 export const GetAllJabData = createAsyncThunk("getAddJobData", async (data) => {
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
     const res = await GET_ALL_JOB_DATA(updatedReq, authToken);
-
 
     return await res;
   } catch (err) {
@@ -154,9 +219,12 @@ export const AddAllJobType = createAsyncThunk("jobAdd", async (data) => {
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
     const res = await Add_Job_Type(updatedReq, authToken);
-
 
     return await res;
   } catch (err) {
@@ -168,7 +236,11 @@ export const Get_All_Job_List = createAsyncThunk("jobAction", async (data) => {
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
     const res = await GET_ALL_JOB_LIST(updatedReq, authToken);
     return await res;
   } catch (err) {
@@ -180,7 +252,11 @@ export const UpdateJob = createAsyncThunk("jobUpdate", async (data) => {
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
     const res = await UPDATE_JOB(updatedReq, authToken);
     return await res;
   } catch (err) {
@@ -188,20 +264,24 @@ export const UpdateJob = createAsyncThunk("jobUpdate", async (data) => {
   }
 });
 
-export const GET_ALL_CHECKLIST = createAsyncThunk("checklistAction", async (data) => {
-  try {
-    const { req, authToken } = data;
-    let IP_Data = await GET_IP();
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
-    const res = await GETALLCHECKLIST(updatedReq, authToken);
-    return await res;
-  } catch (err) {
-    throw err;
+export const GET_ALL_CHECKLIST = createAsyncThunk(
+  "checklistAction",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      let IP_Data = await GET_IP();
+      const updatedReq = {
+        ...req,
+        ip: IP_Data.data.ip,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await GETALLCHECKLIST(updatedReq, authToken);
+      return await res;
+    } catch (err) {
+      throw err;
+    }
   }
-});
-
-
- 
+);
 
 const CustomerSlice = createSlice({
   name: "CustomerSlice",
@@ -221,8 +301,7 @@ const CustomerSlice = createSlice({
     addjobtype: [],
     getalljoblist: [],
     updatejob: [],
-    getallchecklist: []
-
+    getallchecklist: [],
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -380,7 +459,7 @@ const CustomerSlice = createSlice({
       .addCase(GET_ALL_CHECKLIST.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
-      })
+      });
   },
 });
 

@@ -1,7 +1,6 @@
 const pool = require('../config/database');
 const SatffLogUpdateOperation = async (logData) => {
 
-    console.log("logData adsadfsffd",logData)
     try {
         let staff_id = logData.staff_id;
         let date = logData.date;
@@ -16,7 +15,7 @@ const SatffLogUpdateOperation = async (logData) => {
         `;
         const [result2] = await pool.execute(query, [staff_id,date,module_name,log_message,permission_type,ip]);
     } catch (error) {
-       console.log("Error in SatffLogUpdateOperation",error) 
+   
     }
   
   };

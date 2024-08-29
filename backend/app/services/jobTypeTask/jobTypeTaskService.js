@@ -32,7 +32,7 @@ const addChecklist = async (checklist) => {
 };
 
 const checklistAction = async (checklist) => {
- console.log("ff",checklist);
+
   const {action} = checklist
   if(action === "get"){
     return jobTypeTaskModel.getChecklist(checklist);
