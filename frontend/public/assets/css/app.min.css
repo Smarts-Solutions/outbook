@@ -9934,3 +9934,24 @@ body .accordion-button:not(.collapsed)::after {
  
     box-shadow: none !important;
 }
+.search
+{
+  position: relative;
+  text-indent: 15px;
+}
+.search-box
+{
+  display: flex;
+  align-items: center;
+}
+.search-icon
+{
+  position: absolute;
+  left: 20px;
+  z-index: 1;
+}
+ .data-table-header {
+     background-color: #f0f0f0;
+     font-weight: bold;
+     text-align: center;
+   }

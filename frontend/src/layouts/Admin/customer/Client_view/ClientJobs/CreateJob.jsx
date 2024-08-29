@@ -26,6 +26,10 @@ const CreateJob = () => {
     const [getChecklistId, setChecklistId] = useState('')
     const [AddTaskArr, setAddTaskArr] = useState([])
     const [showAddJobModal, setShowAddJobModal] = useState(false);
+    const [taskName, setTaskName] = useState('')
+    const [Budgeted, setBudgeted] = useState('')
+    const [taskNameError, setTaskNameError] = useState('')
+    const [BudgetedError, setBudgetedError] = useState('')
     const [jobModalStatus, jobModalSetStatus] = useState(false);
 
     const [jobData, setJobData] = useState({
@@ -74,6 +78,10 @@ const CreateJob = () => {
         InvoiceRemark: "",
     });
 
+    console.log("AllChecklist", AllChecklist)
+    console.log("getChecklistId", getChecklistId)
+
+
     useEffect(() => {
         setJobData(prevState => ({
             ...prevState,
@@ -90,7 +98,7 @@ const CreateJob = () => {
         await dispatch(GetAllJabData(data))
             .unwrap()
             .then(async (response) => {
-                
+
                 if (response.status) {
                     setAllJobData({
                         loading: true,
@@ -171,7 +179,7 @@ const CreateJob = () => {
 
 
     const getChecklistData = async () => {
-        const req = { action: "getById", checklist_id: 1 }
+        const req = { action: "getById", checklist_id: getChecklistId && getChecklistId}
         const data = { req: req, authToken: token }
         await dispatch(GET_ALL_CHECKLIST(data))
             .unwrap()
@@ -179,7 +187,7 @@ const CreateJob = () => {
                 if (response.status) {
                     setAllChecklistData({
                         loading: true,
-                        data: response.data
+                        data: response.data.task || []
                     })
                 } else {
                     setAllChecklistData({
@@ -311,8 +319,6 @@ const CreateJob = () => {
     };
 
 
-
-
     const handleSubmit = async () => {
         const req = {
             account_manager_id: location.state.goto == "Customer" ? location.state.details.account_manager_id : location.state.details.customer_id.account_manager_id,
@@ -357,15 +363,18 @@ const CreateJob = () => {
             invoice_value: jobData.InvoiceValue,
             invoice_date: jobData.InvoiceDate,
             invoice_hours: jobData.InvoiceHours,
-            invoice_remark: jobData.InvoiceRemark
+            invoice_remark: jobData.InvoiceRemark,
+            tasks: {
+                checklist_id: location.state.details.customer_id.id,
+                task : AddTaskArr
+            }
         }
 
 
         const data = { req: req, authToken: token }
         setIsSubmitted(true);
         const isValid = validateAllFields();
-      
-        return
+         
         if (isValid) {
             await dispatch(AddAllJobType(data))
                 .unwrap()
@@ -417,7 +426,7 @@ const CreateJob = () => {
 
 
     const AddTask = (id) => {
-        const filterData = AllChecklistData.data.task.find((data) => data.task_id == id);
+        const filterData = AllChecklistData.data.find((data) => data.task_id == id);
 
         if (!filterData) {
             return;
@@ -441,14 +450,43 @@ const CreateJob = () => {
     }
 
 
+    const handleChange1 = (e) => {
+        const { name, value } = e.target;
+
+        // Validation for Task Name
+        if (name === "taskname") {
+            if (value.trim() === "") {
+                setTaskNameError("Please Enter Task Name");
+            } else {
+                setTaskNameError("");
+            }
+            setTaskName(value);
+        }
+
+        // Validation for Budgeted Hour
+        if (name === "budgeted_hour") {
+            if (value.trim() === "") {
+                setBudgetedError("Please Enter Budgeted Hour");
+            } else if (isNaN(value) || value <= 0) {
+                setBudgetedError("Please enter a valid number for Budgeted Hour");
+            } else {
+                setBudgetedError("");
+            }
+            setBudgeted(value);
+        }
+    };
 
 
 
 
+    const handleAddTask = () => {
+        const req = { task_id: "", task_name: taskName, budgeted_hour: Budgeted }
+        setAddTaskArr([...AddTaskArr, req])
+        console.log("req", req)
+        setShowAddJobModal(false)
+    }
 
-
-
-
+    
 
     return (
         <div>
@@ -500,7 +538,7 @@ const CreateJob = () => {
                                                                                     <option value="">Select Client</option>
                                                                                     {AllJobData.loading &&
                                                                                         AllJobData.data.client.map((client) => (
-                                                                                        <option value={client.client_id} key={client.client_id}>{client.client_trading_name}</option>
+                                                                                            <option value={client.client_id} key={client.client_id}>{client.client_trading_name}</option>
                                                                                         ))
                                                                                     }
                                                                                 </select>
@@ -1116,9 +1154,9 @@ const CreateJob = () => {
                                                                                 >
                                                                                     <option value="">Please Select Currency</option>
                                                                                     {
-                                                                                       AllJobData.loading &&
-                                                               AllJobData.data.currency.map((currency) => (
-                                                               <option value={currency.country_id} key={currency.country_id}>{currency.currency_name}</option>
+                                                                                        AllJobData.loading &&
+                                                                                        AllJobData.data.currency.map((currency) => (
+                                                                                            <option value={currency.country_id} key={currency.country_id}>{currency.currency_name}</option>
                                                                                         ))
                                                                                     }
                                                                                 </select>
@@ -1127,7 +1165,7 @@ const CreateJob = () => {
                                                                                 )}
                                                                             </div>
                                                                             <div className="col-lg-4">
-                                                                                <label className="form-label" > Invoice Value </label>
+                                                                                <label className="form-label">Invoice Value</label>
                                                                                 <input type="text" className="form-control" placeholder="Invoice Value"
                                                                                     name="InvoiceValue" onChange={HandleChange} value={jobData.InvoiceValue}
                                                                                 />
@@ -1155,7 +1193,7 @@ const CreateJob = () => {
 
                                                                             <div className="col-lg-4">
                                                                                 <div className="mb-3">
-                                                                                    <label className="form-label" >Invoice Date</label>
+                                                                                    <label className="form-label" >Invoice </label>
                                                                                     <div className="input-group">
                                                                                         <input
                                                                                             type="text"
@@ -1236,8 +1274,6 @@ const CreateJob = () => {
                                                                                     <option value={checklist.checklists_id} key={checklist.checklists_id}>{checklist.check_list_name}</option>
                                                                                 ))
                                                                             }
-
-
                                                                         </select>
                                                                     </div>
                                                                     <div className="col-lg-6">
@@ -1264,7 +1300,7 @@ const CreateJob = () => {
                                                                                         </thead>
                                                                                         <tbody className="list form-check-all">
                                                                                             {
-                                                                                                AllChecklistData && AllChecklistData.data.task.map((checklist) => (
+                                                                                                AllChecklistData.data && AllChecklistData.data.map((checklist) => (
                                                                                                     <tr className="">
                                                                                                         <td>{checklist.task_name} </td>
                                                                                                         <td>{checklist.budgeted_hour} hr</td>
@@ -1304,12 +1340,12 @@ const CreateJob = () => {
                                                                                                 AddTaskArr && AddTaskArr.map((checklist) => (
 
                                                                                                     <tr className="">
-                                                                                                     
+                                                                                                        {console.log("checklist", checklist)}
                                                                                                         <td>{checklist.task_name} </td>
                                                                                                         <td>{checklist.budgeted_hour} hr</td>
                                                                                                         <td>
                                                                                                             <div className="add">
-                                                                                                                <button class="delete-icon"><i class="ti-trash" onClick={() => RemoveTask(checklist.task_id)}></i></button>
+                                                                                                                <button className="delete-icon"><i className="ti-trash" onClick={() => RemoveTask(checklist.task_id)}></i></button>
                                                                                                             </div>
                                                                                                         </td>
                                                                                                     </tr>
@@ -1339,21 +1375,37 @@ const CreateJob = () => {
                                                         <div className='col-lg-12'>
                                                             <label className="form-label">Task Name</label>
                                                             <div>
-                                                                <input type="text" placeholder="Enter Task name" className='p-1 w-100 mb-2 rounded' />
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Enter Task name"
+                                                                    name='taskname'
+                                                                    className='p-1 w-100 mb-2 rounded'
+                                                                    onChange={handleChange1}
+                                                                    value={taskName}
+                                                                />
+                                                                {taskNameError && <div className="error-text text-danger">{taskNameError}</div>}
                                                             </div>
                                                         </div>
                                                         <div className='col-lg-12'>
                                                             <label className="form-label">Budgeted Hour</label>
                                                             <div>
-                                                                <input type="text" placeholder='Enter Budgeted Hour' className='p-1 mb-2 w-100 rounded' />
+                                                                <input
+                                                                    type="number"
+                                                                    placeholder='Enter Budgeted Hour'
+                                                                    name='budgeted_hour'
+                                                                    className='p-1 mb-2 w-100 rounded'
+                                                                    onChange={handleChange1}
+                                                                    value={Budgeted}
+                                                                />
+                                                                {BudgetedError && <div className="error-text text-danger">{BudgetedError}</div>}
                                                             </div>
                                                         </div>
-
                                                     </div>
+
                                                 </Modal.Body>
                                                 <Modal.Footer>
-                                                    <Button variant="secondary">Close</Button>
-                                                    <Button variant="btn btn-info text-white float-end blue-btn">Add</Button>
+                                                    <Button variant="secondary" onClick={(e) => setShowAddJobModal(false)}>Close</Button>
+                                                    <Button variant="btn btn-info text-white float-end blue-btn" onClick={handleAddTask}>Add</Button>
                                                 </Modal.Footer>
                                             </Modal>
                                         )}

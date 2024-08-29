@@ -247,6 +247,7 @@ async function generateNextUniqueCode() {
  }
 
 const jobAdd = async (job) => {
+
  
   const {
     account_manager_id,
@@ -404,19 +405,19 @@ const getJobByCustomer = async (job) => {
 
      FROM 
      jobs
-     JOIN 
+     LEFT JOIN 
      customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
      JOIN 
      clients ON jobs.client_id = clients.id
-     JOIN 
+     LEFT JOIN 
      job_types ON jobs.job_type_id = job_types.id
-     JOIN 
+     LEFT JOIN 
      services ON jobs.service_id = services.id
-     JOIN 
+     LEFT JOIN 
      staffs ON jobs.allocated_to = staffs.id
-     JOIN 
+     LEFT JOIN 
      staffs AS staffs2 ON jobs.reviewer = staffs2.id
-     JOIN 
+     LEFT JOIN 
      staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
      WHERE 
      jobs.customer_id = ?
@@ -433,6 +434,7 @@ const getJobByCustomer = async (job) => {
 
 const getJobByClient = async (job) => {
      const {client_id} = job;
+     console.log("client_id ",client_id)
      try {
      const query = `
      SELECT 
@@ -463,15 +465,15 @@ const getJobByClient = async (job) => {
      customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
      JOIN 
      clients ON jobs.client_id = clients.id
-     JOIN 
+     LEFT JOIN 
      job_types ON jobs.job_type_id = job_types.id
-     JOIN 
+     LEFT JOIN 
      services ON jobs.service_id = services.id
-     JOIN 
+     LEFT JOIN 
      staffs ON jobs.allocated_to = staffs.id
-     JOIN 
+     LEFT JOIN 
      staffs AS staffs2 ON jobs.reviewer = staffs2.id
-     JOIN 
+     LEFT JOIN 
      staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
      WHERE 
      jobs.client_id = ?
@@ -485,18 +487,20 @@ const getJobByClient = async (job) => {
     //     OR jobs.allocated_id = ?
     //   )
      const [rows] = await pool.execute(query, [client_id]);
+     console.log("rows ",rows)
      return { status: true, message: 'Success.', data: rows };
      } catch (error) {
      
      return { status: false, message: 'Error getting job.' };
      }
+
+    
     
 
 }
 
 const getJobById = async (job) => {
      const {job_id} = job;
-
      try {
      const query = `
     SELECT 
@@ -594,6 +598,7 @@ const getJobById = async (job) => {
 
    
      const [rows] = await pool.execute(query, [job_id]);
+     console.log("rows ",rows)
      let result = {}
      if(rows.length > 0){
 
@@ -665,8 +670,10 @@ const getJobById = async (job) => {
         }
        }
 
+      
        
      }
+     console.log("result ",result)
      return { status: true, message: 'Success.', data: result };
      } catch (error) {
      console.log("error ",error)

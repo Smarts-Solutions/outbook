@@ -1,11 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import DataTable from 'react-data-table-component';
 import DataTableExtensions from 'react-data-table-component-extensions';
 import 'react-data-table-component-extensions/dist/index.css';
 
 const Datatable = ({ columns, data, filter }) => {
   const noDataImage = '/assets/images/No-data-amico.png'; // Replace with your image path
+  useEffect(() => {
 
+    const table = document.querySelector('.rdt_Table');
+    
+    
+    if (table) {
+    
+    const preventDrag = (e) => e.preventDefault();
+    
+    table.addEventListener('dragstart', preventDrag);
+    
+    
+    return () => {
+    
+    table.removeEventListener('dragstart', preventDrag);
+    
+    };
+    
+    }
+    
+    }, []);
   return (
     <div className="datatable-container">
       {data.length === 0 ? (

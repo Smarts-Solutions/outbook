@@ -64,16 +64,10 @@ const MissingLogs = () => {
         hideBtn={true}
         handleClose={() => {
            setAddmissinglogs(false);
-          // formik.resetForm();
+         
         }}>
     <div className="row">
-  {/* <div class="col-lg-6">
-                              <label for="firstNameinput"
-                                          class="form-label">Expected Delivery Date
-                                         </label>
-                                         <input type="date" class="form-control mb-3" placeholder="DD-MM-YYYY" id="cleave-date">
 
-                          </div>*/}
   <div className="col-lg-6">
     <div className="mb-3">
       <label htmlFor="firstNameinput" className="form-label">

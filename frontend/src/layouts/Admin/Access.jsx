@@ -175,20 +175,8 @@ const Access = () => {
            
                 
                 <div className='report-data mt-4'>
-                <div class="tab-title"><h3>Set Default Access</h3></div>
-                    {/* <div className='d-flex justify-content-end align-items-center'>
-
-                        <div>
-                            <button
-                                type="button"
-                                data-bs-toggle="modal"
-                                data-bs-target="#exampleModal"
-                                onClick={(e) => setOpenModalOpen(true)}
-                                className='btn btn-info text-white float-end'>
-                                <i className="fa fa-plus" /> Set Default Access
-                            </button>
-                        </div>
-                    </div> */}
+                <div className="tab-title"><h3>Set Default Access</h3></div>
+                  
                     <div className='mt-3'>
                     <div className="accordion" id="default-accordion-example">
                                     {roleDataAll.data && roleDataAll.data.map((val, index) => (
@@ -232,55 +220,7 @@ const Access = () => {
                     </div>
                 </div>
 
-                {/* Modal */}
-                {/* <div className={modalOpen ? "modal fade  show" : "modal"} id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div className="modal-dialog modal-lg modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title" id="exampleModalLabel">Set Default Access</h5>
-                                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div className="modal-body">
-                                <div className="accordion" id="default-accordion-example">
-                                    {roleDataAll.data && roleDataAll.data.map((val, index) => (
-                                        <div className="accordion-item mt-2" key={index}>
-                                            <h2 className="accordion-header" id={`heading${index}`} onClick={(e) => OpenAccourdian(val)} >
-                                                <button
-                                                    className="accordion-button"
-                                                    type="button"
-                                                    data-bs-toggle="collapse"
-                                                    data-bs-target={`#collapse${index}`}
-                                                    aria-expanded="false"
-                                                    aria-controls={`collapse${index}`}>
-                                                    {val.role_name}
-                                                </button>
-                                            </h2>
-                                            <div
-                                                id={`collapse${index}`}
-                                                className="accordion-collapse collapse"
-                                                aria-labelledby={`heading${index}`}
-                                                data-bs-parent="#default-accordion-example">
-                                                <div className="accordion-body">
-                                                    <div className="row">
-                                                        {accessData && accessData.data.map((section, index) => (
-                                                            <div key={index} className="col-lg-6">
-                                                                <AccordionItem section={section} TradingName={val.role_name} role_id={val.id} />
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" className="btn btn-primary" onClick={handleSaveChanges}>Save changes</button>
-                            </div>
-                        </div>
-                    </div>
-                </div> */}
+
             
         </div>
 
