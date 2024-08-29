@@ -26,12 +26,10 @@ const CreateJob = () => {
     const [getChecklistId, setChecklistId] = useState('')
     const [AddTaskArr, setAddTaskArr] = useState([])
     const [showAddJobModal, setShowAddJobModal] = useState(false);
-
-
-    console.log("AddTaskArr", AddTaskArr)
-
-
-
+    const [taskName, setTaskName] = useState('')
+    const [Budgeted, setBudgeted] = useState('')
+    const [taskNameError, setTaskNameError] = useState('')
+    const [BudgetedError, setBudgetedError] = useState('')
     const [jobModalStatus, jobModalSetStatus] = useState(false);
 
     const [jobData, setJobData] = useState({
@@ -376,9 +374,7 @@ const CreateJob = () => {
         const data = { req: req, authToken: token }
         setIsSubmitted(true);
         const isValid = validateAllFields();
-        console.log("isValid", isValid)
-        console.log("req", req)
-        return
+         
         if (isValid) {
             await dispatch(AddAllJobType(data))
                 .unwrap()
@@ -1197,7 +1193,7 @@ const CreateJob = () => {
 
                                                                             <div className="col-lg-4">
                                                                                 <div className="mb-3">
-                                                                                    <label className="form-label" >Invoice Hours</label>
+                                                                                    <label className="form-label" >Invoice </label>
                                                                                     <div className="input-group">
                                                                                         <input
                                                                                             type="text"
@@ -1344,7 +1340,7 @@ const CreateJob = () => {
                                                                                                 AddTaskArr && AddTaskArr.map((checklist) => (
 
                                                                                                     <tr className="">
-                                                                                                     
+                                                                                                        {console.log("checklist", checklist)}
                                                                                                         <td>{checklist.task_name} </td>
                                                                                                         <td>{checklist.budgeted_hour} hr</td>
                                                                                                         <td>
