@@ -28,34 +28,48 @@ const Paper = () => {
   const handleFileChange = (event) => {
     const files = event.currentTarget.files;
     var fileArray;
+  
     if (files && typeof files[Symbol.iterator] === "function") {
       fileArray = Array.from(files);
-      setNewFiles(fileArray);
     } else {
-      console.log("File input is not iterable or not correctly set.");
+     
+      return;
     }
-
-    const previewArray = fileArray.map((file) => {
+  
+    
+    const allowedTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "image/png", "image/jpg", "image/jpeg"];
+  
+    
+    const validFiles = fileArray.filter((file) => allowedTypes.includes(file.type));
+  
+    if (validFiles.length !== fileArray.length) {
+      alert("Only PDFs, DOCS, PNG, JPG, and JPEG are allowed.");
+    }
+  
+    setNewFiles(validFiles);
+  
+    const previewArray = validFiles.map((file) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       return new Promise((resolve) => {
         reader.onload = () => resolve(reader.result);
       });
     });
-
+  
     Promise.all(previewArray).then((previewData) => {
       setPreviews(previewData);
     });
   };
+  
 
   const GetCustomerData = async () => {
     const req = { customer_id: location.state.id, pageStatus: "4" };
     const data1 = { req: req, authToken: token };
-    console.log("data1", data1);
+
     await dispatch(GET_CUSTOMER_DATA(data1))
       .unwrap()
       .then((response) => {
-        console.log("response.status", response);
+   
         if (response.status) {
           const existingFiles = response.data.customer_paper_work || [];
           setCustomerDetails({
@@ -80,11 +94,10 @@ const Paper = () => {
   }, []);
 
   const handleSubmit = async (values) => {
-    console.log("address", address);
-
     const data1 = {
-      req: { customer_id: address, fileData: newFiles },
-      authToken: token,
+
+      req: { fileData: newFiles, customer_id: address, authToken: token },
+
     };
     await dispatch(ADD_PEPPER_WORKS(data1))
       .unwrap()

@@ -225,12 +225,8 @@ const Engagement = () => {
         }
 
         const newJobEntries = [...jobEntries];
-        console.log(name, value)
-        // newJobEntries[0].minimum_number_of_jobs = value
-        // newJobEntries[index][name] = value;
-
         newJobEntries[index] = { ...newJobEntries[index], [name]: value };
-        console.log("newJobEntries", newJobEntries)
+     
 
         validate4()
         setJobEntries(newJobEntries);

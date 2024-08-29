@@ -28,13 +28,11 @@ export async function GET_IP(data, token) {
 
 export const GetAllCompany = createAsyncThunk("seachCompany", async (data) => {
   try {
-    const { req } = data;
-    let IP_Data = await GET_IP();
     const updatedReq = {
-      ...req,
-      ip: IP_Data.data.ip,
+      search: data.search,
       StaffUserId: StaffUserId.id,
     };
+
     const res = await GETALLCOMPANY(updatedReq);
 
     return await res;
@@ -101,7 +99,7 @@ export const ADD_PEPPER_WORKS = createAsyncThunk(
   async (data) => {
     try {
       const { req, authToken } = data;
-      console.log("req", req);
+    
 
       let IP_Data = await GET_IP();
       const updatedReq = {
@@ -110,7 +108,7 @@ export const ADD_PEPPER_WORKS = createAsyncThunk(
         customer_id: req.customer_id,
         StaffUserId: StaffUserId.id,
       };
-      const res = await ADD_PEPPER_WORK(updatedReq, authToken);
+      const res = await ADD_PEPPER_WORK(updatedReq, req.authToken);
 
       return await res;
     } catch (err) {
