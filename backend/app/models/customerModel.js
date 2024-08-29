@@ -362,6 +362,7 @@ const createCustomer = async (customer) => {
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
+                console.log('Error inserting data:', err);
                 return { status: false, message: 'Update Error Customer Type 3' };
             }
 
@@ -1796,7 +1797,8 @@ const customerUpdate = async (customer) => {
 
                         arrayInterId.push(contact_id)
                         const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, residential_address, authorised_signatory_status, customer_id, contact_id]);
-                        if (result3[0].changedRows > 0) {
+                      
+                        if (result3.changedRows > 0) {
                             logUpdateRequired = true;
                         }
 
@@ -1853,6 +1855,7 @@ const customerUpdate = async (customer) => {
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
+                console.log("Error",err)
                 return { status: false, message: 'Update Error Customer Type 3' };
             }
 
