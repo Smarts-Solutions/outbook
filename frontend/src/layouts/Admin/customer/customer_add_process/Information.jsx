@@ -1504,12 +1504,12 @@ const Information = () => {
                                                 <div className="row">
                                                   <div className="col-lg-12">
                                                     <div
-                                                      className="form-check form-switch form-switch-md mb-3 d-flex justify-content-between"
+                                                      className="form-switch-md mb-3 d-flex justify-content-between"
                                                       dir="ltr"
                                                     >
                                                       <div>
                                                         <label
-                                                          className="form-check-label"
+                                                          className="form-check-label fs-16"
                                                           htmlFor={`customSwitchsizemd-${index}`}
                                                         >
                                                           {" "}

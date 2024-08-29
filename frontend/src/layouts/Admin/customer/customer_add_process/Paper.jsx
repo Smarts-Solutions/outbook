@@ -120,6 +120,9 @@ const Paper = () => {
                                 >
                                   <thead className="table-light table-head-blue">
                                     <tr>
+                                    <th className="" data-sort="file_name">
+                                        File Image
+                                      </th>
                                       <th className="" data-sort="file_name">
                                         File Name
                                       </th>
@@ -190,7 +193,7 @@ const Paper = () => {
                                                       );
                                                     }}
                                                   >
-                                                    <i className="ti-trash" />
+                                                    <i className="ti-trash text-danger fs-5" />
                                                   </a>
                                                 </div>
                                               </div>
