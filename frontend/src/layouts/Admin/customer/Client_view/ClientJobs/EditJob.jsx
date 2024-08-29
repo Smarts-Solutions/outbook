@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
-import { GetAllJabData, UpdateJob } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { GetAllJabData, UpdateJob ,  GET_ALL_CHECKLIST} from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import sweatalert from 'sweetalert2';
 import { Get_All_Job_List } from "../../../../../ReduxStore/Slice/Customer/CustomerSlice";
 
+ 
+import { Modal, Button } from 'react-bootstrap';
 const CreateJob = () => {
     const location = useLocation()
     const navigate = useNavigate();
@@ -13,12 +15,22 @@ const CreateJob = () => {
     const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
     const [getJobDetails, setGetJobDetails] = useState({ loading: false, data: [] });
     const [errors, setErrors] = useState({})
-
+    const [jobModalStatus, jobModalSetStatus] = useState(false);
+    const [showAddJobModal, setShowAddJobModal] = useState(false);
+    const [getChecklistId, setChecklistId] = useState('')
+    const [AllChecklist, setAllChecklist] = useState({ loading: false, data: [] })
+    const [AllChecklistData, setAllChecklistData] = useState({ loading: false, data: [] })
+    const [AddTaskArr, setAddTaskArr] = useState([])
+    const [taskNameError, setTaskNameError] = useState('')
+    const [BudgetedError, setBudgetedError] = useState('')
+    const [taskName, setTaskName] = useState('')
+    const [Budgeted, setBudgeted] = useState('')
 
 
 
     const JobDetails = async () => {
         const req = { action: "getByJobId", job_id: location.state.row.job_id }
+        console.log("req", req)
         const data = { req: req, authToken: token }
         await dispatch(Get_All_Job_List(data))
             .unwrap()
@@ -44,6 +56,9 @@ const CreateJob = () => {
     useEffect(() => {
         JobDetails()
     }, []);
+    
+
+  
 
     const [jobData, setJobData] = useState({
         AccountManager: "",
@@ -92,55 +107,82 @@ const CreateJob = () => {
     });
 
 
+    const getAllChecklist = async () => {
+        const req = { action: "getByServiceWithJobType", service_id: jobData.Service, customer_id: location.state.goto == "Customer" ? location.state.details.id : location.state.details.customer_id.id, job_type_id: jobData.JobType }
+        const data = { req: req, authToken: token }
+        await dispatch(GET_ALL_CHECKLIST(data))
+            .unwrap()
+            .then(async (response) => {
+                if (response.status) {
+                    setAllChecklist({
+                        loading: true,
+                        data: response.data
+                    })
+                } else {
+                    setAllChecklist({
+                        loading: true,
+                        data: []
+                    })
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    }
+
+    useEffect(() => {
+        getAllChecklist()
+    }, [jobData.JobType]);
 
 
- 
+
+
     useEffect(() => {
         setJobData(prevState => ({
             ...prevState,
-            AccountManager: getJobDetails.loading && getJobDetails.data[0].account_manager_officer_first_name + " " + getJobDetails.loading && getJobDetails.data[0].account_manager_officer_last_name,
-            Customer: getJobDetails.loading && getJobDetails.data[0].customer_trading_name,
-            Client: location.state.goto == "Customer" ? getJobDetails.loading && getJobDetails.data[0].client_id : getJobDetails.loading && getJobDetails.data[0].client_trading_name,
-            ClientJobCode: getJobDetails.loading && getJobDetails.data[0].client_job_code,
-            CustomerAccountManager: getJobDetails.loading && getJobDetails.data[0].account_manager_officer_id,
-            Service: getJobDetails.loading && getJobDetails.data[0].service_id,
-            JobType: getJobDetails.loading && getJobDetails.data[0].job_type_id,
-            BudgetedHours: getJobDetails.loading && getJobDetails.data[0].budgeted_hours,
-            Reviewer: getJobDetails.loading && getJobDetails.data[0].reviewer_id,
-            AllocatedTo: getJobDetails.loading && getJobDetails.data[0].allocated_id,
-            AllocatedOn: getJobDetails.loading && getJobDetails.data[0].allocated_on.split("T")[0],
-            DateReceivedOn: getJobDetails.loading && getJobDetails.data[0].date_received_on.split("T")[0],
-            YearEnd: getJobDetails.loading && getJobDetails.data[0].year_end,
-            TotalPreparationTime: getJobDetails.loading && getJobDetails.data[0].total_preparation_time,
-            ReviewTime: getJobDetails.loading && getJobDetails.data[0].review_time,
-            FeedbackIncorporationTime: getJobDetails.loading && getJobDetails.data[0].feedback_incorporation_time,
-            TotalTime: getJobDetails.loading && getJobDetails.data[0].total_time,
-            EngagementModel: getJobDetails.loading && getJobDetails.data[0].engagement_model,
-            ExpectedDeliveryDate: getJobDetails.loading && getJobDetails.data[0].expected_delivery_date.split("T")[0],
-            DueOn: getJobDetails.loading && getJobDetails.data[0].due_on.split("T")[0],
-            SubmissionDeadline: getJobDetails.loading && getJobDetails.data[0].submission_deadline.split("T")[0],
-            CustomerDeadlineDate: getJobDetails.loading && getJobDetails.data[0].customer_deadline_date.split("T")[0],
-            SLADeadlineDate: getJobDetails.loading && getJobDetails.data[0].sla_deadline_date.split("T")[0],
-            InternalDeadlineDate: getJobDetails.loading && getJobDetails.data[0].internal_deadline_date.split("T")[0],
-            FilingWithCompaniesHouseRequired: getJobDetails.loading && getJobDetails.data[0].filing_Companies_required,
-            CompaniesHouseFilingDate: getJobDetails.loading && getJobDetails.data[0].filing_Companies_date.split("T")[0],
-            FilingWithHMRCRequired: getJobDetails.loading && getJobDetails.data[0].filing_hmrc_required,
-            HMRCFilingDate: getJobDetails.loading && getJobDetails.data[0].filing_hmrc_date.split("T")[0],
-            OpeningBalanceAdjustmentRequired: getJobDetails.loading && getJobDetails.data[0].opening_balance_required,
-            OpeningBalanceAdjustmentDate: getJobDetails.loading && getJobDetails.data[0].opening_balance_date.split("T")[0],
-            NumberOfTransactions: getJobDetails.loading && getJobDetails.data[0].number_of_transaction,
-            NumberOfTrialBalanceItems: getJobDetails.loading && getJobDetails.data[0].number_of_balance_items,
-            Turnover: getJobDetails.loading && getJobDetails.data[0].turnover,
-            NoOfEmployees: getJobDetails.loading && getJobDetails.data[0].number_of_employees,
-            VATReconciliation: getJobDetails.loading && getJobDetails.data[0].vat_reconciliation,
-            Bookkeeping: getJobDetails.loading && getJobDetails.data[0].bookkeeping,
-            ProcessingType: getJobDetails.loading && getJobDetails.data[0].processing_type,
-            Invoiced: getJobDetails.loading && getJobDetails.data[0].invoiced,
-            Currency: getJobDetails.loading && getJobDetails.data[0].currency,
-            InvoiceValue: getJobDetails.loading && getJobDetails.data[0].invoice_value,
-            InvoiceDate: getJobDetails.loading && getJobDetails.data[0].invoice_date,
-            InvoiceHours: getJobDetails.loading && getJobDetails.data[0].invoice_hours,
-            InvoiceRemark: getJobDetails.loading && getJobDetails.data[0].invoice_remark
+            AccountManager: getJobDetails.loading && getJobDetails.data.account_manager_officer_first_name + " " + getJobDetails.loading && getJobDetails.data.account_manager_officer_last_name,
+            Customer: getJobDetails.loading && getJobDetails.data.customer_trading_name,
+            Client: location.state.goto == "Customer" ? getJobDetails.loading && getJobDetails.data.client_id : getJobDetails.loading && getJobDetails.data.client_trading_name,
+            ClientJobCode: getJobDetails.loading && getJobDetails.data.client_job_code,
+            CustomerAccountManager: getJobDetails.loading && getJobDetails.data.account_manager_officer_id,
+            Service: getJobDetails.loading && getJobDetails.data.service_id,
+            JobType: getJobDetails.loading && getJobDetails.data.job_type_id,
+            BudgetedHours: getJobDetails.loading && getJobDetails.data.budgeted_hours,
+            Reviewer: getJobDetails.loading && getJobDetails.data.reviewer_id,
+            AllocatedTo: getJobDetails.loading && getJobDetails.data.allocated_id,
+            AllocatedOn: getJobDetails.loading && getJobDetails.data.allocated_on.split("T"),
+            DateReceivedOn: getJobDetails.loading && getJobDetails.data.date_received_on.split("T"),
+            YearEnd: getJobDetails.loading && getJobDetails.data.year_end,
+            TotalPreparationTime: getJobDetails.loading && getJobDetails.data.total_preparation_time,
+            ReviewTime: getJobDetails.loading && getJobDetails.data.review_time,
+            FeedbackIncorporationTime: getJobDetails.loading && getJobDetails.data.feedback_incorporation_time,
+            TotalTime: getJobDetails.loading && getJobDetails.data.total_time,
+            EngagementModel: getJobDetails.loading && getJobDetails.data.engagement_model,
+            ExpectedDeliveryDate: getJobDetails.loading && getJobDetails.data.expected_delivery_date.split("T"),
+            DueOn: getJobDetails.loading && getJobDetails.data.due_on.split("T"),
+            SubmissionDeadline: getJobDetails.loading && getJobDetails.data.submission_deadline.split("T"),
+            CustomerDeadlineDate: getJobDetails.loading && getJobDetails.data.customer_deadline_date.split("T"),
+            SLADeadlineDate: getJobDetails.loading && getJobDetails.data.sla_deadline_date.split("T"),
+            InternalDeadlineDate: getJobDetails.loading && getJobDetails.data.internal_deadline_date.split("T"),
+            FilingWithCompaniesHouseRequired: getJobDetails.loading && getJobDetails.data.filing_Companies_required,
+            CompaniesHouseFilingDate: getJobDetails.loading && getJobDetails.data.filing_Companies_date.split("T"),
+            FilingWithHMRCRequired: getJobDetails.loading && getJobDetails.data.filing_hmrc_required,
+            HMRCFilingDate: getJobDetails.loading && getJobDetails.data.filing_hmrc_date.split("T"),
+            OpeningBalanceAdjustmentRequired: getJobDetails.loading && getJobDetails.data.opening_balance_required,
+            OpeningBalanceAdjustmentDate: getJobDetails.loading && getJobDetails.data.opening_balance_date.split("T"),
+            NumberOfTransactions: getJobDetails.loading && getJobDetails.data.number_of_transaction,
+            NumberOfTrialBalanceItems: getJobDetails.loading && getJobDetails.data.number_of_balance_items,
+            Turnover: getJobDetails.loading && getJobDetails.data.turnover,
+            NoOfEmployees: getJobDetails.loading && getJobDetails.data.number_of_employees,
+            VATReconciliation: getJobDetails.loading && getJobDetails.data.vat_reconciliation,
+            Bookkeeping: getJobDetails.loading && getJobDetails.data.bookkeeping,
+            ProcessingType: getJobDetails.loading && getJobDetails.data.processing_type,
+            Invoiced: getJobDetails.loading && getJobDetails.data.invoiced,
+            Currency: getJobDetails.loading && getJobDetails.data.currency,
+            InvoiceValue: getJobDetails.loading && getJobDetails.data.invoice_value,
+            InvoiceDate: getJobDetails.loading && getJobDetails.data.invoice_date,
+            InvoiceHours: getJobDetails.loading && getJobDetails.data.invoice_hours,
+            InvoiceRemark: getJobDetails.loading && getJobDetails.data.invoice_remark
         }));
     }, [getJobDetails]);
 
@@ -182,7 +224,7 @@ const CreateJob = () => {
     }
 
 
-    
+
 
 
     const fieldErrors = {
@@ -273,7 +315,7 @@ const CreateJob = () => {
             job_id: location.state.row.job_id,
             account_manager_id: getJobDetails.loading && getJobDetails.data[0].account_manager_officer_id,
             customer_id: getJobDetails.loading && getJobDetails.data[0].customer_id,
-            client_id:  getJobDetails.loading && getJobDetails.data[0].client_id,
+            client_id: getJobDetails.loading && getJobDetails.data[0].client_id,
             client_job_code: jobData.ClientJobCode,
             customer_contact_details_id: jobData.CustomerAccountManager,
             service_id: jobData.Service,
@@ -334,7 +376,7 @@ const CreateJob = () => {
                             }, 1500);
                         }, 1500);
                     } else {
-                       
+
                     }
                 })
                 .catch((error) => {
@@ -355,9 +397,78 @@ const CreateJob = () => {
 
     const handleClose = () => {
         location.state.goto == "Customer" ? navigate('/admin/Clientlist', { state: location.state.details }) :
-        navigate('/admin/client/profile', { state: location.state.details });
+            navigate('/admin/client/profile', { state: location.state.details });
     }
- 
+
+    const openJobModal = (e) => {
+
+        if (e.target.value != "") {
+            jobModalSetStatus(true)
+        }
+
+    }
+
+
+    const AddTask = (id) => {
+        const filterData = AllChecklistData.data.find((data) => data.task_id == id);
+
+        if (!filterData) {
+            return;
+        }
+
+        setAddTaskArr((prevTasks) => {
+            const taskExists = prevTasks.some((task) => task.task_id === filterData.task_id);
+
+            if (taskExists) {
+                return prevTasks;
+            } else {
+                return [...prevTasks, filterData];
+            }
+        });
+
+    };
+
+    const RemoveTask = (id) => {
+        setAddTaskArr((prevTasks) => prevTasks.filter((task) => task.task_id !== id));
+
+    }
+
+
+    const handleChange1 = (e) => {
+        const { name, value } = e.target;
+
+        // Validation for Task Name
+        if (name === "taskname") {
+            if (value.trim() === "") {
+                setTaskNameError("Please Enter Task Name");
+            } else {
+                setTaskNameError("");
+            }
+            setTaskName(value);
+        }
+
+        // Validation for Budgeted Hour
+        if (name === "budgeted_hour") {
+            if (value.trim() === "") {
+                setBudgetedError("Please Enter Budgeted Hour");
+            } else if (isNaN(value) || value <= 0) {
+                setBudgetedError("Please enter a valid number for Budgeted Hour");
+            } else {
+                setBudgetedError("");
+            }
+            setBudgeted(value);
+        }
+    };
+
+
+
+
+    const handleAddTask = () => {
+        const req = { task_id: "", task_name: taskName, budgeted_hour: Budgeted }
+        setAddTaskArr([...AddTaskArr, req])
+        console.log("req", req)
+        setShowAddJobModal(false)
+    }
 
 
     return (
@@ -366,7 +477,7 @@ const CreateJob = () => {
                 <div className="row mt-4">
                     <div className="col-xl-12">
                         <div className="card">
-                          
+
                             <div className="card-header d-flex justify-content-between">
                                 <h3 className="card-title mb-0">Update Job</h3>
                                 <button type="button" className="btn btn-info text-white blue-btn" onClick={() => navigate('/admin/Clientlist', { state: { id: location.state.details.id, route: "job" } })}>Back</button>
@@ -385,7 +496,7 @@ const CreateJob = () => {
                                                             </div>
                                                             <div className="card-body">
                                                                 <div className="row">
-                                                                    <div className="mb-3 col-lg-3">
+                                                                    <div className="mb-3 col-lg-4">
                                                                         <label className="form-label"> Outbook Account Manager</label>
                                                                         <input type="text" className="form-control" placeholder="Account Manager" disabled
                                                                             name="AccountManager" onChange={HandleChange} value={jobData.AccountManager} />
@@ -394,7 +505,7 @@ const CreateJob = () => {
                                                                         )}
                                                                     </div>
 
-                                                                    <div id="invoiceremark" className="mb-3 col-lg-3">
+                                                                    <div id="invoiceremark" className="mb-3 col-lg-4">
                                                                         <label className="form-label">Customer</label>
                                                                         <input type="text" className="form-control" placeholder="Customer" disabled
                                                                             name="Customer" onChange={HandleChange} value={jobData.Customer} />
@@ -404,7 +515,7 @@ const CreateJob = () => {
                                                                     </div>
                                                                     {
                                                                         location.state.goto == "Customer" ?
-                                                                            <div className="col-lg-3">
+                                                                            <div className="col-lg-4">
                                                                                 <label className="form-label">Client</label>
                                                                                 <select className="form-select mb-3"
                                                                                     name="Client" onChange={HandleChange} value={jobData.Client}>
@@ -421,7 +532,7 @@ const CreateJob = () => {
 
                                                                             </div>
                                                                             :
-                                                                            <div className="col-lg-3">
+                                                                            <div className="col-lg-4">
                                                                                 <label className="form-label">Client</label>
                                                                                 <input type="text" className="form-control" placeholder="Client Job Code"
                                                                                     name="Client" onChange={HandleChange} value={jobData.Client} disabled />
@@ -432,7 +543,7 @@ const CreateJob = () => {
                                                                     }
 
 
-                                                                    <div className="mb-3 col-lg-3">
+                                                                    <div className="mb-3 col-lg-4">
                                                                         <label className="form-label">Client Job Code</label>
                                                                         <input type="text" className="form-control" placeholder="Client Job Code"
                                                                             name="ClientJobCode" onChange={HandleChange} value={jobData.ClientJobCode} />
@@ -441,7 +552,7 @@ const CreateJob = () => {
                                                                         )}
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
                                                                         <label className="form-label">Customer Account Manager(Officer)</label>
                                                                         <select className="form-select mb-3"
                                                                             name="CustomerAccountManager" onChange={HandleChange} value={jobData.CustomerAccountManager}>
@@ -459,7 +570,7 @@ const CreateJob = () => {
 
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
                                                                         <label className="form-label">Service</label>
                                                                         <select className="form-select mb-3"
                                                                             name="Service" onChange={HandleChange} value={jobData.Service}>
@@ -478,10 +589,11 @@ const CreateJob = () => {
                                                                         )}
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
                                                                         <label className="form-label">Job Type</label>
                                                                         <select className="form-select mb-3 jobtype"
-                                                                            name="JobType" onChange={HandleChange} value={jobData.JobType}>
+
+                                                                            name="JobType" onChange={(e) => { HandleChange(e); openJobModal(e) }} value={jobData.JobType}> 
                                                                             <option value="">Select Job Type</option>
                                                                             {AllJobData.loading &&
                                                                                 AllJobData.data.job_type.map((jobtype) => (
@@ -493,7 +605,7 @@ const CreateJob = () => {
                                                                         )}
                                                                     </div>
 
-                                                                    <div className="col-lg-3">
+                                                                    <div className="col-lg-4">
                                                                         <label className="form-label">Budgeted Hours</label>
                                                                         <div className="input-group">
                                                                             <input type="text" className="form-control" placeholder='Enter Budgeted Hours'
@@ -962,6 +1074,167 @@ const CreateJob = () => {
                                                 </div>
                                             </div>
                                         </div>
+
+                                        {jobModalStatus && (
+                                            <Modal show={jobModalStatus} onHide={(e) => jobModalSetStatus(false)} centered size="lg">
+                                                <Modal.Header closeButton>
+                                                    <Modal.Title>Tasks</Modal.Title>
+                                                </Modal.Header>
+                                                <Modal.Body>
+                                                    <div className="tablelist-form">
+                                                        <div className="modal-body">
+                                                            <div className="row">
+                                                                <div className="col-md-12" style={{ display: "flex" }}>
+                                                                    <div className="col-lg-6">
+                                                                        <select
+                                                                            id="search-select"
+                                                                            className="form-select mb-3"
+                                                                            aria-label="Default select example"
+                                                                            style={{ color: "#8a8c8e !important" }}
+                                                                            onChange={(e) => { setChecklistId(e.target.value) }}
+                                                                            value={getChecklistId}
+                                                                        >
+                                                                            <option value="">Select Checklist Name</option>
+                                                                            {
+                                                                                AllChecklist && AllChecklist.data.map((checklist) => (
+                                                                                    <option value={checklist.checklists_id} key={checklist.checklists_id}>{checklist.check_list_name}</option>
+                                                                                ))
+                                                                            }
+                                                                        </select>
+                                                                    </div>
+                                                                    <div className="col-lg-6">
+                                                                        <div className="col-sm-auto" style={{ marginLeft: 250 }}>
+                                                                            <button className="btn btn-info text-white float-end blue-btn" onClick={() => setShowAddJobModal(true)}>Add Task</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-lg-6 column" id="column1">
+                                                                    <div className="card">
+                                                                        <div className="card-body">
+                                                                            <div id="customerList">
+                                                                                <div className="table-responsive table-card mt-3 mb-1">
+                                                                                    <table
+                                                                                        className="table align-middle table-nowrap"
+                                                                                        id="customerTable"
+                                                                                    >
+                                                                                        <thead className="table-light">
+                                                                                            <tr>
+                                                                                                <th>Task Name</th>
+                                                                                                <th>Budgeted Hour</th>
+                                                                                                <th>Action</th>
+                                                                                            </tr>
+                                                                                        </thead>
+                                                                                        <tbody className="list form-check-all">
+                                                                                            {
+                                                                                                AllChecklistData.data && AllChecklistData.data.map((checklist) => (
+                                                                                                    <tr className="">
+                                                                                                        <td>{checklist.task_name} </td>
+                                                                                                        <td>{checklist.budgeted_hour} hr</td>
+                                                                                                        <td>
+                                                                                                            <div className="add">
+                                                                                                                <button className=" btn-info text-white blue-btn" onClick={() => AddTask(checklist.task_id)}>+</button>
+                                                                                                            </div>
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                ))
+                                                                                            }
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-lg-6 " id="column2">
+                                                                    <div className="card">
+                                                                        <div className="card-body">
+                                                                            <div id="customerList">
+                                                                                <div className="table-responsive table-card mt-3 mb-1">
+                                                                                    <table
+                                                                                        className="table align-middle table-nowrap"
+                                                                                        id="customerTable"
+                                                                                    >
+                                                                                        <thead className="table-light">
+                                                                                            <tr>
+                                                                                                <th>Task Name</th>
+                                                                                                <th>Budgeted Hour</th>
+                                                                                                <th>Action</th>
+                                                                                            </tr>
+                                                                                        </thead>
+                                                                                        <tbody className="list form-check-all">
+                                                                                            {
+                                                                                                AddTaskArr && AddTaskArr.map((checklist) => (
+
+                                                                                                    <tr className="">
+                                                                                                        {console.log("checklist", checklist)}
+                                                                                                        <td>{checklist.task_name} </td>
+                                                                                                        <td>{checklist.budgeted_hour} hr</td>
+                                                                                                        <td>
+                                                                                                            <div className="add">
+                                                                                                                <button class="delete-icon"><i class="ti-trash" onClick={() => RemoveTask(checklist.task_id)}></i></button>
+                                                                                                            </div>
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                ))
+                                                                                            }
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </Modal.Body>
+                                            </Modal>
+                                        )}
+
+                                        {showAddJobModal && (
+                                            <Modal show={showAddJobModal} onHide={(e) => setShowAddJobModal(false)} centered size="sm">
+                                                <Modal.Header closeButton>
+                                                    <Modal.Title>Add Task</Modal.Title>
+                                                </Modal.Header>
+                                                <Modal.Body>
+                                                    <div className='row'>
+                                                        <div className='col-lg-12'>
+                                                            <label className="form-label">Task Name</label>
+                                                            <div>
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Enter Task name"
+                                                                    name='taskname'
+                                                                    className='p-1 w-100 mb-2 rounded'
+                                                                    onChange={handleChange1}
+                                                                    value={taskName}
+                                                                />
+                                                                {taskNameError && <div className="error-text text-danger">{taskNameError}</div>}
+                                                            </div>
+                                                        </div>
+                                                        <div className='col-lg-12'>
+                                                            <label className="form-label">Budgeted Hour</label>
+                                                            <div>
+                                                                <input
+                                                                    type="number"
+                                                                    placeholder='Enter Budgeted Hour'
+                                                                    name='budgeted_hour'
+                                                                    className='p-1 mb-2 w-100 rounded'
+                                                                    onChange={handleChange1}
+                                                                    value={Budgeted}
+                                                                />
+                                                                {BudgetedError && <div className="error-text text-danger">{BudgetedError}</div>}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </Modal.Body>
+                                                <Modal.Footer>
+                                                    <Button variant="secondary" onClick={(e) => setShowAddJobModal(false)}>Close</Button>
+                                                    <Button variant="btn btn-info text-white float-end blue-btn" onClick={handleAddTask}>Add</Button>
+                                                </Modal.Footer>
+                                            </Modal>
+                                        )}
                                         <div className="hstack gap-2 justify-content-end">
                                             <button type="button" className="btn btn-light" onClick={handleClose}>Cancel</button>
                                             <button type="button" className="btn btn-info text-white float-end blue-btn" onClick={handleSubmit}>Update</button>

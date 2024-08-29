@@ -360,7 +360,7 @@ const CreateJob = () => {
             invoice_date: jobData.InvoiceDate,
             invoice_hours: jobData.InvoiceHours,
             invoice_remark: jobData.InvoiceRemark,
-            task: {
+            tasks: {
                 checklist_id: location.state.details.customer_id.id,
                 task : AddTaskArr
             }
@@ -483,14 +483,6 @@ const CreateJob = () => {
     }
 
     
-
-
-
-
-
-
-
-
 
     return (
         <div>
