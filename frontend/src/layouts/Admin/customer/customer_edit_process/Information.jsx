@@ -35,7 +35,6 @@ const Information = ({ id, pageStatus }) => {
   const [customerType, setCustomerType] = useState("");
   const [ManagerType, setManagerType] = useState("");
   const [searchItem, setSearchItem] = useState("");
-  const [countryCode, setCountryCode] = useState("");
   const [getAllSearchCompany, setGetAllSearchCompany] = useState([]);
   const [getSearchDetails, setSearchDetails] = useState("");
   const [showDropdown, setShowDropdown] = useState(true);
@@ -591,6 +590,7 @@ const Information = ({ id, pageStatus }) => {
   // for partnership
   const handleChange3 = (e) => {
     const { name, value } = e.target;
+    // console.log("name->", name, "value->", value);
     if (name === "VATNumber") {
       if (!/^[0-9+]*$/.test(value)) {
         return;
@@ -603,16 +603,16 @@ const Information = ({ id, pageStatus }) => {
   const validate3 = () => {
     const newErrors = {};
     for (const key in getPartnershipDetails) {
-      console.log("key", getPartnershipDetails[key]);
+      
 
       if (!getPartnershipDetails[key]) {
-        if (key === "ClientIndustry")
+        if (key === "ClientIndustry") {
           newErrors[key] = "Please Select Client Industry";
-        else if (key === "TradingName")
+        } else if (key === "TradingName") {
           newErrors[key] = "Please Enter Trading Name";
-        // else if (key === 'TradingAddress') newErrors[key] = 'Please Enter Trading Address';
-        else if (key === "VATRegistered")
+        } else if (key === "VATRegistered") {
           newErrors[key] = "Please Enter VAT Registered";
+        }
         // else if (key === 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
         // else if (key === 'Website') newErrors[key] = 'Please Enter Website';
       }
@@ -684,7 +684,6 @@ const Information = ({ id, pageStatus }) => {
     setContactsErrors(errors);
   };
 
-  // Filter out selected details
   const FilterSearchDetails = () => {
     const filterData = getAllSearchCompany.filter(
       (data) => data.title === searchItem
@@ -866,30 +865,23 @@ const Information = ({ id, pageStatus }) => {
     }
   }, [errors3]);
 
-
   const managerSelectRef = useRef(null);
 
   useEffect(() => {
-    console.log("getAccountMangerIdErr", managerSelectRef);
-
     if (getAccountMangerIdErr && managerSelectRef.current) {
-
       managerSelectRef.current.scrollIntoView({
         behavior: "smooth",
         block: "center",
       });
 
       managerSelectRef.current.focus();
-      
     }
   }, [getAccountMangerIdErr]);
-
 
   const capitalizeFirstLetter = (string) => {
     if (!string) return "";
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   };
-
 
   return (
     <>
@@ -960,8 +952,10 @@ const Information = ({ id, pageStatus }) => {
                             ))}
                           </Field>
                           {getAccountMangerIdErr && (
-                            <div className="error-text" style={{ color: "red" }}>
-
+                            <div
+                              className="error-text"
+                              style={{ color: "red" }}
+                            >
                               {getAccountMangerIdErr}
                             </div>
                           )}
@@ -1607,7 +1601,10 @@ const Information = ({ id, pageStatus }) => {
                                             />
                                             {errors[index] &&
                                               errors[index].first_name && (
-                                                <div className="error-text" style={{ color: "red" }}>
+                                                <div
+                                                  className="error-text"
+                                                  style={{ color: "red" }}
+                                                >
                                                   {errors[index].first_name}
                                                 </div>
                                               )}
@@ -1640,7 +1637,10 @@ const Information = ({ id, pageStatus }) => {
                                             />
                                             {errors[index] &&
                                               errors[index].last_name && (
-                                                <div className="error-text" style={{ color: "red" }}>
+                                                <div
+                                                  className="error-text"
+                                                  style={{ color: "red" }}
+                                                >
                                                   {errors[index].last_name}
                                                 </div>
                                               )}
@@ -1687,7 +1687,10 @@ const Information = ({ id, pageStatus }) => {
                                             {errors[index] &&
                                               errors[index]
                                                 .customer_contact_person_role_id && (
-                                                <div className="error-text" style={{ color: "red" }}>
+                                                <div
+                                                  className="error-text"
+                                                  style={{ color: "red" }}
+                                                >
                                                   {
                                                     errors[index]
                                                       .customer_contact_person_role_id
@@ -1785,7 +1788,10 @@ const Information = ({ id, pageStatus }) => {
                                             />
                                             {errors[index] &&
                                               errors[index].email && (
-                                                <div className="error-text" style={{ color: "red" }}>
+                                                <div
+                                                  className="error-text"
+                                                  style={{ color: "red" }}
+                                                >
                                                   {errors[index].email}
                                                 </div>
                                               )}
@@ -2013,7 +2019,10 @@ const Information = ({ id, pageStatus }) => {
                                           />
                                           {contactsErrors[index]
                                             ?.first_name && (
-                                            <div className="error-text" style={{ color: "red" }}>
+                                            <div
+                                              className="error-text"
+                                              style={{ color: "red" }}
+                                            >
                                               {contactsErrors[index].first_name}
                                             </div>
                                           )}
@@ -2042,7 +2051,10 @@ const Information = ({ id, pageStatus }) => {
                                             }
                                           />
                                           {contactsErrors[index]?.last_name && (
-                                            <div className="error-text" style={{ color: "red" }}>
+                                            <div
+                                              className="error-text"
+                                              style={{ color: "red" }}
+                                            >
                                               {contactsErrors[index].last_name}
                                             </div>
                                           )}
@@ -2087,7 +2099,10 @@ const Information = ({ id, pageStatus }) => {
                                           </select>
                                           {contactsErrors[index]
                                             ?.customer_contact_person_role_id && (
-                                            <div className="error-text" style={{ color: "red" }}>
+                                            <div
+                                              className="error-text"
+                                              style={{ color: "red" }}
+                                            >
                                               {
                                                 contactsErrors[index]
                                                   .customer_contact_person_role_id
@@ -2147,7 +2162,10 @@ const Information = ({ id, pageStatus }) => {
                                                 minLength={9}
                                               />
                                               {contactsErrors[index]?.phone && (
-                                                <div className="error-text" style={{ color: "red" }}>
+                                                <div
+                                                  className="error-text"
+                                                  style={{ color: "red" }}
+                                                >
                                                   {contactsErrors[index].phone}
                                                 </div>
                                               )}
@@ -2178,7 +2196,10 @@ const Information = ({ id, pageStatus }) => {
                                             }
                                           />
                                           {contactsErrors[index]?.email && (
-                                            <div className="error-text" style={{ color: "red" }}>
+                                            <div
+                                              className="error-text"
+                                              style={{ color: "red" }}
+                                            >
                                               {contactsErrors[index].email}
                                             </div>
                                           )}
