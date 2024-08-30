@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import Datatable from "../../../../Components/ExtraComponents/Datatable";
-import CommonModal from "../../../../Components/ExtraComponents/Modals/Modal";
+import Datatable from "../../../Components/ExtraComponents/Datatable";
 
 const Statuses = () => {
 

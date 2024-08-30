@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
-import { GetAllJabData, AddAllJobType, GET_ALL_CHECKLIST } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { GetAllJabData, AddAllJobType, GET_ALL_CHECKLIST } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import sweatalert from 'sweetalert2';
 import * as bootstrap from 'bootstrap';
-import { JobType } from '../../../../../ReduxStore/Slice/Settings/settingSlice'
+import { JobType } from '../../../../ReduxStore/Slice/Settings/settingSlice'
 import { Modal, Button } from 'react-bootstrap';
 
 const CreateJob = () => {

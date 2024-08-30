@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
-import { GetAllJabData, UpdateJob, GET_ALL_CHECKLIST } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { GetAllJabData, UpdateJob, GET_ALL_CHECKLIST } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import sweatalert from 'sweetalert2';
-import { Get_All_Job_List } from "../../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { Get_All_Job_List } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 import { Modal, Button } from 'react-bootstrap';
 const EditJob = () => {
@@ -529,7 +529,6 @@ const EditJob = () => {
   }
 
 
-  console.log("jobData", jobData)
   return (
     <div>
       <div className="container-fluid">

@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { JobType, AddTask } from '../../ReduxStore/Slice/Settings/settingSlice'
-import Datatable from '../../Components/ExtraComponents/Datatable';
-import Modal from '../../Components/ExtraComponents/Modals/Modal';
+import { JobType, AddTask } from '../../../ReduxStore/Slice/Settings/settingSlice'
+import Datatable from '../../../Components/ExtraComponents/Datatable';
+import Modal from '../../../Components/ExtraComponents/Modals/Modal';
 import sweatalert from 'sweetalert2';
 import { useDispatch, useSelector } from 'react-redux';
-import CommanModal from '../../Components/ExtraComponents/Modals/CommanModal';
-import Formicform from '../../Components/ExtraComponents/Forms/Comman.form';
+import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
 import { useFormik } from 'formik';
 import * as XLSX from 'xlsx';
 

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import Datatable from "../../../../Components/ExtraComponents/Datatable";
-import { Get_All_Client } from "../../../../ReduxStore/Slice/Client/ClientSlice";
+import Datatable from "../../../Components/ExtraComponents/Datatable";
+import { Get_All_Client } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Get_All_Job_List } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
-import { getList } from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import { Get_All_Job_List } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import Statuses from "./Statuses";
 

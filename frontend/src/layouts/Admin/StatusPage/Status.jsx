@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import Datatable from "../../Components/ExtraComponents/Datatable";
+import Datatable from "../../../Components/ExtraComponents/Datatable";
 import {
   MasterStatusData,
   StatusType,
-} from "../../ReduxStore/Slice/Settings/settingSlice";
+} from "../../../ReduxStore/Slice/Settings/settingSlice";
 import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
-import { fa_time } from "../../Utils/Date_formet";
-import CommanModal from "../../Components/ExtraComponents/Modals/CommanModal";
+import { fa_time } from "../../../Utils/Date_formet";
+import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 
 const Status = () => {
   const dispatch = useDispatch();

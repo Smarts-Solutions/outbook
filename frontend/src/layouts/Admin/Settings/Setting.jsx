@@ -7,9 +7,9 @@ import {
   PersonRole,
   ClientIndustry,
   Country,
-} from "../../ReduxStore/Slice/Settings/settingSlice";
-import Datatable from "../../Components/ExtraComponents/Datatable";
-import Modal from "../../Components/ExtraComponents/Modals/Modal";
+} from "../../../ReduxStore/Slice/Settings/settingSlice";
+import Datatable from "../../../Components/ExtraComponents/Datatable";
+import Modal from "../../../Components/ExtraComponents/Modals/Modal";
 import { useDispatch, useSelector } from "react-redux";
 import sweatalert from "sweetalert2";
 
