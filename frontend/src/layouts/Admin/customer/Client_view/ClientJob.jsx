@@ -82,6 +82,11 @@ const ClientList = () => {
       sortable: true,
     },
     {
+      name: "Client",
+      selector: (row) => row.client_trading_name,
+      sortable: true,
+    },
+    {
       name: "Client Job Code",
       selector: (row) => row.client_job_code,
       sortable: true,
@@ -97,7 +102,7 @@ const ClientList = () => {
     {
       name: "Allocated To",
       selector: (row) =>
-        row.allocated_first_name + " " + row.allocated_last_name,
+      row.allocated_id !=null?row.allocated_first_name + " " + row.allocated_last_name : "",
       sortable: true,
     },
     {
@@ -113,6 +118,15 @@ const ClientList = () => {
       row.invoiced == "1"? "YES" :"NO",
       sortable: true,
     },
+
+    {
+      name: "Status",
+      selector: (row) =>
+        // row.allocated_first_name + " " + row.allocated_last_name,
+      "",
+      sortable: true,
+    },
+
 
     {
       name: "Actions",

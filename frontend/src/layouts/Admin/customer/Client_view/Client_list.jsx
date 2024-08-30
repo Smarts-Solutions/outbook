@@ -120,9 +120,44 @@ const ClientList = () => {
       selector: (row) => row.account_manager_officer_first_name + " " + row.account_manager_officer_last_name,
       sortable: true,
     },
+    {
+      name: "Client",
+      selector: (row) => row.client_trading_name,
+      sortable: true,
+    },
+
     { name: "Client Job Code", selector: (row) => row.client_job_code, sortable: true },
+
     { name: "Outbooks Acount Manager", selector: (row) => row.outbooks_acount_manager_first_name + " " + row.outbooks_acount_manager_last_name, sortable: true },
-    { name: "Allocated To", selector: (row) => row.allocated_first_name + " " + row.allocated_last_name, sortable: true },
+
+    {
+      name: "Allocated To",
+      selector: (row) =>
+      row.allocated_id !=null?row.allocated_first_name + " " + row.allocated_last_name : "",
+      sortable: true,
+    },
+
+    {
+      name: "Timesheet",
+      selector: (row) =>
+        // row.allocated_first_name + " " + row.allocated_last_name,
+      "",
+      sortable: true,
+    },
+    {
+      name: "Invoicing",
+      selector: (row) =>
+      row.invoiced == "1"? "YES" :"NO",
+      sortable: true,
+    },
+
+    {
+      name: "Status",
+      selector: (row) =>
+        // row.allocated_first_name + " " + row.allocated_last_name,
+      "",
+      sortable: true,
+    },
 
     {
       name: "Actions",
