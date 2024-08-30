@@ -307,8 +307,6 @@ const Information = ({ id, pageStatus }) => {
         if (key == "IndustryType") newErrors[key] = "Select Client Industry";
         else if (key == "tradingName")
           newErrors[key] = "Please enter Trading Name";
-        else if (key == "vatRegistered")
-          newErrors[key] = "Please select VAT Registered";
         else if (key == "first_name")
           newErrors[key] = "Please enter First Name";
         else if (key == "last_name") newErrors[key] = "Please enter Last Name";
@@ -527,9 +525,7 @@ const Information = ({ id, pageStatus }) => {
           newErrors[key] = "Please Enter Incorporation Date";
         else if (key == "IncorporationIn")
           newErrors[key] = "Please Enter Incorporation In";
-        else if (key == "VATRegistered")
-          newErrors[key] = "Please Enter VAT Registered";
-        else if (key == "TradingName")
+        else  if (key == "TradingName")
           newErrors[key] = "Please Enter Trading Name";
       }
     }
@@ -610,11 +606,8 @@ const Information = ({ id, pageStatus }) => {
           newErrors[key] = "Please Select Client Industry";
         } else if (key === "TradingName") {
           newErrors[key] = "Please Enter Trading Name";
-        } else if (key === "VATRegistered") {
-          newErrors[key] = "Please Enter VAT Registered";
-        }
-        // else if (key === 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
-        // else if (key === 'Website') newErrors[key] = 'Please Enter Website';
+        } 
+ 
       }
     }
 

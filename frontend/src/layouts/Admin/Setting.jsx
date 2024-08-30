@@ -701,6 +701,20 @@ const Setting = () => {
         title: " Country",
         tabStatus: tabStatus,
       });
+    }else if (tabStatus === "7") {
+      setModalData({
+        ...modalData,
+        fields: [
+          {
+            type: "text",
+            name: "Incorporation ",
+            label: "Incorporation ",
+            placeholder: "Enter Incorporation ",
+          },
+        ],
+        title: " Incorporation",
+        tabStatus: tabStatus,
+      });
     }
     // setModalData({});
     setIsEdit(false);
@@ -1000,6 +1014,8 @@ const Setting = () => {
     { id: "4", label: "Services" },
     { id: "5", label: "Client Industry" },
     { id: "6", label: "Country" },
+    { id: "7", label: "Incorporation" },
+
   ];
 
   return (
@@ -1041,12 +1057,7 @@ const Setting = () => {
                       </ul>
                     </>
                   </div>
-                  {/* <div className="col-md-4  col-auto ">
-                                    <button type="button"
-
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#exampleModal" className='btn btn-info text-white float-end'> <i className="fa fa-plus" /> Add Customer</button>
-                                </div> */}
+                 
                 </div>
               </div>
             </div>
@@ -1267,6 +1278,43 @@ const Setting = () => {
             </div>
 
             {/* {/ Country end /} */}
+
+
+            {/* Incorporation  Start */}
+            <div
+              className={`tab-pane fade ${
+                getShowTabId === "7" ? "show active" : ""
+              }`}
+            >
+              <div className="report-data">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div className="tab-title">
+                    <h3 className="mt-0">Incorporation</h3>
+                  </div>
+                  {!showSettingInsertTab ? null : (
+                    <div>
+                      <button
+                        type="button"
+                        className="btn btn-info text-white float-end"
+                        onClick={(e) => handleAdd(e, "7")}
+                      >
+                        {" "}
+                        <i className="fa fa-plus" /> Add Incorporation
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className="datatable-wrapper">
+                  <Datatable
+                    filter={true}
+                    columns={columnCountry}
+                    data={countryDataAll.data}
+                  />
+                </div>
+              </div>
+            </div>
+            {/* Incorporation  End */}
+
           </div>
         </div>
         {/* {/ Add staff Modal start /} */}

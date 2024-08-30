@@ -159,9 +159,12 @@ const Information = () => {
         errors.Incorporation_Date = "Please Enter Incorporation Date";
       } else if (!values.Incorporation_in) {
         errors.Incorporation_in = "Please Enter Incorporation in";
-      } else if (values.VAT_Registered === "1" && !values.VAT_Number) {
-        errors.VAT_Number = "Please Enter VAT Number";
-      } else if (values.VAT_Number && values.VAT_Number.length > 9) {
+      } else 
+      // if (values.VAT_Registered === "1" && !values.VAT_Number) {
+      //   errors.VAT_Number = "Please Enter VAT Number";
+      // } else 
+      
+      if (values.VAT_Number && values.VAT_Number.length > 9) {
         errors.VAT_Number = "VAT Number cannot exceed 9 Numbers";
       } else if (values.Website && values.Website.length > 200) {
         errors.Website = "Website cannot exceed 200 characters";
@@ -267,11 +270,15 @@ const Information = () => {
         values.Trading_Address.length > 200
       ) {
         errors.Trading_Address = "Trading Address cannot exceed 200 characters";
-      } else if (!values.VAT_Registered) {
-        errors.VAT_Registered = "Please Enter VAT Registered";
-      } else if (values.VAT_Registered === "1" && !values.VAT_Number) {
-        errors.VAT_Number = "Please Enter VAT Number";
-      } else if (values.VAT_Number && values.VAT_Number.length > 9) {
+      } else 
+      // if (!values.VAT_Registered) {
+      //   errors.VAT_Registered = "Please Enter VAT Registered";
+      // }
+      //  else
+      //  if (values.VAT_Registered === "1" && !values.VAT_Number) {
+      //   errors.VAT_Number = "Please Enter VAT Number";
+      // } else 
+      if (values.VAT_Number && values.VAT_Number.length > 9) {
         errors.VAT_Number = "VAT Number cannot exceed 9 Numbers";
       } else if (values.Website && values.Website.length > 200) {
         errors.Website = "Website cannot exceed 200 characters";
@@ -343,11 +350,13 @@ const Information = () => {
         return;
       } else if (!values.Trading_Name.trim()) {
         errors.Trading_Name = "Please Enter Trading Name";
-      } else if (!values.VAT_Registered) {
-        errors.VAT_Registered = "Please Enter VAT Registered";
-      } else if (values.VAT_Registered === "1" && !values.VAT_Number) {
-        errors.VAT_Number = "Please Enter VAT Number";
-      }
+      } 
+      // else if (!values.VAT_Registered) {
+      //   errors.VAT_Registered = "Please Enter VAT Registered";
+      // } 
+      // else if (values.VAT_Registered === "1" && !values.VAT_Number) {
+      //   errors.VAT_Number = "Please Enter VAT Number";
+      // }
 
       return errors;
     },
