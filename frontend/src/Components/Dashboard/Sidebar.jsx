@@ -89,7 +89,6 @@ const Sidebar = () => {
     navigate(linkPathname);
   };
 
-  console.log("showTab", showTab);
 
   return (
     <div ref={menuRef}>
