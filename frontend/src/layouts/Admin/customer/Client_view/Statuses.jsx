@@ -106,7 +106,7 @@ const Statuses = () => {
                       <div className="media-body align-self-center">
                         <h6 className="fs-14 mb-0">USA</h6>
                       </div>
-                      {/*end media body*/}
+                 
                     </div>
                   </li>
                   <li className="list-group-item align-items-center d-flex justify-content-between py-1">
@@ -114,7 +114,7 @@ const Statuses = () => {
                       <div className="media-body align-self-center">
                         <h6 className="fs-14 mb-0">Germany</h6>
                       </div>
-                      {/*end media body*/}
+                      
                     </div>
                   </li>
                   <li className="list-group-item align-items-center d-flex justify-content-between py-1">
@@ -122,7 +122,7 @@ const Statuses = () => {
                       <div className="media-body align-self-center">
                         <h6 className="fs-14 mb-0">French</h6>
                       </div>
-                      {/*end media body*/}
+                    
                     </div>
                   </li>
                   <li className="list-group-item align-items-center d-flex justify-content-between py-1">
@@ -130,7 +130,7 @@ const Statuses = () => {
                       <div className="media-body align-self-center">
                         <h6 className="fs-14 mb-0">Spain</h6>
                       </div>
-                      {/*end media body*/}
+                   
                     </div>
                   </li>
                   <li className="list-group-item align-items-center d-flex justify-content-between py-1">
@@ -138,7 +138,7 @@ const Statuses = () => {
                       <div className="media-body align-self-center">
                         <h6 className="fs-14 mb-0">Italy</h6>
                       </div>
-                      {/*end media body*/}
+                
                     </div>
                   </li>
                 </ul>
