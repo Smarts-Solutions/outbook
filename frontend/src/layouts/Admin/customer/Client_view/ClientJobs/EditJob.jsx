@@ -10,9 +10,12 @@ const CreateJob = () => {
     const location = useLocation()
     const navigate = useNavigate();
     const token = JSON.parse(localStorage.getItem("token"));
+    const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
+    
+
     const dispatch = useDispatch();
     const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
-    const [getJobDetails, setGetJobDetails] = useState({ loading: false, data: [] });
+    const [getJobDetails, setGetJobDetails] = useState({ loading: false, data: {} });
     const [errors, setErrors] = useState({})
     const [jobModalStatus, jobModalSetStatus] = useState(false);
     const [showAddJobModal, setShowAddJobModal] = useState(false);
@@ -32,6 +35,7 @@ const CreateJob = () => {
     const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" })
     const [BudgetedHoursAddTask, setBudgetedHoursAddTask] = useState({ hours: "", minutes: "" })
     const [BudgetedMinuteError, setBudgetedMinuteError] = useState('')
+    const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" })
 
 
 
@@ -53,7 +57,7 @@ const CreateJob = () => {
                 else {
                     setGetJobDetails({
                         loading: true,
-                        data: []
+                        data: {}
                     })
                 }
             })
@@ -176,66 +180,69 @@ const CreateJob = () => {
     }, [getChecklistId])
 
 
+
     useEffect(() => {
+        var a= {}
+        console.log("getJobDetails.data", getJobDetails.data)
 
         setBudgetedHours({
-            hours: getJobDetails.loading && getJobDetails.data.budgeted_hours.split(":")[0],
-            minutes: getJobDetails.loading && getJobDetails.data.budgeted_hours.split(":")[1]
+            hours:   Object.keys(getJobDetails.data).length>0 && getJobDetails.data.budgeted_hours.split(":")[0],
+            minutes: Object.keys(getJobDetails.data).length>0 && getJobDetails.data.budgeted_hours.split(":")[1]
         });
         setReviewTime({
-            hours: getJobDetails.loading && getJobDetails.data.review_time.split(":")[0],
-            minutes: getJobDetails.loading && getJobDetails.data.review_time.split(":")[1]
+            hours:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.review_time.split(":")[0],
+            minutes:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.review_time.split(":")[1]
         });
         setFeedbackIncorporationTime({
-            hours: getJobDetails.loading && getJobDetails.data.feedback_incorporation_time.split(":")[0],
-            minutes: getJobDetails.loading && getJobDetails.data.feedback_incorporation_time.split(":")[1]
+            hours:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.feedback_incorporation_time.split(":")[0],
+            minutes:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.feedback_incorporation_time.split(":")[1]
         });
         setPreparationTimne({
-            hours: getJobDetails.loading && getJobDetails.data.total_preparation_time.split(":")[0],
-            minutes: getJobDetails.loading && getJobDetails.data.total_preparation_time.split(":")[1]
+            hours:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.total_preparation_time.split(":")[0],
+            minutes:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.total_preparation_time.split(":")[1]
         });
 
 
         setJobData(prevState => ({
             ...prevState,
-            AccountManager: getJobDetails.loading && getJobDetails.data.account_manager_officer_first_name + " " + getJobDetails.loading && getJobDetails.data.account_manager_officer_last_name,
-            Customer: getJobDetails.loading && getJobDetails.data.customer_trading_name,
-            Client: location.state.goto == "Customer" ? getJobDetails.loading && getJobDetails.data.client_id : getJobDetails.loading && getJobDetails.data.client_trading_name,
-            ClientJobCode: getJobDetails.loading && getJobDetails.data.client_job_code,
-            CustomerAccountManager: getJobDetails.loading && getJobDetails.data.account_manager_officer_id,
-            Service: getJobDetails.loading && getJobDetails.data.service_id,
-            JobType: getJobDetails.loading && getJobDetails.data.job_type_id,
-            Reviewer: getJobDetails.loading && getJobDetails.data.reviewer_id,
-            AllocatedTo: getJobDetails.loading && getJobDetails.data.allocated_id,
-            AllocatedOn: getJobDetails.loading && getJobDetails.data.allocated_on.split("T"),
-            DateReceivedOn: getJobDetails.loading && getJobDetails.data.date_received_on.split("T"),
-            YearEnd: getJobDetails.loading && getJobDetails.data.year_end,
-            EngagementModel: getJobDetails.loading && getJobDetails.data.engagement_model,
-            ExpectedDeliveryDate: getJobDetails.loading && getJobDetails.data.expected_delivery_date.split("T"),
-            DueOn: getJobDetails.loading && getJobDetails.data.due_on.split("T"),
-            SubmissionDeadline: getJobDetails.loading && getJobDetails.data.submission_deadline.split("T"),
-            CustomerDeadlineDate: getJobDetails.loading && getJobDetails.data.customer_deadline_date.split("T"),
-            SLADeadlineDate: getJobDetails.loading && getJobDetails.data.sla_deadline_date.split("T"),
-            InternalDeadlineDate: getJobDetails.loading && getJobDetails.data.internal_deadline_date.split("T"),
-            FilingWithCompaniesHouseRequired: getJobDetails.loading && getJobDetails.data.filing_Companies_required,
-            CompaniesHouseFilingDate: getJobDetails.loading && getJobDetails.data.filing_Companies_date.split("T"),
-            FilingWithHMRCRequired: getJobDetails.loading && getJobDetails.data.filing_hmrc_required,
-            HMRCFilingDate: getJobDetails.loading && getJobDetails.data.filing_hmrc_date.split("T"),
-            OpeningBalanceAdjustmentRequired: getJobDetails.loading && getJobDetails.data.opening_balance_required,
-            OpeningBalanceAdjustmentDate: getJobDetails.loading && getJobDetails.data.opening_balance_date.split("T"),
-            NumberOfTransactions: getJobDetails.loading && getJobDetails.data.number_of_transaction,
-            NumberOfTrialBalanceItems: getJobDetails.loading && getJobDetails.data.number_of_balance_items,
-            Turnover: getJobDetails.loading && getJobDetails.data.turnover,
-            NoOfEmployees: getJobDetails.loading && getJobDetails.data.number_of_employees,
-            VATReconciliation: getJobDetails.loading && getJobDetails.data.vat_reconciliation,
-            Bookkeeping: getJobDetails.loading && getJobDetails.data.bookkeeping,
-            ProcessingType: getJobDetails.loading && getJobDetails.data.processing_type,
-            Invoiced: getJobDetails.loading && getJobDetails.data.invoiced,
-            Currency: getJobDetails.loading && getJobDetails.data.currency,
-            InvoiceValue: getJobDetails.loading && getJobDetails.data.invoice_value,
-            InvoiceDate: getJobDetails.loading && getJobDetails.data.invoice_date,
-            InvoiceHours: getJobDetails.loading && getJobDetails.data.invoice_hours,
-            InvoiceRemark: getJobDetails.loading && getJobDetails.data.invoice_remark
+            AccountManager:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.account_manager_officer_first_name + " " +Object.keys(getJobDetails.data).length>0 && getJobDetails.data.account_manager_officer_last_name,
+            Customer:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.customer_trading_name,
+            Client: location.state.goto == "Customer" ?Object.keys(getJobDetails.data).length>0 && getJobDetails.data.client_id :Object.keys(getJobDetails.data).length>0 && getJobDetails.data.client_trading_name,
+            ClientJobCode:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.client_job_code,
+            CustomerAccountManager:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.account_manager_officer_id,
+            Service:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.service_id,
+            JobType:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.job_type_id,
+            Reviewer:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.reviewer_id,
+            AllocatedTo:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.allocated_id,
+            AllocatedOn:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.allocated_on.split("T"),
+            DateReceivedOn:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.date_received_on.split("T"),
+            YearEnd:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.year_end,
+            EngagementModel:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.engagement_model,
+            ExpectedDeliveryDate:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.expected_delivery_date.split("T"),
+            DueOn:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.due_on.split("T"),
+            SubmissionDeadline:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.submission_deadline.split("T"),
+            CustomerDeadlineDate:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.customer_deadline_date.split("T"),
+            SLADeadlineDate:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.sla_deadline_date.split("T"),
+            InternalDeadlineDate:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.internal_deadline_date.split("T"),
+            FilingWithCompaniesHouseRequired:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.filing_Companies_required,
+            CompaniesHouseFilingDate:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.filing_Companies_date.split("T"),
+            FilingWithHMRCRequired:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.filing_hmrc_required,
+            HMRCFilingDate:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.filing_hmrc_date.split("T"),
+            OpeningBalanceAdjustmentRequired:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.opening_balance_required,
+            OpeningBalanceAdjustmentDate:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.opening_balance_date.split("T"),
+            NumberOfTransactions:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.number_of_transaction,
+            NumberOfTrialBalanceItems:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.number_of_balance_items,
+            Turnover:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.turnover,
+            NoOfEmployees:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.number_of_employees,
+            VATReconciliation:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.vat_reconciliation,
+            Bookkeeping:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.bookkeeping,
+            ProcessingType:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.processing_type,
+            Invoiced:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.invoiced,
+            Currency:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.currency,
+            InvoiceValue:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.invoice_value,
+            InvoiceDate:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.invoice_date,
+            InvoiceHours:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.invoice_hours,
+            InvoiceRemark:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.invoice_remark
         }));
     }, [getJobDetails]);
 
@@ -326,9 +333,10 @@ const CreateJob = () => {
     const handleSubmit = async () => {
         const req = {
             job_id: location.state.row.job_id,
-            account_manager_id: getJobDetails.loading && getJobDetails.data.account_manager_officer_id,
-            customer_id: getJobDetails.loading && getJobDetails.data.customer_id,
-            client_id: getJobDetails.loading && getJobDetails.data.client_id,
+            staffCreatedId : staffCreatedId,
+            account_manager_id:getJobDetails.data && getJobDetails.data.account_manager_officer_id,
+            customer_id:getJobDetails.data && getJobDetails.data.customer_id,
+            client_id:getJobDetails.data && getJobDetails.data.client_id,
             client_job_code: jobData.ClientJobCode,
             customer_contact_details_id: Number(jobData.CustomerAccountManager),
             service_id: Number(jobData.Service),
@@ -419,11 +427,9 @@ const CreateJob = () => {
     }
 
     const openJobModal = (e) => {
-
         if (e.target.value != "") {
             jobModalSetStatus(true)
         }
-
     }
 
 
@@ -448,7 +454,6 @@ const CreateJob = () => {
 
     const RemoveTask = (id) => {
         setAddTaskArr((prevTasks) => prevTasks.filter((task) => task.task_id !== id));
-
     }
 
 
@@ -895,6 +900,46 @@ const CreateJob = () => {
                                                                     </div>
 
 
+
+
+                                                                    {/* <div className="col-lg-4">
+                                                                        <div className="mb-3">
+                                                                            <label className="form-label" >Total Time</label>
+                                                                            <div className="input-group">
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    placeholder="Hours"
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || /^[0-9]*$/.test(value)) {
+                                                                                            setTotalTime({ ...Totaltime, hours: value });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={Totaltime.hours}
+                                                                                />
+
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    placeholder="Minutes"
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                                                                                            setTotalTime({
+                                                                                                ...Totaltime,
+                                                                                                minutes: value
+                                                                                            });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={Totaltime.minutes}
+                                                                                />
+                                                                            </div>
+                                                                            {errors['TotalPreparationTime'] && (
+                                                                                <div className="error-text">{errors['TotalPreparationTime']}</div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div> */}
                                                                     <div className="col-lg-4">
                                                                         <div className="mb-3">
                                                                             <label className="form-label" > Total Time</label>

@@ -11,6 +11,7 @@ const CreateJob = () => {
     const location = useLocation()
     const navigate = useNavigate();
     const token = JSON.parse(localStorage.getItem("token"));
+    const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
     const dispatch = useDispatch();
     const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
     const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] })
@@ -32,7 +33,8 @@ const CreateJob = () => {
     const [BudgetedError, setBudgetedError] = useState('')
     const [jobModalStatus, jobModalSetStatus] = useState(false);
     const [BudgetedHoursAddTask, setBudgetedHoursAddTask] = useState({ hours: "", minutes: "" })
-
+    const [BudgetedHoureError, setBudgetedHourError] = useState('')
+    const [BudgetedMinuteError, setBudgetedMinuteError] = useState('')
     const [jobData, setJobData] = useState({
         AccountManager: "",
         Customer: "",
@@ -79,8 +81,7 @@ const CreateJob = () => {
         InvoiceRemark: "",
     });
 
-    console.log("AllChecklist", AllChecklist)
-    console.log("getChecklistId", getChecklistId)
+    
 
 
     useEffect(() => {
@@ -294,6 +295,7 @@ const CreateJob = () => {
 
     const handleSubmit = async () => {
         const req = {
+            staffCreatedId : staffCreatedId,
             account_manager_id: location.state.goto == "Customer" ? location.state.details.account_manager_id : location.state.details.customer_id.account_manager_id,
             customer_id: location.state.goto == "Customer" ? location.state.details.id : location.state.details.customer_id.id,
             client_id: location.state.goto == "Customer" ? jobData.Client : location.state.details.row.id,
@@ -399,7 +401,6 @@ const CreateJob = () => {
     }
 
 
-
     const AddTask = (id) => {
         const filterData = AllChecklistData.data.find((data) => data.task_id == id);
 
@@ -419,48 +420,80 @@ const CreateJob = () => {
 
     };
 
+     
+
     const RemoveTask = (id) => {
         setAddTaskArr((prevTasks) => prevTasks.filter((task) => task.task_id !== id));
 
     }
 
-
     const handleChange1 = (e) => {
         const { name, value } = e.target;
 
-        // Validation for Task Name
-        if (name === "taskname") {
-            if (value.trim() === "") {
-                setTaskNameError("Please Enter Task Name");
+        const validate = (field, setter, message) => {
+            if (value.trim() === "" || isNaN(value) || value <= 0) {
+                setter(message);
             } else {
-                setTaskNameError("");
+                setter("");
             }
-            setTaskName(value);
-        }
+        };
 
-        // Validation for Budgeted Hour
-        if (name === "budgeted_hour") {
-            if (value.trim() === "") {
-                setBudgetedError("Please Enter Budgeted Hour");
-            } else if (isNaN(value) || value <= 0) {
-                setBudgetedError("Please enter a valid number for Budgeted Hour");
-            } else {
-                setBudgetedError("");
+        if (name === "taskname") {
+            setTaskName(value);
+            setTaskNameError(value.trim() === "" ? "Please Enter Task Name" : "");
+        }
+        else if (name === "budgeted_hour") {
+            validate(name, setBudgetedHourError, "Required");
+            if (value === '' || Number(value) >= 0) {
+                setBudgetedHoursAddTask({ ...BudgetedHoursAddTask, hours: value });
             }
-            setBudgeted(value);
+        }
+        else if (name === "budgeted_minute") {
+            validate(name, setBudgetedMinuteError, "Required");
+            if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                setBudgetedHoursAddTask({ ...BudgetedHoursAddTask, minutes: value });
+            }
         }
     };
 
-
-
-
     const handleAddTask = () => {
-        const req = { task_id: "", task_name: taskName, budgeted_hour: Budgeted }
-        setAddTaskArr([...AddTaskArr, req])
-        console.log("req", req)
-        setShowAddJobModal(false)
+        const errors = {
+            taskNameError: taskName.trim() ? "" : "Please Enter Task Name",
+            budgetedHourError: BudgetedHoursAddTask.hours && BudgetedHoursAddTask.hours > 0 ? "" : "Required",
+            budgetedMinuteError: BudgetedHoursAddTask.minutes && BudgetedHoursAddTask.minutes >= 0 && BudgetedHoursAddTask.minutes <= 59 ? "" : "Required"
+        };
+
+        setTaskNameError(errors.taskNameError);
+        setBudgetedHourError(errors.budgetedHourError);
+        setBudgetedMinuteError(errors.budgetedMinuteError);
+
+        if (!errors.taskNameError && !errors.budgetedHourError && !errors.budgetedMinuteError) {
+            const req = {
+                task_id: "",
+                task_name: taskName,
+                budgeted_hour: `${BudgetedHoursAddTask.hours}:${BudgetedHoursAddTask.minutes}`,
+            };
+            setAddTaskArr([...AddTaskArr, req]);
+            HandleReset();
+            setShowAddJobModal(false);
+        }
+    };
+
+    const HandleReset = () => {
+        setBudgetedHoursAddTask({ ...BudgetedHoursAddTask, hours: '', minutes: '' });
+        setTaskName('');
     }
 
+    const HandleReset1 = () => {
+        setAddTaskArr([])
+        setChecklistId('');
+    }
+
+    const handleAddCheckList = () => {
+        jobModalSetStatus(false);
+    }
+
+ 
 
 
     return (
@@ -1227,9 +1260,8 @@ const CreateJob = () => {
                                             </div>
                                         </div>
 
-
                                         {jobModalStatus && (
-                                            <Modal show={jobModalStatus} onHide={(e) => jobModalSetStatus(false)} centered size="lg">
+                                            <Modal show={jobModalStatus} onHide={(e) => {jobModalSetStatus(false); HandleReset1()}} centered size="lg">
                                                 <Modal.Header closeButton>
                                                     <Modal.Title>Tasks</Modal.Title>
                                                 </Modal.Header>
@@ -1246,7 +1278,6 @@ const CreateJob = () => {
                                                                             style={{ color: "#8a8c8e !important" }}
                                                                             onChange={(e) => { setChecklistId(e.target.value) }}
                                                                             value={getChecklistId}
-
                                                                         >
                                                                             <option value="">Select Checklist Name</option>
                                                                             {
@@ -1283,10 +1314,18 @@ const CreateJob = () => {
                                                                                                 AllChecklistData.data && AllChecklistData.data.map((checklist) => (
                                                                                                     <tr className="">
                                                                                                         <td>{checklist.task_name} </td>
-                                                                                                        <td>{checklist.budgeted_hour} hr</td>
+
+                                                                                                        <td> {checklist.budgeted_hour.split(":")[0]}h {checklist.budgeted_hour.split(":")[1]}m </td>
                                                                                                         <td>
-                                                                                                            <div className="add">
-                                                                                                                <button className=" btn-info text-white blue-btn" onClick={() => AddTask(checklist.task_id)}>+</button>
+                                                                                                          {console.log(AddTaskArr)}
+                                                                                                          {console.log("getChecklistId",getChecklistId)}
+
+                                                                                                            <div className="add" >
+                                                                                                                { AddTaskArr && AddTaskArr.find((task) => task.task_id == checklist.task_id) ? "":
+                                                                                                                    <button className=" btn-info text-white blue-btn"  onClick={() => AddTask(checklist.task_id)}  >+</button> 
+
+                                                                                                                }
+                                                                                                             
                                                                                                             </div>
                                                                                                         </td>
                                                                                                     </tr>
@@ -1320,9 +1359,13 @@ const CreateJob = () => {
                                                                                                 AddTaskArr && AddTaskArr.map((checklist) => (
 
                                                                                                     <tr className="">
-                                                                                                        {console.log("checklist", checklist)}
+
                                                                                                         <td>{checklist.task_name} </td>
-                                                                                                        <td>{checklist.budgeted_hour} hr</td>
+                                                                                                        <td>
+                                                                                                            {checklist.budgeted_hour.split(":")[0]}h {checklist.budgeted_hour.split(":")[1]}m
+                                                                                                        </td>
+
+                                                                                                        {/* <td>{checklist.budgeted_hour} hr</td> */}
                                                                                                         <td>
                                                                                                             <div className="add">
                                                                                                                 <button className="delete-icon"><i className="ti-trash" onClick={() => RemoveTask(checklist.task_id)}></i></button>
@@ -1342,11 +1385,23 @@ const CreateJob = () => {
                                                         </div>
                                                     </div>
                                                 </Modal.Body>
+                                                <Modal.Footer>
+                                                    <Button variant="secondary" onClick={() => {
+                                                        jobModalSetStatus(false)
+                                                        HandleReset1()
+                                                    }}
+                                                    >Close</Button>
+                                                    <Button variant="btn btn-info text-white float-end blue-btn" onClick={handleAddCheckList}>Submit</Button>
+                                                </Modal.Footer>
                                             </Modal>
                                         )}
 
                                         {showAddJobModal && (
-                                            <Modal show={showAddJobModal} onHide={(e) => setShowAddJobModal(false)} centered size="sm">
+                                            <Modal show={showAddJobModal} onHide={() => {
+                                                setShowAddJobModal(false);
+                                                HandleReset();
+                                            }}
+                                                centered size="sm">
                                                 <Modal.Header closeButton>
                                                     <Modal.Title>Add Task</Modal.Title>
                                                 </Modal.Header>
@@ -1366,7 +1421,6 @@ const CreateJob = () => {
                                                                 {taskNameError && <div className="error-text text-danger">{taskNameError}</div>}
                                                             </div>
                                                         </div>
-
                                                         <div className='col-lg-12 mt-2'>
 
                                                             <div className="mb-3">
@@ -1400,25 +1454,11 @@ const CreateJob = () => {
                                                                 }
                                                             </div>
                                                         </div>
-                                                        {/* <div className='col-lg-12'>
-                                                            <label className="form-label">Budgeted Hour</label>
-                                                            <div>
-                                                                <input
-                                                                    type="number"
-                                                                    placeholder='Enter Budgeted Hour'
-                                                                    name='budgeted_hour'
-                                                                    className='p-1 mb-2 w-100 rounded'
-                                                                    onChange={handleChange1}
-                                                                    value={Budgeted}
-                                                                />
-                                                                {BudgetedError && <div className="error-text text-danger">{BudgetedError}</div>}
-                                                            </div>
-                                                        </div> */}
                                                     </div>
 
                                                 </Modal.Body>
                                                 <Modal.Footer>
-                                                    <Button variant="secondary" onClick={(e) => setShowAddJobModal(false)}>Close</Button>
+                                                    <Button variant="secondary" onClick={() => {setShowAddJobModal(false);HandleReset();}}>Close</Button>
                                                     <Button variant="btn btn-info text-white float-end blue-btn" onClick={handleAddTask}>Add</Button>
                                                 </Modal.Footer>
                                             </Modal>
