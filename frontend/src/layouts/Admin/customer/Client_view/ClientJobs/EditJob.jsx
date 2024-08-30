@@ -33,7 +33,7 @@ const CreateJob = () => {
 
     const JobDetails = async () => {
         const req = { action: "getByJobId", job_id: location.state.row.job_id }
-        console.log("req", req)
+         
         const data = { req: req, authToken: token }
         await dispatch(Get_All_Job_List(data))
             .unwrap()
@@ -167,8 +167,27 @@ const CreateJob = () => {
         getChecklistData()
     }, [getChecklistId])
 
-
+ 
     useEffect(() => {
+
+        setBudgetedHours({
+            hours: getJobDetails.loading && getJobDetails.data.budgeted_hours.split(":")[0],
+            minutes: getJobDetails.loading && getJobDetails.data.budgeted_hours.split(":")[1]
+        });
+        setReviewTime({
+            hours: getJobDetails.loading && getJobDetails.data.review_time.split(":")[0],
+            minutes: getJobDetails.loading && getJobDetails.data.review_time.split(":")[1]
+        });
+        setFeedbackIncorporationTime({
+            hours: getJobDetails.loading && getJobDetails.data.feedback_incorporation_time.split(":")[0],
+            minutes: getJobDetails.loading && getJobDetails.data.feedback_incorporation_time.split(":")[1]
+        });
+        setPreparationTimne({
+            hours: getJobDetails.loading && getJobDetails.data.total_preparation_time.split(":")[0],
+            minutes: getJobDetails.loading && getJobDetails.data.total_preparation_time.split(":")[1]
+        });
+
+
         setJobData(prevState => ({
             ...prevState,
             AccountManager: getJobDetails.loading && getJobDetails.data.account_manager_officer_first_name + " " + getJobDetails.loading && getJobDetails.data.account_manager_officer_last_name,
@@ -178,16 +197,11 @@ const CreateJob = () => {
             CustomerAccountManager: getJobDetails.loading && getJobDetails.data.account_manager_officer_id,
             Service: getJobDetails.loading && getJobDetails.data.service_id,
             JobType: getJobDetails.loading && getJobDetails.data.job_type_id,
-            BudgetedHours: getJobDetails.loading && getJobDetails.data.budgeted_hours,
             Reviewer: getJobDetails.loading && getJobDetails.data.reviewer_id,
             AllocatedTo: getJobDetails.loading && getJobDetails.data.allocated_id,
             AllocatedOn: getJobDetails.loading && getJobDetails.data.allocated_on.split("T"),
             DateReceivedOn: getJobDetails.loading && getJobDetails.data.date_received_on.split("T"),
             YearEnd: getJobDetails.loading && getJobDetails.data.year_end,
-            TotalPreparationTime: getJobDetails.loading && getJobDetails.data.total_preparation_time,
-            ReviewTime: getJobDetails.loading && getJobDetails.data.review_time,
-            FeedbackIncorporationTime: getJobDetails.loading && getJobDetails.data.feedback_incorporation_time,
-            TotalTime: getJobDetails.loading && getJobDetails.data.total_time,
             EngagementModel: getJobDetails.loading && getJobDetails.data.engagement_model,
             ExpectedDeliveryDate: getJobDetails.loading && getJobDetails.data.expected_delivery_date.split("T"),
             DueOn: getJobDetails.loading && getJobDetails.data.due_on.split("T"),
@@ -352,8 +366,7 @@ const CreateJob = () => {
                 task: AddTaskArr
             }
         }
-        console.log("req", req)
-        return
+         
         const data = { req: req, authToken: token }
         if (validate()) {
             await dispatch(UpdateJob(data))
@@ -464,7 +477,7 @@ const CreateJob = () => {
     const handleAddTask = () => {
         const req = { task_id: "", task_name: taskName, budgeted_hour: Budgeted }
         setAddTaskArr([...AddTaskArr, req])
-        console.log("req", req)
+         
         setShowAddJobModal(false)
     }
 
@@ -1301,7 +1314,7 @@ const CreateJob = () => {
                                                                                                 AddTaskArr && AddTaskArr.map((checklist) => (
 
                                                                                                     <tr className="">
-                                                                                                        {console.log("checklist", checklist)}
+                                                                                                        
                                                                                                         <td>{checklist.task_name} </td>
                                                                                                         <td>{checklist.budgeted_hour} hr</td>
                                                                                                         <td>

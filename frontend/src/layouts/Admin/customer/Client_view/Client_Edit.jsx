@@ -882,7 +882,7 @@ const ClientEdit = () => {
     }
   }, [getSearchDetails]);
 
-  // Filter out selected details
+
   const FilterSearchDetails = () => {
     const filterData = getAllSearchCompany.filter(
       (data) => data.title === searchItem
@@ -904,15 +904,16 @@ const ClientEdit = () => {
         <div className="row">
           <div className="col-xl-12">
             <div className="card">
-              <div className="card-header align-items-center step-header-blue d-flex justify-content-between">
-                <h4 className="card-title  mb-0">Edit Client</h4>
+              <div className="card-header align-items-center step-header-blue d-flex ">
+                
                 <button
                   type="button"
-                  className="btn btn-info text-white blue-btn"
+                  className="btn p-0"
                   onClick={HandleCancel}
                 >
-                  Back
+                 <i className="pe-2 fa-regular fa-arrow-left-long text-white" ></i>
                 </button>
+                <h4 className="card-title  mb-0">Edit Client</h4>
               </div>
 
               {/* end card header */}

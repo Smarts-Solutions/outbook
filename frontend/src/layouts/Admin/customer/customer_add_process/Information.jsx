@@ -1064,9 +1064,6 @@ const Information = () => {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   };
 
-  console.log("getAccountMangerIdErr", getAccountMangerIdErr);
-
-
   return (
     <Formik
       initialValues={address}
@@ -1346,12 +1343,12 @@ const Information = () => {
                                             </div>
 
                                             <div className="col-lg-4">
+                                              <label className="form-label">
+                                                Phone
+                                              </label>
                                               <div className="mb-3">
                                                 <div className="row">
-                                                  <div className="col-md-4">
-                                                    <label className="form-label">
-                                                      Phone
-                                                    </label>
+                                                  <div className="col-md-4 pe-0">
                                                     <select
                                                       className="form-select"
                                                       onChange={(e) =>
@@ -1376,7 +1373,7 @@ const Information = () => {
                                                       )}
                                                     </select>
                                                   </div>
-                                                  <div className="mb-3 col-md-8">
+                                                  <div className="mb-3 col-md-8 ps-1">
                                                     <input
                                                       type="text"
                                                       className="form-control"
@@ -1507,12 +1504,12 @@ const Information = () => {
                                                 <div className="row">
                                                   <div className="col-lg-12">
                                                     <div
-                                                      className="form-check form-switch form-switch-md mb-3 d-flex justify-content-between"
+                                                      className="form-switch-md mb-3 d-flex justify-content-between"
                                                       dir="ltr"
                                                     >
                                                       <div>
                                                         <label
-                                                          className="form-check-label"
+                                                          className="form-check-label fs-16"
                                                           htmlFor={`customSwitchsizemd-${index}`}
                                                         >
                                                           {" "}

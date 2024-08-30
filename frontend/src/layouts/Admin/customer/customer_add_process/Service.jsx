@@ -309,13 +309,13 @@ const Service = () => {
                                     <div>
                                         <button
                                             type="button"
-                                            className="btn btn-dark add-btn text-white add-btn"
+                                            className="btn btn-secondary add-btn"
                                             id="create-btn"
                                             onClick={AddManager}
                                         >
-                                           
+                                           <i className="pe-2 fa fa-plus"></i>
                                             Add
-                                            <i className="ps-2 ti-plus"></i>
+                                            
                                         </button>
                                     </div>
                                 </div>

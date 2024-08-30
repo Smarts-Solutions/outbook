@@ -414,12 +414,12 @@ const Engagement = () => {
                       <div className="col-xl-12 col-md-12 col-lg-12">
                         <div className="card pricing-box p-0">
                           <div className="col-lg-12">
-                            <div className="card-header">
-                              <p className="office-name card-title fs-6">FTE/Dedicated</p>
+                            <div className="card-header card-header-light-blue">
+                              <p className="mb-0 card-title fs-6">FTE/Dedicated</p>
                             </div>
                           </div>
                           <div className="card-body">
-                            <div className="row align-items-end">
+                            <div className="row ">
                               {[
                                 { label: 'Accountants', name: 'accountants', feeName: "Number of Accountants" },
                                 { label: '', name: 'feePerAccountant', feeName: "Fee Per Accountant" },
@@ -437,7 +437,7 @@ const Engagement = () => {
 
 
                                   <div className="mb-3 cl">
-                                    <label className="form-label">{field.label}</label>
+                                    <label className="form-label label-height">{field.label}</label>
                                     {/* <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label> */}
                                     <input
                                       type="text"
@@ -448,7 +448,7 @@ const Engagement = () => {
                                       onChange={(e) => handleChange1(e)}
                                     />
                                     {errors1[field.name] && (
-                                      <div className="text-danger">{errors1[field.name]}</div>
+                                      <div className="error-text">{errors1[field.name]}</div>
                                     )}
                                   </div>
                                 </div>
@@ -465,8 +465,8 @@ const Engagement = () => {
                       <div style={{ marginBottom: "26px !important" }} className="col-xl-12 col-lg-12">
                         <div className="card pricing-box p-0">
                           <div className="col-lg-12">
-                            <div className="card-header">
-                              <p className="office-name card-title fs-6">Percentage Model</p>
+                            <div className="card-header card-header-light-blue">
+                              <p className="mb-0 card-title fs-6">Percentage Model</p>
                             </div>
                           </div>
                           <div className="card-body">
@@ -493,7 +493,7 @@ const Engagement = () => {
                                       onChange={handleChange2}
                                     />
                                     {errors2[field.name] && (
-                                      <div className="text-danger">{errors2[field.name]}</div>
+                                      <div className="error-text">{errors2[field.name]}</div>
                                     )}
 
                                   </div>
@@ -513,8 +513,8 @@ const Engagement = () => {
                       <div style={{ marginBottom: "26px !important" }} className="col-xl-12 col-lg-12">
                         <div className="card pricing-box p-0">
                           <div className="col-lg-12">
-                            <div className="card-header">
-                              <p className="office-name card-title fs-6">Adhoc/PAYG/Hourly</p>
+                            <div className="card-header card-header-light-blue">
+                              <p className="mb-0 card-title fs-6">Adhoc/PAYG/Hourly</p>
                             </div>
                           </div>
                          
@@ -541,7 +541,7 @@ const Engagement = () => {
                                       onChange={handleChange3}
                                     />
                                     {errors3[field.name] && (
-                                      <div className="text-danger">{errors3[field.name]}</div>
+                                      <div className="error-text">{errors3[field.name]}</div>
                                     )}
 
                                   </div>
@@ -565,8 +565,8 @@ const Engagement = () => {
                       <div className="col-xl-12 col-lg-12">
                         <div className="card pricing-box p-0">
                           <div className="col-lg-12">
-                            <div className="card-header">
-                              <p className="office-name card-title fs-6">Customised Pricing</p>
+                            <div className="card-header card-header-light-blue">
+                              <p className="mb-0 card-title fs-6">Customised Pricing</p>
                             </div>
                           </div>
                           <div className="card-body">
@@ -588,7 +588,7 @@ const Engagement = () => {
                                         onChange={(e) => handleChange4(index, e)}
                                       />
                                       {errors4[index] && (
-                                        <div className="text-danger">{errors4[index].minimum_number_of_jobs}</div>
+                                        <div className="error-text">{errors4[index].minimum_number_of_jobs}</div>
                                       )}
                                     </div>
                                   </div>
@@ -610,7 +610,7 @@ const Engagement = () => {
                                       ))}
                                     </select>
                                     {errors4[index] && (
-                                      <div className="text-danger">{errors4[index].job_type_id}</div>
+                                      <div className="error-text">{errors4[index].job_type_id}</div>
                                     )}
 
 
@@ -632,7 +632,7 @@ const Engagement = () => {
                                         onChange={(e) => handleChange4(index, e)}
                                       />
                                       {errors4[index] && (
-                                        <div className="text-danger">{errors4[index].cost_per_job}</div>
+                                        <div className="error-text">{errors4[index].cost_per_job}</div>
                                       )}
                                     </div>
                                   </div>
@@ -679,7 +679,7 @@ const Engagement = () => {
               </Button>
               
               <Button className="btn btn-info text-white blue-btn" onClick={handleSubmit}>
-                Next
+                Next  <i className="ps-2 fa-regular fa-arrow-right-long"></i>
               </Button>
             </div>
 

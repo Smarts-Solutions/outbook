@@ -6,26 +6,25 @@ import 'react-data-table-component-extensions/dist/index.css';
 const Datatable = ({ columns, data, filter }) => {
   const noDataImage = '/assets/images/No-data-amico.png'; // Replace with your image path
   useEffect(() => {
-
     const table = document.querySelector('.rdt_Table');
-    
-    
+  
     if (table) {
-    
-    const preventDrag = (e) => e.preventDefault();
-    
-    table.addEventListener('dragstart', preventDrag);
-    
-    
-    return () => {
-    
-    table.removeEventListener('dragstart', preventDrag);
-    
-    };
-    
+      const preventDrag = (e) => e.preventDefault();
+  
+      // Apply the event listener to all table headers or cells
+      const columns = table.querySelectorAll('th, td');
+      columns.forEach(column => {
+        column.addEventListener('dragstart', preventDrag);
+      });
+  
+      return () => {
+        columns.forEach(column => {
+          column.removeEventListener('dragstart', preventDrag);
+        });
+      };
     }
-    
-    }, []);
+  }, []);
+  
   return (
     <div className="datatable-container">
       {data.length === 0 ? (
