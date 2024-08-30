@@ -302,7 +302,7 @@ const ClientList = () => {
               <div className="col-8">
                 <h4 className="card-title">
                   {informationData.client_type == 1
-                    ? "Solo"
+                    ? "Sole Trader"
                     : informationData.client_type == 2
                     ? "Company"
                     : "Partnership"}{" "}

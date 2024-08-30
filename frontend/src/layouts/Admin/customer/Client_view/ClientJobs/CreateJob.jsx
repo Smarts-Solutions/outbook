@@ -494,7 +494,7 @@ const CreateJob = () => {
     }
 
 
-
+console.log("jobData",location.state)
 
     return (
         <div>
