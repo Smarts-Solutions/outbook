@@ -494,6 +494,8 @@ const CreateJob = () => {
     }
 
 
+
+
     return (
         <div>
             <div className="container-fluid">
@@ -601,7 +603,7 @@ const CreateJob = () => {
                                                                             name="Service" onChange={HandleChange} value={jobData.Service}>
                                                                             <option value="">Select Service</option>
                                                                             {
-                                                                                AllJobData.loading && AllJobData.data.services &&
+                                                                                AllJobData.loading && AllJobData.data.services && 
                                                                                 AllJobData.data.services.map((service) => (
                                                                                     <option value={service.service_id} key={service.service_id}>{service.service_name}</option>
                                                                                 ))
@@ -619,7 +621,7 @@ const CreateJob = () => {
                                                                         <select className="form-select mb-3 jobtype"
                                                                             name="JobType" onChange={(e) => { HandleChange(e); openJobModal(e) }} value={jobData.JobType}>
                                                                             <option value="">Select Job Type</option>
-                                                                            {get_Job_Type.loading && get_Job_Type.data &&
+                                                                            {get_Job_Type.loading && get_Job_Type.data && 
                                                                                 get_Job_Type.data.map((jobtype) => (
                                                                                     <option
                                                                                         value={jobtype.id}
@@ -677,7 +679,7 @@ const CreateJob = () => {
                                                                             name="Reviewer" onChange={HandleChange} value={jobData.Reviewer}>
                                                                             <option value=""> Select Reviewer</option>
                                                                             {
-                                                                                AllJobData.loading && AllJobData.data.reviewer &&
+                                                                                AllJobData.loading && AllJobData.data.reviewer && 
                                                                                 AllJobData.data.reviewer.map((reviewer) => (
                                                                                     <option value={reviewer.reviewer_id} key={reviewer.reviewer_id}>{reviewer.reviewer_name}</option>
                                                                                 ))
@@ -693,7 +695,7 @@ const CreateJob = () => {
                                                                         <select className="form-select"
                                                                             name="AllocatedTo" onChange={HandleChange} value={jobData.AllocatedTo}>
                                                                             <option value=""> Select Staff</option>
-                                                                            {AllJobData.loading && AllJobData.data.allocated &&
+                                                                            {AllJobData.loading && AllJobData.data.allocated && 
                                                                                 AllJobData.data.allocated.map((staff) => (
                                                                                     <option value={staff.allocated_id} key={staff.allocated_id}>{staff.allocated_name}</option>
                                                                                 ))}
@@ -1163,7 +1165,7 @@ const CreateJob = () => {
                                                                                 >
                                                                                     <option value="">Please Select Currency</option>
                                                                                     {
-                                                                                        AllJobData.loading && AllJobData.data.currency &&
+                                                                                        AllJobData.loading &&  AllJobData.data.currency && 
                                                                                         AllJobData.data.currency.map((currency) => (
                                                                                             <option value={currency.country_id} key={currency.country_id}>{currency.currency_name}</option>
                                                                                         ))
