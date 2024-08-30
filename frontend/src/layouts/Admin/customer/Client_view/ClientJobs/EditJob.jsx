@@ -204,6 +204,10 @@ const EditJob = () => {
                 hours: getJobDetails.data && getJobDetails.data.total_preparation_time.split(":")[0],
                 minutes: getJobDetails.data && getJobDetails.data.total_preparation_time.split(":")[1]
             });
+            setInvoiceTime({
+                hours: getJobDetails.data && getJobDetails.data.invoice_hours.split(":")[0],
+                minutes: getJobDetails.data && getJobDetails.data.invoice_hours.split(":")[1]
+            });
  
             console.log("getJobDetails",getJobDetails.data)
             setJobData(prevState => ({
@@ -335,7 +339,11 @@ const EditJob = () => {
     };
 
 
- 
+    function formatTime(hours, minutes) {
+        const formattedHours = hours != "" || hours != null ? String(hours).padStart(2, '0') : '00';
+        const formattedMinutes = minutes != "" || minutes != null ? String(minutes).padStart(2, '0') : '00';
+        return `${formattedHours}:${formattedMinutes}`;
+    }
 
     const handleSubmit = async () => {
         const req = {
@@ -348,16 +356,16 @@ const EditJob = () => {
             customer_contact_details_id: Number(jobData.CustomerAccountManager),
             service_id: Number(jobData.Service),
             job_type_id: Number(jobData.JobType),
-            budgeted_hours: budgetedHours.hours + ":" + budgetedHours.minutes,
+            budgeted_hours: formatTime(budgetedHours.hours,budgetedHours.minutes),
             reviewer: Number(jobData.Reviewer),
             allocated_to: Number(jobData.AllocatedTo),
             allocated_on: jobData.AllocatedOn ? jobData.AllocatedOn : new Date().toISOString().split('T')[0],
             date_received_on: jobData.DateReceivedOn ? jobData.DateReceivedOn : new Date().toISOString().split('T')[0],
             year_end: jobData.YearEnd,
-            total_preparation_time: PreparationTimne.hours + ":" + PreparationTimne.minutes,
-            review_time: reviewTime.hours + ":" + reviewTime.minutes,
-            feedback_incorporation_time: FeedbackIncorporationTime.hours + ":" + FeedbackIncorporationTime.minutes,
-            total_time: Math.floor(totalHours / 60) + ":" + totalHours % 60,
+            total_preparation_time: formatTime(PreparationTimne.hours,PreparationTimne.minutes),
+            review_time: formatTime(reviewTime.hours,reviewTime.minutes),
+            feedback_incorporation_time: formatTime(FeedbackIncorporationTime.hours,FeedbackIncorporationTime.minutes),
+            total_time: formatTime(Math.floor(totalHours / 60),totalHours % 60),
             engagement_model: jobData.EngagementModel,
             expected_delivery_date: jobData.ExpectedDeliveryDate,
             due_on: jobData.DueOn,
@@ -1280,18 +1288,43 @@ const EditJob = () => {
                                                                                     <div style={{ 'color': 'red' }}>{errors['InvoiceDate']}</div>
                                                                                 )}
                                                                             </div>
+
                                                                             <div className="col-lg-4">
-                                                                                <label className="form-label" >Invoice Hours </label>
-                                                                                <div className="input-group">
-                                                                                    <input type="text" className="form-control"
-                                                                                        name="InvoiceHours" onChange={HandleChange} value={jobData.InvoiceHours}
-                                                                                    />
-                                                                                    <span className="input-group-text" >Hours</span>
-                                                                                    {errors['InvoiceHours'] && (
-                                                                                        <div style={{ 'color': 'red' }}>{errors['InvoiceHours']}</div>
-                                                                                    )}
+                                                                                <div className="mb-3">
+                                                                                    <label className="form-label" >Invoice </label>
+                                                                                    <div className="input-group">
+                                                                                        <input
+                                                                                            type="text"
+                                                                                            className="form-control"
+                                                                                            placeholder="Hours"
+                                                                                            onChange={(e) => {
+                                                                                                const value = e.target.value;
+                                                                                                if (value === '' || Number(value) >= 0) {
+                                                                                                    setInvoiceTime({ ...invoiceTime, hours: value });
+                                                                                                }
+                                                                                            }}
+                                                                                            value={invoiceTime.hours}
+                                                                                        />
+                                                                                        <input
+                                                                                            type="text"
+                                                                                            className="form-control"
+                                                                                            placeholder="Minutes"
+                                                                                            onChange={(e) => {
+                                                                                                const value = e.target.value;
+                                                                                                if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                                                                                                    setInvoiceTime({
+                                                                                                        ...invoiceTime,
+                                                                                                        minutes: value
+                                                                                                    });
+                                                                                                }
+                                                                                            }}
+                                                                                            value={invoiceTime.minutes}
+                                                                                        />
+                                                                                    </div>
+
                                                                                 </div>
                                                                             </div>
+                                                                        
                                                                             <div id="invoicedremark" className="col-lg-3">
                                                                                 <label className="form-label" >Invoice Remark</label>
                                                                                 <input type="text" className="form-control" placeholder="Invoice Remark"

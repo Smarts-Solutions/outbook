@@ -100,6 +100,19 @@ const ClientList = () => {
         row.allocated_first_name + " " + row.allocated_last_name,
       sortable: true,
     },
+    {
+      name: "Timesheet",
+      selector: (row) =>
+        // row.allocated_first_name + " " + row.allocated_last_name,
+      "",
+      sortable: true,
+    },
+    {
+      name: "Invoicing",
+      selector: (row) =>
+      row.invoiced == "1"? "YES" :"NO",
+      sortable: true,
+    },
 
     {
       name: "Actions",

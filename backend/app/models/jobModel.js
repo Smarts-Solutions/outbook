@@ -390,6 +390,7 @@ const getJobByCustomer = async (job) => {
      customer_contact_details.last_name AS account_manager_officer_last_name,
      clients.trading_name AS client_trading_name,
      jobs.client_job_code AS client_job_code,
+     jobs.invoiced AS invoiced,
 
      staffs.id AS allocated_id,
      staffs.first_name AS allocated_first_name,
@@ -449,7 +450,7 @@ const getJobByClient = async (job) => {
      customer_contact_details.last_name AS account_manager_officer_last_name,
      clients.trading_name AS client_trading_name,
      jobs.client_job_code AS client_job_code,
-
+     jobs.invoiced AS invoiced,
      staffs.id AS allocated_id,
      staffs.first_name AS allocated_first_name,
      staffs.last_name AS allocated_last_name,
