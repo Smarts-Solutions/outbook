@@ -341,14 +341,12 @@ const Setting = () => {
                     </div>
                 </div>
                 <div className="tab-content mt-4" id="pills-tabContent">
-                    {/* {/ Staff Role Start /} */}
+                 
 
                     <div className={`tab-pane show active`}>
                         <div className='report-data'>
                             <div className='d-flex justify-content-end align-items-center'>
-                                {/* <div className='tab-title'>
-                                    <h3 className='mt-0'>Job Type</h3>
-                                </div> */}
+                             
                                 <div>
                                     <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '1')}> <i className="fa fa-plus" /> Add Job Type</button>
                                 </div>
@@ -361,7 +359,7 @@ const Setting = () => {
                             </div>
                         </div>
                     </div>
-                    {/* {/ Staff Role end /} */}
+                  
 
 
                 </div>

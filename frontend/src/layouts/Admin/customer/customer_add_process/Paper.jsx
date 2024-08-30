@@ -24,9 +24,7 @@ const Paper = () => {
     if (files && typeof files[Symbol.iterator] === "function") {
       fileArray = Array.from(files);
       setNewFiles(fileArray);
-    } else {
-      console.log("File input is not iterable or not correctly set.");
-    }
+    } 
 
     const previewArray = fileArray.map((file) => {
       const reader = new FileReader();

@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE, CLIENTINDUSTRY, COUNTRY, JOBTYPE, ADDTASK, GetServicesByCustomer, GETTASK, getListAction, addChecklist, UpdateChecklist } from "../../../Services/Settings/settingService";
+import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE, CLIENTINDUSTRY, COUNTRY, JOBTYPE, ADDTASK, GetServicesByCustomer, GETTASK, getListAction, addChecklist, UpdateChecklist ,MasterStatus} from "../../../Services/Settings/settingService";
 import axios from "axios";
 
 
@@ -201,6 +201,21 @@ export const UpdateChecklistData = createAsyncThunk("updateChecklist", async (da
   }
 });
 
+
+export const MasterStatusData = createAsyncThunk("masterStatus", async (data) => {
+  try {
+    const { req, authToken } = data
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await MasterStatus(updatedReq, authToken);
+
+    return await res;
+  } catch
+  (err) {
+    return err;
+  }
+});
+
 //Setting Slice
 const SettingSlice = createSlice({
   name: "SettingSlice",
@@ -219,7 +234,8 @@ const SettingSlice = createSlice({
     gettask: [],
     list: [],
     addChecklistData: [],
-    updatecheckdata: []
+    updatecheckdata: [],
+    masterStatusData: []
   },
 
   reducers: {},
@@ -366,6 +382,17 @@ const SettingSlice = createSlice({
         state.updatecheckdata = action.payload;
       })
       .addCase(UpdateChecklistData.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(MasterStatusData.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(MasterStatusData.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.masterStatusData = action.payload;
+      })
+      .addCase(MasterStatusData.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
       });

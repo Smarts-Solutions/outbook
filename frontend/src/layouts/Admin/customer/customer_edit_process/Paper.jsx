@@ -8,6 +8,7 @@ import sweatalert from "sweetalert2";
 import {
   ADD_PEPPER_WORKS,
   GET_CUSTOMER_DATA,
+  DELETE_CUSTOMER_FILE,
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 const Paper = () => {
@@ -28,26 +29,32 @@ const Paper = () => {
   const handleFileChange = (event) => {
     const files = event.currentTarget.files;
     var fileArray;
-  
+
     if (files && typeof files[Symbol.iterator] === "function") {
       fileArray = Array.from(files);
     } else {
-     
       return;
     }
-  
-    
-    const allowedTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "image/png", "image/jpg", "image/jpeg"];
-  
-    
-    const validFiles = fileArray.filter((file) => allowedTypes.includes(file.type));
-  
+
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "image/png",
+      "image/jpg",
+      "image/jpeg",
+    ];
+
+    const validFiles = fileArray.filter((file) =>
+      allowedTypes.includes(file.type)
+    );
+
     if (validFiles.length !== fileArray.length) {
       alert("Only PDFs, DOCS, PNG, JPG, and JPEG are allowed.");
     }
-  
+
     setNewFiles(validFiles);
-  
+
     const previewArray = validFiles.map((file) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -55,12 +62,11 @@ const Paper = () => {
         reader.onload = () => resolve(reader.result);
       });
     });
-  
+
     Promise.all(previewArray).then((previewData) => {
       setPreviews(previewData);
     });
   };
-  
 
   const GetCustomerData = async () => {
     const req = { customer_id: location.state.id, pageStatus: "4" };
@@ -69,7 +75,6 @@ const Paper = () => {
     await dispatch(GET_CUSTOMER_DATA(data1))
       .unwrap()
       .then((response) => {
-   
         if (response.status) {
           const existingFiles = response.data.customer_paper_work || [];
           setCustomerDetails({
@@ -95,9 +100,7 @@ const Paper = () => {
 
   const handleSubmit = async (values) => {
     const data1 = {
-
       req: { fileData: newFiles, customer_id: address, authToken: token },
-
     };
     await dispatch(ADD_PEPPER_WORKS(data1))
       .unwrap()
@@ -118,6 +121,49 @@ const Paper = () => {
         console.log("Error", error);
       });
   };
+
+  const removeItem = async (file) => {
+    const req = {
+      action: "delete",
+      customer_id: location.state.id,
+      id: file.customer_paper_work_id,
+      file_name: file.file_name,
+    };
+    const data = { req: req, authToken: token };
+  
+    sweatalert
+      .fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+      })
+      .then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            const response = await dispatch(DELETE_CUSTOMER_FILE(data)).unwrap();
+            if (response.status) {
+              sweatalert.fire({
+                title: "Deleted!",
+                text: "Your file has been deleted.",
+                icon: "success",
+              });
+  
+            
+              setFileState((prevFiles) =>
+                prevFiles.filter((data) => data.customer_paper_work_id !== file.customer_paper_work_id)
+              );
+            }
+          } catch (error) {
+            console.log("Error", error);
+          }
+        }
+      });
+  };
+  
 
   return (
     <Formik
@@ -325,8 +371,12 @@ const Paper = () => {
                                             <td className="action">
                                               <div className="d-flex gap-2">
                                                 <div className="remove">
-                                                  <a>
-                                                    <i className="ti-trash text-danger" />
+                                                  <a
+                                                    onClick={(e) =>
+                                                      removeItem(file)
+                                                    }
+                                                  >
+                                                    <i className="ti-trash" />
                                                   </a>
                                                 </div>
                                               </div>

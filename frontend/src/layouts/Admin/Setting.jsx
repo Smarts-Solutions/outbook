@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Role,StatusType, Service, PersonRole, ClientIndustry, Country } from "../../ReduxStore/Slice/Settings/settingSlice";
+import {
+  Role,
+  StatusType,
+  Service,
+  PersonRole,
+  ClientIndustry,
+  Country,
+} from "../../ReduxStore/Slice/Settings/settingSlice";
 import Datatable from "../../Components/ExtraComponents/Datatable";
 import Modal from "../../Components/ExtraComponents/Modals/Modal";
 import { useDispatch, useSelector } from "react-redux";
@@ -332,11 +339,28 @@ const Setting = () => {
   };
 
   const columnRoles = [
-    
-    { name: "Role Name", selector: (row) => row.role_name, sortable: true },
+    {
+      name: "Role Name",
+      selector: (row) => row.role_name,
+      sortable: true,
+      width: "80%",
+    },
 
-    { name: 'Status', cell: row => (<div><span className={`badge ${row.status === '1' ? 'bg-success' : 'bg-danger'}`}>{row.status === '1' ? 'Active' : 'Deactive'}</span></div>), width: '80px', },
-
+    {
+      name: "Status",
+      cell: (row) => (
+        <div>
+          <span
+            className={`badge ${
+              row.status === "1" ? "bg-success" : "bg-danger"
+            }`}
+          >
+            {row.status === "1" ? "Active" : "Deactive"}
+          </span>
+        </div>
+      ),
+      width: "10%",
+    },
 
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
@@ -374,7 +398,21 @@ const Setting = () => {
 
   const columnStatusType = [
     { name: "Status", selector: (row) => row.type, sortable: true },
-    { name: 'Status', cell: row => (<div><span className={`badge ${row.status === '1' ? 'bg-success' : 'bg-danger'}`}>{row.status === '1' ? 'Active' : 'Deactive'}</span></div>), width: '80px', },
+    {
+      name: "Status",
+      cell: (row) => (
+        <div>
+          <span
+            className={`badge ${
+              row.status === "1" ? "bg-success" : "bg-danger"
+            }`}
+          >
+            {row.status === "1" ? "Active" : "Deactive"}
+          </span>
+        </div>
+      ),
+      width: "80px",
+    },
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
           {
@@ -410,8 +448,21 @@ const Setting = () => {
   ];
 
   const columnService = [
-    { name: "Service Name", selector: (row) => row.name, sortable: true, },
-    { name: 'Status', cell: row => (<div><span className={`badge ${row.status === '1' ? 'bg-success' : 'bg-danger'}`}>{row.status === '1' ? 'Active' : 'Deactive'}</span></div>),  },
+    { name: "Service Name", selector: (row) => row.name, sortable: true },
+    {
+      name: "Status",
+      cell: (row) => (
+        <div>
+          <span
+            className={`badge ${
+              row.status === "1" ? "bg-success" : "bg-danger"
+            }`}
+          >
+            {row.status === "1" ? "Active" : "Deactive"}
+          </span>
+        </div>
+      ),
+    },
 
     ...(showSettingUpdateTab || showSettingDeleteTab || showSettingInsertTab
       ? [
@@ -450,7 +501,7 @@ const Setting = () => {
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
-            width:'20%' 
+            width: "20%",
           },
         ]
       : []),
@@ -458,7 +509,21 @@ const Setting = () => {
 
   const columnPersonRole = [
     { name: "Service Name", selector: (row) => row.name, sortable: true },
-    { name: 'Status', cell: row => (<div><span className={`badge ${row.status === '1' ? 'bg-success' : 'bg-danger'}`}>{row.status === '1' ? 'Active' : 'Deactive'}</span></div>), width: '80px', },
+    {
+      name: "Status",
+      cell: (row) => (
+        <div>
+          <span
+            className={`badge ${
+              row.status === "1" ? "bg-success" : "bg-danger"
+            }`}
+          >
+            {row.status === "1" ? "Active" : "Deactive"}
+          </span>
+        </div>
+      ),
+      width: "80px",
+    },
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
           {
@@ -499,7 +564,21 @@ const Setting = () => {
       selector: (row) => row.business_type,
       sortable: true,
     },
-    { name: 'Status', cell: row => (<div><span className={`badge ${row.status === '1' ? 'bg-success' : 'bg-danger'}`}>{row.status === '1' ? 'Active' : 'Deactive'}</span></div>), width: '80px', },
+    {
+      name: "Status",
+      cell: (row) => (
+        <div>
+          <span
+            className={`badge ${
+              row.status === "1" ? "bg-success" : "bg-danger"
+            }`}
+          >
+            {row.status === "1" ? "Active" : "Deactive"}
+          </span>
+        </div>
+      ),
+      width: "80px",
+    },
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
           {
@@ -543,7 +622,21 @@ const Setting = () => {
       selector: (row) => (row.status == 1 ? "Yes" : "No"),
       sortable: true,
     },
-    { name: 'Status', cell: row => (<div><span className={`badge ${row.status === '1' ? 'bg-success' : 'bg-danger'}`}>{row.status === '1' ? 'Active' : 'Deactive'}</span></div>), width: '80px', },
+    {
+      name: "Status",
+      cell: (row) => (
+        <div>
+          <span
+            className={`badge ${
+              row.status === "1" ? "bg-success" : "bg-danger"
+            }`}
+          >
+            {row.status === "1" ? "Active" : "Deactive"}
+          </span>
+        </div>
+      ),
+      width: "80px",
+    },
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
           {
@@ -699,6 +792,20 @@ const Setting = () => {
           },
         ],
         title: " Country",
+        tabStatus: tabStatus,
+      });
+    } else if (tabStatus === "7") {
+      setModalData({
+        ...modalData,
+        fields: [
+          {
+            type: "text",
+            name: "Incorporation ",
+            label: "Incorporation ",
+            placeholder: "Enter Incorporation ",
+          },
+        ],
+        title: " Incorporation",
         tabStatus: tabStatus,
       });
     }
@@ -981,7 +1088,6 @@ const Setting = () => {
               CountryData(req);
               break;
             default:
-            
               break;
           }
           sweatalert.fire({
@@ -1000,6 +1106,7 @@ const Setting = () => {
     { id: "4", label: "Services" },
     { id: "5", label: "Client Industry" },
     { id: "6", label: "Country" },
+    { id: "7", label: "Incorporation" },
   ];
 
   return (
@@ -1041,12 +1148,6 @@ const Setting = () => {
                       </ul>
                     </>
                   </div>
-                  {/* <div className="col-md-4  col-auto ">
-                                    <button type="button"
-
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#exampleModal" className='btn btn-info text-white float-end'> <i className="fa fa-plus" /> Add Customer</button>
-                                </div> */}
                 </div>
               </div>
             </div>
@@ -1267,6 +1368,41 @@ const Setting = () => {
             </div>
 
             {/* {/ Country end /} */}
+
+            {/* Incorporation  Start */}
+            <div
+              className={`tab-pane fade ${
+                getShowTabId === "7" ? "show active" : ""
+              }`}
+            >
+              <div className="report-data">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div className="tab-title">
+                    <h3 className="mt-0">Incorporation</h3>
+                  </div>
+                  {!showSettingInsertTab ? null : (
+                    <div>
+                      <button
+                        type="button"
+                        className="btn btn-info text-white float-end"
+                        onClick={(e) => handleAdd(e, "7")}
+                      >
+                        {" "}
+                        <i className="fa fa-plus" /> Add Incorporation
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className="datatable-wrapper">
+                  <Datatable
+                    filter={true}
+                    columns={columnCountry}
+                    data={countryDataAll.data}
+                  />
+                </div>
+              </div>
+            </div>
+            {/* Incorporation  End */}
           </div>
         </div>
         {/* {/ Add staff Modal start /} */}
@@ -1293,7 +1429,6 @@ const Setting = () => {
           )}
         </>
       </div>
-     
     </>
   );
 };

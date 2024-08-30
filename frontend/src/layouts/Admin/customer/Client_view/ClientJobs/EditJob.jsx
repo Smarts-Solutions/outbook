@@ -6,12 +6,12 @@ import sweatalert from 'sweetalert2';
 import { Get_All_Job_List } from "../../../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 import { Modal, Button } from 'react-bootstrap';
-const CreateJob = () => {
+const EditJob = () => {
     const location = useLocation()
     const navigate = useNavigate();
     const token = JSON.parse(localStorage.getItem("token"));
     const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
-    
+
 
     const dispatch = useDispatch();
     const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
@@ -93,7 +93,7 @@ const CreateJob = () => {
         FeedbackIncorporationTime: "",
         TotalTime: "",
         EngagementModel: "",
-        ExpectedDeliveryDate: "",
+        ExpectedDeliveryDate: null,
         DueOn: "",
         SubmissionDeadline: "",
         CustomerDeadlineDate: "",
@@ -156,7 +156,7 @@ const CreateJob = () => {
         await dispatch(GET_ALL_CHECKLIST(data))
             .unwrap()
             .then(async (response) => {
-                
+
 
                 if (response.status) {
                     setAllChecklistData({
@@ -182,68 +182,73 @@ const CreateJob = () => {
 
 
     useEffect(() => {
-        var a= {}
-        console.log("getJobDetails.data", getJobDetails.data)
-
-        setBudgetedHours({
-            hours:   Object.keys(getJobDetails.data).length>0 && getJobDetails.data.budgeted_hours.split(":")[0],
-            minutes: Object.keys(getJobDetails.data).length>0 && getJobDetails.data.budgeted_hours.split(":")[1]
-        });
-        setReviewTime({
-            hours:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.review_time.split(":")[0],
-            minutes:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.review_time.split(":")[1]
-        });
-        setFeedbackIncorporationTime({
-            hours:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.feedback_incorporation_time.split(":")[0],
-            minutes:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.feedback_incorporation_time.split(":")[1]
-        });
-        setPreparationTimne({
-            hours:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.total_preparation_time.split(":")[0],
-            minutes:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.total_preparation_time.split(":")[1]
-        });
+        var a = {}
+        if (Object.keys(getJobDetails.data).length > 0) {
 
 
-        setJobData(prevState => ({
-            ...prevState,
-            AccountManager:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.account_manager_officer_first_name + " " +Object.keys(getJobDetails.data).length>0 && getJobDetails.data.account_manager_officer_last_name,
-            Customer:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.customer_trading_name,
-            Client: location.state.goto == "Customer" ?Object.keys(getJobDetails.data).length>0 && getJobDetails.data.client_id :Object.keys(getJobDetails.data).length>0 && getJobDetails.data.client_trading_name,
-            ClientJobCode:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.client_job_code,
-            CustomerAccountManager:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.account_manager_officer_id,
-            Service:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.service_id,
-            JobType:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.job_type_id,
-            Reviewer:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.reviewer_id,
-            AllocatedTo:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.allocated_id,
-            AllocatedOn:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.allocated_on.split("T"),
-            DateReceivedOn:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.date_received_on.split("T"),
-            YearEnd:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.year_end,
-            EngagementModel:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.engagement_model,
-            ExpectedDeliveryDate:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.expected_delivery_date.split("T"),
-            DueOn:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.due_on.split("T"),
-            SubmissionDeadline:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.submission_deadline.split("T"),
-            CustomerDeadlineDate:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.customer_deadline_date.split("T"),
-            SLADeadlineDate:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.sla_deadline_date.split("T"),
-            InternalDeadlineDate:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.internal_deadline_date.split("T"),
-            FilingWithCompaniesHouseRequired:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.filing_Companies_required,
-            CompaniesHouseFilingDate:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.filing_Companies_date.split("T"),
-            FilingWithHMRCRequired:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.filing_hmrc_required,
-            HMRCFilingDate:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.filing_hmrc_date.split("T"),
-            OpeningBalanceAdjustmentRequired:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.opening_balance_required,
-            OpeningBalanceAdjustmentDate:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.opening_balance_date.split("T"),
-            NumberOfTransactions:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.number_of_transaction,
-            NumberOfTrialBalanceItems:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.number_of_balance_items,
-            Turnover:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.turnover,
-            NoOfEmployees:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.number_of_employees,
-            VATReconciliation:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.vat_reconciliation,
-            Bookkeeping:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.bookkeeping,
-            ProcessingType:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.processing_type,
-            Invoiced:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.invoiced,
-            Currency:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.currency,
-            InvoiceValue:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.invoice_value,
-            InvoiceDate:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.invoice_date,
-            InvoiceHours:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.invoice_hours,
-            InvoiceRemark:Object.keys(getJobDetails.data).length>0 && getJobDetails.data.invoice_remark
-        }));
+
+
+            setBudgetedHours({
+                hours: getJobDetails.data && getJobDetails.data.budgeted_hours.split(":")[0],
+                minutes: getJobDetails.data && getJobDetails.data.budgeted_hours.split(":")[1]
+            });
+            setReviewTime({
+                hours: getJobDetails.data && getJobDetails.data.review_time.split(":")[0],
+                minutes: getJobDetails.data && getJobDetails.data.review_time.split(":")[1]
+            });
+            setFeedbackIncorporationTime({
+                hours: getJobDetails.data && getJobDetails.data.feedback_incorporation_time.split(":")[0],
+                minutes: getJobDetails.data && getJobDetails.data.feedback_incorporation_time.split(":")[1]
+            });
+            setPreparationTimne({
+                hours: getJobDetails.data && getJobDetails.data.total_preparation_time.split(":")[0],
+                minutes: getJobDetails.data && getJobDetails.data.total_preparation_time.split(":")[1]
+            });
+ 
+          
+            setJobData(prevState => ({
+                ...prevState,
+                AccountManager: getJobDetails.data && getJobDetails.data.outbooks_acount_manager_first_name + " " + getJobDetails.data.outbooks_acount_manager_last_name,
+                Customer: getJobDetails.data && getJobDetails.data.customer_trading_name,
+                Client: location.state.goto == "Customer" ? getJobDetails.data && getJobDetails.data.client_id : getJobDetails.data && getJobDetails.data.client_trading_name,
+                ClientJobCode: getJobDetails.data && getJobDetails.data.client_job_code,
+                CustomerAccountManager: getJobDetails.data && getJobDetails.data.account_manager_officer_id,
+                Service: getJobDetails.data && getJobDetails.data.service_id,
+                JobType: getJobDetails.data && getJobDetails.data.job_type_id,
+                Reviewer: getJobDetails.data && getJobDetails.data.reviewer_id,
+                AllocatedTo: getJobDetails.data && getJobDetails.data.allocated_id,
+                AllocatedOn: getJobDetails.data && getJobDetails.data.allocated_on.split("T"),
+                DateReceivedOn: getJobDetails.data && getJobDetails.data.date_received_on.split("T"),
+                YearEnd: getJobDetails.data && getJobDetails.data.year_end,
+                EngagementModel: getJobDetails.data && getJobDetails.data.engagement_model,
+                ExpectedDeliveryDate: getJobDetails.data && getJobDetails.data.expected_delivery_date == null ? "" : getJobDetails.data && getJobDetails.data.expected_delivery_date.split("T"),
+                DueOn: getJobDetails.data && getJobDetails.data.due_on && getJobDetails.data.due_on.split("T"),
+                SubmissionDeadline: getJobDetails.data && getJobDetails.data.submission_deadline && getJobDetails.data.submission_deadline.split("T"),
+                CustomerDeadlineDate: getJobDetails.data && getJobDetails.data.customer_deadline_date && getJobDetails.data.customer_deadline_date.split("T"),
+                SLADeadlineDate: getJobDetails.data && getJobDetails.data.sla_deadline_date && getJobDetails.data.sla_deadline_date.split("T"),
+                InternalDeadlineDate: getJobDetails.data && getJobDetails.data.internal_deadline_date && getJobDetails.data.internal_deadline_date.split("T"),
+                FilingWithCompaniesHouseRequired: getJobDetails.data && getJobDetails.data.filing_Companies_required,
+                CompaniesHouseFilingDate: getJobDetails.data && getJobDetails.data.filing_Companies_date && getJobDetails.data.filing_Companies_date.split("T"),
+                FilingWithHMRCRequired: getJobDetails.data && getJobDetails.data.filing_hmrc_required,
+                HMRCFilingDate: getJobDetails.data && getJobDetails.data.filing_hmrc_date && getJobDetails.data.filing_hmrc_date.split("T"),
+                OpeningBalanceAdjustmentRequired: getJobDetails.data && getJobDetails.data.opening_balance_required,
+                OpeningBalanceAdjustmentDate: getJobDetails.data && getJobDetails.data.opening_balance_date && getJobDetails.data.opening_balance_date.split("T"),
+                NumberOfTransactions: getJobDetails.data && getJobDetails.data.number_of_transaction,
+                NumberOfTrialBalanceItems: getJobDetails.data && getJobDetails.data.number_of_balance_items,
+                Turnover: getJobDetails.data && getJobDetails.data.turnover,
+                NoOfEmployees: getJobDetails.data && getJobDetails.data.number_of_employees,
+                VATReconciliation: getJobDetails.data && getJobDetails.data.vat_reconciliation,
+                Bookkeeping: getJobDetails.data && getJobDetails.data.bookkeeping,
+                ProcessingType: getJobDetails.data && getJobDetails.data.processing_type,
+                Invoiced: getJobDetails.data && getJobDetails.data.invoiced,
+                Currency: getJobDetails.data && getJobDetails.data.currency,
+                InvoiceValue: getJobDetails.data && getJobDetails.data.invoice_value,
+                InvoiceDate: getJobDetails.data && getJobDetails.data.invoice_date,
+                InvoiceHours: getJobDetails.data && getJobDetails.data.invoice_hours,
+                InvoiceRemark: getJobDetails.data && getJobDetails.data.invoice_remark
+            }));
+
+        }
     }, [getJobDetails]);
 
 
@@ -330,13 +335,15 @@ const CreateJob = () => {
     };
 
 
+ 
+
     const handleSubmit = async () => {
         const req = {
             job_id: location.state.row.job_id,
-            staffCreatedId : staffCreatedId,
-            account_manager_id:getJobDetails.data && getJobDetails.data.account_manager_officer_id,
-            customer_id:getJobDetails.data && getJobDetails.data.customer_id,
-            client_id:getJobDetails.data && getJobDetails.data.client_id,
+            staffCreatedId: staffCreatedId,
+            account_manager_id: getJobDetails.data && getJobDetails.data.outbooks_acount_manager_id,
+            customer_id: getJobDetails.data && getJobDetails.data.customer_id,
+            client_id: getJobDetails.data && getJobDetails.data.client_id,
             client_job_code: jobData.ClientJobCode,
             customer_contact_details_id: Number(jobData.CustomerAccountManager),
             service_id: Number(jobData.Service),
@@ -525,8 +532,7 @@ const CreateJob = () => {
         jobModalSetStatus(false);
     }
 
-
-
+ 
 
     return (
         <div>
@@ -1307,7 +1313,7 @@ const CreateJob = () => {
                                         </div>
 
                                         {jobModalStatus && (
-                                            <Modal show={jobModalStatus} onHide={(e) => {jobModalSetStatus(false); HandleReset1()}} centered size="lg">
+                                            <Modal show={jobModalStatus} onHide={(e) => { jobModalSetStatus(false); HandleReset1() }} centered size="lg">
                                                 <Modal.Header closeButton>
                                                     <Modal.Title>Tasks</Modal.Title>
                                                 </Modal.Header>
@@ -1363,15 +1369,14 @@ const CreateJob = () => {
 
                                                                                                         <td> {checklist.budgeted_hour.split(":")[0]}h {checklist.budgeted_hour.split(":")[1]}m </td>
                                                                                                         <td>
-                                                                                                          {console.log(AddTaskArr)}
-                                                                                                          {console.log("getChecklistId",getChecklistId)}
+                                                                                                           
 
                                                                                                             <div className="add" >
-                                                                                                                { AddTaskArr && AddTaskArr.find((task) => task.task_id == checklist.task_id) ? "":
-                                                                                                                    <button className=" btn-info text-white blue-btn"  onClick={() => AddTask(checklist.task_id)}  >+</button> 
+                                                                                                                {AddTaskArr && AddTaskArr.find((task) => task.task_id == checklist.task_id) ? "" :
+                                                                                                                    <button className=" btn-info text-white blue-btn" onClick={() => AddTask(checklist.task_id)}  >+</button>
 
                                                                                                                 }
-                                                                                                             
+
                                                                                                             </div>
                                                                                                         </td>
                                                                                                     </tr>
@@ -1489,7 +1494,7 @@ const CreateJob = () => {
                                                                         className="form-control"
                                                                         placeholder="Minutes"
                                                                         name='budgeted_minute'
-                                                                        onChange={(e) => {  handleChange1(e); }}
+                                                                        onChange={(e) => { handleChange1(e); }}
                                                                         value={BudgetedHoursAddTask.minutes}
                                                                     />
 
@@ -1504,7 +1509,7 @@ const CreateJob = () => {
 
                                                 </Modal.Body>
                                                 <Modal.Footer>
-                                                    <Button variant="secondary" onClick={() => {setShowAddJobModal(false);HandleReset();}}>Close</Button>
+                                                    <Button variant="secondary" onClick={() => { setShowAddJobModal(false); HandleReset(); }}>Close</Button>
                                                     <Button variant="btn btn-info text-white float-end blue-btn" onClick={handleAddTask}>Add</Button>
                                                 </Modal.Footer>
                                             </Modal>
@@ -1524,4 +1529,4 @@ const CreateJob = () => {
     )
 }
 
-export default CreateJob
+export default EditJob
