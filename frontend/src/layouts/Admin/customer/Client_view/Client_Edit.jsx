@@ -911,7 +911,7 @@ const ClientEdit = () => {
                   className="btn p-0"
                   onClick={HandleCancel}
                 >
-                 <i className="pe-2 fa-regular fa-arrow-left-long text-white" ></i>
+                 <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" ></i>
                 </button>
                 <h4 className="card-title  mb-0">Edit Client</h4>
               </div>

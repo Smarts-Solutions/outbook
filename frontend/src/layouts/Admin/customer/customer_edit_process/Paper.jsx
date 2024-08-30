@@ -170,6 +170,9 @@ const Paper = () => {
                                   >
                                     <thead className="table-light table-head-blue">
                                       <tr>
+                                      <th className="" data-sort="file_name">
+                                          File Image
+                                        </th>
                                         <th className="" data-sort="file_name">
                                           File Name
                                         </th>
@@ -189,17 +192,19 @@ const Paper = () => {
                                         Array.from(newFiles).map(
                                           (file, index) => (
                                             <tr key={`new-${index}`}>
-                                              <td className="file_name">
-                                                {" "}
-                                                <img
+                                              <td>        <img
                                                   src={previews[index]}
                                                   alt="preview"
+
                                                   style={{
                                                     width: "50px",
                                                     height: "50px",
                                                   }}
-                                                />
-                                                {file.name}{" "}
+                                                /></td>
+                                              <td className="file_name">
+                                              
+                                        
+                                                {file.name}
                                               </td>
 
                                               <td className="file_type">
@@ -217,7 +222,7 @@ const Paper = () => {
                                               </td>
 
                                               <td className="action">
-                                                <div className="d-flex gap-2">
+                                                <div className="">
                                                   <div className="remove">
                                                     <a
                                                       onClick={() => {
@@ -241,7 +246,7 @@ const Paper = () => {
                                                         );
                                                       }}
                                                     >
-                                                      <i className="ti-trash" />
+                                                      <i className="fs-5 ti-trash text-danger" />
                                                     </a>
                                                   </div>
                                                 </div>
@@ -321,7 +326,7 @@ const Paper = () => {
                                               <div className="d-flex gap-2">
                                                 <div className="remove">
                                                   <a>
-                                                    <i className="ti-trash" />
+                                                    <i className="ti-trash text-danger" />
                                                   </a>
                                                 </div>
                                               </div>

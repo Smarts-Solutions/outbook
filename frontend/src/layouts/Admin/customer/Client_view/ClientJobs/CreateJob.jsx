@@ -502,7 +502,13 @@ const CreateJob = () => {
                 <div className="row mt-4">
                     <div className="col-xl-12">
                         <div className="card">
-                            <div className="card-header step-header-blue">
+                            <div className="card-header align-items-center step-header-blue d-flex">
+                            <button
+                  type="button"
+                  className="btn p-0"
+                >
+                 <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" ></i>
+                </button>
                                 <h4 className="card-title mb-0 mt-0">Create New Job</h4>
                             </div>
 
@@ -615,7 +621,7 @@ const CreateJob = () => {
 
                                                                     <div className="col-lg-4 mb-3">
                                                                         <label className="form-label">Job Type</label>
-                                                                        <select className="form-select mb-3 jobtype"
+                                                                        <select className="form-select  jobtype"
                                                                             name="JobType" onChange={(e) => { HandleChange(e); openJobModal(e) }} value={jobData.JobType}>
                                                                             <option value="">Select Job Type</option>
                                                                             {get_Job_Type.loading &&
@@ -1414,7 +1420,7 @@ const CreateJob = () => {
                                                                     type="text"
                                                                     placeholder="Enter Task name"
                                                                     name='taskname'
-                                                                    className='p-1 w-100 mb-2 rounded'
+                                                                    className='p-1 w-100 mb-2 rounded form-control'
                                                                     onChange={handleChange1}
                                                                     value={taskName}
                                                                 />
@@ -1454,6 +1460,22 @@ const CreateJob = () => {
                                                                 }
                                                             </div>
                                                         </div>
+ 
+                                                        {/* <div className='col-lg-12'>
+                                                            <label className="form-label">Budgeted Hour</label>
+                                                            <div>
+                                                                <input
+                                                                    type="number"
+                                                                    placeholder='Enter Budgeted Hour'
+                                                                    name='budgeted_hour'
+                                                                    className='p-1 mb-2 w-100 rounded form-control'
+                                                                    onChange={handleChange1}
+                                                                    value={Budgeted}
+                                                                />
+                                                                {BudgetedError && <div className="error-text text-danger">{BudgetedError}</div>}
+                                                            </div>
+                                                        </div> */}
+ 
                                                     </div>
 
                                                 </Modal.Body>

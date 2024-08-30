@@ -535,6 +535,7 @@ const Engagement = () => {
                                                                         type="text"
                                                                         className="form-control"
                                                                         name={field.name}
+                                                                        placeholder={field.feeName}
                                                                         value={formValues1[field.name]}
                                                                         onChange={(e) => handleChange1(e)}
                                                                     />
@@ -580,6 +581,7 @@ const Engagement = () => {
                                                                         className="form-control"
                                                                         name={field.name}
                                                                         value={formValues2[field.name]}
+                                                                        placeholder={field.feeName}
                                                                         onChange={handleChange2}
                                                                     />
                                                                     {errors2[field.name] && (
@@ -624,6 +626,7 @@ const Engagement = () => {
                                                                         className="form-control"
                                                                         name={field.name}
                                                                         value={formValues3[field.name]}
+                                                                        placeholder={field.feeName}
                                                                         onChange={handleChange3}
                                                                     />
                                                                     {errors3[field.name] && (
@@ -653,7 +656,7 @@ const Engagement = () => {
                                                     <div className="card-body">
                                                         <div id="custprize">
                                                             {jobEntries.map((job, index) => (
-                                                                <div className="row align-items-center" key={index}>
+                                                                <div className="row " key={index}>
                                                                     <div className="col-lg-4">
                                                                         <div className="mb-3">
                                                                             <label htmlFor={`minimumJobs_${index}`} className="form-label">
@@ -720,7 +723,7 @@ const Engagement = () => {
                                                                     </div>
 
                                                                     {jobEntries.length > 1 &&
-                                                                        <div className="col-lg-1 text-center" >
+                                                                        <div className="col-lg-1 text-center mt-4" >
                                                                             <a className="add_icon text-decoration-none" onClick={(e) => handleRemoveJob(index)}>
                                                                                 <i
                                                                                     style={{ fontSize: 25, cursor: "pointer", }}

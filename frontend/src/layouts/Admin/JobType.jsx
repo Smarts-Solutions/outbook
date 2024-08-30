@@ -406,7 +406,7 @@ const Setting = () => {
                     </div>
                     <div>
                         <div className="row ">
-                            <div className="col-lg-10">
+                            <div className="col-lg-9">
                                 <div className="mb-3">
                                     <input
                                         type="text"
@@ -419,20 +419,21 @@ const Setting = () => {
                                     />
                                 </div>
                             </div>
-                            <div className="col-lg-2 ">
+                            <div className="col-lg-3 ">
                                 <div className="remove">
                                     <a
                                         className="btn btn-secondary btn-sm add-btn-job_type add-btn-new"
                                         onClick={handleAddTask} // Call handleAddTask when clicked
                                     >
-                                        ADD
+                                      <i className='fa fa-plus pe-2'>  </i>
+                                      Add
                                     </a>
                                 </div>
                             </div>
                         </div>
                         <h6 className='or text-center'>OR</h6>
                         <div className='row align-items-center'>
-                            <div className="mb-3 col-lg-9">
+                            <div className="mb-3 col-lg-12">
                                 <label htmlFor="firstNameinput" className="form-label">Import Excel</label>
                                 <input
                                     type="file"
@@ -444,15 +445,15 @@ const Setting = () => {
                                 />
                             </div>
 
-                            <input type="file" className="form-control" placeholder="Job Name" id="firstNameinput" />
+                            {/* <input type="file" className="form-control" placeholder="Job Name" id="firstNameinput" /> */}
                         </div>
-                        <div className="col-lg-3">
+                        {/* <div className="col-lg-3">
                             <div className="remove" style={{ float: 'right' }}>
                                 <a className="btn btn-sm add-btn-job_type add-btn-new">
                                     UPLOAD
                                 </a>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                     <br />
                     <div style={{ border: '2px hidden black', margin: '5px' }} className="table-responsive table-card mt-3 mb-1">
@@ -479,8 +480,8 @@ const Setting = () => {
                                             <div className="d-flex gap-2">
                                                 <div className="remove">
                                                     <a
-                                                        style={{ backgroundColor: 'rgb(75, 175, 75)', color: 'white', width: '60px' }}
-                                                        className="btn btn-sm"
+                                                        style={{ backgroundColor: 'rgb(75, 175, 75)', color: 'white', width: '60px',fontSize:'12px' }}
+                                                        className="btn btn-sm "
                                                     >
                                                         Enable
                                                     </a>
@@ -494,9 +495,9 @@ const Setting = () => {
                     </div>
                     <div className="col-lg-12">
                         <div className="remove" style={{ float: 'right' }}>
-                            <a className="btn btn-sm add-btn-job_type add-btn-new" onClick={(e) => handleSaveTask()}>
+                            <button className="btn btn-info text-white " onClick={(e) => handleSaveTask()}>
                                 Submit
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
