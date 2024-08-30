@@ -1,5 +1,5 @@
 import React from 'react';
-import Datatable from '../../Components/ExtraComponents/Datatable';
+import Datatable from '../../../Components/ExtraComponents/Datatable';
 
 
 const data = [

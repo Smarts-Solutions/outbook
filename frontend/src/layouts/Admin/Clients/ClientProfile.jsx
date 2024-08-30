@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import Datatable from "../../../../Components/ExtraComponents/Datatable";
-import { Get_All_Job_List } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import Datatable from "../../../Components/ExtraComponents/Datatable";
+import { Get_All_Job_List } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Get_All_Client } from "../../../../ReduxStore/Slice/Client/ClientSlice";
+import { Get_All_Client } from "../../../ReduxStore/Slice/Client/ClientSlice";
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -329,7 +329,7 @@ const ClientList = () => {
               <div className="col-8">
                 <h4 className="card-title">
                   {informationData.client_type == 1
-                    ? "Solo"
+                    ? "Sole Trader"
                     : informationData.client_type == 2
                     ? "Company"
                     : "Partnership"}{" "}

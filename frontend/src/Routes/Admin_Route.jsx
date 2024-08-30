@@ -3,30 +3,38 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import Sidebar from '../Components/Dashboard/Sidebar';
-import Dashboard from '../layouts/Admin/Dashboard';
 import Header from '../Components/Dashboard/Header';
-import Customer from '../layouts/Admin/customer/Customer';
-import Status from '../layouts/Admin/Status';
-import Reports from '../layouts/Admin/Reports';
+import Profile from '../Components/Dashboard/Profile'
+
+import Dashboard from '../layouts/Admin/DashboardPage/Dashboard';
+
 import Service from '../layouts/Admin/customer/customer_add_process/Service';
-import Footer from '../Components/Dashboard/Footer';
-import Access from '../layouts/Admin/Access';
-import Setting from '../layouts/Admin/Setting';
-import Staff from '../layouts/Admin/Staff/Staff';
-import ViewLogs from '../layouts/Admin/Staff/ViewLogs';
+import Customer from '../layouts/Admin/customer/Customer';
+
 import Addcustomer from '../layouts/Admin/customer/customer_add_process/Addcustomer';
 import Editcustomer from '../layouts/Admin/customer/customer_edit_process/Editcustomer';
-import AddNewClient from '../layouts/Admin/customer/Client_view/CreateClient'
-import JobType from '../layouts/Admin/JobType'
-import Profile from '../Components/Dashboard/Profile'
+
+import Status from '../layouts/Admin/StatusPage/Status';
+import Reports from '../layouts/Admin/ReportsPage/Reports';
+import Access from '../layouts/Admin/AccessPage/Access';
+import Setting from '../layouts/Admin/Settings/Setting';
+import Staff from '../layouts/Admin/Staff/Staff';
+import ViewLogs from '../layouts/Admin/Staff/ViewLogs';
+
+import JobType from '../layouts/Admin/Settings/JobType'
 import { RoleAccess } from '../ReduxStore/Slice/Access/AccessSlice';
-import ClientList from '../layouts/Admin/customer/Client_view/Client_list'
-import ClientEdit from '../layouts/Admin/customer/Client_view/Client_Edit'
-import CreateJob from '../layouts/Admin/customer/Client_view/ClientJobs/CreateJob'
-import ClientProfile from '../layouts/Admin/customer/Client_view/ClientJob'
-import JobEdit from '../layouts/Admin/customer/Client_view/ClientJobs/EditJob'
-import CreateCheckList from '../layouts/Admin/customer/Client_view/CreateCheckList';
-import EditCheckList from '../layouts/Admin/customer/Client_view/Editchecklist';
+
+import AddNewClient from '../layouts/Admin/Clients/CreateClient'
+import ClientList from '../layouts/Admin/Clients/Client_list'
+import ClientEdit from '../layouts/Admin/Clients/Client_Edit'
+
+import ClientProfile from '../layouts/Admin/Clients/ClientProfile'
+
+import CreateCheckList from '../layouts/Admin/Clients/CreateCheckList';
+import EditCheckList from '../layouts/Admin/Clients/Editchecklist';
+import Statuses from '../layouts/Admin/Clients/Statuses';
+
+
 import JobInformation from '../layouts/Admin/Jobs/JobInformation';
 import TaskTimesheet from '../layouts/Admin/Jobs/TaskTimesheet';
 import JobTimeline from '../layouts/Admin/Jobs/JobTimeline';
@@ -34,8 +42,9 @@ import MissingLogs from '../layouts/Admin/Jobs/MissingLogs';
 import Queries from '../layouts/Admin/Jobs/Queries';
 import Drafts from '../layouts/Admin/Jobs/Drafts';
 import Documents from '../layouts/Admin/Jobs/Documents';
-import Statuses from '../layouts/Admin/customer/Client_view/Statuses';
 
+import CreateJob from '../layouts/Admin/Jobs/JobAction/CreateJob'
+import JobEdit from '../layouts/Admin/Jobs/JobAction/EditJob'
 
 
 const Admin_Route = () => {

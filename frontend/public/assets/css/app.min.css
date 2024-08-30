@@ -9955,3 +9955,7 @@ body .accordion-button:not(.collapsed)::after {
      font-weight: bold;
      text-align: center;
    }
+.btn:active {
+
+    border-color: transparent !important;
+}

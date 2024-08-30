@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import Datatable from '../../Components/ExtraComponents/Datatable';
+import Datatable from '../../../Components/ExtraComponents/Datatable';
 import { useDispatch } from 'react-redux';
-import { Role } from '../../ReduxStore/Slice/Settings/settingSlice';
-import { GetAccess } from '../../ReduxStore/Slice/Access/AccessSlice';
+import { Role } from '../../../ReduxStore/Slice/Settings/settingSlice';
+import { GetAccess } from '../../../ReduxStore/Slice/Access/AccessSlice';
 import Swal from 'sweetalert2';
 
 const Access = () => {

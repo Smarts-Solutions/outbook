@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
-import { GetAllJabData, AddAllJobType, GET_ALL_CHECKLIST } from '../../../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { GetAllJabData, AddAllJobType, GET_ALL_CHECKLIST } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import sweatalert from 'sweetalert2';
 import * as bootstrap from 'bootstrap';
-import { JobType } from '../../../../../ReduxStore/Slice/Settings/settingSlice'
+import { JobType } from '../../../../ReduxStore/Slice/Settings/settingSlice'
 import { Modal, Button } from 'react-bootstrap';
 
 const CreateJob = () => {
@@ -126,6 +126,7 @@ const CreateJob = () => {
 
     const getAllChecklist = async () => {
         const req = { action: "getByServiceWithJobType", service_id: jobData.Service, customer_id: location.state.goto == "Customer" ? location.state.details.id : location.state.details.customer_id.id, job_type_id: jobData.JobType }
+        
         const data = { req: req, authToken: token }
         await dispatch(GET_ALL_CHECKLIST(data))
             .unwrap()
@@ -502,8 +503,11 @@ const CreateJob = () => {
                 <div className="row mt-4">
                     <div className="col-xl-12">
                         <div className="card">
-                            <div className="card-header step-header-blue">
-                                <h4 className="card-title mb-0 mt-0">Create New Job</h4>
+
+                            <div className="card-header d-flex justify-content-between">
+                                <h3 className="card-title mb-0">Create New Job</h3>
+                                <button type="button" className="btn btn-info text-white blue-btn" onClick={() => window.history.back()}>
+                                <i className="fa fa-arrow-left pe-1" /> Back</button>
                             </div>
 
                             <div className="card-body form-steps">

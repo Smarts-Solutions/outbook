@@ -7,7 +7,7 @@ import {
   GETTASKDATA,
   getList,
   UpdateChecklistData,
-} from "../../../../ReduxStore/Slice/Settings/settingSlice";
+} from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 
 const CreateCheckList = () => {
@@ -47,7 +47,7 @@ const CreateCheckList = () => {
         .then((response) => {
           if (response.status) {
             const checklistData = response.data;
-          
+
 
             getJobTypeData(checklistData.service_id);
 

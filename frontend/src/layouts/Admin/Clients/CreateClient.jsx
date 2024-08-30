@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch } from 'react-redux';
-import { GetClientIndustry, Add_Client } from '../../../../ReduxStore/Slice/Client/ClientSlice';
-import { GetAllCompany } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
-import { Email_regex } from '../../../../Utils/Common_regex'
+import { GetClientIndustry, Add_Client } from '../../../ReduxStore/Slice/Client/ClientSlice';
+import { GetAllCompany } from '../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { Email_regex } from '../../../Utils/Common_regex'
 import { useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2'
-import { PersonRole, Country } from '../../../../ReduxStore/Slice/Settings/settingSlice'
+import { PersonRole, Country } from '../../../ReduxStore/Slice/Settings/settingSlice'
 import Search from 'antd/es/transfer/search';
 const CreateClient = () => {
     const dispatch = useDispatch();

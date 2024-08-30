@@ -4,16 +4,16 @@ import {
   GetClientIndustry,
   Edit_Client,
   Get_All_Client,
-} from "../../../../ReduxStore/Slice/Client/ClientSlice";
-import { GetAllCompany } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
-import { Email_regex } from "../../../../Utils/Common_regex";
+} from "../../../ReduxStore/Slice/Client/ClientSlice";
+import { GetAllCompany } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { Email_regex } from "../../../Utils/Common_regex";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
 import {
   PersonRole,
   Country,
-} from "../../../../ReduxStore/Slice/Settings/settingSlice";
+} from "../../../ReduxStore/Slice/Settings/settingSlice";
 
 import Search from "antd/es/transfer/search";
 const ClientEdit = () => {
@@ -911,7 +911,7 @@ const ClientEdit = () => {
                   className="btn p-0"
                   onClick={HandleCancel}
                 >
-                 <i className="pe-2 fa-regular fa-arrow-left-long text-white" ></i>
+                 <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" ></i>
                 </button>
                 <h4 className="card-title  mb-0">Edit Client</h4>
               </div>

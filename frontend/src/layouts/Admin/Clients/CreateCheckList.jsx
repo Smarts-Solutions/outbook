@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { JobType, GetServicesByCustomers, GETTASKDATA, getList, addChecklists } from '../../../../ReduxStore/Slice/Settings/settingSlice';
+import { JobType, GetServicesByCustomers, GETTASKDATA, getList, addChecklists } from '../../../ReduxStore/Slice/Settings/settingSlice';
 import sweatalert from 'sweetalert2';
 
 const CreateCheckList = () => {
@@ -247,23 +247,25 @@ const CreateCheckList = () => {
 
   return (
     <div className="container-fluid">
-      <div className="content-title">
-
-
-        <div className="card-header d-flex justify-content-between">
-          <h3 className="card-title mb-0">Create New Checklist</h3>
-          <button type="button" className="btn btn-info text-white blue-btn" onClick={() => navigate('/admin/Clientlist', { state: { id: location.state.id, route: "Checklist" } })}>Back</button>
+  
+      <div className="card mt-4">
+      <div className="card-header d-flex step-header-blue">
+         
+          <button
+                  type="button"
+                  className="btn p-0"
+                  onClick={() => navigate('/admin/Clientlist', { state: { id: location.state.id, route: "Checklist" } })}
+                >
+                 <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" ></i>
+                </button>
+                <h3 className="card-title mb-0">Create New Checklist</h3>
         </div>
-
-
-
-      </div>
-      <div className="report-data mt-4">
-        <div>
+        <div className='card-body'>
           <div className="row">
             <div className="col-lg-4">
               <div className="row">
                 <div className="col-lg-12">
+                  <label className="form-label"> Select Service Type</label>
                   <select
                     className="default-select wide form-select"
                     name="service_id"
@@ -280,13 +282,14 @@ const CreateCheckList = () => {
                       </option>
                     ))}
                   </select>
-                  {errors.service_id && <p className="text-danger">{errors.service_id}</p>}
+                  {errors.service_id && <p className="error-text">{errors.service_id}</p>}
                 </div>
               </div>
             </div>
             <div className="col-lg-4">
               <div className="row">
                 <div className="col-lg-12">
+                <label className="form-label"> Select Job Typ</label>
                   <select
                     className="default-select wide form-select"
                     name="job_type_id"
@@ -303,13 +306,14 @@ const CreateCheckList = () => {
                       </option>
                     ))}
                   </select>
-                  {errors.job_type_id && <p className="text-danger">{errors.job_type_id}</p>}
+                  {errors.job_type_id && <p className="error-text">{errors.job_type_id}</p>}
                 </div>
               </div>
             </div>
             <div className="col-lg-4">
               <div className="row">
                 <div className="col-lg-12">
+                <label className="form-label">Select Client Type</label>
                   <select
                     className="default-select wide form-select"
                     name="client_type_id"
@@ -323,13 +327,14 @@ const CreateCheckList = () => {
                       </option>
                     ))}
                   </select>
-                  {errors.client_type_id && <p className="text-danger">{errors.client_type_id}</p>}
+                  {errors.client_type_id && <p className="error-text">{errors.client_type_id}</p>}
                 </div>
               </div>
             </div>
             <div className="col-lg-4 mt-3">
               <div className="mb-3 row flex-column">
                 <div>
+                <label className="form-label">Check List Name</label>
                   <input
                     type="text"
                     className="form-control"
@@ -338,13 +343,15 @@ const CreateCheckList = () => {
                     defaultValue={formData.check_list_name}
                     onChange={handleInputChange}
                   />
-                  {errors.check_list_name && <p className="text-danger">{errors.check_list_name}</p>}
+                  {errors.check_list_name && <p className="error-text">{errors.check_list_name}</p>}
                 </div>
               </div>
             </div>
             <div className="col-lg-4 mt-3">
               <div className="row">
                 <div className="col-lg-12">
+                <label className="form-label">Status</label>
+
                   <select
                     className="default-select wide form-select"
                     name="status"
@@ -355,7 +362,7 @@ const CreateCheckList = () => {
                     <option value="1">Active</option>
                     <option value="0">Inactive</option>
                   </select>
-                  {errors.status && <p className="text-danger">{errors.status}</p>}
+                  {errors.status && <p className="error-text">{errors.status}</p>}
                 </div>
               </div>
             </div>
@@ -377,7 +384,7 @@ const CreateCheckList = () => {
                       disabled={task.task_id}
                     />
                     {errors[`task_name_${index}`] && (
-                      <p className="text-danger">{errors[`task_name_${index}`]}</p>
+                      <p className="error-text">{errors[`task_name_${index}`]}</p>
                     )}
                   </div>
                 </div>
