@@ -599,7 +599,7 @@ const getJobById = async (job) => {
      
 
      const [rows] = await pool.execute(query, [job_id]);
-     console.log("rows ",rows)
+    //  console.log("rows ",rows)
      let result = {}
      if(rows.length > 0){
 
