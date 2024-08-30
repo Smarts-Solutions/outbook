@@ -586,7 +586,7 @@ const Information = ({ id, pageStatus }) => {
   // for partnership
   const handleChange3 = (e) => {
     const { name, value } = e.target;
-    // console.log("name->", name, "value->", value);
+  
     if (name === "VATNumber") {
       if (!/^[0-9+]*$/.test(value)) {
         return;
