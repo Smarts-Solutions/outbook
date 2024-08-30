@@ -407,8 +407,10 @@ const getJobByCustomer = async (job) => {
      jobs
      LEFT JOIN 
      customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-     JOIN 
+     LEFT JOIN 
      clients ON jobs.client_id = clients.id
+     LEFT JOIN 
+     customers ON jobs.customer_id = customers.id
      LEFT JOIN 
      job_types ON jobs.job_type_id = job_types.id
      LEFT JOIN 
@@ -420,6 +422,7 @@ const getJobByCustomer = async (job) => {
      LEFT JOIN 
      staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
      WHERE 
+     jobs.customer_id = customers.id AND 
      jobs.customer_id = ?
      `;
      const [rows] = await pool.execute(query, [customer_id]);
@@ -461,9 +464,9 @@ const getJobByClient = async (job) => {
 
      FROM 
      jobs
-     JOIN 
+     LEFT JOIN 
      customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-     JOIN 
+     LEFT JOIN 
      clients ON jobs.client_id = clients.id
      LEFT JOIN 
      job_types ON jobs.job_type_id = job_types.id
@@ -476,6 +479,7 @@ const getJobByClient = async (job) => {
      LEFT JOIN 
      staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
      WHERE 
+     jobs.client_id = clients.id AND
      jobs.client_id = ?
      `;
 

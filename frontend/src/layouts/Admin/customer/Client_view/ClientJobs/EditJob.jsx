@@ -205,7 +205,7 @@ const EditJob = () => {
                 minutes: getJobDetails.data && getJobDetails.data.total_preparation_time.split(":")[1]
             });
  
-
+          
             setJobData(prevState => ({
                 ...prevState,
                 AccountManager: getJobDetails.data && getJobDetails.data.outbooks_acount_manager_first_name + " " + getJobDetails.data.outbooks_acount_manager_last_name,
