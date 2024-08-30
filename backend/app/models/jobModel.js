@@ -589,14 +589,15 @@ const getJobById = async (job) => {
      client_job_task ON client_job_task.job_id = jobs.id
      JOIN
      task ON client_job_task.task_id = task.id
-     JOIN
+     LEFT JOIN
      checklist_tasks ON checklist_tasks.checklist_id = client_job_task.checklist_id
      WHERE
      checklist_tasks.checklist_id = client_job_task.checklist_id AND checklist_tasks.task_id = client_job_task.task_id AND
      jobs.id = ?
      `;
+    
+     
 
-   
      const [rows] = await pool.execute(query, [job_id]);
      console.log("rows ",rows)
      let result = {}
