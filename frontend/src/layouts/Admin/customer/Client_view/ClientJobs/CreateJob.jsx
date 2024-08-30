@@ -31,6 +31,7 @@ const CreateJob = () => {
     const [taskNameError, setTaskNameError] = useState('')
     const [BudgetedError, setBudgetedError] = useState('')
     const [jobModalStatus, jobModalSetStatus] = useState(false);
+    const [BudgetedHoursAddTask, setBudgetedHoursAddTask] = useState({ hours: "", minutes: "" })
 
     const [jobData, setJobData] = useState({
         AccountManager: "",
@@ -51,29 +52,29 @@ const CreateJob = () => {
         FeedbackIncorporationTime: "",
         TotalTime: "",
         EngagementModel: "",
-        ExpectedDeliveryDate: "",
-        DueOn: "",
-        SubmissionDeadline: "",
-        CustomerDeadlineDate: "",
-        SLADeadlineDate: "",
-        InternalDeadlineDate: "",
-        FilingWithCompaniesHouseRequired: "",
-        CompaniesHouseFilingDate: "",
-        FilingWithHMRCRequired: "",
-        HMRCFilingDate: "",
-        OpeningBalanceAdjustmentRequired: "",
-        OpeningBalanceAdjustmentDate: "",
+        ExpectedDeliveryDate: null,
+        DueOn: null,
+        SubmissionDeadline: null,
+        CustomerDeadlineDate: null,
+        SLADeadlineDate: null,
+        InternalDeadlineDate: null,
+        FilingWithCompaniesHouseRequired: "0",
+        CompaniesHouseFilingDate: null,
+        FilingWithHMRCRequired: "0",
+        HMRCFilingDate: null,
+        OpeningBalanceAdjustmentRequired: "0",
+        OpeningBalanceAdjustmentDate: null,
         NumberOfTransactions: "",
         NumberOfTrialBalanceItems: "",
         Turnover: "",
         NoOfEmployees: "",
-        VATReconciliation: "",
-        Bookkeeping: "",
-        ProcessingType: "",
-        Invoiced: "",
-        Currency: "",
-        InvoiceValue: "",
-        InvoiceDate: "",
+        VATReconciliation: "0",
+        Bookkeeping: "0",
+        ProcessingType: "0",
+        Invoiced: "0",
+        Currency: "0",
+        InvoiceValue: "0",
+        InvoiceDate: null,
         InvoiceHours: "",
         InvoiceRemark: "",
     });
@@ -179,7 +180,7 @@ const CreateJob = () => {
 
 
     const getChecklistData = async () => {
-        const req = { action: "getById", checklist_id: getChecklistId && getChecklistId}
+        const req = { action: "getById", checklist_id: getChecklistId && getChecklistId }
         const data = { req: req, authToken: token }
         await dispatch(GET_ALL_CHECKLIST(data))
             .unwrap()
@@ -228,14 +229,14 @@ const CreateJob = () => {
     const fieldErrors = {
         'AccountManager': 'Please Enter Account Manager',
         'Customer': 'Please Enter Customer',
-        'Client': 'Please Select Client', 
+        'Client': 'Please Select Client',
         'CustomerAccountManager': 'Please Select Customer Account Manager',
         'Service': 'Please Select Service',
-        'JobType': 'Please Select Job Type', 
+        'JobType': 'Please Select Job Type',
         'NumberOfTransactions': 'Please Enter Number Of Transactions less than 1000000',
         'NumberOfTrialBalanceItems': 'Please Enter Number Of Trial Balance Items less than 5000',
         'Turnover': 'Please Enter Turnover less than 200000000',
-         
+
     };
 
     const validate = (name, value, isSubmitting = false) => {
@@ -285,6 +286,11 @@ const CreateJob = () => {
         return isValid;
     };
 
+    function formatTime(hours, minutes) {
+        const formattedHours = hours != "" || hours != null ? String(hours).padStart(2, '0') : '00';
+        const formattedMinutes = minutes != "" || minutes != null ? String(minutes).padStart(2, '0') : '00';
+        return `${formattedHours}:${formattedMinutes}`;
+    }
 
     const handleSubmit = async () => {
         const req = {
@@ -295,16 +301,18 @@ const CreateJob = () => {
             customer_contact_details_id: Number(jobData.CustomerAccountManager),
             service_id: Number(jobData.Service),
             job_type_id: Number(jobData.JobType),
-            budgeted_hours: budgetedHours.hours + ":" + budgetedHours.minutes,
+            budgeted_hours: formatTime(budgetedHours.hours, budgetedHours.minutes),
             reviewer: Number(jobData.Reviewer),
             allocated_to: Number(jobData.AllocatedTo),
             allocated_on: jobData.AllocatedOn ? jobData.AllocatedOn : new Date().toISOString().split('T')[0],
             date_received_on: jobData.DateReceivedOn ? jobData.DateReceivedOn : new Date().toISOString().split('T')[0],
             year_end: jobData.YearEnd,
-            total_preparation_time: PreparationTimne.hours + ":" + PreparationTimne.minutes,
-            review_time: reviewTime.hours + ":" + reviewTime.minutes,
-            feedback_incorporation_time: FeedbackIncorporationTime.hours + ":" + FeedbackIncorporationTime.minutes,
-            total_time: Math.floor(totalHours / 60) + ":" + totalHours % 60,
+            //total_preparation_time: PreparationTimne.hours + ":" + PreparationTimne.minutes,
+            total_preparation_time: formatTime(PreparationTimne.hours, PreparationTimne.minutes),
+            review_time: formatTime(reviewTime.hours, reviewTime.minutes),
+            feedback_incorporation_time: formatTime(FeedbackIncorporationTime.hours, FeedbackIncorporationTime.minutes),
+            //  total_time: Math.floor(totalHours / 60) + ":" + totalHours % 60,
+            total_time: formatTime(Math.floor(totalHours / 60), totalHours % 60),
             engagement_model: jobData.EngagementModel,
             expected_delivery_date: jobData.ExpectedDeliveryDate,
             due_on: jobData.DueOn,
@@ -329,11 +337,11 @@ const CreateJob = () => {
             currency: jobData.Currency,
             invoice_value: jobData.InvoiceValue,
             invoice_date: jobData.InvoiceDate,
-            invoice_hours: jobData.InvoiceHours,
+            invoice_hours: formatTime(invoiceTime.hours, invoiceTime.minutes),
             invoice_remark: jobData.InvoiceRemark,
             tasks: {
                 checklist_id: location.state.details.customer_id.id,
-                task : AddTaskArr
+                task: AddTaskArr
             }
         }
 
@@ -341,7 +349,7 @@ const CreateJob = () => {
         const data = { req: req, authToken: token }
         setIsSubmitted(true);
         const isValid = validateAllFields();
-         
+
         if (isValid) {
             await dispatch(AddAllJobType(data))
                 .unwrap()
@@ -453,7 +461,7 @@ const CreateJob = () => {
         setShowAddJobModal(false)
     }
 
-    
+
 
     return (
         <div>
@@ -1202,10 +1210,15 @@ const CreateJob = () => {
 
                                                                             <div id="invoicedremark" className="col-lg-4">
                                                                                 <label className="form-label" >Invoice Remark</label>
-                                                                                <input type="text" className="form-control" placeholder="Invoice Remark"
-                                                                                    name="InvoiceRemark" onChange={HandleChange} value={jobData.InvoiceRemark}
+                                                                                <textarea
+                                                                                    className="form-control"
+                                                                                    placeholder="Invoice Remark"
+                                                                                    name="InvoiceRemark"
+                                                                                    onChange={HandleChange}
+                                                                                    value={jobData.InvoiceRemark}
                                                                                     maxLength={500}
                                                                                 />
+
                                                                                 {errors['InvoiceRemark'] && (
                                                                                     <div className="error-text">{errors['InvoiceRemark']}</div>
                                                                                 )}
@@ -1359,7 +1372,41 @@ const CreateJob = () => {
                                                                 {taskNameError && <div className="error-text text-danger">{taskNameError}</div>}
                                                             </div>
                                                         </div>
-                                                        <div className='col-lg-12'>
+
+                                                        <div className='col-lg-12 mt-2'>
+
+                                                            <div className="mb-3">
+                                                                <label className="form-label" >Budgeted Hours</label>
+                                                                <div className="input-group">
+                                                                    <input
+                                                                        type="text"
+                                                                        className="form-control"
+                                                                        placeholder="Hours"
+                                                                        name='budgeted_hour'
+                                                                        onChange={(e) => {
+                                                                            handleChange1(e);
+
+                                                                        }}
+                                                                        value={BudgetedHoursAddTask.hours}
+                                                                    />
+
+                                                                    <input
+                                                                        type="text"
+                                                                        className="form-control"
+                                                                        placeholder="Minutes"
+                                                                        name='budgeted_minute'
+                                                                        onChange={(e) => {  handleChange1(e); }}
+                                                                        value={BudgetedHoursAddTask.minutes}
+                                                                    />
+
+                                                                </div>
+                                                                {
+                                                                    BudgetedHoureError ? <div className="error-text text-danger">{BudgetedHoureError}</div> :
+                                                                        BudgetedMinuteError ? <div className="error-text text-danger">{BudgetedMinuteError}</div> : ""
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                        {/* <div className='col-lg-12'>
                                                             <label className="form-label">Budgeted Hour</label>
                                                             <div>
                                                                 <input
@@ -1372,7 +1419,7 @@ const CreateJob = () => {
                                                                 />
                                                                 {BudgetedError && <div className="error-text text-danger">{BudgetedError}</div>}
                                                             </div>
-                                                        </div>
+                                                        </div> */}
                                                     </div>
 
                                                 </Modal.Body>
