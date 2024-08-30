@@ -21,7 +21,7 @@ const CreateJob = () => {
     const [AllChecklistData, setAllChecklistData] = useState({ loading: false, data: [] })
     const [AddTaskArr, setAddTaskArr] = useState([])
     const [taskNameError, setTaskNameError] = useState('')
-    const [BudgetedError, setBudgetedError] = useState('')
+    const [BudgetedHoureError, setBudgetedHourError] = useState('')
     const [taskName, setTaskName] = useState('')
     const [Budgeted, setBudgeted] = useState('')
 
@@ -30,10 +30,16 @@ const CreateJob = () => {
     const [reviewTime, setReviewTime] = useState({ hours: "", minutes: "" })
     const [budgetedHours, setBudgetedHours] = useState({ hours: "", minutes: "" })
     const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" })
+    const [BudgetedHoursAddTask, setBudgetedHoursAddTask] = useState({ hours: "", minutes: "" })
+    const [BudgetedMinuteError, setBudgetedMinuteError] = useState('')
 
+
+
+
+    console.log("BudgetedHoursAddTask", BudgetedHoursAddTask)
     const JobDetails = async () => {
         const req = { action: "getByJobId", job_id: location.state.row.job_id }
-         
+
         const data = { req: req, authToken: token }
         await dispatch(Get_All_Job_List(data))
             .unwrap()
@@ -167,7 +173,7 @@ const CreateJob = () => {
         getChecklistData()
     }, [getChecklistId])
 
- 
+
     useEffect(() => {
 
         setBudgetedHours({
@@ -314,7 +320,7 @@ const CreateJob = () => {
         return Object.keys(newErrors).length === 0;
     };
 
- 
+
     const handleSubmit = async () => {
         const req = {
             job_id: location.state.row.job_id,
@@ -366,7 +372,7 @@ const CreateJob = () => {
                 task: AddTaskArr
             }
         }
-         
+
         const data = { req: req, authToken: token }
         if (validate()) {
             await dispatch(UpdateJob(data))
@@ -446,6 +452,8 @@ const CreateJob = () => {
 
     const handleChange1 = (e) => {
         const { name, value } = e.target;
+        console.log("Name", name)
+        console.log("Value", value)
 
         // Validation for Task Name
         if (name === "taskname") {
@@ -458,15 +466,35 @@ const CreateJob = () => {
         }
 
         // Validation for Budgeted Hour
-        if (name === "budgeted_hour") {
+        else if (name === "budgeted_hour") {
+            console.log("BudgetedHour", value)
             if (value.trim() === "") {
-                setBudgetedError("Please Enter Budgeted Hour");
+                setBudgetedHourError("Required");
             } else if (isNaN(value) || value <= 0) {
-                setBudgetedError("Please enter a valid number for Budgeted Hour");
+                setBudgetedHourError("Required");
             } else {
-                setBudgetedError("");
+                setBudgetedHourError("");
             }
-            setBudgeted(value);
+
+            if (value === '' || Number(value) >= 0) {
+                setBudgetedHoursAddTask({ ...BudgetedHoursAddTask, hours: value });
+            }
+        }
+        else if (name === "budgeted_minute") {
+            console.log("budgeted_minute", value)
+            if (value.trim() === "") {
+                setBudgetedMinuteError("Required");
+            } else if (isNaN(value) || value <= 0) {
+                setBudgetedMinuteError("Required");
+            } else {
+                setBudgetedMinuteError("");
+            }
+            if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                setBudgetedHoursAddTask({
+                    ...BudgetedHoursAddTask,
+                    minutes: value
+                });
+            }
         }
     };
 
@@ -475,13 +503,16 @@ const CreateJob = () => {
 
 
     const handleAddTask = () => {
-        const req = { task_id: "", task_name: taskName, budgeted_hour: Budgeted }
-        setAddTaskArr([...AddTaskArr, req])
-         
-        setShowAddJobModal(false)
+        if (BudgetedMinuteError === "" && BudgetedHoureError === "" && taskNameError === "") {
+            const req = { task_id: "", task_name: taskName, budgeted_hour: BudgetedHoursAddTask.hours + ":" + BudgetedHoursAddTask.minutes }
+            setAddTaskArr([...AddTaskArr, req])
+
+            setShowAddJobModal(false)
+        }
     }
 
     const totalHours = Number(PreparationTimne.hours) * 60 + Number(PreparationTimne.minutes) + Number(reviewTime.hours) * 60 + Number(reviewTime.minutes) + Number(FeedbackIncorporationTime.hours) * 60 + Number(FeedbackIncorporationTime.minutes)
+
 
 
 
@@ -1314,7 +1345,7 @@ const CreateJob = () => {
                                                                                                 AddTaskArr && AddTaskArr.map((checklist) => (
 
                                                                                                     <tr className="">
-                                                                                                        
+
                                                                                                         <td>{checklist.task_name} </td>
                                                                                                         <td>{checklist.budgeted_hour} hr</td>
                                                                                                         <td>
@@ -1360,8 +1391,57 @@ const CreateJob = () => {
                                                                 {taskNameError && <div className="error-text text-danger">{taskNameError}</div>}
                                                             </div>
                                                         </div>
-                                                        <div className='col-lg-12'>
-                                                            <label className="form-label">Budgeted Hour</label>
+                                                        <div className='col-lg-12 mt-2'>
+
+                                                            <div className="mb-3">
+                                                                <label className="form-label" >Budgeted Hours</label>
+                                                                <div className="input-group">
+                                                                    <input
+                                                                        type="text"
+                                                                        className="form-control"
+                                                                        placeholder="Hours"
+                                                                        name='budgeted_hour'
+                                                                        onChange={(e) => {
+                                                                            handleChange1(e);
+
+                                                                        }}
+                                                                        value={BudgetedHoursAddTask.hours}
+                                                                    />
+
+                                                                    <input
+                                                                        type="text"
+                                                                        className="form-control"
+                                                                        placeholder="Minutes"
+                                                                        name='budgeted_minute'
+                                                                        onChange={(e) => {
+                                                                            handleChange1(e);
+
+
+                                                                        }}
+                                                                        value={BudgetedHoursAddTask.minutes}
+                                                                    />
+
+
+
+
+
+                                                                </div>
+                                                                {
+                                                                    BudgetedHoureError ? <div className="error-text text-danger">{BudgetedHoureError}</div> :
+                                                                        BudgetedMinuteError ? <div className="error-text text-danger">{BudgetedMinuteError}</div> : ""
+                                                                }
+                                                                {/* <div>
+                                                                    {BudgetedHoureError && <div className="error-text text-danger">{BudgetedHoureError}</div>}
+                                                                </div>
+                                                                <div>
+
+                                                                    {BudgetedMinuteError && <div className="error-text text-danger">{BudgetedMinuteError}</div>}
+                                                                </div> */}
+
+
+
+                                                            </div>
+                                                            {/* <label className="form-label">Budgeted Hour</label>
                                                             <div>
                                                                 <input
                                                                     type="number"
@@ -1371,8 +1451,10 @@ const CreateJob = () => {
                                                                     onChange={handleChange1}
                                                                     value={Budgeted}
                                                                 />
+
+
                                                                 {BudgetedError && <div className="error-text text-danger">{BudgetedError}</div>}
-                                                            </div>
+                                                            </div> */}
                                                         </div>
                                                     </div>
 
