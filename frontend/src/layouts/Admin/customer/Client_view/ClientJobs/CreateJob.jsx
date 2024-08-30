@@ -494,16 +494,17 @@ const CreateJob = () => {
     }
 
 
-console.log("jobData",location.state)
-
     return (
         <div>
             <div className="container-fluid">
                 <div className="row mt-4">
                     <div className="col-xl-12">
                         <div className="card">
-                            <div className="card-header step-header-blue">
-                                <h4 className="card-title mb-0 mt-0">Create New Job</h4>
+
+                            <div className="card-header d-flex justify-content-between">
+                                <h3 className="card-title mb-0">Create New Job</h3>
+                                <button type="button" className="btn btn-info text-white blue-btn" onClick={() => window.history.back()}>
+                                <i className="fa fa-arrow-left pe-1" /> Back</button>
                             </div>
 
                             <div className="card-body form-steps">
@@ -600,7 +601,7 @@ console.log("jobData",location.state)
                                                                             name="Service" onChange={HandleChange} value={jobData.Service}>
                                                                             <option value="">Select Service</option>
                                                                             {
-                                                                                AllJobData.loading && AllJobData.data.services && 
+                                                                                AllJobData.loading && AllJobData.data.services &&
                                                                                 AllJobData.data.services.map((service) => (
                                                                                     <option value={service.service_id} key={service.service_id}>{service.service_name}</option>
                                                                                 ))
@@ -618,7 +619,7 @@ console.log("jobData",location.state)
                                                                         <select className="form-select mb-3 jobtype"
                                                                             name="JobType" onChange={(e) => { HandleChange(e); openJobModal(e) }} value={jobData.JobType}>
                                                                             <option value="">Select Job Type</option>
-                                                                            {get_Job_Type.loading && get_Job_Type.data && 
+                                                                            {get_Job_Type.loading && get_Job_Type.data &&
                                                                                 get_Job_Type.data.map((jobtype) => (
                                                                                     <option
                                                                                         value={jobtype.id}
@@ -676,7 +677,7 @@ console.log("jobData",location.state)
                                                                             name="Reviewer" onChange={HandleChange} value={jobData.Reviewer}>
                                                                             <option value=""> Select Reviewer</option>
                                                                             {
-                                                                                AllJobData.loading && AllJobData.data.reviewer && 
+                                                                                AllJobData.loading && AllJobData.data.reviewer &&
                                                                                 AllJobData.data.reviewer.map((reviewer) => (
                                                                                     <option value={reviewer.reviewer_id} key={reviewer.reviewer_id}>{reviewer.reviewer_name}</option>
                                                                                 ))
@@ -692,7 +693,7 @@ console.log("jobData",location.state)
                                                                         <select className="form-select"
                                                                             name="AllocatedTo" onChange={HandleChange} value={jobData.AllocatedTo}>
                                                                             <option value=""> Select Staff</option>
-                                                                            {AllJobData.loading && AllJobData.data.allocated && 
+                                                                            {AllJobData.loading && AllJobData.data.allocated &&
                                                                                 AllJobData.data.allocated.map((staff) => (
                                                                                     <option value={staff.allocated_id} key={staff.allocated_id}>{staff.allocated_name}</option>
                                                                                 ))}
@@ -1162,7 +1163,7 @@ console.log("jobData",location.state)
                                                                                 >
                                                                                     <option value="">Please Select Currency</option>
                                                                                     {
-                                                                                        AllJobData.loading &&  AllJobData.data.currency && 
+                                                                                        AllJobData.loading && AllJobData.data.currency &&
                                                                                         AllJobData.data.currency.map((currency) => (
                                                                                             <option value={currency.country_id} key={currency.country_id}>{currency.currency_name}</option>
                                                                                         ))
