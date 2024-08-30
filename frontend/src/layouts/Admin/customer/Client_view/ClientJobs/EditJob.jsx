@@ -514,11 +514,7 @@ const CreateJob = () => {
         setChecklistId('');
     }
 
-
-
-
     const totalHours = Number(PreparationTimne.hours) * 60 + Number(PreparationTimne.minutes) + Number(reviewTime.hours) * 60 + Number(reviewTime.minutes) + Number(FeedbackIncorporationTime.hours) * 60 + Number(FeedbackIncorporationTime.minutes)
-
 
     const handleAddCheckList = () => {
         jobModalSetStatus(false);
@@ -1448,11 +1444,7 @@ const CreateJob = () => {
                                                                         className="form-control"
                                                                         placeholder="Minutes"
                                                                         name='budgeted_minute'
-                                                                        onChange={(e) => {
-                                                                            handleChange1(e);
-
-
-                                                                        }}
+                                                                        onChange={(e) => {  handleChange1(e); }}
                                                                         value={BudgetedHoursAddTask.minutes}
                                                                     />
 
@@ -1461,18 +1453,13 @@ const CreateJob = () => {
                                                                     BudgetedHoureError ? <div className="error-text text-danger">{BudgetedHoureError}</div> :
                                                                         BudgetedMinuteError ? <div className="error-text text-danger">{BudgetedMinuteError}</div> : ""
                                                                 }
-
                                                             </div>
                                                         </div>
                                                     </div>
 
                                                 </Modal.Body>
                                                 <Modal.Footer>
-                                                    <Button variant="secondary" onClick={() => {
-                                                        setShowAddJobModal(false);
-                                                        HandleReset();
-                                                    }}
-                                                    >Close</Button>
+                                                    <Button variant="secondary" onClick={() => {setShowAddJobModal(false);HandleReset();}}>Close</Button>
                                                     <Button variant="btn btn-info text-white float-end blue-btn" onClick={handleAddTask}>Add</Button>
                                                 </Modal.Footer>
                                             </Modal>

@@ -31,6 +31,7 @@ const CreateJob = () => {
     const [taskNameError, setTaskNameError] = useState('')
     const [BudgetedError, setBudgetedError] = useState('')
     const [jobModalStatus, jobModalSetStatus] = useState(false);
+    const [BudgetedHoursAddTask, setBudgetedHoursAddTask] = useState({ hours: "", minutes: "" })
 
     const [jobData, setJobData] = useState({
         AccountManager: "",
@@ -1365,7 +1366,41 @@ const CreateJob = () => {
                                                                 {taskNameError && <div className="error-text text-danger">{taskNameError}</div>}
                                                             </div>
                                                         </div>
-                                                        <div className='col-lg-12'>
+
+                                                        <div className='col-lg-12 mt-2'>
+
+                                                            <div className="mb-3">
+                                                                <label className="form-label" >Budgeted Hours</label>
+                                                                <div className="input-group">
+                                                                    <input
+                                                                        type="text"
+                                                                        className="form-control"
+                                                                        placeholder="Hours"
+                                                                        name='budgeted_hour'
+                                                                        onChange={(e) => {
+                                                                            handleChange1(e);
+
+                                                                        }}
+                                                                        value={BudgetedHoursAddTask.hours}
+                                                                    />
+
+                                                                    <input
+                                                                        type="text"
+                                                                        className="form-control"
+                                                                        placeholder="Minutes"
+                                                                        name='budgeted_minute'
+                                                                        onChange={(e) => {  handleChange1(e); }}
+                                                                        value={BudgetedHoursAddTask.minutes}
+                                                                    />
+
+                                                                </div>
+                                                                {
+                                                                    BudgetedHoureError ? <div className="error-text text-danger">{BudgetedHoureError}</div> :
+                                                                        BudgetedMinuteError ? <div className="error-text text-danger">{BudgetedMinuteError}</div> : ""
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                        {/* <div className='col-lg-12'>
                                                             <label className="form-label">Budgeted Hour</label>
                                                             <div>
                                                                 <input
@@ -1378,7 +1413,7 @@ const CreateJob = () => {
                                                                 />
                                                                 {BudgetedError && <div className="error-text text-danger">{BudgetedError}</div>}
                                                             </div>
-                                                        </div>
+                                                        </div> */}
                                                     </div>
 
                                                 </Modal.Body>
