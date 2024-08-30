@@ -78,8 +78,7 @@ const CreateJob = () => {
         InvoiceRemark: "",
     });
 
-    console.log("AllChecklist", AllChecklist)
-    console.log("getChecklistId", getChecklistId)
+ 
 
 
     useEffect(() => {
@@ -456,7 +455,7 @@ const CreateJob = () => {
     const handleAddTask = () => {
         const req = { task_id: "", task_name: taskName, budgeted_hour: Budgeted }
         setAddTaskArr([...AddTaskArr, req])
-        console.log("req", req)
+     
         setShowAddJobModal(false)
     }
 
@@ -1319,7 +1318,7 @@ const CreateJob = () => {
                                                                                                 AddTaskArr && AddTaskArr.map((checklist) => (
 
                                                                                                     <tr className="">
-                                                                                                        {console.log("checklist", checklist)}
+                                                                                                   
                                                                                                         <td>{checklist.task_name} </td>
                                                                                                         <td>{checklist.budgeted_hour} hr</td>
                                                                                                         <td>

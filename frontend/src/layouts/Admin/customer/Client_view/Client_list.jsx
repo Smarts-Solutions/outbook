@@ -19,8 +19,6 @@ const ClientList = () => {
   const [getJobDetails, setGetJobDetails] = useState({ loading: false, data: [] });
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
-
-  const getActiveTav = localStorage.getItem('Clientlist')
   const [activeTab, setActiveTab] = useState(location.state && location.state.route && location.state.route ==  "Checklist" ? "checklist"  : location.state.route ==  "job" ? "job":'client');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -265,7 +263,6 @@ const ClientList = () => {
   function handleEdit(row) { navigate('/admin/client/edit', { state: { row, id: location.state.id } }); }
   function handleJobEdit(row) { navigate("/admin/job/edit", { state: { details: location.state, row: row, goto: "Customer" } }); }
   function handleDelete(row) { console.log('Deleting row:', row); }
-
   const handleClick = () => { navigate('/admin/create/checklist', { state: { id: location.state.id } }); }
   const EditChecklist = (row) => { navigate('/admin/edit/checklist', { state: { id: location.state.id ,checklist_id: row.checklists_id} }); }
 
@@ -401,7 +398,7 @@ const ClientList = () => {
                 <div className='datatable-wrapper '>
 
                   {ClientData && ClientData && (
-                    <Datatable columns={columns} data={ClientData} filter={false} />
+                    <Datatable columns={columns} data={[]} filter={false} />
                   )}
                 </div>
               </div>

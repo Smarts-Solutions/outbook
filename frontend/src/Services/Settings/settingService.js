@@ -194,3 +194,17 @@ export async function UpdateChecklist(data, token) {
         return await err;
     }
 }
+
+
+export async function MasterStatus(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}masterStatus`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}

@@ -39,7 +39,7 @@ const CreateJob = () => {
 
     const JobDetails = async () => {
         const req = { action: "getByJobId", job_id: location.state.row.job_id }
-
+        console.log("req", req)
         const data = { req: req, authToken: token }
         await dispatch(Get_All_Job_List(data))
             .unwrap()
@@ -465,57 +465,31 @@ const CreateJob = () => {
 
         if (name === "taskname") {
             setTaskName(value);
-            setTaskNameError(value.trim() === "" ? "Please Enter Task Name" : "");
         }
-        else if (name === "budgeted_hour") {
-            validate(name, setBudgetedHourError, "Required");
-            if (value === '' || Number(value) >= 0) {
-                setBudgetedHoursAddTask({ ...BudgetedHoursAddTask, hours: value });
+
+        // Validation for Budgeted Hour
+        if (name === "budgeted_hour") {
+            if (value.trim() === "") {
+                setBudgetedError("Please Enter Budgeted Hour");
+            } else if (isNaN(value) || value <= 0) {
+                setBudgetedError("Please enter a valid number for Budgeted Hour");
+            } else {
+                setBudgetedError("");
             }
-        }
-        else if (name === "budgeted_minute") {
-            validate(name, setBudgetedMinuteError, "Required");
-            if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
-                setBudgetedHoursAddTask({ ...BudgetedHoursAddTask, minutes: value });
-            }
+            setBudgeted(value);
         }
     };
+
+
+
+
 
     const handleAddTask = () => {
-        const errors = {
-            taskNameError: taskName.trim() ? "" : "Please Enter Task Name",
-            budgetedHourError: BudgetedHoursAddTask.hours && BudgetedHoursAddTask.hours > 0 ? "" : "Required",
-            budgetedMinuteError: BudgetedHoursAddTask.minutes && BudgetedHoursAddTask.minutes >= 0 && BudgetedHoursAddTask.minutes <= 59 ? "" : "Required"
-        };
-
-        setTaskNameError(errors.taskNameError);
-        setBudgetedHourError(errors.budgetedHourError);
-        setBudgetedMinuteError(errors.budgetedMinuteError);
-
-        if (!errors.taskNameError && !errors.budgetedHourError && !errors.budgetedMinuteError) {
-            const req = {
-                task_id: "",
-                task_name: taskName,
-                budgeted_hour: `${BudgetedHoursAddTask.hours}:${BudgetedHoursAddTask.minutes}`,
-            };
-            setAddTaskArr([...AddTaskArr, req]);
-            HandleReset();
-            setShowAddJobModal(false);
-        }
-    };
-
-    const HandleReset = () => {
-        setBudgetedHoursAddTask({ ...BudgetedHoursAddTask, hours: '', minutes: '' });
-        setTaskName('');
+        const req = { task_id: "", task_name: taskName, budgeted_hour: Budgeted }
+        setAddTaskArr([...AddTaskArr, req])
+        console.log("req", req)
+        setShowAddJobModal(false)
     }
-
-    const HandleReset1 = () => {
-        setAddTaskArr([])
-        setChecklistId('');
-    }
-
-
-
 
     const totalHours = Number(PreparationTimne.hours) * 60 + Number(PreparationTimne.minutes) + Number(reviewTime.hours) * 60 + Number(reviewTime.minutes) + Number(FeedbackIncorporationTime.hours) * 60 + Number(FeedbackIncorporationTime.minutes)
 
@@ -1364,7 +1338,7 @@ const CreateJob = () => {
                                                                                                 AddTaskArr && AddTaskArr.map((checklist) => (
 
                                                                                                     <tr className="">
-
+                                                                                                        {console.log("checklist", checklist)}
                                                                                                         <td>{checklist.task_name} </td>
                                                                                                         <td>
                                                                                                             {checklist.budgeted_hour.split(":")[0]}h {checklist.budgeted_hour.split(":")[1]}m

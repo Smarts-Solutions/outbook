@@ -47,7 +47,7 @@ const CreateCheckList = () => {
         .then((response) => {
           if (response.status) {
             const checklistData = response.data;
-            console.log("checklistData", checklistData);
+          
 
             getJobTypeData(checklistData.service_id);
 
