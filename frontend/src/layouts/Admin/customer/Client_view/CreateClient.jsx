@@ -601,7 +601,12 @@ const CreateClient = () => {
                 <div className="row">
                     <div className="col-xl-12">
                         <div className="card">
-                            <div className="card-header step-header-blue">
+                            <div className="card-header align-items-center step-header-blue d-flex">
+                            <button
+                  type="button"
+                  className="btn p-0">
+                 <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" ></i>
+                </button>
                                 <h4 className="card-title mb-0">Create New Client</h4>
                             </div>
                             {/* end card header */}
