@@ -8064,7 +8064,7 @@ ul.steppedprogress li:first-child:after {
   font-weight: normal;
 }
 
-.checkbox label::before {
+/* .checkbox label::before {
   -o-transition: 0.3s ease-in-out;
   -webkit-transition: 0.3s ease-in-out;
   background-color: #fff;
@@ -8093,11 +8093,11 @@ ul.steppedprogress li:first-child:after {
   padding-top: 2px;
   position: absolute;
   width: 18px;
-}
+} */
 
 .checkbox input[type="checkbox"] {
   cursor: pointer;
-  opacity: 0;
+  opacity:1;
   z-index: 1;
   outline: none !important;
 }

@@ -7,7 +7,7 @@ const CustomMultiselect = () => {
       label: "Option 1", 
       subOptions: [
         { id: 11, label: "Sub Option 1" }, 
-        { id: 12, label: "Sub Option 2" } 
+        { id: 12, label: "Sub Option 2", subOptions: [{ id: 121, label: "Sub Sub Option 1" }] } 
       ] 
     },
     { 
@@ -23,11 +23,7 @@ const CustomMultiselect = () => {
       label: "Option 4", 
       subOptions: [
         { id: 41, label: "Sub Option 4" },
-        { id: 42, label: "Sub Option 5"},
-        { id: 42, label: "Sub Option 5"},
-        { id: 42, label: "Sub Option 5"},
-        { id: 42, label: "Sub Option 5"}
-
+        { id: 42, label: "Sub Option 5", subOptions: [{ id: 421, label: "Sub Sub Option 2" }] }
       ]
     },
   ];
@@ -40,29 +36,37 @@ const CustomMultiselect = () => {
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
-    setOpenMainOption(null);  // Close any open subdropdown when main dropdown is closed
-    setOpenSubDropdowns({});
+    if (isOpen) {
+      // If dropdown is closing, close all subdropdowns
+      setOpenMainOption(null);
+      setOpenSubDropdowns({});
+    }
   };
 
   const handleCheckboxChange = (optionId, hasSubOptions) => {
-    setSelectedOptions((prevSelectedOptions) =>
-      prevSelectedOptions.includes(optionId)
-        ? prevSelectedOptions.filter((id) => id !== optionId)
-        : [...prevSelectedOptions, optionId]
-    );
+    const isOptionSelected = selectedOptions.includes(optionId);
 
-    if (hasSubOptions) {
-      setOpenSubDropdowns({ [optionId]: !openSubDropdowns[optionId] });
+    // If the option is being selected, open subdropdowns if it has any
+    if (!isOptionSelected) {
+      setSelectedOptions((prevSelectedOptions) => [...prevSelectedOptions, optionId]);
+      if (hasSubOptions) {
+        setOpenSubDropdowns({ [optionId]: true });
+      }
+    } else {
+      // Option is being deselected, but subdropdowns should stay open if there are other selected options
+      setSelectedOptions((prevSelectedOptions) =>
+        prevSelectedOptions.filter((id) => id !== optionId)
+      );
     }
   };
 
   const handleOptionClick = (optionId, hasSubOptions) => {
     if (openMainOption === optionId) {
-      // Close the current option if it's already open
+      // Toggle the currently open main option
       setOpenMainOption(null);
       setOpenSubDropdowns({});
     } else {
-      // Open the clicked option and close any other open option
+      // Open the new main option and close any other open subdropdowns
       setOpenMainOption(optionId);
       setOpenSubDropdowns({});
       if (hasSubOptions) {
@@ -86,7 +90,7 @@ const CustomMultiselect = () => {
     };
   }, []);
 
-  const renderSubOptions = (subOptions, parentId) => {
+  const renderSubOptions = (subOptions) => {
     return (
       <div className="sub-dropdown-menu">
         {subOptions.map((subOption) => (
@@ -100,7 +104,7 @@ const CustomMultiselect = () => {
               {subOption.label}
             </label>
             {openSubDropdowns[subOption.id] && subOption.subOptions && subOption.subOptions.length > 0 && (
-              renderSubOptions(subOption.subOptions, subOption.id)
+              renderSubOptions(subOption.subOptions)
             )}
           </div>
         ))}
@@ -126,7 +130,7 @@ const CustomMultiselect = () => {
                 {option.label}
               </label>
               {openMainOption === option.id && option.subOptions.length > 0 && (
-                renderSubOptions(option.subOptions, option.id)
+                renderSubOptions(option.subOptions)
               )}
             </div>
           ))}
