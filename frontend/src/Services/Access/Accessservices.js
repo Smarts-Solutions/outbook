@@ -22,6 +22,7 @@ export async function GETACCESS(data, token) {
 // ROLE COMMAN ACCESS PERMISION
 export async function ROLEACCESS(data, token) {
     try {
+        console.log("ddda",data);
         const res = await axios.post(`${Config.base_url}accessRolePermissions`, data, {
             headers: header(token),
             data: {}

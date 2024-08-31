@@ -6,15 +6,14 @@ import {
   SignInWithAzure,
 } from "../../ReduxStore/Slice/Auth/authSlice";
 import { useDispatch } from "react-redux";
-
 import { azureLogin } from "../AuthWithAzure/AuthProvider";
-
 import { Email_regex, Mobile_regex } from "../../Utils/Common_regex";
 import {
   PASSWORD_ERROR,
   INVALID_EMAIL_ERROR,
   EMPTY_EMAIL_ERROR,
 } from "../../Utils/Common_Message";
+import { RoleAccess } from "../../ReduxStore/Slice/Access/AccessSlice";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -44,6 +43,9 @@ const Login = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
+          accessDataFetch(response.data.staffDetails, response.data.token);
+
+
           localStorage.setItem(
             "staffDetails",
             JSON.stringify(response.data.staffDetails)
@@ -54,7 +56,7 @@ const Login = () => {
             JSON.stringify(response.data.staffDetails.role)
           );
 
-          //Update Auth Token
+
           const req_auth_token = {
             id: response.data.staffDetails.id,
             login_auth_token: response.data.token,
@@ -124,6 +126,62 @@ const Login = () => {
         .catch((error) => {
           console.log("Error", error);
         });
+    }
+  };
+
+  const accessDataFetch = async (data, token) => {
+    try {
+     
+
+      const response = await dispatch(
+        RoleAccess({
+          req: { role_id: data.role_id, StaffUserId: data.id, action: "get" },
+          authToken: token,
+        })
+      ).unwrap();
+
+      if (response.data) {
+        response.data.forEach((item) => {
+          const updatedShowTab = {
+            setting: false,
+            customer: false,
+            staff: false,
+            status: false,
+          };
+
+          response.data.forEach((item) => {
+            if (item.permission_name === "setting") {
+              const settingView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.setting =
+                settingView && settingView.is_assigned === 1;
+            } else if (item.permission_name === "customer") {
+              const customerView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.customer =
+                customerView && customerView.is_assigned === 1;
+            } else if (item.permission_name === "staff") {
+              const staffView = item.items.find((item) => item.type === "view");
+              updatedShowTab.staff = staffView && staffView.is_assigned === 1;
+            } else if (item.permission_name === "status") {
+              const statusView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.status =
+                statusView && statusView.is_assigned === 1;
+            }
+          });
+
+          localStorage.setItem(
+            "updatedShowTab",
+            JSON.stringify(updatedShowTab)
+          );
+        });
+      }
+    } catch (error) {
+      console.log("Error fetching access data:", error);
     }
   };
 
