@@ -1,78 +1,165 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
-import { useDispatch, useSelector } from 'react-redux';
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
-import Sidebar from '../Components/Dashboard/Sidebar';
-import Header from '../Components/Dashboard/Header';
-import Profile from '../Components/Dashboard/Profile'
+import { useDispatch } from "react-redux";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+import Sidebar from "../Components/Dashboard/Sidebar";
+import Header from "../Components/Dashboard/Header";
+import Profile from "../Components/Dashboard/Profile";
 
-import Dashboard from '../layouts/Admin/DashboardPage/Dashboard';
+import Dashboard from "../layouts/Admin/DashboardPage/Dashboard";
 
-import Service from '../layouts/Admin/customer/customer_add_process/Service';
-import Customer from '../layouts/Admin/customer/Customer';
+import Service from "../layouts/Admin/customer/customer_add_process/Service";
+import Customer from "../layouts/Admin/customer/Customer";
 
-import Addcustomer from '../layouts/Admin/customer/customer_add_process/Addcustomer';
-import Editcustomer from '../layouts/Admin/customer/customer_edit_process/Editcustomer';
+import Addcustomer from "../layouts/Admin/customer/customer_add_process/Addcustomer";
+import Editcustomer from "../layouts/Admin/customer/customer_edit_process/Editcustomer";
 
-import Status from '../layouts/Admin/StatusPage/Status';
-import Reports from '../layouts/Admin/ReportsPage/Reports';
-import Access from '../layouts/Admin/AccessPage/Access';
-import Setting from '../layouts/Admin/Settings/Setting';
-import Staff from '../layouts/Admin/Staff/Staff';
-import ViewLogs from '../layouts/Admin/Staff/ViewLogs';
+import Status from "../layouts/Admin/StatusPage/Status";
+import Reports from "../layouts/Admin/ReportsPage/Reports";
+import Access from "../layouts/Admin/AccessPage/Access";
+import Setting from "../layouts/Admin/Settings/Setting";
+import Staff from "../layouts/Admin/Staff/Staff";
+import ViewLogs from "../layouts/Admin/Staff/ViewLogs";
 
-import JobType from '../layouts/Admin/Settings/JobType'
-import { RoleAccess } from '../ReduxStore/Slice/Access/AccessSlice';
+import JobType from "../layouts/Admin/Settings/JobType";
+import { RoleAccess } from "../ReduxStore/Slice/Access/AccessSlice";
 
-import AddNewClient from '../layouts/Admin/Clients/CreateClient'
-import ClientList from '../layouts/Admin/Clients/Client_list'
-import ClientEdit from '../layouts/Admin/Clients/Client_Edit'
+import AddNewClient from "../layouts/Admin/Clients/CreateClient";
+import ClientList from "../layouts/Admin/Clients/Client_list";
+import ClientEdit from "../layouts/Admin/Clients/Client_Edit";
 
-import ClientProfile from '../layouts/Admin/Clients/ClientProfile'
+import ClientProfile from "../layouts/Admin/Clients/ClientProfile";
 
-import CreateCheckList from '../layouts/Admin/Clients/CreateCheckList';
-import EditCheckList from '../layouts/Admin/Clients/Editchecklist';
-import Statuses from '../layouts/Admin/Clients/Statuses';
+import CreateCheckList from "../layouts/Admin/Clients/CreateCheckList";
+import EditCheckList from "../layouts/Admin/Clients/Editchecklist";
+import Statuses from "../layouts/Admin/Clients/Statuses";
 
+import JobInformation from "../layouts/Admin/Jobs/JobInformation";
+import TaskTimesheet from "../layouts/Admin/Jobs/TaskTimesheet";
+import JobTimeline from "../layouts/Admin/Jobs/JobTimeline";
+import MissingLogs from "../layouts/Admin/Jobs/MissingLogs";
+import Queries from "../layouts/Admin/Jobs/Queries";
+import Drafts from "../layouts/Admin/Jobs/Drafts";
+import Documents from "../layouts/Admin/Jobs/Documents";
 
-import JobInformation from '../layouts/Admin/Jobs/JobInformation';
-import TaskTimesheet from '../layouts/Admin/Jobs/TaskTimesheet';
-import JobTimeline from '../layouts/Admin/Jobs/JobTimeline';
-import MissingLogs from '../layouts/Admin/Jobs/MissingLogs';
-import Queries from '../layouts/Admin/Jobs/Queries';
-import Drafts from '../layouts/Admin/Jobs/Drafts';
-import Documents from '../layouts/Admin/Jobs/Documents';
-
-import CreateJob from '../layouts/Admin/Jobs/JobAction/CreateJob'
-import JobEdit from '../layouts/Admin/Jobs/JobAction/EditJob'
-
+import CreateJob from "../layouts/Admin/Jobs/JobAction/CreateJob";
+import JobEdit from "../layouts/Admin/Jobs/JobAction/EditJob";
 
 const Admin_Route = () => {
   const dispatch = useDispatch();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+  const role = JSON.parse(localStorage.getItem("role"));
 
-  const { pathname } = useLocation();
+  const [showTab, setShowTab] = useState({
+    setting: true,
+    customer: true,
+    staff: true,
+    status: true,
+  });
+
+  useEffect(() => {
+    accessDataFetch();
+  }, []);
 
   useEffect(() => {
     window.scroll({
       top: 0,
       left: 0,
-      behavior: 'smooth' // Smooth transition ke liye behavior 'smooth' set karein
+      behavior: "smooth",
     });
   }, [pathname]);
+
   const accessDataFetch = async () => {
     try {
-      const response = await dispatch(RoleAccess({ req: { "role_id": staffDetails.role_id, "action": "get" }, authToken: token })).unwrap();
+      const response = await dispatch(
+        RoleAccess({
+          req: { role_id: staffDetails.role_id, action: "get" },
+          authToken: token,
+        })
+      ).unwrap();
 
+      if (response.data) {
+        response.data.forEach((item) => {
+          if (!role == "ADMIN" || !role == "SUPERADMIN") {
+            if (item.permission_name === "setting") {
+              const settingView = item.items.find(
+                (item) => item.type === "view"
+              );
+
+              if (settingView && settingView.is_assigned === 0) {
+                navigate("/admin/dashboard");
+              }
+            } else if (item.permission_name === "customer") {
+              const customerView = item.items.find(
+                (item) => item.type === "view"
+              );
+
+              if (customerView && customerView.is_assigned === 0) {
+                navigate("/admin/dashboard");
+              }
+            } else if (item.permission_name === "staff") {
+              const staffView = item.items.find((item) => item.type === "view");
+
+              if (staffView && staffView.is_assigned === 0) {
+                navigate("/admin/dashboard");
+              }
+            } else if (item.permission_name === "status") {
+              const statusView = item.items.find(
+                (item) => item.type === "view"
+              );
+
+              if (statusView && statusView.is_assigned === 0) {
+                navigate("/admin/dashboard");
+              }
+            }
+          }
+          const updatedShowTab = { ...showTab };
+
+          response.data.forEach((item) => {
+            if (item.permission_name === "setting") {
+              const settingView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.setting =
+                settingView && settingView.is_assigned === 1;
+            } else if (item.permission_name === "customer") {
+              const customerView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.customer =
+                customerView && customerView.is_assigned === 1;
+            } else if (item.permission_name === "staff") {
+              const staffView = item.items.find((item) => item.type === "view");
+              updatedShowTab.staff = staffView && staffView.is_assigned === 1;
+            } else if (item.permission_name === "status") {
+              const statusView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.status =
+                statusView && statusView.is_assigned === 1;
+            }
+          });
+
+          localStorage.setItem(
+            "updatedShowTab",
+            JSON.stringify(updatedShowTab)
+          );
+        });
+      }
     } catch (error) {
-      console.error("Error fetching access data:", error);
-
+      console.log("Error fetching access data:", error);
     }
   };
-  useEffect(() => {
-    accessDataFetch();
-  }, []);
 
   return (
     <div className="app-container">
@@ -110,12 +197,11 @@ const Admin_Route = () => {
             <Route path="/job/drafts" element={<Drafts />} />
             <Route path="/job/documents" element={<Documents />} />
             <Route path="/job/jobtimeline" element={<JobTimeline />} />
-
           </Routes>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Admin_Route
+export default Admin_Route;

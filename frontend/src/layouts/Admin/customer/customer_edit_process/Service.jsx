@@ -6,12 +6,16 @@ import {
   Get_Service,
   GET_CUSTOMER_DATA,
   Edit_Customer,
-  ADD_SERVICES_CUSTOMERS,
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import MultiStepFormContext from "./MultiStepFormContext";
 import CommanModal from "../../../../Components/ExtraComponents/Modals/CommanModal";
 import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
 import { useLocation } from "react-router-dom";
+import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
+import Multiselect from "react-multiselect-checkbox"; // npm install react-multiselect-checkbox
+import { JobType } from "../../../../ReduxStore/Slice/Settings/settingSlice";
+// import Multiselect from "multiselect-react-dropdown";
+import CustomMultiselect from "../../../../Components/ExtraComponents/CustomMultiselect";
 
 const Service = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
@@ -30,7 +34,19 @@ const Service = () => {
     loading: true,
     data: [],
   });
+  const [jobTypeData, setJobTypeData] = useState([]);
+  const options = [
+    { label: "Option 1", value: "1" },
+    { label: "Option 2", value: "2" },
+    { label: "Option 3", value: "3" },
+    { label: "Option 4", value: "4" },
+  ];
 
+  const [selectedOptions, setSelectedOptions] = useState([]);
+
+  const handleSelect = (selectedList) => {
+    setSelectedOptions(selectedList);
+  };
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -57,7 +73,6 @@ const Service = () => {
             ),
         ]);
       } catch (error) {
-        console.error("Error fetching data", error);
         setAllService({ loading: false, data: [] });
         setStaffDataAll({ loading: false, data: [] });
       }
@@ -111,6 +126,7 @@ const Service = () => {
 
   const handleCheckboxChange = (e, item) => {
     if (e.target.checked) {
+      JobTypeDataAPi(item, 1);
       setServices((prevServices) =>
         !prevServices.includes(item.id)
           ? [...prevServices, item.id]
@@ -231,6 +247,44 @@ const Service = () => {
     }
   };
 
+  const JobTypeDataAPi = async (req, id) => {
+    const fetchJobTypeData = async (service_id) => {
+      const data = {
+        req: { action: "get", service_id },
+        authToken: token,
+      };
+
+      try {
+        const response = await dispatch(JobType(data)).unwrap();
+
+        if (response.status && response.data.length > 0) {
+          setJobTypeData((prev) => {
+            const exists = prev.some((item) => item.service_id === service_id);
+
+            if (!exists) {
+              return [...prev, { service_id: service_id, data: response.data }];
+            }
+            return prev;
+          });
+        }
+      } catch (error) {
+        console.log("Error", error);
+      }
+    };
+
+    if (id === 2) {
+      for (const item of req) {
+        await fetchJobTypeData(item);
+      }
+    } else {
+      await fetchJobTypeData(req.id);
+    }
+  };
+
+  useEffect(() => {
+    JobTypeDataAPi(services, 2);
+  }, [services]);
+
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
       {({ handleSubmit }) => (
@@ -276,7 +330,40 @@ const Service = () => {
                               />
                             </div>
                           </th>
-                          <td className="customer_name">{item.name}</td>
+
+                          <td className="customer_name">
+                            <div className="customer-details d-flex align-items-center">
+                              <div>{item.name}</div>
+                              <div className="form-check">
+                                {/* <select className="form-select">
+                                  <option value="" disabled>
+                                    Select Job Type
+                                  </option>
+                                  {jobTypeData &&
+                                    jobTypeData.map((data) => {
+                                      if (item.id === data.service_id) {
+                                        return data.data.map((job) => (
+                                          <option key={job.id} value={job.id}>
+                                            <input
+                                              className="form-check-input new_input new-checkbox"
+                                              type="checkbox"
+                                              checked={services.includes(
+                                                job.id
+                                              )}
+                                            />
+                                            {job.type}
+                                          </option>
+                                        ));
+                                      }
+                                      return null;
+                                    })}
+                                </select> */}
+
+                                <CustomMultiselect />
+                              </div>
+                            </div>
+                          </td>
+
                           <td>
                             <button
                               className="btn btn-sm tn btn-outline-info remove-item-btn"
@@ -405,7 +492,7 @@ const Service = () => {
 
           <div className="form__item button__items d-flex justify-content-between">
             <Button className="btn btn-secondary" type="default" onClick={prev}>
-            <i className="pe-2 fa-regular fa-arrow-left-long"></i> Previous
+              <i className="pe-2 fa-regular fa-arrow-left-long"></i> Previous
             </Button>
             <Button
               className="btn btn-info text-white blue-btn"
@@ -422,3 +509,5 @@ const Service = () => {
 };
 
 export default Service;
+
+

@@ -1,18 +1,24 @@
-import React , {useEffect} from 'react'
-import { BrowserRouter as Router, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import Login from '../layouts/Auth/Login';
-import Admin_Route from './Admin_Route';
+import React, { useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+import Login from "../layouts/Auth/Login";
+import Admin_Route from "./Admin_Route";
 
 const Main_Route = () => {
   const location = useLocation();
   const navigate = useNavigate();
-    const staffDetails = JSON.parse(localStorage.getItem('staffDetails'));
-    const role = JSON.parse(localStorage.getItem("role"));
-    const token = JSON.parse(localStorage.getItem("token"));
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+  const role = JSON.parse(localStorage.getItem("role"));
+  const token = JSON.parse(localStorage.getItem("token"));
 
   useEffect(() => {
     // Check if Staff details exist
-    if (role==null||token == null||staffDetails==null) {
+    if (role == null || token == null || staffDetails == null) {
       navigate("/login");
       return;
     }
@@ -32,41 +38,38 @@ const Main_Route = () => {
       return;
     }
 
-     // Redirect based on user role and route prefix
-     switch (role) {
+    // Redirect based on user role and route prefix
+    switch (role) {
       case "ADMIN":
-          if (location.pathname === "/login" || location.pathname === "/" || !location.pathname.startsWith("/admin")) {
-              navigate("/admin/dashboard");
-          }
-          break;
+        if (
+          location.pathname === "/login" ||
+          location.pathname === "/" ||
+          !location.pathname.startsWith("/admin")
+        ) {
+          navigate("/admin/dashboard");
+        }
+        break;
       default:
-        if (location.pathname === "/login" || location.pathname === "/" || !location.pathname.startsWith("/admin")) {
+        if (
+          location.pathname === "/login" ||
+          location.pathname === "/" ||
+          !location.pathname.startsWith("/admin")
+        ) {
           // navigate("/staff/dashboard");
           navigate("/admin/dashboard");
-
-          }
-          break;
-  }
-
-  }, [navigate, location.pathname ,role ,staffDetails]);
-
-
+        }
+        break;
+    }
+  }, [navigate, location.pathname, role, staffDetails]);
 
   return (
     <div>
       <Routes>
-      <Route path="/admin/*" element={(role) ? <Admin_Route /> : <Login />} />
-      {/* <Route path="/admin/*" element={(role) ? <Admin_Route /> : <Login />} /> */}
-        {/* Add other routes here */}
+        <Route path="/admin/*" element={role ? <Admin_Route /> : <Login />} />
         <Route path="/login" element={<Login />} />
-        {
-        /* 
-
-        <Route path="/forget" element={<Forget />} />
-        <Route path="/updatepassword/:id" element={<Update />} /> */}
       </Routes>
     </div>
-  )
-}
+  );
+};
 
-export default Main_Route
+export default Main_Route;
