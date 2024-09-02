@@ -12,11 +12,10 @@ import MultiStepFormContext from "./MultiStepFormContext";
 import CommanModal from "../../../../Components/ExtraComponents/Modals/CommanModal";
 import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
 import { useLocation } from "react-router-dom";
-import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
-import Multiselect from "react-multiselect-checkbox"; // npm install react-multiselect-checkbox
-import { JobType } from "../../../../ReduxStore/Slice/Settings/settingSlice";
-// import Multiselect from "multiselect-react-dropdown";
-import CustomMultiselect from "../../../../Components/ExtraComponents/CustomMultiselect";
+import {
+  JobType,
+  GETTASKDATA,
+} from "../../../../ReduxStore/Slice/Settings/settingSlice";
 
 const Service = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
@@ -32,23 +31,16 @@ const Service = () => {
   const [services, setServices] = useState([]);
   const [tempServices, setTempServices] = useState("");
   const [jobtype, SetJobtype] = useState(false);
+  const [tasks, setTasks] = useState([]);
+  const [getServiceData, setServiceData] = useState([]);
+  const [jobTypeData, setJobTypeData] = useState([]);
   const [getCustomerService, setCustomerService] = useState({
     loading: true,
     data: [],
   });
-  const [jobTypeData, setJobTypeData] = useState([]);
-  const options = [
-    { label: "Option 1", value: "1" },
-    { label: "Option 2", value: "2" },
-    { label: "Option 3", value: "3" },
-    { label: "Option 4", value: "4" },
-  ];
 
-  const [selectedOptions, setSelectedOptions] = useState([]);
+  const [tasksGet, setTasksData] = useState([]);
 
-  const handleSelect = (selectedList) => {
-    setSelectedOptions(selectedList);
-  };
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -235,6 +227,7 @@ const Service = () => {
       customer_id: address,
       pageStatus: "2",
       services: filteredMatchData,
+      Task: tasksGet,
     };
 
     try {
@@ -287,6 +280,34 @@ const Service = () => {
     JobTypeDataAPi(services, 2);
   }, [services]);
 
+  const getCheckListData = async (service_id, item) => {
+    const req = { service_id: service_id, job_type_id: item.id };
+    const data = { req, authToken: token };
+    await dispatch(GETTASKDATA(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          if (response.data.length > 0) {
+            setTasks((prev) => {
+              const mergedTasks = [...prev, ...response.data];
+
+              const uniqueTasks = mergedTasks.filter(
+                (task, index, self) =>
+                  index === self.findIndex((t) => t.id === task.id)
+              );
+
+              return uniqueTasks;
+            });
+          } else {
+            setTasks((prev) => [...prev, ...response.data]);
+          }
+        }
+      })
+      .catch((error) => console.log("Error fetching job types:", error));
+  };
+
+  console.log("tasks-", tasksGet);
+
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
       {({ handleSubmit }) => (
@@ -301,18 +322,7 @@ const Service = () => {
                   <thead className="table-light table-head-blue">
                     <tr>
                       <th scope="col" style={{ width: 50 }}>
-                        <div className="form-check">
-                          {/* <input
-                            className="form-check-input new_input new-checkbox"
-                            type="checkbox"
-                            id="checkAll"
-                            onChange={handleSelectAllChange}
-                            checked={
-                              services.length === GetAllService.data.length &&
-                              GetAllService.data.length > 0
-                            }
-                          /> */}
-                        </div>
+                        <div className="form-check"></div>
                       </th>
                       <th>Service Name</th>
                       <th>Action</th>
@@ -327,46 +337,22 @@ const Service = () => {
                               <input
                                 className="form-check-input new_input new-checkbox"
                                 type="checkbox"
-                                // onChange={(e) => handleCheckboxChange(e, item)}
                                 checked={services.includes(item.id)}
-                                onChange={(e) =>  SetJobtype(true) }
+                                onChange={(e) => {
+                                  handleCheckboxChange(e, item);
+                                  setServiceData(item);
+
+                                  if (e.target.checked) {
+                                    SetJobtype(true);
+                                  }
+                                }}
                               />
                             </div>
                           </th>
 
                           <td className="customer_name">
-
                             <div className="customer-details d-flex align-items-center">
                               <div>{item.name}</div>
-
-                              
-                              <div className="form-check">
-                                {/* <select className="form-select">
-                                  <option value="" disabled>
-                                    Select Job Type
-                                  </option>
-                                  {jobTypeData &&
-                                    jobTypeData.map((data) => {
-                                      if (item.id === data.service_id) {
-                                        return data.data.map((job) => (
-                                          <option key={job.id} value={job.id}>
-                                            <input
-                                              className="form-check-input new_input new-checkbox"
-                                              type="checkbox"
-                                              checked={services.includes(
-                                                job.id
-                                              )}
-                                            />
-                                            {job.type}
-                                          </option>
-                                        ));
-                                      }
-                                      return null;
-                                    })}
-                                </select> */}
-
-                                <CustomMultiselect />
-                              </div>
                             </div>
                           </td>
 
@@ -397,123 +383,94 @@ const Service = () => {
             </div>
           </div>
           <CommanModal
-                isOpen={jobtype}
-                backdrop="static"
-                size="ms-5"
-                title="VAT Return
-"
-                hideBtn={true}
-                handleClose={() => SetJobtype(false)}
-            >
-              <table className="table align-middle table-nowrap">
-                <thead className="table-light table-head-blue">
-                <tr>
-                  <td className="p-0">
-                  <div className="form-group mb-0">
-    <div className="checkbox">
-      <label
-        data-toggle="collapse"
-        data-target="#collapseOne"
-        aria-expanded="false"
-        aria-controls="collapseOne"
-        className="accordion-button fs-16 fw-bold py-2"
-      >
-        <input type="checkbox" /> A checkbox
-      </label>
-    </div>
-  </div>
-                  </td>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                  <td className="p-0">
-                  <div id="collapseOne" aria-expanded="false" className="collapse  p-2">
-    <div className="row p-2">
-      <div className="col-md-6"> 
-        <input type="checkbox" /> A checkbox
-     
-      </div>
-     
-      <div className="col-md-6"> 
-       
-      <input type="checkbox" /> A checkbox
-      </div>
-    </div>
-    <div className="row p-2">
-      <div className="col-md-6"> 
-        <input type="checkbox" /> A checkbox
-     
-      </div>
-     
-      <div className="col-md-6"> 
-       
-      <input type="checkbox" /> A checkbox
-      </div>
-    </div>
-  </div>
-                  </td>
-                </tr>
-                </tbody>
+            isOpen={jobtype}
+            backdrop="static"
+            size="ms-5"
+            title="Job Type"
+            hideBtn={true}
+            handleClose={() => SetJobtype(false)}
+          >
+            <table className="table align-middle table-nowrap">
+              {jobTypeData.map((data) => {
+                if (data.service_id === getServiceData.id) {
+                  return data.data.map((item, index) => (
+                    <React.Fragment key={index}>
+                      <thead className="table-light table-head-blue">
+                        <tr>
+                          <td className="p-0">
+                            <div className="form-group mb-0">
+                              <div className="checkbox">
+                                <label
+                                  data-toggle="collapse"
+                                  data-target={`#collapse${index}`}
+                                  aria-expanded="false"
+                                  aria-controls={`collapse${index}`}
+                                  className="accordion-button fs-16 fw-bold py-2"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    onChange={(e) =>
+                                      getCheckListData(getServiceData.id, item)
+                                    }
+                                  />{" "}
+                                  {item.type}
+                                </label>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="p-0">
+                            <div
+                              id={`collapse${index}`}
+                              aria-expanded="false"
+                              className="collapse p-2"
+                            >
+                              {tasks && tasks.length > 0 ? (
+                                tasks
+                                  .filter(
+                                    (task) =>
+                                      task.job_type_id === item.id &&
+                                      task.service_id === getServiceData.id
+                                  )
+                                  .map((task, taskIndex) => (
+                                    <div className="row p-2" key={taskIndex}>
+                                      <div className="col-md-6">
+                                        <input
+                                          type="checkbox"
+                                          onChange={(e) =>
+                                            setTasksData((pre) => [
+                                              ...pre,
+                                              task,
+                                            ])
+                                          }
+                                        />{" "}
+                                        {task.name}
+                                      </div>
+                                    </div>
+                                  ))
+                              ) : (
+                                <p>No tasks available.</p>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </React.Fragment>
+                  ));
+                }
+                return null;
+              })}
+            </table>
 
-                <thead className="table-light table-head-blue">
-                <tr>
-                  <td className="p-0">
-                  <div className="form-group mb-0">
-    <div className="checkbox">
-      <label
-        data-toggle="collapse"
-        data-target="#collapseTwo"
-        aria-expanded="false"
-        aria-controls="collapseTwo"
-        className="accordion-button fs-16 fw-bold py-2"
-      >
-        <input type="checkbox" /> A checkbox2
-      </label>
-    </div>
-  </div>
-                  </td>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                  <td className="p-0">
-                  <div id="collapseTwo" aria-expanded="false" className="collapse  p-2">
-    <div className="row p-2">
-      <div className="col-md-6"> 
-        <input type="checkbox" /> A checkbox
-     
-      </div>
-     
-      <div className="col-md-6"> 
-       
-      <input type="checkbox" /> A checkbox
-      </div>
-    </div>
-    <div className="row p-2">
-      <div className="col-md-6"> 
-        <input type="checkbox" /> A checkbox
-     
-      </div>
-     
-      <div className="col-md-6"> 
-       
-      <input type="checkbox" /> A checkbox
-      </div>
-    </div>
-  </div>
-                  </td>
-                </tr>
-                </tbody>
-              </table>
-      
-
-                <div className="d-flex justify-content-end">
-                    <Button className="btn btn-info" color="primary" >
-                       Submit
-                    </Button>
-                </div>
-            </CommanModal> 
+            <div className="d-flex justify-content-end">
+              <Button className="btn btn-info" color="primary">
+                Submit
+              </Button>
+            </div>
+          </CommanModal>
 
           <CommanModal
             isOpen={getModal}
@@ -633,5 +590,3 @@ const Service = () => {
 };
 
 export default Service;
-
-
