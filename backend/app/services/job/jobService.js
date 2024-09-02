@@ -20,6 +20,9 @@ const jobAction = async (job) => {
   else if(action === "getByJobId"){
     return jobModel.getJobById(job);
   }
+  else if(action === "getByJobStaffId"){
+    return jobModel.getByJobStaffId(job);
+  }
   else{
     return { status: false, message: 'Error getting job.' };
   }
