@@ -236,28 +236,30 @@ const CreateCheckList = () => {
 
   return (
     <div className="container-fluid">
-      <div className="content-title">
-        <div className="card-header d-flex justify-content-between">
-          <h3 className="card-title mb-0">Update Checklist</h3>
-          <button
+   
+      <div className="card mt-4">
+      <div className="card-header step-header-blue d-flex ">
+
+  <button
             type="button"
-            className="btn btn-info text-white blue-btn"
+            className="btn p-0"
             onClick={() =>
               navigate("/admin/Clientlist", {
                 state: { id: location.state.id, route: "Checklist" },
               })
             }
           >
-            Back
+              <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" />
           </button>
-        </div>
-      </div>
-      <div className="report-data mt-4">
-        <div>
+  <h3 className="card-title mb-0">Update Checklist</h3>
+</div>
+
+        <div className="card-body">
           <div className="row">
-            <div className="col-lg-4 mt-4">
+            <div className="col-lg-4 ">
               <div className="row">
                 <div className="col-lg-12">
+                <label className="form-label"> Select Service Type</label>
                   <select
                     className="default-select wide form-select"
                     name="service_id"
@@ -284,9 +286,10 @@ const CreateCheckList = () => {
                 </div>
               </div>
             </div>
-            <div className="col-lg-4 mt-4">
+            <div className="col-lg-4 ">
               <div className="row">
                 <div className="col-lg-12">
+                <label className="form-label"> Select Job Typ</label>
                   <select
                     className="default-select wide form-select"
                     name="job_type_id"
@@ -311,9 +314,10 @@ const CreateCheckList = () => {
                 </div>
               </div>
             </div>
-            <div className="col-lg-4 mt-4">
+            <div className="col-lg-4 ">
               <div className="row">
                 <div className="col-lg-12">
+                <label className="form-label">Select Client Type</label>
                   <select
                     className="default-select wide form-select"
                     name="client_type_id"
@@ -337,6 +341,7 @@ const CreateCheckList = () => {
             <div className="col-lg-4 mt-4">
               <div className="row">
                 <div className="col-lg-12">
+                <label className="form-label">Check List Name</label>
                   <input
                     type="text"
                     className="form-control"
@@ -354,6 +359,7 @@ const CreateCheckList = () => {
             <div className="col-lg-4 mt-4">
               <div className="row">
                 <div className="col-lg-12">
+                <label className="form-label">Status</label>
                   <select
                     className="default-select wide form-select"
                     name="status"
@@ -371,9 +377,21 @@ const CreateCheckList = () => {
               </div>
             </div>
           </div>
+          <div className="row">
+            <div className="col-lg-12 mt-4">
+            <button
+                    type="button"
+                    className="btn btn-secondary ms-2"
+                    onClick={addTask}
+                  >
+                   <i className="fa fa-plus"></i> Add Task
+                  </button>
+          </div>
+          </div>
           {tasks.map((task, index) => (
-            <div key={index} className="row mt-4">
-              <div className="col-lg-4">
+            <div key={index} className="row mt-4 align-items-end">
+              <div className="col-lg-5">
+              <label className="form-label">Task Name</label>
                 <input
                   type="text"
                   className="form-control"
@@ -387,8 +405,40 @@ const CreateCheckList = () => {
                   <p className="text-danger">{errors[`task_name_${index}`]}</p>
                 )}
               </div>
-              <div className="col-lg-4">
-                <input
+              <div className="col-lg-5">
+              <label className="form-label">Budgeted Hours</label>
+              <div className="input-group">
+                      {/* Hours Input */}
+                      <input
+                        type="number"
+                        className="form-control"
+                        placeholder="Hours"
+                        name="hours"
+                        defaultValue={task.budgeted_hour?.hours || ""}
+                        onChange={(e) => handleTaskChange(index, e)}
+                      />
+                      {/* Hours Error */}
+                      
+
+                      {/* Minutes Input */}
+                      <input
+                        type="number"
+                        className="form-control"
+                        placeholder="Minutes"
+                        name="minutes"
+                        min="0"
+                        max="59"
+                        defaultValue={task.budgeted_hour?.minutes || ""}
+                        onChange={(e) => handleTaskChange(index, e)}
+                      />
+                      {/* Minutes Error */}
+                      {errors[`budgeted_hour_${index}`] && (
+                  <p className="text-danger">
+                    {errors[`budgeted_hour_${index}`]}
+                  </p>
+                )}
+                    </div>
+                {/* <input
                   type="number"
                   className="form-control"
                   placeholder="Enter Budgeted Hour"
@@ -400,27 +450,27 @@ const CreateCheckList = () => {
                   <p className="text-danger">
                     {errors[`budgeted_hour_${index}`]}
                   </p>
-                )}
+                )} */}
               </div>
-              <div className="col-lg-4 d-flex align-items-center">
+              <div className="col-lg-2 d-flex align-items-center">
                 {tasks.length > 1 && (
                   <button
                     type="button"
-                    className="btn btn-danger"
+                    className="btn p-0"
                     onClick={() => removeTask(index)}
                   >
-                    Remove
+                   <i className="ti-trash text-danger fs-4"></i>
                   </button>
                 )}
-                {index === tasks.length - 1 && (
+                {/* {index === tasks.length - 1 && (
                   <button
                     type="button"
-                    className="btn btn-info ms-2"
+                    className="btn btn-secondary ms-2"
                     onClick={addTask}
                   >
-                    Add Task
+                   <i className="fa fa-plus"></i> Add Task
                   </button>
-                )}
+                )} */}
               </div>
             </div>
           ))}

@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { JobType, GetServicesByCustomers, GETTASKDATA, getList, addChecklists } from '../../../ReduxStore/Slice/Settings/settingSlice';
 import sweatalert from 'sweetalert2';
+import CustomMultiSelect from '../../../Components/ExtraComponents/CustomMultiselect';
 
 const CreateCheckList = () => {
   const location = useLocation();
@@ -32,7 +33,16 @@ const CreateCheckList = () => {
   const [tasks, setTasks] = useState([{ task_id: "", task_name: '', budgeted_hour: '' }]);
 
   const [errors, setErrors] = useState({}); // Validation errors
+  const options = [
+    { value: 'option1', label: 'Sole Trader' },
+    { value: 'option2', label: 'Company' },
+    { value: 'option3', label: 'Partnership' },
+    { value: 'option4', label: 'Individual' },
+  ];
 
+  const handleMultiSelectChange = (selectedOptions) => {
+    console.log('Selected options:', selectedOptions);
+  };
   useEffect(() => {
     if (formData.customer_id) {
       const req = { customer_id: formData.customer_id };
@@ -266,6 +276,7 @@ const CreateCheckList = () => {
               <div className="row">
                 <div className="col-lg-12">
                   <label className="form-label"> Select Service Type</label>
+           
                   <select
                     className="default-select wide form-select"
                     name="service_id"
@@ -314,6 +325,12 @@ const CreateCheckList = () => {
               <div className="row">
                 <div className="col-lg-12">
                 <label className="form-label">Select Client Type</label>
+                <CustomMultiSelect
+        options={options}
+        className="form-select"
+        placeholder="Select options"
+        onChange={handleMultiSelectChange}
+      />
                   <select
                     className="default-select wide form-select"
                     name="client_type_id"
@@ -370,7 +387,7 @@ const CreateCheckList = () => {
           <button className="btn btn-secondary mt-3" onClick={addTask}><i className='fa fa-plus'></i>Add Task</button>
           <div className="mt-4">
             {tasks.map((task, index) => (
-              <div key={index} className="d-flex gap-3 mt-4">
+              <div key={index} className="row  mt-4 align-items-end">
                 <div className="col-lg-5">
                   <div>
                     <label className="form-label">Task Name</label>
@@ -390,7 +407,7 @@ const CreateCheckList = () => {
                 </div>
 
                 <div className="col-lg-5">
-                  <div className="mb-3">
+                
                     <label className="form-label">Budgeted Hours</label>
                     <div className="input-group">
                       {/* Hours Input */}
@@ -420,13 +437,14 @@ const CreateCheckList = () => {
                     
                     </div>
                      
-                  </div>
+                 
 
                 </div>
-
-                <button className="btn" onClick={() => removeTask(index)}>
+                <div className="col-lg-2">
+                <button className="btn p-0" onClick={() => removeTask(index)}>
                   <i className="ti-trash text-danger fs-4"></i>
                 </button>
+              </div>
               </div>
             ))}
 

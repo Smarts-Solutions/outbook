@@ -504,10 +504,11 @@ const CreateJob = () => {
                     <div className="col-xl-12">
                         <div className="card">
 
-                            <div className="card-header d-flex justify-content-between">
+                            <div className="card-header step-header-blue d-flex ">
+                                
+                                <button type="button " className="btn p-0" onClick={() => window.history.back()}>
+                                <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" /> </button>
                                 <h3 className="card-title mb-0">Create New Job</h3>
-                                <button type="button" className="btn btn-info text-white blue-btn" onClick={() => window.history.back()}>
-                                <i className="fa fa-arrow-left pe-1" /> Back</button>
                             </div>
 
                             <div className="card-body form-steps">
@@ -619,7 +620,7 @@ const CreateJob = () => {
 
                                                                     <div className="col-lg-4 mb-3">
                                                                         <label className="form-label">Job Type</label>
-                                                                        <select className="form-select mb-3 jobtype"
+                                                                        <select className="form-select  jobtype"
                                                                             name="JobType" onChange={(e) => { HandleChange(e); openJobModal(e) }} value={jobData.JobType}>
                                                                             <option value="">Select Job Type</option>
                                                                             {get_Job_Type.loading && get_Job_Type.data && 
