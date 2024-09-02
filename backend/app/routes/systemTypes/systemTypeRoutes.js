@@ -19,3 +19,6 @@ router.post('/country',verifyToken, controllers.countryController.handleCountry)
 // Customer Contact Person Role
 router.post('/customerContactPersonRole',verifyToken, controllers.customerContactPersonRoleController.handleCustomerContactPersonRole);
 module.exports = router;
+
+//incorporation_in
+router.post('/incorporation',verifyToken, controllers.IncorporationController.handleIncorporation);
