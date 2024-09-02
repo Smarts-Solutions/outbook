@@ -683,6 +683,17 @@ CREATE TABLE jobs (
   FOREIGN KEY (staff_id) REFERENCES staffs(id)
 );
 
+   
+
+/*--TABLE:- Incorporation in DOCUMENTS  */
+ CREATE TABLE incorporation_in (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
     
 
 
