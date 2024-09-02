@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Formik } from "formik";
 import { Button } from "antd";
 import { useDispatch } from "react-redux";
+
 import {
   Get_Service,
   GET_CUSTOMER_DATA,
@@ -30,6 +31,7 @@ const Service = () => {
   const [getManager, setManager] = useState([]);
   const [services, setServices] = useState([]);
   const [tempServices, setTempServices] = useState("");
+  const [jobtype, SetJobtype] = useState(false);
   const [getCustomerService, setCustomerService] = useState({
     loading: true,
     data: [],
@@ -300,7 +302,7 @@ const Service = () => {
                     <tr>
                       <th scope="col" style={{ width: 50 }}>
                         <div className="form-check">
-                          <input
+                          {/* <input
                             className="form-check-input new_input new-checkbox"
                             type="checkbox"
                             id="checkAll"
@@ -309,7 +311,7 @@ const Service = () => {
                               services.length === GetAllService.data.length &&
                               GetAllService.data.length > 0
                             }
-                          />
+                          /> */}
                         </div>
                       </th>
                       <th>Service Name</th>
@@ -325,15 +327,19 @@ const Service = () => {
                               <input
                                 className="form-check-input new_input new-checkbox"
                                 type="checkbox"
-                                onChange={(e) => handleCheckboxChange(e, item)}
+                                // onChange={(e) => handleCheckboxChange(e, item)}
                                 checked={services.includes(item.id)}
+                                onChange={(e) =>  SetJobtype(true) }
                               />
                             </div>
                           </th>
 
                           <td className="customer_name">
+
                             <div className="customer-details d-flex align-items-center">
                               <div>{item.name}</div>
+
+                              
                               <div className="form-check">
                                 {/* <select className="form-select">
                                   <option value="" disabled>
@@ -390,6 +396,124 @@ const Service = () => {
               </div>
             </div>
           </div>
+          <CommanModal
+                isOpen={jobtype}
+                backdrop="static"
+                size="ms-5"
+                title="VAT Return
+"
+                hideBtn={true}
+                handleClose={() => SetJobtype(false)}
+            >
+              <table className="table align-middle table-nowrap">
+                <thead className="table-light table-head-blue">
+                <tr>
+                  <td className="p-0">
+                  <div className="form-group mb-0">
+    <div className="checkbox">
+      <label
+        data-toggle="collapse"
+        data-target="#collapseOne"
+        aria-expanded="false"
+        aria-controls="collapseOne"
+        className="accordion-button fs-16 fw-bold py-2"
+      >
+        <input type="checkbox" /> A checkbox
+      </label>
+    </div>
+  </div>
+                  </td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                  <td className="p-0">
+                  <div id="collapseOne" aria-expanded="false" className="collapse  p-2">
+    <div className="row p-2">
+      <div className="col-md-6"> 
+        <input type="checkbox" /> A checkbox
+     
+      </div>
+     
+      <div className="col-md-6"> 
+       
+      <input type="checkbox" /> A checkbox
+      </div>
+    </div>
+    <div className="row p-2">
+      <div className="col-md-6"> 
+        <input type="checkbox" /> A checkbox
+     
+      </div>
+     
+      <div className="col-md-6"> 
+       
+      <input type="checkbox" /> A checkbox
+      </div>
+    </div>
+  </div>
+                  </td>
+                </tr>
+                </tbody>
+
+                <thead className="table-light table-head-blue">
+                <tr>
+                  <td className="p-0">
+                  <div className="form-group mb-0">
+    <div className="checkbox">
+      <label
+        data-toggle="collapse"
+        data-target="#collapseTwo"
+        aria-expanded="false"
+        aria-controls="collapseTwo"
+        className="accordion-button fs-16 fw-bold py-2"
+      >
+        <input type="checkbox" /> A checkbox2
+      </label>
+    </div>
+  </div>
+                  </td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                  <td className="p-0">
+                  <div id="collapseTwo" aria-expanded="false" className="collapse  p-2">
+    <div className="row p-2">
+      <div className="col-md-6"> 
+        <input type="checkbox" /> A checkbox
+     
+      </div>
+     
+      <div className="col-md-6"> 
+       
+      <input type="checkbox" /> A checkbox
+      </div>
+    </div>
+    <div className="row p-2">
+      <div className="col-md-6"> 
+        <input type="checkbox" /> A checkbox
+     
+      </div>
+     
+      <div className="col-md-6"> 
+       
+      <input type="checkbox" /> A checkbox
+      </div>
+    </div>
+  </div>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+      
+
+                <div className="d-flex justify-content-end">
+                    <Button className="btn btn-info" color="primary" >
+                       Submit
+                    </Button>
+                </div>
+            </CommanModal> 
 
           <CommanModal
             isOpen={getModal}
@@ -409,7 +533,7 @@ const Service = () => {
                       className="form-control search"
                       placeholder="Search Manager..."
                       value={searchValue}
-                      onChange={(e) => setSearchValue(e.target.value)}
+                      onClick={(e) => setSearchValue(e.target.value)}
                     />
                   </div>
                   {filteredData.length > 0 && (

@@ -200,7 +200,7 @@ const Sidebar = () => {
                     </Link>
                   </li>
 
-                  {(updatedShowTab && updatedShowTab.customer ||
+                  {(updatedShowTab &&  updatedShowTab.customer ||
                     role == "ADMIN" ||
                     role == "SUPERADMIN") && (
                     <li
