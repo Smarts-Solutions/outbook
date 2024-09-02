@@ -872,11 +872,6 @@ const jobUpdate = async (job) => {
    }
    
 
-
-
-
-
-
 module.exports = {
     getAddJobData,
     jobAdd,
