@@ -79,11 +79,7 @@ const EditJob = () => {
     InvoiceHours: "",
     InvoiceRemark: "",
   });
-
-
-  console.log("getJobDetails", getJobDetails)
-
-
+ 
 
   const JobDetails = async () => {
     const req = { action: "getByJobId", job_id: location.state.row.job_id }
@@ -627,7 +623,6 @@ const EditJob = () => {
                                       </div>
                                   }
 
-
                                   <div className="mb-3 col-lg-4">
                                     <label className="form-label">Client Job Code</label>
                                     <input type="text" className="form-control" placeholder="Client Job Code"
@@ -692,7 +687,6 @@ const EditJob = () => {
                                     )}
                                   </div>
 
-
                                   <div className="col-lg-4">
                                     <div className="mb-3">
                                       <label className="form-label" >Budgeted Hours</label>
@@ -728,7 +722,6 @@ const EditJob = () => {
 
                                     </div>
                                   </div>
-
 
                                   <div className="col-lg-4">
                                     <label className="form-label">Reviewer</label>
@@ -778,7 +771,6 @@ const EditJob = () => {
                                     )}
                                   </div>
 
-
                                   <div className="col-lg-4">
                                     <label className="form-label">Date Received On</label>
                                     <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
@@ -789,7 +781,6 @@ const EditJob = () => {
                                       <div style={{ 'color': 'red' }}>{errors['DateReceivedOn']}</div>
                                     )}
                                   </div>
-
 
                                   <div className="col-lg-4">
                                     <div className="mb-3">
@@ -887,7 +878,6 @@ const EditJob = () => {
                                     </div>
                                   </div>
 
-
                                   <div className="col-lg-4">
                                     <div className="mb-3">
                                       <label className="form-label" >Feedback Incorporation Time</label>
@@ -926,8 +916,6 @@ const EditJob = () => {
                                       )}
                                     </div>
                                   </div>
-
-
 
                                   <div className="col-lg-4">
                                     <div className="mb-3">
@@ -970,24 +958,6 @@ const EditJob = () => {
                                     </div>
                                   </div>
 
-
-                                  {/* <div className="col-lg-4">
-                                    <div className="mb-3">
-                                      <label className="form-label" > Total Time</label>
-
-                                      <input type="text"
-                                        name="TotalTime"
-                                        className="form-control"
-                                        value={Math.floor(totalHours / 60) + ":" + totalHours % 60}
-                                        onChange={HandleChange}
-                                        disabled
-                                      />
-                                      {errors['TotalTime'] && (
-                                        <div className="error-text">{errors['TotalTime']}</div>
-                                      )} */}
-                                  {/* </div>
-                              </div> */}
-
                                   <div id="invoice_type" className="col-lg-4">
                                     <label htmlFor="firstNameinput" className="form-label">
                                       Engagement Model
@@ -1005,7 +975,6 @@ const EditJob = () => {
                                     )}
 
                                   </div>
-
                                 </div>
                               </div>
                             </div>
@@ -1844,14 +1813,11 @@ const EditJob = () => {
                             <button type="button" className="btn btn-light" onClick={handleClose}>Cancel</button>
                             <button type="button" className="btn btn-info text-white float-end blue-btn" onClick={handleSubmit}>Update</button>
                           </div>
-
-
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                
               </div >
             </div >
           </div >

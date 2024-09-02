@@ -1,9 +1,246 @@
 import React from 'react'
+import { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import { GetAllJabData, AddAllJobType, GET_ALL_CHECKLIST } from '../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { Get_All_Job_List } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 
-const JobInformationPage = () => {
+
+const JobInformationPage = ({ job_id }) => {
+    const token = JSON.parse(localStorage.getItem("token"));
+    const location = useLocation();
+    const [AllJobData, setAllJobData] = useState([]);
+    const dispatch = useDispatch();
+    const [JobInformationData, setJobInformationData] = useState({
+        AccountManager: "",
+        Customer: "",
+        Client: "",
+        ClientJobCode: "",
+        CustomerAccountManager: "",
+        Service: "",
+        JobType: "",
+        BudgetedHours: "",
+        Reviewer: "",
+        AllocatedTo: "",
+        AllocatedOn: "",
+        DateReceivedOn: "",
+        YearEnd: "",
+        TotalPreparationTime: "",
+        ReviewTime: "",
+        FeedbackIncorporationTime: "",
+        TotalTime: "",
+        EngagementModel: "",
+        ExpectedDeliveryDate: "",
+        DueOn: "",
+        SubmissionDeadline: "",
+        CustomerDeadlineDate: "",
+        SLADeadlineDate: "",
+        InternalDeadlineDate: "",
+        FilingWithCompaniesHouseRequired: "",
+        CompaniesHouseFilingDate: "",
+        FilingWithHMRCRequired: "",
+        HMRCFilingDate: "",
+        OpeningBalanceAdjustmentRequired: "",
+        OpeningBalanceAdjustmentDate: "",
+        NumberOfTransactions: "",
+        NumberOfTrialBalanceItems: "",
+        Turnover: "",
+        NoOfEmployees: "",
+        VATReconciliation: "",
+        Bookkeeping: "",
+        ProcessingType: "",
+        Invoiced: "",
+        Currency: "",
+        InvoiceValue: "",
+        InvoiceDate: "",
+        InvoiceTime: "",
+        InvoiceRemark: "",
+
+    });
+
+
+    console.log("JobInformationData", JobInformationData)
+    console.log("job_id", job_id)
+
+
+    const GetJobData = async () => {
+        const req = { customer_id: location.state.details.customer_id.id }
+        const data = { req: req, authToken: token }
+        await dispatch(GetAllJabData(data))
+            .unwrap()
+            .then(async (response) => {
+
+                if (response.status) {
+                    setAllJobData({
+                        loading: true,
+                        data: response.data
+                    })
+                } else {
+                    setAllJobData({
+                        loading: true,
+                        data: []
+                    })
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+
+    }
+
+    useEffect(() => {
+        GetJobData()
+    }, []);
+
+
+    // "data": {
+    //     "job_id": 18,
+    //     "customer_id": 21,
+    //     "customer_trading_name": "cppp",
+    //     "client_id": 8,
+    //     "client_trading_name": "www",
+    //     "client_job_code": "sasa",
+    //     "outbooks_acount_manager_id": 7,
+    //     "outbooks_acount_manager_first_name": "acoount",
+    //     "outbooks_acount_manager_last_name": "acoount",
+    //     "account_manager_officer_id": 29,
+    //     "account_manager_officer_first_name": "Chandra",
+    //     "account_manager_officer_last_name": "Prakash",
+    //     "service_id": 3,
+    //     "service_name": "VAT Return\t",
+    //     "job_type_id": 4,
+    //     "job_type_name": "SS",
+    //     "budgeted_hours": "22:00:00",
+    //     "reviewer_id": 9,
+    //     "reviewer_first_name": "shk",
+    //     "reviewer_last_name": "hu",
+    //     "allocated_id": null,
+    //     "allocated_first_name": null,
+    //     "allocated_last_name": null,
+    //     "allocated_on": "2024-08-30",
+    //     "date_received_on": "2024-08-30",
+    //     "year_end": "",
+    //     "total_preparation_time": "00:00:00",
+    //     "review_time": "00:00:00",
+    //     "feedback_incorporation_time": "00:00:00",
+    //     "total_time": "00:00:00",
+    //     "engagement_model": "",
+    //     "expected_delivery_date": null,
+    //     "due_on": null,
+    //     "submission_deadline": null,
+    //     "customer_deadline_date": null,
+    //     "sla_deadline_date": null,
+    //     "internal_deadline_date": null,
+    //     "filing_Companies_required": "0",
+    //     "filing_Companies_date": null,
+    //     "filing_hmrc_required": "0",
+    //     "filing_hmrc_date": null,
+    //     "opening_balance_required": "0",
+    //     "opening_balance_date": null,
+    //     "number_of_transaction": "0.00",
+    //     "number_of_balance_items": 0,
+    //     "turnover": "0.00",
+    //     "number_of_employees": 0,
+    //     "vat_reconciliation": "0",
+    //     "bookkeeping": "0",
+    //     "processing_type": "",
+    //     "invoiced": "1",
+    //     "currency_id": null,
+    //     "currency": null,
+    //     "invoice_value": "77.00",
+    //     "invoice_date": "2024-08-31",
+    //     "invoice_hours": "10:10:00",
+    //     "invoice_remark": "ppp",
+    //     "tasks": {
+    //         "checklist_id": 21,
+    //         "task": [
+    //             {
+    //                 "task_id": 17,
+    //                 "task_name": "U",
+    //                 "budgeted_hour": "00:00:04"
+    //             },
+    //             {
+    //                 "task_id": 19,
+    //                 "task_name": "sasa",
+    //                 "budgeted_hour": "22:22:00"
+    //             }
+    //         ]
+    //     }
+
+    const JobDetails = async () => {
+        const req = { action: "getByJobId", job_id: job_id }
+        const data = { req: req, authToken: token }
+        await dispatch(Get_All_Job_List(data))
+            .unwrap()
+            .then(async (response) => {
+                if (response.status) {
+                    setJobInformationData(prevState => ({
+                        ...prevState,
+                        AccountManager: `${response.data.outbooks_acount_manager_first_name} ${response.data.outbooks_acount_manager_last_name}`,
+                        Customer: response.data.customer_trading_name,
+                        Client: response.data.client_trading_name,
+                        ClientJobCode: response.data.client_job_code,
+                        CustomerAccountManager: response.data.account_manager_officer_id,
+                        Service: response.data.service_id,
+                        JobType: response.data.job_type_id,
+                        // BudgetedHours: response.data.budgeted_hours,
+                        // Reviewer: response.data.reviewer_id,
+                        // AllocatedTo: response.data.allocated_id,
+
+                        // AllocatedOn: response.data.allocated_on,
+                        // DateReceivedOn: response.data.date_received_on,
+                        // YearEnd: response.data.year_end,
+                        // TotalPreparationTime: response.data.total_preparation_time,
+                        // ReviewTime: response.data.review_time,
+                        // FeedbackIncorporationTime: response.data.feedback_incorporation_time,
+                        // TotalTime: response.data.total_time,
+                        // EngagementModel: response.data.engagement_model,
+                        // ExpectedDeliveryDate: response.data.expected_delivery_date,
+                        // DueOn: response.data.due_on,
+                        // SubmissionDeadline: response.data.submission_deadline,
+                        // CustomerDeadlineDate: response.data.customer_deadline_date,
+                        // SLADeadlineDate: response.data.sla_deadline_date,
+                        // InternalDeadlineDate: response.data.internal_deadline_date,
+                        // FilingWithCompaniesHouseRequired: response.data.filing_Companies_required,
+                        // CompaniesHouseFilingDate: response.data.filing_Companies_date,
+                        // FilingWithHMRCRequired: response.data.filing_hmrc_required,
+                        // HMRCFilingDate: response.data.filing_hmrc_date,
+                        // OpeningBalanceAdjustmentRequired: response.data.opening_balance_required,
+                        // OpeningBalanceAdjustmentDate: response.data.opening_balance_date,
+                        // NumberOfTransactions: response.data.number_of_transaction,
+                        // NumberOfTrialBalanceItems: response.data.number_of_balance_items,
+                        // Turnover: response.data.turnover,
+                        // NoOfEmployees: response.data.number_of_employees,
+                        // VATReconciliation: response.data.vat_reconciliation,
+                        // Bookkeeping: response.data.bookkeeping,
+                        // ProcessingType: response.data.processing_type,
+                        // Invoiced: response.data.invoiced,
+                        // Currency: response.data.currency,
+                        // InvoiceValue: response.data.invoice_value,
+                        // InvoiceDate: response.data.invoice_date,
+                        // InvoiceTime: response.data.invoice_hours,
+                        // InvoiceRemark: response.data.invoice_remark,
+
+
+                    }));
+
+
+                }
+
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    }
+
+    useEffect(() => {
+        JobDetails()
+    }, []);
+
+
+
     return (
         <div>
-
             <div className='row mb-3'>
                 <div className='col-md-8'>
                     <div className='tab-title'>
@@ -33,10 +270,11 @@ const JobInformationPage = () => {
                                         <input
                                             type="text"
                                             className="form-control"
-                                            placeholder="Account Manager"
-                                            disabled=""
+                                            placeholder="Enter Account Manager Name"
+                                            disabled
                                             name="AccountManager"
-                                            defaultValue="acoount acoount"
+                                            onChange={(e) => setJobInformationData({ ...JobInformationData, AccountManager: e.target.value })}
+                                            value={JobInformationData.AccountManager}
                                         />
                                     </div>
                                     <div id="invoiceremark" className="mb-3 col-lg-4">
@@ -44,10 +282,11 @@ const JobInformationPage = () => {
                                         <input
                                             type="text"
                                             className="form-control"
-                                            placeholder="Customer"
-                                            disabled=""
+                                            placeholder="Enter Customer"
+                                            disabled
                                             name="Customer"
-                                            defaultValue="testeerete"
+                                            onChange={(e) => setJobInformationData({ ...JobInformationData, Customer: e.target.value })}
+                                            value={JobInformationData.Customer}
                                         />
                                     </div>
                                     <div className="col-lg-4">
@@ -55,10 +294,12 @@ const JobInformationPage = () => {
                                         <input
                                             type="text"
                                             className="form-control"
-                                            placeholder="Client Job Code"
+                                            placeholder="Enter Client Job Code"
                                             name="Client"
-                                            disabled=""
-                                            defaultValue="erewrewr"
+                                            disabled
+                                            onChange={(e) => setJobInformationData({ ...JobInformationData, Client: e.target.value })}
+                                            value={JobInformationData.Client}
+
                                         />
                                     </div>
                                     <div className="mb-3 col-lg-4">
@@ -68,32 +309,75 @@ const JobInformationPage = () => {
                                             className="form-control"
                                             placeholder="Client Job Code"
                                             name="ClientJobCode"
-                                            defaultValue=""
+                                            disabled
+                                            onChange={(e) => setJobInformationData({ ...JobInformationData, ClientJobCode: e.target.value })}
+                                            value={JobInformationData.ClientJobCode}
                                         />
                                     </div>
+
                                     <div className="col-lg-4">
-                                        <label className="form-label">
-                                            Customer Account Manager(Officer)<span className='text-danger'>*</span>
-                                        </label>
-                                        <select className="form-select" name="CustomerAccountManager">
+                                        <label className="form-label">Customer Account Manager(Officer)</label>
+                                        <select className="form-select"
+                                            name="CustomerAccountManager"
+                                            disabled
+                                            onChange={(e) => setJobInformationData({ ...JobInformationData, CustomerAccountManager: e.target.value })}
+                                            value={JobInformationData.CustomerAccountManager}
+                                        >
                                             <option value="">Select Customer Account Manager</option>
-                                            <option value={9}>nnn nnn</option>
+                                            {
+                                                AllJobData.data && AllJobData.data.customer_account_manager &&
+                                                AllJobData.data.customer_account_manager.map((customer_account_manager) => (
+                                                    <option value={customer_account_manager.customer_account_manager_officer_id}
+                                                        key={customer_account_manager.customer_account_manager_officer_id}>
+                                                        {customer_account_manager.customer_account_manager_officer_name}
+                                                    </option>
+                                                ))
+                                            }
                                         </select>
+
+
                                     </div>
+
+
                                     <div className="col-lg-4">
-                                        <label className="form-label">Service<span className='text-danger'>*</span></label>
-                                        <select className="form-select" name="Service">
+                                        <label className="form-label">Service</label>
+                                        <select className="form-select mb-3"
+                                            name="Service"
+                                            disabled
+                                            onChange={(e) => setJobInformationData({ ...JobInformationData, Service: e.target.value })}
+                                            value={JobInformationData.Service}
+                                        >
                                             <option value="">Select Service</option>
-                                            <option value={6}>Onboarding/Setup </option>
+                                            {AllJobData?.data?.services?.length > 0 &&
+                                                AllJobData.data.services.map(({ service_id, service_name }) => (
+                                                    <option value={service_id} key={service_id}>
+                                                        {service_name}
+                                                    </option>
+                                                ))
+                                            }
+
+
                                         </select>
+
                                     </div>
-                                    <div className="col-lg-4 mb-3">
-                                        <label className="form-label">Job Type<span className='text-danger'>*</span></label>
-                                        <select className="form-select mb-3 jobtype" name="JobType">
+
+                                    <div className="col-lg-4">
+                                        <label className="form-label">Job Type</label>
+                                        <select className="form-select mb-3 jobtype"
+                                            disabled
+                                            name="JobType"
+                                            onChange={(e) => setJobInformationData({ ...JobInformationData, JobType: e.target.value })}
+                                            value={JobInformationData.JobType}
+                                        >
                                             <option value="">Select Job Type</option>
-                                            <option value={3}>VAT1</option>
+                                            {AllJobData.loading &&
+                                                AllJobData.data.job_type.map((jobtype) => (
+                                                    <option value={jobtype.job_type_id} key={jobtype.job_type_id}>{jobtype.job_type_name}</option>
+                                                ))}
                                         </select>
+
                                     </div>
+
                                     <div className="col-lg-4">
                                         <div className="mb-3">
                                             <label className="form-label">Budgeted Hours</label>
@@ -617,8 +901,6 @@ const JobInformationPage = () => {
                 </div>
 
             </div>
-
-
         </div>
     )
 }

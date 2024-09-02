@@ -8,6 +8,7 @@ import Documents from './Documents';
 import JobTimeline from './JobTimeline'
 import JobInformation from './JobInformation';
 import CommonModal from '../../../Components/ExtraComponents/Modals/Modal';
+import { useLocation } from 'react-router-dom';
 
 const data = [
   { TradingName: 'W120', Code: '012_BlaK_T_1772', CustomerName: 'The Black T', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Admin/Support Tasks', JobType: 'Year End' },
@@ -32,6 +33,8 @@ const columns = [
 
 
 const JobLogs = () => {
+  const location = useLocation();
+  console.log(location.state)
   return (
     <div className='container-fluid'>
 
@@ -143,8 +146,20 @@ const JobLogs = () => {
 
                   </ul>
 
+
                 </>
 
+              </div>
+              <div className="col-md-4">
+
+                <div className="page-title-right">
+                  <div
+                    className="btn btn-info text-white float-end blue-btn"
+                    onClick={() => window.history.back()}
+                  >
+                    <i className="fa fa-arrow-left pe-1" /> Back
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -161,7 +176,7 @@ const JobLogs = () => {
           role="tabpanel"
           aria-labelledby="job-information-tab"
         >
-          <JobInformation />
+          <JobInformation job_id = {location.state.row.job_id} />
         </div>
 
         <div

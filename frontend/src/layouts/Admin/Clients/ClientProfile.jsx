@@ -20,6 +20,8 @@ const ClientList = () => {
   const [clientInformationData, setClientInformationData] = useState([]);
   const [companyDetails, setCompanyDetails] = useState([]);
 
+
+ 
   const GetClientDetails = async () => {
     const req = { action: "getByid", client_id: location.state.row.id };
     const data = { req: req, authToken: token };
@@ -147,7 +149,9 @@ const ClientList = () => {
   ];
 
   const HandleJob = (row) => {
-    navigate("/admin/job/logs", { state: row });
+    navigate("/admin/job/logs", { 
+      state: { details: location.state, row: row },
+    });
   };
 
   function handleEdit(row) {
