@@ -13,12 +13,6 @@ export async function GET_IP(data, token) {
   }
 }
 
-
-
-
-
-
-// Unique action type for GetAccess
 export const GetAccess = createAsyncThunk("accessRolePermissions/getAccess", async (data) => {
   try {
     const { req, authToken } = data;
@@ -31,11 +25,10 @@ export const GetAccess = createAsyncThunk("accessRolePermissions/getAccess", asy
   }
 });
 
-// Unique action type for RoleAccess
 export const RoleAccess = createAsyncThunk("accessRolePermissions/roleAccess", async (data) => {
   try {
     const { req, authToken } = data;
-    console.log("========", req.StaffUserId);
+  
     let IP_Data = await GET_IP();
     const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: req.StaffUserId ?req.StaffUserId :StaffUserId.id };
     const res = await ROLEACCESS(updatedReq, authToken);

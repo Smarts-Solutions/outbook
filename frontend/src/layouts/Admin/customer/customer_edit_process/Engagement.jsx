@@ -175,17 +175,23 @@ const Engagement = () => {
 
     const handleChange1 = (e) => {
         const { name, value } = e.target;
-        if (!/^[0-9+]*$/.test(value)) {
+        console.log(value);
+        console.log(name);
+    
+        // Update the regular expression to allow numbers and a single decimal point
+        if (!/^\d*\.?\d*$/.test(value)) {
             return;
         }
-
-        validate1()
-
+    
+        validate1();
+    
         setFormValues1({ ...formValues1, [name]: value });
     };
+    
 
     const handleChange2 = (e) => {
         const { name, value } = e.target;
+   
         if (value === '' || (/^[0-9]*$/.test(value) && value <= 100)) {
             validate2()
             setFormValues2({ ...formValues2, [name]: value });

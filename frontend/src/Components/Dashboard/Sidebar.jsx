@@ -94,7 +94,7 @@ const Sidebar = () => {
                     </Link>
                   </li>
 
-                  {(updatedShowTab.customer ||
+                  {(updatedShowTab && updatedShowTab.customer ||
                     role == "ADMIN" ||
                     role == "SUPERADMIN") && (
                     <li
@@ -118,7 +118,7 @@ const Sidebar = () => {
                     </li>
                   )}
 
-                  {(updatedShowTab.status ||
+                  {(updatedShowTab && updatedShowTab.status ||
                     role == "ADMIN" ||
                     role == "SUPERADMIN") && (
                     <li
@@ -140,7 +140,7 @@ const Sidebar = () => {
                     </li>
                   )}
 
-                  {(updatedShowTab.staff ||
+                  {(updatedShowTab && updatedShowTab.staff ||
                     role == "ADMIN" ||
                     role == "SUPERADMIN") && (
                     <li
@@ -200,7 +200,7 @@ const Sidebar = () => {
                     </Link>
                   </li>
 
-                  {(updatedShowTab.customer ||
+                  {(updatedShowTab && updatedShowTab.customer ||
                     role == "ADMIN" ||
                     role == "SUPERADMIN") && (
                     <li
