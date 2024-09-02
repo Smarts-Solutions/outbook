@@ -15,12 +15,10 @@ const ClientList = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const [ClientData, setClientData] = useState([]);
-  const [getJobDetails, setGetJobDetails] = useState({
-    loading: false,
-    data: [],
-  });
+  const [getJobDetails, setGetJobDetails] = useState([]);
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
+  
   const [activeTab, setActiveTab] = useState(
     location.state &&
       location.state.route &&
@@ -53,15 +51,9 @@ const ClientList = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setGetJobDetails({
-            loading: true,
-            data: response.data,
-          });
+          setGetJobDetails(response.data);
         } else {
-          setGetJobDetails({
-            loading: true,
-            data: [],
-          });
+          setGetJobDetails([]);
         }
       })
       .catch((error) => {
@@ -362,6 +354,44 @@ const ClientList = () => {
     }
   }, [searchQuery]);
 
+  const tabs1 = [
+    {
+      key: "client",
+      title: "Clients",
+      placeholder: "Search clients...",
+      data: ClientData,
+      columns: columns,
+    },
+    {
+      key: "job",
+      title: "Jobs",
+      placeholder: "Search jobs...",
+      data: getJobDetails,
+      columns: JobColumns,
+    },
+    {
+      key: "documents",
+      title: "Documents",
+      placeholder: null,
+      data: [],
+      columns: columns,
+    },
+    {
+      key: "status",
+      title: "Status",
+      placeholder: "Search Status...",
+      data: [],
+      columns: JobColumns,
+    },
+    {
+      key: "checklist",
+      title: "Checklist",
+      placeholder: "Search...",
+      data: getCheckList1,
+      columns: CheckListColumns,
+    },
+  ];
+
   return (
     <div className="container-fluid">
       <div className="row ">
@@ -431,151 +461,53 @@ const ClientList = () => {
           </div>
         </div>
       </div>
+
       <div className="tab-content" id="pills-tabContent">
-        {activeTab == "client" && (
+        {tabs1.map((tab) => (
           <div
+            key={tab.key}
             className={`tab-pane fade ${
-              activeTab == "client" ? "show active" : ""
+              activeTab == tab.key ? "show active" : ""
             }`}
-            id={"client"}
+            id={tab.key}
             role="tabpanel"
-            aria-labelledby={`client-tab`}
-          >
-            <div className="container-fluid">
-              <div className="report-data mt-4 ">
-                <div className="d-flex justify-content-between align-items-center">
-              
-                  <div className="tab-title">
-                    <h3 className="mt-0">Clients</h3>
-                  </div>
-
-            
-                  <div className="search-input">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Search clients..."
-                    />
-                  </div>
-                </div>
-
-                <div className="datatable-wrapper ">
-                  {ClientData && ClientData && (
-                    <Datatable
-                      columns={columns}
-                      data={ClientData}
-                      filter={false}
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab == "job" && (
-          <div
-            className={`tab-pane fade ${
-              activeTab == "job" ? "show active" : ""
-            }`}
-            id={"job"}
-            role="tabpanel"
-            aria-labelledby={`job-tab`}
-          >
-            {getJobDetails && getJobDetails && (
-              <Datatable
-                columns={JobColumns}
-                data={getJobDetails.data}
-                filter={false}
-              />
-            )}
-          </div>
-        )}
-
-        {activeTab == "documents" && (
-          <div
-            className={`tab-pane fade ${
-              activeTab == "documents" ? "show active" : ""
-            }`}
-            id={"documents"}
-            role="tabpanel"
-            aria-labelledby={`documents-tab`}
-          >
-            <div className="container-fluid">
-              <div className="report-data mt-4 ">
-                <div className="d-flex justify-content-between align-items-center">
-                  <div className="tab-title">
-                    <h3 className="mt-0">Documents</h3>
-                  </div>
-                </div>
-                <div className="datatable-wrapper ">
-                  {ClientData && ClientData && (
-                    <Datatable columns={columns} data={[]} filter={false} />
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab == "status" && (
-          <div
-            className={`tab-pane fade ${
-              activeTab == "status" ? "show active" : ""
-            }`}
-            id={"statuses"}
-            role="tabpanel"
-          >
-            <Statuses />
-            {getJobDetails && getJobDetails && (
-              <Datatable
-                columns={JobColumns}
-                data={getJobDetails.data}
-                filter={false}
-              />
-            )}
-          </div>
-        )}
-
-        {activeTab == "checklist" && (
-          <div
-            className={`tab-pane fade ${
-              activeTab == "checklist" ? "show active" : ""
-            }`}
-            id={"checklist"}
-            role="tabpanel"
+            aria-labelledby={`${tab.key}-tab`}
           >
             <div className="container-fluid">
               <div className="report-data mt-4">
                 <div className="d-flex justify-content-between align-items-center">
                   <div className="tab-title">
-                    <h3 className="mt-0">Checklist</h3>
+                    <h3 className="mt-0">{tab.title}</h3>
                   </div>
-                </div>
 
-                <div className="d-flex justify-content-end mb-3">
-                  <input
-                    type="text"
-                    className="form-control w-25 me-2"
-                    placeholder="Search..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+                  {tab.placeholder && (
+                    <div className="search-input">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder={tab.placeholder}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="datatable-wrapper">
-                  {ClientData && ClientData && (
+                  {tab.data && tab.data.length > 0 ? (
                     <Datatable
-                      columns={CheckListColumns}
-                      data={getCheckList1}
+                      columns={tab.columns}
+                      data={tab.data}
                       filter={false}
                     />
+                  ) : (
+                    <p>No data available.</p>
                   )}
                 </div>
               </div>
             </div>
           </div>
-        )}
+        ))}
       </div>
     </div>
   );
