@@ -192,7 +192,7 @@ const Admin_Route = () => {
             <Route path="/create/checklist" element={<CreateCheckList />} />
             <Route path="/create/statuses" element={<Statuses />} />
             <Route path="/edit/checklist" element={<EditCheckList />} />
-            <Route path="/job/joblogs" element={<JobLogs />} />
+            <Route path="/job/logs" element={<JobLogs />} />
             <Route path="/job/tasktimesheet" element={<TaskTimesheet />} />
             <Route path="/job/missinglogs" element={<MissingLogs />} />
             <Route path="/job/queries" element={<Queries />} />

@@ -147,7 +147,7 @@ const ClientList = () => {
   ];
 
   const HandleJob = (row) => {
-    navigate("/admin/job/jobinformation", { state: row });
+    navigate("/admin/job/logs", { state: row });
   };
 
   function handleEdit(row) {
