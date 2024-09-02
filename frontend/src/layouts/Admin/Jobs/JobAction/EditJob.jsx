@@ -11,8 +11,6 @@ const EditJob = () => {
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
   const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
-
-
   const dispatch = useDispatch();
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
   const [getJobDetails, setGetJobDetails] = useState({ loading: false, data: {} });
@@ -26,8 +24,6 @@ const EditJob = () => {
   const [taskNameError, setTaskNameError] = useState('')
   const [BudgetedHoureError, setBudgetedHourError] = useState('')
   const [taskName, setTaskName] = useState('')
-  const [Budgeted, setBudgeted] = useState('')
-
   const [PreparationTimne, setPreparationTimne] = useState({ hours: "", minutes: "" })
   const [FeedbackIncorporationTime, setFeedbackIncorporationTime] = useState({ hours: "", minutes: "" })
   const [reviewTime, setReviewTime] = useState({ hours: "", minutes: "" })
@@ -37,7 +33,7 @@ const EditJob = () => {
   const [BudgetedMinuteError, setBudgetedMinuteError] = useState('')
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" })
 
- 
+
   const [jobData, setJobData] = useState({
     AccountManager: "",
     Customer: "",
@@ -58,42 +54,48 @@ const EditJob = () => {
     TotalTime: "",
     EngagementModel: "",
     ExpectedDeliveryDate: null,
-    DueOn: "",
-    SubmissionDeadline: "",
-    CustomerDeadlineDate: "",
-    SLADeadlineDate: "",
-    InternalDeadlineDate: "",
-    FilingWithCompaniesHouseRequired: "",
-    CompaniesHouseFilingDate: "",
-    FilingWithHMRCRequired: "",
-    HMRCFilingDate: "",
-    OpeningBalanceAdjustmentRequired: "",
-    OpeningBalanceAdjustmentDate: "",
+    DueOn: null,
+    SubmissionDeadline: null,
+    CustomerDeadlineDate: null,
+    SLADeadlineDate: null,
+    InternalDeadlineDate: null,
+    FilingWithCompaniesHouseRequired: "0",
+    CompaniesHouseFilingDate: null,
+    FilingWithHMRCRequired: "0",
+    HMRCFilingDate: null,
+    OpeningBalanceAdjustmentRequired: "0",
+    OpeningBalanceAdjustmentDate: null,
     NumberOfTransactions: "",
     NumberOfTrialBalanceItems: "",
     Turnover: "",
     NoOfEmployees: "",
-    VATReconciliation: "",
-    Bookkeeping: "",
-    ProcessingType: "",
-    Invoiced: "",
-    Currency: "",
-    InvoiceValue: "",
-    InvoiceDate: "",
+    VATReconciliation: "0",
+    Bookkeeping: "0",
+    ProcessingType: "0",
+    Invoiced: "0",
+    Currency: "0",
+    InvoiceValue: "0",
+    InvoiceDate: null,
     InvoiceHours: "",
     InvoiceRemark: "",
   });
 
 
+  console.log("getJobDetails", getJobDetails)
+
+
 
   const JobDetails = async () => {
     const req = { action: "getByJobId", job_id: location.state.row.job_id }
-
     const data = { req: req, authToken: token }
     await dispatch(Get_All_Job_List(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
+          // const data = response.data?.data ?? {}; 
+
+
+
           setGetJobDetails({
             loading: true,
             data: response.data
@@ -144,8 +146,6 @@ const EditJob = () => {
     getAllChecklist()
   }, [jobData.JobType]);
 
-
-
   const getChecklistData = async () => {
     const req = { action: "getById", checklist_id: getChecklistId && getChecklistId }
     const data = { req: req, authToken: token }
@@ -178,10 +178,7 @@ const EditJob = () => {
 
 
   useEffect(() => {
-    const data = getJobDetails?.data ?? {};
-
-
-    console.log("Data : ", data.total_time)
+    const data = getJobDetails?.data ?? {}; 
     if (Object.keys(data).length > 0) {
       setBudgetedHours({
         hours: data.budgeted_hours?.split(":")[0] ?? "",
@@ -207,6 +204,13 @@ const EditJob = () => {
         minutes: data.total_preparation_time?.split(":")[1] ?? "",
       });
 
+      setInvoiceTime({
+        hours: data.invoice_hours?.split(":")[0] ?? "",
+        minutes: data.invoice_hours?.split(":")[1] ?? "",
+      });
+
+
+
       setJobData(prevState => ({
         ...prevState,
         AccountManager: `${data.outbooks_acount_manager_first_name ?? ""} ${data.outbooks_acount_manager_last_name ?? ""}`,
@@ -218,22 +222,22 @@ const EditJob = () => {
         JobType: data.job_type_id ?? "",
         Reviewer: data.reviewer_id ?? "",
         AllocatedTo: data.allocated_id ?? "",
-        AllocatedOn: data.allocated_on?.split("T")[0] ?? "",
-        DateReceivedOn: data.date_received_on?.split("T")[0] ?? "",
+        AllocatedOn: data.allocated_on?.split("T")[0] ?? null,
+        DateReceivedOn: data.date_received_on?.split("T")[0] ?? null,
         YearEnd: data.year_end ?? "",
         EngagementModel: data.engagement_model ?? "",
-        ExpectedDeliveryDate: data.expected_delivery_date?.split("T")[0] ?? "",
-        DueOn: data.due_on?.split("T")[0] ?? "",
-        SubmissionDeadline: data.submission_deadline?.split("T")[0] ?? "",
-        CustomerDeadlineDate: data.customer_deadline_date?.split("T")[0] ?? "",
-        SLADeadlineDate: data.sla_deadline_date?.split("T")[0] ?? "",
-        InternalDeadlineDate: data.internal_deadline_date?.split("T")[0] ?? "",
+        ExpectedDeliveryDate: data.expected_delivery_date?.split("T")[0] ?? null,
+        DueOn: data.due_on?.split("T")[0] ?? null,
+        SubmissionDeadline: data.submission_deadline?.split("T")[0] ?? null,
+        CustomerDeadlineDate: data.customer_deadline_date?.split("T")[0] ?? null,
+        SLADeadlineDate: data.sla_deadline_date?.split("T")[0] ?? null,
+        InternalDeadlineDate: data.internal_deadline_date?.split("T")[0] ?? null,
         FilingWithCompaniesHouseRequired: data.filing_Companies_required ?? false,
-        CompaniesHouseFilingDate: data.filing_Companies_date?.split("T")[0] ?? "",
+        CompaniesHouseFilingDate: data.filing_Companies_date?.split("T")[0] ?? null,
         FilingWithHMRCRequired: data.filing_hmrc_required ?? false,
-        HMRCFilingDate: data.filing_hmrc_date?.split("T")[0] ?? "",
+        HMRCFilingDate: data.filing_hmrc_date?.split("T")[0] ?? null,
         OpeningBalanceAdjustmentRequired: data.opening_balance_required ?? false,
-        OpeningBalanceAdjustmentDate: data.opening_balance_date?.split("T")[0] ?? "",
+        OpeningBalanceAdjustmentDate: data.opening_balance_date?.split("T")[0] ?? null,
         NumberOfTransactions: data.number_of_transaction ?? 0,
         NumberOfTrialBalanceItems: data.number_of_balance_items ?? 0,
         Turnover: data.turnover ?? 0,
@@ -242,9 +246,9 @@ const EditJob = () => {
         Bookkeeping: data.bookkeeping ?? "",
         ProcessingType: data.processing_type ?? "",
         Invoiced: data.invoiced ?? false,
-        Currency: data.currency ?? "",
+        Currency: data.currency ?? '0',
         InvoiceValue: data.invoice_value ?? 0,
-        InvoiceDate: data.invoice_date ?? "",
+        InvoiceDate: data.invoice_date?.split("T")[0] ?? null,
         InvoiceHours: data.invoice_hours ?? "",
         InvoiceRemark: data.invoice_remark ?? "",
       }));
@@ -337,7 +341,11 @@ const EditJob = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-
+  function formatTime(hours, minutes) {
+    const formattedHours = hours != "" || hours != null ? String(hours).padStart(2, '0') : '00';
+    const formattedMinutes = minutes != "" || minutes != null ? String(minutes).padStart(2, '0') : '00';
+    return `${formattedHours}:${formattedMinutes}`;
+}
 
 
   const handleSubmit = async () => {
@@ -351,17 +359,17 @@ const EditJob = () => {
       customer_contact_details_id: Number(jobData.CustomerAccountManager),
       service_id: Number(jobData.Service),
       job_type_id: Number(jobData.JobType),
-      budgeted_hours: budgetedHours.hours + ":" + budgetedHours.minutes,
+      budgeted_hours:formatTime(budgetedHours.hours, budgetedHours.minutes),
       reviewer: Number(jobData.Reviewer),
       allocated_to: Number(jobData.AllocatedTo),
       allocated_on: jobData.AllocatedOn ? jobData.AllocatedOn : new Date().toISOString().split('T')[0],
       date_received_on: jobData.DateReceivedOn ? jobData.DateReceivedOn : new Date().toISOString().split('T')[0],
       year_end: jobData.YearEnd,
-      total_preparation_time: PreparationTimne.hours + ":" + PreparationTimne.minutes,
-      review_time: reviewTime.hours + ":" + reviewTime.minutes,
-      feedback_incorporation_time: FeedbackIncorporationTime.hours + ":" + FeedbackIncorporationTime.minutes,
+      total_preparation_time:  formatTime(PreparationTimne.hours, PreparationTimne.minutes),
+      review_time:formatTime(reviewTime.hours, reviewTime.minutes),
+      feedback_incorporation_time:  formatTime(FeedbackIncorporationTime.hours, FeedbackIncorporationTime.minutes),
       // total_time:  Math.floor(totalHours / 60) + ":" + totalHours % 60,
-      total_time:  Math.floor(totalHours / 60) + ":" + totalHours % 60,
+      total_time: formatTime(Math.floor(totalHours / 60), totalHours % 60),
 
       engagement_model: jobData.EngagementModel,
       expected_delivery_date: jobData.ExpectedDeliveryDate,
@@ -387,7 +395,7 @@ const EditJob = () => {
       currency: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.Currency,
       invoice_value: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.InvoiceValue,
       invoice_date: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.InvoiceDate,
-      invoice_hours: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.InvoiceHours,
+      invoice_hours: formatTime(invoiceTime.hours, invoiceTime.minutes),
       invoice_remark: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.InvoiceRemark,
       tasks: {
         checklist_id: location.state.details.customer_id.id,
@@ -535,7 +543,7 @@ const EditJob = () => {
 
 
   useEffect(() => {
-    setTotalTime({ ...Totaltime, hours: Math.floor(totalHours / 60) , minutes: totalHours % 60 });
+    setTotalTime({ ...Totaltime, hours: Math.floor(totalHours / 60), minutes: totalHours % 60 });
   }, [totalHours]);
 
 
@@ -974,570 +982,600 @@ const EditJob = () => {
                                       {errors['TotalTime'] && (
                                         <div className="error-text">{errors['TotalTime']}</div>
                                       )} */}
-                                {/* </div>
+                                  {/* </div>
                               </div> */}
 
-                              <div id="invoice_type" className="col-lg-4">
-                                <label htmlFor="firstNameinput" className="form-label">
-                                  Engagement Model
-                                </label>
-                                <select className="form-select mb-3 invoice_type_dropdown"
-                                  name="EngagementModel" onChange={HandleChange} value={jobData.EngagementModel}
-                                >
-                                  <option value="">Please Select Engagement Model</option>
-                                  {Object.keys(filteredData).map(key => (
-                                    <option key={key} value={key}>{key}</option>
-                                  ))}
-                                </select>
-                                {errors['EngagementModel'] && (
-                                  <div style={{ 'color': 'red' }}>{errors['EngagementModel']}</div>
-                                )}
-
-                              </div>
-
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="col-lg-12">
-                        <div className="card card_shadow">
-                          <div className="card-header align-items-center d-flex">
-                            <h4 className="card-title mb-0 flex-grow-1">Deadline</h4>
-                          </div>
-                          <div className="card-body">
-                            <div className="" style={{ marginTop: 15 }}>
-                              <div className="row">
-                                <div className="col-lg-4">
-                                  <label className="form-label">Expected Delivery Date</label>
-                                  <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
-                                    name="ExpectedDeliveryDate" onChange={HandleChange} value={jobData.ExpectedDeliveryDate} />
-                                  {errors['ExpectedDeliveryDate'] && (
-                                    <div style={{ 'color': 'red' }}>{errors['ExpectedDeliveryDate']}</div>
-                                  )}
-
-                                </div>
-                                <div className="col-lg-4">
-                                  <label className="form-label" >Due On</label>
-                                  <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
-                                    name="DueOn" onChange={HandleChange} value={jobData.DueOn} />
-                                  {errors['DueOn'] && (
-                                    <div style={{ 'color': 'red' }}>{errors['DueOn']}</div>
-                                  )}
-                                </div>
-                                <div className="col-lg-4">
-                                  <label className="form-label">Submission Deadline</label>
-                                  <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
-                                    name="SubmissionDeadline" onChange={HandleChange} value={jobData.SubmissionDeadline} />
-                                  {errors['SubmissionDeadline'] && (
-                                    <div style={{ 'color': 'red' }}>{errors['SubmissionDeadline']}</div>
-                                  )}
-                                </div>
-                                <div className="col-lg-4">
-                                  <label className="form-label">Customer Deadline Date</label>
-                                  <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
-                                    name="CustomerDeadlineDate" onChange={HandleChange} value={jobData.CustomerDeadlineDate} />
-                                  {errors['CustomerDeadlineDate'] && (
-                                    <div style={{ 'color': 'red' }}>{errors['CustomerDeadlineDate']}</div>
-                                  )}
-                                </div>
-                                <div className="col-lg-4">
-                                  <label className="form-label">SLA Deadline Date</label>
-                                  <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
-                                    name="SLADeadlineDate" onChange={HandleChange} value={jobData.SLADeadlineDate} />
-                                  {errors['SLADeadlineDate'] && (
-                                    <div style={{ 'color': 'red' }}>{errors['SLADeadlineDate']}</div>
-                                  )}
-                                </div>
-                                <div className="col-lg-4">
-                                  <label className="form-label">Internal Deadline Date</label>
-                                  <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
-                                    name="InternalDeadlineDate" onChange={HandleChange} value={jobData.InternalDeadlineDate} />
-                                  {errors['InternalDeadlineDate'] && (
-                                    <div style={{ 'color': 'red' }}>{errors['InternalDeadlineDate']}</div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="col-lg-12">
-                        <div className="card card_shadow">
-                          <div className="card-header align-items-center d-flex">
-                            <h4 className="card-title mb-0 flex-grow-1">Other Task</h4>
-                          </div>
-                          <div className="card-body">
-                            <div className="" style={{ marginTop: 15 }}>
-                              <div className="row">
-                                <div className="col-lg-4">
-                                  <div className="mb-3">
-                                    <label className="form-label">Filing With Companies House Required?</label>
-                                    <select className="form-select mb-3"
-                                      name="FilingWithCompaniesHouseRequired" onChange={HandleChange} value={jobData.FilingWithCompaniesHouseRequired}>
-                                      <option value="">Please Select Companies House Required</option>
-                                      <option value="1">Yes</option>
-                                      <option value="0">No</option>
-                                    </select>
-                                    {errors['FilingWithCompaniesHouseRequired'] && (
-                                      <div style={{ 'color': 'red' }}>{errors['FilingWithCompaniesHouseRequired']}</div>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="col-lg-4">
-                                  <div className="mb-3">
-                                    <label className="form-label">Companies House Filing Date</label>
-                                    <input type="date" className="form-control"
-                                      name="CompaniesHouseFilingDate" onChange={HandleChange} value={jobData.CompaniesHouseFilingDate} />
-                                    {errors['CompaniesHouseFilingDate'] && (
-                                      <div style={{ 'color': 'red' }}>{errors['CompaniesHouseFilingDate']}</div>
-                                    )}
-
-                                  </div>
-                                </div>
-                                <div className="col-lg-4">
-                                  <label className="form-label" >Filing with HMRC Required?</label>
-                                  <select className="form-select mb-3 invoice_type_dropdown"
-                                    name="FilingWithHMRCRequired" onChange={HandleChange} value={jobData.FilingWithHMRCRequired}>
-                                    <option value="">Please Select HMRC Required</option>
-                                    <option value="1">Yes</option>
-                                    <option value="0">No</option>
-                                  </select>
-                                  {errors['FilingWithHMRCRequired'] && (
-                                    <div style={{ 'color': 'red' }}>{errors['FilingWithHMRCRequired']}</div>
-                                  )}
-                                </div>
-                                <div className="col-lg-4">
-                                  <div className="mb-3">
-                                    <label className="form-label">HMRC Filing Date</label>
-                                    <input type="date" className="form-control"
-                                      name="HMRCFilingDate" onChange={HandleChange} value={jobData.HMRCFilingDate} />
-                                    {errors['HMRCFilingDate'] && (
-                                      <div style={{ 'color': 'red' }}>{errors['HMRCFilingDate']}</div>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="col-lg-4">
-                                  <div className="mb-3">
-                                    <label className="form-label">Opening Balance Adjustment Required</label>
-                                    <select className="form-select mb-3"
-                                      name="OpeningBalanceAdjustmentRequired" onChange={HandleChange} value={jobData.OpeningBalanceAdjustmentRequired}>
-                                      <option value="">Please Select Opening Balance Adjustment</option>
-                                      <option value="1">Yes</option>
-                                      <option value="0">No</option>
-                                    </select>
-                                    {errors['OpeningBalanceAdjustmentRequired'] && (
-                                      <div style={{ 'color': 'red' }}>{errors['OpeningBalanceAdjustmentRequired']}</div>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="col-lg-4">
-                                  <div className="mb-3">
-                                    <label className="form-label">Opening Balance Adjustment Date</label>
-                                    <input type="date" className="form-control"
-                                      name="OpeningBalanceAdjustmentDate" onChange={HandleChange} value={jobData.OpeningBalanceAdjustmentDate} />
-                                    {errors['OpeningBalanceAdjustmentDate'] && (
-                                      <div style={{ 'color': 'red' }}>{errors['OpeningBalanceAdjustmentDate']}</div>
-                                    )}
-
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="card card_shadow">
-                          <div className="card-header align-items-center d-flex">
-                            <h4 className="card-title mb-0 flex-grow-1">  Other Data </h4>
-                          </div>
-                          <div className="card-body">
-                            <div className="" style={{ marginTop: 15 }}>
-                              <div className="row">
-                                <div className="col-lg-4">
-                                  <label className="form-label" >Number of Transactions </label>
-                                  <input type="text" className="form-control" placeholder="Number of Transactions"
-                                    name="NumberOfTransactions" onChange={HandleChange} value={jobData.NumberOfTransactions}
-                                  />
-                                  {errors['NumberOfTransactions'] && (
-                                    <div style={{ 'color': 'red' }}>{errors['NumberOfTransactions']}</div>
-                                  )}
-                                </div>
-                                <div className="col-lg-4">
-                                  <label className="form-label" >Number of Trial Balance Items</label>
-                                  <input type="text" className="form-control" placeholder="Number of Trial Balance Items"
-                                    name="NumberOfTrialBalanceItems" onChange={HandleChange} value={jobData.NumberOfTrialBalanceItems}
-                                  />
-                                  {errors['NumberOfTrialBalanceItems'] && (
-                                    <div style={{ 'color': 'red' }}>{errors['NumberOfTrialBalanceItems']}</div>
-                                  )}
-                                </div>
-                                <div className="col-lg-4">
-                                  <label className="form-label" >Turnover</label>
-                                  <input type="text" className="form-control" placeholder="Turnover"
-                                    name="Turnover" onChange={HandleChange} value={jobData.Turnover}
-                                  />
-                                  {errors['Turnover'] && (
-                                    <div style={{ 'color': 'red' }}>{errors['Turnover']}</div>
-                                  )}
-                                </div>
-                                <div className="col-lg-4">
-                                  <label className="form-label"  >  No.Of Employees  </label>
-                                  <input type="text" className="form-control" placeholder="No.Of Employees"
-                                    name="NoOfEmployees" onChange={HandleChange} value={jobData.NoOfEmployees}
-                                  />
-                                  {errors['NoOfEmployees'] && (
-                                    <div style={{ 'color': 'red' }}>{errors['NoOfEmployees']}</div>
-                                  )}
-
-                                </div>
-                                <div className="col-lg-4">
-                                  <label className="form-label" >VAT Reconciliation</label>
-                                  <select className="form-select mb-3 invoice_type_dropdown"
-                                    name="VATReconciliation" onChange={HandleChange} value={jobData.VATReconciliation}>
-
-                                    <option value="">Please Select VAT Reconciliation</option>
-                                    <option value="1">Yes</option>
-                                    <option value="0">No</option>
-                                  </select>
-                                  {errors['VATReconciliation'] && (
-                                    <div style={{ 'color': 'red' }}>{errors['VATReconciliation']}</div>
-                                  )}
-                                </div>
-                                <div className="col-lg-4">
-                                  <label className="form-label"  >Bookkeeping?</label>
-                                  <select className="form-select mb-3 invoice_type_dropdown"
-                                    name="Bookkeeping" onChange={HandleChange} value={jobData.Bookkeeping}
-                                  >
-                                    <option value="">Please Select Bookkeeping</option>
-                                    <option value="1">Yes</option>
-                                    <option value="0">No</option>
-                                  </select>
-                                  {errors['Bookkeeping'] && (
-                                    <div style={{ 'color': 'red' }}>{errors['Bookkeeping']}</div>
-                                  )}
-                                </div>
-                                <div className="col-lg-4">
-                                  <label className="form-label" >Processing Type</label>
-                                  <select className="form-select mb-3 invoice_type_dropdown"
-                                    name="ProcessingType" onChange={HandleChange} value={jobData.ProcessingType}
-                                  >
-                                    <option value="1"> Manual </option>
-                                    <option value="2">Software</option>
-                                  </select>
-                                  {errors['ProcessingType'] && (
-                                    <div style={{ 'color': 'red' }}>{errors['ProcessingType']}</div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {jobData.EngagementModel != "fte_dedicated_staffing" && <div className="col-lg-12">
-                        <div className="col-lg-12">
-                          <div className="card card_shadow">
-                            <div className="card-header align-items-center d-flex">
-                              <h4 className="card-title mb-0 flex-grow-1">Invoice</h4>
-                            </div>
-                            <div className="card-body">
-                              <div style={{ marginTop: 15 }}>
-                                <div className="row">
-                                  <div className="col-lg-4">
-                                    <label className="form-label">Invoiced</label>
-                                    <select className="invoiced_dropdown form-select mb-3"
-                                      name="Invoiced" onChange={HandleChange} value={jobData.Invoiced}
+                                  <div id="invoice_type" className="col-lg-4">
+                                    <label htmlFor="firstNameinput" className="form-label">
+                                      Engagement Model
+                                    </label>
+                                    <select className="form-select mb-3 invoice_type_dropdown"
+                                      name="EngagementModel" onChange={HandleChange} value={jobData.EngagementModel}
                                     >
-                                      <option value="">Please Select Invoiced</option>
-                                      <option value="1">Yes</option>
-                                      <option value="0">No</option>
+                                      <option value="">Please Select Engagement Model</option>
+                                      {Object.keys(filteredData).map(key => (
+                                        <option key={key} value={key}>{key}</option>
+                                      ))}
                                     </select>
-                                    {errors['Invoiced'] && (
-                                      <div style={{ 'color': 'red' }}>{errors['Invoiced']}</div>
+                                    {errors['EngagementModel'] && (
+                                      <div style={{ 'color': 'red' }}>{errors['EngagementModel']}</div>
                                     )}
 
                                   </div>
-                                  <div className="col-lg-4">
-                                    <label className="form-label" >Currency</label>
-                                    <select className="invoiced_dropdown form-select mb-3"
-                                      name="Currency" onChange={HandleChange} value={jobData.Currency}
-                                    >
-                                      <option value="">Please Select Currency</option>
-                                      {
-                                        AllJobData.loading &&
-                                        AllJobData.data.currency.map((currency) => (
-                                          <option value={currency.currency_id} key={currency.currency_id}>{currency.currency_name}</option>
-                                        ))
-                                      }
-                                    </select>
-                                    {errors['Currency'] && (
-                                      <div style={{ 'color': 'red' }}>{errors['Currency']}</div>
-                                    )}
-                                  </div>
-                                  <div className="col-lg-4">
-                                    <label className="form-label" > Invoice Value </label>
-                                    <input type="text" className="form-control" placeholder="Invoice Value"
-                                      name="InvoiceValue" onChange={HandleChange} value={jobData.InvoiceValue}
-                                    />
-                                    {errors['InvoiceValue'] && (
-                                      <div style={{ 'color': 'red' }}>{errors['InvoiceValue']}</div>
-                                    )}
-                                  </div>
-                                  <div className="col-lg-4">
-                                    <label className="form-label" > Invoice Date </label>
-                                    <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
-                                      name="InvoiceDate" onChange={HandleChange} value={jobData.InvoiceDate}
-                                      max={new Date().toISOString().split("T")[0]}
-                                    />
-                                    {errors['InvoiceDate'] && (
-                                      <div style={{ 'color': 'red' }}>{errors['InvoiceDate']}</div>
-                                    )}
-                                  </div>
-                                  <div className="col-lg-4">
-                                    <label className="form-label" >Invoice Hours </label>
-                                    <div className="input-group">
-                                      <input type="text" className="form-control"
-                                        name="InvoiceHours" onChange={HandleChange} value={jobData.InvoiceHours}
-                                      />
-                                      <span className="input-group-text" >Hours</span>
-                                      {errors['InvoiceHours'] && (
-                                        <div style={{ 'color': 'red' }}>{errors['InvoiceHours']}</div>
+
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="col-lg-12">
+                            <div className="card card_shadow">
+                              <div className="card-header align-items-center d-flex">
+                                <h4 className="card-title mb-0 flex-grow-1">Deadline</h4>
+                              </div>
+                              <div className="card-body">
+                                <div className="" style={{ marginTop: 15 }}>
+                                  <div className="row">
+                                    <div className="col-lg-4">
+                                      <label className="form-label">Expected Delivery Date</label>
+                                      <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
+                                        name="ExpectedDeliveryDate" onChange={HandleChange} value={jobData.ExpectedDeliveryDate} />
+                                      {errors['ExpectedDeliveryDate'] && (
+                                        <div style={{ 'color': 'red' }}>{errors['ExpectedDeliveryDate']}</div>
+                                      )}
+
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <label className="form-label" >Due On</label>
+                                      <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
+                                        name="DueOn" onChange={HandleChange} value={jobData.DueOn} />
+                                      {errors['DueOn'] && (
+                                        <div style={{ 'color': 'red' }}>{errors['DueOn']}</div>
+                                      )}
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <label className="form-label">Submission Deadline</label>
+                                      <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
+                                        name="SubmissionDeadline" onChange={HandleChange} value={jobData.SubmissionDeadline} />
+                                      {errors['SubmissionDeadline'] && (
+                                        <div style={{ 'color': 'red' }}>{errors['SubmissionDeadline']}</div>
+                                      )}
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <label className="form-label">Customer Deadline Date</label>
+                                      <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
+                                        name="CustomerDeadlineDate" onChange={HandleChange} value={jobData.CustomerDeadlineDate} />
+                                      {errors['CustomerDeadlineDate'] && (
+                                        <div style={{ 'color': 'red' }}>{errors['CustomerDeadlineDate']}</div>
+                                      )}
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <label className="form-label">SLA Deadline Date</label>
+                                      <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
+                                        name="SLADeadlineDate" onChange={HandleChange} value={jobData.SLADeadlineDate} />
+                                      {errors['SLADeadlineDate'] && (
+                                        <div style={{ 'color': 'red' }}>{errors['SLADeadlineDate']}</div>
+                                      )}
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <label className="form-label">Internal Deadline Date</label>
+                                      <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
+                                        name="InternalDeadlineDate" onChange={HandleChange} value={jobData.InternalDeadlineDate} />
+                                      {errors['InternalDeadlineDate'] && (
+                                        <div style={{ 'color': 'red' }}>{errors['InternalDeadlineDate']}</div>
                                       )}
                                     </div>
                                   </div>
-                                  <div id="invoicedremark" className="col-lg-3">
-                                    <label className="form-label" >Invoice Remark</label>
-                                    <input type="text" className="form-control" placeholder="Invoice Remark"
-                                      name="InvoiceRemark" onChange={HandleChange} value={jobData.InvoiceRemark}
-                                      maxLength={500}
-                                    />
-                                    {errors['InvoiceRemark'] && (
-                                      <div style={{ 'color': 'red' }}>{errors['InvoiceRemark']}</div>
-                                    )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="col-lg-12">
+                            <div className="card card_shadow">
+                              <div className="card-header align-items-center d-flex">
+                                <h4 className="card-title mb-0 flex-grow-1">Other Task</h4>
+                              </div>
+                              <div className="card-body">
+                                <div className="" style={{ marginTop: 15 }}>
+                                  <div className="row">
+                                    <div className="col-lg-4">
+                                      <div className="mb-3">
+                                        <label className="form-label">Filing With Companies House Required?</label>
+                                        <select className="form-select mb-3"
+                                          name="FilingWithCompaniesHouseRequired" onChange={HandleChange} value={jobData.FilingWithCompaniesHouseRequired}>
+                                          <option value="">Please Select Companies House Required</option>
+                                          <option value="1">Yes</option>
+                                          <option value="0">No</option>
+                                        </select>
+                                        {errors['FilingWithCompaniesHouseRequired'] && (
+                                          <div style={{ 'color': 'red' }}>{errors['FilingWithCompaniesHouseRequired']}</div>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <div className="mb-3">
+                                        <label className="form-label">Companies House Filing Date</label>
+                                        <input type="date" className="form-control"
+                                          name="CompaniesHouseFilingDate" onChange={HandleChange} value={jobData.CompaniesHouseFilingDate} />
+                                        {errors['CompaniesHouseFilingDate'] && (
+                                          <div style={{ 'color': 'red' }}>{errors['CompaniesHouseFilingDate']}</div>
+                                        )}
+
+                                      </div>
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <label className="form-label" >Filing with HMRC Required?</label>
+                                      <select className="form-select mb-3 invoice_type_dropdown"
+                                        name="FilingWithHMRCRequired" onChange={HandleChange} value={jobData.FilingWithHMRCRequired}>
+                                        <option value="">Please Select HMRC Required</option>
+                                        <option value="1">Yes</option>
+                                        <option value="0">No</option>
+                                      </select>
+                                      {errors['FilingWithHMRCRequired'] && (
+                                        <div style={{ 'color': 'red' }}>{errors['FilingWithHMRCRequired']}</div>
+                                      )}
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <div className="mb-3">
+                                        <label className="form-label">HMRC Filing Date</label>
+                                        <input type="date" className="form-control"
+                                          name="HMRCFilingDate" onChange={HandleChange} value={jobData.HMRCFilingDate} />
+                                        {errors['HMRCFilingDate'] && (
+                                          <div style={{ 'color': 'red' }}>{errors['HMRCFilingDate']}</div>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <div className="mb-3">
+                                        <label className="form-label">Opening Balance Adjustment Required</label>
+                                        <select className="form-select mb-3"
+                                          name="OpeningBalanceAdjustmentRequired" onChange={HandleChange} value={jobData.OpeningBalanceAdjustmentRequired}>
+                                          <option value="">Please Select Opening Balance Adjustment</option>
+                                          <option value="1">Yes</option>
+                                          <option value="0">No</option>
+                                        </select>
+                                        {errors['OpeningBalanceAdjustmentRequired'] && (
+                                          <div style={{ 'color': 'red' }}>{errors['OpeningBalanceAdjustmentRequired']}</div>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <div className="mb-3">
+                                        <label className="form-label">Opening Balance Adjustment Date</label>
+                                        <input type="date" className="form-control"
+                                          name="OpeningBalanceAdjustmentDate" onChange={HandleChange} value={jobData.OpeningBalanceAdjustmentDate} />
+                                        {errors['OpeningBalanceAdjustmentDate'] && (
+                                          <div style={{ 'color': 'red' }}>{errors['OpeningBalanceAdjustmentDate']}</div>
+                                        )}
+
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="card card_shadow">
+                              <div className="card-header align-items-center d-flex">
+                                <h4 className="card-title mb-0 flex-grow-1">  Other Data </h4>
+                              </div>
+                              <div className="card-body">
+                                <div className="" style={{ marginTop: 15 }}>
+                                  <div className="row">
+                                    <div className="col-lg-4">
+                                      <label className="form-label" >Number of Transactions </label>
+                                      <input type="text" className="form-control" placeholder="Number of Transactions"
+                                        name="NumberOfTransactions" onChange={HandleChange} value={jobData.NumberOfTransactions}
+                                      />
+                                      {errors['NumberOfTransactions'] && (
+                                        <div style={{ 'color': 'red' }}>{errors['NumberOfTransactions']}</div>
+                                      )}
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <label className="form-label" >Number of Trial Balance Items</label>
+                                      <input type="text" className="form-control" placeholder="Number of Trial Balance Items"
+                                        name="NumberOfTrialBalanceItems" onChange={HandleChange} value={jobData.NumberOfTrialBalanceItems}
+                                      />
+                                      {errors['NumberOfTrialBalanceItems'] && (
+                                        <div style={{ 'color': 'red' }}>{errors['NumberOfTrialBalanceItems']}</div>
+                                      )}
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <label className="form-label" >Turnover</label>
+                                      <input type="text" className="form-control" placeholder="Turnover"
+                                        name="Turnover" onChange={HandleChange} value={jobData.Turnover}
+                                      />
+                                      {errors['Turnover'] && (
+                                        <div style={{ 'color': 'red' }}>{errors['Turnover']}</div>
+                                      )}
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <label className="form-label"  >  No.Of Employees  </label>
+                                      <input type="text" className="form-control" placeholder="No.Of Employees"
+                                        name="NoOfEmployees" onChange={HandleChange} value={jobData.NoOfEmployees}
+                                      />
+                                      {errors['NoOfEmployees'] && (
+                                        <div style={{ 'color': 'red' }}>{errors['NoOfEmployees']}</div>
+                                      )}
+
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <label className="form-label" >VAT Reconciliation</label>
+                                      <select className="form-select mb-3 invoice_type_dropdown"
+                                        name="VATReconciliation" onChange={HandleChange} value={jobData.VATReconciliation}>
+
+                                        <option value="">Please Select VAT Reconciliation</option>
+                                        <option value="1">Yes</option>
+                                        <option value="0">No</option>
+                                      </select>
+                                      {errors['VATReconciliation'] && (
+                                        <div style={{ 'color': 'red' }}>{errors['VATReconciliation']}</div>
+                                      )}
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <label className="form-label"  >Bookkeeping?</label>
+                                      <select className="form-select mb-3 invoice_type_dropdown"
+                                        name="Bookkeeping" onChange={HandleChange} value={jobData.Bookkeeping}
+                                      >
+                                        <option value="">Please Select Bookkeeping</option>
+                                        <option value="1">Yes</option>
+                                        <option value="0">No</option>
+                                      </select>
+                                      {errors['Bookkeeping'] && (
+                                        <div style={{ 'color': 'red' }}>{errors['Bookkeeping']}</div>
+                                      )}
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <label className="form-label" >Processing Type</label>
+                                      <select className="form-select mb-3 invoice_type_dropdown"
+                                        name="ProcessingType" onChange={HandleChange} value={jobData.ProcessingType}
+                                      >
+                                        <option value="1"> Manual </option>
+                                        <option value="2">Software</option>
+                                      </select>
+                                      {errors['ProcessingType'] && (
+                                        <div style={{ 'color': 'red' }}>{errors['ProcessingType']}</div>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
                           </div>
+
+                          {jobData.EngagementModel != "fte_dedicated_staffing" && <div className="col-lg-12">
+                            <div className="col-lg-12">
+                              <div className="card card_shadow">
+                                <div className="card-header align-items-center d-flex">
+                                  <h4 className="card-title mb-0 flex-grow-1">Invoice</h4>
+                                </div>
+                                <div className="card-body">
+                                  <div style={{ marginTop: 15 }}>
+                                    <div className="row">
+                                      <div className="col-lg-4">
+                                        <label className="form-label">Invoiced</label>
+                                        <select className="invoiced_dropdown form-select mb-3"
+                                          name="Invoiced" onChange={HandleChange} value={jobData.Invoiced}
+                                        >
+                                          <option value="">Please Select Invoiced</option>
+                                          <option value="1">Yes</option>
+                                          <option value="0">No</option>
+                                        </select>
+                                        {errors['Invoiced'] && (
+                                          <div style={{ 'color': 'red' }}>{errors['Invoiced']}</div>
+                                        )}
+
+                                      </div>
+                                      <div className="col-lg-4">
+                                        <label className="form-label" >Currency</label>
+                                        <select className="invoiced_dropdown form-select mb-3"
+                                          name="Currency" onChange={HandleChange} value={jobData.Currency}
+                                        >
+                                          <option value="">Please Select Currency</option>
+                                          {
+                                            AllJobData.loading &&
+                                            AllJobData.data.currency.map((currency) => (
+                                              <option value={currency.currency_id} key={currency.currency_id}>{currency.currency_name}</option>
+                                            ))
+                                          }
+                                        </select>
+                                        {errors['Currency'] && (
+                                          <div style={{ 'color': 'red' }}>{errors['Currency']}</div>
+                                        )}
+                                      </div>
+                                      <div className="col-lg-4">
+                                        <label className="form-label" > Invoice Value </label>
+                                        <input type="text" className="form-control" placeholder="Invoice Value"
+                                          name="InvoiceValue" onChange={HandleChange} value={jobData.InvoiceValue}
+                                        />
+                                        {errors['InvoiceValue'] && (
+                                          <div style={{ 'color': 'red' }}>{errors['InvoiceValue']}</div>
+                                        )}
+                                      </div>
+                                      <div className="col-lg-4">
+                                        <label className="form-label" > Invoice Date </label>
+                                        <input type="date" className="form-control mb-3" placeholder="DD-MM-YYYY"
+                                          name="InvoiceDate" onChange={HandleChange} value={jobData.InvoiceDate}
+                                          max={new Date().toISOString().split("T")[0]}
+                                        />
+                                        {errors['InvoiceDate'] && (
+                                          <div style={{ 'color': 'red' }}>{errors['InvoiceDate']}</div>
+                                        )}
+                                      </div>
+
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <label className="form-label" >Invoice </label>
+                                          <div className="input-group">
+                                            <input
+                                              type="text"
+                                              className="form-control"
+                                              placeholder="Hours"
+                                              onChange={(e) => {
+                                                const value = e.target.value;
+                                                if (value === '' || Number(value) >= 0) {
+                                                  setInvoiceTime({ ...invoiceTime, hours: value });
+                                                }
+                                              }}
+                                              value={invoiceTime.hours}
+                                            />
+                                            <input
+                                              type="text"
+                                              className="form-control"
+                                              placeholder="Minutes"
+                                              onChange={(e) => {
+                                                const value = e.target.value;
+                                                if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                                                  setInvoiceTime({
+                                                    ...invoiceTime,
+                                                    minutes: value
+                                                  });
+                                                }
+                                              }}
+                                              value={invoiceTime.minutes}
+                                            />
+                                          </div>
+
+                                        </div>
+                                      </div>
+
+                                      <div id="invoicedremark" className="col-lg-4">
+                                        <label className="form-label" >Invoice Remark</label>
+                                        <textarea
+                                          className="form-control"
+                                          placeholder="Invoice Remark"
+                                          name="InvoiceRemark"
+                                          onChange={HandleChange}
+                                          value={jobData.InvoiceRemark}
+                                          maxLength={500}
+                                        />
+
+                                        {errors['InvoiceRemark'] && (
+                                          <div className="error-text">{errors['InvoiceRemark']}</div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>}
                         </div>
-                      </div>}
+                      </div>
+                    </div>
+
+                    {jobModalStatus && (
+                      <Modal show={jobModalStatus} onHide={(e) => { jobModalSetStatus(false); HandleReset1() }} centered size="lg">
+                        <Modal.Header closeButton>
+                          <Modal.Title>Tasks</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                          <div className="tablelist-form">
+                            <div className="modal-body">
+                              <div className="row">
+                                <div className="col-md-12" style={{ display: "flex" }}>
+                                  <div className="col-lg-6">
+                                    <select
+                                      id="search-select"
+                                      className="form-select mb-3"
+                                      aria-label="Default select example"
+                                      style={{ color: "#8a8c8e !important" }}
+                                      onChange={(e) => { setChecklistId(e.target.value) }}
+                                      value={getChecklistId}
+                                    >
+                                      <option value="">Select Checklist Name</option>
+                                      {
+                                        AllChecklist && AllChecklist.data.map((checklist) => (
+                                          <option value={checklist.checklists_id} key={checklist.checklists_id}>{checklist.check_list_name}</option>
+                                        ))
+                                      }
+                                    </select>
+                                  </div>
+                                  <div className="col-lg-6">
+                                    <div className="col-sm-auto" style={{ marginLeft: 250 }}>
+                                      <button className="btn btn-info text-white float-end blue-btn" onClick={() => setShowAddJobModal(true)}>Add Task</button>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="col-lg-6 column" id="column1">
+                                  <div className="card">
+                                    <div className="card-body">
+                                      <div id="customerList">
+                                        <div className="table-responsive table-card mt-3 mb-1">
+                                          <table
+                                            className="table align-middle table-nowrap"
+                                            id="customerTable"
+                                          >
+                                            <thead className="table-light">
+                                              <tr>
+                                                <th>Task Name</th>
+                                                <th>Budgeted Hour</th>
+                                                <th>Action</th>
+                                              </tr>
+                                            </thead>
+                                            <tbody className="list form-check-all">
+                                              {
+                                                AllChecklistData.data && AllChecklistData.data.map((checklist) => (
+                                                  <tr className="">
+                                                    <td>{checklist.task_name} </td>
+
+                                                    <td> {checklist.budgeted_hour.split(":")[0]}h {checklist.budgeted_hour.split(":")[1]}m </td>
+                                                    <td>
+
+
+                                                      <div className="add" >
+                                                        {AddTaskArr && AddTaskArr.find((task) => task.task_id == checklist.task_id) ? "" :
+                                                          <button className=" btn-info text-white blue-btn" onClick={() => AddTask(checklist.task_id)}  >+</button>
+
+                                                        }
+
+                                                      </div>
+                                                    </td>
+                                                  </tr>
+                                                ))
+                                              }
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="col-lg-6 " id="column2">
+                                  <div className="card">
+                                    <div className="card-body">
+                                      <div id="customerList">
+                                        <div className="table-responsive table-card mt-3 mb-1">
+                                          <table
+                                            className="table align-middle table-nowrap"
+                                            id="customerTable"
+                                          >
+                                            <thead className="table-light">
+                                              <tr>
+                                                <th>Task Name</th>
+                                                <th>Budgeted Hour</th>
+                                                <th>Action</th>
+                                              </tr>
+                                            </thead>
+                                            <tbody className="list form-check-all">
+                                              {
+                                                AddTaskArr && AddTaskArr.map((checklist) => (
+
+                                                  <tr className="">
+
+                                                    <td>{checklist.task_name} </td>
+                                                    <td>
+                                                      {checklist.budgeted_hour.split(":")[0]}h {checklist.budgeted_hour.split(":")[1]}m
+                                                    </td>
+
+                                                    {/* <td>{checklist.budgeted_hour} hr</td> */}
+                                                    <td>
+                                                      <div className="add">
+                                                        <button className="delete-icon"><i className="ti-trash" onClick={() => RemoveTask(checklist.task_id)}></i></button>
+                                                      </div>
+                                                    </td>
+                                                  </tr>
+                                                ))
+                                              }
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </Modal.Body>
+                        <Modal.Footer>
+                          <Button variant="secondary" onClick={() => {
+                            jobModalSetStatus(false)
+                            HandleReset1()
+                          }}
+                          >Close</Button>
+                          <Button variant="btn btn-info text-white float-end blue-btn" onClick={handleAddCheckList}>Submit</Button>
+                        </Modal.Footer>
+                      </Modal>
+                    )}
+
+                    {showAddJobModal && (
+                      <Modal show={showAddJobModal} onHide={() => {
+                        setShowAddJobModal(false);
+                        HandleReset();
+                      }}
+                        centered size="sm">
+                        <Modal.Header closeButton>
+                          <Modal.Title>Add Task</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                          <div className='row'>
+                            <div className='col-lg-12'>
+                              <label className="form-label">Task Name</label>
+                              <div>
+                                <input
+                                  type="text"
+                                  placeholder="Enter Task name"
+                                  name='taskname'
+                                  className='p-1 w-100 mb-2 rounded'
+                                  onChange={handleChange1}
+                                  value={taskName}
+                                />
+                                {taskNameError && <div className="error-text text-danger">{taskNameError}</div>}
+                              </div>
+                            </div>
+                            <div className='col-lg-12 mt-2'>
+
+                              <div className="mb-3">
+                                <label className="form-label" >Budgeted Hours</label>
+                                <div className="input-group">
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Hours"
+                                    name='budgeted_hour'
+                                    onChange={(e) => {
+                                      handleChange1(e);
+
+                                    }}
+                                    value={BudgetedHoursAddTask.hours}
+                                  />
+
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Minutes"
+                                    name='budgeted_minute'
+                                    onChange={(e) => { handleChange1(e); }}
+                                    value={BudgetedHoursAddTask.minutes}
+                                  />
+
+                                </div>
+                                {
+                                  BudgetedHoureError ? <div className="error-text text-danger">{BudgetedHoureError}</div> :
+                                    BudgetedMinuteError ? <div className="error-text text-danger">{BudgetedMinuteError}</div> : ""
+                                }
+                              </div>
+                            </div>
+                          </div>
+
+                        </Modal.Body>
+                        <Modal.Footer>
+                          <Button variant="secondary" onClick={() => { setShowAddJobModal(false); HandleReset(); }}>Close</Button>
+                          <Button variant="btn btn-info text-white float-end blue-btn" onClick={handleAddTask}>Add</Button>
+                        </Modal.Footer>
+                      </Modal>
+                    )}
+                    <div className="hstack gap-2 justify-content-end">
+                      <button type="button" className="btn btn-light" onClick={handleClose}>Cancel</button>
+                      <button type="button" className="btn btn-info text-white float-end blue-btn" onClick={handleSubmit}>Update</button>
                     </div>
                   </div>
-                </div>
-
-                {jobModalStatus && (
-                  <Modal show={jobModalStatus} onHide={(e) => { jobModalSetStatus(false); HandleReset1() }} centered size="lg">
-                    <Modal.Header closeButton>
-                      <Modal.Title>Tasks</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                      <div className="tablelist-form">
-                        <div className="modal-body">
-                          <div className="row">
-                            <div className="col-md-12" style={{ display: "flex" }}>
-                              <div className="col-lg-6">
-                                <select
-                                  id="search-select"
-                                  className="form-select mb-3"
-                                  aria-label="Default select example"
-                                  style={{ color: "#8a8c8e !important" }}
-                                  onChange={(e) => { setChecklistId(e.target.value) }}
-                                  value={getChecklistId}
-                                >
-                                  <option value="">Select Checklist Name</option>
-                                  {
-                                    AllChecklist && AllChecklist.data.map((checklist) => (
-                                      <option value={checklist.checklists_id} key={checklist.checklists_id}>{checklist.check_list_name}</option>
-                                    ))
-                                  }
-                                </select>
-                              </div>
-                              <div className="col-lg-6">
-                                <div className="col-sm-auto" style={{ marginLeft: 250 }}>
-                                  <button className="btn btn-info text-white float-end blue-btn" onClick={() => setShowAddJobModal(true)}>Add Task</button>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="col-lg-6 column" id="column1">
-                              <div className="card">
-                                <div className="card-body">
-                                  <div id="customerList">
-                                    <div className="table-responsive table-card mt-3 mb-1">
-                                      <table
-                                        className="table align-middle table-nowrap"
-                                        id="customerTable"
-                                      >
-                                        <thead className="table-light">
-                                          <tr>
-                                            <th>Task Name</th>
-                                            <th>Budgeted Hour</th>
-                                            <th>Action</th>
-                                          </tr>
-                                        </thead>
-                                        <tbody className="list form-check-all">
-                                          {
-                                            AllChecklistData.data && AllChecklistData.data.map((checklist) => (
-                                              <tr className="">
-                                                <td>{checklist.task_name} </td>
-
-                                                <td> {checklist.budgeted_hour.split(":")[0]}h {checklist.budgeted_hour.split(":")[1]}m </td>
-                                                <td>
-
-
-                                                  <div className="add" >
-                                                    {AddTaskArr && AddTaskArr.find((task) => task.task_id == checklist.task_id) ? "" :
-                                                      <button className=" btn-info text-white blue-btn" onClick={() => AddTask(checklist.task_id)}  >+</button>
-
-                                                    }
-
-                                                  </div>
-                                                </td>
-                                              </tr>
-                                            ))
-                                          }
-                                        </tbody>
-                                      </table>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="col-lg-6 " id="column2">
-                              <div className="card">
-                                <div className="card-body">
-                                  <div id="customerList">
-                                    <div className="table-responsive table-card mt-3 mb-1">
-                                      <table
-                                        className="table align-middle table-nowrap"
-                                        id="customerTable"
-                                      >
-                                        <thead className="table-light">
-                                          <tr>
-                                            <th>Task Name</th>
-                                            <th>Budgeted Hour</th>
-                                            <th>Action</th>
-                                          </tr>
-                                        </thead>
-                                        <tbody className="list form-check-all">
-                                          {
-                                            AddTaskArr && AddTaskArr.map((checklist) => (
-
-                                              <tr className="">
-
-                                                <td>{checklist.task_name} </td>
-                                                <td>
-                                                  {checklist.budgeted_hour.split(":")[0]}h {checklist.budgeted_hour.split(":")[1]}m
-                                                </td>
-
-                                                {/* <td>{checklist.budgeted_hour} hr</td> */}
-                                                <td>
-                                                  <div className="add">
-                                                    <button className="delete-icon"><i className="ti-trash" onClick={() => RemoveTask(checklist.task_id)}></i></button>
-                                                  </div>
-                                                </td>
-                                              </tr>
-                                            ))
-                                          }
-                                        </tbody>
-                                      </table>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </Modal.Body>
-                    <Modal.Footer>
-                      <Button variant="secondary" onClick={() => {
-                        jobModalSetStatus(false)
-                        HandleReset1()
-                      }}
-                      >Close</Button>
-                      <Button variant="btn btn-info text-white float-end blue-btn" onClick={handleAddCheckList}>Submit</Button>
-                    </Modal.Footer>
-                  </Modal>
-                )}
-
-                {showAddJobModal && (
-                  <Modal show={showAddJobModal} onHide={() => {
-                    setShowAddJobModal(false);
-                    HandleReset();
-                  }}
-                    centered size="sm">
-                    <Modal.Header closeButton>
-                      <Modal.Title>Add Task</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                      <div className='row'>
-                        <div className='col-lg-12'>
-                          <label className="form-label">Task Name</label>
-                          <div>
-                            <input
-                              type="text"
-                              placeholder="Enter Task name"
-                              name='taskname'
-                              className='p-1 w-100 mb-2 rounded'
-                              onChange={handleChange1}
-                              value={taskName}
-                            />
-                            {taskNameError && <div className="error-text text-danger">{taskNameError}</div>}
-                          </div>
-                        </div>
-                        <div className='col-lg-12 mt-2'>
-
-                          <div className="mb-3">
-                            <label className="form-label" >Budgeted Hours</label>
-                            <div className="input-group">
-                              <input
-                                type="text"
-                                className="form-control"
-                                placeholder="Hours"
-                                name='budgeted_hour'
-                                onChange={(e) => {
-                                  handleChange1(e);
-
-                                }}
-                                value={BudgetedHoursAddTask.hours}
-                              />
-
-                              <input
-                                type="text"
-                                className="form-control"
-                                placeholder="Minutes"
-                                name='budgeted_minute'
-                                onChange={(e) => { handleChange1(e); }}
-                                value={BudgetedHoursAddTask.minutes}
-                              />
-
-                            </div>
-                            {
-                              BudgetedHoureError ? <div className="error-text text-danger">{BudgetedHoureError}</div> :
-                                BudgetedMinuteError ? <div className="error-text text-danger">{BudgetedMinuteError}</div> : ""
-                            }
-                          </div>
-                        </div>
-                      </div>
-
-                    </Modal.Body>
-                    <Modal.Footer>
-                      <Button variant="secondary" onClick={() => { setShowAddJobModal(false); HandleReset(); }}>Close</Button>
-                      <Button variant="btn btn-info text-white float-end blue-btn" onClick={handleAddTask}>Add</Button>
-                    </Modal.Footer>
-                  </Modal>
-                )}
-                <div className="hstack gap-2 justify-content-end">
-                  <button type="button" className="btn btn-light" onClick={handleClose}>Cancel</button>
-                  <button type="button" className="btn btn-info text-white float-end blue-btn" onClick={handleSubmit}>Update</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
       </div >
     </div >
   )

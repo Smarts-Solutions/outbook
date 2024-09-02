@@ -23,6 +23,7 @@ const Engagement = () => {
     const [errors2, setErrors2] = useState({});
     const [errors3, setErrors3] = useState({});
     const [errors4, setErrors4] = useState([]);
+
     const [customerDetails, setCustomerDetails] = useState({
         loading: true,
         data: [],
@@ -350,11 +351,10 @@ const Engagement = () => {
             alert("Please select at least one option.");
             return;
         }
-        const validations = [validate1, validate3, validate2, validate4];
+        const validations = [validate1,validate2 ,validate3, validate4];
 
         for (let i = 0; i < checkboxStates.length; i++) {
             if (checkboxStates[i] === 1 && !validations[i]()) {
-
                 return;
             }
         }

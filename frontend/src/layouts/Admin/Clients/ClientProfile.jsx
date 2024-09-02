@@ -11,7 +11,7 @@ const ClientList = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const [customerData, setCustomerData] = useState([]);
-  const [activeTab, setActiveTab] = useState("viewclient");
+  const [activeTab, setActiveTab] = useState("NoOfJobs");
   const [getClientDetails, setClientDetails] = useState({
     loading: true,
     data: [],
@@ -46,8 +46,8 @@ const ClientList = () => {
       });
   };
   const tabs = [
-    { id: "viewclient", label: "View Client" },
     { id: "NoOfJobs", label: "No.Of Jobs" },
+    { id: "viewclient", label: "View Client" },
     { id: "documents", label: "Documents" },
   ];
 
@@ -57,7 +57,7 @@ const ClientList = () => {
       cell: (row) => (
         <div>
           <a
-            onClick={() => HandleClientView(row)}
+            onClick={() => HandleJob(row)}
             style={{ cursor: "pointer", color: "#26bdf0" }}
           >
             {row.job_code_id}
@@ -82,6 +82,11 @@ const ClientList = () => {
       sortable: true,
     },
     {
+      name: "Client",
+      selector: (row) => row.client_trading_name,
+      sortable: true,
+    },
+    {
       name: "Client Job Code",
       selector: (row) => row.client_job_code,
       sortable: true,
@@ -97,7 +102,7 @@ const ClientList = () => {
     {
       name: "Allocated To",
       selector: (row) =>
-        row.allocated_first_name + " " + row.allocated_last_name,
+      row.allocated_id !=null?row.allocated_first_name + " " + row.allocated_last_name : "",
       sortable: true,
     },
     {
@@ -113,6 +118,15 @@ const ClientList = () => {
       row.invoiced == "1"? "YES" :"NO",
       sortable: true,
     },
+
+    {
+      name: "Status",
+      selector: (row) =>
+        // row.allocated_first_name + " " + row.allocated_last_name,
+      "",
+      sortable: true,
+    },
+
 
     {
       name: "Actions",
@@ -132,8 +146,8 @@ const ClientList = () => {
     },
   ];
 
-  const HandleClientView = (row) => {
-    navigate("/admin/client/profile", { state: row });
+  const HandleJob = (row) => {
+    navigate("/admin/job/jobinformation", { state: row });
   };
 
   function handleEdit(row) {
