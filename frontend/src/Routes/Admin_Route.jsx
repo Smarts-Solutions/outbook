@@ -40,6 +40,7 @@ import CreateCheckList from "../layouts/Admin/Clients/CreateCheckList";
 import EditCheckList from "../layouts/Admin/Clients/Editchecklist";
 import Statuses from "../layouts/Admin/Clients/Statuses";
 
+import JobLogs from "../layouts/Admin/Jobs/JobLogs";
 import JobInformation from "../layouts/Admin/Jobs/JobInformation";
 import TaskTimesheet from "../layouts/Admin/Jobs/TaskTimesheet";
 import JobTimeline from "../layouts/Admin/Jobs/JobTimeline";
@@ -50,6 +51,7 @@ import Documents from "../layouts/Admin/Jobs/Documents";
 
 import CreateJob from "../layouts/Admin/Jobs/JobAction/CreateJob";
 import JobEdit from "../layouts/Admin/Jobs/JobAction/EditJob";
+ 
 
 const Admin_Route = () => {
   const dispatch = useDispatch();
@@ -190,13 +192,14 @@ const Admin_Route = () => {
             <Route path="/create/checklist" element={<CreateCheckList />} />
             <Route path="/create/statuses" element={<Statuses />} />
             <Route path="/edit/checklist" element={<EditCheckList />} />
-            <Route path="/job/jobinformation" element={<JobInformation />} />
+            <Route path="/job/joblogs" element={<JobLogs />} />
             <Route path="/job/tasktimesheet" element={<TaskTimesheet />} />
             <Route path="/job/missinglogs" element={<MissingLogs />} />
             <Route path="/job/queries" element={<Queries />} />
             <Route path="/job/drafts" element={<Drafts />} />
             <Route path="/job/documents" element={<Documents />} />
             <Route path="/job/jobtimeline" element={<JobTimeline />} />
+            <Route path="/job/jobinformation" element={<JobInformation />} />
           </Routes>
         </div>
       </div>

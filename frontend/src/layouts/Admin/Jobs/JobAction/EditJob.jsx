@@ -11,8 +11,6 @@ const EditJob = () => {
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
   const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
-
-
   const dispatch = useDispatch();
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
   const [getJobDetails, setGetJobDetails] = useState({ loading: false, data: {} });
@@ -26,8 +24,6 @@ const EditJob = () => {
   const [taskNameError, setTaskNameError] = useState('')
   const [BudgetedHoureError, setBudgetedHourError] = useState('')
   const [taskName, setTaskName] = useState('')
-  const [Budgeted, setBudgeted] = useState('')
-
   const [PreparationTimne, setPreparationTimne] = useState({ hours: "", minutes: "" })
   const [FeedbackIncorporationTime, setFeedbackIncorporationTime] = useState({ hours: "", minutes: "" })
   const [reviewTime, setReviewTime] = useState({ hours: "", minutes: "" })
@@ -85,15 +81,21 @@ const EditJob = () => {
   });
 
 
+  console.log("getJobDetails", getJobDetails)
+
+
 
   const JobDetails = async () => {
     const req = { action: "getByJobId", job_id: location.state.row.job_id }
-
     const data = { req: req, authToken: token }
     await dispatch(Get_All_Job_List(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
+          // const data = response.data?.data ?? {}; 
+
+
+
           setGetJobDetails({
             loading: true,
             data: response.data
@@ -144,8 +146,6 @@ const EditJob = () => {
     getAllChecklist()
   }, [jobData.JobType]);
 
-
-
   const getChecklistData = async () => {
     const req = { action: "getById", checklist_id: getChecklistId && getChecklistId }
     const data = { req: req, authToken: token }
@@ -178,10 +178,7 @@ const EditJob = () => {
 
 
   useEffect(() => {
-    const data = getJobDetails?.data ?? {};
-
-
-    console.log("Data : ", data.total_time)
+    const data = getJobDetails?.data ?? {}; 
     if (Object.keys(data).length > 0) {
       setBudgetedHours({
         hours: data.budgeted_hours?.split(":")[0] ?? "",
