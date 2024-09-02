@@ -1635,7 +1635,6 @@ const EditJob = () => {
                             </div>)
                           }
 
-
                           {jobModalStatus && (
                             <>
                               <Modal show={jobModalStatus} onHide={(e) => { jobModalSetStatus(false); HandleReset1() }} centered size="lg">
@@ -1840,7 +1839,6 @@ const EditJob = () => {
                               </Modal.Footer>
                             </Modal>
                           )}
-
 
                           <div className="hstack gap-2 justify-content-end">
                             <button type="button" className="btn btn-light" onClick={handleClose}>Cancel</button>
