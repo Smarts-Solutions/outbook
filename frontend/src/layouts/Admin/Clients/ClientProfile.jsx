@@ -247,9 +247,75 @@ const ClientList = () => {
           role="tabpanel"
           aria-labelledby={`NoOfJobs-tab`}
         >
-          {customerData && customerData && (
+          <div className="container-fluid">
+              <div className="report-data mt-4 ">
+                <div className="d-flex justify-content-between align-items-center">
+              
+                <ul className="nav nav-tabs border-0 mb-3" role="tablist">
+  <li className="nav-item" role="presentation">
+    <button
+      className="nav-link active"
+      id="assignedjob-tab"
+      data-bs-toggle="pill"
+      data-bs-target="#assignedjob"
+      type="button"
+      role="tab"
+      aria-controls="assignedjob"
+      aria-selected="true"
+      tabIndex={-1}
+    >
+      Assigned Jobs
+    </button>
+  </li>
+  <li className="nav-item" role="presentation">
+    <button
+      className="nav-link"
+      id="alljob-tab"
+      data-bs-toggle="pill"
+      data-bs-target="#alljob"
+      type="button"
+      role="tab"
+      aria-controls="alljob"
+      aria-selected="false"
+      tabIndex={-1}
+    >
+     All Jobs
+    </button>
+  </li>
+</ul>
+
+
+            
+                  <div className="search-input">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Search clients..."
+                    />
+                  </div>
+                </div>
+                <div className="tab-content" id="pills-tabContent">
+  <div className="tab-pane fade active show" id="assignedjob" role="tabpanel" aria-labelledby="assignedjob-tab">
+test
+<div className="datatable-wrapper ">
+                  
+{customerData && customerData && (
             <Datatable columns={columns} data={customerData} filter={false} />
           )}
+                  </div>
+</div>
+<div className="tab-pane fade " id="alljob" role="tabpanel" aria-labelledby="alljob-tab">
+testwew
+</div>
+</div>
+                {/* <div className="datatable-wrapper ">
+                {customerData && customerData && (
+            <Datatable columns={columns} data={customerData} filter={false} />
+          )}
+                </div> */}
+              </div>
+            </div>
+         
         </div>
       )}
 

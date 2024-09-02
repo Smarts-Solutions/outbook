@@ -572,7 +572,7 @@ const Engagement = () => {
                           <div className="card-body">
                             <div id="custprize">
                               {jobEntries.map((job, index) => (
-                                <div className="row" key={index}>
+                                <div className="row " key={index}>
                                   <div className="col-lg-4">
                                     <div className="mb-3">
                                       <label htmlFor={`minimumJobs_${index}`} className="form-label">
@@ -598,7 +598,7 @@ const Engagement = () => {
                                     </label>
                                     <select
                                       id={`jobType_${index}`}
-                                      className="form-select mb-3"
+                                      className="form-select "
                                       name="job_type_id"
                                       value={job.job_type_id}
                                       onChange={(e) => handleChange4(index, e)}
@@ -638,15 +638,15 @@ const Engagement = () => {
                                   </div>
 
                                   {jobEntries.length > 1 &&
-                                    <div className="col-lg-1 text-center" style={{ marginTop: 22 }}>
-                                      <a className="add_icon text-decoration-none" onClick={(e) => handleRemoveJob(index)}>
+                                    <div className="col-lg-1 text-center d-flex" >
+                                      <button className="btn p-0 add_icon text-decoration-none" onClick={(e) => handleRemoveJob(index)}>
                                         <i
-                                          style={{ fontSize: 25, cursor: "pointer", color: "#00AFEF" }}
-                                          className="ti-trash"
+                                          
+                                          className="ti-trash text-danger fs-4"
 
                                         />
 
-                                      </a>
+                                      </button>
                                     </div>}
 
                                 </div>

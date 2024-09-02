@@ -552,9 +552,10 @@ const EditJob = () => {
           <div className="col-xl-12">
             <div className="card">
 
-              <div className="card-header d-flex justify-content-between">
+              <div className="card-header d-flex  step-header-blue">
+                
+                <button type="button" className="btn p-0" onClick={() => window.history.back()}><i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" /></button>
                 <h3 className="card-title mb-0">Update Job</h3>
-                <button type="button" className="btn btn-info text-white blue-btn" onClick={() => window.history.back()}><i className="fa fa-arrow-left pe-1" /> Back</button>
               </div>
 
               <div className="card-body form-steps">
@@ -565,7 +566,7 @@ const EditJob = () => {
                         <div className="row">
                           <div className="col-lg-12">
                             <div className="card card_shadow">
-                              <div className="card-header align-items-center d-flex">
+                              <div className="card-header align-items-center d-flex card-header-light-blue ">
                                 <h4 className="card-title mb-0 flex-grow-1">Job Information</h4>
                               </div>
                               <div className="card-body">
@@ -1002,7 +1003,7 @@ const EditJob = () => {
 
                       <div className="col-lg-12">
                         <div className="card card_shadow">
-                          <div className="card-header align-items-center d-flex">
+                          <div className="card-header align-items-center d-flex card-header-light-blue">
                             <h4 className="card-title mb-0 flex-grow-1">Deadline</h4>
                           </div>
                           <div className="card-body">
@@ -1065,7 +1066,7 @@ const EditJob = () => {
 
                       <div className="col-lg-12">
                         <div className="card card_shadow">
-                          <div className="card-header align-items-center d-flex">
+                          <div className="card-header align-items-center d-flex card-header-light-blue">
                             <h4 className="card-title mb-0 flex-grow-1">Other Task</h4>
                           </div>
                           <div className="card-body">
@@ -1148,13 +1149,13 @@ const EditJob = () => {
                           </div>
                         </div>
                         <div className="card card_shadow">
-                          <div className="card-header align-items-center d-flex">
+                          <div className="card-header align-items-center d-flex card-header-light-blue">
                             <h4 className="card-title mb-0 flex-grow-1">  Other Data </h4>
                           </div>
                           <div className="card-body">
                             <div className="" style={{ marginTop: 15 }}>
                               <div className="row">
-                                <div className="col-lg-4">
+                                <div className="col-lg-4 mb-3">
                                   <label className="form-label" >Number of Transactions </label>
                                   <input type="text" className="form-control" placeholder="Number of Transactions"
                                     name="NumberOfTransactions" onChange={HandleChange} value={jobData.NumberOfTransactions}
@@ -1163,7 +1164,7 @@ const EditJob = () => {
                                     <div style={{ 'color': 'red' }}>{errors['NumberOfTransactions']}</div>
                                   )}
                                 </div>
-                                <div className="col-lg-4">
+                                <div className="col-lg-4 mb-3">
                                   <label className="form-label" >Number of Trial Balance Items</label>
                                   <input type="text" className="form-control" placeholder="Number of Trial Balance Items"
                                     name="NumberOfTrialBalanceItems" onChange={HandleChange} value={jobData.NumberOfTrialBalanceItems}
@@ -1172,7 +1173,7 @@ const EditJob = () => {
                                     <div style={{ 'color': 'red' }}>{errors['NumberOfTrialBalanceItems']}</div>
                                   )}
                                 </div>
-                                <div className="col-lg-4">
+                                <div className="col-lg-4 mb-3">
                                   <label className="form-label" >Turnover</label>
                                   <input type="text" className="form-control" placeholder="Turnover"
                                     name="Turnover" onChange={HandleChange} value={jobData.Turnover}
@@ -1181,7 +1182,7 @@ const EditJob = () => {
                                     <div style={{ 'color': 'red' }}>{errors['Turnover']}</div>
                                   )}
                                 </div>
-                                <div className="col-lg-4">
+                                <div className="col-lg-4 mb-3">
                                   <label className="form-label"  >  No.Of Employees  </label>
                                   <input type="text" className="form-control" placeholder="No.Of Employees"
                                     name="NoOfEmployees" onChange={HandleChange} value={jobData.NoOfEmployees}
@@ -1238,7 +1239,7 @@ const EditJob = () => {
                       {jobData.EngagementModel != "fte_dedicated_staffing" && <div className="col-lg-12">
                         <div className="col-lg-12">
                           <div className="card card_shadow">
-                            <div className="card-header align-items-center d-flex">
+                            <div className="card-header align-items-center d-flex card-header-light-blue">
                               <h4 className="card-title mb-0 flex-grow-1">Invoice</h4>
                             </div>
                             <div className="card-body">
@@ -1529,7 +1530,7 @@ const EditJob = () => {
                   </Modal>
                 )}
                 <div className="hstack gap-2 justify-content-end">
-                  <button type="button" className="btn btn-light" onClick={handleClose}>Cancel</button>
+                  <button type="button" className="btn btn-secondary" onClick={handleClose}>Cancel</button>
                   <button type="button" className="btn btn-info text-white float-end blue-btn" onClick={handleSubmit}>Update</button>
                 </div>
               </div>
