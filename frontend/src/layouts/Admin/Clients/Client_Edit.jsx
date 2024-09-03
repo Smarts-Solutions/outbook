@@ -9,13 +9,11 @@ import { GetAllCompany } from "../../../ReduxStore/Slice/Customer/CustomerSlice"
 import { Email_regex } from "../../../Utils/Common_regex";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { Link } from "react-router-dom";
 import {
   PersonRole,
   Country,
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
 
-import Search from "antd/es/transfer/search";
 const ClientEdit = () => {
   const dispatch = useDispatch();
   const location = useLocation();

@@ -20,7 +20,11 @@ const ClientList = () => {
   const [clientInformationData, setClientInformationData] = useState([]);
   const [companyDetails, setCompanyDetails] = useState([]);
 
-
+ 
+  useEffect(() => {
+    GetAllJobList();
+    GetClientDetails();
+  }, []);
  
   const GetClientDetails = async () => {
     const req = { action: "getByid", client_id: location.state.row.id };
@@ -47,6 +51,7 @@ const ClientList = () => {
         console.log("Error", error);
       });
   };
+
   const tabs = [
     { id: "NoOfJobs", label: "No.Of Jobs" },
     { id: "viewclient", label: "View Client" },
@@ -104,20 +109,21 @@ const ClientList = () => {
     {
       name: "Allocated To",
       selector: (row) =>
-      row.allocated_id !=null?row.allocated_first_name + " " + row.allocated_last_name : "",
+        row.allocated_id != null
+          ? row.allocated_first_name + " " + row.allocated_last_name
+          : "",
       sortable: true,
     },
     {
       name: "Timesheet",
       selector: (row) =>
         // row.allocated_first_name + " " + row.allocated_last_name,
-      "",
+        "",
       sortable: true,
     },
     {
       name: "Invoicing",
-      selector: (row) =>
-      row.invoiced == "1"? "YES" :"NO",
+      selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
     },
 
@@ -125,10 +131,9 @@ const ClientList = () => {
       name: "Status",
       selector: (row) =>
         // row.allocated_first_name + " " + row.allocated_last_name,
-      "",
+        "",
       sortable: true,
     },
-
 
     {
       name: "Actions",
@@ -181,21 +186,29 @@ const ClientList = () => {
       });
   };
 
-
-
   const handleAddClient = () => {
     navigate("/admin/createjob", {
       state: { details: location.state, goto: "client" },
     });
   };
 
-
-  useEffect(() => {
-    GetAllJobList();
-    GetClientDetails();
-  }, []);
-
   
+
+  function handleEdit(row) {
+    navigate("/admin/job/edit", {
+      state: { details: location.state, row: row },
+    });
+  }
+
+  function handleDelete(row) {
+    console.log("Deleting row:", row);
+  }
+  function ClientEdit(row) {
+    console.log("row", row);
+    navigate("/admin/client/edit", { state: { row, id: row} });
+  }
+
+
   return (
     <div className="container-fluid">
       <div className="col-sm-12">
@@ -368,13 +381,15 @@ testwew
                       <li className="">
                         <i className="fa-regular fa-phone me-2 text-secondary font-22 align-middle"></i>
                         <b>phone </b>:{" "}
-                        {clientInformationData.phone_code +
-                          " " +
-                          clientInformationData.phone}
+                        {clientInformationData &&
+                          clientInformationData.phone &&
+                          clientInformationData.phone_code +
+                            " " +
+                            clientInformationData.phone}
                       </li>
                       <li className="mt-2">
                         <i className="fa-regular fa-envelope text-secondary font-22 align-middle me-2"></i>
-                        <b>Email </b>: {clientInformationData.email}
+                        <b>Email </b>: {clientInformationData && clientInformationData.email}
                       </li>
                     </ul>
                   </div>
@@ -382,10 +397,10 @@ testwew
                   <div className="col-lg-4 align-self-center">
                     <ul className="list-unstyled personal-detail mb-0">
                       <li className="">
-                        <b>Trading Name</b>: {informationData.trading_name}
+                        <b>Trading Name</b>: {informationData && informationData.trading_name}
                       </li>
                       <li className="mt-2">
-                        <b>Trading Address</b>:{informationData.trading_address}
+                        <b>Trading Address</b>:{informationData && informationData.trading_address}
                       </li>
                     </ul>
                   </div>
@@ -398,7 +413,7 @@ testwew
             <div className="card-header border-bottom pb-3 row">
               <div className="col-8">
                 <h4 className="card-title">
-                  {informationData.client_type == 1
+                  {informationData && informationData.client_type == 1
                     ? "Sole Trader"
                     : informationData.client_type == 2
                     ? "Company"
@@ -408,7 +423,7 @@ testwew
               </div>
               <div className="col-4">
                 <div className="float-end">
-                  <button type="button" className="btn btn-info text-white  ">
+                  <button type="button" className="btn btn-info text-white " onClick={(e)=>ClientEdit(informationData.id)}>
                     <i className="fa-regular fa-pencil me-2" />
                     Edit
                   </button>
@@ -521,20 +536,25 @@ testwew
                   <div className="col-lg-6">
                     <ul className="list-unstyled faq-qa">
                       <li className="mb-4">
-                        <h6 className="">Company Name</h6>
+                        <h6 className="">Trading Name</h6>
                         <p className="font-14  ml-3">
-                          Outbooks Outsourcing Pvt Ltd
+                          {informationData && informationData.trading_name}
                         </p>
                       </li>
                       <li className="mb-4">
-                        <h6 className="">Company Status</h6>
-                        <p className="font-14  ml-3">Active</p>
+                        <h6 className="">VAT Registered</h6>
+                        <p className="font-14  ml-3">
+                          {" "}
+                          {informationData &&
+                          informationData.vat_registered == "0"
+                            ? "No"
+                            : "Yes"}
+                        </p>
                       </li>
                       <li className="mb-4">
-                        <h6 className="">Registered Office Address</h6>
+                        <h6 className="">Website</h6>
                         <p className="font-14  ml-3">
-                          Suite 18, Winsor & Newton Building, Whitefriars
-                          Avenue, Harrow HA3 5RN
+                          {informationData && informationData.website}
                         </p>
                       </li>
                     </ul>
@@ -542,18 +562,17 @@ testwew
                   <div className="col-lg-6">
                     <ul className="list-unstyled faq-qa">
                       <li className="mb-4">
-                        <h6 className="">Entity Type</h6>
-                        <p className="font-14  ml-3">Entity Type</p>
-                      </li>
-                      <li className="mb-4">
-                        <h6 className="">Company Number</h6>
-                        <p className="font-14  ml-3">06465146</p>
-                      </li>
-                      <li className="mb-4">
-                        <h6 className="">6. What is Dastyle?</h6>
+                        <h6 className="">Trading Address</h6>
                         <p className="font-14  ml-3">
-                          Anim pariatur cliche reprehenderit, enim eiusmod high
-                          life accusamus terry richardson ad squid.
+                          {" "}
+                          {informationData && informationData.trading_address}
+                        </p>
+                      </li>
+                      <li className="mb-4">
+                        <h6 className="">VAT Number</h6>
+                        <p className="font-14  ml-3">
+                          {" "}
+                          {informationData && informationData.vat_number}
                         </p>
                       </li>
                     </ul>

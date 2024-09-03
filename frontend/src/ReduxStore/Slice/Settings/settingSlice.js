@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE, CLIENTINDUSTRY, COUNTRY, JOBTYPE, ADDTASK, GetServicesByCustomer, GETTASK, getListAction, addChecklist, UpdateChecklist ,MasterStatus} from "../../../Services/Settings/settingService";
+import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE, CLIENTINDUSTRY, COUNTRY, JOBTYPE, ADDTASK, GetServicesByCustomer, GETTASK, getListAction, addChecklist, UpdateChecklist ,MasterStatus,incorporationApi} from "../../../Services/Settings/settingService";
 import axios from "axios";
 
 
@@ -216,6 +216,20 @@ export const MasterStatusData = createAsyncThunk("masterStatus", async (data) =>
   }
 });
 
+export const IncorporationApi = createAsyncThunk("incorporation", async (data) => {
+  try {
+    const { req, authToken } = data
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await incorporationApi(updatedReq, authToken);
+
+    return await res;
+  } catch
+  (err) {
+    return err;
+  }
+});
+
 //Setting Slice
 const SettingSlice = createSlice({
   name: "SettingSlice",
@@ -235,7 +249,8 @@ const SettingSlice = createSlice({
     list: [],
     addChecklistData: [],
     updatecheckdata: [],
-    masterStatusData: []
+    masterStatusData: [],
+    incorporationData: []
   },
 
   reducers: {},
@@ -393,6 +408,17 @@ const SettingSlice = createSlice({
         state.masterStatusData = action.payload;
       })
       .addCase(MasterStatusData.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(IncorporationApi.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(IncorporationApi.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.incorporationData = action.payload;
+      })
+      .addCase(IncorporationApi.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
       });

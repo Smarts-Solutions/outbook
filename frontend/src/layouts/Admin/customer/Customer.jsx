@@ -15,7 +15,7 @@ const Customer = () => {
 
   const [customerData, setCustomerData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [activeTab, setActiveTab] = useState("this-week");
+  const [activeTab, setActiveTab] = useState("this-year");
   const [searchTerm, setSearchTerm] = useState("");
 
   const tabs = [
