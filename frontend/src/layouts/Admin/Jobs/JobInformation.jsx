@@ -17,13 +17,12 @@ const JobInformationPage = ({ job_id }) => {
     const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" })
     const [FeedbackIncorporationTime, setFeedbackIncorporationTime] = useState({ hours: "", minutes: "" })
     const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" })
-
-
-
+ 
 
     const [JobInformationData, setJobInformationData] = useState({
         AccountManager: "",
         Customer: "",
+        Customer_id: 0,
         Client: "",
         ClientJobCode: "",
         CustomerAccountManager: "",
@@ -68,115 +67,9 @@ const JobInformationPage = ({ job_id }) => {
 
     });
 
-
-
-
-    const GetJobData = async () => {
-        const req = { customer_id: location.state.details.customer_id.id }
-        const data = { req: req, authToken: token }
-        await dispatch(GetAllJabData(data))
-            .unwrap()
-            .then(async (response) => {
-
-                if (response.status) {
-                    setAllJobData({
-                        loading: true,
-                        data: response.data
-                    })
-                } else {
-                    setAllJobData({
-                        loading: true,
-                        data: []
-                    })
-                }
-            })
-            .catch((error) => {
-                console.log("Error", error);
-            });
-
-    }
-
-    useEffect(() => {
-        GetJobData()
-    }, []);
-
-
-    // "data": {
-    //     "job_id": 18,
-    //     "customer_id": 21,
-    //     "customer_trading_name": "cppp",
-    //     "client_id": 8,
-    //     "client_trading_name": "www",
-    //     "client_job_code": "sasa",
-    //     "outbooks_acount_manager_id": 7,
-    //     "outbooks_acount_manager_first_name": "acoount",
-    //     "outbooks_acount_manager_last_name": "acoount",
-    //     "account_manager_officer_id": 29,
-    //     "account_manager_officer_first_name": "Chandra",
-    //     "account_manager_officer_last_name": "Prakash",
-    //     "service_id": 3,
-    //     "service_name": "VAT Return\t",
-    //     "job_type_id": 4,
-    //     "job_type_name": "SS",
-    //     "budgeted_hours": "22:00:00",
-    //     "reviewer_id": 9,
-    //     "reviewer_first_name": "shk",
-    //     "reviewer_last_name": "hu",
-    //     "allocated_id": null,
-    //     "allocated_first_name": null,
-    //     "allocated_last_name": null,
-    //     "allocated_on": "2024-08-30",
-    //     "date_received_on": "2024-08-30",
-    //     "year_end": "",
-    //     "total_preparation_time": "00:00:00",
-    //     "review_time": "00:00:00",
-    //     "feedback_incorporation_time": "00:00:00",
-    //     "total_time": "00:00:00",
-    //     "engagement_model": "",
-    //     "expected_delivery_date": null,
-    //     "due_on": null,
-    //     "submission_deadline": null,
-    //     "customer_deadline_date": null,
-    //     "sla_deadline_date": null,
-    //     "internal_deadline_date": null,
-    //     "filing_Companies_required": "0",
-    //     "filing_Companies_date": null,
-    //     "filing_hmrc_required": "0",
-    //     "filing_hmrc_date": null,
-    //     "opening_balance_required": "0",
-    //     "opening_balance_date": null,
-    //     "number_of_transaction": "0.00",
-    //     "number_of_balance_items": 0,
-    //     "turnover": "0.00",
-    //     "number_of_employees": 0,
-    //     "vat_reconciliation": "0",
-    //     "bookkeeping": "0",
-    //     "processing_type": "",
-    //     "invoiced": "1",
-    //     "currency_id": null,
-    //     "currency": null,
-    //     "invoice_value": "77.00",
-    //     "invoice_date": "2024-08-31",
-    //     "invoice_hours": "10:10:00",
-    //     "invoice_remark": "ppp",
-    //     "tasks": {
-    //         "checklist_id": 21,
-    //         "task": [
-    //             {
-    //                 "task_id": 17,
-    //                 "task_name": "U",
-    //                 "budgeted_hour": "00:00:04"
-    //             },
-    //             {
-    //                 "task_id": 19,
-    //                 "task_name": "sasa",
-    //                 "budgeted_hour": "22:22:00"
-    //             }
-    //         ]
-    //     }
-
+    
     const JobDetails = async () => {
-        const req = { action: "getByJobId", job_id: job_id }
+        const req = { action: "getByJobId", job_id: location.state.job_id }
         const data = { req: req, authToken: token }
         await dispatch(Get_All_Job_List(data))
             .unwrap()
@@ -210,12 +103,12 @@ const JobInformationPage = ({ job_id }) => {
                         ...prevState,
                         AccountManager: `${response.data.outbooks_acount_manager_first_name} ${response.data.outbooks_acount_manager_last_name}`,
                         Customer: response.data.customer_trading_name,
+                        Customer_id: response.data.customer_id,
                         Client: response.data.client_trading_name,
                         ClientJobCode: response.data.client_job_code,
                         CustomerAccountManager: response.data.account_manager_officer_id,
                         Service: response.data.service_id,
                         JobType: response.data.job_type_id,
-
                         Reviewer: response.data.reviewer_id,
                         AllocatedTo: response.data.allocated_id,
                         AllocatedOn: response.data.allocated_on,
@@ -264,9 +157,40 @@ const JobInformationPage = ({ job_id }) => {
             });
     }
 
+    const GetJobData = async () => {
+        const req = { customer_id: JobInformationData?.Customer_id }
+        const data = { req: req, authToken: token }
+        await dispatch(GetAllJabData(data))
+            .unwrap()
+            .then(async (response) => {
+
+                if (response.status) {
+                    setAllJobData({
+                        loading: true,
+                        data: response.data
+                    })
+                } else {
+                    setAllJobData({
+                        loading: true,
+                        data: []
+                    })
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+
+    }
+
     useEffect(() => {
         JobDetails()
     }, []);
+
+    useEffect(() => {
+        GetJobData()
+    }, [JobInformationData]);
+
+
 
     const filteredData = AllJobData.data?.engagement_model?.[0]
         ? Object.keys(AllJobData.data.engagement_model[0])
@@ -313,6 +237,7 @@ const JobInformationPage = ({ job_id }) => {
                                             placeholder="Enter Account Manager Name"
                                             disabled
                                             name="AccountManager"
+                                            defaultValue=""
                                             onChange={(e) => setJobInformationData({ ...JobInformationData, AccountManager: e.target.value })}
                                             value={JobInformationData.AccountManager}
                                         />
@@ -326,6 +251,7 @@ const JobInformationPage = ({ job_id }) => {
                                             placeholder="Enter Customer"
                                             disabled
                                             name="Customer"
+                                            defaultValue=""
                                             onChange={(e) => setJobInformationData({ ...JobInformationData, Customer: e.target.value })}
                                             value={JobInformationData.Customer}
                                         />
@@ -338,6 +264,7 @@ const JobInformationPage = ({ job_id }) => {
                                             className="form-control"
                                             placeholder="Enter Client Job Code"
                                             name="Client"
+                                            defaultValue=""
                                             disabled
                                             onChange={(e) => setJobInformationData({ ...JobInformationData, Client: e.target.value })}
                                             value={JobInformationData.Client}
@@ -352,6 +279,7 @@ const JobInformationPage = ({ job_id }) => {
                                             className="form-control"
                                             placeholder="Client Job Code"
                                             name="ClientJobCode"
+                                            defaultValue=""
                                             disabled
                                             onChange={(e) => setJobInformationData({ ...JobInformationData, ClientJobCode: e.target.value })}
                                             value={JobInformationData.ClientJobCode}
@@ -363,18 +291,14 @@ const JobInformationPage = ({ job_id }) => {
                                         <select className="form-select"
                                             name="CustomerAccountManager"
                                             disabled
+                                            defaultValue=""
                                             onChange={(e) => setJobInformationData({ ...JobInformationData, CustomerAccountManager: e.target.value })}
                                             value={JobInformationData.CustomerAccountManager}
                                         >
                                             <option value="">Select Customer Account Manager</option>
-                                            {
-                                                AllJobData.data && AllJobData.data.customer_account_manager &&
-                                                AllJobData.data.customer_account_manager.map((customer_account_manager) => (
-                                                    <option value={customer_account_manager.customer_account_manager_officer_id}
-                                                        key={customer_account_manager.customer_account_manager_officer_id}>
-                                                        {customer_account_manager.customer_account_manager_officer_name}
-                                                    </option>
-                                                ))
+                                            {(AllJobData?.data?.customer_account_manager || []).map((customer_account_manager) => (
+                                                <option value={customer_account_manager.customer_account_manager_officer_id} key={customer_account_manager.customer_account_manager_officer_id}>{customer_account_manager.customer_account_manager_officer_name}</option>
+                                            ))
                                             }
                                         </select>
 
@@ -385,20 +309,17 @@ const JobInformationPage = ({ job_id }) => {
                                         <label className="form-label">Service</label>
                                         <select className="form-select mb-3"
                                             name="Service"
+                                            defaultValue=""
                                             disabled
                                             onChange={(e) => setJobInformationData({ ...JobInformationData, Service: e.target.value })}
                                             value={JobInformationData.Service}
                                         >
                                             <option value="">Select Service</option>
-                                            {AllJobData?.data?.services?.length > 0 &&
-                                                AllJobData.data.services.map(({ service_id, service_name }) => (
-                                                    <option value={service_id} key={service_id}>
-                                                        {service_name}
-                                                    </option>
+                                            {
+                                                (AllJobData?.data?.services || []).map((service) => (
+                                                    <option value={service.service_id} key={service.service_id}>{service.service_name}</option>
                                                 ))
                                             }
-
-
                                         </select>
 
                                     </div>
@@ -408,12 +329,13 @@ const JobInformationPage = ({ job_id }) => {
                                         <select className="form-select mb-3 jobtype"
                                             disabled
                                             name="JobType"
+                                            defaultValue=""
                                             onChange={(e) => setJobInformationData({ ...JobInformationData, JobType: e.target.value })}
                                             value={JobInformationData.JobType}
                                         >
                                             <option value="">Select Job Type</option>
-                                            {AllJobData.loading &&
-                                                AllJobData.data.job_type.map((jobtype) => (
+                                            {
+                                                (AllJobData?.data?.job_type || []).map((jobtype) => (
                                                     <option value={jobtype.job_type_id} key={jobtype.job_type_id}>{jobtype.job_type_name}</option>
                                                 ))}
                                         </select>
@@ -426,6 +348,7 @@ const JobInformationPage = ({ job_id }) => {
                                             <div className="input-group">
                                                 <input
                                                     type="text"
+                                                    defaultValue=""
                                                     className="form-control"
                                                     placeholder="Hours"
                                                     name="BudgetedHours"
@@ -442,6 +365,7 @@ const JobInformationPage = ({ job_id }) => {
                                                     className="form-control"
                                                     placeholder="Minutes"
                                                     name="BudgetedHours"
+                                                    defaultValue=""
                                                     disabled
                                                     onChange={(e) => setBudgetedHours({ ...budgetedhours, minutes: e.target.value })}
                                                     value={budgetedhours.minutes}
@@ -458,6 +382,7 @@ const JobInformationPage = ({ job_id }) => {
                                         <label className="form-label">Reviewer</label>
                                         <select className="form-select mb-3"
                                             name="Reviewer"
+                                            defaultValue=""
                                             disabled
                                             onChange={(e) => setJobInformationData({ ...JobInformationData, Reviewer: e.target.value })}
                                             value={JobInformationData.Reviewer}
@@ -465,8 +390,8 @@ const JobInformationPage = ({ job_id }) => {
                                         >
                                             <option value=""> Select Reviewer</option>
                                             {
-                                                AllJobData.loading &&
-                                                AllJobData.data.reviewer.map((reviewer) => (
+
+                                                (AllJobData?.data?.reviewer || []).map((reviewer) => (
                                                     <option value={reviewer.reviewer_id} key={reviewer.reviewer_id}>{reviewer.reviewer_name}</option>
                                                 ))
                                             }
@@ -478,15 +403,16 @@ const JobInformationPage = ({ job_id }) => {
                                         <label className="form-label">Allocated To</label>
                                         <select className="form-select mb-3"
                                             name="AllocatedTo"
+                                            defaultValue=""
                                             disabled
                                             onChange={(e) => setJobInformationData({ ...JobInformationData, AllocatedTo: e.target.value })}
                                             value={JobInformationData.AllocatedTo}
                                         >
                                             <option value=""> Select Staff</option>
-                                            {AllJobData.data &&
-                                                AllJobData.data.allocated.map((staff) => (
-                                                    <option value={staff.allocated_id} key={staff.allocated_id}>{staff.allocated_name}</option>
-                                                ))}
+                                            {
+                                        (AllJobData?.data?.allocated || []).map((staff) => (
+                                          <option value={staff.allocated_id} key={staff.allocated_id}>{staff.allocated_name}</option>
+                                        ))}
                                         </select>
 
                                     </div>
@@ -514,6 +440,7 @@ const JobInformationPage = ({ job_id }) => {
                                             className="form-control mb-3"
                                             placeholder="DD-MM-YYYY"
                                             name="DateReceivedOn"
+                                            defaultValue=""
                                             disabled
                                             onChange={(e) => setJobInformationData({ ...JobInformationData, DateReceivedOn: e.target.value })
 
@@ -533,6 +460,7 @@ const JobInformationPage = ({ job_id }) => {
                                                 className="form-control"
                                                 placeholder="MM/YYYY"
                                                 name="YearEnd"
+                                                defaultValue=""
                                                 disabled
                                                 onChange={(e) => setJobInformationData({ ...JobInformationData, YearEnd: e.target.value })}
                                                 value={JobInformationData.YearEnd}
@@ -548,6 +476,7 @@ const JobInformationPage = ({ job_id }) => {
                                                     type="text"
                                                     className="form-control"
                                                     placeholder="Hours"
+                                                    defaultValue=""
                                                     disabled
                                                     onChange={(e) => setPreparationTimne({ ...PreparationTimne, hours: e.target.value })}
                                                     value={PreparationTimne.hours}
@@ -559,6 +488,7 @@ const JobInformationPage = ({ job_id }) => {
                                                     type="text"
                                                     className="form-control"
                                                     placeholder="Minutes"
+                                                    defaultValue=""
                                                     disabled
                                                     onChange={(e) => setPreparationTimne({ ...PreparationTimne, minutes: e.target.value })}
                                                     value={PreparationTimne.minutes}
@@ -579,6 +509,7 @@ const JobInformationPage = ({ job_id }) => {
                                                     type="text"
                                                     className="form-control"
                                                     placeholder="Hours"
+                                                    defaultValue=""
                                                     disabled
                                                     onChange={(e) => setReviewTime({ ...ReviewTime, hours: e.target.value })}
                                                     value={ReviewTime.hours}
@@ -590,6 +521,7 @@ const JobInformationPage = ({ job_id }) => {
                                                     type="text"
                                                     className="form-control"
                                                     placeholder="Minutes"
+                                                    defaultValue=""
                                                     disabled
                                                     onChange={(e) => setReviewTime({ ...ReviewTime, minutes: e.target.value })}
                                                     value={ReviewTime.minutes}
@@ -608,6 +540,7 @@ const JobInformationPage = ({ job_id }) => {
                                                 <input
                                                     type="text"
                                                     className="form-control"
+                                                    defaultValue=""
                                                     placeholder="Hours"
                                                     disabled
                                                     onChange={(e) => setFeedbackIncorporationTime({ ...FeedbackIncorporationTime, hours: e.target.value })}
@@ -620,6 +553,7 @@ const JobInformationPage = ({ job_id }) => {
                                                     type="text"
                                                     className="form-control"
                                                     placeholder="Minutes"
+                                                    defaultValue=""
                                                     disabled
                                                     onChange={(e) => setFeedbackIncorporationTime({ ...FeedbackIncorporationTime, minutes: e.target.value })}
                                                     value={FeedbackIncorporationTime.minutes}
@@ -645,6 +579,7 @@ const JobInformationPage = ({ job_id }) => {
                                                             aria-label="Recipient's username"
                                                             aria-describedby="basic-addon2"
                                                             disabled
+                                                            defaultValue=""
                                                             onChange={(e) => setTotalTime({ ...Totaltime, hours: e.target.value })}
                                                             value={Totaltime.hours}
 
@@ -662,6 +597,7 @@ const JobInformationPage = ({ job_id }) => {
                                                             placeholder={10}
                                                             aria-label="Recipient's username"
                                                             aria-describedby="basic-addon2"
+                                                            defaultValue=""
                                                             disabled
                                                             onChange={(e) => setTotalTime({ ...Totaltime, minutes: e.target.value })}
                                                             value={Totaltime.minutes}
@@ -683,6 +619,7 @@ const JobInformationPage = ({ job_id }) => {
                                         </label>
                                         <select className="form-select mb-3 invoice_type_dropdown"
                                             disabled
+                                            defaultValue=""
                                             name="EngagementModel"
                                             onChange={(e) => setJobInformationData({ ...JobInformationData, EngagementModel: e.target.value })}
                                             value={JobInformationData.EngagementModel}
@@ -808,6 +745,7 @@ const JobInformationPage = ({ job_id }) => {
                                                 <select className="form-select mb-3"
                                                     name="FilingWithCompaniesHouseRequired"
                                                     disabled
+                                                    defaultValue=""
                                                     onChange={(e) => setJobInformationData({ ...JobInformationData, FilingWithCompaniesHouseRequired: e.target.value })}
                                                     value={JobInformationData.FilingWithCompaniesHouseRequired}
                                                 >
@@ -1087,6 +1025,7 @@ const JobInformationPage = ({ job_id }) => {
                                                             type="text"
                                                             className="form-control"
                                                             placeholder="Hours"
+                                                            defaultValue=""
                                                             disabled
                                                             onChange={(e) => {
                                                                 const value = e.target.value;
@@ -1103,6 +1042,7 @@ const JobInformationPage = ({ job_id }) => {
                                                             type="text"
                                                             className="form-control"
                                                             placeholder="Minutes"
+                                                            defaultValue=""
                                                             disabled
                                                             onChange={(e) => {
                                                                 const value = e.target.value;
@@ -1125,6 +1065,7 @@ const JobInformationPage = ({ job_id }) => {
                                                     className="form-control"
                                                     placeholder="Invoice Remark"
                                                     name="InvoiceRemark"
+                                                    defaultValue=""
                                                     disabled
                                                     onChange={(e) => setJobInformationData({ ...JobInformationData, InvoiceRemark: e.target.value })}
                                                     value={JobInformationData.InvoiceRemark}

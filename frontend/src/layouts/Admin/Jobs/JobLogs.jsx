@@ -34,7 +34,7 @@ const columns = [
 
 const JobLogs = () => {
   const location = useLocation();
-  console.log(location.state)
+ 
   return (
     <div className='container-fluid'>
 
@@ -176,7 +176,7 @@ const JobLogs = () => {
           role="tabpanel"
           aria-labelledby="job-information-tab"
         >
-          <JobInformation job_id = {location.state.row.job_id} />
+          <JobInformation job_id = {location.state.job_id} />
         </div>
 
         <div

@@ -20,14 +20,16 @@ const ClientList = () => {
   const [clientInformationData, setClientInformationData] = useState([]);
   const [companyDetails, setCompanyDetails] = useState([]);
 
- 
+
+
   useEffect(() => {
     GetAllJobList();
     GetClientDetails();
   }, []);
- 
+
+
   const GetClientDetails = async () => {
-    const req = { action: "getByid", client_id: location.state.row.id };
+    const req = { action: "getByid", client_id: location.state.Client_id };
     const data = { req: req, authToken: token };
     await dispatch(Get_All_Client(data))
       .unwrap()
@@ -51,6 +53,10 @@ const ClientList = () => {
         console.log("Error", error);
       });
   };
+
+
+  console.log("getClientDetails", getClientDetails?.data?.client?.customer_id);
+
 
   const tabs = [
     { id: "NoOfJobs", label: "No.Of Jobs" },
@@ -154,23 +160,21 @@ const ClientList = () => {
   ];
 
   const HandleJob = (row) => {
-    navigate("/admin/job/logs", { 
-      state: { details: location.state, row: row },
-    });
+    navigate("/admin/job/logs", { state: { job_id: row.job_id, goto: "client" } });
   };
 
+
   function handleEdit(row) {
-    navigate("/admin/job/edit", {
-      state: { details: location.state, row: row },
-    });
+    navigate("/admin/job/edit", { state: { job_id: row.job_id, goto: "client" } });
   }
+
 
   function handleDelete(row) {
     console.log("Deleting row:", row);
   }
 
   const GetAllJobList = async () => {
-    const req = { action: "getByClient", client_id: location.state.row.id };
+    const req = { action: "getByClient", client_id: location.state.Client_id };
     const data = { req: req, authToken: token };
     await dispatch(Get_All_Job_List(data))
       .unwrap()
@@ -186,26 +190,23 @@ const ClientList = () => {
       });
   };
 
-  const handleAddClient = () => {
-    navigate("/admin/createjob", {
-      state: { details: location.state, goto: "client" },
-    });
+  const handleAddClient = (row) => {
+    if (getClientDetails?.data?.client?.customer_id) {
+      navigate("/admin/createjob", {
+        state: { customer_id: getClientDetails?.data?.client?.customer_id, goto: "client" },
+      });
+    }
   };
 
-  
 
-  function handleEdit(row) {
-    navigate("/admin/job/edit", {
-      state: { details: location.state, row: row },
-    });
-  }
+
 
   function handleDelete(row) {
     console.log("Deleting row:", row);
   }
   function ClientEdit(row) {
     console.log("row", row);
-    navigate("/admin/client/edit", { state: { row, id: row} });
+    navigate("/admin/client/edit", { state: { row, id: row } });
   }
 
 
@@ -223,9 +224,8 @@ const ClientList = () => {
                 {tabs.map((tab) => (
                   <li className="nav-item" role="presentation" key={tab.id}>
                     <button
-                      className={`nav-link ${
-                        activeTab === tab.id ? "active" : ""
-                      }`}
+                      className={`nav-link ${activeTab === tab.id ? "active" : ""
+                        }`}
                       id={`${tab.id}-tab`}
                       data-bs-toggle="pill"
                       data-bs-target={`#${tab.id}`}
@@ -271,82 +271,81 @@ const ClientList = () => {
 
       {activeTab == "NoOfJobs" && (
         <div
-          className={`tab-pane fade ${
-            activeTab == "NoOfJobs" ? "show active" : ""
-          }`}
+          className={`tab-pane fade ${activeTab == "NoOfJobs" ? "show active" : ""
+            }`}
           id={"NoOfJobs"}
           role="tabpanel"
           aria-labelledby={`NoOfJobs-tab`}
         >
           <div className="container-fluid">
-              <div className="report-data mt-4 ">
-                <div className="d-flex justify-content-between align-items-center">
-              
+            <div className="report-data mt-4 ">
+              <div className="d-flex justify-content-between align-items-center">
+
                 <ul className="nav nav-tabs border-0 mb-3" role="tablist">
-  <li className="nav-item" role="presentation">
-    <button
-      className="nav-link active"
-      id="assignedjob-tab"
-      data-bs-toggle="pill"
-      data-bs-target="#assignedjob"
-      type="button"
-      role="tab"
-      aria-controls="assignedjob"
-      aria-selected="true"
-      tabIndex={-1}
-    >
-      Assigned Jobs
-    </button>
-  </li>
-  <li className="nav-item" role="presentation">
-    <button
-      className="nav-link"
-      id="alljob-tab"
-      data-bs-toggle="pill"
-      data-bs-target="#alljob"
-      type="button"
-      role="tab"
-      aria-controls="alljob"
-      aria-selected="false"
-      tabIndex={-1}
-    >
-     All Jobs
-    </button>
-  </li>
-</ul>
+                  <li className="nav-item" role="presentation">
+                    <button
+                      className="nav-link active"
+                      id="assignedjob-tab"
+                      data-bs-toggle="pill"
+                      data-bs-target="#assignedjob"
+                      type="button"
+                      role="tab"
+                      aria-controls="assignedjob"
+                      aria-selected="true"
+                      tabIndex={-1}
+                    >
+                      Assigned Jobs
+                    </button>
+                  </li>
+                  <li className="nav-item" role="presentation">
+                    <button
+                      className="nav-link"
+                      id="alljob-tab"
+                      data-bs-toggle="pill"
+                      data-bs-target="#alljob"
+                      type="button"
+                      role="tab"
+                      aria-controls="alljob"
+                      aria-selected="false"
+                      tabIndex={-1}
+                    >
+                      All Jobs
+                    </button>
+                  </li>
+                </ul>
 
 
-            
-                  <div className="search-input">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Search clients..."
-                    />
+
+                <div className="search-input">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search clients..."
+                  />
+                </div>
+              </div>
+              <div className="tab-content" id="pills-tabContent">
+                <div className="tab-pane fade active show" id="assignedjob" role="tabpanel" aria-labelledby="assignedjob-tab">
+                  test
+                  <div className="datatable-wrapper ">
+
+                    {customerData && customerData && (
+                      <Datatable columns={columns} data={customerData} filter={false} />
+                    )}
                   </div>
                 </div>
-                <div className="tab-content" id="pills-tabContent">
-  <div className="tab-pane fade active show" id="assignedjob" role="tabpanel" aria-labelledby="assignedjob-tab">
-test
-<div className="datatable-wrapper ">
-                  
-{customerData && customerData && (
-            <Datatable columns={columns} data={customerData} filter={false} />
-          )}
-                  </div>
-</div>
-<div className="tab-pane fade " id="alljob" role="tabpanel" aria-labelledby="alljob-tab">
-testwew
-</div>
-</div>
-                {/* <div className="datatable-wrapper ">
+                <div className="tab-pane fade " id="alljob" role="tabpanel" aria-labelledby="alljob-tab">
+                  testwew
+                </div>
+              </div>
+              {/* <div className="datatable-wrapper ">
                 {customerData && customerData && (
             <Datatable columns={columns} data={customerData} filter={false} />
           )}
                 </div> */}
-              </div>
             </div>
-         
+          </div>
+
         </div>
       )}
 
@@ -384,8 +383,8 @@ testwew
                         {clientInformationData &&
                           clientInformationData.phone &&
                           clientInformationData.phone_code +
-                            " " +
-                            clientInformationData.phone}
+                          " " +
+                          clientInformationData.phone}
                       </li>
                       <li className="mt-2">
                         <i className="fa-regular fa-envelope text-secondary font-22 align-middle me-2"></i>
@@ -416,14 +415,14 @@ testwew
                   {informationData && informationData.client_type == 1
                     ? "Sole Trader"
                     : informationData.client_type == 2
-                    ? "Company"
-                    : "Partnership"}{" "}
+                      ? "Company"
+                      : "Partnership"}{" "}
                   Information
                 </h4>
               </div>
               <div className="col-4">
                 <div className="float-end">
-                  <button type="button" className="btn btn-info text-white " onClick={(e)=>ClientEdit(informationData.id)}>
+                  <button type="button" className="btn btn-info text-white " onClick={(e) => ClientEdit(informationData.id)}>
                     <i className="fa-regular fa-pencil me-2" />
                     Edit
                   </button>
@@ -546,7 +545,7 @@ testwew
                         <p className="font-14  ml-3">
                           {" "}
                           {informationData &&
-                          informationData.vat_registered == "0"
+                            informationData.vat_registered == "0"
                             ? "No"
                             : "Yes"}
                         </p>

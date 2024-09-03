@@ -1,18 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
 import { GetAllJabData, AddAllJobType, GET_ALL_CHECKLIST } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import sweatalert from 'sweetalert2';
-import * as bootstrap from 'bootstrap';
 import { JobType } from '../../../../ReduxStore/Slice/Settings/settingSlice'
 import { Modal, Button } from 'react-bootstrap';
 
 const CreateJob = () => {
-    const location = useLocation()
+    const location = useLocation();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const token = JSON.parse(localStorage.getItem("token"));
     const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
-    const dispatch = useDispatch();
     const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
     const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] })
     const [errors, setErrors] = useState({})
@@ -28,13 +27,13 @@ const CreateJob = () => {
     const [AddTaskArr, setAddTaskArr] = useState([])
     const [showAddJobModal, setShowAddJobModal] = useState(false);
     const [taskName, setTaskName] = useState('')
-    const [Budgeted, setBudgeted] = useState('')
     const [taskNameError, setTaskNameError] = useState('')
-    const [BudgetedError, setBudgetedError] = useState('')
     const [jobModalStatus, jobModalSetStatus] = useState(false);
     const [BudgetedHoursAddTask, setBudgetedHoursAddTask] = useState({ hours: "", minutes: "" })
     const [BudgetedHoureError, setBudgetedHourError] = useState('')
     const [BudgetedMinuteError, setBudgetedMinuteError] = useState('')
+    const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" })
+
     const [jobData, setJobData] = useState({
         AccountManager: "",
         Customer: "",
@@ -82,20 +81,18 @@ const CreateJob = () => {
     });
 
 
-
-
     useEffect(() => {
         setJobData(prevState => ({
             ...prevState,
-            AccountManager: location.state.goto == "Customer" ? location.state.details.account_manager_firstname + " " + location.state.details.account_manager_lastname : location.state.details.customer_id.account_manager_firstname + " " + location.state.details.customer_id.account_manager_lastname,
-            Customer: location.state.goto == "Customer" ? location.state.details.trading_name : location.state.details.customer_id.trading_name,
-            Client: location.state.goto == "Customer" ? "" : location.state.details.row.client_name
+            AccountManager: AllJobData?.data?.Manager?.[0]?.manager_name || "",
+            Customer: AllJobData?.data?.customer?.customer_trading_name || "",
+            Client: location.state.goto == "Customer" ? "" : AllJobData?.data?.client?.[0]?.client_trading_name || "",
         }));
     }, [AllJobData]);
 
 
     const GetJobData = async () => {
-        const req = { customer_id: location.state.goto == "Customer" ? location.state.details.id : location.state.details.customer_id.id }
+        const req = { customer_id: location.state.customer_id }
         const data = { req: req, authToken: token }
         await dispatch(GetAllJabData(data))
             .unwrap()
@@ -116,7 +113,6 @@ const CreateJob = () => {
             .catch((error) => {
                 console.log("Error", error);
             });
-
     }
 
     useEffect(() => {
@@ -124,9 +120,11 @@ const CreateJob = () => {
     }, []);
 
 
+
+
     const getAllChecklist = async () => {
-        const req = { action: "getByServiceWithJobType", service_id: jobData.Service, customer_id: location.state.goto == "Customer" ? location.state.details.id : location.state.details.customer_id.id, job_type_id: jobData.JobType }
-        
+        const req = { action: "getByServiceWithJobType", service_id: jobData.Service, customer_id: AllJobData?.data?.customer?.customer_id, job_type_id: jobData.JobType }
+
         const data = { req: req, authToken: token }
         await dispatch(GET_ALL_CHECKLIST(data))
             .unwrap()
@@ -297,9 +295,9 @@ const CreateJob = () => {
     const handleSubmit = async () => {
         const req = {
             staffCreatedId: staffCreatedId,
-            account_manager_id: location.state.goto == "Customer" ? location.state.details.account_manager_id : location.state.details.customer_id.account_manager_id,
-            customer_id: location.state.goto == "Customer" ? location.state.details.id : location.state.details.customer_id.id,
-            client_id: location.state.goto == "Customer" ? jobData.Client : location.state.details.row.id,
+            account_manager_id: AllJobData?.data?.Manager[0]?.manager_id,
+            customer_id: AllJobData?.data?.customer?.customer_id,
+            client_id: AllJobData?.data?.client[0]?.client_id,
             client_job_code: jobData.ClientJobCode,
             customer_contact_details_id: Number(jobData.CustomerAccountManager),
             service_id: Number(jobData.Service),
@@ -310,11 +308,10 @@ const CreateJob = () => {
             allocated_on: jobData.AllocatedOn ? jobData.AllocatedOn : new Date().toISOString().split('T')[0],
             date_received_on: jobData.DateReceivedOn ? jobData.DateReceivedOn : new Date().toISOString().split('T')[0],
             year_end: jobData.YearEnd,
-            //total_preparation_time: PreparationTimne.hours + ":" + PreparationTimne.minutes,
             total_preparation_time: formatTime(PreparationTimne.hours, PreparationTimne.minutes),
             review_time: formatTime(reviewTime.hours, reviewTime.minutes),
             feedback_incorporation_time: formatTime(FeedbackIncorporationTime.hours, FeedbackIncorporationTime.minutes),
-            //  total_time: Math.floor(totalHours / 60) + ":" + totalHours % 60,
+
             total_time: formatTime(Math.floor(totalHours / 60), totalHours % 60),
             engagement_model: jobData.EngagementModel,
             expected_delivery_date: jobData.ExpectedDeliveryDate,
@@ -343,7 +340,7 @@ const CreateJob = () => {
             invoice_hours: formatTime(invoiceTime.hours, invoiceTime.minutes),
             invoice_remark: jobData.InvoiceRemark,
             tasks: {
-                checklist_id: location.state.details.customer_id.id,
+                checklist_id: AllJobData?.data?.customer?.customer_id,
                 task: AddTaskArr
             }
         }
@@ -366,7 +363,7 @@ const CreateJob = () => {
                             timer: 1500
                         })
                         setTimeout(() => {
-                            location.state.goto == "Customer" ? navigate('/admin/Clientlist', { state: location.state.details }) : navigate('/admin/client/profile', { state: location.state.details });
+                            window.history.back();
                         }, 1500);
                     } else {
 
@@ -391,6 +388,9 @@ const CreateJob = () => {
 
     const totalHours = Number(PreparationTimne.hours) * 60 + Number(PreparationTimne.minutes) + Number(reviewTime.hours) * 60 + Number(reviewTime.minutes) + Number(FeedbackIncorporationTime.hours) * 60 + Number(FeedbackIncorporationTime.minutes)
 
+    useEffect(() => {
+        setTotalTime({ ...Totaltime, hours: Math.floor(totalHours / 60), minutes: totalHours % 60 });
+    }, [totalHours]);
 
 
     const openJobModal = (e) => {
@@ -505,9 +505,9 @@ const CreateJob = () => {
                         <div className="card">
 
                             <div className="card-header step-header-blue d-flex ">
-                                
+
                                 <button type="button " className="btn p-0" onClick={() => window.history.back()}>
-                                <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" /> </button>
+                                    <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" /> </button>
                                 <h3 className="card-title mb-0">Create New Job</h3>
                             </div>
 
@@ -549,10 +549,9 @@ const CreateJob = () => {
                                                                                 <select className="form-select"
                                                                                     name="Client" onChange={HandleChange} value={jobData.Client}>
                                                                                     <option value="">Select Client</option>
-                                                                                    {AllJobData.loading && AllJobData.data.client &&
-                                                                                        AllJobData.data.client.map((client) => (
-                                                                                            <option value={client.client_id} key={client.client_id}>{client.client_trading_name}</option>
-                                                                                        ))
+                                                                                    {(AllJobData?.data?.client || []).map((client) => (
+                                                                                        <option value={client.client_id} key={client.client_id}>{client.client_trading_name}</option>
+                                                                                    ))
                                                                                     }
                                                                                 </select>
                                                                                 {errors['Client'] && (
@@ -586,11 +585,9 @@ const CreateJob = () => {
                                                                         <select className="form-select"
                                                                             name="CustomerAccountManager" onChange={HandleChange} value={jobData.CustomerAccountManager}>
                                                                             <option value="">Select Customer Account Manager</option>
-                                                                            {
-                                                                                AllJobData.loading && AllJobData.data.customer_account_manager &&
-                                                                                AllJobData.data.customer_account_manager.map((customer_account_manager) => (
-                                                                                    <option value={customer_account_manager.customer_account_manager_officer_id} key={customer_account_manager.customer_account_manager_officer_id}>{customer_account_manager.customer_account_manager_officer_name}</option>
-                                                                                ))
+                                                                            {(AllJobData?.data?.customer_account_manager || []).map((customer_account_manager) => (
+                                                                                <option value={customer_account_manager.customer_account_manager_officer_id} key={customer_account_manager.customer_account_manager_officer_id}>{customer_account_manager.customer_account_manager_officer_name}</option>
+                                                                            ))
                                                                             }
                                                                         </select>
                                                                         {errors['CustomerAccountManager'] && (
@@ -605,8 +602,8 @@ const CreateJob = () => {
                                                                             name="Service" onChange={HandleChange} value={jobData.Service}>
                                                                             <option value="">Select Service</option>
                                                                             {
-                                                                                AllJobData.loading && AllJobData.data.services && 
-                                                                                AllJobData.data.services.map((service) => (
+
+                                                                                (AllJobData?.data?.services || []).map((service) => (
                                                                                     <option value={service.service_id} key={service.service_id}>{service.service_name}</option>
                                                                                 ))
 
@@ -623,7 +620,7 @@ const CreateJob = () => {
                                                                         <select className="form-select  jobtype"
                                                                             name="JobType" onChange={(e) => { HandleChange(e); openJobModal(e) }} value={jobData.JobType}>
                                                                             <option value="">Select Job Type</option>
-                                                                            {get_Job_Type.loading && get_Job_Type.data && 
+                                                                            {get_Job_Type.loading && get_Job_Type.data &&
                                                                                 get_Job_Type.data.map((jobtype) => (
                                                                                     <option
                                                                                         value={jobtype.id}
@@ -655,6 +652,9 @@ const CreateJob = () => {
                                                                                     }}
                                                                                     value={budgetedHours.hours}
                                                                                 />
+                                                                                <span className="input-group-text" id="basic-addon2">
+                                                                                    Hours
+                                                                                </span>
                                                                                 <input
                                                                                     type="text"
                                                                                     className="form-control"
@@ -670,6 +670,9 @@ const CreateJob = () => {
                                                                                     }}
                                                                                     value={budgetedHours.minutes}
                                                                                 />
+                                                                                <span className="input-group-text" id="basic-addon2">
+                                                                                    Minutes
+                                                                                </span>
                                                                             </div>
 
                                                                         </div>
@@ -681,8 +684,8 @@ const CreateJob = () => {
                                                                             name="Reviewer" onChange={HandleChange} value={jobData.Reviewer}>
                                                                             <option value=""> Select Reviewer</option>
                                                                             {
-                                                                                AllJobData.loading && AllJobData.data.reviewer && 
-                                                                                AllJobData.data.reviewer.map((reviewer) => (
+
+                                                                                (AllJobData?.data?.reviewer || []).map((reviewer) => (
                                                                                     <option value={reviewer.reviewer_id} key={reviewer.reviewer_id}>{reviewer.reviewer_name}</option>
                                                                                 ))
                                                                             }
@@ -697,8 +700,8 @@ const CreateJob = () => {
                                                                         <select className="form-select"
                                                                             name="AllocatedTo" onChange={HandleChange} value={jobData.AllocatedTo}>
                                                                             <option value=""> Select Staff</option>
-                                                                            {AllJobData.loading && AllJobData.data.allocated && 
-                                                                                AllJobData.data.allocated.map((staff) => (
+                                                                            {
+                                                                                (AllJobData?.data?.allocated || []).map((staff) => (
                                                                                     <option value={staff.allocated_id} key={staff.allocated_id}>{staff.allocated_name}</option>
                                                                                 ))}
                                                                         </select>
@@ -747,7 +750,7 @@ const CreateJob = () => {
                                                                             <label className="form-label" >Total Preparation Time</label>
                                                                             <div className="input-group">
                                                                                 <input
-                                                                                    type="number"
+                                                                                    type="text"
                                                                                     className="form-control"
                                                                                     placeholder="Hours"
                                                                                     onChange={(e) => {
@@ -758,6 +761,9 @@ const CreateJob = () => {
                                                                                     }}
                                                                                     value={PreparationTimne.hours}
                                                                                 />
+                                                                                <span className="input-group-text" id="basic-addon2">
+                                                                                    Hours
+                                                                                </span>
                                                                                 <input
                                                                                     type="text"
                                                                                     className="form-control"
@@ -773,6 +779,9 @@ const CreateJob = () => {
                                                                                     }}
                                                                                     value={PreparationTimne.minutes}
                                                                                 />
+                                                                                <span className="input-group-text" id="basic-addon2">
+                                                                                    Minutes
+                                                                                </span>
                                                                             </div>
                                                                             {errors['TotalPreparationTime'] && (
                                                                                 <div className="error-text">{errors['TotalPreparationTime']}</div>
@@ -797,6 +806,10 @@ const CreateJob = () => {
                                                                                     }}
                                                                                     value={reviewTime.hours}
                                                                                 />
+                                                                                <span className="input-group-text" id="basic-addon2">
+                                                                                    Hours
+                                                                                </span>
+
 
                                                                                 <input
                                                                                     type="text"
@@ -813,8 +826,12 @@ const CreateJob = () => {
                                                                                     }}
                                                                                     value={reviewTime.minutes}
                                                                                 />
+                                                                                <span className="input-group-text" id="basic-addon2">
+                                                                                    Minutes
+                                                                                </span>
 
                                                                             </div>
+
                                                                             {errors['TotalPreparationTime'] && (
                                                                                 <div className="error-text">{errors['TotalPreparationTime']}</div>
                                                                             )}
@@ -836,6 +853,9 @@ const CreateJob = () => {
                                                                                     }}
                                                                                     value={FeedbackIncorporationTime.hours}
                                                                                 />
+                                                                                <span className="input-group-text" id="basic-addon2">
+                                                                                    Hours
+                                                                                </span>
 
                                                                                 <input
                                                                                     type="text"
@@ -852,6 +872,9 @@ const CreateJob = () => {
                                                                                     }}
                                                                                     value={FeedbackIncorporationTime.minutes}
                                                                                 />
+                                                                                <span className="input-group-text" id="basic-addon2">
+                                                                                    Minutes
+                                                                                </span>
                                                                             </div>
                                                                             {errors['TotalPreparationTime'] && (
                                                                                 <div className="error-text">{errors['TotalPreparationTime']}</div>
@@ -859,22 +882,54 @@ const CreateJob = () => {
                                                                         </div>
                                                                     </div>
 
+
                                                                     <div className="col-lg-4">
                                                                         <div className="mb-3">
-                                                                            <label className="form-label" > Total Time</label>
+                                                                            <label className="form-label" >Total Time</label>
+                                                                            <div className="input-group">
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    placeholder="Hours"
+                                                                                    disabled
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || /^[0-9]*$/.test(value)) {
+                                                                                            setTotalTime({ ...Totaltime, hours: value });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={Totaltime.hours}
+                                                                                />
+                                                                                <span className="input-group-text" id="basic-addon2">
+                                                                                    Hours
+                                                                                </span>
 
-                                                                            <input type="text"
-                                                                                name="TotalTime"
-                                                                                className="form-control"
-                                                                                value={Math.floor(totalHours / 60) + ":" + totalHours % 60}
-                                                                                onChange={HandleChange}
-                                                                                disabled
-                                                                            />
-                                                                            {errors['TotalTime'] && (
-                                                                                <div className="error-text">{errors['TotalTime']}</div>
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    placeholder="Minutes"
+                                                                                    disabled
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                                                                                            setTotalTime({
+                                                                                                ...Totaltime,
+                                                                                                minutes: value
+                                                                                            });
+                                                                                        }
+                                                                                    }}
+                                                                                    value={Totaltime.minutes}
+                                                                                />
+                                                                                <span className="input-group-text" id="basic-addon2">
+                                                                                    Minutes
+                                                                                </span>
+                                                                            </div>
+                                                                            {errors['TotalPreparationTime'] && (
+                                                                                <div className="error-text">{errors['TotalPreparationTime']}</div>
                                                                             )}
                                                                         </div>
                                                                     </div>
+
 
                                                                     <div id="invoice_type" className="col-lg-4">
                                                                         <label htmlFor="firstNameinput" className="form-label">
@@ -1167,11 +1222,11 @@ const CreateJob = () => {
                                                                                 >
                                                                                     <option value="">Please Select Currency</option>
                                                                                     {
-                                                                                        AllJobData.loading &&  AllJobData.data.currency && 
-                                                                                        AllJobData.data.currency.map((currency) => (
+                                                                                        (AllJobData?.data?.currency || []).map((currency) => (
                                                                                             <option value={currency.country_id} key={currency.country_id}>{currency.currency_name}</option>
                                                                                         ))
                                                                                     }
+
                                                                                 </select>
                                                                                 {errors['Currency'] && (
                                                                                     <div className="error-text">{errors['Currency']}</div>
@@ -1220,6 +1275,9 @@ const CreateJob = () => {
                                                                                             }}
                                                                                             value={invoiceTime.hours}
                                                                                         />
+                                                                                        <span className="input-group-text" id="basic-addon2">
+                                                                                            Hours
+                                                                                        </span>
                                                                                         <input
                                                                                             type="text"
                                                                                             className="form-control"
@@ -1235,6 +1293,9 @@ const CreateJob = () => {
                                                                                             }}
                                                                                             value={invoiceTime.minutes}
                                                                                         />
+                                                                                        <span className="input-group-text" id="basic-addon2">
+                                                                                            Minutes
+                                                                                        </span>
                                                                                     </div>
 
                                                                                 </div>
@@ -1322,7 +1383,7 @@ const CreateJob = () => {
 
                                                                                                         <td> {checklist.budgeted_hour.split(":")[0]}h {checklist.budgeted_hour.split(":")[1]}m </td>
                                                                                                         <td>
-                                                                                                          
+
                                                                                                             <div className="add" >
                                                                                                                 {AddTaskArr && AddTaskArr.find((task) => task.task_id == checklist.task_id) ? "" :
                                                                                                                     <button className=" btn-info text-white blue-btn" onClick={() => AddTask(checklist.task_id)}  >+</button>
@@ -1465,9 +1526,6 @@ const CreateJob = () => {
                                                 </Modal.Footer>
                                             </Modal>
                                         )}
-
-
-
 
                                         <div className="hstack gap-2 justify-content-end">
 

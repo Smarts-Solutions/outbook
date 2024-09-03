@@ -18,15 +18,17 @@ const ClientList = () => {
   const [getJobDetails, setGetJobDetails] = useState([]);
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
-  
+
+  console.log("location", location.state);
+
   const [activeTab, setActiveTab] = useState(
     location.state &&
       location.state.route &&
       location.state.route == "Checklist"
       ? "checklist"
       : location.state.route == "job"
-      ? "job"
-      : "client"
+        ? "job"
+        : "client"
   );
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -122,7 +124,7 @@ const ClientList = () => {
       cell: (row) => (
         <div>
           <a
-            onClick={() => HandleClientView(row)}
+            onClick={() => HandleJobView(row)}
             style={{ cursor: "pointer", color: "#26bdf0" }}
           >
             {row.job_code_id}
@@ -309,16 +311,19 @@ const ClientList = () => {
   };
 
   const HandleClientView = (row) => {
-    navigate("/admin/client/profile", {
-      state: { row, customer_id: location.state },
-    });
+    navigate("/admin/client/profile", { state: { Client_id: row.id } });
   };
+
+  const HandleJobView = (row) => {
+    navigate("/admin/client/profile", { state: { Client_id: row.id } });
+  };
+
   const handleAddClient = () => {
     navigate("/admin/addclient", { state: { id: location.state.id } });
   };
   const handleAddJob = () => {
     navigate("/admin/createjob", {
-      state: { details: location.state, goto: "Customer" },
+      state: { customer_id: location.state.id, goto: "Customer" },
     });
   };
   function handleEdit(row) {
@@ -326,7 +331,7 @@ const ClientList = () => {
   }
   function handleJobEdit(row) {
     navigate("/admin/job/edit", {
-      state: { details: location.state, row: row, goto: "Customer" },
+      state: { job_id: row.job_id, goto: "Customer" },
     });
   }
   function handleDelete(row) {
@@ -340,6 +345,8 @@ const ClientList = () => {
       state: { id: location.state.id, checklist_id: row.checklists_id },
     });
   };
+
+
 
   useEffect(() => {
     if (getCheckList) {
@@ -407,9 +414,8 @@ const ClientList = () => {
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
                       <button
-                        className={`nav-link ${
-                          activeTab === tab.id ? "active" : ""
-                        }`}
+                        className={`nav-link ${activeTab === tab.id ? "active" : ""
+                          }`}
                         id={`${tab.id}-tab`}
                         data-bs-toggle="pill"
                         data-bs-target={`#${tab.id}`}
@@ -427,9 +433,9 @@ const ClientList = () => {
               </div>
               <div className="col-md-4 col-auto">
                 {activeTab === "client" ||
-                activeTab === "checklist" ||
-                activeTab === "" ||
-                activeTab === "job" ? (
+                  activeTab === "checklist" ||
+                  activeTab === "" ||
+                  activeTab === "job" ? (
                   <>
                     <div
                       className="btn btn-info text-white float-end blue-btn"
@@ -437,16 +443,16 @@ const ClientList = () => {
                         activeTab === "client"
                           ? handleAddClient
                           : activeTab === "checklist"
-                          ? handleClick
-                          : handleAddJob
+                            ? handleClick
+                            : handleAddJob
                       }
                     >
                       <i className="fa fa-plus pe-1" />
                       {activeTab === "client"
                         ? "Add Client"
                         : activeTab === "checklist"
-                        ? "Add Checklist"
-                        : "Create Job"}
+                          ? "Add Checklist"
+                          : "Create Job"}
                     </div>
                     <div
                       className="btn btn-info text-white float-end blue-btn"
@@ -466,9 +472,8 @@ const ClientList = () => {
         {tabs1.map((tab) => (
           <div
             key={tab.key}
-            className={`tab-pane fade ${
-              activeTab == tab.key ? "show active" : ""
-            }`}
+            className={`tab-pane fade ${activeTab == tab.key ? "show active" : ""
+              }`}
             id={tab.key}
             role="tabpanel"
             aria-labelledby={`${tab.key}-tab`}
