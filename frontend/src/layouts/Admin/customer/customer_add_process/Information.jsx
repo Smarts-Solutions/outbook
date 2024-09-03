@@ -15,8 +15,11 @@ import {
 } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import { GET_CUSTOMER_DATA } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { ADD_CUSTOMER } from "../../../../Utils/Common_Message";
 
 const Information = () => {
+  
+  const inputRefs = useRef([]);
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const customer_id = localStorage.getItem("coustomerId");
@@ -26,7 +29,6 @@ const Information = () => {
   const [getAccountMangerId, setAccountMangerId] = useState("");
   const [getAccountMangerIdErr, setAccountMangerIdErr] = useState("");
   const [CustomerType, setCustomerType] = useState("1");
-  const [getNextStatus, setNextStatus] = useState("0");
   const [customerDetails, setCustomerDetails] = useState({
     loading: true,
     data: [],
@@ -54,6 +56,16 @@ const Information = () => {
       phone_code: "+44",
     },
   ]);
+
+
+  useEffect(() => {
+    if (customer_id != null) {
+      GetCustomerData();
+    }
+  }, []);
+
+
+
 
   const handleAddContact = () => {
     setContacts([
@@ -142,37 +154,31 @@ const Information = () => {
       let errors = {};
 
       if (formik.touched.Trading_Name == true && getAccountMangerId == "") {
-        setAccountMangerIdErr("Please select an Account Manager");
+        setAccountMangerIdErr(ADD_CUSTOMER.ACCOUNT_MANAGER);
         return;
       } else if (!values.company_name) {
-        errors.company_name = "Please Enter Company Name";
+        errors.company_name = ADD_CUSTOMER.COMPANY_NAME;
       } else if (!values.entity_type) {
-        errors.entity_type = "Please Enter Entity Type";
+        errors.entity_type = ADD_CUSTOMER.ENTITY_TYPE;
       } else if (!values.company_status) {
-        errors.company_status = "Please Enter Company Status";
+        errors.company_status = ADD_CUSTOMER.COMPANY_STATUS;
       } else if (!values.company_number) {
-        errors.company_number = "Please Enter Company Number";
+        errors.company_number = ADD_CUSTOMER.COMPANY_NUMBER;
       } else if (!values.Registered_Office_Addres) {
-        errors.Registered_Office_Addres =
-          "Please Enter Registered Office Address";
+        errors.Registered_Office_Addres = ADD_CUSTOMER.REG_OFFICE_ADDRESS;
       } else if (!values.Incorporation_Date) {
-        errors.Incorporation_Date = "Please Enter Incorporation Date";
+        errors.Incorporation_Date = ADD_CUSTOMER.INCORPORATION_DATE;
       } else if (!values.Incorporation_in) {
-        errors.Incorporation_in = "Please Enter Incorporation in";
-      } else 
-      // if (values.VAT_Registered === "1" && !values.VAT_Number) {
-      //   errors.VAT_Number = "Please Enter VAT Number";
-      // } else 
-      
-      if (values.VAT_Number && values.VAT_Number.length > 9) {
-        errors.VAT_Number = "VAT Number cannot exceed 9 Numbers";
+        errors.Incorporation_in = ADD_CUSTOMER.INCORPORATION_IN;
+      } else if (values.VAT_Number && values.VAT_Number.length > 9) {
+        errors.VAT_Number = ADD_CUSTOMER.VAT_NUMBER_VALIDATION;
       } else if (values.Website && values.Website.length > 200) {
-        errors.Website = "Website cannot exceed 200 characters";
+        errors.Website = ADD_CUSTOMER.WEBSITE_VALIDATION;
       } else if (
         values.Trading_Name != undefined &&
         !values.Trading_Name.trim()
       ) {
-        errors.Trading_Name = "Please Enter Trading Name";
+        errors.Trading_Name = ADD_CUSTOMER.TRADING_NAME;
       }
 
       return errors;
@@ -181,16 +187,14 @@ const Information = () => {
       let formIsValid = true;
       const newErrors = contacts.map((contact, index) => {
         const error = {
-          firstName: contact.firstName ? "" : "First Name is required",
-          lastName: contact.lastName ? "" : "Last Name is required",
-          // role: contact.role ? "" : "Role is required",
-          // phoneNumber: contact.phoneNumber ? "" : "Phone Number is required",
+          firstName: contact.firstName ? "" : ADD_CUSTOMER.REQ_FIRST_NAME,
+          lastName: contact.lastName ? "" : ADD_CUSTOMER.REQ_LAST_NAME,
           email:
-            contact.email === ""
-              ? "Email Id is required"
+            contact.email == ""
+              ? ADD_CUSTOMER.REQ_EMAIL
               : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
               ? ""
-              : "Valid Email is required",
+              : ADD_CUSTOMER.VALID_EMAIL,
         };
 
         if (
@@ -254,10 +258,10 @@ const Information = () => {
       let errors = {};
 
       if (formik1.touched.Trading_Name == true && getAccountMangerId == "") {
-        setAccountMangerIdErr("Please select an Account Manager");
+        setAccountMangerIdErr(ADD_CUSTOMER.ACCOUNT_MANAGER);
         return;
       } else if (!values.Trading_Name.trim()) {
-        errors.Trading_Name = "Please Enter Trading Name";
+        errors.Trading_Name = ADD_CUSTOMER.TRADING_NAME;
       }
       if (values.Trading_Name && values.Trading_Name.trim().length > 100) {
         errors.Trading_Name = "Trading Name cannot exceed 100 characters";
@@ -270,18 +274,11 @@ const Information = () => {
         values.Trading_Address.length > 200
       ) {
         errors.Trading_Address = "Trading Address cannot exceed 200 characters";
-      } else 
-      // if (!values.VAT_Registered) {
-      //   errors.VAT_Registered = "Please Enter VAT Registered";
-      // }
-      //  else
-      //  if (values.VAT_Registered === "1" && !values.VAT_Number) {
-      //   errors.VAT_Number = "Please Enter VAT Number";
-      // } else 
-      if (values.VAT_Number && values.VAT_Number.length > 9) {
-        errors.VAT_Number = "VAT Number cannot exceed 9 Numbers";
+      }
+      else if (values.VAT_Number && values.VAT_Number.length > 9) {
+        errors.VAT_Number = ADD_CUSTOMER.VAT_NUMBER_VALIDATION;
       } else if (values.Website && values.Website.length > 200) {
-        errors.Website = "Website cannot exceed 200 characters";
+        errors.Website = ADD_CUSTOMER.WEBSITE_VALIDATION;
       } else if (!values.First_Name) {
         errors.First_Name = "Please Enter First Name";
       } else if (values.First_Name && values.First_Name.length > 50) {
@@ -346,17 +343,11 @@ const Information = () => {
     validate: (values) => {
       let errors = {};
       if (formik2.touched.Trading_Name == true && getAccountMangerId == "") {
-        setAccountMangerIdErr("Please select an Account Manager");
+        setAccountMangerIdErr(ADD_CUSTOMER.ACCOUNT_MANAGER);
         return;
       } else if (!values.Trading_Name.trim()) {
-        errors.Trading_Name = "Please Enter Trading Name";
-      } 
-      // else if (!values.VAT_Registered) {
-      //   errors.VAT_Registered = "Please Enter VAT Registered";
-      // } 
-      // else if (values.VAT_Registered === "1" && !values.VAT_Number) {
-      //   errors.VAT_Number = "Please Enter VAT Number";
-      // }
+        errors.Trading_Name = ADD_CUSTOMER.TRADING_NAME;
+      }
 
       return errors;
     },
@@ -1051,13 +1042,7 @@ const Information = () => {
       });
   };
 
-  useEffect(() => {
-    if (customer_id != null) {
-      GetCustomerData();
-    }
-  }, []);
 
-  const inputRefs = useRef([]);
 
   useEffect(() => {
     for (let i = 0; i < contacts.length; i++) {

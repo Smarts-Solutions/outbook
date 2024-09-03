@@ -16,6 +16,18 @@ export const ADD_CUSTOMER = {
   WEBSITE: "Please enter Website",
   TRADING_NAME: "Please enter Trading Name",
   TRADING_ADDRESS: "Please enter Trading Address",
+
+  VAT_NUMBER_VALIDATION: "VAT Number cannot exceed 9 Numbers",
+  WEBSITE_VALIDATION:  "Website cannot exceed 200 characters",
+
+
+  ENTER_FIRST_NAME: "Please enter First Name",
+  LAST_NAME: "Please enter Last Name",
+  EMAIL: "Please enter Email",
+  REQ_FIRST_NAME:"First Name is required",
+  REQ_LAST_NAME:"Last Name is required",
+  REQ_EMAIL:"Email is required",
+  VALID_EMAIL:"Valid Email is required"
 };
 
 export const EDIT_CUSTOMER = {
@@ -27,7 +39,6 @@ export const EDIT_CUSTOMER = {
   RESIDENTIOAL_ADDRESS: "Please enter Residential Address",
   invalidEmail: "Please enter a valid Email",
   invalidPhone: "Phone Number must be between 9 to 12 digits",
-
   REQUIRED_FIRST_NAME: "First Name is required",
   REQUIRES_LAST_NAME: "Last Name is required",
   REQUIRE_EMAIL: "Email is required",

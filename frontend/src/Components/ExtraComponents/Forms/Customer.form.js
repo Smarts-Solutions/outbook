@@ -372,7 +372,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                           defaultValue=""
                           readOnly={field.disable}
                           autoComplete="new-email"
-                          required={field.name == "Trading_Name" ? true : false}
+                          // required={field.name == "Trading_Name" ? true : false}
                           // ref={(input) => {
                           //   if (formik.touched[field.name] && formik.errors[field.name] && input) {
                           //     input.focus();
