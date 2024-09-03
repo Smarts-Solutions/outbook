@@ -263,7 +263,7 @@ const Service = () => {
           });
         }
       } catch (error) {
-        console.log("Error", error);
+return
       }
     };
 
@@ -303,10 +303,11 @@ const Service = () => {
           }
         }
       })
-      .catch((error) => console.log("Error fetching job types:", error));
+      .catch((error) => {
+        console.log("Error fetching job types:", error)
+      });
   };
 
-  console.log("tasks-", tasksGet);
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
@@ -466,7 +467,7 @@ const Service = () => {
             </table>
 
             <div className="d-flex justify-content-end">
-              <Button className="btn btn-info" color="primary">
+              <Button className="btn btn-info" color="primary" onClick={(e)=>SetJobtype(false)}>
                 Submit
               </Button>
             </div>

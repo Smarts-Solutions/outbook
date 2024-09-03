@@ -2,36 +2,32 @@ import React, { useState, useEffect, useContext, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { Formik, Field, Form } from "formik";
 import { Button } from "antd";
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 import MultiStepFormContext from "./MultiStepFormContext";
+import { EDIT_CUSTOMER } from "../../../../Utils/Common_Message";
+import { Email_regex } from "../../../../Utils/Common_regex";
+import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
+import {
+  PersonRole,
+  Country,
+} from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import {
   GET_CUSTOMER_DATA,
   Edit_Customer,
   GetAllCompany,
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
-import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
-import { Email_regex } from "../../../../Utils/Common_regex";
-import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
-import {
-  PersonRole,
-  Country,
-} from "../../../../ReduxStore/Slice/Settings/settingSlice";
 
 const Information = ({ id, pageStatus }) => {
+  const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
+  const refs = useRef({});
+  const managerSelectRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
-  const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
-  const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
-
-  const [countryDataAll, setCountryDataAll] = useState({
-    loading: true,
-    data: [],
-  });
-  const [customerDetails, setCustomerDetails] = useState({
-    loading: true,
-    data: [],
-  });
+  const [staffDataAll, setStaffDataAll] = useState([]);
+  const [countryDataAll, setCountryDataAll] = useState([]);
+  const [customerDetails, setCustomerDetails] = useState([]);
   const [customerType, setCustomerType] = useState("");
   const [ManagerType, setManagerType] = useState("");
   const [searchItem, setSearchItem] = useState("");
@@ -42,10 +38,16 @@ const Information = ({ id, pageStatus }) => {
   const [errors2, setErrors2] = useState({});
   const [errors3, setErrors3] = useState({});
   const [getAccountMangerIdErr, setAccountMangerIdErr] = useState("");
-  const [personRoleDataAll, setPersonRoleDataAll] = useState({
-    loading: true,
-    data: [],
-  });
+  const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
+  const [contacts1, setContacts1] = useState([]);
+
+  useEffect(() => {
+    CountryData();
+    fetchStaffData();
+    GetCustomerDetails();
+    CustomerPersonRoleData();
+  }, []);
+
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     tradingName: "",
     tradingAddress: "",
@@ -59,6 +61,7 @@ const Information = ({ id, pageStatus }) => {
     residentialAddress: "",
     phone_code: "",
   });
+
   const [getPartnershipDetails, setPartnershipDetails] = useState({
     TradingName: "",
     TradingAddress: "",
@@ -83,7 +86,6 @@ const Information = ({ id, pageStatus }) => {
     TradingAddress: "",
   });
 
-  // for Company
   const [contacts, setContacts] = useState([
     {
       authorised_signatory_status: 0,
@@ -105,6 +107,25 @@ const Information = ({ id, pageStatus }) => {
       phoneCode: false,
       phone: false,
       email: false,
+    },
+  ]);
+
+  const [contactsErrors, setContactsErrors] = useState([
+    {
+      first_name: "",
+      last_name: "",
+      customer_contact_person_role_id: "",
+      phone: "",
+      phone_code: "",
+      email: "",
+    },
+    {
+      first_name: "",
+      last_name: "",
+      customer_contact_person_role_id: "",
+      phone: "",
+      phone_code: "",
+      email: "",
     },
   ]);
 
@@ -133,6 +154,7 @@ const Information = ({ id, pageStatus }) => {
       },
     ]);
   };
+
   const handleDeleteContact = (index) => {
     const newContacts = contacts.filter((_, i) => i !== index);
     const newErrors = errors.filter((_, i) => i !== index);
@@ -141,7 +163,7 @@ const Information = ({ id, pageStatus }) => {
   };
 
   useEffect(() => {
-    if (getSearchDetails.length > 0) {
+    if (getSearchDetails && getSearchDetails.length > 0) {
       setCompanyDetails((prevState) => ({
         ...prevState,
         CompanyName: getSearchDetails[0].title,
@@ -156,27 +178,6 @@ const Information = ({ id, pageStatus }) => {
       }));
     }
   }, [getSearchDetails]);
-
-  //  For Partnership
-  const [contacts1, setContacts1] = useState([]);
-  const [contactsErrors, setContactsErrors] = useState([
-    {
-      first_name: "",
-      last_name: "",
-      customer_contact_person_role_id: "",
-      phone: "",
-      phone_code: "",
-      email: "",
-    },
-    {
-      first_name: "",
-      last_name: "",
-      customer_contact_person_role_id: "",
-      phone: "",
-      phone_code: "",
-      email: "",
-    },
-  ]);
 
   const handleAddContact1 = () => {
     setContacts1([
@@ -217,14 +218,15 @@ const Information = ({ id, pageStatus }) => {
         Staff({ req: { action: "getmanager" }, authToken: token })
       ).unwrap();
       if (response.status) {
-        setStaffDataAll({ loading: false, data: response.data });
+        setStaffDataAll(response.data);
       } else {
-        setStaffDataAll({ loading: false, data: [] });
+        setStaffDataAll([]);
       }
     } catch (error) {
-      setStaffDataAll({ loading: false, data: [] });
+      setStaffDataAll([]);
     }
   };
+
   const GetCustomerDetails = async () => {
     try {
       const response = await dispatch(
@@ -234,20 +236,15 @@ const Information = ({ id, pageStatus }) => {
         })
       ).unwrap();
       if (response.status) {
-        setCustomerDetails({
-          loading: false,
-          data: response.data,
-        });
+        setCustomerDetails(response.data);
       } else {
-        setCustomerDetails({
-          loading: false,
-          data: [],
-        });
+        setCustomerDetails([]);
       }
     } catch (error) {
       console.log("Error fetching customer data", error);
     }
   };
+
   const CustomerPersonRoleData = async () => {
     const req = {
       action: "get",
@@ -257,24 +254,9 @@ const Information = ({ id, pageStatus }) => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setPersonRoleDataAll({ loading: false, data: response.data });
+          setPersonRoleDataAll(response.data);
         } else {
-          setPersonRoleDataAll({ loading: false, data: [] });
-        }
-      })
-      .catch((error) => {
-        console.log("Error", error);
-      });
-  };
-  const CountryData = async (req) => {
-    const data = { req: { action: "get" }, authToken: token };
-    await dispatch(Country(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          setCountryDataAll({ loading: false, data: response.data });
-        } else {
-          setCountryDataAll({ loading: false, data: [] });
+          setPersonRoleDataAll([]);
         }
       })
       .catch((error) => {
@@ -282,12 +264,21 @@ const Information = ({ id, pageStatus }) => {
       });
   };
 
-  useEffect(() => {
-    CountryData();
-    fetchStaffData();
-    GetCustomerDetails();
-    CustomerPersonRoleData();
-  }, []);
+  const CountryData = async (req) => {
+    const data = { req: { action: "get" }, authToken: token };
+    await dispatch(Country(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setCountryDataAll(response.data);
+        } else {
+          setCountryDataAll([]);
+        }
+      })
+      .catch((error) => {
+        console.log("Error", error);
+      });
+  };
 
   const handleChange1 = (e) => {
     const { name, value } = e.target;
@@ -304,22 +295,23 @@ const Information = ({ id, pageStatus }) => {
     const newErrors = {};
     for (const key in getSoleTraderDetails) {
       if (!getSoleTraderDetails[key]) {
-        if (key == "IndustryType") newErrors[key] = "Select Client Industry";
+        if (key == "IndustryType")
+          newErrors[key] = EDIT_CUSTOMER.SELECT_CLIENT_INDUSTRIES;
         else if (key == "tradingName")
-          newErrors[key] = "Please enter Trading Name";
+          newErrors[key] = EDIT_CUSTOMER.ENTER_TRADING_NAME;
         else if (key == "first_name")
-          newErrors[key] = "Please enter First Name";
-        else if (key == "last_name") newErrors[key] = "Please enter Last Name";
-        else if (key == "email") newErrors[key] = "Please enter Email";
+          newErrors[key] = EDIT_CUSTOMER.ENTER_FIRST_NAME;
+        else if (key == "last_name") newErrors[key] = EDIT_CUSTOMER.LAST_NAME;
+        else if (key == "email") newErrors[key] = EDIT_CUSTOMER.EMAIL;
         else if (key == "residentialAddress")
-          newErrors[key] = "Please enter Residential Address";
+          newErrors[key] = EDIT_CUSTOMER.RESIDENTIOAL_ADDRESS;
       } else if (key == "email" && !Email_regex(getSoleTraderDetails[key])) {
-        newErrors[key] = "Please enter valid Email";
+        newErrors[key] = EDIT_CUSTOMER.invalidEmail;
       } else if (
         key == "phone" &&
         !/^\d{9,12}$/.test(getSoleTraderDetails[key])
       ) {
-        newErrors[key] = "Phone Number must be between 9 to 12 digits";
+        newErrors[key] = EDIT_CUSTOMER.invalidPhone;
       }
     }
     setErrors1(newErrors);
@@ -371,29 +363,35 @@ const Information = ({ id, pageStatus }) => {
     }
     if (customerType == 2 && validate2() && ManagerType != "") {
       let formIsValid = true;
-      const newErrors = contacts.map((contact, index) => {
-        const error = {
-          first_name: contact.first_name ? "" : "First Name is required",
-          last_name: contact.last_name ? "" : "Last Name is required",
-          email:
-            contact.email === ""
-              ? "Email Id is required"
-              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+      const newErrors =
+        contacts &&
+        contacts.map((contact, index) => {
+          const error = {
+            first_name: contact.first_name
               ? ""
-              : "Valid Email is required",
-        };
+              : EDIT_CUSTOMER.REQUIRED_FIRST_NAME,
+            last_name: contact.last_name
+              ? ""
+              : EDIT_CUSTOMER.REQUIRES_LAST_NAME,
+            email:
+              contact.email === ""
+                ? EDIT_CUSTOMER.REQUIRE_EMAIL
+                : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+                ? ""
+                : EDIT_CUSTOMER.VALID_EMAIL,
+          };
 
-        if (
-          error.first_name ||
-          error.last_name ||
-          error.customer_contact_person_role_id ||
-          error.phone ||
-          error.email
-        ) {
-          formIsValid = false;
-        }
-        return error;
-      });
+          if (
+            error.first_name ||
+            error.last_name ||
+            error.customer_contact_person_role_id ||
+            error.phone ||
+            error.email
+          ) {
+            formIsValid = false;
+          }
+          return error;
+        });
       setErrors(newErrors);
       if (formIsValid) {
         const req = {
@@ -436,31 +434,36 @@ const Information = ({ id, pageStatus }) => {
     }
     if (customerType == 3 && validate3() && ManagerType != "") {
       let formIsValid = true;
-      const newErrors = contacts1.map((contact, index) => {
-        const error = {
-          first_name: contact.first_name ? "" : "First Name is required",
-          last_name: contact.last_name ? "" : "Last Name is required",
-          // customer_contact_person_role_id: contact.customer_contact_person_role_id ? '' : 'Role is required',
-          // phone: contact.phone ? '' : 'Phone Number is required',
-          email:
-            contact.email === ""
-              ? "Email Id is required"
-              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+      const newErrors =
+        contacts1 &&
+        contacts1.map((contact, index) => {
+          const error = {
+            first_name: contact.first_name
               ? ""
-              : "Valid Email is required",
-        };
+              : EDIT_CUSTOMER.REQUIRED_FIRST_NAME,
+            last_name: contact.last_name
+              ? ""
+              : EDIT_CUSTOMER.REQUIRES_LAST_NAME,
 
-        if (
-          error.first_name ||
-          error.last_name ||
-          error.customer_contact_person_role_id ||
-          error.phone ||
-          error.email
-        ) {
-          formIsValid = false;
-        }
-        return error;
-      });
+            email:
+              contact.email === ""
+                ? EDIT_CUSTOMER.REQUIRE_EMAIL
+                : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+                ? ""
+                : EDIT_CUSTOMER.VALID_EMAIL,
+          };
+
+          if (
+            error.first_name ||
+            error.last_name ||
+            error.customer_contact_person_role_id ||
+            error.phone ||
+            error.email
+          ) {
+            formIsValid = false;
+          }
+          return error;
+        });
       setContactsErrors(newErrors);
       if (formIsValid) {
         const req = {
@@ -496,7 +499,6 @@ const Information = ({ id, pageStatus }) => {
     }
   };
 
-  // for company
   const handleChange2 = (e) => {
     const { name, value } = e.target;
     if (name === "VATNumber") {
@@ -512,21 +514,21 @@ const Information = ({ id, pageStatus }) => {
     const newErrors = {};
     for (const key in getCompanyDetails) {
       if (!getCompanyDetails[key]) {
-        if (key == "CompanyName") newErrors[key] = "Please Enter Company Name";
+        if (key == "CompanyName") newErrors[key] = EDIT_CUSTOMER.COMPANY_NAME;
         else if (key == "EntityType")
-          newErrors[key] = "Please Enter Entity Type";
+          newErrors[key] = EDIT_CUSTOMER.ENTITY_TYPE;
         else if (key == "CompanyStatus")
-          newErrors[key] = "Please Enter Company Status";
+          newErrors[key] = EDIT_CUSTOMER.COMPANY_STATUS;
         else if (key == "CompanyNumber")
-          newErrors[key] = "Please Enter Company Number";
+          newErrors[key] = EDIT_CUSTOMER.COMPANY_NUMBER;
         else if (key == "RegisteredOfficeAddress")
-          newErrors[key] = "Please Enter Registered Office Address";
+          newErrors[key] = EDIT_CUSTOMER.REGISTRER_OFFICE_ADDRESS;
         else if (key == "IncorporationDate")
-          newErrors[key] = "Please Enter Incorporation Date";
+          newErrors[key] = EDIT_CUSTOMER.INCORPORATION_DATE;
         else if (key == "IncorporationIn")
-          newErrors[key] = "Please Enter Incorporation In";
-        else  if (key == "TradingName")
-          newErrors[key] = "Please Enter Trading Name";
+          newErrors[key] = EDIT_CUSTOMER.INCORPORATION_IN;
+        else if (key == "TradingName")
+          newErrors[key] = EDIT_CUSTOMER.ENTER_TRADING_NAME;
       }
     }
     setErrors2(newErrors);
@@ -534,9 +536,11 @@ const Information = ({ id, pageStatus }) => {
   };
 
   const handleChange = (index, field, value) => {
-    const newContacts = contacts.map((contact, i) =>
-      i === index ? { ...contact, [field]: value } : contact
-    );
+    const newContacts =
+      contacts &&
+      contacts.map((contact, i) =>
+        i === index ? { ...contact, [field]: value } : contact
+      );
     setContacts(newContacts);
     validateField(index, field, value);
   };
@@ -554,16 +558,20 @@ const Information = ({ id, pageStatus }) => {
     }
     switch (field) {
       case "first_name":
-        newErrors[index].first_name = value ? "" : "First Name is required";
+        newErrors[index].first_name = value
+          ? ""
+          : EDIT_CUSTOMER.REQUIRED_FIRST_NAME;
         break;
       case "last_name":
-        newErrors[index].last_name = value ? "" : "Last Name is required";
+        newErrors[index].last_name = value
+          ? ""
+          : EDIT_CUSTOMER.REQUIRES_LAST_NAME;
         break;
       case "email":
         if (!value) {
-          newErrors[index].email = "Email Id is required";
+          newErrors[index].email = EDIT_CUSTOMER.REQUIRE_EMAIL;
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          newErrors[index].email = "Valid Email is required";
+          newErrors[index].email = EDIT_CUSTOMER.VALID_EMAIL;
         } else {
           newErrors[index].email = "";
         }
@@ -574,7 +582,7 @@ const Information = ({ id, pageStatus }) => {
             ? ""
             : /^\d{9,12}$/.test(value)
             ? ""
-            : "Phone Number must be between 9 to 12 digits";
+            : EDIT_CUSTOMER.PHONE_VALIDATION;
         break;
 
       default:
@@ -583,10 +591,9 @@ const Information = ({ id, pageStatus }) => {
     setErrors(newErrors);
   };
 
-  // for partnership
   const handleChange3 = (e) => {
     const { name, value } = e.target;
-  
+
     if (name === "VATNumber") {
       if (!/^[0-9+]*$/.test(value)) {
         return;
@@ -599,15 +606,12 @@ const Information = ({ id, pageStatus }) => {
   const validate3 = () => {
     const newErrors = {};
     for (const key in getPartnershipDetails) {
-      
-
       if (!getPartnershipDetails[key]) {
         if (key === "ClientIndustry") {
-          newErrors[key] = "Please Select Client Industry";
+          newErrors[key] = EDIT_CUSTOMER.SELECT_CLIENT_INDUSTRIES;
         } else if (key === "TradingName") {
-          newErrors[key] = "Please Enter Trading Name";
-        } 
- 
+          newErrors[key] = EDIT_CUSTOMER.ENTER_TRADING_NAME;
+        }
       }
     }
 
@@ -618,13 +622,15 @@ const Information = ({ id, pageStatus }) => {
 
   const handleChange4 = (index, field, value) => {
     let newValue = value;
-    if (field == "authorised_signatory_status") {
+    if (field == EDIT_CUSTOMER.AUTHORISED) {
       newValue = value ? 1 : 0;
     }
 
-    const newContacts = contacts1.map((contact, i) =>
-      i === index ? { ...contact, [field]: newValue } : contact
-    );
+    const newContacts =
+      contacts1 &&
+      contacts1.map((contact, i) =>
+        i === index ? { ...contact, [field]: newValue } : contact
+      );
 
     setContacts1(newContacts);
     validateField1(index, field, newValue);
@@ -639,7 +645,7 @@ const Information = ({ id, pageStatus }) => {
         if (!value.trim()) {
           errors[index] = {
             ...errors[index],
-            [field]: "This field is required",
+            [field]: EDIT_CUSTOMER.REQUIRED_FEILD,
           };
         } else {
           delete errors[index][field];
@@ -650,12 +656,12 @@ const Information = ({ id, pageStatus }) => {
         if (!value.trim()) {
           errors[index] = {
             ...errors[index],
-            [field]: "This field is required",
+            [field]: EDIT_CUSTOMER.REQUIRED_FEILD,
           };
         } else if (!/\S+@\S+\.\S+/.test(value)) {
           errors[index] = {
             ...errors[index],
-            [field]: "Invalid email address",
+            [field]: EDIT_CUSTOMER.INVALID_EMAIL_ERROR,
           };
         } else {
           delete errors[index][field];
@@ -667,7 +673,7 @@ const Information = ({ id, pageStatus }) => {
             ? ""
             : /^\d{9,12}$/.test(value)
             ? ""
-            : "Phone Number must be between 9 to 12 digits";
+            : EDIT_CUSTOMER.PHONE_VALIDATION;
         break;
 
       default:
@@ -683,10 +689,6 @@ const Information = ({ id, pageStatus }) => {
     );
     setSearchDetails(filterData);
   };
-
-  useEffect(() => {
-    FilterSearchDetails();
-  }, [searchItem]);
 
   const handleChangeValue = (e) => {
     setManagerType(e.target.value);
@@ -713,139 +715,133 @@ const Information = ({ id, pageStatus }) => {
       });
   };
 
+  const capitalizeFirstLetter = (string) => {
+    if (!string) return "";
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+  };
+
   useEffect(() => {
     Get_Company();
+  }, [searchItem]);
+
+  useEffect(() => {
+    FilterSearchDetails();
   }, [searchItem]);
 
   useEffect(() => {
     setCustomerType(id.customer_type);
     setManagerType(id.account_manager_id);
 
-    if (id.customer_type == "1") {
-      setSoleTraderDetails((prevState) => ({
-        ...prevState,
-        tradingName:
-          !customerDetails.loading &&
-          customerDetails.data.customer.trading_name,
-        tradingAddress:
-          !customerDetails.loading &&
-          customerDetails.data.customer.trading_address,
-        vatRegistered:
-          !customerDetails.loading &&
-          customerDetails.data.customer.vat_registered,
-        vatNumber:
-          !customerDetails.loading && customerDetails.data.customer.vat_number,
-        website:
-          !customerDetails.loading && customerDetails.data.customer.website,
-        first_name:
-          !customerDetails.loading &&
-          customerDetails.data.contact_details[0].first_name,
-        last_name:
-          !customerDetails.loading &&
-          customerDetails.data.contact_details[0].last_name,
-        phone:
-          !customerDetails.loading &&
-          customerDetails.data.contact_details[0].phone,
-        email:
-          !customerDetails.loading &&
-          customerDetails.data.contact_details[0].email,
-        residentialAddress:
-          !customerDetails.loading &&
-          customerDetails.data.contact_details[0].residential_address,
-        phone_code:
-          !customerDetails.loading &&
-          customerDetails.data.contact_details[0].phone_code,
-        contact_id:
-          !customerDetails.loading &&
-          customerDetails.data.contact_details[0].contact_id,
-      }));
-    }
-    if (id.customer_type == "2") {
-      setCompanyDetails((prevState) => ({
-        ...prevState,
-        CompanyName:
-          !customerDetails.loading &&
-          customerDetails.data.company_details.company_name,
-        EntityType:
-          !customerDetails.loading &&
-          customerDetails.data.company_details.entity_type,
-        CompanyStatus:
-          !customerDetails.loading &&
-          customerDetails.data.company_details.company_status,
-        CompanyNumber:
-          !customerDetails.loading &&
-          customerDetails.data.company_details.company_number,
-        RegisteredOfficeAddress:
-          !customerDetails.loading &&
-          customerDetails.data.company_details.registered_office_address,
-        IncorporationDate:
-          !customerDetails.loading &&
-          customerDetails.data.company_details.incorporation_date
-            ? customerDetails.data.company_details.incorporation_date
-            : "",
-        IncorporationIn:
-          !customerDetails.loading &&
-          customerDetails.data.company_details.incorporation_in,
+    if (customerDetails && customerDetails) {
+      if (id.customer_type == "1") {
+        setSoleTraderDetails((prevState) => ({
+          ...prevState,
+          tradingName:
+            customerDetails.customer && customerDetails.customer.trading_name,
+          tradingAddress:
+            customerDetails.customer &&
+            customerDetails.customer.trading_address,
+          vatRegistered:
+            customerDetails.customer && customerDetails.customer.vat_registered,
+          vatNumber:
+            customerDetails.customer && customerDetails.customer.vat_number,
+          website: customerDetails.customer && customerDetails.customer.website,
+          first_name:
+            customerDetails.contact_details &&
+            customerDetails.contact_details[0].first_name,
+          last_name:
+            customerDetails.contact_details &&
+            customerDetails.contact_details[0].last_name,
+          phone:
+            customerDetails.contact_details &&
+            customerDetails.contact_details[0].phone,
+          email:
+            customerDetails.contact_details &&
+            customerDetails.contact_details[0].email,
+          residentialAddress:
+            customerDetails.contact_details &&
+            customerDetails.contact_details[0].residential_address,
+          phone_code:
+            customerDetails.contact_details &&
+            customerDetails.contact_details[0].phone_code,
+          contact_id:
+            customerDetails.contact_details &&
+            customerDetails.contact_details[0].contact_id,
+        }));
+      }
+      if (id.customer_type == "2") {
+        setCompanyDetails((prevState) => ({
+          ...prevState,
+          CompanyName:
+            customerDetails.company_details &&
+            customerDetails.company_details.company_name,
+          EntityType:
+            customerDetails.company_details &&
+            customerDetails.company_details.entity_type,
+          CompanyStatus:
+            customerDetails.company_details &&
+            customerDetails.company_details.company_status,
+          CompanyNumber:
+            customerDetails.company_details &&
+            customerDetails.company_details.company_number,
+          RegisteredOfficeAddress:
+            customerDetails.company_details &&
+            customerDetails.company_details.registered_office_address,
+          IncorporationDate:
+            customerDetails.company_details &&
+            customerDetails.company_details.incorporation_date
+              ? customerDetails.company_details &&
+                customerDetails.company_details.incorporation_date
+              : "",
+          IncorporationIn:
+            customerDetails.company_details &&
+            customerDetails.company_details.incorporation_in,
 
-        VATRegistered:
-          !customerDetails.loading &&
-          customerDetails.data.customer.vat_registered,
-        VATNumber:
-          !customerDetails.loading && customerDetails.data.customer.vat_number,
-        Website:
-          !customerDetails.loading && customerDetails.data.customer.website,
+          VATRegistered:
+            customerDetails.customer && customerDetails.customer.vat_registered,
+          VATNumber:
+            customerDetails.customer && customerDetails.customer.vat_number,
+          Website: customerDetails.customer && customerDetails.customer.website,
 
-        TradingName:
-          !customerDetails.loading &&
-          customerDetails.data.customer.trading_name,
-        TradingAddress:
-          !customerDetails.loading &&
-          customerDetails.data.customer.trading_address,
-      }));
-      setContacts(
-        !customerDetails.loading && customerDetails.data.contact_details
-      );
-    }
-    if (id.customer_type == "3") {
-      setPartnershipDetails((prevState) => ({
-        ...prevState,
-        TradingName:
-          !customerDetails.loading &&
-          customerDetails.data.customer.trading_name,
-        TradingAddress:
-          !customerDetails.loading &&
-          customerDetails.data.customer.trading_address,
-        VATRegistered:
-          !customerDetails.loading &&
-          customerDetails.data.customer.vat_registered,
-        VATNumber:
-          !customerDetails.loading && customerDetails.data.customer.vat_number,
-        Website:
-          !customerDetails.loading && customerDetails.data.customer.website,
-      }));
-      setContacts1(
-        customerDetails.data && customerDetails.data.contact_details
-      );
+          TradingName:
+            customerDetails.customer && customerDetails.customer.trading_name,
+          TradingAddress:
+            customerDetails.customer &&
+            customerDetails.customer.trading_address,
+        }));
+        setContacts(customerDetails.contact_details);
+      }
+      if (id.customer_type == "3") {
+        setPartnershipDetails((prevState) => ({
+          ...prevState,
+          TradingName:
+            customerDetails.customer && customerDetails.customer.trading_name,
+          TradingAddress:
+            customerDetails.customer &&
+            customerDetails.customer.trading_address,
+          VATRegistered:
+            customerDetails.customer && customerDetails.customer.vat_registered,
+          VATNumber:
+            customerDetails.customer && customerDetails.customer.vat_number,
+          Website: customerDetails.customer && customerDetails.customer.website,
+        }));
+        setContacts1(customerDetails && customerDetails.contact_details);
 
-      if (
-        customerDetails.data &&
-        customerDetails.data.contact_details?.length > 0
-      ) {
-        const newErrors = customerDetails.data.contact_details.map(
-          (contact) => ({
-            first_name: "",
-            last_name: "",
-            customer_contact_person_role_id: "",
-            phone: "",
-            email: "",
-          })
-        );
-        setContactsErrors(newErrors);
+        if (customerDetails && customerDetails.contact_details?.length > 0) {
+          const newErrors =
+            customerDetails.contact_details &&
+            customerDetails.contact_details.map((contact) => ({
+              first_name: "",
+              last_name: "",
+              customer_contact_person_role_id: "",
+              phone: "",
+              email: "",
+            }));
+          setContactsErrors(newErrors);
+        }
       }
     }
   }, [customerDetails]);
-
-  const refs = useRef({});
 
   useEffect(() => {
     const firstErrorKey = Object.keys(errors3).find((key) => errors3[key]);
@@ -858,8 +854,6 @@ const Information = ({ id, pageStatus }) => {
     }
   }, [errors3]);
 
-  const managerSelectRef = useRef(null);
-
   useEffect(() => {
     if (getAccountMangerIdErr && managerSelectRef.current) {
       managerSelectRef.current.scrollIntoView({
@@ -870,11 +864,6 @@ const Information = ({ id, pageStatus }) => {
       managerSelectRef.current.focus();
     }
   }, [getAccountMangerIdErr]);
-
-  const capitalizeFirstLetter = (string) => {
-    if (!string) return "";
-    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-  };
 
   return (
     <>
@@ -936,13 +925,14 @@ const Information = ({ id, pageStatus }) => {
                             innerRef={managerSelectRef}
                           >
                             <option value="">Select Manager</option>
-                            {staffDataAll.data.map((data) => (
-                              <option key={data.id} value={data.id}>
-                                {capitalizeFirstLetter(data.first_name) +
-                                  " " +
-                                  capitalizeFirstLetter(data.last_name)}
-                              </option>
-                            ))}
+                            {staffDataAll &&
+                              staffDataAll.map((data) => (
+                                <option key={data.id} value={data.id}>
+                                  {capitalizeFirstLetter(data.first_name) +
+                                    " " +
+                                    capitalizeFirstLetter(data.last_name)}
+                                </option>
+                              ))}
                           </Field>
                           {getAccountMangerIdErr && (
                             <div
@@ -1133,11 +1123,15 @@ const Information = ({ id, pageStatus }) => {
                                     name="phone_code"
                                     value={getSoleTraderDetails.phone_code}
                                   >
-                                    {countryDataAll.data.map((data) => (
-                                      <option key={data.code} value={data.code}>
-                                        {data.code}
-                                      </option>
-                                    ))}
+                                    {countryDataAll &&
+                                      countryDataAll.map((data) => (
+                                        <option
+                                          key={data.code}
+                                          value={data.code}
+                                        >
+                                          {data.code}
+                                        </option>
+                                      ))}
                                   </select>
                                 </div>
                                 <div className="mb-3 col-md-8">
@@ -1380,7 +1374,7 @@ const Information = ({ id, pageStatus }) => {
                                 <input
                                   type="text"
                                   className="form-control input_bg"
-                                  placeholder="Please Enter Incorporation In"
+                                  placeholder={EDIT_CUSTOMER.INCORPORATION_IN}
                                   name="IncorporationIn"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails.IncorporationIn}
@@ -1544,7 +1538,8 @@ const Information = ({ id, pageStatus }) => {
                         <div className="row">
                           <div className="card-body">
                             <div className="row">
-                              {contacts.length > 0 &&
+                              {contacts &&
+                                contacts.length > 0 &&
                                 contacts.map((contact, index) => (
                                   <div
                                     className="col-xl-12 col-lg-12 mt-3"
@@ -1666,7 +1661,7 @@ const Information = ({ id, pageStatus }) => {
                                                 Select Role
                                               </option>
                                               {personRoleDataAll &&
-                                                personRoleDataAll.data.map(
+                                                personRoleDataAll.map(
                                                   (item) => (
                                                     <option
                                                       value={item.id}
@@ -1712,16 +1707,17 @@ const Information = ({ id, pageStatus }) => {
                                                   name="phone_code"
                                                   value={contact.phone_code}
                                                 >
-                                                  {countryDataAll.data.map(
-                                                    (data) => (
-                                                      <option
-                                                        key={data.code}
-                                                        value={data.code}
-                                                      >
-                                                        {data.code}
-                                                      </option>
-                                                    )
-                                                  )}
+                                                  {countryDataAll &&
+                                                    countryDataAll.map(
+                                                      (data) => (
+                                                        <option
+                                                          key={data.code}
+                                                          value={data.code}
+                                                        >
+                                                          {data.code}
+                                                        </option>
+                                                      )
+                                                    )}
                                                 </select>
                                               </div>
                                               <div className="mb-3 col-md-8">
@@ -2079,7 +2075,7 @@ const Information = ({ id, pageStatus }) => {
                                               Select Role
                                             </option>
                                             {personRoleDataAll &&
-                                              personRoleDataAll.data.map(
+                                              personRoleDataAll.map(
                                                 (item, i) => (
                                                   <option
                                                     value={item.id}
@@ -2124,16 +2120,15 @@ const Information = ({ id, pageStatus }) => {
                                                 name="phone_code"
                                                 value={contact.phone_code}
                                               >
-                                                {countryDataAll.data.map(
-                                                  (data) => (
+                                                {countryDataAll &&
+                                                  countryDataAll.map((data) => (
                                                     <option
                                                       key={data.code}
                                                       value={data.code}
                                                     >
                                                       {data.code}
                                                     </option>
-                                                  )
-                                                )}
+                                                  ))}
                                               </select>
                                             </div>
                                             <div className="mb-3 col-md-8">

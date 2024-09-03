@@ -208,3 +208,17 @@ export async function MasterStatus(data, token) {
         return await err;
     }
 }
+
+export async function incorporationApi(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}incorporation`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+

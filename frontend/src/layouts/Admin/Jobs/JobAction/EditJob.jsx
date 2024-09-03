@@ -81,7 +81,6 @@ const EditJob = () => {
   });
 
 
-  console.log("getJobDetails", getJobDetails)
 
 
 

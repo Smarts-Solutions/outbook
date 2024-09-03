@@ -7,6 +7,7 @@ import {
   PersonRole,
   ClientIndustry,
   Country,
+  IncorporationApi,
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import Modal from "../../../Components/ExtraComponents/Modals/Modal";
@@ -75,6 +76,8 @@ const Setting = () => {
     loading: true,
     data: [],
   });
+
+  const [incorporationDataAll, setIncorporationDataAll] = useState([]);
   const [addRoleName, setAddRoleName] = useState("");
   const [statusTypeDataAll, setStatusTypeDataAll] = useState({
     loading: true,
@@ -195,6 +198,7 @@ const Setting = () => {
         console.log("Error", error);
       });
   };
+
   const PersonRoleData = async (req) => {
     const data = { req: req, authToken: token };
     await dispatch(PersonRole(data))
@@ -300,6 +304,41 @@ const Setting = () => {
       });
   };
 
+  const incorporationData = async (req) => {
+    const data = { req: req, authToken: token };
+    await dispatch(IncorporationApi(data))
+      .unwrap()
+      .then(async (response) => {
+        if (req.action == "getAll") {
+          if (response.status) {
+            setIncorporationDataAll(response.data);
+          } else {
+            setIncorporationDataAll([]);
+          }
+        } else {
+          if (response.status) {
+            sweatalert.fire({
+              title: response.message,
+              icon: "success",
+              timer: 2000,
+            });
+            setTimeout(() => {
+              incorporationData({ action: "getAll" });
+            }, 2000);
+          } else {
+            sweatalert.fire({
+              title: response.message,
+              icon: "error",
+              timer: 2000,
+            });
+          }
+        }
+      })
+      .catch((error) => {
+        console.log("Error", error);
+      });
+  };
+
   useEffect(() => {
     fetchApiData(tabStatus.current);
   }, [tabStatus.current]);
@@ -332,6 +371,9 @@ const Setting = () => {
         break;
       case "6":
         CountryData(req);
+        break;
+      case "7":
+        incorporationData(req);
         break;
       default:
         break;
@@ -671,13 +713,52 @@ const Setting = () => {
       : []),
   ];
 
+  const columnincorporation = [
+    { name: "Incorporation Name", selector: (row) => row.name, sortable: true },
+    {
+      name: "Status",
+      cell: (row) => (
+        <div>
+          <span
+            className={`badge ${
+              row.status === "1" ? "bg-success" : "bg-danger"
+            }`}
+          >
+            {row.status === "1" ? "Active" : "Deactive"}
+          </span>
+        </div>
+      ),
+    },
+
+    {
+      name: "Actions",
+      cell: (row) => (
+        <div>
+          <button className="edit-icon" onClick={() => handleEdit(row, "7")}>
+            {" "}
+            <i className="ti-pencil" />
+          </button>
+
+          <button
+            className="delete-icon"
+            onClick={() => handleDelete(row, "7")}
+          >
+            {" "}
+            <i className="ti-trash" />
+          </button>
+        </div>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+    },
+  ];
+
   const handleJobType = (row) => {
     navigate("/admin/add/jobtype", { state: { Id: row.id } });
   };
 
   const handleModalChange = (e) => {
-    // setModalData({ ...modalData, value: e.target.value });
-
     const { name, value } = e.target;
     setModalData((prevModalData) => ({
       ...prevModalData,
@@ -985,6 +1066,33 @@ const Setting = () => {
         tabStatus: tabStatus,
         id: data.id,
       });
+    } else if (tabStatus === "7") {
+      setModalData({
+        ...modalData,
+        fields: [
+          {
+            type: "text",
+            name: "name",
+            label: "Incorporation",
+            placeholder: "Enter Incorporation Name",
+            value: data.name,
+          },
+          {
+            type: "select",
+            name: "status",
+            label: "Status",
+            placeholder: "Select Status",
+            value: data.status === "1" ? "1" : "0",
+            options: [
+              { label: "Active", value: "1" },
+              { label: "Deactive", value: "0" },
+            ],
+          },
+        ],
+        title: "Incorporation",
+        tabStatus: tabStatus,
+        id: data.id,
+      });
     }
 
     //setModalData(data);
@@ -1003,7 +1111,7 @@ const Setting = () => {
         icon: "warning",
         timer: 2000,
       });
-      // alert("Please enter " + modalData.fields[0].label);
+
       return;
     }
     const req = { action: isEdit ? "update" : "add" };
@@ -1036,6 +1144,9 @@ const Setting = () => {
       case "6":
         CountryData(req);
         break;
+      case "7":
+        incorporationData(req);
+        break;
       default:
         break;
     }
@@ -1050,7 +1161,6 @@ const Setting = () => {
         : tabStatus == "2"
         ? data.type
         : data.name;
-    // Confirm deletion with the user
 
     sweatalert
       .fire({
@@ -1086,6 +1196,9 @@ const Setting = () => {
               break;
             case "6":
               CountryData(req);
+              break;
+            case "7":
+              incorporationData(req);
               break;
             default:
               break;
@@ -1396,27 +1509,25 @@ const Setting = () => {
                 <div className="datatable-wrapper">
                   <Datatable
                     filter={true}
-                    columns={columnCountry}
-                    data={countryDataAll.data}
+                    columns={columnincorporation}
+                    data={incorporationDataAll}
                   />
                 </div>
               </div>
             </div>
-            {/* Incorporation  End */}
+        
           </div>
         </div>
-        {/* {/ Add staff Modal start /} */}
+    
         <>
-          {/* {/ Modal1 /} */}
+      
           {isModalOpen && (
             <Modal
               modalId="exampleModal3"
               title={
                 isEdit ? "Edit " + modalData.title : "Add " + modalData.title
               }
-              // fields={[
-              //     { type: modalData.type, name: modalData.name, label: modalData.label, placeholder: modalData.placeholder, value: modalData.value }
-              // ]}
+          
               fields={modalData.fields}
               onClose={() => {
                 setIsModalOpen(false);

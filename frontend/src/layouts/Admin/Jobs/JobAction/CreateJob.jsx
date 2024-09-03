@@ -1321,9 +1321,7 @@ const CreateJob = () => {
 
                                                                                                         <td> {checklist.budgeted_hour.split(":")[0]}h {checklist.budgeted_hour.split(":")[1]}m </td>
                                                                                                         <td>
-                                                                                                            {console.log(AddTaskArr)}
-                                                                                                            {console.log("getChecklistId", getChecklistId)}
-
+                                                                                                          
                                                                                                             <div className="add" >
                                                                                                                 {AddTaskArr && AddTaskArr.find((task) => task.task_id == checklist.task_id) ? "" :
                                                                                                                     <button className=" btn-info text-white blue-btn" onClick={() => AddTask(checklist.task_id)}  >+</button>
