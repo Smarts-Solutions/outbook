@@ -40,10 +40,66 @@ const Profile = () => {
     return (
         <div className="container">
             <div className="main-body mt-3">
+                <div className='card'>
+            <div className="card-body">
+  <div className="dastyle-profile">
+    <div className="row py-3">
+      <div className="col-lg-4 align-self-center mb-3 mb-lg-0">
+        <div className="dastyle-profile-main justify-content-center">
+          <div className="dastyle-profile-main-pic">
+          <img
+             src="https://bootdey.com/img/Content/avatar/avatar7.png"
+             alt="Admin"
+             className="rounded-circle"
+             width={200}
+             />
+         
+          </div>
+          <div className="dastyle-profile_user-detail">
+            {/* <h5 className="dastyle-user-name">{getProfileDetails && getProfileDetails.first_name}</h5> */}
+            {/* <p className="mb-0 dastyle-user-name-post">UI/UX Designer, India</p> */}
+          </div>
+        </div>
+      </div>
+      {/*end col*/}
+      <div className="col-lg-8 ml-auto align-self-center">
+        <ul className="list-unstyled personal-detail mb-0">
+        <li className=" mb-3">
+            <i className=" ti-user mr-2 text-secondary font-22 align-middle" />{" "}
+            <b>Full Name </b>{getProfileDetails && getProfileDetails.first_name + " " +  getProfileDetails.last_name}
+          </li>
+          <li className="mb-3">
+            <i className="fa-regular fa-phone mr-2 text-secondary font-22 align-middle" />{" "}
+            <b>phone </b>: {getProfileDetails && getProfileDetails.phone}
+          </li>
+          <li className="mb-3">
+            <i className="fa-regular fa-envelope text-secondary font-22 align-middle mr-2" />{" "}
+            <b>Email </b>: {getProfileDetails && getProfileDetails.email}
+          </li>
+          <li className="mb-3">
+          
+            <i className="fa-regular fa-power-off text-secondary font-22 align-middle mr-2" />{" "}
+            <b>Status </b>: {getProfileDetails && getProfileDetails.status}
+          </li>
+          <li className="">
+            <button className='btn btn-info'><i className='fa fa-edit pe-2'></i>Edit </button>
+          </li>
+        </ul>
+      </div>
+  
+    </div>
+    {/*end row*/}
+  </div>
+  {/*end f_profile*/}
+</div>
+</div>
 
-                <div className="row gutters-sm">
+                {/* <div className="row gutters-sm">
                     <div className="col-md-4 mb-3">
                         <div className="card">
+                            <div className='row'>
+                                
+                            </div>
                             <div className="card-body">
                                 <div className="d-flex flex-column align-items-center text-center">
                                     <img
@@ -54,12 +110,7 @@ const Profile = () => {
                                     />
                                     <div className="mt-3">
                                         <h4>{getProfileDetails && getProfileDetails.first_name}</h4>
-                                        {/* <p className="text-secondary mb-1">Full Stack Developer</p>
-                                        <p className="text-muted font-size-sm">
-                                            Bay Area, San Francisco, CA
-                                        </p>
-                                        <button className="btn btn-primary">Follow</button>
-                                        <button className="btn btn-outline-primary">Message</button> */}
+                                       
                                     </div>
                                 </div>
                             </div>
@@ -114,7 +165,7 @@ const Profile = () => {
                         </div>
 
                     </div>
-                </div>
+                </div> */}
             </div>
         </div>
 
