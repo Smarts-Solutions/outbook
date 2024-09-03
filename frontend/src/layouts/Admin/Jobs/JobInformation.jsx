@@ -11,6 +11,16 @@ const JobInformationPage = ({ job_id }) => {
     const location = useLocation();
     const [AllJobData, setAllJobData] = useState([]);
     const dispatch = useDispatch();
+    const [budgetedhours, setBudgetedHours] = useState({ hours: "", minutes: "" })
+    const [PreparationTimne, setPreparationTimne] = useState({ hours: "", minutes: "" })
+    const [ReviewTime, setReviewTime] = useState({ hours: "", minutes: "" })
+    const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" })
+    const [FeedbackIncorporationTime, setFeedbackIncorporationTime] = useState({ hours: "", minutes: "" })
+    const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" })
+
+
+
+
     const [JobInformationData, setJobInformationData] = useState({
         AccountManager: "",
         Customer: "",
@@ -59,8 +69,6 @@ const JobInformationPage = ({ job_id }) => {
     });
 
 
-    console.log("JobInformationData", JobInformationData)
-    console.log("job_id", job_id)
 
 
     const GetJobData = async () => {
@@ -174,6 +182,30 @@ const JobInformationPage = ({ job_id }) => {
             .unwrap()
             .then(async (response) => {
                 if (response.status) {
+                    setBudgetedHours({
+                        hours: response.data.budgeted_hours.split(":")[0],
+                        minutes: response.data.budgeted_hours.split(":")[1]
+                    })
+                    setReviewTime({
+                        hours: response.data.review_time.split(":")[0],
+                        minutes: response.data.review_time.split(":")[1]
+                    })
+                    setPreparationTimne({
+                        hours: response.data.total_preparation_time.split(":")[0],
+                        minutes: response.data.total_preparation_time.split(":")[1]
+                    })
+                    setTotalTime({
+                        hours: response.data.total_time.split(":")[0],
+                        minutes: response.data.total_time.split(":")[1]
+                    })
+                    setFeedbackIncorporationTime({
+                        hours: response.data.feedback_incorporation_time.split(":")[0],
+                        minutes: response.data.feedback_incorporation_time.split(":")[1]
+                    })
+                    setInvoiceTime({
+                        hours: response.data.invoice_hours.split(":")[0],
+                        minutes: response.data.invoice_hours.split(":")[1]
+                    })
                     setJobInformationData(prevState => ({
                         ...prevState,
                         AccountManager: `${response.data.outbooks_acount_manager_first_name} ${response.data.outbooks_acount_manager_last_name}`,
@@ -183,43 +215,42 @@ const JobInformationPage = ({ job_id }) => {
                         CustomerAccountManager: response.data.account_manager_officer_id,
                         Service: response.data.service_id,
                         JobType: response.data.job_type_id,
-                        // BudgetedHours: response.data.budgeted_hours,
-                        // Reviewer: response.data.reviewer_id,
-                        // AllocatedTo: response.data.allocated_id,
 
-                        // AllocatedOn: response.data.allocated_on,
-                        // DateReceivedOn: response.data.date_received_on,
-                        // YearEnd: response.data.year_end,
-                        // TotalPreparationTime: response.data.total_preparation_time,
-                        // ReviewTime: response.data.review_time,
-                        // FeedbackIncorporationTime: response.data.feedback_incorporation_time,
-                        // TotalTime: response.data.total_time,
-                        // EngagementModel: response.data.engagement_model,
-                        // ExpectedDeliveryDate: response.data.expected_delivery_date,
-                        // DueOn: response.data.due_on,
-                        // SubmissionDeadline: response.data.submission_deadline,
-                        // CustomerDeadlineDate: response.data.customer_deadline_date,
-                        // SLADeadlineDate: response.data.sla_deadline_date,
-                        // InternalDeadlineDate: response.data.internal_deadline_date,
-                        // FilingWithCompaniesHouseRequired: response.data.filing_Companies_required,
-                        // CompaniesHouseFilingDate: response.data.filing_Companies_date,
-                        // FilingWithHMRCRequired: response.data.filing_hmrc_required,
-                        // HMRCFilingDate: response.data.filing_hmrc_date,
-                        // OpeningBalanceAdjustmentRequired: response.data.opening_balance_required,
-                        // OpeningBalanceAdjustmentDate: response.data.opening_balance_date,
-                        // NumberOfTransactions: response.data.number_of_transaction,
-                        // NumberOfTrialBalanceItems: response.data.number_of_balance_items,
-                        // Turnover: response.data.turnover,
-                        // NoOfEmployees: response.data.number_of_employees,
-                        // VATReconciliation: response.data.vat_reconciliation,
-                        // Bookkeeping: response.data.bookkeeping,
-                        // ProcessingType: response.data.processing_type,
-                        // Invoiced: response.data.invoiced,
-                        // Currency: response.data.currency,
-                        // InvoiceValue: response.data.invoice_value,
-                        // InvoiceDate: response.data.invoice_date,
-                        // InvoiceTime: response.data.invoice_hours,
-                        // InvoiceRemark: response.data.invoice_remark,
+                        Reviewer: response.data.reviewer_id,
+                        AllocatedTo: response.data.allocated_id,
+                        AllocatedOn: response.data.allocated_on,
+                        DateReceivedOn: response.data.date_received_on,
+                        YearEnd: response.data.year_end,
+                        TotalPreparationTime: response.data.total_preparation_time,
+                        ReviewTime: response.data.review_time,
+                        FeedbackIncorporationTime: response.data.feedback_incorporation_time,
+                        TotalTime: response.data.total_time,
+                        EngagementModel: response.data.engagement_model,
+                        ExpectedDeliveryDate: response.data.expected_delivery_date,
+                        DueOn: response.data.due_on,
+                        SubmissionDeadline: response.data.submission_deadline,
+                        CustomerDeadlineDate: response.data.customer_deadline_date,
+                        SLADeadlineDate: response.data.sla_deadline_date,
+                        InternalDeadlineDate: response.data.internal_deadline_date,
+                        FilingWithCompaniesHouseRequired: response.data.filing_Companies_required,
+                        CompaniesHouseFilingDate: response.data.filing_Companies_date,
+                        FilingWithHMRCRequired: response.data.filing_hmrc_required,
+                        HMRCFilingDate: response.data.filing_hmrc_date,
+                        OpeningBalanceAdjustmentRequired: response.data.opening_balance_required,
+                        OpeningBalanceAdjustmentDate: response.data.opening_balance_date,
+                        NumberOfTransactions: response.data.number_of_transaction,
+                        NumberOfTrialBalanceItems: response.data.number_of_balance_items,
+                        Turnover: response.data.turnover,
+                        NoOfEmployees: response.data.number_of_employees,
+                        VATReconciliation: response.data.vat_reconciliation,
+                        Bookkeeping: response.data.bookkeeping,
+                        ProcessingType: response.data.processing_type,
+                        Invoiced: response.data.invoiced,
+                        Currency: response.data.currency,
+                        InvoiceValue: response.data.invoice_value,
+                        InvoiceDate: response.data.invoice_date,
+                        InvoiceTime: response.data.invoice_hours,
+                        InvoiceRemark: response.data.invoice_remark,
 
 
                     }));
@@ -236,6 +267,15 @@ const JobInformationPage = ({ job_id }) => {
     useEffect(() => {
         JobDetails()
     }, []);
+
+    const filteredData = AllJobData.data?.engagement_model?.[0]
+        ? Object.keys(AllJobData.data.engagement_model[0])
+            .filter(key => AllJobData.data.engagement_model[0][key] === "1")
+            .reduce((obj, key) => {
+                obj[key] = AllJobData.data.engagement_model[0][key];
+                return obj;
+            }, {})
+        : {};
 
 
 
@@ -277,6 +317,7 @@ const JobInformationPage = ({ job_id }) => {
                                             value={JobInformationData.AccountManager}
                                         />
                                     </div>
+
                                     <div id="invoiceremark" className="mb-3 col-lg-4">
                                         <label className="form-label">Customer<span className='text-danger'>*</span></label>
                                         <input
@@ -289,6 +330,7 @@ const JobInformationPage = ({ job_id }) => {
                                             value={JobInformationData.Customer}
                                         />
                                     </div>
+
                                     <div className="col-lg-4">
                                         <label className="form-label">Client<span className='text-danger'>*</span></label>
                                         <input
@@ -302,6 +344,7 @@ const JobInformationPage = ({ job_id }) => {
 
                                         />
                                     </div>
+
                                     <div className="mb-3 col-lg-4">
                                         <label className="form-label">Client Job Code</label>
                                         <input
@@ -337,7 +380,6 @@ const JobInformationPage = ({ job_id }) => {
 
 
                                     </div>
-
 
                                     <div className="col-lg-4">
                                         <label className="form-label">Service</label>
@@ -386,51 +428,103 @@ const JobInformationPage = ({ job_id }) => {
                                                     type="text"
                                                     className="form-control"
                                                     placeholder="Hours"
-                                                    defaultValue=""
+                                                    name="BudgetedHours"
+                                                    disabled
+                                                    onChange={(e) => setBudgetedHours({ ...budgetedhours, hours: e.target.value })}
+                                                    value={budgetedhours.hours}
+
                                                 />
+                                                <span className="input-group-text" id="basic-addon2">
+                                                    Hours
+                                                </span>
                                                 <input
                                                     type="text"
                                                     className="form-control"
                                                     placeholder="Minutes"
-                                                    defaultValue=""
+                                                    name="BudgetedHours"
+                                                    disabled
+                                                    onChange={(e) => setBudgetedHours({ ...budgetedhours, minutes: e.target.value })}
+                                                    value={budgetedhours.minutes}
+
                                                 />
+                                                <span className="input-group-text" id="basic-addon2">
+                                                    Minutes
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
+
                                     <div className="col-lg-4">
                                         <label className="form-label">Reviewer</label>
-                                        <select className="form-select" name="Reviewer">
+                                        <select className="form-select mb-3"
+                                            name="Reviewer"
+                                            disabled
+                                            onChange={(e) => setJobInformationData({ ...JobInformationData, Reviewer: e.target.value })}
+                                            value={JobInformationData.Reviewer}
+
+                                        >
                                             <option value=""> Select Reviewer</option>
-                                            <option value={9}>shk hu</option>
+                                            {
+                                                AllJobData.loading &&
+                                                AllJobData.data.reviewer.map((reviewer) => (
+                                                    <option value={reviewer.reviewer_id} key={reviewer.reviewer_id}>{reviewer.reviewer_name}</option>
+                                                ))
+                                            }
                                         </select>
+
                                     </div>
-                                    <div className="col-lg-4 mb-3">
+
+                                    <div className="col-lg-4">
                                         <label className="form-label">Allocated To</label>
-                                        <select className="form-select" name="AllocatedTo">
+                                        <select className="form-select mb-3"
+                                            name="AllocatedTo"
+                                            disabled
+                                            onChange={(e) => setJobInformationData({ ...JobInformationData, AllocatedTo: e.target.value })}
+                                            value={JobInformationData.AllocatedTo}
+                                        >
                                             <option value=""> Select Staff</option>
-                                            <option value={4}>staff staff</option>
+                                            {AllJobData.data &&
+                                                AllJobData.data.allocated.map((staff) => (
+                                                    <option value={staff.allocated_id} key={staff.allocated_id}>{staff.allocated_name}</option>
+                                                ))}
                                         </select>
+
                                     </div>
+
                                     <div className="col-lg-4">
                                         <label className="form-label"> Allocated On </label>
                                         <input
                                             type="date"
-                                            className="form-control"
+                                            className="form-control mb-3"
                                             placeholder="DD-MM-YYYY"
                                             name="AllocatedOn"
-                                            defaultValue=""
+                                            disabled
+                                            onChange={(e) => setJobInformationData({ ...JobInformationData, AllocatedOn: e.target.value })}
+                                            value={JobInformationData.AllocatedOn}
+
+                                            max={new Date().toISOString().split("T")[0]}
                                         />
+
                                     </div>
+
                                     <div className="col-lg-4">
                                         <label className="form-label">Date Received On</label>
                                         <input
                                             type="date"
-                                            className="form-control"
+                                            className="form-control mb-3"
                                             placeholder="DD-MM-YYYY"
                                             name="DateReceivedOn"
-                                            defaultValue=""
+                                            disabled
+                                            onChange={(e) => setJobInformationData({ ...JobInformationData, DateReceivedOn: e.target.value })
+
+                                            }
+                                            value={JobInformationData.DateReceivedOn}
+
+                                            max={new Date().toISOString().split("T")[0]}
                                         />
+
                                     </div>
+
                                     <div className="col-lg-4">
                                         <div className="mb-3">
                                             <label className="form-label">Year End</label>
@@ -439,29 +533,44 @@ const JobInformationPage = ({ job_id }) => {
                                                 className="form-control"
                                                 placeholder="MM/YYYY"
                                                 name="YearEnd"
-                                                defaultValue=""
+                                                disabled
+                                                onChange={(e) => setJobInformationData({ ...JobInformationData, YearEnd: e.target.value })}
+                                                value={JobInformationData.YearEnd}
                                             />
                                         </div>
                                     </div>
+
                                     <div className="col-lg-4">
                                         <div className="mb-3">
-                                            <label className="form-label">Total Preparation Time</label>
+                                            <label className="form-label" >Total Preparation Time</label>
                                             <div className="input-group">
                                                 <input
-                                                    type="number"
+                                                    type="text"
                                                     className="form-control"
                                                     placeholder="Hours"
-                                                    defaultValue=""
+                                                    disabled
+                                                    onChange={(e) => setPreparationTimne({ ...PreparationTimne, hours: e.target.value })}
+                                                    value={PreparationTimne.hours}
                                                 />
+                                                <span className="input-group-text" id="basic-addon2">
+                                                    Hours
+                                                </span>
                                                 <input
                                                     type="text"
                                                     className="form-control"
                                                     placeholder="Minutes"
-                                                    defaultValue=""
+                                                    disabled
+                                                    onChange={(e) => setPreparationTimne({ ...PreparationTimne, minutes: e.target.value })}
+                                                    value={PreparationTimne.minutes}
                                                 />
+                                                <span className="input-group-text" id="basic-addon2">
+                                                    Minutes
+                                                </span>
                                             </div>
+
                                         </div>
                                     </div>
+
                                     <div className="col-lg-4">
                                         <div className="mb-3">
                                             <label className="form-label">Review Time</label>
@@ -470,36 +579,59 @@ const JobInformationPage = ({ job_id }) => {
                                                     type="text"
                                                     className="form-control"
                                                     placeholder="Hours"
-                                                    defaultValue=""
+                                                    disabled
+                                                    onChange={(e) => setReviewTime({ ...ReviewTime, hours: e.target.value })}
+                                                    value={ReviewTime.hours}
                                                 />
+                                                <span className="input-group-text" id="basic-addon2">
+                                                    Hours
+                                                </span>
                                                 <input
                                                     type="text"
                                                     className="form-control"
                                                     placeholder="Minutes"
-                                                    defaultValue=""
+                                                    disabled
+                                                    onChange={(e) => setReviewTime({ ...ReviewTime, minutes: e.target.value })}
+                                                    value={ReviewTime.minutes}
                                                 />
+                                                <span className="input-group-text" id="basic-addon2">
+                                                    Minutes
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
+
                                     <div className="col-lg-4">
                                         <div className="mb-3">
-                                            <label className="form-label">Feedback Incorporation Time</label>
+                                            <label className="form-label" >Feedback Incorporation Time</label>
                                             <div className="input-group">
                                                 <input
                                                     type="text"
                                                     className="form-control"
                                                     placeholder="Hours"
-                                                    defaultValue=""
+                                                    disabled
+                                                    onChange={(e) => setFeedbackIncorporationTime({ ...FeedbackIncorporationTime, hours: e.target.value })}
+                                                    value={FeedbackIncorporationTime.hours}
                                                 />
+                                                <span className="input-group-text" id="basic-addon2">
+                                                    Hours
+                                                </span>
                                                 <input
                                                     type="text"
                                                     className="form-control"
                                                     placeholder="Minutes"
-                                                    defaultValue=""
+                                                    disabled
+                                                    onChange={(e) => setFeedbackIncorporationTime({ ...FeedbackIncorporationTime, minutes: e.target.value })}
+                                                    value={FeedbackIncorporationTime.minutes}
                                                 />
+                                                <span className="input-group-text" id="basic-addon2">
+                                                    Minutes
+                                                </span>
                                             </div>
+
                                         </div>
                                     </div>
+
                                     <div className="col-lg-4">
                                         <div className="mb-3">
                                             <label className="form-label"> Total Time</label>
@@ -512,6 +644,10 @@ const JobInformationPage = ({ job_id }) => {
                                                             placeholder={10}
                                                             aria-label="Recipient's username"
                                                             aria-describedby="basic-addon2"
+                                                            disabled
+                                                            onChange={(e) => setTotalTime({ ...Totaltime, hours: e.target.value })}
+                                                            value={Totaltime.hours}
+
                                                         />
                                                         <span className="input-group-text" id="basic-addon2">
                                                             Hours
@@ -526,6 +662,9 @@ const JobInformationPage = ({ job_id }) => {
                                                             placeholder={10}
                                                             aria-label="Recipient's username"
                                                             aria-describedby="basic-addon2"
+                                                            disabled
+                                                            onChange={(e) => setTotalTime({ ...Totaltime, minutes: e.target.value })}
+                                                            value={Totaltime.minutes}
                                                         />
                                                         <span className="input-group-text" id="basic-addon2">
                                                             Minutes
@@ -537,21 +676,26 @@ const JobInformationPage = ({ job_id }) => {
                                             </div>
                                         </div>
                                     </div>
+
                                     <div id="invoice_type" className="col-lg-4">
                                         <label htmlFor="firstNameinput" className="form-label">
                                             Engagement Model
                                         </label>
-                                        <select
-                                            className="form-select invoice_type_dropdown"
+                                        <select className="form-select mb-3 invoice_type_dropdown"
+                                            disabled
                                             name="EngagementModel"
+                                            onChange={(e) => setJobInformationData({ ...JobInformationData, EngagementModel: e.target.value })}
+                                            value={JobInformationData.EngagementModel}
                                         >
                                             <option value="">Please Select Engagement Model</option>
-                                            <option value="fte_dedicated_staffing">
-                                                fte_dedicated_staffing
-                                            </option>
-                                            <option value="customised_pricing">customised_pricing</option>
+                                            {Object.keys(filteredData).map(key => (
+                                                <option key={key} value={key}>{key}</option>
+                                            ))}
                                         </select>
+
+
                                     </div>
+
                                 </div>
                             </div>
                         </div>
@@ -572,6 +716,10 @@ const JobInformationPage = ({ job_id }) => {
                                                 placeholder="DD-MM-YYYY"
                                                 name="ExpectedDeliveryDate"
                                                 defaultValue=""
+                                                disabled
+                                                onChange={(e) => setJobInformationData({ ...JobInformationData, ExpectedDeliveryDate: e.target.value })}
+                                                value={JobInformationData.ExpectedDeliveryDate}
+
                                             />
                                         </div>
                                         <div className="col-lg-4">
@@ -582,6 +730,9 @@ const JobInformationPage = ({ job_id }) => {
                                                 placeholder="DD-MM-YYYY"
                                                 name="DueOn"
                                                 defaultValue=""
+                                                disabled
+                                                onChange={(e) => setJobInformationData({ ...JobInformationData, DueOn: e.target.value })}
+                                                value={JobInformationData.DueOn}
                                             />
                                         </div>
                                         <div className="col-lg-4">
@@ -592,6 +743,10 @@ const JobInformationPage = ({ job_id }) => {
                                                 placeholder="DD-MM-YYYY"
                                                 name="SubmissionDeadline"
                                                 defaultValue=""
+                                                disabled
+                                                onChange={(e) => setJobInformationData({ ...JobInformationData, SubmissionDeadline: e.target.value })}
+
+                                                value={JobInformationData.SubmissionDeadline}
                                             />
                                         </div>
                                         <div className="col-lg-4">
@@ -602,6 +757,9 @@ const JobInformationPage = ({ job_id }) => {
                                                 placeholder="DD-MM-YYYY"
                                                 name="CustomerDeadlineDate"
                                                 defaultValue=""
+                                                disabled
+                                                onChange={(e) => setJobInformationData({ ...JobInformationData, CustomerDeadlineDate: e.target.value })}
+                                                value={JobInformationData.CustomerDeadlineDate}
                                             />
                                         </div>
                                         <div className="col-lg-4">
@@ -612,6 +770,10 @@ const JobInformationPage = ({ job_id }) => {
                                                 placeholder="DD-MM-YYYY"
                                                 name="SLADeadlineDate"
                                                 defaultValue=""
+                                                disabled
+                                                onChange={(e) => setJobInformationData({ ...JobInformationData, SLADeadlineDate: e.target.value })}
+                                                value={JobInformationData.SLADeadlineDate}
+
                                             />
                                         </div>
                                         <div className="col-lg-4">
@@ -622,6 +784,9 @@ const JobInformationPage = ({ job_id }) => {
                                                 placeholder="DD-MM-YYYY"
                                                 name="InternalDeadlineDate"
                                                 defaultValue=""
+                                                disabled
+                                                onChange={(e) => setJobInformationData({ ...JobInformationData, InternalDeadlineDate: e.target.value })}
+                                                value={JobInformationData.InternalDeadlineDate}
                                             />
                                         </div>
                                     </div>
@@ -639,19 +804,18 @@ const JobInformationPage = ({ job_id }) => {
                                     <div className="row">
                                         <div className="col-lg-4">
                                             <div className="mb-3">
-                                                <label className="form-label">
-                                                    Filing With Companies House Required?
-                                                </label>
-                                                <select
-                                                    className="form-select"
+                                                <label className="form-label">Filing With Companies House Required?</label>
+                                                <select className="form-select mb-3"
                                                     name="FilingWithCompaniesHouseRequired"
+                                                    disabled
+                                                    onChange={(e) => setJobInformationData({ ...JobInformationData, FilingWithCompaniesHouseRequired: e.target.value })}
+                                                    value={JobInformationData.FilingWithCompaniesHouseRequired}
                                                 >
-                                                    <option value="">
-                                                        Please Select Companies House Required
-                                                    </option>
-                                                    <option value={1}>Yes</option>
-                                                    <option value={0}>No</option>
+                                                    <option value="">Please Select Companies House Required</option>
+                                                    <option value="1">Yes</option>
+                                                    <option value="0">No</option>
                                                 </select>
+
                                             </div>
                                         </div>
                                         <div className="col-lg-4">
@@ -664,6 +828,10 @@ const JobInformationPage = ({ job_id }) => {
                                                     className="form-control"
                                                     name="CompaniesHouseFilingDate"
                                                     defaultValue=""
+                                                    disabled
+                                                    onChange={(e) => setJobInformationData({ ...JobInformationData, CompaniesHouseFilingDate: e.target.value })}
+                                                    value={JobInformationData.CompaniesHouseFilingDate}
+
                                                 />
                                             </div>
                                         </div>
@@ -672,6 +840,9 @@ const JobInformationPage = ({ job_id }) => {
                                             <select
                                                 className="form-select invoice_type_dropdown"
                                                 name="FilingWithHMRCRequired"
+                                                disabled
+                                                onChange={(e) => setJobInformationData({ ...JobInformationData, FilingWithHMRCRequired: e.target.value })}
+                                                value={JobInformationData.FilingWithHMRCRequired}
                                             >
                                                 <option value="">Please Select HMRC Required</option>
                                                 <option value={1}>Yes</option>
@@ -686,6 +857,10 @@ const JobInformationPage = ({ job_id }) => {
                                                     className="form-control"
                                                     name="HMRCFilingDate"
                                                     defaultValue=""
+                                                    disabled
+                                                    onChange={(e) => setJobInformationData({ ...JobInformationData, HMRCFilingDate: e.target.value })}
+                                                    value={JobInformationData.HMRCFilingDate}
+
                                                 />
                                             </div>
                                         </div>
@@ -697,6 +872,9 @@ const JobInformationPage = ({ job_id }) => {
                                                 <select
                                                     className="form-select"
                                                     name="OpeningBalanceAdjustmentRequired"
+                                                    disabled
+                                                    onChange={(e) => setJobInformationData({ ...JobInformationData, OpeningBalanceAdjustmentRequired: e.target.value })}
+                                                    value={JobInformationData.OpeningBalanceAdjustmentRequired}
                                                 >
                                                     <option value="">
                                                         Please Select Opening Balance Adjustment
@@ -716,6 +894,9 @@ const JobInformationPage = ({ job_id }) => {
                                                     className="form-control"
                                                     name="OpeningBalanceAdjustmentDate"
                                                     defaultValue=""
+                                                    disabled
+                                                    onChange={(e) => setJobInformationData({ ...JobInformationData, OpeningBalanceAdjustmentDate: e.target.value })}
+                                                    value={JobInformationData.OpeningBalanceAdjustmentDate}
                                                 />
                                             </div>
                                         </div>
@@ -738,6 +919,9 @@ const JobInformationPage = ({ job_id }) => {
                                                 placeholder="Number of Transactions"
                                                 name="NumberOfTransactions"
                                                 defaultValue=""
+                                                disabled
+                                                onChange={(e) => setJobInformationData({ ...JobInformationData, NumberOfTransactions: e.target.value })}
+                                                value={JobInformationData.NumberOfTransactions}
                                             />
                                         </div>
                                         <div className="col-lg-4">
@@ -750,6 +934,9 @@ const JobInformationPage = ({ job_id }) => {
                                                 placeholder="Enter Trial Balance Items"
                                                 name="NumberOfTrialBalanceItems"
                                                 defaultValue=""
+                                                disabled
+                                                onChange={(e) => setJobInformationData({ ...JobInformationData, NumberOfTrialBalanceItems: e.target.value })}
+                                                value={JobInformationData.NumberOfTrialBalanceItems}
                                             />
                                         </div>
                                         <div className="col-lg-4">
@@ -760,6 +947,9 @@ const JobInformationPage = ({ job_id }) => {
                                                 placeholder="Enter Turnover"
                                                 name="Turnover"
                                                 defaultValue=""
+                                                disabled
+                                                onChange={(e) => setJobInformationData({ ...JobInformationData, Turnover: e.target.value })}
+                                                value={JobInformationData.Turnover}
                                             />
                                         </div>
                                         <div className="col-lg-4 mb-3">
@@ -770,6 +960,10 @@ const JobInformationPage = ({ job_id }) => {
                                                 placeholder="No.Of Employees"
                                                 name="NoOfEmployees"
                                                 defaultValue=""
+                                                disabled
+                                                onChange={(e) => setJobInformationData({ ...JobInformationData, NoOfEmployees: e.target.value })}
+                                                value={JobInformationData.NoOfEmployees}
+
                                             />
                                         </div>
                                         <div className="col-lg-4">
@@ -777,6 +971,9 @@ const JobInformationPage = ({ job_id }) => {
                                             <select
                                                 className="form-select invoice_type_dropdown"
                                                 name="VATReconciliation"
+                                                disabled
+                                                onChange={(e) => setJobInformationData({ ...JobInformationData, VATReconciliation: e.target.value })}
+                                                value={JobInformationData.VATReconciliation}
                                             >
                                                 <option value="">Please Select VAT Reconciliation</option>
                                                 <option value={1}>Yes</option>
@@ -788,6 +985,9 @@ const JobInformationPage = ({ job_id }) => {
                                             <select
                                                 className="form-select invoice_type_dropdown"
                                                 name="Bookkeeping"
+                                                disabled
+                                                onChange={(e) => setJobInformationData({ ...JobInformationData, Bookkeeping: e.target.value })}
+                                                value={JobInformationData.Bookkeeping}
                                             >
                                                 <option value="">Please Select Bookkeeping</option>
                                                 <option value={1}>Yes</option>
@@ -799,6 +999,9 @@ const JobInformationPage = ({ job_id }) => {
                                             <select
                                                 className="form-select invoice_type_dropdown"
                                                 name="ProcessingType"
+                                                disabled
+                                                onChange={(e) => setJobInformationData({ ...JobInformationData, ProcessingType: e.target.value })}
+                                                value={JobInformationData.ProcessingType}
                                             >
                                                 <option value="">Please Select Processing Type</option>
                                                 <option value={1}> Manual </option>
@@ -824,6 +1027,9 @@ const JobInformationPage = ({ job_id }) => {
                                                 <select
                                                     className="invoiced_dropdown form-select"
                                                     name="Invoiced"
+                                                    disabled
+                                                    onChange={(e) => setJobInformationData({ ...JobInformationData, Invoiced: e.target.value })}
+                                                    value={JobInformationData.Invoiced}
                                                 >
                                                     <option value="">Please Select Invoiced</option>
                                                     <option value={1}>Yes</option>
@@ -835,6 +1041,9 @@ const JobInformationPage = ({ job_id }) => {
                                                 <select
                                                     className="invoiced_dropdown form-select"
                                                     name="Currency"
+                                                    disabled
+                                                    onChange={(e) => setJobInformationData({ ...JobInformationData, Currency: e.target.value })}
+                                                    value={JobInformationData.Currency}
                                                 >
                                                     <option value="">Please Select Currency</option>
                                                     <option>Rupee</option>
@@ -849,6 +1058,10 @@ const JobInformationPage = ({ job_id }) => {
                                                     placeholder="Invoice Value"
                                                     name="InvoiceValue"
                                                     defaultValue=""
+                                                    disabled
+
+                                                    onChange={(e) => setJobInformationData({ ...JobInformationData, InvoiceValue: e.target.value })}
+                                                    value={JobInformationData.InvoiceValue}
                                                 />
                                             </div>
                                             <div className="col-lg-4">
@@ -860,36 +1073,62 @@ const JobInformationPage = ({ job_id }) => {
                                                     name="InvoiceDate"
                                                     max="2024-08-27"
                                                     defaultValue=""
+                                                    disabled
+                                                    onChange={(e) => setJobInformationData({ ...JobInformationData, InvoiceDate: e.target.value })}
+                                                    value={JobInformationData.InvoiceDate}
                                                 />
                                             </div>
+
                                             <div className="col-lg-4">
                                                 <div className="mb-3">
-                                                    <label className="form-label">Invoice Date</label>
+                                                    <label className="form-label" >Invoice </label>
                                                     <div className="input-group">
                                                         <input
                                                             type="text"
                                                             className="form-control"
                                                             placeholder="Hours"
-                                                            defaultValue=""
+                                                            disabled
+                                                            onChange={(e) => {
+                                                                const value = e.target.value;
+                                                                if (value === '' || (Number(value) >= 0 && Number(value) <= 23)) {
+                                                                    setInvoiceTime({
+                                                                        ...invoiceTime,
+                                                                        hours: value
+                                                                    });
+                                                                }
+                                                            }}
+                                                            value={invoiceTime.hours}
                                                         />
                                                         <input
                                                             type="text"
                                                             className="form-control"
                                                             placeholder="Minutes"
-                                                            defaultValue=""
+                                                            disabled
+                                                            onChange={(e) => {
+                                                                const value = e.target.value;
+                                                                if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                                                                    setInvoiceTime({
+                                                                        ...invoiceTime,
+                                                                        minutes: value
+                                                                    });
+                                                                }
+                                                            }}
+                                                            value={invoiceTime.minutes}
                                                         />
                                                     </div>
+
                                                 </div>
                                             </div>
                                             <div id="invoicedremark" className="col-lg-4">
-                                                <label className="form-label">Invoice Remark</label>
-                                                <input
-                                                    type="text"
+                                                <label className="form-label" >Invoice Remark</label>
+                                                <textarea
                                                     className="form-control"
                                                     placeholder="Invoice Remark"
                                                     name="InvoiceRemark"
+                                                    disabled
+                                                    onChange={(e) => setJobInformationData({ ...JobInformationData, InvoiceRemark: e.target.value })}
+                                                    value={JobInformationData.InvoiceRemark}
                                                     maxLength={500}
-                                                    defaultValue=""
                                                 />
                                             </div>
                                         </div>
