@@ -12,10 +12,7 @@ const ClientList = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const [customerData, setCustomerData] = useState([]);
   const [activeTab, setActiveTab] = useState("NoOfJobs");
-  const [getClientDetails, setClientDetails] = useState({
-    loading: true,
-    data: [],
-  });
+  const [getClientDetails, setClientDetails] = useState({ loading: true, data: [], });
   const [informationData, informationSetData] = useState([]);
   const [clientInformationData, setClientInformationData] = useState([]);
   const [companyDetails, setCompanyDetails] = useState([]);
@@ -53,9 +50,6 @@ const ClientList = () => {
         console.log("Error", error);
       });
   };
-
-
-  console.log("getClientDetails", getClientDetails?.data?.client?.customer_id);
 
 
   const tabs = [
@@ -163,11 +157,9 @@ const ClientList = () => {
     navigate("/admin/job/logs", { state: { job_id: row.job_id, goto: "client" } });
   };
 
-
   function handleEdit(row) {
     navigate("/admin/job/edit", { state: { job_id: row.job_id, goto: "client" } });
   }
-
 
   function handleDelete(row) {
     console.log("Deleting row:", row);
@@ -198,12 +190,10 @@ const ClientList = () => {
     }
   };
 
-
-
-
   function handleDelete(row) {
     console.log("Deleting row:", row);
   }
+
   function ClientEdit(row) {
     console.log("row", row);
     navigate("/admin/client/edit", { state: { row, id: row } });

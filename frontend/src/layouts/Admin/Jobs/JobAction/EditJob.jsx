@@ -82,16 +82,88 @@ const EditJob = () => {
     InvoiceRemark: "",
   });
 
-
-
+ 
   const JobDetails = async () => {
     const req = { action: "getByJobId", job_id: location.state.job_id }
-    console.log("req", req);
     const data = { req: req, authToken: token }
     await dispatch(Get_All_Job_List(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
+
+          if (Object.keys(response.data).length > 0) {
+            setBudgetedHours({
+              hours: response.data.budgeted_hours?.split(":")[0] ?? "",
+              minutes: response.data.budgeted_hours?.split(":")[1] ?? "",
+            });
+            setTotalTime({
+              hours: response.data.total_time?.split(":")[0] ?? "",
+              minutes: response.data.total_time?.split(":")[1] ?? "",
+            });
+
+            setReviewTime({
+              hours: response.data.review_time?.split(":")[0] ?? "",
+              minutes: response.data.review_time?.split(":")[1] ?? "",
+            });
+
+            setFeedbackIncorporationTime({
+              hours: response.data.feedback_incorporation_time?.split(":")[0] ?? "",
+              minutes: response.data.feedback_incorporation_time?.split(":")[1] ?? "",
+            });
+
+            setPreparationTimne({
+              hours: response.data.total_preparation_time?.split(":")[0] ?? "",
+              minutes: response.data.total_preparation_time?.split(":")[1] ?? "",
+            });
+
+            setInvoiceTime({
+              hours: response.data.invoice_hours?.split(":")[0] ?? "",
+              minutes: response.data.invoice_hours?.split(":")[1] ?? "",
+            });
+
+            setJobData(prevState => ({
+              ...prevState,
+              AccountManager: `${response.data.outbooks_acount_manager_first_name ?? ""} ${response.data.outbooks_acount_manager_last_name ?? ""}`,
+              Customer: response.data.customer_trading_name ?? "",
+              Client: location.state.goto == "Customer" ? response.data.client_id : response.data.client_trading_name ?? "",
+              ClientJobCode: response.data.client_job_code ?? "",
+              CustomerAccountManager: response.data.account_manager_officer_id ?? "",
+              Service: response.data.service_id ?? "",
+              JobType: response.data.job_type_id ?? "",
+              Reviewer: response.data.reviewer_id ?? "",
+              AllocatedTo: response.data.allocated_id ?? "",
+              AllocatedOn: response.data.allocated_on?.split("T")[0] ?? null,
+              DateReceivedOn: response.data.date_received_on?.split("T")[0] ?? null,
+              YearEnd: response.data.year_end ?? "",
+              EngagementModel: response.data.engagement_model ?? "",
+              ExpectedDeliveryDate: response.data.expected_delivery_date?.split("T")[0] ?? null,
+              DueOn: response.data.due_on?.split("T")[0] ?? null,
+              SubmissionDeadline: response.data.submission_deadline?.split("T")[0] ?? null,
+              CustomerDeadlineDate: response.data.customer_deadline_date?.split("T")[0] ?? null,
+              SLADeadlineDate: response.data.sla_deadline_date?.split("T")[0] ?? null,
+              InternalDeadlineDate: response.data.internal_deadline_date?.split("T")[0] ?? null,
+              FilingWithCompaniesHouseRequired: response.data.filing_Companies_required ?? false,
+              CompaniesHouseFilingDate: response.data.filing_Companies_date?.split("T")[0] ?? null,
+              FilingWithHMRCRequired: response.data.filing_hmrc_required ?? false,
+              HMRCFilingDate: response.data.filing_hmrc_date?.split("T")[0] ?? null,
+              OpeningBalanceAdjustmentRequired: response.data.opening_balance_required ?? false,
+              OpeningBalanceAdjustmentDate: response.data.opening_balance_date?.split("T")[0] ?? null,
+              NumberOfTransactions: response.data.number_of_transaction ?? 0,
+              NumberOfTrialBalanceItems: response.data.number_of_balance_items ?? 0,
+              Turnover: response.data.turnover ?? 0,
+              NoOfEmployees: response.data.number_of_employees ?? 0,
+              VATReconciliation: response.data.vat_reconciliation ?? "",
+              Bookkeeping: response.data.bookkeeping ?? "",
+              ProcessingType: response.data.processing_type ?? "",
+              Invoiced: response.data.invoiced ?? false,
+              Currency: response.data.currency_id ?? '0',
+              InvoiceValue: response.data.invoice_value ?? 0,
+              InvoiceDate: response.data.invoice_date?.split("T")[0] ?? null,
+              InvoiceHours: response.data.invoice_hours ?? "",
+              InvoiceRemark: response.data.invoice_remark ?? "",
+            }));
+          }
+
           setGetJobDetails({
             loading: true,
             data: response.data
@@ -173,84 +245,8 @@ const EditJob = () => {
 
 
   useEffect(() => {
-    const data = getJobDetails?.data ?? {};
-    if (Object.keys(data).length > 0) {
-      setBudgetedHours({
-        hours: data.budgeted_hours?.split(":")[0] ?? "",
-        minutes: data.budgeted_hours?.split(":")[1] ?? "",
-      });
-      setTotalTime({
-        hours: data.total_time?.split(":")[0] ?? "",
-        minutes: data.total_time?.split(":")[1] ?? "",
-      });
 
-      setReviewTime({
-        hours: data.review_time?.split(":")[0] ?? "",
-        minutes: data.review_time?.split(":")[1] ?? "",
-      });
-
-      setFeedbackIncorporationTime({
-        hours: data.feedback_incorporation_time?.split(":")[0] ?? "",
-        minutes: data.feedback_incorporation_time?.split(":")[1] ?? "",
-      });
-
-      setPreparationTimne({
-        hours: data.total_preparation_time?.split(":")[0] ?? "",
-        minutes: data.total_preparation_time?.split(":")[1] ?? "",
-      });
-
-      setInvoiceTime({
-        hours: data.invoice_hours?.split(":")[0] ?? "",
-        minutes: data.invoice_hours?.split(":")[1] ?? "",
-      });
-
-      console.log("data", data.client_trading_name);
-      setJobData(prevState => ({
-        ...prevState,
-        AccountManager: `${data.outbooks_acount_manager_first_name ?? ""} ${data.outbooks_acount_manager_last_name ?? ""}`,
-        Customer: data.customer_trading_name ?? "",
-        Client:  location.state.goto == "Customer" ? data.client_id : data.client_trading_name ?? "",
-        ClientJobCode: data.client_job_code ?? "",
-        CustomerAccountManager: data.account_manager_officer_id ?? "",
-        Service: data.service_id ?? "",
-        JobType: data.job_type_id ?? "",
-        Reviewer: data.reviewer_id ?? "",
-        AllocatedTo: data.allocated_id ?? "",
-        AllocatedOn: data.allocated_on?.split("T")[0] ?? null,
-        DateReceivedOn: data.date_received_on?.split("T")[0] ?? null,
-        YearEnd: data.year_end ?? "",
-        EngagementModel: data.engagement_model ?? "",
-        ExpectedDeliveryDate: data.expected_delivery_date?.split("T")[0] ?? null,
-        DueOn: data.due_on?.split("T")[0] ?? null,
-        SubmissionDeadline: data.submission_deadline?.split("T")[0] ?? null,
-        CustomerDeadlineDate: data.customer_deadline_date?.split("T")[0] ?? null,
-        SLADeadlineDate: data.sla_deadline_date?.split("T")[0] ?? null,
-        InternalDeadlineDate: data.internal_deadline_date?.split("T")[0] ?? null,
-        FilingWithCompaniesHouseRequired: data.filing_Companies_required ?? false,
-        CompaniesHouseFilingDate: data.filing_Companies_date?.split("T")[0] ?? null,
-        FilingWithHMRCRequired: data.filing_hmrc_required ?? false,
-        HMRCFilingDate: data.filing_hmrc_date?.split("T")[0] ?? null,
-        OpeningBalanceAdjustmentRequired: data.opening_balance_required ?? false,
-        OpeningBalanceAdjustmentDate: data.opening_balance_date?.split("T")[0] ?? null,
-        NumberOfTransactions: data.number_of_transaction ?? 0,
-        NumberOfTrialBalanceItems: data.number_of_balance_items ?? 0,
-        Turnover: data.turnover ?? 0,
-        NoOfEmployees: data.number_of_employees ?? 0,
-        VATReconciliation: data.vat_reconciliation ?? "",
-        Bookkeeping: data.bookkeeping ?? "",
-        ProcessingType: data.processing_type ?? "",
-        Invoiced: data.invoiced ?? false,
-        Currency: data.currency_id ?? '0',
-        InvoiceValue: data.invoice_value ?? 0,
-        InvoiceDate: data.invoice_date?.split("T")[0] ?? null,
-        InvoiceHours: data.invoice_hours ?? "",
-        InvoiceRemark: data.invoice_remark ?? "",
-      }));
-    }
   }, [getJobDetails, location.state.goto]);
-
-
-
 
 
   const GetJobData = async () => {
@@ -459,18 +455,11 @@ const EditJob = () => {
       }, {})
     : {};
 
-
-  const handleClose = () => {
-
-
-  }
-
   const openJobModal = (e) => {
     if (e.target.value != "") {
       jobModalSetStatus(true)
     }
   }
-
 
   const AddTask = (id) => {
     const filterData = AllChecklistData.data.find((data) => data.task_id == id);
@@ -494,7 +483,6 @@ const EditJob = () => {
   const RemoveTask = (id) => {
     setAddTaskArr((prevTasks) => prevTasks.filter((task) => task.task_id !== id));
   }
-
 
   const handleChange1 = (e) => {
     const { name, value } = e.target;
@@ -560,12 +548,9 @@ const EditJob = () => {
 
   const totalHours = Number(PreparationTimne.hours) * 60 + Number(PreparationTimne.minutes) + Number(reviewTime.hours) * 60 + Number(reviewTime.minutes) + Number(FeedbackIncorporationTime.hours) * 60 + Number(FeedbackIncorporationTime.minutes)
 
-
   useEffect(() => {
     setTotalTime({ ...Totaltime, hours: Math.floor(totalHours / 60), minutes: totalHours % 60 });
   }, [totalHours]);
-
-
 
   const handleAddCheckList = () => {
     jobModalSetStatus(false);
@@ -623,7 +608,7 @@ const EditJob = () => {
                                           name="Client" onChange={HandleChange} value={jobData.Client}>
                                           <option value="">Select Client</option>
 
-                                         
+
                                           {(AllJobData?.data?.client || []).map((client) => (
                                             <option value={client.client_id} key={client.client_id}>{client.client_trading_name}</option>
                                           ))
@@ -1300,7 +1285,7 @@ const EditJob = () => {
                                           name="Currency" onChange={HandleChange} value={jobData.Currency}
                                         >
                                           <option value="">Please Select Currency</option>
-                                           
+
                                           {
                                             (AllJobData?.data?.currency || []).map((currency) => (
                                               <option value={currency.country_id} key={currency.country_id}>{currency.currency_name}</option>
