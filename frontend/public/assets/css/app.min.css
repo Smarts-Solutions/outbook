@@ -9771,7 +9771,9 @@ margin: 0px auto;
 .mt-minus {
   margin-top: -45px;
 }
-
+.mt-minus-60 {
+  margin-top: -60px;
+}
 .job-filter-btn {
   margin-left: 360px;
   margin-top: 10px;
