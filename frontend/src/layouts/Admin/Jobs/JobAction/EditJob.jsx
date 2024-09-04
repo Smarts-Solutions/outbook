@@ -34,6 +34,8 @@ const EditJob = () => {
   const [BudgetedMinuteError, setBudgetedMinuteError] = useState('')
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" })
   const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] })
+  const [tempTaskArr, setTempTaskArr] = useState([])
+  const [tempChecklistId, setTempChecklistId] = useState('')
 
   const [jobData, setJobData] = useState({
     AccountManager: "",
@@ -81,29 +83,6 @@ const EditJob = () => {
     InvoiceRemark: "",
   });
 
-
-  console.log("getJobDetails", getJobDetails)
-  console.log("getChecklistId", getChecklistId)
-  console.log("AllChecklist", AllChecklist)
-
-
-
-//   {
-//     "checklist_id": 21,
-//     "task": [
-//         {
-//             "task_id": 17,
-//             "task_name": "U",
-//             "budgeted_hour": "00:00:04"
-//         },
-//         {
-//             "task_id": 18,
-//             "task_name": "cp",
-//             "budgeted_hour": "00:00:00"
-//         }
-//     ]
-// }
-
   const JobDetails = async () => {
     const req = { action: "getByJobId", job_id: location.state.job_id }
     const data = { req: req, authToken: token }
@@ -114,6 +93,8 @@ const EditJob = () => {
 
           if (Object.keys(response.data).length > 0) {
             setChecklistId(response.data.tasks?.checklist_id ?? 0);
+            setTempChecklistId(response.data.tasks?.checklist_id ?? 0);
+            setTempTaskArr(response.data.tasks?.task ?? []);
             setAddTaskArr(response.data.tasks?.task ?? []);
             setBudgetedHours({
               hours: response.data.budgeted_hours?.split(":")[0] ?? "",
@@ -207,9 +188,6 @@ const EditJob = () => {
   useEffect(() => {
     JobDetails()
   }, []);
-
-
-  // console.log("getJobDetails", getJobDetails.data.tasks)
 
   const getAllChecklist = async () => {
     const req = { action: "getByServiceWithJobType", service_id: jobData.Service, customer_id: getJobDetails?.data?.customer_id || 0, job_type_id: jobData.JobType }
@@ -562,11 +540,12 @@ const EditJob = () => {
     setTaskName('');
   }
 
+
   const HandleReset1 = () => {
-    setAddTaskArr([])
-    setChecklistId('');
+    setAddTaskArr(tempTaskArr);
+    setChecklistId(tempChecklistId);
   }
-  
+
   const totalHours = Number(PreparationTimne.hours) * 60 + Number(PreparationTimne.minutes) + Number(reviewTime.hours) * 60 + Number(reviewTime.minutes) + Number(FeedbackIncorporationTime.hours) * 60 + Number(FeedbackIncorporationTime.minutes)
 
   useEffect(() => {
@@ -575,6 +554,8 @@ const EditJob = () => {
 
   const handleAddCheckList = () => {
     jobModalSetStatus(false);
+    setTempTaskArr(AddTaskArr);
+    setTempChecklistId(getChecklistId);
   }
 
 
@@ -1419,7 +1400,7 @@ const EditJob = () => {
                                               className="form-select mb-3"
                                               aria-label="Default select example"
                                               style={{ color: "#8a8c8e !important" }}
-                                              onChange={(e) => { setChecklistId(e.target.value) }}
+                                              onChange={(e) => { setChecklistId(e.target.value); setAddTaskArr([]) }}
                                               value={getChecklistId}
                                             >
                                               <option value="">Select Checklist Name</option>
