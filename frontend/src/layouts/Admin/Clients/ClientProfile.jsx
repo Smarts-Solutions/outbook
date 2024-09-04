@@ -24,7 +24,6 @@ const ClientList = () => {
     GetClientDetails();
   }, []);
 
-
   const GetClientDetails = async () => {
     const req = { action: "getByid", client_id: location.state.Client_id };
     const data = { req: req, authToken: token };
@@ -199,7 +198,6 @@ const ClientList = () => {
     navigate("/admin/client/edit", { state: { row, id: row } });
   }
 
-
   return (
     <div className="container-fluid">
       <div className="col-sm-12">
@@ -240,6 +238,14 @@ const ClientList = () => {
                   >
                     <i className="fa fa-plus pe-1" /> Create Job
                   </div>
+
+                  <button
+                    type="button"
+                    className="btn btn-info text-white float-end blue-btn"
+                    onClick={() => window.history.back()}
+                  >
+                    <i className="fa fa-arrow-left pe-1" /> Back
+                  </button>
                 </div>
               </>
             )}
@@ -270,7 +276,6 @@ const ClientList = () => {
           <div className="container-fluid">
             <div className="report-data mt-4 ">
               <div className="d-flex justify-content-between align-items-center">
-
                 <ul className="nav nav-tabs border-0 mb-3" role="tablist">
                   <li className="nav-item" role="presentation">
                     <button
@@ -304,8 +309,6 @@ const ClientList = () => {
                   </li>
                 </ul>
 
-
-
                 <div className="search-input">
                   <input
                     type="text"
@@ -315,16 +318,29 @@ const ClientList = () => {
                 </div>
               </div>
               <div className="tab-content" id="pills-tabContent">
-                <div className="tab-pane fade active show" id="assignedjob" role="tabpanel" aria-labelledby="assignedjob-tab">
+                <div
+                  className="tab-pane fade active show"
+                  id="assignedjob"
+                  role="tabpanel"
+                  aria-labelledby="assignedjob-tab"
+                >
                   test
                   <div className="datatable-wrapper ">
-
                     {customerData && customerData && (
-                      <Datatable columns={columns} data={customerData} filter={false} />
+                      <Datatable
+                        columns={columns}
+                        data={customerData}
+                        filter={false}
+                      />
                     )}
                   </div>
                 </div>
-                <div className="tab-pane fade " id="alljob" role="tabpanel" aria-labelledby="alljob-tab">
+                <div
+                  className="tab-pane fade "
+                  id="alljob"
+                  role="tabpanel"
+                  aria-labelledby="alljob-tab"
+                >
                   testwew
                 </div>
               </div>
@@ -335,7 +351,6 @@ const ClientList = () => {
                 </div> */}
             </div>
           </div>
-
         </div>
       )}
 
@@ -378,7 +393,8 @@ const ClientList = () => {
                       </li>
                       <li className="mt-2">
                         <i className="fa-regular fa-envelope text-secondary font-22 align-middle me-2"></i>
-                        <b>Email </b>: {clientInformationData && clientInformationData.email}
+                        <b>Email </b>:{" "}
+                        {clientInformationData && clientInformationData.email}
                       </li>
                     </ul>
                   </div>
@@ -386,10 +402,12 @@ const ClientList = () => {
                   <div className="col-lg-4 align-self-center">
                     <ul className="list-unstyled personal-detail mb-0">
                       <li className="">
-                        <b>Trading Name</b>: {informationData && informationData.trading_name}
+                        <b>Trading Name</b>:{" "}
+                        {informationData && informationData.trading_name}
                       </li>
                       <li className="mt-2">
-                        <b>Trading Address</b>:{informationData && informationData.trading_address}
+                        <b>Trading Address</b>:
+                        {informationData && informationData.trading_address}
                       </li>
                     </ul>
                   </div>
@@ -410,7 +428,7 @@ const ClientList = () => {
                   Information
                 </h4>
               </div>
-              <div className="col-4">
+              {/* <div className="col-4">
                 <div className="float-end">
                   <button type="button" className="btn btn-info text-white " onClick={(e) => ClientEdit(informationData.id)}>
                     <i className="fa-regular fa-pencil me-2" />
@@ -424,7 +442,7 @@ const ClientList = () => {
                     Delete
                   </button>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {informationData.client_type == 1 ? (
