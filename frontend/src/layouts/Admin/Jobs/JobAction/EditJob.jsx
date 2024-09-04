@@ -35,9 +35,6 @@ const EditJob = () => {
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" })
   const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] })
 
-
-
-  console.log("AllChecklistData", AllChecklistData)
   const [jobData, setJobData] = useState({
     AccountManager: "",
     Customer: "",
