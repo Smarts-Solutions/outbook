@@ -294,6 +294,25 @@ const CreateJob = () => {
         return `${formattedHours}:${formattedMinutes}`;
     }
 
+  let budgeted_hour_totalTime
+   if(AddTaskArr.length > 0){
+    budgeted_hour_totalTime = AddTaskArr.reduce((acc, task) => {
+        const [hours, minutes] = task.budgeted_hour.split(':').map(Number);
+    
+        acc.hours += hours;
+        acc.minutes += minutes;
+    
+        // Convert every 60 minutes into an hour
+        if (acc.minutes >= 60) {
+            acc.hours += Math.floor(acc.minutes / 60);
+            acc.minutes = acc.minutes % 60;
+        }
+        return acc;
+    }, { hours: 0, minutes: 0 });
+   }
+
+   console.log("AddTaskArr ",AddTaskArr)
+   console.log("budgeted_hour_totalTime ",budgeted_hour_totalTime)
     const handleSubmit = async () => {
         const req = {
             staffCreatedId: staffCreatedId,
@@ -304,7 +323,7 @@ const CreateJob = () => {
             customer_contact_details_id: Number(jobData.CustomerAccountManager),
             service_id: Number(jobData.Service),
             job_type_id: Number(jobData.JobType),
-            budgeted_hours: formatTime(budgetedHours.hours, budgetedHours.minutes),
+            budgeted_hours: formatTime(budgeted_hour_totalTime.hours, budgeted_hour_totalTime.minutes),
             reviewer: Number(jobData.Reviewer),
             allocated_to: Number(jobData.AllocatedTo),
             allocated_on: jobData.AllocatedOn ? jobData.AllocatedOn : new Date().toISOString().split('T')[0],
@@ -312,8 +331,7 @@ const CreateJob = () => {
             year_end: jobData.YearEnd,
             total_preparation_time: formatTime(PreparationTimne.hours, PreparationTimne.minutes),
             review_time: formatTime(reviewTime.hours, reviewTime.minutes),
-            feedback_incorporation_time: formatTime(FeedbackIncorporationTime.hours, FeedbackIncorporationTime.minutes),
-
+            feedback_incorporation_time: formatTime(FeedbackIncorporationTime.hours, FeedbackIncorporationTime.minutes), 
             total_time: formatTime(Math.floor(totalHours / 60), totalHours % 60),
             engagement_model: jobData.EngagementModel,
             expected_delivery_date: jobData.ExpectedDeliveryDate,
@@ -345,9 +363,7 @@ const CreateJob = () => {
                 checklist_id: getChecklistId,
                 task: AddTaskArr
             }
-        }
-
-
+        } 
         const data = { req: req, authToken: token }
         setIsSubmitted(true);
         const isValid = validateAllFields();
@@ -497,7 +513,7 @@ const CreateJob = () => {
     }
 
 
-
+  
 
     return (
         <div>
@@ -652,7 +668,8 @@ const CreateJob = () => {
                                                                                             setBudgetedHours({ ...budgetedHours, hours: value });
                                                                                         }
                                                                                     }}
-                                                                                    value={budgetedHours.hours}
+                                                                                    value={budgeted_hour_totalTime != undefined ? budgeted_hour_totalTime.hours:"0"}
+                                                                                    disabled
                                                                                 />
                                                                                 <span className="input-group-text" id="basic-addon2">
                                                                                     Hours
@@ -670,7 +687,9 @@ const CreateJob = () => {
                                                                                             });
                                                                                         }
                                                                                     }}
-                                                                                    value={budgetedHours.minutes}
+    
+                                                                                    value={budgeted_hour_totalTime != undefined ? budgeted_hour_totalTime.minutes:"0"}
+                                                                                    disabled
                                                                                 />
                                                                                 <span className="input-group-text" id="basic-addon2">
                                                                                     Minutes
@@ -1329,7 +1348,7 @@ const CreateJob = () => {
                                         </div>
 
                                         {jobModalStatus && (
-                                            <Modal show={jobModalStatus} onHide={(e) => { jobModalSetStatus(false); HandleReset1() }} centered size="lg">
+                                            <Modal show={jobModalStatus} onHide={(e) => { jobModalSetStatus(false); HandleReset1(); setAddTaskArr([]) }} centered size="lg">
                                                 <Modal.Header closeButton>
                                                     <Modal.Title>Tasks</Modal.Title>
                                                 </Modal.Header>
@@ -1453,7 +1472,9 @@ const CreateJob = () => {
                                                 <Modal.Footer>
                                                     <Button variant="secondary" onClick={() => {
                                                         jobModalSetStatus(false)
-                                                        HandleReset1()
+                                                        HandleReset1();
+                                                        setAddTaskArr([])
+
                                                     }}
                                                     >Close</Button>
                                                     <Button variant="btn btn-info text-white float-end blue-btn" onClick={handleAddCheckList}>Submit</Button>
