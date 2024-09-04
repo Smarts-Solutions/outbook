@@ -20,12 +20,11 @@ const ClientList = () => {
   const [clientInformationData, setClientInformationData] = useState([]);
   const [companyDetails, setCompanyDetails] = useState([]);
 
- 
   useEffect(() => {
     GetAllJobList();
     GetClientDetails();
   }, []);
- 
+
   const GetClientDetails = async () => {
     const req = { action: "getByid", client_id: location.state.row.id };
     const data = { req: req, authToken: token };
@@ -154,7 +153,7 @@ const ClientList = () => {
   ];
 
   const HandleJob = (row) => {
-    navigate("/admin/job/logs", { 
+    navigate("/admin/job/logs", {
       state: { details: location.state, row: row },
     });
   };
@@ -192,8 +191,6 @@ const ClientList = () => {
     });
   };
 
-  
-
   function handleEdit(row) {
     navigate("/admin/job/edit", {
       state: { details: location.state, row: row },
@@ -205,9 +202,8 @@ const ClientList = () => {
   }
   function ClientEdit(row) {
     console.log("row", row);
-    navigate("/admin/client/edit", { state: { row, id: row} });
+    navigate("/admin/client/edit", { state: { row, id: row } });
   }
-
 
   return (
     <div className="container-fluid">
@@ -250,6 +246,14 @@ const ClientList = () => {
                   >
                     <i className="fa fa-plus pe-1" /> Create Job
                   </div>
+
+                  <button
+                    type="button"
+                    className="btn btn-info text-white float-end blue-btn"
+                    onClick={() => window.history.back()}
+                  >
+                    <i className="fa fa-arrow-left pe-1" /> Back
+                  </button>
                 </div>
               </>
             )}
@@ -279,74 +283,83 @@ const ClientList = () => {
           aria-labelledby={`NoOfJobs-tab`}
         >
           <div className="container-fluid">
-              <div className="report-data mt-4 ">
-                <div className="d-flex justify-content-between align-items-center">
-              
+            <div className="report-data mt-4 ">
+              <div className="d-flex justify-content-between align-items-center">
                 <ul className="nav nav-tabs border-0 mb-3" role="tablist">
-  <li className="nav-item" role="presentation">
-    <button
-      className="nav-link active"
-      id="assignedjob-tab"
-      data-bs-toggle="pill"
-      data-bs-target="#assignedjob"
-      type="button"
-      role="tab"
-      aria-controls="assignedjob"
-      aria-selected="true"
-      tabIndex={-1}
-    >
-      Assigned Jobs
-    </button>
-  </li>
-  <li className="nav-item" role="presentation">
-    <button
-      className="nav-link"
-      id="alljob-tab"
-      data-bs-toggle="pill"
-      data-bs-target="#alljob"
-      type="button"
-      role="tab"
-      aria-controls="alljob"
-      aria-selected="false"
-      tabIndex={-1}
-    >
-     All Jobs
-    </button>
-  </li>
-</ul>
+                  <li className="nav-item" role="presentation">
+                    <button
+                      className="nav-link active"
+                      id="assignedjob-tab"
+                      data-bs-toggle="pill"
+                      data-bs-target="#assignedjob"
+                      type="button"
+                      role="tab"
+                      aria-controls="assignedjob"
+                      aria-selected="true"
+                      tabIndex={-1}
+                    >
+                      Assigned Jobs
+                    </button>
+                  </li>
+                  <li className="nav-item" role="presentation">
+                    <button
+                      className="nav-link"
+                      id="alljob-tab"
+                      data-bs-toggle="pill"
+                      data-bs-target="#alljob"
+                      type="button"
+                      role="tab"
+                      aria-controls="alljob"
+                      aria-selected="false"
+                      tabIndex={-1}
+                    >
+                      All Jobs
+                    </button>
+                  </li>
+                </ul>
 
-
-            
-                  <div className="search-input">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Search clients..."
-                    />
+                <div className="search-input">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search clients..."
+                  />
+                </div>
+              </div>
+              <div className="tab-content" id="pills-tabContent">
+                <div
+                  className="tab-pane fade active show"
+                  id="assignedjob"
+                  role="tabpanel"
+                  aria-labelledby="assignedjob-tab"
+                >
+                  test
+                  <div className="datatable-wrapper ">
+                    {customerData && customerData && (
+                      <Datatable
+                        columns={columns}
+                        data={customerData}
+                        filter={false}
+                      />
+                    )}
                   </div>
                 </div>
-                <div className="tab-content" id="pills-tabContent">
-  <div className="tab-pane fade active show" id="assignedjob" role="tabpanel" aria-labelledby="assignedjob-tab">
-test
-<div className="datatable-wrapper ">
-                  
-{customerData && customerData && (
-            <Datatable columns={columns} data={customerData} filter={false} />
-          )}
-                  </div>
-</div>
-<div className="tab-pane fade " id="alljob" role="tabpanel" aria-labelledby="alljob-tab">
-testwew
-</div>
-</div>
-                {/* <div className="datatable-wrapper ">
+                <div
+                  className="tab-pane fade "
+                  id="alljob"
+                  role="tabpanel"
+                  aria-labelledby="alljob-tab"
+                >
+                  testwew
+                </div>
+              </div>
+              {/* <div className="datatable-wrapper ">
                 {customerData && customerData && (
             <Datatable columns={columns} data={customerData} filter={false} />
           )}
                 </div> */}
-              </div>
             </div>
-         
+          </div>
         </div>
       )}
 
@@ -389,7 +402,8 @@ testwew
                       </li>
                       <li className="mt-2">
                         <i className="fa-regular fa-envelope text-secondary font-22 align-middle me-2"></i>
-                        <b>Email </b>: {clientInformationData && clientInformationData.email}
+                        <b>Email </b>:{" "}
+                        {clientInformationData && clientInformationData.email}
                       </li>
                     </ul>
                   </div>
@@ -397,10 +411,12 @@ testwew
                   <div className="col-lg-4 align-self-center">
                     <ul className="list-unstyled personal-detail mb-0">
                       <li className="">
-                        <b>Trading Name</b>: {informationData && informationData.trading_name}
+                        <b>Trading Name</b>:{" "}
+                        {informationData && informationData.trading_name}
                       </li>
                       <li className="mt-2">
-                        <b>Trading Address</b>:{informationData && informationData.trading_address}
+                        <b>Trading Address</b>:
+                        {informationData && informationData.trading_address}
                       </li>
                     </ul>
                   </div>
@@ -421,7 +437,7 @@ testwew
                   Information
                 </h4>
               </div>
-              <div className="col-4">
+              {/* <div className="col-4">
                 <div className="float-end">
                   <button type="button" className="btn btn-info text-white " onClick={(e)=>ClientEdit(informationData.id)}>
                     <i className="fa-regular fa-pencil me-2" />
@@ -435,7 +451,7 @@ testwew
                     Delete
                   </button>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {informationData.client_type == 1 ? (
