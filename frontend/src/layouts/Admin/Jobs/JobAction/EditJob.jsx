@@ -82,6 +82,28 @@ const EditJob = () => {
   });
 
 
+  console.log("getJobDetails", getJobDetails)
+  console.log("getChecklistId", getChecklistId)
+  console.log("AllChecklist", AllChecklist)
+
+
+
+//   {
+//     "checklist_id": 21,
+//     "task": [
+//         {
+//             "task_id": 17,
+//             "task_name": "U",
+//             "budgeted_hour": "00:00:04"
+//         },
+//         {
+//             "task_id": 18,
+//             "task_name": "cp",
+//             "budgeted_hour": "00:00:00"
+//         }
+//     ]
+// }
+
   const JobDetails = async () => {
     const req = { action: "getByJobId", job_id: location.state.job_id }
     const data = { req: req, authToken: token }
@@ -91,6 +113,8 @@ const EditJob = () => {
         if (response.status) {
 
           if (Object.keys(response.data).length > 0) {
+            setChecklistId(response.data.tasks?.checklist_id ?? 0);
+            setAddTaskArr(response.data.tasks?.task ?? []);
             setBudgetedHours({
               hours: response.data.budgeted_hours?.split(":")[0] ?? "",
               minutes: response.data.budgeted_hours?.split(":")[1] ?? "",
@@ -410,7 +434,7 @@ const EditJob = () => {
       invoice_hours: formatTime(invoiceTime.hours, invoiceTime.minutes),
       invoice_remark: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.InvoiceRemark,
       tasks: {
-        checklist_id: getJobDetails?.data?.customer_id || 0,
+        checklist_id: getChecklistId,
         task: AddTaskArr
       }
     }
@@ -450,11 +474,14 @@ const EditJob = () => {
       }, {})
     : {};
 
+
   const openJobModal = (e) => {
+    console.log("e", e.target.value)
     if (e.target.value != "") {
       jobModalSetStatus(true)
     }
   }
+
 
   const AddTask = (id) => {
     const filterData = AllChecklistData.data.find((data) => data.task_id == id);
@@ -465,7 +492,6 @@ const EditJob = () => {
 
     setAddTaskArr((prevTasks) => {
       const taskExists = prevTasks.some((task) => task.task_id === filterData.task_id);
-
       if (taskExists) {
         return prevTasks;
       } else {
@@ -540,7 +566,7 @@ const EditJob = () => {
     setAddTaskArr([])
     setChecklistId('');
   }
-
+  
   const totalHours = Number(PreparationTimne.hours) * 60 + Number(PreparationTimne.minutes) + Number(reviewTime.hours) * 60 + Number(reviewTime.minutes) + Number(FeedbackIncorporationTime.hours) * 60 + Number(FeedbackIncorporationTime.minutes)
 
   useEffect(() => {
