@@ -666,7 +666,7 @@ const Information = () => {
       label: "Trading Name",
       type: "text",
       label_size: 12,
-      col_size: 4,
+      col_size: 6,
       disable: false,
     },
     {
@@ -674,7 +674,7 @@ const Information = () => {
       label: "Trading Address",
       type: "text",
       label_size: 12,
-      col_size: 4,
+      col_size: 6,
       disable: false,
     },
   ];
