@@ -21,7 +21,7 @@ const Service = () => {
     const [getManager, setManager] = useState([]);
     const [services, setServices] = useState([]);
     const [tempServices, setTempServices] = useState("");
-
+    const [jobtype, SetJobtype] = useState(true);
 
     const GetAllServiceData = async () => {
         const req = { action: "get" };
@@ -222,6 +222,7 @@ const Service = () => {
                                                         id="checkAll"
                                                         onChange={handleSelectAllChange}
                                                         checked={services.length === GetAllService.data.length && GetAllService.data.length > 0}
+                                                    
                                                     />
                                                 </div>
                                             </th>
@@ -268,7 +269,264 @@ const Service = () => {
                             </div>
                         </div>
                     </div>
+                    <CommanModal
+            isOpen={jobtype}
+            backdrop="static"
+            size="lg"
+            title="Job Type"
+            hideBtn={true}
+            handleClose={() => SetJobtype(false)}
+          >
+            <table className="table align-middle table-nowrap">
+  <thead className="table-light table-head-blue">
+    <tr>
+      <td className="p-0">
+        <div className="form-group mb-0">
+          <div className="checkbox">
+            <label
+              data-toggle="collapse"
+              data-target="#collapse0"
+              aria-expanded="false"
+              aria-controls="collapse0"
+              className="accordion-button fs-16 fw-bold py-2"
+            >
+              <input type="checkbox" /> SS
+            </label>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="p-0">
+        <div
+          id="collapse0"
+          aria-expanded="false"
+          className="p-2 collapse show"
+          style={{}}
+        >
+          <div className="row py-2 align-items-center">
+            <div className="col-md-5 ">
+              <input type="checkbox" /> Management Accounts
+            </div>
+            <div className="col-lg-7  ps-0">
+              <label className="form-label">Budgeted Hours</label>
+              <div className="input-group">
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Hours"
+                  name="hours"
+                  defaultValue=""
+                />
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Minutes"
+                  name="minutes"
+                  min={0}
+                  max={59}
+                  defaultValue=""
+                />
+              </div>
+            </div>
+          </div>
+          <div className="row py-2 align-items-center">
+            <div className="col-md-5">
+              <input type="checkbox" /> Personal Tax Return
+            </div>
+            <div className="col-lg-7  ps-0">
+              <label className="form-label">Budgeted Hours</label>
+              <div className="input-group">
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Hours"
+                  name="hours"
+                  defaultValue=""
+                />
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Minutes"
+                  name="minutes"
+                  min={0}
+                  max={59}
+                  defaultValue=""
+                />
+              </div>
+            </div>
+          </div>
+          <div className="row py-2 align-items-center">
+            <div className="col-md-5 ">
+              <input type="checkbox" /> Payroll, Statutory Accounts
+            </div>
+            <div className="col-lg-7  ps-0">
+              <label className="form-label">Budgeted Hours</label>
+              <div className="input-group">
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Hours"
+                  name="hours"
+                  defaultValue=""
+                />
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Minutes"
+                  name="minutes"
+                  min={0}
+                  max={59}
+                  defaultValue=""
+                />
+              </div>
+            </div>
+          </div>
+          <div className="row py-2 align-items-center">
+            <div className="col-md-5 ">
+              <input type="checkbox" /> po
+            </div>
+            <div className="col-lg-7  ps-0">
+              <label className="form-label">Budgeted Hours</label>
+              <div className="input-group">
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Hours"
+                  name="hours"
+                  defaultValue=""
+                />
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Minutes"
+                  name="minutes"
+                  min={0}
+                  max={59}
+                  defaultValue=""
+                />
+              </div>
+            </div>
+          </div>
+          <div className="row py-2 align-items-center">
+            <div className="col-md-5 ">
+              <input type="checkbox" /> test1
+            </div>
+            <div className="col-lg-7  ps-0">
+              <label className="form-label">Budgeted Hours</label>
+              <div className="input-group">
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Hours"
+                  name="hours"
+                  defaultValue=""
+                />
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Minutes"
+                  name="minutes"
+                  min={0}
+                  max={59}
+                  defaultValue=""
+                />
+              </div>
+            </div>
+          </div>
+          <div className="row py-2 align-items-center">
+            <div className="col-md-5 ">
+              <input type="checkbox" /> test
+            </div>
+            <div className="col-lg-7  ps-0">
+              <label className="form-label">Budgeted Hours</label>
+              <div className="input-group">
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Hours"
+                  name="hours"
+                  defaultValue=""
+                />
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Minutes"
+                  name="minutes"
+                  min={0}
+                  max={59}
+                  defaultValue=""
+                />
+              </div>
+            </div>
+          </div>
+          <div className="row py-2 align-items-center">
+            <div className="col-md-5 ">
+              <input type="checkbox" /> dfgdgdg
+            </div>
+            <div className="col-lg-7  ps-0">
+              <label className="form-label">Budgeted Hours</label>
+              <div className="input-group">
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Hours"
+                  name="hours"
+                  defaultValue=""
+                />
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Minutes"
+                  name="minutes"
+                  min={0}
+                  max={59}
+                  defaultValue=""
+                />
+              </div>
+            </div>
+          </div>
+          <div className="row py-2 align-items-center">
+            <div className="col-md-5">
+              <input type="checkbox" /> efefge
+            </div>
+            <div className="col-lg-7  ps-0">
+              <label className="form-label">Budgeted Hours</label>
+              <div className="input-group">
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Hours"
+                  name="hours"
+                  defaultValue=""
+                />
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Minutes"
+                  name="minutes"
+                  min={0}
+                  max={59}
+                  defaultValue=""
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
+
+            <div className="d-flex justify-content-end">
+              <Button className="btn btn-info" color="primary" onClick={(e)=>SetJobtype(false)}>
+                Submit
+              </Button>
+            </div>
+          </CommanModal>
                     <CommanModal
                         isOpen={getModal}
                         backdrop="static"

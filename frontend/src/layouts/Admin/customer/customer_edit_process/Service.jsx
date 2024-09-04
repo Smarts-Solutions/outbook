@@ -386,7 +386,7 @@ return
           <CommanModal
             isOpen={jobtype}
             backdrop="static"
-            size="ms-5"
+            size="lg"
             title="Job Type"
             hideBtn={true}
             handleClose={() => SetJobtype(false)}
@@ -437,8 +437,8 @@ return
                                       task.service_id === getServiceData.id
                                   )
                                   .map((task, taskIndex) => (
-                                    <div className="row p-2" key={taskIndex}>
-                                      <div className="col-md-6">
+                                    <div className="row py-2 align-items-center" key={taskIndex}>
+                                      <div className="col-md-5">
                                         <input
                                           type="checkbox"
                                           onChange={(e) =>
@@ -450,6 +450,28 @@ return
                                         />{" "}
                                         {task.name}
                                       </div>
+                                      <div className="col-lg-7  ps-0">
+  <label className="form-label">Budgeted Hours</label>
+  <div className="input-group">
+    <input
+      type="number"
+      className="form-control"
+      placeholder="Hours"
+      name="hours"
+      defaultValue=""
+    />
+    <input
+      type="number"
+      className="form-control"
+      placeholder="Minutes"
+      name="minutes"
+      min={0}
+      max={59}
+      defaultValue=""
+    />
+  </div>
+</div>
+
                                     </div>
                                   ))
                               ) : (
