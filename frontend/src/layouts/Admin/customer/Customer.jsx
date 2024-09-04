@@ -9,10 +9,8 @@ import { getDateRange } from "../../../Utils/Comman_function";
 const Customer = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
-
   const [customerData, setCustomerData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [activeTab, setActiveTab] = useState("this-year");
@@ -89,10 +87,10 @@ const Customer = () => {
         row.customer_type == 1
           ? "Sole Trader"
           : row.customer_type == 2
-          ? "Company"
-          : row.customer_type == 3
-          ? "Partnership"
-          : "-",
+            ? "Company"
+            : row.customer_type == 3
+              ? "Partnership"
+              : "-",
       sortable: true,
       width: "150px",
     },
@@ -188,8 +186,8 @@ const Customer = () => {
         (
           item.account_manager_firstname &&
           item.account_manager_firstname +
-            " " +
-            item.account_manager_lastname &&
+          " " +
+          item.account_manager_lastname &&
           item.account_manager_lastname
         )
           .toLowerCase()
@@ -211,25 +209,16 @@ const Customer = () => {
   return (
     <div className="container-fluid">
       <div className="content-title">
-     <div className="row">
-      <div className="col-md-8">
-      <div className="tab-title">
-      <h3 className="mt-0">Customers</h3></div>
+        <div className="row">
+          <div className="col-md-8">
+            <div className="tab-title">
+              <h3 className="mt-0">Customers</h3></div>
+          </div>
+          <div className="col-md-4">
+            <Link to="/admin/addcustomer" className="btn btn-info text-white float-end blue-btn"><i className="fa fa-plus" />Add Customer</Link>
+          </div>
+        </div>
       </div>
-      <div className="col-md-4">
-      <Link
-            to="/admin/addcustomer"
-            className="btn btn-info text-white float-end blue-btn"
-          >
-           
-            <i className="fa fa-plus" /> Add Customer
-          </Link>
-      </div>
-     </div>
-
-       
-      </div>
-
       <div className="report-data mt-4">
         <div className="col-sm-12">
           <div className="page-title-box pt-0">
@@ -243,9 +232,8 @@ const Customer = () => {
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
                       <button
-                        className={`nav-link ${
-                          activeTab === tab.id ? "active" : ""
-                        }`}
+                        className={`nav-link ${activeTab === tab.id ? "active" : ""
+                          }`}
                         id={`${tab.id}-tab`}
                         data-bs-toggle="pill"
                         data-bs-target={`#${tab.id}`}
@@ -262,14 +250,14 @@ const Customer = () => {
                 </ul>
               </div>
               <div className="col-md-4 col-auto">
-           
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={handleSearch}
-                  />
+
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={handleSearch}
+                />
               </div>
             </div>
           </div>
@@ -279,9 +267,8 @@ const Customer = () => {
           {tabs.map((tab) => (
             <div
               key={tab.id}
-              className={`tab-pane fade ${
-                activeTab === tab.id ? "show active" : ""
-              }`}
+              className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""
+                }`}
               id={tab.id}
               role="tabpanel"
               aria-labelledby={`${tab.id}-tab`}

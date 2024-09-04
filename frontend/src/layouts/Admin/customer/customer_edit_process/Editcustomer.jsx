@@ -28,13 +28,8 @@ const AddCustomer = () => {
     const [address, setAddress] = useState(addressInitialState);
     const [currentStep, setCurrentStep] = useState(0);
     const [coustomerId, setCoustomerId] = useState("");
-
     const location = useLocation();
-
-
-
     const { Step } = Steps;
-
     const renderStep = (step) => {
         switch (step) {
             case 0:
@@ -50,7 +45,6 @@ const AddCustomer = () => {
         }
     };
     const next = (data) => {
-
         setCoustomerId(data)
         if (currentStep < 3) {
             setCurrentStep(currentStep + 1);

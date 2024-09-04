@@ -19,8 +19,6 @@ const ClientList = () => {
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
 
-  console.log("location", location.state);
-
   const [activeTab, setActiveTab] = useState(
     location.state &&
       location.state.route &&
@@ -63,7 +61,7 @@ const ClientList = () => {
       });
   };
 
-  const columns = [
+  const ClientListColumns = [
     {
       name: "Client Name",
       cell: (row) => (
@@ -315,7 +313,7 @@ const ClientList = () => {
   };
 
   const HandleJobView = (row) => {
-    navigate("/admin/client/profile", { state: { Client_id: row.id } });
+    navigate("/admin/job/logs", { state: { job_id: row.job_id, goto: "Customer" } });
   };
 
   const handleAddClient = () => {
@@ -347,7 +345,6 @@ const ClientList = () => {
   };
 
 
-
   useEffect(() => {
     if (getCheckList) {
       const filteredData = getCheckList.filter((item) =>
@@ -367,7 +364,7 @@ const ClientList = () => {
       title: "Clients",
       placeholder: "Search clients...",
       data: ClientData,
-      columns: columns,
+      columns: ClientListColumns,
     },
     {
       key: "job",
@@ -381,7 +378,7 @@ const ClientList = () => {
       title: "Documents",
       placeholder: null,
       data: [],
-      columns: columns,
+      columns: ClientListColumns,
     },
     {
       key: "status",

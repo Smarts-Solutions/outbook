@@ -4,9 +4,9 @@ import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
 import { JobType } from '../../../../ReduxStore/Slice/Settings/settingSlice'
 import { useDispatch } from 'react-redux';
- 
+
 import { ADD_SERVICES_CUSTOMERS } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
- 
+
 
 const Engagement = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
@@ -16,6 +16,7 @@ const Engagement = () => {
   const [errors2, setErrors2] = useState({});
   const [errors3, setErrors3] = useState({});
   const [errors4, setErrors4] = useState([]);
+  const [jobType, setJobType] = useState([])
 
 
   const [formValues1, setFormValues1] = useState({
@@ -50,8 +51,6 @@ const Engagement = () => {
     { minimum_number_of_jobs: '', job_type_id: '', cost_per_job: '' }
   ]);
 
-  const [jobType, setJobType] = useState([])
-
   const checkboxOptions = [
     { id: 'formCheck1', label: 'FTE/Dedicated Staffing' },
     { id: 'formCheck2', label: 'Percentage Model' },
@@ -62,8 +61,6 @@ const Engagement = () => {
   const [checkboxStates, setCheckboxStates] = useState(Array(checkboxOptions.length).fill(0));
 
   const handleCheckboxChange = (index) => {
-
-
     setCheckboxStates(prevStates => {
       const newStates = [...prevStates];
       newStates[index] = newStates[index] === 1 ? 0 : 1;
@@ -71,16 +68,12 @@ const Engagement = () => {
     });
   };
 
-
-
   const handleChange1 = (e) => {
     const { name, value } = e.target;
     if (!/^[0-9+]*$/.test(value)) {
       return;
     }
-
     validate1()
-
     setFormValues1({ ...formValues1, [name]: value });
   };
 
@@ -255,11 +248,11 @@ const Engagement = () => {
       alert("Please select at least one option.");
       return;
     }
-    const validations = [validate1, validate3, validate2, validate4];
-     
+    const validations = [validate1, validate2, validate3, validate4];
+
 
     for (let i = 0; i < checkboxStates.length; i++) {
-    
+
       if (checkboxStates[i] == 1 && !validations[i]()) {
 
         return;
@@ -320,7 +313,6 @@ const Engagement = () => {
         customised_pricing_data: jobEntries
       };
     }
-    
 
     const data = { req: req, authToken: token }
     await dispatch(ADD_SERVICES_CUSTOMERS(data))
@@ -336,8 +328,6 @@ const Engagement = () => {
         console.log("Error", error);
       });
   };
-
-
 
   useEffect(() => {
     if (checkboxStates[0] === 0)
@@ -356,13 +346,8 @@ const Engagement = () => {
   }, []);
 
 
-
   return (
-    <Formik
-      initialValues={address}
-      onSubmit={handleSubmit}
-
-    >
+    <Formik initialValues={address} onSubmit={handleSubmit}>
       {({ handleSubmit }) => {
         return (
 
@@ -405,9 +390,7 @@ const Engagement = () => {
                   ))}
                 </div>
 
-
                 <div className="" style={{ marginTop: 15 }}>
-
 
                   {checkboxStates && checkboxStates[0] === 1 && (
                     <div id="myDiv1" className="row">
@@ -501,12 +484,11 @@ const Engagement = () => {
                               ))}
                             </div>
                           </div>
-                        
+
                         </div>
                       </div>
                     </div>
                   )}
-
 
                   {checkboxStates && checkboxStates[2] === 1 && (
                     <div id="myDiv2" className="row">
@@ -517,7 +499,7 @@ const Engagement = () => {
                               <p className="mb-0 card-title fs-6">Adhoc/PAYG/Hourly</p>
                             </div>
                           </div>
-                         
+
 
                           <div className="card-body">
                             <div className="row">
@@ -553,12 +535,6 @@ const Engagement = () => {
                       </div>
                     </div>
                   )}
-
-
-
-
-
-
 
                   {checkboxStates && checkboxStates[3] === 1 && (
                     <div id="myDiv4" className="row">
@@ -641,7 +617,7 @@ const Engagement = () => {
                                     <div className="col-lg-1 text-center d-flex" >
                                       <button className="btn p-0 add_icon text-decoration-none" onClick={(e) => handleRemoveJob(index)}>
                                         <i
-                                          
+
                                           className="ti-trash text-danger fs-4"
 
                                         />
@@ -667,23 +643,19 @@ const Engagement = () => {
                     </div>
                   )}
 
-
-
                 </div>
               </div>
             </div>
 
             <div className="form__item button__items d-flex justify-content-between">
               <Button className="btn btn-secondary" type="default" onClick={prev}>
-              <i className="pe-2 fa-regular fa-arrow-left-long"></i> Previous
+                <i className="pe-2 fa-regular fa-arrow-left-long"></i> Previous
               </Button>
-              
+
               <Button className="btn btn-info text-white blue-btn" onClick={handleSubmit}>
                 Next  <i className="ps-2 fa-regular fa-arrow-right-long"></i>
               </Button>
             </div>
-
-
 
           </div>
 

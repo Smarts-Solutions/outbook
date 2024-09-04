@@ -36,6 +36,8 @@ const EditJob = () => {
   const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] })
 
 
+
+  console.log("AllChecklistData", AllChecklistData)
   const [jobData, setJobData] = useState({
     AccountManager: "",
     Customer: "",
@@ -82,7 +84,7 @@ const EditJob = () => {
     InvoiceRemark: "",
   });
 
- 
+
   const JobDetails = async () => {
     const req = { action: "getByJobId", job_id: location.state.job_id }
     const data = { req: req, authToken: token }
@@ -186,6 +188,8 @@ const EditJob = () => {
   }, []);
 
 
+  // console.log("getJobDetails", getJobDetails.data.tasks)
+
   const getAllChecklist = async () => {
     const req = { action: "getByServiceWithJobType", service_id: jobData.Service, customer_id: getJobDetails?.data?.customer_id || 0, job_type_id: jobData.JobType }
     const data = { req: req, authToken: token }
@@ -241,12 +245,6 @@ const EditJob = () => {
   useEffect(() => {
     getChecklistData()
   }, [getChecklistId])
-
-
-
-  useEffect(() => {
-
-  }, [getJobDetails, location.state.goto]);
 
 
   const GetJobData = async () => {
@@ -684,9 +682,9 @@ const EditJob = () => {
 
                                       name="JobType" onChange={(e) => { HandleChange(e); openJobModal(e) }} value={jobData.JobType}>
                                       <option value="">Select Job Type</option>
-                                      {
-                                        (AllJobData?.data?.job_type || []).map((jobtype) => (
-                                          <option value={jobtype.job_type_id} key={jobtype.job_type_id}>{jobtype.job_type_name}</option>
+                                      {get_Job_Type.loading && get_Job_Type.data &&
+                                        get_Job_Type.data.map((jobtype) => (
+                                          <option value={jobtype.id} key={jobtype.id}>{jobtype.type}</option>
                                         ))}
                                     </select>
                                     {errors['JobType'] && (
