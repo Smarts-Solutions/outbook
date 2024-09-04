@@ -207,6 +207,8 @@ const CreateJob = () => {
     }, [getChecklistId])
 
 
+    console.log("getChecklistId", getChecklistId)
+
     const HandleChange = (e) => {
         let name = e.target.name
         let value = e.target.value
@@ -340,7 +342,7 @@ const CreateJob = () => {
             invoice_hours: formatTime(invoiceTime.hours, invoiceTime.minutes),
             invoice_remark: jobData.InvoiceRemark,
             tasks: {
-                checklist_id: AllJobData?.data?.customer?.customer_id,
+                checklist_id: getChecklistId,
                 task: AddTaskArr
             }
         }
