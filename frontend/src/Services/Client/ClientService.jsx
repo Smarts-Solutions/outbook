@@ -25,7 +25,7 @@ export async function GET_CLIENT_INDUSTRY(data ,token) {
 
 
 // Get All Client List
-export async function GET_ALL_CLIENT(data) {
+export async function CLIENT_ACTION(data) {
   const token =  JSON.parse(localStorage.getItem("token"));
    
    

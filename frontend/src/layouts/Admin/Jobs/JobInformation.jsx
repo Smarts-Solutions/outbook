@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useLocation , useNavigate } from 'react-router-dom';
 import { GetAllJabData, AddAllJobType, GET_ALL_CHECKLIST } from '../../../ReduxStore/Slice/Customer/CustomerSlice';
-import { Get_All_Job_List } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 
 const JobInformationPage = ({ job_id }) => {
@@ -72,7 +72,7 @@ const JobInformationPage = ({ job_id }) => {
     const JobDetails = async () => {
         const req = { action: "getByJobId", job_id: location.state.job_id }
         const data = { req: req, authToken: token }
-        await dispatch(Get_All_Job_List(data))
+        await dispatch(JobAction(data))
             .unwrap()
             .then(async (response) => {
                 if (response.status) {

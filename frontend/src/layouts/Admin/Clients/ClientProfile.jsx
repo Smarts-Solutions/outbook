@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
-import { Get_All_Job_List } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Get_All_Client } from "../../../ReduxStore/Slice/Client/ClientSlice";
+import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ const ClientList = () => {
   const GetClientDetails = async () => {
     const req = { action: "getByid", client_id: location.state.Client_id };
     const data = { req: req, authToken: token };
-    await dispatch(Get_All_Client(data))
+    await dispatch(ClientAction(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
@@ -167,7 +167,7 @@ const ClientList = () => {
   const GetAllJobList = async () => {
     const req = { action: "getByClient", client_id: location.state.Client_id };
     const data = { req: req, authToken: token };
-    await dispatch(Get_All_Job_List(data))
+    await dispatch(JobAction(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
