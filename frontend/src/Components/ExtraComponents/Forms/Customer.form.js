@@ -607,7 +607,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                 <>
                   <>
                     <div className={`col-lg-${field.col_size} px-2`}>
-                      <div className="mb-3  mt-4 row flex-column">
+                      <div className="  mt-4 row flex-column">
                         <div className="card-header card-header-light-blue step-card-header mb-4 card-header-light-blue" ><h6 className="my-0 fw-bold">Trading Details </h6></div>
                         {/* <label
                         className={`col-lg-${field.label_size}`}

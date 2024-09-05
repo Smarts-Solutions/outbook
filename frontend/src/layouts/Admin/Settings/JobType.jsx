@@ -334,17 +334,24 @@ const Setting = () => {
     return (
         <div>
             <div className='container-fluid'>
-                <div className='content-title'>
-                    <div className='tab-title'>
-                        <h3 className='mt-0'>Job Type</h3>
-                    </div>
-                </div>
-                <div className="tab-content mt-4" id="pills-tabContent">
+
+             
                  
 
-                    <div className={`tab-pane show active`}>
-                        <div className='report-data'>
-                            <div className='d-flex justify-content-end align-items-center'>
+                  
+                        <div className='card mt-4'>
+                            <div className='card-header align-items-center step-header-blue d-flex'>
+                            <button
+                  type="button"
+                  className="btn p-0"
+                  
+                >
+                 <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" ></i>
+                </button>
+                                <h4 className='card-title'>Job Type</h4>
+                            </div>
+                            <div className='card-body'>
+                                <div className='d-flex justify-content-end align-items-center'>
                              
                                 <div>
                                     <button type="button" className='btn btn-info text-white float-end' onClick={(e) => handleAdd(e, '1')}> <i className="fa fa-plus" /> Add Job Type</button>
@@ -357,11 +364,11 @@ const Setting = () => {
                                     data={jobTypeData.data} />
                             </div>
                         </div>
-                    </div>
+                        </div>
                   
 
 
-                </div>
+               
 
 
             </div>

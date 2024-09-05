@@ -984,7 +984,7 @@ const Information = ({ id, pageStatus }) => {
                               )}
                             </div>
                           </div>
-                          <div className="col-lg-4">
+                          <div className="col-lg-6">
                             <div className="mb-3">
                               <label className="form-label">
                                 Trading Address
