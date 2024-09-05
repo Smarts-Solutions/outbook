@@ -310,9 +310,7 @@ const CreateJob = () => {
         return acc;
     }, { hours: 0, minutes: 0 });
    }
-
-   console.log("AddTaskArr ",AddTaskArr)
-   console.log("budgeted_hour_totalTime ",budgeted_hour_totalTime)
+ 
     const handleSubmit = async () => {
         const req = {
             staffCreatedId: staffCreatedId,
