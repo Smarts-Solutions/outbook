@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import { getAllTaskTimeSheet } from "../../../ReduxStore/Slice/Customer/CustomerSlice";  
 
 const TaskTimesheet = () => {
-  const token = localStorage.getItem("token");
+  const token = JSON.parse(localStorage.getItem("token"));
   const location = useLocation();
   const dispatch = useDispatch();
   const [addjobtimesheet, setAddjobtimesheet] = useState(false);
@@ -38,6 +38,8 @@ const TaskTimesheet = () => {
         console.log("error", error)
       })
   }
+  
+  
 
 
 
