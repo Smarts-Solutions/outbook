@@ -14,6 +14,7 @@ import {
   GET_ALL_JOB_LIST,
   UPDATE_JOB,
   GETALLCHECKLIST,
+  JOB_DELETE,
 } from "../../../Services/Customer/CustomerService";
 
 import axios from "axios";
@@ -283,6 +284,8 @@ export const GET_ALL_CHECKLIST = createAsyncThunk(
   }
 );
 
+ 
+
 const CustomerSlice = createSlice({
   name: "CustomerSlice",
   initialState: {
@@ -302,6 +305,7 @@ const CustomerSlice = createSlice({
     getalljoblist: [],
     updatejob: [],
     getallchecklist: [],
+    
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -459,7 +463,8 @@ const CustomerSlice = createSlice({
       .addCase(GET_ALL_CHECKLIST.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
-      });
+      })
+      
   },
 });
 

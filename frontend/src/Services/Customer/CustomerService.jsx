@@ -214,3 +214,4 @@ export async function GETALLCHECKLIST(data, token) {
     return await err;
   }
 }
+ 

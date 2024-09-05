@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { Get_All_Client } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Get_All_Job_List } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { Get_All_Job_List  } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import Statuses from "./Statuses";
@@ -173,7 +173,7 @@ const ClientList = () => {
           <button className="edit-icon" onClick={() => handleJobEdit(row)}>
             <i className="ti-pencil" />
           </button>
-          <button className="delete-icon" onClick={() => handleDelete(row)}>
+          <button className="delete-icon" onClick={() => handleJobDelete(row)}>
             <i className="ti-trash" />
           </button>
         </div>
@@ -308,6 +308,42 @@ const ClientList = () => {
       });
   };
 
+  const handleJobDelete = async (row) => {
+    const req = { action: "delete", job_id: row.job_id };
+    const data = { req: req, authToken: token };
+
+    console.log("data", data);
+
+    return 
+    await dispatch(Get_All_Job_List(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          sweatalert.fire({
+            title: "Deleted",
+            icon: "success",
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          JobDetails();
+        } else {
+          sweatalert.fire({
+            title: "Failed",
+            icon: "error",
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        }
+      })
+      .catch((error) => {
+        console.log("Error", error);
+      });
+  };
+
+
+
   const HandleClientView = (row) => {
     navigate("/admin/client/profile", { state: { Client_id: row.id } });
   };
@@ -332,6 +368,8 @@ const ClientList = () => {
       state: { job_id: row.job_id, goto: "Customer" },
     });
   }
+
+
   function handleDelete(row) {
     console.log("Deleting row:", row);
   }
