@@ -97,10 +97,6 @@ const jobTimeSheet = async (req,res) => {
  }
 }
 
-
-
-
-
 module.exports = {
   getAddJobData,
   jobAdd,
