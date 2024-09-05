@@ -69,9 +69,8 @@ const getjobTimeSheet = async (timeSheet) => {
     return { status: false, message: 'Error getTaskTimeSheet .' };
   }
 }
-
 const updateTaskTimeSheetStatus = async (timeSheet) => {
-  
+
   const { id, task_status , time } = timeSheet;
   try {
     const query = `
