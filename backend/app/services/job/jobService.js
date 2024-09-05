@@ -43,6 +43,17 @@ const getTaskTimeSheet = async (job) => {
   return taskTimeSheetModel.getTaskTimeSheet(job);
 };
 
+const jobTimeSheet = async (job) => {
+  const {action} = job
+  if(action === "get"){
+    return taskTimeSheetModel.getjobTimeSheet(job);
+  }
+  else{
+    return { status: false, message: 'Error getting Job TimeSheet.' };
+  }
+  
+}
+
 
 
 module.exports = {
@@ -50,6 +61,7 @@ module.exports = {
   jobAdd,
   jobAction,
   jobUpdate,
-  getTaskTimeSheet
+  getTaskTimeSheet,
+  jobTimeSheet
 
  };
