@@ -503,7 +503,14 @@ const ClientList = () => {
                       filter={false}
                     />
                   ) : (
+                    <div className="text-center">
+                    <img 
+                    src='/assets/images/No-data-amico.png'
+                    alt="No records available" 
+                    style={{ width: '250px', height: 'auto', objectFit: 'contain' }}
+                  />
                     <p>No data available.</p>
+                    </div>
                   )}
                 </div>
               </div>

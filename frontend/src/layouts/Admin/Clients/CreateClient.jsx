@@ -602,7 +602,15 @@ const CreateClient = () => {
                     <div className="col-xl-12">
                         <div className="card">
                             <div className="card-header step-header-blue">
-                                <h4 className="card-title mb-0">Create New Client</h4>
+                                <h4 className="card-title mb-0">
+                                <button
+                  type="button"
+                  className="btn p-0"
+                  onClick={HandleCancel}
+                >
+                 <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" ></i>
+                </button>
+                                    Create New Client</h4>
                             </div>
                             {/* end card header */}
                             <div className="card-body form-steps">
@@ -859,7 +867,7 @@ const CreateClient = () => {
                                                                     <div className="col-lg-12">
                                                                         <div className="card card_shadow ">
                                                                             <div className="card-header card-header-light-blue align-items-center d-flex">
-                                                                                <h4 className="card-title mb-0 flex-grow-1 fs-16">Company</h4>
+                                                                                <h4 className="card-title mb-0 flex-grow-1 fs-16">Company Information</h4>
                                                                             </div>
                                                                             {/* end card header */}
                                                                             <div className="card-body">
@@ -870,7 +878,7 @@ const CreateClient = () => {
                                                                                             <div className="mb-3">
                                                                                                 <div className='position-relative'>
                                                                                                     <label className="form-label">Search Company</label>
-                                                                                                    <input type="text" className="form-control" placeholder="Outbooks Quality & Certainty"
+                                                                                                    <input type="text" className="form-control" placeholder="Search Company"
                                                                                                         name="SearchCompany" onChange={(e) => setSearchItem(e.target.value)} value={searchItem}
                                                                                                         onClick={() => setShowDropdown(true)}
                                                                                                         style={{ cursor: "pointer" }}
@@ -896,7 +904,7 @@ const CreateClient = () => {
                                                                                         <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label" >Company Name<span style={{ color: "red" }}>*</span>  </label>
-                                                                                                <input type="text" className="form-control input_bg" placeholder="Outbooks Quality & Certainty LTD"
+                                                                                                <input type="text" className="form-control input_bg" placeholder="Enter Company Name"
                                                                                                     name="CompanyName" onChange={(e) => handleChange2(e)} value={getCompanyDetails.CompanyName}
                                                                                                     disabled
                                                                                                 />
@@ -909,7 +917,7 @@ const CreateClient = () => {
                                                                                         <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Entity Type<span style={{ color: "red" }}>*</span>   </label>
-                                                                                                <input type="text" className="form-control input_bg" placeholder="LTD"
+                                                                                                <input type="text" className="form-control input_bg" placeholder="Enter Entity Type"
                                                                                                     name="EntityType" onChange={(e) => handleChange2(e)} value={getCompanyDetails.EntityType} disabled />
                                                                                                 {errors2['EntityType'] && (
                                                                                                     <div className="error-text">{errors2['EntityType']}</div>
@@ -919,7 +927,7 @@ const CreateClient = () => {
                                                                                         <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label"  >  Company Status  <span style={{ color: "red" }}>*</span> </label>
-                                                                                                <input type="text" className="form-control input_bg" placeholder="Active"
+                                                                                                <input type="text" className="form-control input_bg" placeholder="Company Status"
                                                                                                     name="CompanyStatus" onChange={(e) => handleChange2(e)} value={getCompanyDetails.CompanyStatus} disabled />
                                                                                                 {errors2['CompanyStatus'] && (
                                                                                                     <div className="error-text">{errors2['CompanyStatus']}</div>)}
@@ -927,8 +935,8 @@ const CreateClient = () => {
                                                                                         </div>
                                                                                         <div className="col-lg-4">
                                                                                             <div className="mb-3">
-                                                                                                <label className="form-label">Company Number<span style={{ color: "red" }}>*</span></label>
-                                                                                                <input type="text" className="form-control input_bg" placeholder="Company Number"
+                                                                                                <label className="form-label">Company Status<span style={{ color: "red" }}>*</span></label>
+                                                                                                <input type="text" className="form-control input_bg" placeholder="Enter Company Number"
                                                                                                     name="CompanyNumber" onChange={(e) => handleChange2(e)} value={getCompanyDetails.CompanyNumber}
                                                                                                     disabled
                                                                                                 />
@@ -940,7 +948,7 @@ const CreateClient = () => {
                                                                                         <div className="col-lg-4">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Incorporation Date</label>
-                                                                                                <input type="text" className="form-control input_bg" placeholder="07-01-2023"
+                                                                                                <input type="text" className="form-control input_bg" placeholder="Incorporation Date"
                                                                                                     name="IncorporationDate" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationDate} disabled
                                                                                                 />
                                                                                                 {errors2['IncorporationDate'] && (
@@ -951,7 +959,7 @@ const CreateClient = () => {
                                                                                         <div className="col-lg-7">
                                                                                             <div className="mb-3">
                                                                                                 <label className="form-label">Registered Office Address<span style={{ color: "red" }}>*</span>  </label>
-                                                                                                <input type="text" className="form-control input_bg" placeholder="Suite Winsor & Netwon Building, White Fridrs Avenue, England,HA3 5RN"
+                                                                                                <input type="text" className="form-control input_bg" placeholder="Registered Office Address"
                                                                                                     name="RegisteredOfficeAddress" onChange={(e) => handleChange2(e)} value={getCompanyDetails.RegisteredOfficeAddress} disabled
                                                                                                 />
                                                                                                 {errors2['RegisteredOfficeAddress'] && (
@@ -962,7 +970,7 @@ const CreateClient = () => {
 
                                                                                         <div className="col-lg-5">
                                                                                             <div className="mb-3">
-                                                                                                <label className="form-label"  > Incorporation in  <span style={{ color: "red" }}>*</span> </label>
+                                                                                                <label className="form-label"  > Incorporation In  <span style={{ color: "red" }}>*</span> </label>
                                                                                                 <input type="text" className="form-control input_bg" placeholder="Please Enter Incorporation In"
                                                                                                     name="IncorporationIn" onChange={(e) => handleChange2(e)} value={getCompanyDetails.IncorporationIn} disabled
                                                                                                 />

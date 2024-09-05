@@ -9901,6 +9901,14 @@ body .accordion-button:not(.collapsed)::after {
   padding: 0px 3px;
   margin-top: 4px;
 }
+.error-text-login {
+  background: #cb0000;
+  color: #fff !important;
+  font-size: 13px;
+  padding: 0px 3px;
+  width: 100%;
+  display: block;
+}
 .upload-box {
   border: 1px dotted #ddd;
   display: flex;

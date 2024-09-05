@@ -79,7 +79,7 @@ const Customer = () => {
       name: "Company Number",
       selector: (row) => (row.company_number == null ? "" : row.company_number),
       sortable: true,
-      width: "150px",
+      width: "200px",
     },
     {
       name: "Type",
@@ -125,7 +125,7 @@ const Customer = () => {
           </button>
           <button className="delete-icon" onClick={() => handleDelete(row)}>
             {" "}
-            <i className="ti-trash" />
+            <i className="ti-trash text-danger" />
           </button>
         </div>
       ),

@@ -416,7 +416,7 @@ const Engagement = () => {
                                 { label: '', name: 'feePerAdmin', feeName: "Fee Per Admin/Other Staff" },
                               ].map((field, index) => (
 
-                                <div className="col-lg-3" key={index}>
+                                <div className="col-lg-6" key={index}>
 
 
                                   <div className="mb-3 cl">
