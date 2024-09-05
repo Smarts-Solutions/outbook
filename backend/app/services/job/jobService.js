@@ -39,14 +39,17 @@ const jobUpdate = async (job) => {
 
 
 // task TimeSheet  Work .....
-const getTaskTimeSheet = async (job) => {
-  return taskTimeSheetModel.getTaskTimeSheet(job);
+const getTaskTimeSheet = async (timeSheet) => {
+  return taskTimeSheetModel.getTaskTimeSheet(timeSheet);
 };
 
-const jobTimeSheet = async (job) => {
-  const {action} = job
+const jobTimeSheet = async (timeSheet) => {
+  const {action} = timeSheet
   if(action === "get"){
-    return taskTimeSheetModel.getjobTimeSheet(job);
+    return taskTimeSheetModel.getjobTimeSheet(timeSheet);
+  }
+  else if(action === "updateTaskTimeSheetStatus"){
+    return taskTimeSheetModel.updateTaskTimeSheetStatus(timeSheet);
   }
   else{
     return { status: false, message: 'Error getting Job TimeSheet.' };

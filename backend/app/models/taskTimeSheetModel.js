@@ -1,7 +1,7 @@
 const pool = require('../config/database');
 
-const getTaskTimeSheet = async (job) => {
-  const { job_id } = job;
+const getTaskTimeSheet = async (timeSheet) => {
+  const { job_id } = timeSheet;
   console.log("job_id ", job_id)
   try {
     const query = `
@@ -46,8 +46,8 @@ const getTaskTimeSheet = async (job) => {
 
 
 }
-const getjobTimeSheet = async (job) => {
-  const { job_id } = job;
+const getjobTimeSheet = async (timeSheet) => {
+  const { job_id } = timeSheet;
   console.log("job_id ", job_id)
   try {
     const query = `
@@ -70,7 +70,28 @@ const getjobTimeSheet = async (job) => {
   }
 }
 
+const updateTaskTimeSheetStatus = async (timeSheet) => {
+  const { id, task_status , time } = timeSheet;
+  try {
+    const query = `
+     UPDATE 
+     client_job_task
+     SET
+     task_status = ? , time = ?
+     WHERE 
+     id = ?
+     `;
+    const [rows] = await pool.execute(query, [task_status, time, id]);
+    console.log("rows ", rows)
+    return { status: true, message: 'Success.', data: rows };
+  } catch (error) {
+     console.log("error ",error)
+    return { status: false, message: 'Error getTaskTimeSheet .' };
+  }
+}
+
 module.exports = {
   getTaskTimeSheet,
-  getjobTimeSheet
+  getjobTimeSheet,
+  updateTaskTimeSheetStatus
 };

@@ -69,9 +69,9 @@ const jobUpdate = async (req, res) => {
 // task TimeSheet  Work .....
 const getTaskTimeSheet = async (req, res) => {
   try {
-     const { ...job } = req.body;
+     const { ...timeSheet } = req.body;
   
-       const result = await jobService.getTaskTimeSheet(job);
+       const result = await jobService.getTaskTimeSheet(timeSheet);
        if(!result.status){
         return  res.status(200).json({ status: false, message: result.message });  
         }else{
@@ -85,8 +85,8 @@ const getTaskTimeSheet = async (req, res) => {
 
 const jobTimeSheet = async (req,res) => {
   try {
-    const { ...job } = req.body;
-    const result = await jobService.jobTimeSheet(job);
+    const { ...timeSheet } = req.body;
+    const result = await jobService.jobTimeSheet(timeSheet);
     if(!result.status){
      return  res.status(200).json({ status: false, message: result.message });  
      }else{
