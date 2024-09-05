@@ -42,6 +42,10 @@ const Service = () => {
   const [tasksGet, setTasksData] = useState([]);
 
   useEffect(() => {
+    JobTypeDataAPi(services, 2);
+  }, [services]);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         await Promise.all([
@@ -218,17 +222,26 @@ const Service = () => {
       };
     });
 
-    // Filter out services that are not selected
     const filteredMatchData = MatchData.filter((item) =>
       services.includes(item.service_id)
     );
+
+
+    let TaskGet = [];
+    if (tasksGet.length > 0) {
+      TaskGet = tasksGet.map(({ hours, minutes, ...task }) => ({
+        ...task,
+        budgeted_hours: `${hours}:${minutes}`,
+      }));
+    }
 
     const req = {
       customer_id: address,
       pageStatus: "2",
       services: filteredMatchData,
-      Task: tasksGet,
+      Task: TaskGet,
     };
+
 
     try {
       const response = await dispatch(
@@ -238,7 +251,7 @@ const Service = () => {
         next(response.data);
       }
     } catch (error) {
-      console.error("Error updating services", error);
+      console.log("Error updating services", error);
     }
   };
 
@@ -263,7 +276,7 @@ const Service = () => {
           });
         }
       } catch (error) {
-return
+        return;
       }
     };
 
@@ -275,10 +288,6 @@ return
       await fetchJobTypeData(req.id);
     }
   };
-
-  useEffect(() => {
-    JobTypeDataAPi(services, 2);
-  }, [services]);
 
   const getCheckListData = async (service_id, item) => {
     const req = { service_id: service_id, job_type_id: item.id };
@@ -304,7 +313,7 @@ return
         }
       })
       .catch((error) => {
-        console.log("Error fetching job types:", error)
+        console.log("Error fetching job types:", error);
       });
   };
 
@@ -392,7 +401,7 @@ return
             handleClose={() => SetJobtype(false)}
           >
             <table className="table align-middle table-nowrap">
-              {jobTypeData.map((data) => {
+              {jobTypeData && jobTypeData.map((data) => {
                 if (data.service_id === getServiceData.id) {
                   return data.data.map((item, index) => (
                     <React.Fragment key={index}>
@@ -437,41 +446,86 @@ return
                                       task.service_id === getServiceData.id
                                   )
                                   .map((task, taskIndex) => (
-                                    <div className="row py-2 align-items-center" key={taskIndex}>
+                                    <div
+                                      className="row py-2 align-items-center"
+                                      key={taskIndex}
+                                    >
                                       <div className="col-md-5">
                                         <input
                                           type="checkbox"
-                                          onChange={(e) =>
-                                            setTasksData((pre) => [
-                                              ...pre,
-                                              task,
-                                            ])
-                                          }
+                                          onChange={(e) => {
+                                            if (e.target.checked) {
+                                              setTasksData((pre) => [
+                                                ...pre,
+                                                {
+                                                  ...task,
+                                                  hours: "",
+                                                  minutes: "",
+                                                },
+                                              ]);
+                                            } else {
+                                              setTasksData((pre) =>
+                                                pre.filter(
+                                                  (t) => t.id !== task.id
+                                                )
+                                              );
+                                            }
+                                          }}
                                         />{" "}
                                         {task.name}
                                       </div>
-                                      <div className="col-lg-7  ps-0">
-  <label className="form-label">Budgeted Hours</label>
-  <div className="input-group">
-    <input
-      type="number"
-      className="form-control"
-      placeholder="Hours"
-      name="hours"
-      defaultValue=""
-    />
-    <input
-      type="number"
-      className="form-control"
-      placeholder="Minutes"
-      name="minutes"
-      min={0}
-      max={59}
-      defaultValue=""
-    />
-  </div>
-</div>
-
+                                      <div className="col-lg-7 ps-0">
+                                        <label className="form-label">
+                                          Budgeted Hours
+                                        </label>
+                                        <div className="input-group">
+                                          <input
+                                            type="number"
+                                            className="form-control"
+                                            placeholder="Hours"
+                                            name="hours"
+                                            min={0}
+                                            value={
+                                              tasksGet.find(
+                                                (t) => t.id === task.id
+                                              )?.hours || ""
+                                            }
+                                            onChange={(e) => {
+                                              const hours = e.target.value;
+                                              setTasksData((pre) =>
+                                                pre.map((t) =>
+                                                  t.id === task.id
+                                                    ? { ...t, hours }
+                                                    : t
+                                                )
+                                              );
+                                            }}
+                                          />
+                                          <input
+                                            type="number"
+                                            className="form-control"
+                                            placeholder="Minutes"
+                                            name="minutes"
+                                            min={0}
+                                            max={59}
+                                            value={
+                                              tasksGet.find(
+                                                (t) => t.id === task.id
+                                              )?.minutes || ""
+                                            }
+                                            onChange={(e) => {
+                                              const minutes = e.target.value;
+                                              setTasksData((pre) =>
+                                                pre.map((t) =>
+                                                  t.id === task.id
+                                                    ? { ...t, minutes }
+                                                    : t
+                                                )
+                                              );
+                                            }}
+                                          />
+                                        </div>
+                                      </div>
                                     </div>
                                   ))
                               ) : (
@@ -489,7 +543,11 @@ return
             </table>
 
             <div className="d-flex justify-content-end">
-              <Button className="btn btn-info" color="primary" onClick={(e)=>SetJobtype(false)}>
+              <Button
+                className="btn btn-info"
+                color="primary"
+                onClick={(e) => SetJobtype(false)}
+              >
                 Submit
               </Button>
             </div>
