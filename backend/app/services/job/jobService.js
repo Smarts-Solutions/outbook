@@ -1,6 +1,8 @@
 
 const jobModel = require('../../models/jobModel');
+const taskTimeSheetModel = require('../../models/taskTimeSheetModel');
 
+// Job Work .....
 const getAddJobData = async (job) => {
   return jobModel.getAddJobData(job);
 };
@@ -23,6 +25,9 @@ const jobAction = async (job) => {
   else if(action === "getByJobStaffId"){
     return jobModel.getByJobStaffId(job);
   }
+  else if(action === "delete"){
+    return jobModel.deleteJobById(job);
+  }
   else{
     return { status: false, message: 'Error getting job.' };
   }
@@ -33,10 +38,18 @@ const jobUpdate = async (job) => {
 };
 
 
+// task TimeSheet  Work .....
+const getTaskTimeSheet = async (job) => {
+  return taskTimeSheetModel.getTaskTimeSheet(job);
+};
+
+
 
 module.exports = {
   getAddJobData,
   jobAdd,
   jobAction,
-  jobUpdate
+  jobUpdate,
+  getTaskTimeSheet
+
  };

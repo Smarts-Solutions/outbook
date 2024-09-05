@@ -958,6 +958,22 @@ const jobUpdate = async (job) => {
   }
 }
 
+const deleteJobById = async(job)=>{
+  const { job_id } = job;
+  try {
+    
+    const [result] = await pool.execute('DELETE FROM jobs WHERE id = ?', [job_id]);
+    await pool.execute('DELETE FROM client_job_task WHERE job_id = ?', [job_id]);
+    if (result.affectedRows > 0) {
+      return { status: true, message: 'Job deleted successfully.', data: job_id };
+    } else {
+      return { status: false, message: 'No job found with the given job_id.' };
+    }
+  } catch (err) {
+    return { status: false, message: 'Error deleting job.' };
+  }
+}
+
 
 module.exports = {
   getAddJobData,
@@ -967,5 +983,6 @@ module.exports = {
   getByJobStaffId,
   getJobById,
   jobUpdate,
+  deleteJobById
 
 };
