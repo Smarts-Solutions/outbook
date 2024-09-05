@@ -226,7 +226,6 @@ const Service = () => {
       services.includes(item.service_id)
     );
 
-console.log("tasksGet",tasksGet)
 
     let TaskGet = [];
     if (tasksGet.length > 0) {
@@ -318,6 +317,7 @@ console.log("tasksGet",tasksGet)
       });
   };
 
+
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
       {({ handleSubmit }) => (
@@ -401,7 +401,7 @@ console.log("tasksGet",tasksGet)
             handleClose={() => SetJobtype(false)}
           >
             <table className="table align-middle table-nowrap">
-              {jobTypeData.map((data) => {
+              {jobTypeData && jobTypeData.map((data) => {
                 if (data.service_id === getServiceData.id) {
                   return data.data.map((item, index) => (
                     <React.Fragment key={index}>

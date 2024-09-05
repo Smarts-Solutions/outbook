@@ -9,6 +9,10 @@ import {
   ADD_SERVICES_CUSTOMERS,
   Get_Service,
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import {
+  JobType,
+  GETTASKDATA,
+} from "../../../../ReduxStore/Slice/Settings/settingSlice";
 
 const Service = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
@@ -22,12 +26,20 @@ const Service = () => {
   const [getManager, setManager] = useState([]);
   const [services, setServices] = useState([]);
   const [tempServices, setTempServices] = useState("");
-  const [jobtype, SetJobtype] = useState(true);
+  const [jobtype, SetJobtype] = useState(false);
+  const [jobTypeData, setJobTypeData] = useState([]);
+  const [getServiceData, setServiceData] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [tasksGet, setTasksData] = useState([]);
 
   useEffect(() => {
     GetAllServiceData();
     fetchStaffData();
   }, []);
+
+  useEffect(() => {
+    JobTypeDataAPi(services, 2);
+  }, [services]);
 
   useEffect(() => {
     if (searchValue.trim() !== "") {
@@ -192,12 +204,23 @@ const Service = () => {
       };
     });
 
+
+    let TaskGet = [];
+    if (tasksGet.length > 0) {
+      TaskGet = tasksGet.map(({ hours, minutes, ...task }) => ({
+        ...task,
+        budgeted_hours: `${hours}:${minutes}`,
+      }));
+    }
     // Create request object
     var req = {
       customer_id: address,
       pageStatus: "2",
       services: MatchData,
+      Task:TaskGet
     };
+
+    console.log("req", req);
 
     // Send request
     const data = { req: req, authToken: token };
@@ -214,6 +237,72 @@ const Service = () => {
         console.log("Error", error);
       });
   };
+
+  const JobTypeDataAPi = async (req, id) => {
+    const fetchJobTypeData = async (service_id) => {
+      const data = {
+        req: { action: "get", service_id },
+        authToken: token,
+      };
+
+      try {
+        const response = await dispatch(JobType(data)).unwrap();
+
+        if (response.status && response.data.length > 0) {
+          setJobTypeData((prev) => {
+            const exists = prev.some((item) => item.service_id === service_id);
+
+            if (!exists) {
+              return [...prev, { service_id: service_id, data: response.data }];
+            }
+            return prev;
+          });
+        }
+      } catch (error) {
+        return;
+      }
+    };
+
+    if (id === 2) {
+      for (const item of req) {
+        await fetchJobTypeData(item);
+      }
+    } else {
+      await fetchJobTypeData(req.id);
+    }
+  };
+
+  const getCheckListData = async (service_id, item) => {
+    const req = { service_id: service_id, job_type_id: item.id };
+    const data = { req, authToken: token };
+    await dispatch(GETTASKDATA(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          if (response.data.length > 0) {
+            setTasks((prev) => {
+              const mergedTasks = [...prev, ...response.data];
+
+              const uniqueTasks = mergedTasks.filter(
+                (task, index, self) =>
+                  index === self.findIndex((t) => t.id === task.id)
+              );
+
+              return uniqueTasks;
+            });
+          } else {
+            setTasks((prev) => [...prev, ...response.data]);
+          }
+        }
+      })
+      .catch((error) => {
+        console.log("Error fetching job types:", error);
+      });
+  };
+
+
+  console.log("tasksGet", tasksGet);
+
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
@@ -263,13 +352,20 @@ const Service = () => {
                               <input
                                 className="form-check-input new_input new-checkbox"
                                 type="checkbox"
-                                onChange={(e) =>
+                                onChange={(e) => {
                                   handleCheckboxChange(
                                     e.target.checked,
                                     item,
                                     2
-                                  )
-                                }
+                                  );
+
+
+                                  setServiceData(item);
+
+                                  if (e.target.checked) {
+                                    SetJobtype(true);
+                                  }
+                                }}
                                 checked={services.includes(item.id)}
                               />
                             </div>
@@ -314,246 +410,145 @@ const Service = () => {
             handleClose={() => SetJobtype(false)}
           >
             <table className="table align-middle table-nowrap">
-              <thead className="table-light table-head-blue">
-                <tr>
-                  <td className="p-0">
-                    <div className="form-group mb-0">
-                      <div className="checkbox">
-                        <label
-                          data-toggle="collapse"
-                          data-target="#collapse0"
-                          aria-expanded="false"
-                          aria-controls="collapse0"
-                          className="accordion-button fs-16 fw-bold py-2"
-                        >
-                          <input type="checkbox" /> SS
-                        </label>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="p-0">
-                    <div
-                      id="collapse0"
-                      aria-expanded="false"
-                      className="p-2 collapse show"
-                      style={{}}
-                    >
-                      <div className="row py-2 align-items-center">
-                        <div className="col-md-5 ">
-                          <input type="checkbox" /> Management Accounts
-                        </div>
-                        <div className="col-lg-7  ps-0">
-                          <label className="form-label">Budgeted Hours</label>
-                          <div className="input-group">
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="Hours"
-                              name="hours"
-                              defaultValue=""
-                            />
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="Minutes"
-                              name="minutes"
-                              min={0}
-                              max={59}
-                              defaultValue=""
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="row py-2 align-items-center">
-                        <div className="col-md-5">
-                          <input type="checkbox" /> Personal Tax Return
-                        </div>
-                        <div className="col-lg-7  ps-0">
-                          <label className="form-label">Budgeted Hours</label>
-                          <div className="input-group">
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="Hours"
-                              name="hours"
-                              defaultValue=""
-                            />
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="Minutes"
-                              name="minutes"
-                              min={0}
-                              max={59}
-                              defaultValue=""
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="row py-2 align-items-center">
-                        <div className="col-md-5 ">
-                          <input type="checkbox" /> Payroll, Statutory Accounts
-                        </div>
-                        <div className="col-lg-7  ps-0">
-                          <label className="form-label">Budgeted Hours</label>
-                          <div className="input-group">
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="Hours"
-                              name="hours"
-                              defaultValue=""
-                            />
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="Minutes"
-                              name="minutes"
-                              min={0}
-                              max={59}
-                              defaultValue=""
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="row py-2 align-items-center">
-                        <div className="col-md-5 ">
-                          <input type="checkbox" /> po
-                        </div>
-                        <div className="col-lg-7  ps-0">
-                          <label className="form-label">Budgeted Hours</label>
-                          <div className="input-group">
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="Hours"
-                              name="hours"
-                              defaultValue=""
-                            />
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="Minutes"
-                              name="minutes"
-                              min={0}
-                              max={59}
-                              defaultValue=""
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="row py-2 align-items-center">
-                        <div className="col-md-5 ">
-                          <input type="checkbox" /> test1
-                        </div>
-                        <div className="col-lg-7  ps-0">
-                          <label className="form-label">Budgeted Hours</label>
-                          <div className="input-group">
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="Hours"
-                              name="hours"
-                              defaultValue=""
-                            />
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="Minutes"
-                              name="minutes"
-                              min={0}
-                              max={59}
-                              defaultValue=""
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="row py-2 align-items-center">
-                        <div className="col-md-5 ">
-                          <input type="checkbox" /> test
-                        </div>
-                        <div className="col-lg-7  ps-0">
-                          <label className="form-label">Budgeted Hours</label>
-                          <div className="input-group">
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="Hours"
-                              name="hours"
-                              defaultValue=""
-                            />
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="Minutes"
-                              name="minutes"
-                              min={0}
-                              max={59}
-                              defaultValue=""
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="row py-2 align-items-center">
-                        <div className="col-md-5 ">
-                          <input type="checkbox" /> dfgdgdg
-                        </div>
-                        <div className="col-lg-7  ps-0">
-                          <label className="form-label">Budgeted Hours</label>
-                          <div className="input-group">
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="Hours"
-                              name="hours"
-                              defaultValue=""
-                            />
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="Minutes"
-                              name="minutes"
-                              min={0}
-                              max={59}
-                              defaultValue=""
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="row py-2 align-items-center">
-                        <div className="col-md-5">
-                          <input type="checkbox" /> efefge
-                        </div>
-                        <div className="col-lg-7  ps-0">
-                          <label className="form-label">Budgeted Hours</label>
-                          <div className="input-group">
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="Hours"
-                              name="hours"
-                              defaultValue=""
-                            />
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="Minutes"
-                              name="minutes"
-                              min={0}
-                              max={59}
-                              defaultValue=""
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
+              {jobTypeData.map((data) => {
+                if (data.service_id === getServiceData.id) {
+                  return data.data.map((item, index) => (
+                    <React.Fragment key={index}>
+                      <thead className="table-light table-head-blue">
+                        <tr>
+                          <td className="p-0">
+                            <div className="form-group mb-0">
+                              <div className="checkbox">
+                                <label
+                                  data-toggle="collapse"
+                                  data-target={`#collapse${index}`}
+                                  aria-expanded="false"
+                                  aria-controls={`collapse${index}`}
+                                  className="accordion-button fs-16 fw-bold py-2"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    onChange={(e) =>
+                                      getCheckListData(getServiceData.id, item)
+                                    }
+                                  />{" "}
+                                  {item.type}
+                                </label>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="p-0">
+                            <div
+                              id={`collapse${index}`}
+                              aria-expanded="false"
+                              className="collapse p-2"
+                            >
+                              {tasks && tasks.length > 0 ? (
+                                tasks
+                                  .filter(
+                                    (task) =>
+                                      task.job_type_id === item.id &&
+                                      task.service_id === getServiceData.id
+                                  )
+                                  .map((task, taskIndex) => (
+                                    <div
+                                      className="row py-2 align-items-center"
+                                      key={taskIndex}
+                                    >
+                                      <div className="col-md-5">
+                                        <input
+                                          type="checkbox"
+                                          onChange={(e) => {
+                                            if (e.target.checked) {
+                                              setTasksData((pre) => [
+                                                ...pre,
+                                                {
+                                                  ...task,
+                                                  hours: "",
+                                                  minutes: "",
+                                                },
+                                              ]);
+                                            } else {
+                                              setTasksData((pre) =>
+                                                pre.filter(
+                                                  (t) => t.id !== task.id
+                                                )
+                                              );
+                                            }
+                                          }}
+                                        />{" "}
+                                        {task.name}
+                                      </div>
+                                      <div className="col-lg-7 ps-0">
+                                        <label className="form-label">
+                                          Budgeted Hours
+                                        </label>
+                                        <div className="input-group">
+                                          <input
+                                            type="number"
+                                            className="form-control"
+                                            placeholder="Hours"
+                                            name="hours"
+                                            min={0}
+                                            value={
+                                              tasksGet.find(
+                                                (t) => t.id === task.id
+                                              )?.hours || ""
+                                            }
+                                            onChange={(e) => {
+                                              const hours = e.target.value;
+                                              setTasksData((pre) =>
+                                                pre.map((t) =>
+                                                  t.id === task.id
+                                                    ? { ...t, hours }
+                                                    : t
+                                                )
+                                              );
+                                            }}
+                                          />
+                                          <input
+                                            type="number"
+                                            className="form-control"
+                                            placeholder="Minutes"
+                                            name="minutes"
+                                            min={0}
+                                            max={59}
+                                            value={
+                                              tasksGet.find(
+                                                (t) => t.id === task.id
+                                              )?.minutes || ""
+                                            }
+                                            onChange={(e) => {
+                                              const minutes = e.target.value;
+                                              setTasksData((pre) =>
+                                                pre.map((t) =>
+                                                  t.id === task.id
+                                                    ? { ...t, minutes }
+                                                    : t
+                                                )
+                                              );
+                                            }}
+                                          />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))
+                              ) : (
+                                <p>No tasks available.</p>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </React.Fragment>
+                  ));
+                }
+                return null;
+              })}
             </table>
 
             <div className="d-flex justify-content-end">
