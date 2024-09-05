@@ -1,8 +1,46 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
+import { useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { getAllTaskTimeSheet } from "../../../ReduxStore/Slice/Customer/CustomerSlice";  
 
 const TaskTimesheet = () => {
+  const token = localStorage.getItem("token");
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const [addjobtimesheet, setAddjobtimesheet] = useState(false);
+  const [addtask, setAddtask] = useState(false);
+  const [viewtimesheet, setViewtimesheet] = useState(false);
+  const [taskTimeData, setTaskTimeData] = useState([]);
+
+
+
+  useEffect(() => {
+    GetAllTaskTimeSheetData()
+  }, [])
+
+
+  const GetAllTaskTimeSheetData = async () => {
+    const req = { action: "get", job_id: location.state.job_id }
+    const data = { req: req, authToken: token }
+    await dispatch(getAllTaskTimeSheet(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setTaskTimeData(response.data || [])
+        }
+        else {
+          setTaskTimeData([])
+        }
+      })
+      .catch((error) => {
+        console.log("error", error)
+      })
+  }
+
+
+
   const data = [
     {
       TradingName: "W120",
@@ -52,9 +90,7 @@ const TaskTimesheet = () => {
   ];
 
   // Correctly defined state
-  const [addjobtimesheet, setAddjobtimesheet] = useState(false);
-  const [addtask, setAddtask] = useState(false);
-  const [viewtimesheet, setViewtimesheet] = useState(false);
+
 
   return (
     <>

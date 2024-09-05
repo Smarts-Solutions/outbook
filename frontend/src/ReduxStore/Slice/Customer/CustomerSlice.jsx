@@ -14,7 +14,8 @@ import {
   JOB_ACTION,
   UPDATE_JOB,
   GETALLCHECKLIST,
-  JOB_DELETE,
+  GET_ALL_TASK_TIME_SHEET
+   
 } from "../../../Services/Customer/CustomerService";
 
 import axios from "axios";
@@ -284,6 +285,25 @@ export const GET_ALL_CHECKLIST = createAsyncThunk(
   }
 );
 
+
+
+
+export const getAllTaskTimeSheet = createAsyncThunk("jobTimeSheet", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await GET_ALL_TASK_TIME_SHEET(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
  
 
 const CustomerSlice = createSlice({
@@ -305,6 +325,7 @@ const CustomerSlice = createSlice({
     jobaction: [],
     updatejob: [],
     getallchecklist: [],
+    getalltasktimesheet: [],
     
   },
   reducers: {},
@@ -464,6 +485,17 @@ const CustomerSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
       })
+      .addCase(getAllTaskTimeSheet.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getAllTaskTimeSheet.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.getalltasktimesheet = action.payload;
+      })
+      .addCase(getAllTaskTimeSheet.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      });
       
   },
 });

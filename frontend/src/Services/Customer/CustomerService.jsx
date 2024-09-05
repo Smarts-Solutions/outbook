@@ -214,4 +214,16 @@ export async function GETALLCHECKLIST(data, token) {
     return await err;
   }
 }
+
+export async function GET_ALL_TASK_TIME_SHEET(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}jobTimeSheet`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
  

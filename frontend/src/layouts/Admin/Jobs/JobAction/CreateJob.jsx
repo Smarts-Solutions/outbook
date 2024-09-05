@@ -294,7 +294,7 @@ const CreateJob = () => {
         return `${formattedHours}:${formattedMinutes}`;
     }
 
-  let budgeted_hour_totalTime
+  let budgeted_hour_totalTime={hours:'',minutes:''}
    if(AddTaskArr.length > 0){
     budgeted_hour_totalTime = AddTaskArr.reduce((acc, task) => {
         const [hours, minutes] = task.budgeted_hour.split(':').map(Number);
@@ -310,7 +310,7 @@ const CreateJob = () => {
         return acc;
     }, { hours: 0, minutes: 0 });
    }
- 
+  
     const handleSubmit = async () => {
         const req = {
             staffCreatedId: staffCreatedId,
