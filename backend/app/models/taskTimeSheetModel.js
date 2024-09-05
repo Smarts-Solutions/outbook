@@ -6,6 +6,7 @@ const getTaskTimeSheet = async (job) => {
   try {
     const query = `
      SELECT 
+     client_job_task.id AS id,
      jobs.id AS job_id,
      task.id AS task_id,
      task.name AS task_name,
@@ -52,7 +53,8 @@ const getjobTimeSheet = async (job) => {
     const query = `
      SELECT 
      jobs.id AS job_id,
-     jobs.budgeted_hours AS budgeted_hours
+     jobs.budgeted_hours AS budgeted_hours,
+     jobs.job_id AS job_code_id
      FROM 
      jobs
      WHERE 
