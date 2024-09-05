@@ -3,7 +3,7 @@ import Datatable from "../../../Components/ExtraComponents/Datatable";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { getAllTaskTimeSheet } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { getAllTaskTimeSheet, getJobTimeSheet } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 const TaskTimesheet = () => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -13,8 +13,11 @@ const TaskTimesheet = () => {
   const [addtask, setAddtask] = useState(false);
   const [viewtimesheet, setViewtimesheet] = useState(false);
   const [taskTimeData, setTaskTimeData] = useState([]);
+  const [jobTimeData, setJobTimeData] = useState([]);
+  const [TotalTime , setTotalTime] = useState({hours:0,minutes:0})
 
 
+  
 
   useEffect(() => {
     GetAllTaskTimeSheetData()
@@ -32,6 +35,24 @@ const TaskTimesheet = () => {
         }
         else {
           setTaskTimeData([])
+        }
+      })
+      .catch((error) => {
+        console.log("error", error)
+      })
+  }
+
+  const handleTimeSheetView = async (row) => {
+    const req = { action: "get", job_id: row.job_id }
+    const data = { req: req, authToken: token }
+    await dispatch(getJobTimeSheet(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setJobTimeData(response.data || [])
+        }
+        else {
+          setJobTimeData([])
         }
       })
       .catch((error) => {
@@ -72,7 +93,7 @@ const TaskTimesheet = () => {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="edit-icon" onClick={() => setViewtimesheet(true)}>
+          <button className="edit-icon" onClick={() => { handleTimeSheetView(row); setViewtimesheet(true) }}>
             <i className="fa fa-eye fs-6 text-secondary" />
           </button>
         </div>
@@ -81,8 +102,10 @@ const TaskTimesheet = () => {
       allowOverflow: true,
       button: true,
     },
-  ]; 
+  ];
 
+
+  console.log("jobTimeData", jobTimeData && jobTimeData[0])
 
   return (
     <>
@@ -331,16 +354,17 @@ const TaskTimesheet = () => {
         size="md"
         title="View Timesheet"
         cancel_btn='true'
-        hideBtn={true}
+        btn_name="Save"
+        hideBtn={false}
         handleClose={() => {
           setViewtimesheet(false);
-           
+
         }}
       >
         <div className="row">
           <div className="col-md-12">
             <div className="card-body">
-              <div className="row">
+              {/* <div className="row">
                 <div className="col-md-4">
                   <label htmlFor="customername-field" className="form-label">
                     Job Name
@@ -349,7 +373,7 @@ const TaskTimesheet = () => {
                 <div className="col-md-8">
                   <span className="text-muted">Year End Accounting</span>
                 </div>
-              </div>
+              </div> */}
               <div className="row">
                 <div className="col-md-4">
                   <label htmlFor="customername-field" className="form-label">
@@ -357,10 +381,11 @@ const TaskTimesheet = () => {
                   </label>
                 </div>
                 <div className="col-md-8">
-                  <span className="text-muted">Job-001</span>
+                  
+                  <span className="text-muted">{jobTimeData && jobTimeData[0] && jobTimeData[0].job_id}</span>
                 </div>
               </div>
-              <div className="row">
+              {/* <div className="row">
                 <div className="col-md-4">
                   <label htmlFor="customername-field" className="form-label">
                     Message
@@ -371,7 +396,7 @@ const TaskTimesheet = () => {
                     This Task is Completed on 31st March 2023 by Nirav Patel
                   </span>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
           <div className="col-md-12 ">
@@ -389,9 +414,12 @@ const TaskTimesheet = () => {
                           <input
                             type="text"
                             className="form-control"
-                            placeholder={10}
+                            
                             aria-label="Recipient's username"
                             aria-describedby="basic-addon2"
+                            onChange={(e) => setTotalTime({ ...TotalTime, hours: e.target.value })}
+                            value={TotalTime.hours}
+                            placeholder="Hours"
                           />
                           <span className="input-group-text" id="basic-addon2">
                             Hours
@@ -403,9 +431,12 @@ const TaskTimesheet = () => {
                           <input
                             type="text"
                             className="form-control"
-                            placeholder={10}
+                        
                             aria-label="Recipient's username"
                             aria-describedby="basic-addon2"
+                            placeholder="Minutes"
+                            onChange={(e) => setTotalTime({ ...TotalTime, minutes: e.target.value })}
+                            value={TotalTime.minutes}
                           />
                           <span className="input-group-text" id="basic-addon2">
                             Minutes
