@@ -217,7 +217,7 @@ export async function GETALLCHECKLIST(data, token) {
 
 export async function GET_ALL_TASK_TIME_SHEET(data, token) {
   try {
-    const res = await axios.post(`${Config.base_url}jobTimeSheet`, data, {
+    const res = await axios.post(`${Config.base_url}getTaskTimeSheet`, data, {
       headers: header(token),
       data: {},
     });

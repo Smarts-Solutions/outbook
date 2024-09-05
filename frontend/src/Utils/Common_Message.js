@@ -56,6 +56,36 @@ export const EDIT_CUSTOMER = {
   INVALID_EMAIL_ERROR: "Invalid email address",
 };
 
+export const FTEDedicatedErrorMessages = {
+  'accountants': "Please Enter Number of Accountants",
+  'feePerAccountant': "Please Enter Fee Per Accountant",
+  'bookkeepers': "Please Enter Number of Bookkeepers",
+  'feePerBookkeeper': "Please Enter Fee Per Bookkeeper",
+  'payrollExperts': "Please Enter Number of Payroll Experts",
+  'feePerPayrollExpert': "Please Enter Fee Per Payroll Expert",
+  'taxExperts': "Please Enter Number of Tax Experts",
+  'feePerTaxExpert': "Please Enter Fee Per Tax Expert",
+  'numberOfAdmin': "Please Enter Number of Admin/Other Staff",
+  'feePerAdmin': "Please Enter Fee Per Admin/Other Staff",
+}
+
+export const  PercentageModelErrorMessages = {
+  'total_outsourcing': "Please Enter Total Outsourcing Fee Percentage between 0 and 100",
+  'accountants': "Please Enter Accountants Fee Percentage between 0 and 100",
+  'bookkeepers': "Please Enter Bookkeepers Fee Percentage between 0 and 100",
+  'payroll_experts': "Please Enter Payroll Experts Fee Percentage between 0 and 100",
+  'tax_experts': "Please Enter Tax Experts Fee Percentage between 0 and 100",
+  'admin_staff': "Please Enter Admin/Other Staff Fee Percentage between 0 and 100",
+};
+
+export const  AdhocPAYGHourlyErrorMessages  = {
+  'adhoc_accountants': "Please Enter Accountants Fee Per Hour between 7 and 25",
+  'adhoc_bookkeepers': 'Please Enter Bookkeepers Fee Per Hour between 7 and 25',
+  'adhoc_payroll_experts': "Please Enter Payroll Experts Fee Per Hour between 7 and 25",
+  'adhoc_tax_experts': "Please Enter Tax Experts Fee Per Hour between 7 and 25",
+  'adhoc_admin_staff': "Please Enter Admin/Other Staff Fee Per Hour between 7 and 25",
+}
+
 const fieldErrors = {
   AccountManager: "Please Enter Account Manager",
   Customer: "Please Enter Customer",
@@ -68,5 +98,7 @@ const fieldErrors = {
     "Please Enter Number Of Trial Balance Items less than 5000",
   Turnover: "Please Enter Turnover less than 200000000",
 };
+
+
 
 export default fieldErrors;

@@ -288,7 +288,7 @@ export const GET_ALL_CHECKLIST = createAsyncThunk(
 
 
 
-export const getAllTaskTimeSheet = createAsyncThunk("jobTimeSheet", async (data) => {
+export const getAllTaskTimeSheet = createAsyncThunk("getTaskTimeSheet", async (data) => {
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();

@@ -206,9 +206,6 @@ const CreateJob = () => {
         getChecklistData()
     }, [getChecklistId])
 
-
-    console.log("getChecklistId", getChecklistId)
-
     const HandleChange = (e) => {
         let name = e.target.name
         let value = e.target.value
@@ -266,9 +263,6 @@ const CreateJob = () => {
             else if (name == "Turnover" && (value > 200000000)) {
                 newErrors[name] = fieldErrors[name];
             }
-
-
-
             else {
                 delete newErrors[name];
             }

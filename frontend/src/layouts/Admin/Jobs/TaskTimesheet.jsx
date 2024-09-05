@@ -3,7 +3,7 @@ import Datatable from "../../../Components/ExtraComponents/Datatable";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { getAllTaskTimeSheet } from "../../../ReduxStore/Slice/Customer/CustomerSlice";  
+import { getAllTaskTimeSheet } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 const TaskTimesheet = () => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -38,43 +38,35 @@ const TaskTimesheet = () => {
         console.log("error", error)
       })
   }
-  
-  
 
-
-
-  const data = [
-    {
-      TradingName: "W120",
-      Code: "012_BlaK_T_1772",
-      CustomerName: "The Black T",
-      AccountManager: "Ajeet Aggarwal",
-      ServiceType: "Admin/Support Tasks",
-      JobType: "Year End",
-    },
-    {
-      TradingName: "W121",
-      Code: "025_NesTea_1663",
-      CustomerName: "Nestea",
-      AccountManager: "Ajeet Aggarwal",
-      ServiceType: "Onboarding/Setup",
-      JobType: "Year End",
-    },
-    // More data...
-  ];
 
   const columns = [
     {
-      name: "Trading Name",
-      selector: (row) => row.TradingName,
+      name: "Task Name",
+      selector: (row) => row.task_name || '-',
       sortable: true,
     },
-    { name: "Customer Code", selector: (row) => row.Code, sortable: true },
     {
-      name: "Customer Name",
-      selector: (row) => row.CustomerName,
+      name: "Service Type",
+      selector: (row) => row.service_name || '-',
+      sortable: true
+    },
+    {
+      name: "Job Type",
+      selector: (row) => row.job_type_type || '-',
       sortable: true,
     },
+    {
+      name: "Task Status",
+      selector: (row) => row.task_status || '-',
+      sortable: true,
+    },
+    {
+      name: "Time",
+      selector: (row) => row.time || '-',
+      sortable: true,
+    },
+
 
     {
       name: "Actions",
@@ -89,9 +81,7 @@ const TaskTimesheet = () => {
       allowOverflow: true,
       button: true,
     },
-  ];
-
-  // Correctly defined state
+  ]; 
 
 
   return (
@@ -124,7 +114,7 @@ const TaskTimesheet = () => {
         </div>
 
         <div className="datatable-wrapper">
-          <Datatable filter={true} columns={columns} data={data} />
+          <Datatable filter={true} columns={columns} data={taskTimeData} />
         </div>
       </div>
       <CommonModal
@@ -344,7 +334,7 @@ const TaskTimesheet = () => {
         hideBtn={true}
         handleClose={() => {
           setViewtimesheet(false);
-          // formik.resetForm();
+           
         }}
       >
         <div className="row">
