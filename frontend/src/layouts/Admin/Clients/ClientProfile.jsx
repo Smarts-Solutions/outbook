@@ -4,6 +4,7 @@ import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
+import sweatalert from "sweetalert2";
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -141,7 +142,7 @@ const ClientList = () => {
           <button className="edit-icon" onClick={() => handleEdit(row)}>
             <i className="ti-pencil" />
           </button>
-          <button className="delete-icon" onClick={() => handleDelete(row)}>
+          <button className="delete-icon" onClick={() => handleDelete(row , 'job')}>
             <i className="ti-trash" />
           </button>
         </div>
@@ -160,9 +161,37 @@ const ClientList = () => {
     navigate("/admin/job/edit", { state: { job_id: row.job_id, goto: "client" } });
   }
 
-  function handleDelete(row) {
-    console.log("Deleting row:", row);
-  }
+  const handleDelete = async (row, type) => {
+    const req = { action: "delete", ...(type === "job" ? { job_id: row.job_id } : { client_id: row.id }) };
+    const data = { req: req, authToken: token };
+    await dispatch(type=='job' ? JobAction(data) : ClientAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          sweatalert.fire({
+            title: "Deleted",
+            icon: "success",
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+
+          type === "job" ?  GetAllJobList() : GetClientDetails();
+          
+        } else {
+          sweatalert.fire({
+            title: "Failed",
+            icon: "error",
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        }
+      })
+      .catch((error) => {
+        console.log("Error", error);
+      });
+  };
 
   const GetAllJobList = async () => {
     const req = { action: "getByClient", client_id: location.state.Client_id };
@@ -188,11 +217,7 @@ const ClientList = () => {
       });
     }
   };
-
-  function handleDelete(row) {
-    console.log("Deleting row:", row);
-  }
-
+ 
   function ClientEdit(row) {
     console.log("row", row);
     navigate("/admin/client/edit", { state: { row, id: row } });
