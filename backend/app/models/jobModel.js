@@ -14,7 +14,8 @@ const getAddJobData = async (job) => {
         customers.account_manager_id  AS customer_account_manager_id,
 
         clients.id AS client_id,
-        clients.trading_name AS client_trading_name
+        clients.trading_name AS client_trading_name,
+        clients.client_type AS client_client_type
     FROM 
         customers
    JOIN 
@@ -35,7 +36,8 @@ const getAddJobData = async (job) => {
 
       client = rows.map(row => ({
         client_id: row.client_id,
-        client_trading_name: row.client_trading_name
+        client_trading_name: row.client_trading_name,
+        client_client_type: row.client_client_type
       }));
 
 
