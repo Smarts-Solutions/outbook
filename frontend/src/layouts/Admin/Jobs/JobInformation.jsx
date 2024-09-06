@@ -145,8 +145,6 @@ const JobInformationPage = ({ job_id }) => {
                         InvoiceDate: response.data.invoice_date,
                         InvoiceTime: response.data.invoice_hours,
                         InvoiceRemark: response.data.invoice_remark,
-
-
                     }));
 
 
@@ -205,7 +203,7 @@ const JobInformationPage = ({ job_id }) => {
 
 
         const handleJobEdit = () => {
-            navigate('/admin/jobs/editjob', { state: { job_id: location.state.job_id } })
+            navigate('/admin/job/edit', { state: { job_id: location.state.job_id } })
         }
             
 
