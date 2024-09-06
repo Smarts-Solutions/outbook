@@ -64,7 +64,14 @@ const Information = () => {
     }
   }, []);
 
-
+  useEffect(() => {
+    for (let i = 0; i < contacts.length; i++) {
+      if (errors[i]?.firstName) {
+        inputRefs.current[i]?.focus();
+        break;
+      }
+    }
+  }, [errors, contacts]);
 
 
   const handleAddContact = () => {
@@ -149,6 +156,8 @@ const Information = () => {
       Website: "",
       Trading_Name: "",
       Trading_Address: "",
+      countryCode: "+44",
+
     },
     validate: (values) => {
       let errors = {};
@@ -339,6 +348,8 @@ const Information = () => {
       VAT_Registered: "0",
       VAT_Number: "",
       Website: "",
+      countryCode: "+44",
+
     },
     validate: (values) => {
       let errors = {};
@@ -666,7 +677,7 @@ const Information = () => {
       label: "Trading Name",
       type: "text",
       label_size: 12,
-      col_size: 4,
+      col_size: 6,
       disable: false,
     },
     {
@@ -674,7 +685,7 @@ const Information = () => {
       label: "Trading Address",
       type: "text",
       label_size: 12,
-      col_size: 4,
+      col_size: 6,
       disable: false,
     },
   ];
@@ -793,6 +804,7 @@ const Information = () => {
   };
 
   useEffect(() => {
+
     if (CustomerType == 1 || CustomerType == 3) {
       formik.resetForm();
     }
@@ -802,6 +814,7 @@ const Information = () => {
     if (CustomerType == 1 || CustomerType == 2) {
       formik2.resetForm();
     }
+    CountryData();
   }, [CustomerType]);
 
   const ChangeCustomerType = (value) => {
@@ -1042,21 +1055,12 @@ const Information = () => {
       });
   };
 
-
-
-  useEffect(() => {
-    for (let i = 0; i < contacts.length; i++) {
-      if (errors[i]?.firstName) {
-        inputRefs.current[i]?.focus();
-        break;
-      }
-    }
-  }, [errors, contacts]);
-
   const capitalizeFirstLetter = (string) => {
     if (!string) return "";
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   };
+
+
 
   return (
     <Formik

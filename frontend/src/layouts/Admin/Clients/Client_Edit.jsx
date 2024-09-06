@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import {
   GetClientIndustry,
   Edit_Client,
-  Get_All_Client,
+  ClientAction,
 } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { GetAllCompany } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { Email_regex } from "../../../Utils/Common_regex";
@@ -202,7 +202,7 @@ const ClientEdit = () => {
   const GetClientDetails = async () => {
     const req = { action: "getByid", client_id: location.state.row.id };
     const data = { req: req, authToken: token };
-    await dispatch(Get_All_Client(data))
+    await dispatch(ClientAction(data))
       .unwrap()
       .then((response) => {
         if (response.status) {

@@ -45,7 +45,7 @@ const Main_Route = () => {
           location.pathname === "/login" ||
           location.pathname === "/" ||
           !location.pathname.startsWith("/admin")
-        ) {
+        ) {  
           navigate("/admin/dashboard");
         }
         break;

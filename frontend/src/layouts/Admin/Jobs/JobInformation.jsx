@@ -1,12 +1,13 @@
 import React from 'react'
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { useLocation , useNavigate } from 'react-router-dom';
 import { GetAllJabData, AddAllJobType, GET_ALL_CHECKLIST } from '../../../ReduxStore/Slice/Customer/CustomerSlice';
-import { Get_All_Job_List } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 
 const JobInformationPage = ({ job_id }) => {
+    const navigate = useNavigate();
     const token = JSON.parse(localStorage.getItem("token"));
     const location = useLocation();
     const [AllJobData, setAllJobData] = useState([]);
@@ -71,7 +72,7 @@ const JobInformationPage = ({ job_id }) => {
     const JobDetails = async () => {
         const req = { action: "getByJobId", job_id: location.state.job_id }
         const data = { req: req, authToken: token }
-        await dispatch(Get_All_Job_List(data))
+        await dispatch(JobAction(data))
             .unwrap()
             .then(async (response) => {
                 if (response.status) {
@@ -203,6 +204,11 @@ const JobInformationPage = ({ job_id }) => {
 
 
 
+        const handleJobEdit = () => {
+            navigate('/admin/jobs/editjob', { state: { job_id: location.state.job_id } })
+        }
+            
+
     return (
         <div>
             <div className='row mb-3'>
@@ -215,7 +221,7 @@ const JobInformationPage = ({ job_id }) => {
                     <div>
                         <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" className="btn btn-info text-white float-end ms-2"> <i className="ti-trash pe-1"></i>  Delete</button>
                         <button type="button" className="btn btn-info text-white float-end ">
-                            <i className="fa-regular fa-pencil pe-1"></i> Edit</button>
+                            <i className="fa-regular fa-pencil pe-1" onClick={handleJobEdit}></i> Edit</button>
                     </div>
 
                 </div>

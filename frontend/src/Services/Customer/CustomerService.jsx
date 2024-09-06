@@ -178,7 +178,7 @@ export async function Add_Job_Type(data, token) {
 }
 
 // Add Job Type
-export async function GET_ALL_JOB_LIST(data, token) {
+export async function JOB_ACTION(data, token) {
   try {
     const res = await axios.post(`${Config.base_url}jobAction`, data, {
       headers: header(token),
@@ -214,3 +214,28 @@ export async function GETALLCHECKLIST(data, token) {
     return await err;
   }
 }
+
+export async function GET_ALL_TASK_TIME_SHEET(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getTaskTimeSheet`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function GET_JOB_TIME_SHEET(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}jobTimeSheet`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+ 

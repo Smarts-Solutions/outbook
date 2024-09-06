@@ -206,9 +206,6 @@ const CreateJob = () => {
         getChecklistData()
     }, [getChecklistId])
 
-
-    console.log("getChecklistId", getChecklistId)
-
     const HandleChange = (e) => {
         let name = e.target.name
         let value = e.target.value
@@ -266,9 +263,6 @@ const CreateJob = () => {
             else if (name == "Turnover" && (value > 200000000)) {
                 newErrors[name] = fieldErrors[name];
             }
-
-
-
             else {
                 delete newErrors[name];
             }
@@ -294,7 +288,7 @@ const CreateJob = () => {
         return `${formattedHours}:${formattedMinutes}`;
     }
 
-  let budgeted_hour_totalTime
+  let budgeted_hour_totalTime={hours:'',minutes:''}
    if(AddTaskArr.length > 0){
     budgeted_hour_totalTime = AddTaskArr.reduce((acc, task) => {
         const [hours, minutes] = task.budgeted_hour.split(':').map(Number);
@@ -310,9 +304,7 @@ const CreateJob = () => {
         return acc;
     }, { hours: 0, minutes: 0 });
    }
-
-   console.log("AddTaskArr ",AddTaskArr)
-   console.log("budgeted_hour_totalTime ",budgeted_hour_totalTime)
+  
     const handleSubmit = async () => {
         const req = {
             staffCreatedId: staffCreatedId,

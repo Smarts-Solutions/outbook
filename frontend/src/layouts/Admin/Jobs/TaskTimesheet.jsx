@@ -1,46 +1,99 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
+import { useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { getAllTaskTimeSheet, getJobTimeSheet } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 const TaskTimesheet = () => {
-  const data = [
-    {
-      TradingName: "W120",
-      Code: "012_BlaK_T_1772",
-      CustomerName: "The Black T",
-      AccountManager: "Ajeet Aggarwal",
-      ServiceType: "Admin/Support Tasks",
-      JobType: "Year End",
-    },
-    {
-      TradingName: "W121",
-      Code: "025_NesTea_1663",
-      CustomerName: "Nestea",
-      AccountManager: "Ajeet Aggarwal",
-      ServiceType: "Onboarding/Setup",
-      JobType: "Year End",
-    },
-    // More data...
-  ];
+  const token = JSON.parse(localStorage.getItem("token"));
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const [addjobtimesheet, setAddjobtimesheet] = useState(false);
+  const [addtask, setAddtask] = useState(false);
+  const [viewtimesheet, setViewtimesheet] = useState(false);
+  const [taskTimeData, setTaskTimeData] = useState([]);
+  const [jobTimeData, setJobTimeData] = useState([]);
+  const [TotalTime , setTotalTime] = useState({hours:0,minutes:0})
+
+
+  
+
+  useEffect(() => {
+    GetAllTaskTimeSheetData()
+  }, [])
+
+
+  const GetAllTaskTimeSheetData = async () => {
+    const req = { action: "get", job_id: location.state.job_id }
+    const data = { req: req, authToken: token }
+    await dispatch(getAllTaskTimeSheet(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setTaskTimeData(response.data || [])
+        }
+        else {
+          setTaskTimeData([])
+        }
+      })
+      .catch((error) => {
+        console.log("error", error)
+      })
+  }
+
+  const handleTimeSheetView = async (row) => {
+    const req = { action: "get", job_id: row.job_id }
+    const data = { req: req, authToken: token }
+    await dispatch(getJobTimeSheet(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setJobTimeData(response.data || [])
+        }
+        else {
+          setJobTimeData([])
+        }
+      })
+      .catch((error) => {
+        console.log("error", error)
+      })
+  }
+
 
   const columns = [
     {
-      name: "Trading Name",
-      selector: (row) => row.TradingName,
+      name: "Task Name",
+      selector: (row) => row.task_name || '-',
       sortable: true,
     },
-    { name: "Customer Code", selector: (row) => row.Code, sortable: true },
     {
-      name: "Customer Name",
-      selector: (row) => row.CustomerName,
+      name: "Service Type",
+      selector: (row) => row.service_name || '-',
+      sortable: true
+    },
+    {
+      name: "Job Type",
+      selector: (row) => row.job_type_type || '-',
       sortable: true,
     },
+    {
+      name: "Task Status",
+      selector: (row) => row.task_status || '-',
+      sortable: true,
+    },
+    {
+      name: "Time",
+      selector: (row) => row.time || '-',
+      sortable: true,
+    },
+
 
     {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="edit-icon" onClick={() => setViewtimesheet(true)}>
+          <button className="edit-icon" onClick={() => { handleTimeSheetView(row); setViewtimesheet(true) }}>
             <i className="fa fa-eye fs-6 text-secondary" />
           </button>
         </div>
@@ -51,10 +104,8 @@ const TaskTimesheet = () => {
     },
   ];
 
-  // Correctly defined state
-  const [addjobtimesheet, setAddjobtimesheet] = useState(false);
-  const [addtask, setAddtask] = useState(false);
-  const [viewtimesheet, setViewtimesheet] = useState(false);
+
+  console.log("jobTimeData", jobTimeData && jobTimeData[0])
 
   return (
     <>
@@ -86,7 +137,7 @@ const TaskTimesheet = () => {
         </div>
 
         <div className="datatable-wrapper">
-          <Datatable filter={true} columns={columns} data={data} />
+          <Datatable filter={true} columns={columns} data={taskTimeData} />
         </div>
       </div>
       <CommonModal
@@ -303,16 +354,17 @@ const TaskTimesheet = () => {
         size="md"
         title="View Timesheet"
         cancel_btn='true'
-        hideBtn={true}
+        btn_name="Save"
+        hideBtn={false}
         handleClose={() => {
           setViewtimesheet(false);
-          // formik.resetForm();
+
         }}
       >
         <div className="row">
           <div className="col-md-12">
             <div className="card-body">
-              <div className="row">
+              {/* <div className="row">
                 <div className="col-md-4">
                   <label htmlFor="customername-field" className="form-label">
                     Job Name
@@ -321,7 +373,7 @@ const TaskTimesheet = () => {
                 <div className="col-md-8">
                   <span className="text-muted">Year End Accounting</span>
                 </div>
-              </div>
+              </div> */}
               <div className="row">
                 <div className="col-md-4">
                   <label htmlFor="customername-field" className="form-label">
@@ -329,10 +381,11 @@ const TaskTimesheet = () => {
                   </label>
                 </div>
                 <div className="col-md-8">
-                  <span className="text-muted">Job-001</span>
+                  
+                  <span className="text-muted">{jobTimeData && jobTimeData[0] && jobTimeData[0].job_id}</span>
                 </div>
               </div>
-              <div className="row">
+              {/* <div className="row">
                 <div className="col-md-4">
                   <label htmlFor="customername-field" className="form-label">
                     Message
@@ -343,7 +396,7 @@ const TaskTimesheet = () => {
                     This Task is Completed on 31st March 2023 by Nirav Patel
                   </span>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
           <div className="col-md-12 ">
@@ -361,9 +414,12 @@ const TaskTimesheet = () => {
                           <input
                             type="text"
                             className="form-control"
-                            placeholder={10}
+                            
                             aria-label="Recipient's username"
                             aria-describedby="basic-addon2"
+                            onChange={(e) => setTotalTime({ ...TotalTime, hours: e.target.value })}
+                            value={TotalTime.hours}
+                            placeholder="Hours"
                           />
                           <span className="input-group-text" id="basic-addon2">
                             Hours
@@ -375,9 +431,12 @@ const TaskTimesheet = () => {
                           <input
                             type="text"
                             className="form-control"
-                            placeholder={10}
+                        
                             aria-label="Recipient's username"
                             aria-describedby="basic-addon2"
+                            placeholder="Minutes"
+                            onChange={(e) => setTotalTime({ ...TotalTime, minutes: e.target.value })}
+                            value={TotalTime.minutes}
                           />
                           <span className="input-group-text" id="basic-addon2">
                             Minutes
