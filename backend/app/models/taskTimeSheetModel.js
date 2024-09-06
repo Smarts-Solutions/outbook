@@ -15,6 +15,7 @@ const getTaskTimeSheet = async (timeSheet) => {
      job_types.id AS job_type_id,
      job_types.type AS job_type_type,
      client_job_task.task_status AS task_status,
+     master_status.name AS task_status_name,
      client_job_task.time AS time
      FROM 
      jobs
@@ -28,6 +29,8 @@ const getTaskTimeSheet = async (timeSheet) => {
      services ON services.id = task.service_id
      JOIN
      job_types ON job_types.id = task.job_type_id
+     LEFT JOIN
+     master_status ON master_status.id = client_job_task.task_status
      WHERE 
      jobs.id = client_job_task.job_id AND
      client_job_task.job_id = ?
