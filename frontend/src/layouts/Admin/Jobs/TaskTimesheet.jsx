@@ -3,7 +3,10 @@ import Datatable from "../../../Components/ExtraComponents/Datatable";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { getAllTaskTimeSheet, getJobTimeSheet } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { getAllTaskTimeSheet, JobTimeSheetAction  } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import sweatalert from 'sweetalert2';
+
 
 const TaskTimesheet = () => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -14,15 +17,26 @@ const TaskTimesheet = () => {
   const [viewtimesheet, setViewtimesheet] = useState(false);
   const [taskTimeData, setTaskTimeData] = useState([]);
   const [jobTimeData, setJobTimeData] = useState([]);
-  const [TotalTime , setTotalTime] = useState({hours:0,minutes:0})
-
-
-  
+  const [TotalTime, setTotalTime] = useState({ hours: 0, minutes: 0 })
+  const [getRowData, setRowData] = useState({})
+  const [getMasterStatusArr, setMasterStatusDataArr] = useState([])
+  const [TaskStatus, setTaskStatus] = useState('')
+ 
 
   useEffect(() => {
     GetAllTaskTimeSheetData()
   }, [])
 
+  useEffect(() => {
+    getMasterStatusData()
+    if(getRowData && getRowData.time){
+      const time = getRowData.time.split(":")
+      setTotalTime({hours:time[0],minutes:time[1]})
+      setTaskStatus(getRowData.task_status)
+    }
+  }, [getRowData])
+
+   
 
   const GetAllTaskTimeSheetData = async () => {
     const req = { action: "get", job_id: location.state.job_id }
@@ -43,9 +57,10 @@ const TaskTimesheet = () => {
   }
 
   const handleTimeSheetView = async (row) => {
+    setRowData(row)
     const req = { action: "get", job_id: row.job_id }
     const data = { req: req, authToken: token }
-    await dispatch(getJobTimeSheet(data))
+    await dispatch(JobTimeSheetAction(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
@@ -59,6 +74,66 @@ const TaskTimesheet = () => {
         console.log("error", error)
       })
   }
+
+  const getMasterStatusData = async () => {
+    const req = { action: "get" }
+    const data = { req: req, authToken: token }
+    await dispatch(MasterStatusData(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setMasterStatusDataArr(response.data || [])
+        }
+        else {
+          setMasterStatusDataArr([])
+        }
+      })
+      .catch((error) => {
+        console.log("error", error)
+      })
+  }
+
+  const handleSubmit = async () => {
+    const req = {
+      action: "updateTaskTimeSheetStatus",
+      id: getRowData?.id,
+      time: TotalTime.hours + ":" + TotalTime.minutes,
+      task_status: Number(TaskStatus)
+    }
+    const data = { req: req, authToken: token }
+    await dispatch(JobTimeSheetAction(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          GetAllTaskTimeSheetData()
+          sweatalert.fire({
+            icon: 'success',
+            title: response.message,
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 1500
+          })
+          setTimeout(() => {
+            setViewtimesheet(false)
+            
+          }, 1500)
+        }
+        else {
+          sweatalert.fire({
+            icon: 'error',
+            title: response.message,
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 1500
+          })
+        }
+      })
+      .catch((error) => {
+        console.log("error", error)
+      })
+
+  }
+
 
 
   const columns = [
@@ -104,8 +179,6 @@ const TaskTimesheet = () => {
     },
   ];
 
-
-  console.log("jobTimeData", jobTimeData && jobTimeData[0])
 
   return (
     <>
@@ -360,6 +433,8 @@ const TaskTimesheet = () => {
           setViewtimesheet(false);
 
         }}
+
+        Submit_Function={handleSubmit}
       >
         <div className="row">
           <div className="col-md-12">
@@ -381,7 +456,7 @@ const TaskTimesheet = () => {
                   </label>
                 </div>
                 <div className="col-md-8">
-                  
+
                   <span className="text-muted">{jobTimeData && jobTimeData[0] && jobTimeData[0].job_id}</span>
                 </div>
               </div>
@@ -414,7 +489,7 @@ const TaskTimesheet = () => {
                           <input
                             type="text"
                             className="form-control"
-                            
+
                             aria-label="Recipient's username"
                             aria-describedby="basic-addon2"
                             onChange={(e) => setTotalTime({ ...TotalTime, hours: e.target.value })}
@@ -431,7 +506,7 @@ const TaskTimesheet = () => {
                           <input
                             type="text"
                             className="form-control"
-                        
+
                             aria-label="Recipient's username"
                             aria-describedby="basic-addon2"
                             placeholder="Minutes"
@@ -455,23 +530,18 @@ const TaskTimesheet = () => {
                         data-trigger=""
                         name="status-field"
                         id="status-field"
+                        onChange={(e) => setTaskStatus(e.target.value)}
+                        value={TaskStatus}
                       >
-                        <option value="" selected="">
-                          {" "}
-                          Select Status
-                        </option>
-                        <option value="">To Be started</option>
-                        <option value="">WIP</option>
-                        <option value="">Missing Paperwork</option>
-                        <option value="">Query Responses Awaited</option>
-                        <option value="">To Be Reviewed</option>
-                        <option value="">WIP - Amendment</option>
-                        <option value="">WIP - Fixing Errors</option>
-                        <option value="">Draft Sent for Approval</option>
-                        <option value="">Filed With Companies House</option>
-                        <option value="">
-                          Filed With Companies House and HMRC
-                        </option>
+                        <option value=""> Select Status</option>
+                        {getMasterStatusArr && getMasterStatusArr.map((item) => {
+                          return (
+                            <option value={item.id} key={item.id}>
+                              {item.name}
+                            </option>
+                          );
+                        })}
+
                       </select>
                     </div>
                   </div>
@@ -479,6 +549,7 @@ const TaskTimesheet = () => {
               </div>
             </div>
           </div>
+
         </div>
       </CommonModal>
     </>

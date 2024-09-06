@@ -7,7 +7,11 @@ function CustomMultiSelect({ options, placeholder, onChange }) {
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
-  const handleOptionClick = (option) => {
+
+
+  const handleOptionClick = (e,option) => {
+
+    console.log('option', e.target.checked);
     const isSelected = selectedOptions.includes(option);
     let updatedOptions;
     
@@ -40,7 +44,7 @@ function CustomMultiSelect({ options, placeholder, onChange }) {
         {selectedOptions.length > 0
           ? selectedOptions.map((option) => option.label).join(', ')
           : placeholder}
-          {/* <i className="">&#xf107;</i> */}
+  
         <span className={`arrow fa ${isOpen ? 'open' : 'fa'}`}>&#xf107;</span>
       </div>
       {isOpen && (
@@ -55,7 +59,7 @@ function CustomMultiSelect({ options, placeholder, onChange }) {
               <input
                 type="checkbox"
                 checked={selectedOptions.includes(option)}
-                onChange={() => handleOptionClick(option)}
+                onChange={(e) => handleOptionClick(e,option)}
               />
               <span onClick={() => handleOptionClick(option)}>{option.label}</span>
             </li>
