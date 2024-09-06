@@ -514,7 +514,7 @@ const CreateJob = () => {
                     <div className="col-xl-12">
                         <div className="card">
 
-                            <div className="card-header step-header-blue d-flex ">
+                            <div className="card-header step-header-blue d-flex align-items-center">
 
                                 <button type="button " className="btn p-0" onClick={() => window.history.back()}>
                                     <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" /> </button>
