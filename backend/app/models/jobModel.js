@@ -681,9 +681,9 @@ const getJobById = async (job) => {
      staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
      LEFT JOIN 
      countries ON jobs.currency = countries.id
-     JOIN 
+     LEFT JOIN 
      client_job_task ON client_job_task.job_id = jobs.id
-     JOIN
+     LEFT JOIN
      task ON client_job_task.task_id = task.id
      LEFT JOIN
      checklist_tasks ON checklist_tasks.checklist_id = client_job_task.checklist_id
@@ -877,9 +877,6 @@ const jobUpdate = async (job) => {
           .map(tsk => tsk.task_id);
 
 
-
-
-
         // Working progresss.................
 
         // Get existing task IDs for the checklist
@@ -894,7 +891,10 @@ const jobUpdate = async (job) => {
 
         // Find task IDs that need to be deleted
         const tasksToDelete = existingTaskIds.filter(id => !providedTaskIds.includes(id));
-
+       
+        console.log("tasksToDelete ",tasksToDelete)
+        console.log("job_id ",job_id)
+        console.log("checklist_id ",checklist_id)
 
         if (tasksToDelete.length > 0) {
           const deleteQuery = `
