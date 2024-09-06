@@ -1397,7 +1397,7 @@ const CreateJob = () => {
                                                                                                     <tr className="">
                                                                                                         <td>{checklist.task_name} </td>
 
-                                                                                                        <td> {checklist.budgeted_hour.split(":")[0]}h {checklist.budgeted_hour.split(":")[1]}m </td>
+                                                                                                        <td> {checklist.budgeted_hour.split(":")[0]}h {" "+checklist.budgeted_hour.split(":")[1]}m </td>
                                                                                                         <td>
 
                                                                                                             <div className="add" >

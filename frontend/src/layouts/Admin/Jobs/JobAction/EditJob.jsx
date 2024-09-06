@@ -561,7 +561,10 @@ const EditJob = () => {
 
   let budgeted_hour_totalTime = { hours: '', minutes: '' }
   if (AddTaskArr.length > 0) {
+
     budgeted_hour_totalTime = AddTaskArr.reduce((acc, task) => {
+  
+      if(task.budgeted_hour != null){
       const [hours, minutes] = task.budgeted_hour.split(':').map(Number);
 
       acc.hours += hours;
@@ -571,6 +574,7 @@ const EditJob = () => {
       if (acc.minutes >= 60) {
         acc.hours += Math.floor(acc.minutes / 60);
         acc.minutes = acc.minutes % 60;
+      }
       }
       return acc;
     }, { hours: 0, minutes: 0 });
@@ -1508,7 +1512,9 @@ const EditJob = () => {
 
                                                             <td>{checklist.task_name} </td>
                                                             <td>
-                                                              {checklist.budgeted_hour.split(":")[0]}h {checklist.budgeted_hour.split(":")[1]}m
+                                                              {checklist.budgeted_hour != null ?checklist.budgeted_hour.split(":")[0] :"0"}h 
+                                                              
+                                                              {checklist.budgeted_hour != null ? checklist.budgeted_hour.split(":")[1]:"0"}m
                                                             </td>
 
                                                             {/* <td>{checklist.budgeted_hour} hr</td> */}

@@ -154,15 +154,17 @@ const TaskTimesheet = () => {
     },
     {
       name: "Task Status",
-      selector: (row) => row.task_status || '-',
+      selector: (row) => row.task_status_name || '-',
       sortable: true,
     },
     {
       name: "Time",
-      selector: (row) => row.time || '-',
+      selector: (row) => row.time ? row.time.split(":")[0]+"h "+row.time.split(":")[1]+"m"  : '-' ,
       sortable: true,
     },
 
+    
+   
 
     {
       name: "Actions",
@@ -457,7 +459,7 @@ const TaskTimesheet = () => {
                 </div>
                 <div className="col-md-8">
 
-                  <span className="text-muted">{jobTimeData && jobTimeData[0] && jobTimeData[0].job_id}</span>
+                  <span className="text-muted">{jobTimeData && jobTimeData[0] && jobTimeData[0].job_code_id}</span>
                 </div>
               </div>
               {/* <div className="row">
@@ -510,7 +512,13 @@ const TaskTimesheet = () => {
                             aria-label="Recipient's username"
                             aria-describedby="basic-addon2"
                             placeholder="Minutes"
-                            onChange={(e) => setTotalTime({ ...TotalTime, minutes: e.target.value })}
+                           onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                              setTotalTime({ ...TotalTime, minutes: e.target.value });
+                            }
+                            }}
+
                             value={TotalTime.minutes}
                           />
                           <span className="input-group-text" id="basic-addon2">
