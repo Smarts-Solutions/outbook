@@ -597,8 +597,6 @@ const getByJobStaffId = async (job) => {
 
 const getJobById = async (job) => {
   const { job_id } = job;
-
-
   try {
     const query = `
     SELECT 
@@ -688,21 +686,27 @@ const getJobById = async (job) => {
      LEFT JOIN
      task ON client_job_task.task_id = task.id
      LEFT JOIN
-     checklist_tasks ON checklist_tasks.checklist_id = client_job_task.checklist_id
+     checklist_tasks ON checklist_tasks.checklist_id = client_job_task.checklist_id AND
+     checklist_tasks.checklist_id = client_job_task.checklist_id AND checklist_tasks.task_id = client_job_task.task_id
      WHERE
-     checklist_tasks.checklist_id = client_job_task.checklist_id AND checklist_tasks.task_id = client_job_task.task_id AND
-     jobs.id = ?
+      jobs.id = ? 
      `;
+
+    //  WHERE
+    //  checklist_tasks.checklist_id = client_job_task.checklist_id AND checklist_tasks.task_id = client_job_task.task_id AND
+    //  jobs.id = ?
     const [rows] = await pool.execute(query, [job_id]);
-    //  console.log("rows ",rows)
+     console.log("rows ",rows)
     let result = {}
     if (rows.length > 0) {
-
-      const tasks = await rows.map(row => ({
+       let tasks= []
+      if (rows[0].task_id !== null) {
+       tasks = await rows.map(row => ({
         task_id: row.task_id,
         task_name: row.task_name,
         budgeted_hour: row.task_budgeted_hour,
       }));
+      }
 
       result = {
         job_id: rows[0].job_id,

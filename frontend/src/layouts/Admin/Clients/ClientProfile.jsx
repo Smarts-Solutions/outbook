@@ -349,7 +349,7 @@ const ClientList = () => {
                   role="tabpanel"
                   aria-labelledby="assignedjob-tab"
                 >
-                  test
+                  
                   <div className="datatable-wrapper ">
                     {customerData && customerData && (
                       <Datatable
