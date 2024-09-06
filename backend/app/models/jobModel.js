@@ -14,7 +14,8 @@ const getAddJobData = async (job) => {
         customers.account_manager_id  AS customer_account_manager_id,
 
         clients.id AS client_id,
-        clients.trading_name AS client_trading_name
+        clients.trading_name AS client_trading_name,
+        clients.client_type AS client_client_type
     FROM 
         customers
    JOIN 
@@ -35,7 +36,8 @@ const getAddJobData = async (job) => {
 
       client = rows.map(row => ({
         client_id: row.client_id,
-        client_trading_name: row.client_trading_name
+        client_trading_name: row.client_trading_name,
+        client_client_type: row.client_client_type
       }));
 
 
@@ -596,7 +598,7 @@ const getByJobStaffId = async (job) => {
 const getJobById = async (job) => {
   const { job_id } = job;
 
-  
+
   try {
     const query = `
     SELECT 
@@ -891,16 +893,22 @@ const jobUpdate = async (job) => {
 
         // Find task IDs that need to be deleted
         const tasksToDelete = existingTaskIds.filter(id => !providedTaskIds.includes(id));
-       
-        console.log("tasksToDelete ",tasksToDelete)
-        console.log("job_id ",job_id)
-        console.log("checklist_id ",checklist_id)
+
+        console.log("tasksToDelete ", tasksToDelete)
+        console.log("job_id ", job_id)
+        console.log("checklist_id ", checklist_id)
 
         if (tasksToDelete.length > 0) {
+          // const deleteQuery = `
+          //     DELETE FROM client_job_task WHERE job_id = ? checklist_id = ? AND task_id IN (?)
+          //   `;
+          // await pool.execute(deleteQuery, [job_id, checklist_id, tasksToDelete]);
+
           const deleteQuery = `
-              DELETE FROM client_job_task WHERE job_id = ? checklist_id = ? AND task_id IN (?)
-            `;
-          await pool.execute(deleteQuery, [job_id, checklist_id, tasksToDelete]);
+    DELETE FROM client_job_task 
+    WHERE job_id = ? AND client_id = ? AND task_id IN (${tasksToDelete.map(() => '?').join(',')})
+`;
+          await pool.execute(deleteQuery, [job_id, client_id, ...tasksToDelete]);
         }
 
         // Insert or update tasks
@@ -958,10 +966,10 @@ const jobUpdate = async (job) => {
   }
 }
 
-const deleteJobById = async(job)=>{
+const deleteJobById = async (job) => {
   const { job_id } = job;
   try {
-    
+
     const [result] = await pool.execute('DELETE FROM jobs WHERE id = ?', [job_id]);
     await pool.execute('DELETE FROM client_job_task WHERE job_id = ?', [job_id]);
     if (result.affectedRows > 0) {
