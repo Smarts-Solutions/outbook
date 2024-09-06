@@ -15,7 +15,7 @@ import {
   UPDATE_JOB,
   GETALLCHECKLIST,
   GET_ALL_TASK_TIME_SHEET,
-  GET_JOB_TIME_SHEET
+  GET_JOB_TIME_SHEET, 
    
 } from "../../../Services/Customer/CustomerService";
 
@@ -305,7 +305,7 @@ export const getAllTaskTimeSheet = createAsyncThunk("getTaskTimeSheet", async (d
   }
 });
 
-export const getJobTimeSheet = createAsyncThunk("jobTimeSheet", async (data) => {
+export const JobTimeSheetAction = createAsyncThunk("jobTimeSheet", async (data) => {
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();
@@ -320,6 +320,8 @@ export const getJobTimeSheet = createAsyncThunk("jobTimeSheet", async (data) => 
     throw err;
   }
 });
+
+ 
 
 
  
@@ -344,7 +346,7 @@ const CustomerSlice = createSlice({
     updatejob: [],
     getallchecklist: [],
     getalltasktimesheet: [],
-    getjobtimesheet: [],
+    jobtimesheetaction: [],
     
   },
   reducers: {},
@@ -515,14 +517,14 @@ const CustomerSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
       })
-      .addCase(getJobTimeSheet.pending, (state) => {
+      .addCase(JobTimeSheetAction.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(getJobTimeSheet.fulfilled, (state, action) => {
+      .addCase(JobTimeSheetAction.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.getjobtimesheet = action.payload;
+        state.jobtimesheetaction = action.payload;
       })
-      .addCase(getJobTimeSheet.rejected, (state) => {
+      .addCase(JobTimeSheetAction.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       });

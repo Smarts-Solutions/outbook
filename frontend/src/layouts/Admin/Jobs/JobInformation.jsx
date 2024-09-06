@@ -1,9 +1,10 @@
 import React from 'react'
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { useLocation , useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { GetAllJabData, AddAllJobType, GET_ALL_CHECKLIST } from '../../../ReduxStore/Slice/Customer/CustomerSlice';
 import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import sweatalert from 'sweetalert2';
 
 
 const JobInformationPage = ({ job_id }) => {
@@ -18,7 +19,7 @@ const JobInformationPage = ({ job_id }) => {
     const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" })
     const [FeedbackIncorporationTime, setFeedbackIncorporationTime] = useState({ hours: "", minutes: "" })
     const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" })
- 
+
 
     const [JobInformationData, setJobInformationData] = useState({
         AccountManager: "",
@@ -68,7 +69,7 @@ const JobInformationPage = ({ job_id }) => {
 
     });
 
-    
+
     const JobDetails = async () => {
         const req = { action: "getByJobId", job_id: location.state.job_id }
         const data = { req: req, authToken: token }
@@ -202,11 +203,45 @@ const JobInformationPage = ({ job_id }) => {
 
 
 
-        const handleJobEdit = () => {
-            navigate('/admin/job/edit', { state: { job_id: location.state.job_id } })
-        }
-            
+    const handleJobEdit = () => {
+        navigate('/admin/job/edit', { state: { job_id: location.state.job_id } })
+    }
 
+
+    const handleDelete = async (row, type) => {
+        const req = { action: "delete", job_id: location.state.job_id };
+        const data = { req: req, authToken: token };
+
+        await dispatch(JobAction(data))
+            .unwrap()
+            .then(async (response) => {
+                if (response.status) {
+                    sweatalert.fire({
+                        title: "Deleted",
+                        icon: "success",
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        timer: 1500,
+                    });
+                    setTimeout(() => {
+                        window.history.back()
+                    }, 1500);
+
+                } else {
+                    sweatalert.fire({
+                        title: "Failed",
+                        icon: "error",
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        timer: 1500,
+                    });
+                }
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            });
+    };
+    
     return (
         <div>
             <div className='row mb-3'>
@@ -217,9 +252,8 @@ const JobInformationPage = ({ job_id }) => {
                 </div>
                 <div className='col-md-4'>
                     <div>
-                        <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" className="btn btn-info text-white float-end ms-2"> <i className="ti-trash pe-1"></i>  Delete</button>
-                        <button type="button" className="btn btn-info text-white float-end ">
-                            <i className="fa-regular fa-pencil pe-1" onClick={handleJobEdit}></i> Edit</button>
+                        <button className='btn btn-info text-white float-end blue-btn' onClick={handleDelete}>Delete</button>
+                        <button className='btn btn-info text-white float-end blue-btn' onClick={handleJobEdit}>Edit</button>
                     </div>
 
                 </div>
@@ -414,9 +448,9 @@ const JobInformationPage = ({ job_id }) => {
                                         >
                                             <option value=""> Select Staff</option>
                                             {
-                                        (AllJobData?.data?.allocated || []).map((staff) => (
-                                          <option value={staff.allocated_id} key={staff.allocated_id}>{staff.allocated_name}</option>
-                                        ))}
+                                                (AllJobData?.data?.allocated || []).map((staff) => (
+                                                    <option value={staff.allocated_id} key={staff.allocated_id}>{staff.allocated_name}</option>
+                                                ))}
                                         </select>
 
                                     </div>

@@ -142,8 +142,8 @@ const ClientList = () => {
           <button className="edit-icon" onClick={() => handleEdit(row)}>
             <i className="ti-pencil" />
           </button>
-          <button className="delete-icon" onClick={() => handleDelete(row , 'job')}>
-            <i className="ti-trash" />
+          <button className="delete-icon" onClick={() => handleDelete(row, 'job')}>
+            <i className="ti-trash text-danger" />
           </button>
         </div>
       ),
@@ -164,7 +164,7 @@ const ClientList = () => {
   const handleDelete = async (row, type) => {
     const req = { action: "delete", ...(type === "job" ? { job_id: row.job_id } : { client_id: row.id }) };
     const data = { req: req, authToken: token };
-    await dispatch(type=='job' ? JobAction(data) : ClientAction(data))
+    await dispatch(type == 'job' ? JobAction(data) : ClientAction(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
@@ -176,8 +176,8 @@ const ClientList = () => {
             timer: 1500,
           });
 
-          type === "job" ?  GetAllJobList() : GetClientDetails();
-          
+          type === "job" ? GetAllJobList() : GetClientDetails();
+
         } else {
           sweatalert.fire({
             title: "Failed",
@@ -217,7 +217,7 @@ const ClientList = () => {
       });
     }
   };
- 
+
   function ClientEdit(row) {
     console.log("row", row);
     navigate("/admin/client/edit", { state: { row, id: row } });
@@ -405,7 +405,7 @@ const ClientList = () => {
                     </div>
                   </div>
 
-                  <div className="col-lg-4 ml-auto align-self-center">
+                  <div className="col-lg-3 ml-auto align-self-center">
                     <ul className="list-unstyled personal-detail mb-0">
                       <li className="">
                         <i className="fa-regular fa-phone me-2 text-secondary font-22 align-middle"></i>
@@ -424,7 +424,7 @@ const ClientList = () => {
                     </ul>
                   </div>
 
-                  <div className="col-lg-4 align-self-center">
+                  <div className="col-lg-5 align-self-center">
                     <ul className="list-unstyled personal-detail mb-0">
                       <li className="">
                         <b>Trading Name</b>:{" "}

@@ -490,7 +490,7 @@ const Setting = () => {
   ];
 
   const columnService = [
-    { name: "Service Name", selector: (row) => row.name, sortable: true },
+    { name: "Service Name", selector: (row) => row.name, sortable: true, width: "70%", },
     {
       name: "Status",
       cell: (row) => (

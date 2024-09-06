@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { JobType, GetServicesByCustomers, GETTASKDATA, getList, addChecklists } from '../../../ReduxStore/Slice/Settings/settingSlice';
 import sweatalert from 'sweetalert2';
 import CustomMultiSelect from '../../../Components/ExtraComponents/CustomMultiselect';
+// import DropdownMultiselect from 'react-multiselect-dropdown-bootstrap';
 
 const CreateCheckList = () => {
   const location = useLocation();
@@ -30,18 +31,25 @@ const CreateCheckList = () => {
     status: '',
   });
 
+  console.log('formData1', formData1);
+
   const [tasks, setTasks] = useState([{ task_id: "", task_name: '', budgeted_hour: '' }]);
 
   const [errors, setErrors] = useState({}); // Validation errors
   const options = [
-    { value: 'option1', label: 'Sole Trader' },
-    { value: 'option2', label: 'Company' },
-    { value: 'option3', label: 'Partnership' },
-    { value: 'option4', label: 'Individual' },
+    { value: '1', label: 'Sole Trader' },
+    { value: '2', label: 'Company' },
+    { value: '3', label: 'Partnership' },
+    { value: '4', label: 'Individual' },
   ];
 
+  const [selectedClientType, setSelectedClientType] = useState([]);
+
+
   const handleMultiSelectChange = (selectedOptions) => {
-    console.log('Selected options:', selectedOptions);
+    console.log('selectedClientType-----', selectedOptions);
+    // setSelectedClientType(selectedOptions)
+
   };
   useEffect(() => {
     if (formData.customer_id) {
@@ -208,6 +216,8 @@ const CreateCheckList = () => {
     // Format the budgeted hours into HH:MM format
     const formattedTasks = formatBudgetedHours();
 
+
+
     const req = {
       ...formData1,
       task: formattedTasks.map(task => ({
@@ -217,7 +227,7 @@ const CreateCheckList = () => {
       })),
     };
 
-    
+
     // Dispatch the request
     const data = { req, authToken: token };
     await dispatch(addChecklists(data))
@@ -257,18 +267,18 @@ const CreateCheckList = () => {
 
   return (
     <div className="container-fluid">
-  
+
       <div className="card mt-4">
-      <div className="card-header d-flex step-header-blue">
-         
+        <div className="card-header d-flex step-header-blue">
+
           <button
-                  type="button"
-                  className="btn p-0"
-                  onClick={() => navigate('/admin/Clientlist', { state: { id: location.state.id, route: "Checklist" } })}
-                >
-                 <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" ></i>
-                </button>
-                <h3 className="card-title mb-0">Create New Checklist</h3>
+            type="button"
+            className="btn p-0"
+            onClick={() => navigate('/admin/Clientlist', { state: { id: location.state.id, route: "Checklist" } })}
+          >
+            <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" ></i>
+          </button>
+          <h3 className="card-title mb-0">Create New Checklist</h3>
         </div>
         <div className='card-body'>
           <div className="row">
@@ -276,7 +286,7 @@ const CreateCheckList = () => {
               <div className="row">
                 <div className="col-lg-12">
                   <label className="form-label"> Select Service Type</label>
-           
+
                   <select
                     className="default-select wide form-select"
                     name="service_id"
@@ -300,7 +310,7 @@ const CreateCheckList = () => {
             <div className="col-lg-4">
               <div className="row">
                 <div className="col-lg-12">
-                <label className="form-label"> Select Job Typ</label>
+                  <label className="form-label"> Select Job Typ</label>
                   <select
                     className="default-select wide form-select"
                     name="job_type_id"
@@ -324,13 +334,19 @@ const CreateCheckList = () => {
             <div className="col-lg-4">
               <div className="row">
                 <div className="col-lg-12">
-                <label className="form-label">Select Client Type</label>
-                <CustomMultiSelect
-        options={options}
-        className="form-select"
-        placeholder="Select options"
-        onChange={handleMultiSelectChange}
-      />
+                  <label className="form-label">Select Client Type</label>
+                  {/* <DropdownMultiselect
+                    options={options}
+                    name='groupName'
+                    handleOnChange={(selected) => setSelectedClientType(selected)}
+                    
+                  /> */}
+                  {/* <CustomMultiSelect
+                    options={options}
+                    className="form-select"
+                    placeholder="Select options"
+                    onChange={handleMultiSelectChange}
+                  /> */}
                   <select
                     className="default-select wide form-select"
                     name="client_type_id"
@@ -351,7 +367,7 @@ const CreateCheckList = () => {
             <div className="col-lg-4 mt-3">
               <div className="mb-3 row flex-column">
                 <div>
-                <label className="form-label">Check List Name</label>
+                  <label className="form-label">Check List Name</label>
                   <input
                     type="text"
                     className="form-control"
@@ -367,7 +383,7 @@ const CreateCheckList = () => {
             <div className="col-lg-4 mt-3">
               <div className="row">
                 <div className="col-lg-12">
-                <label className="form-label">Status</label>
+                  <label className="form-label">Status</label>
 
                   <select
                     className="default-select wide form-select"
@@ -407,44 +423,44 @@ const CreateCheckList = () => {
                 </div>
 
                 <div className="col-lg-5">
-                
-                    <label className="form-label">Budgeted Hours</label>
-                    <div className="input-group">
-                      {/* Hours Input */}
-                      <input
-                        type="number"
-                        className="form-control"
-                        placeholder="Hours"
-                        name="hours"
-                        defaultValue={task.budgeted_hour?.hours || ""}
-                        onChange={(e) => handleTaskChange(index, e)}
-                      />
-                      {/* Hours Error */}
-                      
 
-                      {/* Minutes Input */}
-                      <input
-                        type="number"
-                        className="form-control"
-                        placeholder="Minutes"
-                        name="minutes"
-                        min="0"
-                        max="59"
-                        defaultValue={task.budgeted_hour?.minutes || ""}
-                        onChange={(e) => handleTaskChange(index, e)}
-                      />
-                      {/* Minutes Error */}
-                    
-                    </div>
-                     
-                 
+                  <label className="form-label">Budgeted Hours</label>
+                  <div className="input-group">
+                    {/* Hours Input */}
+                    <input
+                      type="number"
+                      className="form-control"
+                      placeholder="Hours"
+                      name="hours"
+                      defaultValue={task.budgeted_hour?.hours || ""}
+                      onChange={(e) => handleTaskChange(index, e)}
+                    />
+                    {/* Hours Error */}
+
+
+                    {/* Minutes Input */}
+                    <input
+                      type="number"
+                      className="form-control"
+                      placeholder="Minutes"
+                      name="minutes"
+                      min="0"
+                      max="59"
+                      defaultValue={task.budgeted_hour?.minutes || ""}
+                      onChange={(e) => handleTaskChange(index, e)}
+                    />
+                    {/* Minutes Error */}
+
+                  </div>
+
+
 
                 </div>
                 <div className="col-lg-2">
-                <button className="btn p-0" onClick={() => removeTask(index)}>
-                  <i className="ti-trash text-danger fs-4"></i>
-                </button>
-              </div>
+                  <button className="btn p-0" onClick={() => removeTask(index)}>
+                    <i className="ti-trash text-danger fs-4"></i>
+                  </button>
+                </div>
               </div>
             ))}
 

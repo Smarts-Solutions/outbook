@@ -356,14 +356,14 @@ const ClientEdit = () => {
             contact.phone === ""
               ? ""
               : /^\d{9,12}$/.test(contact.phone)
-              ? ""
-              : "Phone Number must be between 9 to 12 digits",
+                ? ""
+                : "Phone Number must be between 9 to 12 digits",
           email:
             contact.email === ""
               ? ""
               : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-              ? ""
-              : "Valid Email is required",
+                ? ""
+                : "Valid Email is required",
         };
 
         if (
@@ -434,26 +434,26 @@ const ClientEdit = () => {
             contact.phone === ""
               ? ""
               : /^\d{9,12}$/.test(contact.phone)
-              ? ""
-              : "Phone Number must be between 9 to 12 digits",
+                ? ""
+                : "Phone Number must be between 9 to 12 digits",
           alternate_phone:
             contact.alternate_phone === ""
               ? ""
               : /^\d{9,12}$/.test(contact.alternate_phone)
-              ? ""
-              : "Alternate Phone Number must be between 9 to 12 digits",
+                ? ""
+                : "Alternate Phone Number must be between 9 to 12 digits",
           email:
             contact.email === ""
               ? ""
               : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-              ? ""
-              : "Valid Email is required",
+                ? ""
+                : "Valid Email is required",
           alternate_email:
             contact.alternate_email === ""
               ? ""
               : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.alternate_email)
-              ? ""
-              : "Valid Email is required",
+                ? ""
+                : "Valid Email is required",
         };
 
         if (
@@ -630,8 +630,8 @@ const ClientEdit = () => {
           value === ""
             ? ""
             : /^\d{9,12}$/.test(value)
-            ? ""
-            : "Phone Number must be between 9 to 12 digits";
+              ? ""
+              : "Phone Number must be between 9 to 12 digits";
 
         break;
       default:
@@ -717,8 +717,8 @@ const ClientEdit = () => {
           value === ""
             ? ""
             : /^\d{9,12}$/.test(value)
-            ? ""
-            : "Phone Number must be between 9 to 12 digits";
+              ? ""
+              : "Phone Number must be between 9 to 12 digits";
         break;
 
       case "alternate_phone":
@@ -726,8 +726,8 @@ const ClientEdit = () => {
           value === ""
             ? ""
             : /^\d{9,12}$/.test(value)
-            ? ""
-            : "Phone Number must be between 9 to 12 digits";
+              ? ""
+              : "Phone Number must be between 9 to 12 digits";
 
         break;
       case "customer_contact_person_role_id":
@@ -749,8 +749,8 @@ const ClientEdit = () => {
       location.state.row.client_type_name == "SoleTrader"
         ? 1
         : location.state.row.client_type_name == "Company"
-        ? 2
-        : 3
+          ? 2
+          : 3
     );
 
     if (location.state.row.client_type_name == "SoleTrader") {
@@ -880,7 +880,6 @@ const ClientEdit = () => {
     }
   }, [getSearchDetails]);
 
-
   const FilterSearchDetails = () => {
     const filterData = getAllSearchCompany.filter(
       (data) => data.title === searchItem
@@ -903,13 +902,12 @@ const ClientEdit = () => {
           <div className="col-xl-12">
             <div className="card">
               <div className="card-header align-items-center step-header-blue d-flex ">
-                
                 <button
                   type="button"
                   className="btn p-0"
                   onClick={HandleCancel}
                 >
-                 <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" ></i>
+                  <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
                 </button>
                 <h4 className="card-title  mb-0">Edit Client</h4>
               </div>
@@ -1021,7 +1019,7 @@ const ClientEdit = () => {
                                             maxLength={100}
                                           />
                                           {errors1["tradingName"] && (
-                                            <div style={{ color: "red" }}>
+                                            <div className="error-text">
                                               {errors1["tradingName"]}
                                             </div>
                                           )}
@@ -1047,7 +1045,7 @@ const ClientEdit = () => {
                                             maxLength={200}
                                           />
                                           {errors1["tradingAddress"] && (
-                                            <div style={{ color: "red" }}>
+                                            <div className="error-text">
                                               {errors1["tradingAddress"]}
                                             </div>
                                           )}
@@ -1074,7 +1072,7 @@ const ClientEdit = () => {
                                             <option value={0}>No</option>
                                           </select>
                                           {errors1["vatRegistered"] && (
-                                            <div style={{ color: "red" }}>
+                                            <div className="error-text">
                                               {errors1["vatRegistered"]}
                                             </div>
                                           )}
@@ -1150,7 +1148,7 @@ const ClientEdit = () => {
                                           maxLength={50}
                                         />
                                         {errors1["first_name"] && (
-                                          <div style={{ color: "red" }}>
+                                          <div className="error-text">
                                             {errors1["first_name"]}
                                           </div>
                                         )}
@@ -1174,7 +1172,7 @@ const ClientEdit = () => {
                                           maxLength={50}
                                         />
                                         {errors1["last_name"] && (
-                                          <div style={{ color: "red" }}>
+                                          <div className="error-text">
                                             {errors1["last_name"]}
                                           </div>
                                         )}
@@ -1183,10 +1181,7 @@ const ClientEdit = () => {
 
                                     <div className="col-lg-4">
                                       <div className="mb-3">
-                                        <label
-                                         
-                                          className="form-label"
-                                        >
+                                        <label className="form-label">
                                           Phone
                                         </label>
                                         <div className="row">
@@ -1223,7 +1218,7 @@ const ClientEdit = () => {
                                               minLength={9}
                                             />
                                             {errors1["phone"] && (
-                                              <div style={{ color: "red" }}>
+                                              <div className="error-text">
                                                 {errors1["phone"]}
                                               </div>
                                             )}
@@ -1249,7 +1244,7 @@ const ClientEdit = () => {
                                           onChange={(e) => handleChange1(e)}
                                         />
                                         {errors1["email"] && (
-                                          <div style={{ color: "red" }}>
+                                          <div className="error-text">
                                             {errors1["email"]}
                                           </div>
                                         )}
@@ -1275,7 +1270,7 @@ const ClientEdit = () => {
                                           onChange={(e) => handleChange1(e)}
                                         />
                                         {errors1["residentialAddress"] && (
-                                          <div style={{ color: "red" }}>
+                                          <div className="error-text">
                                             {errors1["residentialAddress"]}
                                           </div>
                                         )}
@@ -1291,7 +1286,7 @@ const ClientEdit = () => {
                                 <div className="card card_shadow ">
                                   <div className="card-header card-header-light-blue align-items-center d-flex">
                                     <h4 className="card-title fs-16 mb-0 flex-grow-1">
-                                      Company
+                                      Company Information
                                     </h4>
                                   </div>
                                   {/* end card header */}
@@ -1307,7 +1302,7 @@ const ClientEdit = () => {
                                               <input
                                                 type="text"
                                                 className="form-control"
-                                                placeholder="Outbooks Quality & Certainty"
+                                                placeholder="Search Company"
                                                 name="SearchCompany"
                                                 onChange={(e) =>
                                                   setSearchItem(e.target.value)
@@ -1319,7 +1314,7 @@ const ClientEdit = () => {
                                                 style={{ cursor: "pointer" }}
                                               />
                                               {getAllSearchCompany.length > 0 &&
-                                              showDropdown ? (
+                                                showDropdown ? (
                                                 <div className="dropdown-list">
                                                   {getAllSearchCompany &&
                                                     getAllSearchCompany.map(
@@ -1361,7 +1356,7 @@ const ClientEdit = () => {
                                             <input
                                               type="text"
                                               className="form-control input_bg"
-                                              placeholder="Outbooks Quality & Certainty LTD"
+                                              placeholder="Enter Company Name"
                                               name="CompanyName"
                                               onChange={(e) => handleChange2(e)}
                                               value={
@@ -1370,7 +1365,7 @@ const ClientEdit = () => {
                                               disabled
                                             />
                                             {errors2["CompanyName"] && (
-                                              <div style={{ color: "red" }}>
+                                              <div className="error-text">
                                                 {errors2["CompanyName"]}
                                               </div>
                                             )}
@@ -1396,7 +1391,7 @@ const ClientEdit = () => {
                                               disabled
                                             />
                                             {errors2["EntityType"] && (
-                                              <div style={{ color: "red" }}>
+                                              <div className="error-text">
                                                 {errors2["EntityType"]}
                                               </div>
                                             )}
@@ -1422,7 +1417,7 @@ const ClientEdit = () => {
                                               disabled
                                             />
                                             {errors2["CompanyStatus"] && (
-                                              <div style={{ color: "red" }}>
+                                              <div className="error-text">
                                                 {errors2["CompanyStatus"]}
                                               </div>
                                             )}
@@ -1448,7 +1443,7 @@ const ClientEdit = () => {
                                               disabled
                                             />
                                             {errors2["CompanyNumber"] && (
-                                              <div style={{ color: "red" }}>
+                                              <div className="error-text">
                                                 {errors2["CompanyNumber"]}
                                               </div>
                                             )}
@@ -1471,7 +1466,7 @@ const ClientEdit = () => {
                                               disabled
                                             />
                                             {errors2["IncorporationDate"] && (
-                                              <div style={{ color: "red" }}>
+                                              <div className="error-text">
                                                 {errors2["IncorporationDate"]}
                                               </div>
                                             )}
@@ -1499,14 +1494,14 @@ const ClientEdit = () => {
                                             {errors2[
                                               "RegisteredOfficeAddress"
                                             ] && (
-                                              <div style={{ color: "red" }}>
-                                                {
-                                                  errors2[
+                                                <div style={{ color: "red" }}>
+                                                  {
+                                                    errors2[
                                                     "RegisteredOfficeAddress"
-                                                  ]
-                                                }
-                                              </div>
-                                            )}
+                                                    ]
+                                                  }
+                                                </div>
+                                              )}
                                           </div>
                                         </div>
 
@@ -1532,7 +1527,7 @@ const ClientEdit = () => {
                                             />
 
                                             {errors2["IncorporationIn"] && (
-                                              <div style={{ color: "red" }}>
+                                              <div className="error-text">
                                                 {errors2["IncorporationIn"]}
                                               </div>
                                             )}
@@ -1558,7 +1553,7 @@ const ClientEdit = () => {
                                               <option value={0}>No</option>
                                             </select>
                                             {errors2["VATRegistered"] && (
-                                              <div style={{ color: "red" }}>
+                                              <div className="error-text">
                                                 {errors2["VATRegistered"]}
                                               </div>
                                             )}
@@ -1606,7 +1601,7 @@ const ClientEdit = () => {
                                               maxLength={200}
                                             />
                                             {errors2["Website"] && (
-                                              <div style={{ color: "red" }}>
+                                              <div className="error-text">
                                                 {errors2["Website"]}
                                               </div>
                                             )}
@@ -1620,6 +1615,11 @@ const ClientEdit = () => {
                               <div className="col-lg-12">
                                 <div className="card card_shadow ">
                                   {/* end card header */}
+                                  <div className="card-header card-header-light-blue align-items-center d-flex">
+                                    <h4 className="card-title fs-16 mb-0 flex-grow-1">
+                                      Trading Details
+                                    </h4>
+                                  </div>
                                   <div className="card-body">
                                     <div className="row">
                                       <div className="col-lg-6">
@@ -1652,7 +1652,7 @@ const ClientEdit = () => {
                                             )}
                                           </select>
                                           {errors2["ClientIndustry"] && (
-                                            <div style={{ color: "red" }}>
+                                            <div className="error-text">
                                               {errors2["ClientIndustry"]}
                                             </div>
                                           )}
@@ -1678,7 +1678,7 @@ const ClientEdit = () => {
                                             maxLength={100}
                                           />
                                           {errors2["TradingName"] && (
-                                            <div style={{ color: "red" }}>
+                                            <div className="error-text">
                                               {errors2["TradingName"]}
                                             </div>
                                           )}
@@ -1704,7 +1704,7 @@ const ClientEdit = () => {
                                             maxLength={200}
                                           />
                                           {errors2["TradingAddress"] && (
-                                            <div style={{ color: "red" }}>
+                                            <div className="error-text">
                                               {errors2["TradingAddress"]}
                                             </div>
                                           )}
@@ -1748,7 +1748,7 @@ const ClientEdit = () => {
                                                               1
                                                             }
                                                           >
-                                                            Delete
+                                                          <i className="ti-trash  pe-1"></i>  Delete
                                                           </button>
                                                         </div>
                                                       </div>
@@ -1788,11 +1788,7 @@ const ClientEdit = () => {
                                                         {errors[index] &&
                                                           errors[index]
                                                             .first_name && (
-                                                            <div
-                                                              style={{
-                                                                color: "red",
-                                                              }}
-                                                            >
+                                                            <div className="error-text">
                                                               {
                                                                 errors[index]
                                                                   .first_name
@@ -1836,11 +1832,7 @@ const ClientEdit = () => {
                                                         {errors[index] &&
                                                           errors[index]
                                                             .last_name && (
-                                                            <div
-                                                              style={{
-                                                                color: "red",
-                                                              }}
-                                                            >
+                                                            <div className="error-text">
                                                               {
                                                                 errors[index]
                                                                   .last_name
@@ -1900,11 +1892,7 @@ const ClientEdit = () => {
                                                         {errors[index] &&
                                                           errors[index]
                                                             .customer_contact_person_role_id && (
-                                                            <div
-                                                              style={{
-                                                                color: "red",
-                                                              }}
-                                                            >
+                                                            <div className="error-text">
                                                               {
                                                                 errors[index]
                                                                   .customer_contact_person_role_id
@@ -1916,10 +1904,7 @@ const ClientEdit = () => {
 
                                                     <div className="col-lg-4">
                                                       <div className="mb-3">
-                                                        <label
-                                                      
-                                                          className="form-label"
-                                                        >
+                                                        <label className="form-label">
                                                           Phone
                                                         </label>
                                                         <div className="row">
@@ -2026,11 +2011,7 @@ const ClientEdit = () => {
                                                         {errors[index] &&
                                                           errors[index]
                                                             .email && (
-                                                            <div
-                                                              style={{
-                                                                color: "red",
-                                                              }}
-                                                            >
+                                                            <div className="error-text">
                                                               {
                                                                 errors[index]
                                                                   .email
@@ -2048,7 +2029,8 @@ const ClientEdit = () => {
                                               className="btn btn-info text-white blue-btn"
                                               onClick={handleAddContact}
                                             >
-                                              Add Contact
+                                              <i className="fa fa-plus pe-1"></i>
+                                              Add Officer
                                             </button>
                                           </div>
                                         </div>
@@ -2101,7 +2083,7 @@ const ClientEdit = () => {
                                             )}
                                           </select>
                                           {errors3["ClientIndustry"] && (
-                                            <div style={{ color: "red" }}>
+                                            <div className="error-text">
                                               {errors3["ClientIndustry"]}
                                             </div>
                                           )}
@@ -2127,7 +2109,7 @@ const ClientEdit = () => {
                                             maxLength={100}
                                           />
                                           {errors3["TradingName"] && (
-                                            <div style={{ color: "red" }}>
+                                            <div className="error-text">
                                               {errors3["TradingName"]}
                                             </div>
                                           )}
@@ -2153,7 +2135,7 @@ const ClientEdit = () => {
                                             maxLength={200}
                                           />
                                           {errors3["TradingAddress"] && (
-                                            <div style={{ color: "red" }}>
+                                            <div className="error-text">
                                               {errors3["TradingAddress"]}
                                             </div>
                                           )}
@@ -2231,7 +2213,7 @@ const ClientEdit = () => {
                                           />
 
                                           {errors3["Website"] && (
-                                            <div style={{ color: "red" }}>
+                                            <div className="error-text">
                                               {errors3["Website"]}
                                             </div>
                                           )}
@@ -2285,9 +2267,9 @@ const ClientEdit = () => {
                                                           }
                                                           disabled={
                                                             contacts1.length ===
-                                                            2
+                                                              2
                                                               ? index === 0 ||
-                                                                index === 1
+                                                              index === 1
                                                               : false
                                                           }
                                                         />
@@ -2311,7 +2293,7 @@ const ClientEdit = () => {
                                                                 1
                                                               }
                                                             >
-                                                              Delete
+                                                           <i className="ti-trash  pe-1"></i>   Delete
                                                             </button>
                                                           </div>
                                                         )}
@@ -2348,18 +2330,18 @@ const ClientEdit = () => {
                                                       />
                                                       {contactsErrors[index]
                                                         ?.first_name && (
-                                                        <div
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          {
-                                                            contactsErrors[
-                                                              index
-                                                            ].first_name
-                                                          }
-                                                        </div>
-                                                      )}
+                                                          <div
+                                                            style={{
+                                                              color: "red",
+                                                            }}
+                                                          >
+                                                            {
+                                                              contactsErrors[
+                                                                index
+                                                              ].first_name
+                                                            }
+                                                          </div>
+                                                        )}
                                                     </div>
                                                   </div>
                                                   <div className="col-lg-4">
@@ -2393,18 +2375,18 @@ const ClientEdit = () => {
                                                       />
                                                       {contactsErrors[index]
                                                         ?.last_name && (
-                                                        <div
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          {
-                                                            contactsErrors[
-                                                              index
-                                                            ].last_name
-                                                          }
-                                                        </div>
-                                                      )}
+                                                          <div
+                                                            style={{
+                                                              color: "red",
+                                                            }}
+                                                          >
+                                                            {
+                                                              contactsErrors[
+                                                                index
+                                                              ].last_name
+                                                            }
+                                                          </div>
+                                                        )}
                                                     </div>
                                                   </div>
                                                   <div className="col-lg-4">
@@ -2450,27 +2432,24 @@ const ClientEdit = () => {
                                                       </select>
                                                       {contactsErrors[index]
                                                         ?.customer_contact_person_role_id && (
-                                                        <div
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          {
-                                                            contactsErrors[
-                                                              index
-                                                            ]
-                                                              .customer_contact_person_role_id
-                                                          }
-                                                        </div>
-                                                      )}
+                                                          <div
+                                                            style={{
+                                                              color: "red",
+                                                            }}
+                                                          >
+                                                            {
+                                                              contactsErrors[
+                                                                index
+                                                              ]
+                                                                .customer_contact_person_role_id
+                                                            }
+                                                          </div>
+                                                        )}
                                                     </div>
                                                   </div>
-                                                  <div className="col-lg-4">
+                                                  <div className="col-lg-4 pe-0">
                                                     <div className="mb-3">
-                                                      <label
-                                                  
-                                                        className="form-label"
-                                                      >
+                                                      <label className="form-label">
                                                         Phone
                                                       </label>
                                                       <div className="row">
@@ -2505,7 +2484,7 @@ const ClientEdit = () => {
                                                             )}
                                                           </select>
                                                         </div>
-                                                        <div className="mb-3 col-md-8">
+                                                        <div className="mb-3 col-md-8 ps-1">
                                                           <input
                                                             type="number"
                                                             className="form-control"
@@ -2530,9 +2509,7 @@ const ClientEdit = () => {
                                                               index
                                                             ].phone && (
                                                               <div
-                                                                style={{
-                                                                  color: "red",
-                                                                }}
+                                                                className="error-text"
                                                               >
                                                                 {
                                                                   contactsErrors[
@@ -2548,14 +2525,11 @@ const ClientEdit = () => {
 
                                                   <div className="col-lg-4">
                                                     <div className="mb-3">
-                                                      <label
-                                                     
-                                                        className="form-label"
-                                                      >
+                                                      <label className="form-label">
                                                         Alternate Phone
                                                       </label>
                                                       <div className="row">
-                                                        <div className="col-md-4">
+                                                        <div className="col-md-4 pe-0">
                                                           <select
                                                             className="form-select"
                                                             onChange={(e) =>
@@ -2586,7 +2560,7 @@ const ClientEdit = () => {
                                                             )}
                                                           </select>
                                                         </div>
-                                                        <div className="mb-3 col-md-8">
+                                                        <div className="mb-3 col-md-8 ps-1">
                                                           <input
                                                             type="number"
                                                             className="form-control"
@@ -2612,9 +2586,7 @@ const ClientEdit = () => {
                                                             ]
                                                               .alternate_phone && (
                                                               <div
-                                                                style={{
-                                                                  color: "red",
-                                                                }}
+                                                                className="error-text"
                                                               >
                                                                 {
                                                                   contactsErrors[
@@ -2656,18 +2628,18 @@ const ClientEdit = () => {
                                                       />
                                                       {contactsErrors[index]
                                                         ?.email && (
-                                                        <div
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          {
-                                                            contactsErrors[
-                                                              index
-                                                            ].email
-                                                          }
-                                                        </div>
-                                                      )}
+                                                          <div
+                                                            style={{
+                                                              color: "red",
+                                                            }}
+                                                          >
+                                                            {
+                                                              contactsErrors[
+                                                                index
+                                                              ].email
+                                                            }
+                                                          </div>
+                                                        )}
                                                     </div>
                                                   </div>
                                                   <div className="col-lg-4">
@@ -2700,18 +2672,16 @@ const ClientEdit = () => {
                                                       />
                                                       {contactsErrors[index]
                                                         ?.alternate_email && (
-                                                        <div
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          {
-                                                            contactsErrors[
-                                                              index
-                                                            ].alternate_email
-                                                          }
-                                                        </div>
-                                                      )}
+                                                          <div
+                                                            className="error-text"
+                                                          >
+                                                            {
+                                                              contactsErrors[
+                                                                index
+                                                              ].alternate_email
+                                                            }
+                                                          </div>
+                                                        )}
                                                     </div>
                                                   </div>
                                                 </div>

@@ -80,7 +80,6 @@ const CreateJob = () => {
         InvoiceRemark: "",
     });
 
-
     useEffect(() => {
         setJobData(prevState => ({
             ...prevState,
@@ -242,7 +241,10 @@ const CreateJob = () => {
         const newErrors = { ...errors };
 
         if (isSubmitting) {
+
+            
             for (const key in fieldErrors) {
+                
                 if (!jobData[key] && key != "NumberOfTransactions" && key != "NumberOfTrialBalanceItems" && key != "Turnover") {
                     newErrors[key] = fieldErrors[key];
                 }
@@ -288,23 +290,23 @@ const CreateJob = () => {
         return `${formattedHours}:${formattedMinutes}`;
     }
 
-  let budgeted_hour_totalTime={hours:'',minutes:''}
-   if(AddTaskArr.length > 0){
-    budgeted_hour_totalTime = AddTaskArr.reduce((acc, task) => {
-        const [hours, minutes] = task.budgeted_hour.split(':').map(Number);
-    
-        acc.hours += hours;
-        acc.minutes += minutes;
-    
-        // Convert every 60 minutes into an hour
-        if (acc.minutes >= 60) {
-            acc.hours += Math.floor(acc.minutes / 60);
-            acc.minutes = acc.minutes % 60;
-        }
-        return acc;
-    }, { hours: 0, minutes: 0 });
-   }
-  
+    let budgeted_hour_totalTime = { hours: '', minutes: '' }
+    if (AddTaskArr.length > 0) {
+        budgeted_hour_totalTime = AddTaskArr.reduce((acc, task) => {
+            const [hours, minutes] = task.budgeted_hour.split(':').map(Number);
+
+            acc.hours += hours;
+            acc.minutes += minutes;
+
+            // Convert every 60 minutes into an hour
+            if (acc.minutes >= 60) {
+                acc.hours += Math.floor(acc.minutes / 60);
+                acc.minutes = acc.minutes % 60;
+            }
+            return acc;
+        }, { hours: 0, minutes: 0 });
+    }
+
     const handleSubmit = async () => {
         const req = {
             staffCreatedId: staffCreatedId,
@@ -323,7 +325,7 @@ const CreateJob = () => {
             year_end: jobData.YearEnd,
             total_preparation_time: formatTime(PreparationTimne.hours, PreparationTimne.minutes),
             review_time: formatTime(reviewTime.hours, reviewTime.minutes),
-            feedback_incorporation_time: formatTime(FeedbackIncorporationTime.hours, FeedbackIncorporationTime.minutes), 
+            feedback_incorporation_time: formatTime(FeedbackIncorporationTime.hours, FeedbackIncorporationTime.minutes),
             total_time: formatTime(Math.floor(totalHours / 60), totalHours % 60),
             engagement_model: jobData.EngagementModel,
             expected_delivery_date: jobData.ExpectedDeliveryDate,
@@ -355,7 +357,7 @@ const CreateJob = () => {
                 checklist_id: getChecklistId,
                 task: AddTaskArr
             }
-        } 
+        }
         const data = { req: req, authToken: token }
         setIsSubmitted(true);
         const isValid = validateAllFields();
@@ -404,11 +406,9 @@ const CreateJob = () => {
 
 
     const openJobModal = (e) => {
-
         if (e.target.value != "") {
             jobModalSetStatus(true)
         }
-
     }
 
 
@@ -505,7 +505,7 @@ const CreateJob = () => {
     }
 
 
-  
+
 
     return (
         <div>
@@ -514,7 +514,7 @@ const CreateJob = () => {
                     <div className="col-xl-12">
                         <div className="card">
 
-                            <div className="card-header step-header-blue d-flex ">
+                            <div className="card-header step-header-blue d-flex align-items-center">
 
                                 <button type="button " className="btn p-0" onClick={() => window.history.back()}>
                                     <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" /> </button>
@@ -660,7 +660,7 @@ const CreateJob = () => {
                                                                                             setBudgetedHours({ ...budgetedHours, hours: value });
                                                                                         }
                                                                                     }}
-                                                                                    value={budgeted_hour_totalTime != undefined ? budgeted_hour_totalTime.hours:"0"}
+                                                                                    value={budgeted_hour_totalTime != undefined ? budgeted_hour_totalTime.hours : "0"}
                                                                                     disabled
                                                                                 />
                                                                                 <span className="input-group-text" id="basic-addon2">
@@ -679,8 +679,8 @@ const CreateJob = () => {
                                                                                             });
                                                                                         }
                                                                                     }}
-    
-                                                                                    value={budgeted_hour_totalTime != undefined ? budgeted_hour_totalTime.minutes:"0"}
+
+                                                                                    value={budgeted_hour_totalTime != undefined ? budgeted_hour_totalTime.minutes : "0"}
                                                                                     disabled
                                                                                 />
                                                                                 <span className="input-group-text" id="basic-addon2">
@@ -1368,7 +1368,10 @@ const CreateJob = () => {
                                                                     </div>
                                                                     <div className="col-lg-6">
                                                                         <div className="col-sm-auto" style={{ marginLeft: 250 }}>
-                                                                            <button className="btn btn-info text-white float-end blue-btn" onClick={() => setShowAddJobModal(true)}>Add Task</button>
+                                                                            <button className="btn btn-info text-white float-end blue-btn" disabled={getChecklistId == ""}
+                                                                                onClick={() => setShowAddJobModal(true)}>
+                                                                                Add Task
+                                                                            </button>
                                                                         </div>
                                                                     </div>
                                                                 </div>
