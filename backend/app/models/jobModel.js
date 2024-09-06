@@ -987,6 +987,8 @@ const deleteJobById = async (job) => {
 }
 
 
+
+
 module.exports = {
   getAddJobData,
   jobAdd,
@@ -995,6 +997,7 @@ module.exports = {
   getByJobStaffId,
   getJobById,
   jobUpdate,
-  deleteJobById
+  deleteJobById,
+  
 
 };
