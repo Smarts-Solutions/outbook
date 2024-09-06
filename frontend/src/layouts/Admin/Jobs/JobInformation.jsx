@@ -209,6 +209,7 @@ const JobInformationPage = ({ job_id }) => {
         }
             
 
+        console.log("JobInformationData", JobInformationData)
     return (
         <div>
             <div className='row mb-3'>
