@@ -79,6 +79,13 @@ const AddCustomer = () => {
         <div className="container-fluid">
           <div className='content-title'>
                 <div className='tab-title'>
+                <button
+                  type="button"
+                  className="btn p-0"
+                 
+                >
+                 <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" ></i>
+                </button>
                             <h3 className='mt-0'>Create New Customer</h3>
                         </div>
                 </div>

@@ -177,11 +177,18 @@ const Paper = () => {
               <div className="card">
                 <div className="card-header step-header-blue">
                   <h4 className="card-title mb-0">
-                    Upload Customer Specific Paperwork
+                    Edit Paperwork
                   </h4>
                 </div>
                 <div className="card-body">
-                  <div className="input-group">
+                  <div className="card mb-0">
+                    <div className="card-header card-header-light-blue">
+                      <h4 className="card-title fs-16">
+                      Upload Customer Specific Paperwork
+                      </h4>
+                    </div>
+                    <div className="card-body">
+                    <div className="input-group">
                     <div className="custom-file w-100">
                       <input
                         type="file"
@@ -196,12 +203,20 @@ const Paper = () => {
                       />
                     </div>
                   </div>
+                    </div>
+                  </div>
+                  
 
                   <div className="container-fluid page-title-box">
                     <div className="row">
                       <div className="col-lg-12">
-                        <div className="card">
-                          <div className="card-body">
+                        <div className="">
+                        {/* <div className="card-header card-header-light-blue">
+                                <h4 className="card-title fs-16">
+                                  Preview Paperwork
+                                </h4>
+                                </div> */}
+                          <div className="">
                             <div id="customerList">
                               <div className="row g-4 ">
                                 <div className="d-flex justify-content-end">
@@ -209,6 +224,7 @@ const Paper = () => {
                                 </div>
                               </div>
                               <div className="table-responsive table-card mb-1">
+                                
                                 {newFiles.length > 0 && (
                                   <table
                                     className="table align-middle table-nowrap"
@@ -303,7 +319,19 @@ const Paper = () => {
                                     </tbody>
                                   </table>
                                 )}
-
+                               </div>
+                               
+                            </div>
+                          </div>
+                        </div>
+                        <div className="card">
+                                <div className="card-header card-header-light-blue">
+                                <h4 className="card-title fs-16">
+                                  Uploaded Paperworks
+                                </h4>
+                                </div>
+                                <div className="card-body">
+                               <div className="table-responsive table-card mb-1">
                                 <table
                                   className="table align-middle table-nowrap"
                                   id="customerTable"
@@ -376,7 +404,7 @@ const Paper = () => {
                                                       removeItem(file)
                                                     }
                                                   >
-                                                    <i className="ti-trash" />
+                                                    <i className="ti-trash text-danger fs-5" />
                                                   </a>
                                                 </div>
                                               </div>
@@ -394,23 +422,23 @@ const Paper = () => {
                                   </tbody>
                                 </table>
                               </div>
+                              </div>
+
                             </div>
-                          </div>
-                        </div>
                         <div className="d-flex align-items-start gap-3 mt-4 justify-content-between">
                           <button
                             type="button"
                             className="btn btn-secondary text-decoration-none previestab"
                             onClick={prev}
                           >
-                            Previous
+                          <i className="pe-2 fa-regular fa-arrow-left-long"></i>  Previous
                           </button>
                           <Button
                             className="btn btn-info text-white text-center blue-btn float-end"
                             type="submit"
                             onClick={(e) => handleSubmit(e)}
                           >
-                            Save
+                            Save <i className="ps-2 fa-regular fa-arrow-right-long"></i>
                           </Button>
                         </div>
                       </div>

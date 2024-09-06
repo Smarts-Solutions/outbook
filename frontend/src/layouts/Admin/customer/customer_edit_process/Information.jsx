@@ -1206,7 +1206,7 @@ const Information = ({ id, pageStatus }) => {
                   <div className="col-lg-12">
                     <div className="card card_shadow ">
                       <div className="card-header card-header-light-blue  step-card-header align-items-center d-flex">
-                        <h4 className="card-title mb-0 flex-grow-1">Company</h4>
+                        <h4 className="card-title mb-0 flex-grow-1">Company Information</h4>
                       </div>
                       {/* end card header */}
                       <div className="card-body">
@@ -1221,7 +1221,8 @@ const Information = ({ id, pageStatus }) => {
                                   <input
                                     type="text"
                                     className="form-control"
-                                    placeholder="Outbooks Quality & Certainty"
+                                    required
+                                    placeholder=" Search Company"
                                     name="SearchCompany"
                                     onChange={(e) =>
                                       setSearchItem(e.target.value)
@@ -1267,7 +1268,7 @@ const Information = ({ id, pageStatus }) => {
                                 <input
                                   type="text"
                                   className="form-control input_bg"
-                                  placeholder="Outbooks Quality & Certainty LTD"
+                                  placeholder="Enter Company Name"
                                   name="CompanyName"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails.CompanyName}
@@ -1288,7 +1289,7 @@ const Information = ({ id, pageStatus }) => {
                                 <input
                                   type="text"
                                   className="form-control input_bg"
-                                  placeholder="LTD"
+                                  placeholder="Enter Entity Type"
                                   name="EntityType"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails.EntityType}
@@ -1309,7 +1310,7 @@ const Information = ({ id, pageStatus }) => {
                                 <input
                                   type="text"
                                   className="form-control input_bg"
-                                  placeholder="Active"
+                                  placeholder="Enter Company Status"
                                   name="CompanyStatus"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails.CompanyStatus}
@@ -1330,7 +1331,7 @@ const Information = ({ id, pageStatus }) => {
                                 <input
                                   type="text"
                                   className="form-control input_bg"
-                                  placeholder="Company Number"
+                                  placeholder="Enter Company Number"
                                   name="CompanyNumber"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails.CompanyNumber}
@@ -1352,7 +1353,7 @@ const Information = ({ id, pageStatus }) => {
                                 <input
                                   type="text"
                                   className="form-control input_bg"
-                                  placeholder="07dd-01-2023"
+                                  placeholder="Enter Incorporation Date"
                                   name="IncorporationDate"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails.IncorporationDate}
@@ -1478,10 +1479,13 @@ const Information = ({ id, pageStatus }) => {
                   </div>
                   <div className="col-lg-12">
                     <div className="card card_shadow ">
+                      <div className="card-header step-card-header card-header-light-blue ">
+                        <h4 className="card-title">Trading Details</h4>
+                      </div>
                       {/* end card header */}
                       <div className="card-body">
                         <div className="row">
-                          <div className="col-lg-6">
+                          <div className="col-lg-5">
                             <div className="mb-3">
                               <label className="form-label">
                                 Trading Name
@@ -1502,7 +1506,7 @@ const Information = ({ id, pageStatus }) => {
                               )}
                             </div>
                           </div>
-                          <div className="col-lg-6">
+                          <div className="col-lg-7">
                             <div className="mb-3">
                               <label className="form-label">
                                 Trading Address

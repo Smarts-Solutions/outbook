@@ -677,7 +677,7 @@ const Information = () => {
       label: "Trading Name",
       type: "text",
       label_size: 12,
-      col_size: 6,
+      col_size: 5,
       disable: false,
     },
     {
@@ -685,7 +685,7 @@ const Information = () => {
       label: "Trading Address",
       type: "text",
       label_size: 12,
-      col_size: 6,
+      col_size: 7,
       disable: false,
     },
   ];
@@ -1212,7 +1212,7 @@ const Information = () => {
                                                       contacts.length === 1
                                                     }
                                                   >
-                                                    Delete
+                                                     <i className="ti-trash  pe-1" /> Delete
                                                   </button>
                                                 </div>
                                               </div>
@@ -1450,7 +1450,7 @@ const Information = () => {
                                         className="btn btn-info text-white blue-btn"
                                         onClick={handleAddContact}
                                       >
-                                        Add Contact
+                                       <i className="fa fa-plus pe-1"></i> Add Contact
                                       </button>
                                     </div>
                                   </div>
@@ -1530,7 +1530,7 @@ const Information = () => {
                                                                 1
                                                               }
                                                             >
-                                                              Delete
+                                                              <i className="ti-trash  pe-1" /> Delete
                                                             </button>
                                                           </div>
                                                         )}
@@ -1799,7 +1799,7 @@ const Information = () => {
                                               type="button"
                                               onClick={handleAddContact}
                                             >
-                                              Add Contact
+                                             <i className="fa fa-plus pe-2"></i> Add Contact
                                             </button>
                                           </div>
                                         </div>
