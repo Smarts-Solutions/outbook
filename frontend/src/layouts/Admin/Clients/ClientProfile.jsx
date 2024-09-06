@@ -142,7 +142,7 @@ const ClientList = () => {
             <i className="ti-pencil" />
           </button>
           <button className="delete-icon" onClick={() => handleDelete(row)}>
-            <i className="ti-trash" />
+            <i className="ti-trash text-danger" />
           </button>
         </div>
       ),
@@ -380,7 +380,7 @@ const ClientList = () => {
                     </div>
                   </div>
 
-                  <div className="col-lg-4 ml-auto align-self-center">
+                  <div className="col-lg-3 ml-auto align-self-center">
                     <ul className="list-unstyled personal-detail mb-0">
                       <li className="">
                         <i className="fa-regular fa-phone me-2 text-secondary font-22 align-middle"></i>
@@ -399,7 +399,7 @@ const ClientList = () => {
                     </ul>
                   </div>
 
-                  <div className="col-lg-4 align-self-center">
+                  <div className="col-lg-5 align-self-center">
                     <ul className="list-unstyled personal-detail mb-0">
                       <li className="">
                         <b>Trading Name</b>:{" "}

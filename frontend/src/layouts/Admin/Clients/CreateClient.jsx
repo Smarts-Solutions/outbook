@@ -601,15 +601,16 @@ const CreateClient = () => {
                 <div className="row">
                     <div className="col-xl-12">
                         <div className="card">
-                            <div className="card-header step-header-blue">
-                                <h4 className="card-title mb-0">
-                                <button
+                            <div className="card-header step-header-blue d-flex align-items-center">
+                            <button
                   type="button"
                   className="btn p-0"
                   onClick={HandleCancel}
                 >
                  <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" ></i>
                 </button>
+                                <h4 className="card-title mb-0">
+                               
                                     Create New Client</h4>
                             </div>
                             {/* end card header */}
@@ -682,7 +683,7 @@ const CreateClient = () => {
                                                                                             }
                                                                                         </select>
                                                                                         {errors1['IndustryType'] && (
-                                                                                            <div style={{ 'color': 'red' }}>{errors1['IndustryType']}</div>
+                                                                                            <div className="error-text">{errors1['IndustryType']}</div>
                                                                                         )}
                                                                                     </div>
                                                                                 </div>
@@ -1013,7 +1014,7 @@ const CreateClient = () => {
                                                                                                     name="Website" onChange={(e) => handleChange2(e)} value={getCompanyDetails.Website}
                                                                                                 />
                                                                                                 {errors2['Website'] && (
-                                                                                                    <div style={{ 'color': 'red' }}>{errors2['Website']}</div>
+                                                                                                    <div className="error-text">{errors2['Website']}</div>
                                                                                                 )}
                                                                                             </div>
                                                                                         </div>
@@ -1041,7 +1042,7 @@ const CreateClient = () => {
 
                                                                                             </select>
                                                                                             {errors2['ClientIndustry'] && (
-                                                                                                <div style={{ 'color': 'red' }}>{errors2['ClientIndustry']}</div>
+                                                                                                <div className="error-text">{errors2['ClientIndustry']}</div>
                                                                                             )}
                                                                                         </div>
                                                                                     </div>
@@ -1094,7 +1095,7 @@ const CreateClient = () => {
                                                                                                                             onClick={() => handleDeleteContact(index)}
                                                                                                                             disabled={contacts.length === 1}
                                                                                                                         >
-                                                                                                                            Delete
+                                                                                                                          <i className="ti-trash  pe-1"></i>  Delete
                                                                                                                         </button>
                                                                                                                     </div>
                                                                                                                 </div>
@@ -1112,7 +1113,7 @@ const CreateClient = () => {
                                                                                                                         value={contact.first_name}
                                                                                                                         onChange={(e) => handleChange(index, 'first_name', e.target.value)}
                                                                                                                     />
-                                                                                                                    {errors[index].first_name && <div style={{ color: 'red' }}>{errors[index].first_name}</div>}
+                                                                                                                    {errors[index].first_name && <div className="error-text">{errors[index].first_name}</div>}
                                                                                                                 </div>
                                                                                                             </div>
                                                                                                             <div className="col-lg-4">
@@ -1128,7 +1129,7 @@ const CreateClient = () => {
                                                                                                                         value={contact.last_name}
                                                                                                                         onChange={(e) => handleChange(index, 'last_name', e.target.value)}
                                                                                                                     />
-                                                                                                                    {errors[index].last_name && <div style={{ color: 'red' }}>{errors[index].last_name}</div>}
+                                                                                                                    {errors[index].last_name && <div className="error-text">{errors[index].last_name}</div>}
                                                                                                                 </div>
                                                                                                             </div>
                                                                                                             <div className="col-lg-4">
@@ -1148,7 +1149,7 @@ const CreateClient = () => {
                                                                                                                                 <option value={item.id} key={i}>{item.name}</option>
                                                                                                                             ))}
                                                                                                                     </select>
-                                                                                                                    {errors[index].role && <div style={{ color: 'red' }}>{errors[index].role}</div>}
+                                                                                                                    {errors[index].role && <div className="error-text">{errors[index].role}</div>}
                                                                                                                 </div>
                                                                                                             </div>
                                                                                                             <div className="col-lg-4">
@@ -1175,7 +1176,7 @@ const CreateClient = () => {
                                                                                                                                 onChange={(e) => handleChange(index, 'phone', e.target.value)}
                                                                                                                                 maxLength={12}
                                                                                                                             />
-                                                                                                                            {errors[index].phone && <div style={{ color: 'red' }}>{errors[index].phone}</div>}
+                                                                                                                            {errors[index].phone && <div className="error-text">{errors[index].phone}</div>}
                                                                                                                         </div>
                                                                                                                     </div>
                                                                                                                 </div>
@@ -1194,7 +1195,7 @@ const CreateClient = () => {
                                                                                                                         value={contact.email}
                                                                                                                         onChange={(e) => handleChange(index, 'email', e.target.value)}
                                                                                                                     />
-                                                                                                                    {errors[index].email && <div style={{ color: 'red' }}>{errors[index].email}</div>}
+                                                                                                                    {errors[index].email && <div className="error-text">{errors[index].email}</div>}
                                                                                                                 </div>
                                                                                                             </div>
                                                                                                         </div>
@@ -1204,7 +1205,7 @@ const CreateClient = () => {
                                                                                             <div className="justify-content-end d-flex align-items-center">
                                                                                                
                                                                                                 <button className="btn btn-info text-white blue-btn" onClick={handleAddContact}>
-                                                                                                    Add Contact
+                                                                                                    <i className='fa fa-plus pe-1'></i>Add Officer
                                                                                                 </button>
                                                                                             </div>
                                                                                         </div>
@@ -1349,7 +1350,7 @@ const CreateClient = () => {
                                                                                                                                 onClick={() => handleDeleteContact1(index)}
                                                                                                                                 disabled={contacts1.length === 1}
                                                                                                                             >
-                                                                                                                                Delete
+                                                                                                                              <i className="ti-trash  pe-1"></i>   Delete
                                                                                                                             </button>
                                                                                                                         </div>
                                                                                                                     )}
@@ -1363,7 +1364,7 @@ const CreateClient = () => {
                                                                                                                         maxLength={50}
                                                                                                                     />
                                                                                                                     {contactsErrors[index].first_name && (
-                                                                                                                        <div style={{ 'color': 'red' }}>{contactsErrors[index].first_name}</div>
+                                                                                                                        <div className="error-text">{contactsErrors[index].first_name}</div>
                                                                                                                     )}
                                                                                                                 </div>
                                                                                                             </div>
@@ -1375,7 +1376,7 @@ const CreateClient = () => {
                                                                                                                         maxLength={50}
                                                                                                                     />
                                                                                                                     {contactsErrors[index].last_name && (
-                                                                                                                        <div style={{ 'color': 'red' }}>{contactsErrors[index].last_name}</div>
+                                                                                                                        <div className="error-text">{contactsErrors[index].last_name}</div>
                                                                                                                     )}
                                                                                                                 </div>
                                                                                                             </div>
@@ -1396,7 +1397,7 @@ const CreateClient = () => {
                                                                                                                             ))}
                                                                                                                     </select>
                                                                                                                     {contactsErrors[index].role && (
-                                                                                                                        <div style={{ 'color': 'red' }}>{contactsErrors[index].role}</div>
+                                                                                                                        <div className="error-text">{contactsErrors[index].role}</div>
                                                                                                                     )}
 
                                                                                                                 </div>
@@ -1430,7 +1431,7 @@ const CreateClient = () => {
                                                                                                                                 maxLength={12}
                                                                                                                             />
                                                                                                                             {contactsErrors[index].phone && (
-                                                                                                                                <div style={{ 'color': 'red' }}>{contactsErrors[index].phone}</div>
+                                                                                                                                <div className="error-text">{contactsErrors[index].phone}</div>
                                                                                                                             )}
                                                                                                                         </div>
                                                                                                                     </div>
@@ -1458,7 +1459,7 @@ const CreateClient = () => {
                                                                                                                             name="alternate_phone" value={contacts1.alternate_phone} onChange={(e) => handleChange4(index, 'alternate_phone', e.target.value)}
                                                                                                                         />
                                                                                                                         {contactsErrors[index].alternate_phone && (
-                                                                                                                            <div style={{ 'color': 'red' }}>{contactsErrors[index].alternate_phone}</div>
+                                                                                                                            <div className="error-text">{contactsErrors[index].alternate_phone}</div>
                                                                                                                         )}
                                                                                                                     </div>
                                                                                                                 </div>
@@ -1472,7 +1473,7 @@ const CreateClient = () => {
 
                                                                                                                 />
                                                                                                                 {contactsErrors[index].email && (
-                                                                                                                        <div style={{ 'color': 'red' }}>{contactsErrors[index].email}</div>
+                                                                                                                        <div className="error-text">{contactsErrors[index].email}</div>
                                                                                                                     )}
                                                                                                             </div>
                                                                                                         </div>
@@ -1483,7 +1484,7 @@ const CreateClient = () => {
                                                                                                                     name="alternate_email" value={contacts1.alternate_email} onChange={(e) => handleChange4(index, 'alternate_email', e.target.value)}
                                                                                                                 />
                                                                                                                 {contactsErrors[index].alternate_email && (
-                                                                                                                        <div style={{ 'color': 'red' }}>{contactsErrors[index].alternate_email}</div>
+                                                                                                                        <div className="error-text">{contactsErrors[index].alternate_email}</div>
                                                                                                                     )}
                                                                                                             </div>
                                                                                                         </div>
@@ -1493,7 +1494,7 @@ const CreateClient = () => {
                                                                                             ))}
                                                                                         <div className=" d-flex align-items-center justify-content-end">
                                                                                             <div>
-                                                                                                <button className="btn btn-info text-white blue-btn" onClick={handleAddContact1}>Add Partner</button>
+                                                                                                <button className="btn btn-info text-white blue-btn" onClick={handleAddContact1}> <i className='fa fa-plus pe-1'> </i>Add Partner</button>
                                                                                             </div>
                                                                                         </div>
                                                                                     </div>
@@ -1508,7 +1509,7 @@ const CreateClient = () => {
                                     </div>
                                     <div className="hstack gap-2 justify-content-end">
                                         <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                        <button className="btn btn-info text-white blue-btn" onClick={handleSubmit}>Create Client</button>
+                                        <button className="btn btn-info text-white blue-btn" onClick={handleSubmit}><i className='fa fa-plus pe-1'></i>Create Client</button>
                                     </div>
                                 </div>
                             </div>
