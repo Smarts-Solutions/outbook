@@ -904,9 +904,9 @@ const jobUpdate = async (job) => {
 
           const deleteQuery = `
     DELETE FROM client_job_task 
-    WHERE job_id = ? AND checklist_id = ? AND task_id IN (${tasksToDelete.map(() => '?').join(',')})
+    WHERE job_id = ? AND client_id = ? AND task_id IN (${tasksToDelete.map(() => '?').join(',')})
 `;
-          await pool.execute(deleteQuery, [job_id, checklist_id, ...tasksToDelete]);
+          await pool.execute(deleteQuery, [job_id, client_id, ...tasksToDelete]);
         }
 
         // Insert or update tasks
