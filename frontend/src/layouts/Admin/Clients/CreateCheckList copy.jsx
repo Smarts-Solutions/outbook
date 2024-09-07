@@ -2,17 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { JobType, GetServicesByCustomers, GETTASKDATA, getList, addChecklists } from '../../../ReduxStore/Slice/Settings/settingSlice';
-import sweatalert from 'sweetalert2';
+import sweatalert from 'sweetalert2'; 
 import DropdownMultiselect from 'react-multiselect-dropdown-bootstrap';
 
 const CreateCheckList = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem('token'));
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
   const [selectedClientType, setSelectedClientType] = useState([]);
   const [tasks, setTasks] = useState([{ task_id: "", task_name: '', budgeted_hour: '' }]);
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({}); 
 
   const [formData, setFormData] = useState({
     customer_id: location.state?.id || '',
@@ -31,7 +31,7 @@ const CreateCheckList = () => {
     check_list_name: '',
     status: '',
   });
-
+ 
   const options = [
     { key: '1', label: 'Sole Trader' },
     { key: '2', label: 'Company' },
@@ -39,7 +39,7 @@ const CreateCheckList = () => {
     { key: '4', label: 'Individual' },
   ];
 
-
+ 
   useEffect(() => {
     if (formData.customer_id) {
       const req = { customer_id: formData.customer_id };
@@ -67,59 +67,12 @@ const CreateCheckList = () => {
 
   }, [formData.customer_id, dispatch, token]);
 
-
-  const fieldErrors = {
-    'service_id': 'Please Select Service Type',
-    'job_type_id': 'Please Select Job Type',
-    'check_list_name': 'Please Enter Check List Name',
-    'status': 'Please Select Status',
-  };
-
-  const handleInputChange = (e) => {
-    let name = e.target.name
-    let value = e.target.value
-    setFormData1(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
-    validate(name, value);
-  }
-
-  const validate = (name, value, isSubmitting = false) => {
-    const newErrors = { ...errors };
-    if (isSubmitting) {
-      for (const key in fieldErrors) {
-        if (!formData1[key]) {
-          newErrors[key] = fieldErrors[key];
-        }
-      }
-    }
-    else {
-      if (!value) {
-        if (fieldErrors[name]) {
-          newErrors[name] = fieldErrors[name];
-        }
-      }
-      else {
-        delete newErrors[name];
-      }
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleInputChange = (e) => { 
+    const { name, value } = e.target;
+    setFormData1(prev => ({ ...prev, [name]: value }));
   };
 
 
-  const validateAllFields = () => {
-    let isValid = true;
-    for (const key in formData1) {
-        if (!validate(key, formData1[key], true)) {
-            isValid = false;
-        }
-    }
-    return isValid;
-  };
-
- 
   const handleTaskChange = (index, e) => {
     const { name, value } = e.target;
     const newTasks = [...tasks];
@@ -176,6 +129,8 @@ const CreateCheckList = () => {
   };
 
 
+
+
   const addTask = () => {
     setTasks([...tasks, { task_name: '', budgeted_hour: '', task_id: null }]);
   };
@@ -220,24 +175,25 @@ const CreateCheckList = () => {
       .catch((error) => console.log("Error fetching job types:", error));
   };
 
-
+ 
   const handleSubmit = async () => {
     let validationErrors = {};
 
-    const isValid = validateAllFields();
-    if (!isValid) { 
-      return;
-    }
+    // Validate form-level fields
+    if (!formData1.service_id) validationErrors.service_id = "Service Type is required";
+    if (!formData1.job_type_id) validationErrors.job_type_id = "Job Type is required";
+    if (selectedClientType.length==0) validationErrors.client_type_id = "Client Type is required";
+    if (!formData1.check_list_name) validationErrors.check_list_name = "Check List Name is required";
+    if (!formData1.status) validationErrors.status = "Status is required";
 
+    // Validate tasks-level fields
     tasks.forEach((task, index) => {
       if (!task.task_name) {
         validationErrors[`task_name_${index}`] = "Task Name is required";
       }
-
       if (!task.budgeted_hour || task.budgeted_hour.hours === '' || task.budgeted_hour.minutes === '') {
         validationErrors[`budgeted_hour_${index}`] = "Budgeted Hour is required";
       }
-
     });
 
     if (Object.keys(validationErrors).length > 0) {
@@ -248,12 +204,12 @@ const CreateCheckList = () => {
     // Format the budgeted hours into HH:MM format
     const formattedTasks = formatBudgetedHours();
 
-    let ClienTypeArr = ""
+    let ClienTypeArr =""
     selectedClientType.map((item) => {
       ClienTypeArr += item + ','
     })
-
-
+   
+ 
 
     const req = {
       ...formData1,
@@ -264,12 +220,7 @@ const CreateCheckList = () => {
         task_id: task.task_id,
       })),
     };
-
-
-    console.log("req", req);
-
-
-    return 
+ 
     // Dispatch the request
     const data = { req, authToken: token };
     await dispatch(addChecklists(data))
@@ -303,30 +254,16 @@ const CreateCheckList = () => {
       );
   };
 
-  const handleMultipleSelect = (e) => {
-
-    if (e.length === 0) {
-      setErrors({ ...errors, client_type_id: 'Please Select Client Type' });
-    } else {
-      const { client_type_id, ...rest } = errors; // Remove client_type_id from errors
-      setErrors(rest); // Set the remaining errors
-    }
 
 
 
-    // if(e.length == 0){
-    //   setErrors({ ...errors, client_type_id: 'Please Select Client Type' });
-    // }
-    // else{
-    //   setErrors({ ...errors, client_type_id: '' });
-    // }
-    setSelectedClientType(e);
-  };
 
   return (
     <div className="container-fluid">
+
       <div className="card mt-4">
         <div className="card-header d-flex step-header-blue">
+
           <button
             type="button"
             className="btn p-0"
@@ -392,11 +329,11 @@ const CreateCheckList = () => {
                   <label className="form-label">Select Client Type</label>
                   <DropdownMultiselect
                     options={options}
-                    name='client_type_id'
-                    handleOnChange={(e)=>handleMultipleSelect(e)}
-                    
+                    name='name="client_type_id'
+                    handleOnChange={(selected) =>{ setSelectedClientType(selected)}}
+                    onChange={handleInputChange}
                   />
-
+                  
                   {errors.client_type_id && <p className="error-text">{errors.client_type_id}</p>}
                 </div>
               </div>
@@ -437,11 +374,7 @@ const CreateCheckList = () => {
               </div>
             </div>
           </div>
-
-
           <button className="btn btn-secondary mt-3" onClick={addTask}><i className='fa fa-plus'></i>Add Task</button>
-
-
           <div className="mt-4">
             {tasks.map((task, index) => (
               <div key={index} className="row  mt-4 align-items-end">
@@ -464,8 +397,10 @@ const CreateCheckList = () => {
                 </div>
 
                 <div className="col-lg-5">
+
                   <label className="form-label">Budgeted Hours</label>
-                  <div className="input-group"> 
+                  <div className="input-group">
+                    {/* Hours Input */}
                     <input
                       type="number"
                       className="form-control"
@@ -473,7 +408,11 @@ const CreateCheckList = () => {
                       name="hours"
                       defaultValue={task.budgeted_hour?.hours || ""}
                       onChange={(e) => handleTaskChange(index, e)}
-                    /> 
+                    />
+                    {/* Hours Error */}
+
+
+                    {/* Minutes Input */}
                     <input
                       type="number"
                       className="form-control"
@@ -483,7 +422,8 @@ const CreateCheckList = () => {
                       max="59"
                       defaultValue={task.budgeted_hour?.minutes || ""}
                       onChange={(e) => handleTaskChange(index, e)}
-                    /> 
+                    />
+                    {/* Minutes Error */}
 
                   </div>
 
