@@ -410,7 +410,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
 const getJobByCustomer = async (job) => {
   const { customer_id ,StaffUserId } = job;
   try {
-
     const [ExistStaff] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "'+StaffUserId+'" LIMIT 1');
     let result = []
     if(ExistStaff.length>0){
