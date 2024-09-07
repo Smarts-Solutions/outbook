@@ -13,6 +13,7 @@ const CreateCheckList = () => {
   const [selectedClientType, setSelectedClientType] = useState([]);
   const [tasks, setTasks] = useState([{ task_id: "", task_name: '', budgeted_hour: '' }]);
   const [errors, setErrors] = useState({});
+  const [errors1, setErrors1] = useState({});
 
   const [formData, setFormData] = useState({
     customer_id: location.state?.id || '',
@@ -38,7 +39,6 @@ const CreateCheckList = () => {
     { key: '3', label: 'Partnership' },
     { key: '4', label: 'Individual' },
   ];
-
 
   useEffect(() => {
     if (formData.customer_id) {
@@ -66,7 +66,6 @@ const CreateCheckList = () => {
       .catch(error => console.log("Error fetching service types:", error));
 
   }, [formData.customer_id, dispatch, token]);
-
 
   const fieldErrors = {
     'service_id': 'Please Select Service Type',
@@ -104,22 +103,22 @@ const CreateCheckList = () => {
         delete newErrors[name];
       }
     }
+
+    console.log("newErrors", newErrors);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-
   const validateAllFields = () => {
     let isValid = true;
     for (const key in formData1) {
-        if (!validate(key, formData1[key], true)) {
-            isValid = false;
-        }
+      if (!validate(key, formData1[key], true)) {
+        isValid = false;
+      }
     }
     return isValid;
   };
 
- 
   const handleTaskChange = (index, e) => {
     const { name, value } = e.target;
     const newTasks = [...tasks];
@@ -162,8 +161,6 @@ const CreateCheckList = () => {
     setTasks(newTasks);
   };
 
-
-
   const formatBudgetedHours = () => {
     return tasks.map((task) => {
       const hours = task.budgeted_hour?.hours || "";  // Fallback to "00" if empty
@@ -174,7 +171,6 @@ const CreateCheckList = () => {
       };
     });
   };
-
 
   const addTask = () => {
     setTasks([...tasks, { task_name: '', budgeted_hour: '', task_id: null }]);
@@ -223,11 +219,14 @@ const CreateCheckList = () => {
 
   const handleSubmit = async () => {
     let validationErrors = {};
+    const formattedTasks = formatBudgetedHours();
+
 
     const isValid = validateAllFields();
     if (!isValid) { 
       return;
     }
+ 
 
     tasks.forEach((task, index) => {
       if (!task.task_name) {
@@ -241,23 +240,19 @@ const CreateCheckList = () => {
     });
 
     if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+      setErrors1(validationErrors);
       return;
     }
 
-    // Format the budgeted hours into HH:MM format
-    const formattedTasks = formatBudgetedHours();
 
     let ClienTypeArr = ""
     selectedClientType.map((item) => {
       ClienTypeArr += item + ','
     })
 
-
-
     const req = {
       ...formData1,
-      client_type_id: ClienTypeArr,
+      client_type_id:ClienTypeArr.slice(0, -1),
       task: formattedTasks.map(task => ({
         task_name: task.task_name,
         budgeted_hour: task.budgeted_hour,
@@ -265,12 +260,6 @@ const CreateCheckList = () => {
       })),
     };
 
-
-    console.log("req", req);
-
-
-    return 
-    // Dispatch the request
     const data = { req, authToken: token };
     await dispatch(addChecklists(data))
       .unwrap()
@@ -308,18 +297,10 @@ const CreateCheckList = () => {
     if (e.length === 0) {
       setErrors({ ...errors, client_type_id: 'Please Select Client Type' });
     } else {
-      const { client_type_id, ...rest } = errors; // Remove client_type_id from errors
-      setErrors(rest); // Set the remaining errors
+      const { client_type_id, ...rest } = errors; 
+      setErrors(rest);  
     }
 
-
-
-    // if(e.length == 0){
-    //   setErrors({ ...errors, client_type_id: 'Please Select Client Type' });
-    // }
-    // else{
-    //   setErrors({ ...errors, client_type_id: '' });
-    // }
     setSelectedClientType(e);
   };
 
@@ -393,8 +374,8 @@ const CreateCheckList = () => {
                   <DropdownMultiselect
                     options={options}
                     name='client_type_id'
-                    handleOnChange={(e)=>handleMultipleSelect(e)}
-                    
+                    handleOnChange={(e) => handleMultipleSelect(e)}
+
                   />
 
                   {errors.client_type_id && <p className="error-text">{errors.client_type_id}</p>}
@@ -438,9 +419,7 @@ const CreateCheckList = () => {
             </div>
           </div>
 
-
           <button className="btn btn-secondary mt-3" onClick={addTask}><i className='fa fa-plus'></i>Add Task</button>
-
 
           <div className="mt-4">
             {tasks.map((task, index) => (
@@ -457,15 +436,17 @@ const CreateCheckList = () => {
                       placeholder="Task Name"
                       disabled={task.task_id}
                     />
-                    {errors[`task_name_${index}`] && (
-                      <p className="error-text">{errors[`task_name_${index}`]}</p>
+                    {errors1[`task_name_${index}`] && (
+                      <p className="error-text">{errors1[`task_name_${index}`]}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="col-lg-5">
+
                   <label className="form-label">Budgeted Hours</label>
-                  <div className="input-group"> 
+                  <div className="input-group">
+                    {/* Hours Input */}
                     <input
                       type="number"
                       className="form-control"
@@ -473,7 +454,11 @@ const CreateCheckList = () => {
                       name="hours"
                       defaultValue={task.budgeted_hour?.hours || ""}
                       onChange={(e) => handleTaskChange(index, e)}
-                    /> 
+                    />
+                    {/* Hours Error */}
+
+
+                    {/* Minutes Input */}
                     <input
                       type="number"
                       className="form-control"
@@ -483,9 +468,13 @@ const CreateCheckList = () => {
                       max="59"
                       defaultValue={task.budgeted_hour?.minutes || ""}
                       onChange={(e) => handleTaskChange(index, e)}
-                    /> 
+                    />
+                    {/* Minutes Error */}
 
                   </div>
+                  {errors1[`budgeted_hour_${index}`] && (
+                    <p className="error-text">{errors1[`budgeted_hour_${index}`]}</p>
+                  )}
 
                 </div>
                 <div className="col-lg-2">

@@ -208,6 +208,7 @@ const CreateJob = () => {
     const HandleChange = (e) => {
         let name = e.target.name
         let value = e.target.value
+
         if (name == "NumberOfTransactions" || name == "NumberOfTrialBalanceItems" || name == "Turnover") {
             if (!/^[0-9+]*$/.test(value)) {
                 return;
@@ -241,15 +242,13 @@ const CreateJob = () => {
         const newErrors = { ...errors };
 
         if (isSubmitting) {
-
-            
             for (const key in fieldErrors) {
-                
                 if (!jobData[key] && key != "NumberOfTransactions" && key != "NumberOfTrialBalanceItems" && key != "Turnover") {
                     newErrors[key] = fieldErrors[key];
                 }
             }
         }
+        
         else {
             if (!value && name != "NumberOfTransactions" && name != "NumberOfTrialBalanceItems" && name != "Turnover") {
                 if (fieldErrors[name]) {
@@ -385,7 +384,19 @@ const CreateJob = () => {
                     console.log("Error", error);
                 });
         }
+        else {
+            scrollToFirstError();
+        }
     }
+
+    const scrollToFirstError = () => { 
+        const errorField = Object.keys(errors)[0]; 
+ 
+        const errorElement = document.getElementById(errorField);
+        if (errorElement) {
+          errorElement.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
 
     const filteredData = AllJobData.data?.engagement_model?.[0]
         ? Object.keys(AllJobData.data.engagement_model[0])
@@ -537,7 +548,7 @@ const CreateJob = () => {
                                                                     <div className="mb-3 col-lg-4">
                                                                         <label className="form-label"> Outbook Account Manager</label>
                                                                         <input type="text" className="form-control" placeholder="Account Manager" disabled
-                                                                            name="AccountManager" onChange={HandleChange} value={jobData.AccountManager} />
+                                                                            name="AccountManager" id='AccountManager' onChange={HandleChange} value={jobData.AccountManager} />
                                                                         {errors['AccountManager'] && (
                                                                             <div className="error-text">{errors['AccountManager']}</div>
                                                                         )}
@@ -546,7 +557,7 @@ const CreateJob = () => {
                                                                     <div id="invoiceremark" className="mb-3 col-lg-4">
                                                                         <label className="form-label">Customer</label>
                                                                         <input type="text" className="form-control" placeholder="Customer" disabled
-                                                                            name="Customer" onChange={HandleChange} value={jobData.Customer} />
+                                                                            name="Customer" id='Customer' onChange={HandleChange} value={jobData.Customer} />
                                                                         {errors['Customer'] && (
                                                                             <div className="error-text">{errors['Customer']}</div>
                                                                         )}
@@ -557,7 +568,7 @@ const CreateJob = () => {
                                                                             <div className="col-lg-4">
                                                                                 <label className="form-label">Client</label>
                                                                                 <select className="form-select"
-                                                                                    name="Client" onChange={HandleChange} value={jobData.Client}>
+                                                                                    name="Client" id='Client' onChange={HandleChange} value={jobData.Client}>
                                                                                     <option value="">Select Client</option>
                                                                                     {(AllJobData?.data?.client || []).map((client) => (
                                                                                         <option value={client.client_id} key={client.client_id}>{client.client_trading_name}</option>
@@ -573,7 +584,7 @@ const CreateJob = () => {
                                                                             <div className="col-lg-4">
                                                                                 <label className="form-label">Client</label>
                                                                                 <input type="text" className="form-control" placeholder="Client Job Code"
-                                                                                    name="Client" onChange={HandleChange} value={jobData.Client} disabled />
+                                                                                    name="Client" id='Client' onChange={HandleChange} value={jobData.Client} disabled />
 
                                                                                 {errors['Client'] && (
                                                                                     <div className="error-text">{errors['Client']}</div>
@@ -584,7 +595,7 @@ const CreateJob = () => {
                                                                     <div className="mb-3 col-lg-4">
                                                                         <label className="form-label">Client Job Code</label>
                                                                         <input type="text" className="form-control" placeholder="Client Job Code"
-                                                                            name="ClientJobCode" onChange={HandleChange} value={jobData.ClientJobCode} />
+                                                                            name="ClientJobCode" id='ClientJobCode' onChange={HandleChange} value={jobData.ClientJobCode} />
                                                                         {errors['ClientJobCode'] && (
                                                                             <div className="error-text">{errors['ClientJobCode']}</div>
                                                                         )}
@@ -593,7 +604,7 @@ const CreateJob = () => {
                                                                     <div className="col-lg-4">
                                                                         <label className="form-label">Customer Account Manager(Officer)</label>
                                                                         <select className="form-select"
-                                                                            name="CustomerAccountManager" onChange={HandleChange} value={jobData.CustomerAccountManager}>
+                                                                            name="CustomerAccountManager" id='CustomerAccountManager' onChange={HandleChange} value={jobData.CustomerAccountManager}>
                                                                             <option value="">Select Customer Account Manager</option>
                                                                             {(AllJobData?.data?.customer_account_manager || []).map((customer_account_manager) => (
                                                                                 <option value={customer_account_manager.customer_account_manager_officer_id} key={customer_account_manager.customer_account_manager_officer_id}>{customer_account_manager.customer_account_manager_officer_name}</option>
@@ -609,7 +620,7 @@ const CreateJob = () => {
                                                                     <div className="col-lg-4">
                                                                         <label className="form-label">Service</label>
                                                                         <select className="form-select"
-                                                                            name="Service" onChange={HandleChange} value={jobData.Service}>
+                                                                            name="Service" id='Service' onChange={HandleChange} value={jobData.Service}>
                                                                             <option value="">Select Service</option>
                                                                             {
 
@@ -628,7 +639,7 @@ const CreateJob = () => {
                                                                     <div className="col-lg-4 mb-3">
                                                                         <label className="form-label">Job Type</label>
                                                                         <select className="form-select  jobtype"
-                                                                            name="JobType" onChange={(e) => { HandleChange(e); openJobModal(e) }} value={jobData.JobType}>
+                                                                            name="JobType" id='JobType' onChange={(e) => { HandleChange(e); openJobModal(e) }} value={jobData.JobType}>
                                                                             <option value="">Select Job Type</option>
                                                                             {get_Job_Type.loading && get_Job_Type.data &&
                                                                                 get_Job_Type.data.map((jobtype) => (
@@ -654,6 +665,7 @@ const CreateJob = () => {
                                                                                     type="text"
                                                                                     className="form-control"
                                                                                     placeholder="Hours"
+                                                                                   
                                                                                     onChange={(e) => {
                                                                                         const value = e.target.value;
                                                                                         if (value === '' || Number(value) >= 0) {
