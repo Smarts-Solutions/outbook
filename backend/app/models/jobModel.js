@@ -14,7 +14,8 @@ const getAddJobData = async (job) => {
         customers.account_manager_id  AS customer_account_manager_id,
 
         clients.id AS client_id,
-        clients.trading_name AS client_trading_name
+        clients.trading_name AS client_trading_name,
+        clients.client_type AS client_client_type
     FROM 
         customers
    JOIN 
@@ -35,7 +36,8 @@ const getAddJobData = async (job) => {
 
       client = rows.map(row => ({
         client_id: row.client_id,
-        client_trading_name: row.client_trading_name
+        client_trading_name: row.client_trading_name,
+        client_client_type: row.client_client_type
       }));
 
 
@@ -595,8 +597,6 @@ const getByJobStaffId = async (job) => {
 
 const getJobById = async (job) => {
   const { job_id } = job;
-
-  
   try {
     const query = `
     SELECT 
@@ -681,26 +681,32 @@ const getJobById = async (job) => {
      staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
      LEFT JOIN 
      countries ON jobs.currency = countries.id
-     JOIN 
+     LEFT JOIN 
      client_job_task ON client_job_task.job_id = jobs.id
-     JOIN
+     LEFT JOIN
      task ON client_job_task.task_id = task.id
      LEFT JOIN
-     checklist_tasks ON checklist_tasks.checklist_id = client_job_task.checklist_id
+     checklist_tasks ON checklist_tasks.checklist_id = client_job_task.checklist_id AND
+     checklist_tasks.checklist_id = client_job_task.checklist_id AND checklist_tasks.task_id = client_job_task.task_id
      WHERE
-     checklist_tasks.checklist_id = client_job_task.checklist_id AND checklist_tasks.task_id = client_job_task.task_id AND
-     jobs.id = ?
+      jobs.id = ? 
      `;
+
+    //  WHERE
+    //  checklist_tasks.checklist_id = client_job_task.checklist_id AND checklist_tasks.task_id = client_job_task.task_id AND
+    //  jobs.id = ?
     const [rows] = await pool.execute(query, [job_id]);
-    //  console.log("rows ",rows)
+     console.log("rows ",rows)
     let result = {}
     if (rows.length > 0) {
-
-      const tasks = await rows.map(row => ({
+       let tasks= []
+      if (rows[0].task_id !== null) {
+       tasks = await rows.map(row => ({
         task_id: row.task_id,
         task_name: row.task_name,
         budgeted_hour: row.task_budgeted_hour,
       }));
+      }
 
       result = {
         job_id: rows[0].job_id,
@@ -877,9 +883,6 @@ const jobUpdate = async (job) => {
           .map(tsk => tsk.task_id);
 
 
-
-
-
         // Working progresss.................
 
         // Get existing task IDs for the checklist
@@ -895,12 +898,21 @@ const jobUpdate = async (job) => {
         // Find task IDs that need to be deleted
         const tasksToDelete = existingTaskIds.filter(id => !providedTaskIds.includes(id));
 
+        console.log("tasksToDelete ", tasksToDelete)
+        console.log("job_id ", job_id)
+        console.log("checklist_id ", checklist_id)
 
         if (tasksToDelete.length > 0) {
+          // const deleteQuery = `
+          //     DELETE FROM client_job_task WHERE job_id = ? checklist_id = ? AND task_id IN (?)
+          //   `;
+          // await pool.execute(deleteQuery, [job_id, checklist_id, tasksToDelete]);
+
           const deleteQuery = `
-              DELETE FROM client_job_task WHERE job_id = ? checklist_id = ? AND task_id IN (?)
-            `;
-          await pool.execute(deleteQuery, [job_id, checklist_id, tasksToDelete]);
+    DELETE FROM client_job_task 
+    WHERE job_id = ? AND client_id = ? AND task_id IN (${tasksToDelete.map(() => '?').join(',')})
+`;
+          await pool.execute(deleteQuery, [job_id, client_id, ...tasksToDelete]);
         }
 
         // Insert or update tasks
@@ -958,6 +970,24 @@ const jobUpdate = async (job) => {
   }
 }
 
+const deleteJobById = async (job) => {
+  const { job_id } = job;
+  try {
+
+    const [result] = await pool.execute('DELETE FROM jobs WHERE id = ?', [job_id]);
+    await pool.execute('DELETE FROM client_job_task WHERE job_id = ?', [job_id]);
+    if (result.affectedRows > 0) {
+      return { status: true, message: 'Job deleted successfully.', data: job_id };
+    } else {
+      return { status: false, message: 'No job found with the given job_id.' };
+    }
+  } catch (err) {
+    return { status: false, message: 'Error deleting job.' };
+  }
+}
+
+
+
 
 module.exports = {
   getAddJobData,
@@ -967,5 +997,7 @@ module.exports = {
   getByJobStaffId,
   getJobById,
   jobUpdate,
+  deleteJobById,
+  
 
 };

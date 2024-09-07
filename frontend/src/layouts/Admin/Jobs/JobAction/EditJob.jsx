@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
 import { GetAllJabData, UpdateJob, GET_ALL_CHECKLIST } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
 import sweatalert from 'sweetalert2';
-import { Get_All_Job_List } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { JobAction } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { JobType } from '../../../../ReduxStore/Slice/Settings/settingSlice'
 
 import { Modal, Button } from 'react-bootstrap';
@@ -86,7 +86,7 @@ const EditJob = () => {
   const JobDetails = async () => {
     const req = { action: "getByJobId", job_id: location.state.job_id }
     const data = { req: req, authToken: token }
-    await dispatch(Get_All_Job_List(data))
+    await dispatch(JobAction(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
@@ -375,7 +375,7 @@ const EditJob = () => {
       customer_contact_details_id: Number(jobData.CustomerAccountManager),
       service_id: Number(jobData.Service),
       job_type_id: Number(jobData.JobType),
-      budgeted_hours: formatTime(budgetedHours.hours, budgetedHours.minutes),
+      budgeted_hours: formatTime(budgeted_hour_totalTime.hours, budgeted_hour_totalTime.minutes),
       reviewer: Number(jobData.Reviewer),
       allocated_to: Number(jobData.AllocatedTo),
       allocated_on: jobData.AllocatedOn ? jobData.AllocatedOn : new Date().toISOString().split('T')[0],
@@ -454,7 +454,6 @@ const EditJob = () => {
 
 
   const openJobModal = (e) => {
-    console.log("e", e.target.value)
     if (e.target.value != "") {
       jobModalSetStatus(true)
     }
@@ -558,6 +557,28 @@ const EditJob = () => {
     setTempChecklistId(getChecklistId);
   }
 
+
+
+  let budgeted_hour_totalTime = { hours: '', minutes: '' }
+  if (AddTaskArr.length > 0) {
+
+    budgeted_hour_totalTime = AddTaskArr.reduce((acc, task) => {
+  
+      if(task.budgeted_hour != null){
+      const [hours, minutes] = task.budgeted_hour.split(':').map(Number);
+
+      acc.hours += hours;
+      acc.minutes += minutes;
+
+      // Convert every 60 minutes into an hour
+      if (acc.minutes >= 60) {
+        acc.hours += Math.floor(acc.minutes / 60);
+        acc.minutes = acc.minutes % 60;
+      }
+      }
+      return acc;
+    }, { hours: 0, minutes: 0 });
+  }
 
   return (
     <div>
@@ -710,7 +731,12 @@ const EditJob = () => {
                                               setBudgetedHours({ ...budgetedHours, hours: value });
                                             }
                                           }}
-                                          value={budgetedHours.hours}
+
+                                          value={budgeted_hour_totalTime != undefined ? budgeted_hour_totalTime.hours : "0"}
+                                          disabled
+
+
+
                                         />
                                         <span className="input-group-text" id="basic-addon2">
                                           Hours
@@ -728,7 +754,8 @@ const EditJob = () => {
                                               });
                                             }
                                           }}
-                                          value={budgetedHours.minutes}
+                                          value={budgeted_hour_totalTime != undefined ? budgeted_hour_totalTime.minutes : "0"}
+                                          disabled
                                         />
                                         <span className="input-group-text" id="basic-addon2">
                                           Minutes
@@ -1485,7 +1512,9 @@ const EditJob = () => {
 
                                                             <td>{checklist.task_name} </td>
                                                             <td>
-                                                              {checklist.budgeted_hour.split(":")[0]}h {checklist.budgeted_hour.split(":")[1]}m
+                                                              {checklist.budgeted_hour != null ?checklist.budgeted_hour.split(":")[0] :"0"}h 
+                                                              
+                                                              {checklist.budgeted_hour != null ? checklist.budgeted_hour.split(":")[1]:"0"}m
                                                             </td>
 
                                                             {/* <td>{checklist.budgeted_hour} hr</td> */}

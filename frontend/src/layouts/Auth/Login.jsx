@@ -233,7 +233,7 @@ const Login = () => {
                           />
                         </div>
                         {errorEmail ? (
-                          <span className="error-text">{errorEmail}</span>
+                          <span className="error-text-login">{errorEmail}</span>
                         ) : (
                           ""
                         )}
@@ -251,7 +251,7 @@ const Login = () => {
                           />
                         </div>
                         {errorPassword ? (
-                          <span className="error-text">{errorPassword}</span>
+                          <span className="error-text-login">{errorPassword}</span>
                         ) : (
                           ""
                         )}

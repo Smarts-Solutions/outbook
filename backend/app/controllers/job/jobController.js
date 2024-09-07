@@ -1,6 +1,6 @@
 const jobService = require('../../services/job/jobService');
 
-
+// job ....
 const getAddJobData = async (req, res) => {
   try {
      const { ...job } = req.body;
@@ -66,14 +66,42 @@ const jobUpdate = async (req, res) => {
 }
 
 
+// task TimeSheet  Work .....
+const getTaskTimeSheet = async (req, res) => {
+  try {
+     const { ...timeSheet } = req.body;
+  
+       const result = await jobService.getTaskTimeSheet(timeSheet);
+       if(!result.status){
+        return  res.status(200).json({ status: false, message: result.message });  
+        }else{
+        return  res.status(200).json({ status: true, message: result.message , data : result.data});
+        }
+    
+    } catch (error) {
+      res.status(500).json({ status:false, message: error.message});
+    }
+}
 
-
-
-
+const jobTimeSheet = async (req,res) => {
+  try {
+    const { ...timeSheet } = req.body;
+    const result = await jobService.jobTimeSheet(timeSheet);
+    if(!result.status){
+     return  res.status(200).json({ status: false, message: result.message });  
+     }else{
+     return  res.status(200).json({ status: true, message: result.message , data : result.data});
+     }
+ } catch (error) {
+   res.status(500).json({ status:false, message: error.message});
+ }
+}
 
 module.exports = {
   getAddJobData,
   jobAdd,
   jobAction,
-  jobUpdate
+  jobUpdate,
+  getTaskTimeSheet,
+  jobTimeSheet
 };

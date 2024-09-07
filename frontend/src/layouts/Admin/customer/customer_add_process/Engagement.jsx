@@ -4,6 +4,7 @@ import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
 import { JobType } from '../../../../ReduxStore/Slice/Settings/settingSlice'
 import { useDispatch } from 'react-redux';
+import { FTEDedicatedErrorMessages, PercentageModelErrorMessages, AdhocPAYGHourlyErrorMessages } from '../../../../Utils/Common_Message';
 
 import { ADD_SERVICES_CUSTOMERS } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
 
@@ -18,6 +19,7 @@ const Engagement = () => {
   const [errors4, setErrors4] = useState([]);
   const [jobType, setJobType] = useState([])
 
+  
 
   const [formValues1, setFormValues1] = useState({
     accountants: '',
@@ -70,32 +72,136 @@ const Engagement = () => {
 
   const handleChange1 = (e) => {
     const { name, value } = e.target;
-    if (!/^[0-9+]*$/.test(value)) {
-      return;
+    if (value === '' || (/^\d*\.?\d*$/.test(value))) {
+      validate1(name , value);
+      setFormValues1({ ...formValues1, [name]: value });
+      
     }
-    validate1()
-    setFormValues1({ ...formValues1, [name]: value });
   };
-
-
 
   const handleChange2 = (e) => {
     const { name, value } = e.target;
-    if (value === '' || (/^[0-9]*$/.test(value) && value <= 100)) {
-      validate2()
+    if (value === '' || (/^\d*\.?\d*$/.test(value) && value <= 100)) {
+      validate2(name, value);
       setFormValues2({ ...formValues2, [name]: value });
     }
   };
 
   const handleChange3 = (e) => {
     const { name, value } = e.target;
-    if (value === '' || (/^[0-9]*$/.test(value) && value <= 100)) {
-
-      validate3()
+    if (value === '' || (/^\d*\.?\d*$/.test(value) && value <= 100)){
+      validate3(name, value);
       setFormValues3({ ...formValues3, [name]: value });
     }
-
   };
+ 
+ 
+ 
+
+  const validate1 = (name, value, isSubmitting = false) => {
+    const newErrors = { ...errors1 };
+    if (isSubmitting) {
+      for (const key in FTEDedicatedErrorMessages) {
+        if (!formValues1[key]) {
+          newErrors[key] = FTEDedicatedErrorMessages[key];
+        }
+      }
+    }
+    else {
+      if (!value) {
+        if (FTEDedicatedErrorMessages[name]) {
+          newErrors[name] = FTEDedicatedErrorMessages[name];
+        }
+      }
+      else {
+        delete newErrors[name];
+      }
+    }
+ 
+    setErrors1(newErrors);
+    return Object.keys(newErrors).length === 0;
+   
+  };
+
+  const validate2 = (name, value, isSubmitting = false) => {
+    const newErrors = { ...errors2 };
+    if (isSubmitting) {
+      for (const key in PercentageModelErrorMessages) {
+        if (!formValues2[key]) {
+          newErrors[key] = PercentageModelErrorMessages[key];
+        }
+      }
+    }
+    else {
+      if (!value) {
+        if (PercentageModelErrorMessages[name]) {
+          newErrors[name] = PercentageModelErrorMessages[name];
+        }
+      }
+      else {
+        delete newErrors[name];
+      }
+    }
+    setErrors2(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validate3 = (name, value, isSubmitting = false) => {
+    const newErrors = { ...errors3 };
+    if (isSubmitting) {
+      for (const key in AdhocPAYGHourlyErrorMessages) {
+        if (!formValues3[key]) {
+          newErrors[key] = AdhocPAYGHourlyErrorMessages[key];
+        }
+      }
+    }
+    else {
+      if (!value || value < 7 || value > 25) {
+        if (AdhocPAYGHourlyErrorMessages[name]) {
+          newErrors[name] = AdhocPAYGHourlyErrorMessages[name];
+        }
+      }
+      else {
+        delete newErrors[name];
+      }
+    }
+    setErrors3(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateAllFields1 = () => {
+    let isValid = true;
+    for (const key in formValues1) {
+        if (!validate1(key, formValues1[key], true)) {
+            isValid = false;
+        }
+    }
+    return isValid;
+  };
+
+  const validateAllFields2 = () => {
+    let isValid = true;
+    for (const key in formValues2) {
+        if (!validate2(key, formValues2[key], true)) {
+            isValid = false;
+        }
+    }
+    return isValid;
+  };
+
+  const validateAllFields3 = () => {
+    let isValid = true;
+    for (const key in formValues3) {
+        if (!validate3(key, formValues3[key], true)) {
+            isValid = false;
+        }
+    }
+    return isValid;
+};
+
+
+
+ 
 
   const handleAddJob = () => {
     setJobEntries([...jobEntries, { minimum_number_of_jobs: '', job_type_id: '', cost_per_job: '' }]);
@@ -128,69 +234,12 @@ const Engagement = () => {
 
 
 
-  const validate1 = () => {
-    const newErrors = {};
-    for (const key in formValues1) {
-      if (!formValues1[key]) {
-        if (key == 'accountants') newErrors[key] = "Please Enter Number of Accountants";
-        else if (key == 'feePerAccountant') newErrors[key] = "Please Enter Fee Per Accountant";
-        else if (key == 'bookkeepers') newErrors[key] = "Please Enter Number of Bookkeepers";
-        else if (key == 'feePerBookkeeper') newErrors[key] = "Please Enter Fee Per Bookkeeper";
-        else if (key == 'payrollExperts') newErrors[key] = "Please Enter Number of Payroll Experts";
-        else if (key == 'feePerPayrollExpert') newErrors[key] = "Please Enter Fee Per Payroll Expert";
-        else if (key == 'taxExperts') newErrors[key] = "Please Enter Number of Tax Experts";
-        else if (key == 'feePerTaxExpert') newErrors[key] = "Please Enter Fee Per Tax Expert";
-        else if (key == 'numberOfAdmin') newErrors[key] = "Please Enter Number of Admin/Other Staff";
-        else if (key == 'feePerAdmin') newErrors[key] = "Please Enter Fee Per Admin/Other Staff";
-      }
-    }
-    setErrors1(newErrors)
+ 
 
-    return Object.keys(newErrors).length === 0 ? true : false;;
-  };
-
-  const validate2 = () => {
-    const newErrors = {};
-    for (const key in formValues2) {
-      const value = parseFloat(formValues2[key]);
-
-      if (!formValues2[key]) {
-        if (key == 'total_outsourcing') newErrors[key] = "Please Enter Total Outsourcing";
-        else if (key == 'accountants') newErrors[key] = "Please Enter Accountants";
-        else if (key == 'bookkeepers') newErrors[key] = "Please Enter Bookkeepers";
-        else if (key == 'payroll_experts') newErrors[key] = "Please Enter Payroll Experts";
-        else if (key == 'tax_experts') newErrors[key] = "Please Enter Tax Experts";
-        else if (key == 'admin_staff') newErrors[key] = "Please Enter Admin/Other Staff";
-      } else if (isNaN(value) || value < 7 || value > 25) {
-        newErrors[key] = `${key.replace('_', ' ')} must be between 7 and 25, including decimal values`;
-      }
-    }
-
-    setErrors2(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  
 
 
 
-  const validate3 = () => {
-    const newErrors = {};
-    for (const key in formValues3) {
-      const value = parseFloat(formValues3[key]);
-
-
-      if (!formValues3[key]) {
-        if (key == 'adhoc_accountants') newErrors[key] = "Please Enter Accountants Fee Per Hour";
-        else if (key == 'adhoc_bookkeepers') newErrors[key] = 'Please Enter Bookkeepers Fee Per Hour';
-        else if (key == 'adhoc_payroll_experts') newErrors[key] = "Please Enter Payroll Experts Fee Per Hour";
-        else if (key == 'adhoc_tax_experts') newErrors[key] = "Please Enter Tax Experts Fee Per Hour";
-        else if (key == 'adhoc_admin_staff') newErrors[key] = "Please Enter Admin/Other Staff Fee Per Hour";
-      } else if (isNaN(value) || value < 0 || value > 100) {
-        newErrors[key] = `${key.replace('_', ' ')} must be between 0 and 100, including decimal values`;
-      }
-    }
-    setErrors3(newErrors)
-    return Object.keys(newErrors).length === 0 ? true : false;
-  };
 
 
   const validate4 = () => {
@@ -248,7 +297,7 @@ const Engagement = () => {
       alert("Please select at least one option.");
       return;
     }
-    const validations = [validate1, validate2, validate3, validate4];
+    const validations = [validateAllFields1, validateAllFields2, validateAllFields3, validate4];
 
 
     for (let i = 0; i < checkboxStates.length; i++) {
@@ -416,7 +465,7 @@ const Engagement = () => {
                                 { label: '', name: 'feePerAdmin', feeName: "Fee Per Admin/Other Staff" },
                               ].map((field, index) => (
 
-                                <div className="col-lg-3" key={index}>
+                                <div className="col-lg-6" key={index}>
 
 
                                   <div className="mb-3 cl">

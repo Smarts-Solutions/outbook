@@ -452,7 +452,7 @@ CREATE TABLE jobs (
     customer_contact_details_id INT NOT NULL,
     service_id INT NOT NULL,
     job_type_id INT NOT NULL,
-    budgeted_hours DECIMAL(10, 2) DEFAULT NULL,
+    budgeted_hours TIME DEFAULT NULL,
     reviewer INT DEFAULT NULL, 
     allocated_to INT DEFAULT NULL,
     allocated_on  DATE DEFAULT NULL,
@@ -563,12 +563,15 @@ CREATE TABLE jobs (
         client_id INT NOT NULL,
         checklist_id INT NOT NULL,
         task_id INT NOT NULL,
+        task_status INT NOT NULL,
+        time TIME DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (job_id) REFERENCES jobs(id),
         FOREIGN KEY (client_id) REFERENCES clients(id),
         FOREIGN KEY (checklist_id) REFERENCES checklists(id),
         FOREIGN KEY (task_id) REFERENCES task(id),
+        FOREIGN KEY (task_status) REFERENCES master_status(id),
         UNIQUE (job_id,client_id,checklist_id,task_id)
     );
     

@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
-import { Get_All_Client } from "../../../ReduxStore/Slice/Client/ClientSlice";
+import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Get_All_Job_List } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import Statuses from "./Statuses";
@@ -53,7 +53,7 @@ const ClientList = () => {
   const JobDetails = async () => {
     const req = { action: "getByCustomer", customer_id: location.state.id };
     const data = { req: req, authToken: token };
-    await dispatch(Get_All_Job_List(data))
+    await dispatch(JobAction(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
@@ -110,9 +110,9 @@ const ClientList = () => {
             {" "}
             <i className="ti-pencil" />
           </button>
-          <button className="delete-icon" onClick={() => handleDelete(row)}>
+          <button className="delete-icon" onClick={() => handleDelete(row, 'client')}>
             {" "}
-            <i className="ti-trash" />
+            <i className="ti-trash text-danger" />
           </button>
         </div>
       ),
@@ -179,7 +179,7 @@ const ClientList = () => {
           <button className="edit-icon" onClick={() => handleJobEdit(row)}>
             <i className="ti-pencil" />
           </button>
-          <button className="delete-icon" onClick={() => handleDelete(row)}>
+          <button className="delete-icon" onClick={() => handleDelete(row, "job")}>
             <i className="ti-trash" />
           </button>
         </div>
@@ -246,7 +246,7 @@ const ClientList = () => {
   const GetAllClientData = async () => {
     const req = { action: "get", customer_id: location.state.id };
     const data = { req: req, authToken: token };
-    await dispatch(Get_All_Client(data))
+    await dispatch(ClientAction(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
@@ -310,6 +310,41 @@ const ClientList = () => {
       });
   };
 
+
+  const handleDelete = async (row, type) => {
+    const req = { action: "delete", ...(type === "job" ? { job_id: row.job_id } : { client_id: row.id }) };
+    const data = { req: req, authToken: token };
+    await dispatch(type=='job' ? JobAction(data) : ClientAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          sweatalert.fire({
+            title: "Deleted",
+            icon: "success",
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+
+          type === "job" ?  JobDetails() : GetAllClientData();
+          
+        } else {
+          sweatalert.fire({
+            title: "Failed",
+            icon: "error",
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        }
+      })
+      .catch((error) => {
+        console.log("Error", error);
+      });
+  };
+
+
+
   const HandleClientView = (row) => {
     navigate("/admin/client/profile", { state: { Client_id: row.id } });
   };
@@ -334,9 +369,8 @@ const ClientList = () => {
       state: { job_id: row.job_id, goto: "Customer" },
     });
   }
-  function handleDelete(row) {
-    console.log("Deleting row:", row);
-  }
+
+
   const handleClick = () => {
     navigate("/admin/create/checklist", { state: { id: location.state.id } });
   };
@@ -505,7 +539,14 @@ const ClientList = () => {
                       filter={false}
                     />
                   ) : (
+                    <div className="text-center">
+                    <img 
+                    src='/assets/images/No-data-amico.png'
+                    alt="No records available" 
+                    style={{ width: '250px', height: 'auto', objectFit: 'contain' }}
+                  />
                     <p>No data available.</p>
+                    </div>
                   )}
                 </div>
               </div>

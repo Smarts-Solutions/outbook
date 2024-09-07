@@ -11,9 +11,12 @@ import {
   Delete_Customer_File,
   GET_ALL_JOB_DATA,
   Add_Job_Type,
-  GET_ALL_JOB_LIST,
+  JOB_ACTION,
   UPDATE_JOB,
   GETALLCHECKLIST,
+  GET_ALL_TASK_TIME_SHEET,
+  GET_JOB_TIME_SHEET, 
+   
 } from "../../../Services/Customer/CustomerService";
 
 import axios from "axios";
@@ -232,7 +235,7 @@ export const AddAllJobType = createAsyncThunk("jobAdd", async (data) => {
   }
 });
 
-export const Get_All_Job_List = createAsyncThunk("jobAction", async (data) => {
+export const JobAction= createAsyncThunk("jobAction", async (data) => {
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();
@@ -241,7 +244,7 @@ export const Get_All_Job_List = createAsyncThunk("jobAction", async (data) => {
       ip: IP_Data.data.ip,
       StaffUserId: StaffUserId.id,
     };
-    const res = await GET_ALL_JOB_LIST(updatedReq, authToken);
+    const res = await JOB_ACTION(updatedReq, authToken);
     return await res;
   } catch (err) {
     throw err;
@@ -283,6 +286,46 @@ export const GET_ALL_CHECKLIST = createAsyncThunk(
   }
 );
 
+
+
+
+export const getAllTaskTimeSheet = createAsyncThunk("getTaskTimeSheet", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await GET_ALL_TASK_TIME_SHEET(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const JobTimeSheetAction = createAsyncThunk("jobTimeSheet", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await GET_JOB_TIME_SHEET(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+ 
+
+
+ 
+
 const CustomerSlice = createSlice({
   name: "CustomerSlice",
   initialState: {
@@ -299,9 +342,12 @@ const CustomerSlice = createSlice({
     deletecustomerfile: [],
     getalljobdata: [],
     addjobtype: [],
-    getalljoblist: [],
+    jobaction: [],
     updatejob: [],
     getallchecklist: [],
+    getalltasktimesheet: [],
+    jobtimesheetaction: [],
+    
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -427,14 +473,14 @@ const CustomerSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
       })
-      .addCase(Get_All_Job_List.pending, (state) => {
+      .addCase(JobAction.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(Get_All_Job_List.fulfilled, (state, action) => {
+      .addCase(JobAction.fulfilled, (state, action) => {
         state.isLoading = false;
         state.getalljoblist = action.payload;
       })
-      .addCase(Get_All_Job_List.rejected, (state) => {
+      .addCase(JobAction.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       })
@@ -459,7 +505,30 @@ const CustomerSlice = createSlice({
       .addCase(GET_ALL_CHECKLIST.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
+      })
+      .addCase(getAllTaskTimeSheet.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getAllTaskTimeSheet.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.getalltasktimesheet = action.payload;
+      })
+      .addCase(getAllTaskTimeSheet.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(JobTimeSheetAction.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(JobTimeSheetAction.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.jobtimesheetaction = action.payload;
+      })
+      .addCase(JobTimeSheetAction.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
       });
+      
   },
 });
 

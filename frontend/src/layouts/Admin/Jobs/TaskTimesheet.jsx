@@ -1,46 +1,176 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
+import { useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { getAllTaskTimeSheet, JobTimeSheetAction  } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import sweatalert from 'sweetalert2';
+
 
 const TaskTimesheet = () => {
-  const data = [
-    {
-      TradingName: "W120",
-      Code: "012_BlaK_T_1772",
-      CustomerName: "The Black T",
-      AccountManager: "Ajeet Aggarwal",
-      ServiceType: "Admin/Support Tasks",
-      JobType: "Year End",
-    },
-    {
-      TradingName: "W121",
-      Code: "025_NesTea_1663",
-      CustomerName: "Nestea",
-      AccountManager: "Ajeet Aggarwal",
-      ServiceType: "Onboarding/Setup",
-      JobType: "Year End",
-    },
-    // More data...
-  ];
+  const token = JSON.parse(localStorage.getItem("token"));
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const [addjobtimesheet, setAddjobtimesheet] = useState(false);
+  const [addtask, setAddtask] = useState(false);
+  const [viewtimesheet, setViewtimesheet] = useState(false);
+  const [taskTimeData, setTaskTimeData] = useState([]);
+  const [jobTimeData, setJobTimeData] = useState([]);
+  const [TotalTime, setTotalTime] = useState({ hours: 0, minutes: 0 })
+  const [getRowData, setRowData] = useState({})
+  const [getMasterStatusArr, setMasterStatusDataArr] = useState([])
+  const [TaskStatus, setTaskStatus] = useState('')
+ 
+
+  useEffect(() => {
+    GetAllTaskTimeSheetData()
+  }, [])
+
+  useEffect(() => {
+    getMasterStatusData()
+    if(getRowData && getRowData.time){
+      const time = getRowData.time.split(":")
+      setTotalTime({hours:time[0],minutes:time[1]})
+      setTaskStatus(getRowData.task_status)
+    }
+  }, [getRowData])
+
+   
+
+  const GetAllTaskTimeSheetData = async () => {
+    const req = { action: "get", job_id: location.state.job_id }
+    const data = { req: req, authToken: token }
+    await dispatch(getAllTaskTimeSheet(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setTaskTimeData(response.data || [])
+        }
+        else {
+          setTaskTimeData([])
+        }
+      })
+      .catch((error) => {
+        console.log("error", error)
+      })
+  }
+
+  const handleTimeSheetView = async (row) => {
+    setRowData(row)
+    const req = { action: "get", job_id: row.job_id }
+    const data = { req: req, authToken: token }
+    await dispatch(JobTimeSheetAction(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setJobTimeData(response.data || [])
+        }
+        else {
+          setJobTimeData([])
+        }
+      })
+      .catch((error) => {
+        console.log("error", error)
+      })
+  }
+
+  const getMasterStatusData = async () => {
+    const req = { action: "get" }
+    const data = { req: req, authToken: token }
+    await dispatch(MasterStatusData(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setMasterStatusDataArr(response.data || [])
+        }
+        else {
+          setMasterStatusDataArr([])
+        }
+      })
+      .catch((error) => {
+        console.log("error", error)
+      })
+  }
+
+  const handleSubmit = async () => {
+    const req = {
+      action: "updateTaskTimeSheetStatus",
+      id: getRowData?.id,
+      time: TotalTime.hours + ":" + TotalTime.minutes,
+      task_status: Number(TaskStatus)
+    }
+    const data = { req: req, authToken: token }
+    await dispatch(JobTimeSheetAction(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          GetAllTaskTimeSheetData()
+          sweatalert.fire({
+            icon: 'success',
+            title: response.message,
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 1500
+          })
+          setTimeout(() => {
+            setViewtimesheet(false)
+            
+          }, 1500)
+        }
+        else {
+          sweatalert.fire({
+            icon: 'error',
+            title: response.message,
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 1500
+          })
+        }
+      })
+      .catch((error) => {
+        console.log("error", error)
+      })
+
+  }
+
+
 
   const columns = [
     {
-      name: "Trading Name",
-      selector: (row) => row.TradingName,
+      name: "Task Name",
+      selector: (row) => row.task_name || '-',
       sortable: true,
     },
-    { name: "Customer Code", selector: (row) => row.Code, sortable: true },
     {
-      name: "Customer Name",
-      selector: (row) => row.CustomerName,
+      name: "Service Type",
+      selector: (row) => row.service_name || '-',
+      sortable: true
+    },
+    {
+      name: "Job Type",
+      selector: (row) => row.job_type_type || '-',
       sortable: true,
     },
+    {
+      name: "Task Status",
+      selector: (row) => row.task_status_name || '-',
+      sortable: true,
+    },
+    {
+      name: "Time",
+      selector: (row) => row.time ? row.time.split(":")[0]+"h "+row.time.split(":")[1]+"m"  : '-' ,
+      sortable: true,
+    },
+
+    
+   
 
     {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="edit-icon" onClick={() => setViewtimesheet(true)}>
+          <button className="edit-icon" onClick={() => { handleTimeSheetView(row); setViewtimesheet(true) }}>
             <i className="fa fa-eye fs-6 text-secondary" />
           </button>
         </div>
@@ -51,10 +181,6 @@ const TaskTimesheet = () => {
     },
   ];
 
-  // Correctly defined state
-  const [addjobtimesheet, setAddjobtimesheet] = useState(false);
-  const [addtask, setAddtask] = useState(false);
-  const [viewtimesheet, setViewtimesheet] = useState(false);
 
   return (
     <>
@@ -86,7 +212,7 @@ const TaskTimesheet = () => {
         </div>
 
         <div className="datatable-wrapper">
-          <Datatable filter={true} columns={columns} data={data} />
+          <Datatable filter={true} columns={columns} data={taskTimeData} />
         </div>
       </div>
       <CommonModal
@@ -303,16 +429,19 @@ const TaskTimesheet = () => {
         size="md"
         title="View Timesheet"
         cancel_btn='true'
-        hideBtn={true}
+        btn_name="Save"
+        hideBtn={false}
         handleClose={() => {
           setViewtimesheet(false);
-          // formik.resetForm();
+
         }}
+
+        Submit_Function={handleSubmit}
       >
         <div className="row">
           <div className="col-md-12">
             <div className="card-body">
-              <div className="row">
+              {/* <div className="row">
                 <div className="col-md-4">
                   <label htmlFor="customername-field" className="form-label">
                     Job Name
@@ -321,7 +450,7 @@ const TaskTimesheet = () => {
                 <div className="col-md-8">
                   <span className="text-muted">Year End Accounting</span>
                 </div>
-              </div>
+              </div> */}
               <div className="row">
                 <div className="col-md-4">
                   <label htmlFor="customername-field" className="form-label">
@@ -329,10 +458,11 @@ const TaskTimesheet = () => {
                   </label>
                 </div>
                 <div className="col-md-8">
-                  <span className="text-muted">Job-001</span>
+
+                  <span className="text-muted">{jobTimeData && jobTimeData[0] && jobTimeData[0].job_code_id}</span>
                 </div>
               </div>
-              <div className="row">
+              {/* <div className="row">
                 <div className="col-md-4">
                   <label htmlFor="customername-field" className="form-label">
                     Message
@@ -343,7 +473,7 @@ const TaskTimesheet = () => {
                     This Task is Completed on 31st March 2023 by Nirav Patel
                   </span>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
           <div className="col-md-12 ">
@@ -361,9 +491,12 @@ const TaskTimesheet = () => {
                           <input
                             type="text"
                             className="form-control"
-                            placeholder={10}
+
                             aria-label="Recipient's username"
                             aria-describedby="basic-addon2"
+                            onChange={(e) => setTotalTime({ ...TotalTime, hours: e.target.value })}
+                            value={TotalTime.hours}
+                            placeholder="Hours"
                           />
                           <span className="input-group-text" id="basic-addon2">
                             Hours
@@ -375,9 +508,18 @@ const TaskTimesheet = () => {
                           <input
                             type="text"
                             className="form-control"
-                            placeholder={10}
+
                             aria-label="Recipient's username"
                             aria-describedby="basic-addon2"
+                            placeholder="Minutes"
+                           onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                              setTotalTime({ ...TotalTime, minutes: e.target.value });
+                            }
+                            }}
+
+                            value={TotalTime.minutes}
                           />
                           <span className="input-group-text" id="basic-addon2">
                             Minutes
@@ -396,23 +538,18 @@ const TaskTimesheet = () => {
                         data-trigger=""
                         name="status-field"
                         id="status-field"
+                        onChange={(e) => setTaskStatus(e.target.value)}
+                        value={TaskStatus}
                       >
-                        <option value="" selected="">
-                          {" "}
-                          Select Status
-                        </option>
-                        <option value="">To Be started</option>
-                        <option value="">WIP</option>
-                        <option value="">Missing Paperwork</option>
-                        <option value="">Query Responses Awaited</option>
-                        <option value="">To Be Reviewed</option>
-                        <option value="">WIP - Amendment</option>
-                        <option value="">WIP - Fixing Errors</option>
-                        <option value="">Draft Sent for Approval</option>
-                        <option value="">Filed With Companies House</option>
-                        <option value="">
-                          Filed With Companies House and HMRC
-                        </option>
+                        <option value=""> Select Status</option>
+                        {getMasterStatusArr && getMasterStatusArr.map((item) => {
+                          return (
+                            <option value={item.id} key={item.id}>
+                              {item.name}
+                            </option>
+                          );
+                        })}
+
                       </select>
                     </div>
                   </div>
@@ -420,6 +557,7 @@ const TaskTimesheet = () => {
               </div>
             </div>
           </div>
+
         </div>
       </CommonModal>
     </>

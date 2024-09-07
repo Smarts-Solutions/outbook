@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { GET_CLIENT_INDUSTRY, ADD_CLIENT, GET_ALL_CLIENT, EDIT_CLIENT } from "../../../Services/Client/ClientService";
+import { GET_CLIENT_INDUSTRY, ADD_CLIENT, CLIENT_ACTION, EDIT_CLIENT } from "../../../Services/Client/ClientService";
 
 import axios from "axios";
 const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -29,12 +29,12 @@ export const GetClientIndustry = createAsyncThunk("clientIndustry", async (data)
   }
 });
 
-export const Get_All_Client = createAsyncThunk("clientAction", async (data) => {
+export const ClientAction = createAsyncThunk("clientAction", async (data) => {
   const { req, authToken } = data
   try {
     let IP_Data = await GET_IP();
     const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
-    const res = await GET_ALL_CLIENT(updatedReq, authToken);
+    const res = await CLIENT_ACTION(updatedReq, authToken);
 
     return await res;
   } catch (err) {
@@ -80,7 +80,7 @@ const ClientSlice = createSlice({
     getallcompany: [],
     getclientindustry: [],
     addclient: [],
-    getallclient: [],
+    clientaction: [],
     editclient: [],
 
 
@@ -112,14 +112,14 @@ const ClientSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
       })
-      .addCase(Get_All_Client.pending, (state) => {
+      .addCase(ClientAction.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(Get_All_Client.fulfilled, (state, action) => {
+      .addCase(ClientAction.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.getallclient = action.payload;
+        state.clientaction = action.payload;
       })
-      .addCase(Get_All_Client.rejected, (state) => {
+      .addCase(ClientAction.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       })
