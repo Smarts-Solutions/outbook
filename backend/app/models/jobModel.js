@@ -408,58 +408,119 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
 }
 
 const getJobByCustomer = async (job) => {
-  const { customer_id } = job;
+  const { customer_id ,StaffUserId } = job;
   try {
-    const query = `
-     SELECT 
-     jobs.id AS job_id,
-     jobs.job_id AS job_code_id,
-     job_types.type AS job_type_name,
-     customer_contact_details.id AS account_manager_officer_id,
-     customer_contact_details.first_name AS account_manager_officer_first_name,
-     customer_contact_details.last_name AS account_manager_officer_last_name,
-     clients.trading_name AS client_trading_name,
-     jobs.client_job_code AS client_job_code,
-     jobs.invoiced AS invoiced,
 
-     staffs.id AS allocated_id,
-     staffs.first_name AS allocated_first_name,
-     staffs.last_name AS allocated_last_name,
+    const [ExistStaff] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "'+StaffUserId+'" LIMIT 1');
+    console.log("ExistStaff ", ExistStaff)
+    let result = []
+    if(ExistStaff.length>0){
+      if(ExistStaff[0].role_id == 3){
 
-     staffs2.id AS reviewer_id,
-     staffs2.first_name AS reviewer_first_name,
-     staffs2.last_name AS reviewer_last_name,
-
-     staffs3.id AS outbooks_acount_manager_id,
-     staffs3.first_name AS outbooks_acount_manager_first_name,
-     staffs3.last_name AS outbooks_acount_manager_last_name
-
-     FROM 
-     jobs
-     LEFT JOIN 
-     customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-     LEFT JOIN 
-     clients ON jobs.client_id = clients.id
-     LEFT JOIN 
-     customers ON jobs.customer_id = customers.id
-     LEFT JOIN 
-     job_types ON jobs.job_type_id = job_types.id
-     LEFT JOIN 
-     services ON jobs.service_id = services.id
-     LEFT JOIN 
-     staffs ON jobs.allocated_to = staffs.id
-     LEFT JOIN 
-     staffs AS staffs2 ON jobs.reviewer = staffs2.id
-     LEFT JOIN 
-     staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-     WHERE 
-     jobs.customer_id = customers.id AND 
-     jobs.customer_id = ?
-     ORDER BY 
-      jobs.id DESC;
-     `;
-    const [rows] = await pool.execute(query, [customer_id]);
-    return { status: true, message: 'Success.', data: rows };
+        const query = `
+        SELECT 
+        jobs.id AS job_id,
+        jobs.job_id AS job_code_id,
+        job_types.type AS job_type_name,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+   
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+   
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+   
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name
+   
+        FROM 
+        jobs
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN 
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        services ON jobs.service_id = services.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        WHERE 
+        jobs.customer_id = customers.id AND 
+        jobs.allocated_to = ?
+        ORDER BY 
+         jobs.id DESC;
+        `;
+       const [rows] = await pool.execute(query, [ExistStaff[0].id]);
+       result = rows
+      }else{
+        const query = `
+        SELECT 
+        jobs.id AS job_id,
+        jobs.job_id AS job_code_id,
+        job_types.type AS job_type_name,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+   
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+   
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+   
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name
+   
+        FROM 
+        jobs
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN 
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        services ON jobs.service_id = services.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        WHERE 
+        jobs.customer_id = customers.id AND 
+        jobs.customer_id = ?
+        ORDER BY 
+         jobs.id DESC;
+        `;
+       const [rows] = await pool.execute(query, [customer_id]);
+       result = rows
+      }
+    }
+    return { status: true, message: 'Success.', data: result };
   } catch (error) {
     console.log("err -", error)
     return { status: false, message: 'Error getting job.' };
@@ -470,8 +531,6 @@ const getJobByCustomer = async (job) => {
 
 const getJobByClient = async (job) => {
   const { client_id , StaffUserId } = job;
-  console.log("client_id ", client_id)
-  console.log("StaffUserId ", StaffUserId)
   try {
   const [ExistStaff] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "'+StaffUserId+'" LIMIT 1');
   console.log("ExistStaff ", ExistStaff)
