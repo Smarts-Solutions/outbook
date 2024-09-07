@@ -34,6 +34,12 @@ const ClientList = () => {
     setActiveTab(e);
   };
 
+  useEffect(() => {
+    getCheckListData();
+    GetAllClientData();
+    JobDetails();
+  }, []);
+
   let tabs = [
     { id: "client", label: "Client" },
     ...(ClientData && ClientData.length > 0
@@ -254,11 +260,7 @@ const ClientList = () => {
       });
   };
 
-  useEffect(() => {
-    getCheckListData();
-    GetAllClientData();
-    JobDetails();
-  }, []);
+ 
 
   const getCheckListData = async () => {
     const req = { action: "get", customer_id: location.state.id };
