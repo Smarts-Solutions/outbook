@@ -40,14 +40,6 @@ const Information = ({ id, pageStatus }) => {
   const [getAccountMangerIdErr, setAccountMangerIdErr] = useState("");
   const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
   const [contacts1, setContacts1] = useState([]);
-
-  useEffect(() => {
-    CountryData();
-    fetchStaffData();
-    GetCustomerDetails();
-    CustomerPersonRoleData();
-  }, []);
-
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     tradingName: "",
     tradingAddress: "",
@@ -129,6 +121,157 @@ const Information = ({ id, pageStatus }) => {
     },
   ]);
 
+
+
+  useEffect(() => {
+    CountryData();
+    fetchStaffData();
+    GetCustomerDetails();
+    CustomerPersonRoleData();
+  }, []);
+  useEffect(() => {
+    Get_Company();
+  }, [searchItem]);
+
+  useEffect(() => {
+    FilterSearchDetails();
+  }, [searchItem]);
+
+  useEffect(() => {
+    setCustomerType(id.customer_type);
+    setManagerType(id.account_manager_id);
+
+    if (customerDetails && customerDetails) {
+      if (id.customer_type == "1") {
+        setSoleTraderDetails((prevState) => ({
+          ...prevState,
+          tradingName:
+            customerDetails.customer && customerDetails.customer.trading_name,
+          tradingAddress:
+            customerDetails.customer &&
+            customerDetails.customer.trading_address,
+          vatRegistered:
+            customerDetails.customer && customerDetails.customer.vat_registered,
+          vatNumber:
+            customerDetails.customer && customerDetails.customer.vat_number,
+          website: customerDetails.customer && customerDetails.customer.website,
+          first_name:
+            customerDetails.contact_details &&
+            customerDetails.contact_details[0].first_name,
+          last_name:
+            customerDetails.contact_details &&
+            customerDetails.contact_details[0].last_name,
+          phone:
+            customerDetails.contact_details &&
+            customerDetails.contact_details[0].phone,
+          email:
+            customerDetails.contact_details &&
+            customerDetails.contact_details[0].email,
+          residentialAddress:
+            customerDetails.contact_details &&
+            customerDetails.contact_details[0].residential_address,
+          phone_code:
+            customerDetails.contact_details &&
+            customerDetails.contact_details[0].phone_code,
+          contact_id:
+            customerDetails.contact_details &&
+            customerDetails.contact_details[0].contact_id,
+        }));
+      }
+      if (id.customer_type == "2") {
+        setCompanyDetails((prevState) => ({
+          ...prevState,
+          CompanyName:
+            customerDetails.company_details &&
+            customerDetails.company_details.company_name,
+          EntityType:
+            customerDetails.company_details &&
+            customerDetails.company_details.entity_type,
+          CompanyStatus:
+            customerDetails.company_details &&
+            customerDetails.company_details.company_status,
+          CompanyNumber:
+            customerDetails.company_details &&
+            customerDetails.company_details.company_number,
+          RegisteredOfficeAddress:
+            customerDetails.company_details &&
+            customerDetails.company_details.registered_office_address,
+          IncorporationDate:
+            customerDetails.company_details &&
+              customerDetails.company_details.incorporation_date
+              ? customerDetails.company_details &&
+              customerDetails.company_details.incorporation_date
+              : "",
+          IncorporationIn:
+            customerDetails.company_details &&
+            customerDetails.company_details.incorporation_in,
+
+          VATRegistered:
+            customerDetails.customer && customerDetails.customer.vat_registered,
+          VATNumber:
+            customerDetails.customer && customerDetails.customer.vat_number,
+          Website: customerDetails.customer && customerDetails.customer.website,
+
+          TradingName:
+            customerDetails.customer && customerDetails.customer.trading_name,
+          TradingAddress:
+            customerDetails.customer &&
+            customerDetails.customer.trading_address,
+        }));
+        setContacts(customerDetails.contact_details);
+      }
+      if (id.customer_type == "3") {
+        setPartnershipDetails((prevState) => ({
+          ...prevState,
+          TradingName:
+            customerDetails.customer && customerDetails.customer.trading_name,
+          TradingAddress:
+            customerDetails.customer &&
+            customerDetails.customer.trading_address,
+          VATRegistered:
+            customerDetails.customer && customerDetails.customer.vat_registered,
+          VATNumber:
+            customerDetails.customer && customerDetails.customer.vat_number,
+          Website: customerDetails.customer && customerDetails.customer.website,
+        }));
+        setContacts1(customerDetails && customerDetails.contact_details);
+
+        if (customerDetails && customerDetails.contact_details?.length > 0) {
+          const newErrors =
+            customerDetails.contact_details &&
+            customerDetails.contact_details.map((contact) => ({
+              first_name: "",
+              last_name: "",
+              customer_contact_person_role_id: "",
+              phone: "",
+              email: "",
+            }));
+          setContactsErrors(newErrors);
+        }
+      }
+    }
+  }, [customerDetails]);
+
+
+  useEffect(() => {
+    if (getSearchDetails && getSearchDetails.length > 0) {
+      setCompanyDetails((prevState) => ({
+        ...prevState,
+        CompanyName: getSearchDetails[0].title,
+        EntityType: getSearchDetails[0].company_type,
+        CompanyStatus: getSearchDetails[0].company_status,
+        CompanyNumber: getSearchDetails[0].company_number,
+        RegisteredOfficeAddress: getSearchDetails[0].address_snippet,
+        IncorporationDate: getSearchDetails[0].date_of_creation
+          ? getSearchDetails[0].date_of_creation
+          : "",
+        IncorporationIn: getSearchDetails[0].description,
+      }));
+    }
+  }, [getSearchDetails]);
+
+
+
   const handleAddContact = () => {
     setContacts([
       ...contacts,
@@ -162,22 +305,7 @@ const Information = ({ id, pageStatus }) => {
     setErrors(newErrors);
   };
 
-  useEffect(() => {
-    if (getSearchDetails && getSearchDetails.length > 0) {
-      setCompanyDetails((prevState) => ({
-        ...prevState,
-        CompanyName: getSearchDetails[0].title,
-        EntityType: getSearchDetails[0].company_type,
-        CompanyStatus: getSearchDetails[0].company_status,
-        CompanyNumber: getSearchDetails[0].company_number,
-        RegisteredOfficeAddress: getSearchDetails[0].address_snippet,
-        IncorporationDate: getSearchDetails[0].date_of_creation
-          ? getSearchDetails[0].date_of_creation
-          : "",
-        IncorporationIn: getSearchDetails[0].description,
-      }));
-    }
-  }, [getSearchDetails]);
+
 
   const handleAddContact1 = () => {
     setContacts1([
@@ -287,135 +415,73 @@ const Information = ({ id, pageStatus }) => {
         return;
       }
     }
-    validate1();
+    validate1(name, value);
     setSoleTraderDetails({ ...getSoleTraderDetails, [name]: value });
   };
 
-  const validate1 = () => {
-    const newErrors = {};
-    for (const key in getSoleTraderDetails) {
-      if (!getSoleTraderDetails[key]) {
-        if (key == "IndustryType")
-          newErrors[key] = EDIT_CUSTOMER.SELECT_CLIENT_INDUSTRIES;
-        else if (key == "tradingName")
-          newErrors[key] = EDIT_CUSTOMER.ENTER_TRADING_NAME;
-        else if (key == "first_name")
-          newErrors[key] = EDIT_CUSTOMER.ENTER_FIRST_NAME;
-        else if (key == "last_name") newErrors[key] = EDIT_CUSTOMER.LAST_NAME;
-        else if (key == "email") newErrors[key] = EDIT_CUSTOMER.EMAIL;
-        else if (key == "residentialAddress")
-          newErrors[key] = EDIT_CUSTOMER.RESIDENTIOAL_ADDRESS;
-      } else if (key == "email" && !Email_regex(getSoleTraderDetails[key])) {
-        newErrors[key] = EDIT_CUSTOMER.invalidEmail;
-      } else if (
-        key == "phone" &&
-        !/^\d{9,12}$/.test(getSoleTraderDetails[key])
-      ) {
-        newErrors[key] = EDIT_CUSTOMER.invalidPhone;
-      }
+
+  const validate1 = (field, value) => {
+    const newErrors = { ...errors1 };
+    if (!value) {
+      if (field === "IndustryType")
+        newErrors[field] = EDIT_CUSTOMER.SELECT_CLIENT_INDUSTRIES;
+      else if (field === "tradingName")
+        newErrors[field] = EDIT_CUSTOMER.ENTER_TRADING_NAME;
+      else if (field === "first_name")
+        newErrors[field] = EDIT_CUSTOMER.ENTER_FIRST_NAME;
+      else if (field === "last_name")
+        newErrors[field] = EDIT_CUSTOMER.LAST_NAME;
+      else if (field === "email")
+        newErrors[field] = EDIT_CUSTOMER.EMAIL;
+      else if (field === "residentialAddress")
+        newErrors[field] = EDIT_CUSTOMER.RESIDENTIOAL_ADDRESS;
     }
+    else if (field === "email" && !Email_regex(value)) {
+      newErrors[field] = EDIT_CUSTOMER.invalidEmail;
+    }
+    else if (field === "phone" && !/^\d{9,12}$/.test(value)) {
+      newErrors[field] = EDIT_CUSTOMER.invalidPhone;
+    }
+    else {
+      delete newErrors[field];
+    }
+
     setErrors1(newErrors);
-    return Object.keys(newErrors).length === 0 ? true : false;
+
+    return Object.keys(newErrors).length === 0;
   };
+
 
   const handleSubmit = async () => {
-    if (customerType == 1 && validate1() && ManagerType != "") {
-      const req = {
-        customer_id: id.id,
-        pageStatus: "1",
-        customer_type: "1",
-        staff_id: id.staff_id,
-        account_manager_id: id.account_manager_id,
-        trading_name: getSoleTraderDetails.tradingName,
-        customer_code: id.customer_code,
-        trading_address: getSoleTraderDetails.tradingAddress,
-        vat_registered: getSoleTraderDetails.vatRegistered,
-        vat_number: getSoleTraderDetails.vatNumber,
-        website: getSoleTraderDetails.website,
-        contactDetails: [
-          {
-            contact_id: getSoleTraderDetails.contact_id,
-            customer_contact_person_role_id: null,
-            customer_contact_person_role_name: null,
-            first_name: getSoleTraderDetails.first_name,
-            last_name: getSoleTraderDetails.last_name,
-            email: getSoleTraderDetails.email,
-            phone: getSoleTraderDetails.phone,
-            residential_address: getSoleTraderDetails.residentialAddress,
-            phone_code: getSoleTraderDetails.phone_code,
-          },
-        ],
-      };
-      await dispatch(Edit_Customer({ req, authToken: token }))
-        .unwrap()
-        .then((response) => {
-          if (response.status) {
-            next(id.id);
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: response.message,
-              timerProgressBar: true,
-              timer: 1500,
-            });
-          }
-        });
-    }
-    if (customerType == 2 && validate2() && ManagerType != "") {
-      let formIsValid = true;
-      const newErrors =
-        contacts &&
-        contacts.map((contact, index) => {
-          const error = {
-            first_name: contact.first_name
-              ? ""
-              : EDIT_CUSTOMER.REQUIRED_FIRST_NAME,
-            last_name: contact.last_name
-              ? ""
-              : EDIT_CUSTOMER.REQUIRES_LAST_NAME,
-            email:
-              contact.email === ""
-                ? EDIT_CUSTOMER.REQUIRE_EMAIL
-                : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-                ? ""
-                : EDIT_CUSTOMER.VALID_EMAIL,
-          };
 
-          if (
-            error.first_name ||
-            error.last_name ||
-            error.customer_contact_person_role_id ||
-            error.phone ||
-            error.email
-          ) {
-            formIsValid = false;
-          }
-          return error;
-        });
-      setErrors(newErrors);
-      if (formIsValid) {
+    if (customerType == 1 && ManagerType != "") {
+      if (validate1()) {
         const req = {
+          customer_id: id.id,
           pageStatus: "1",
-          customer_type: "2",
+          customer_type: "1",
           staff_id: id.staff_id,
           account_manager_id: id.account_manager_id,
-          customer_id: id.id,
+          trading_name: getSoleTraderDetails.tradingName,
           customer_code: id.customer_code,
-          company_name: getCompanyDetails.CompanyName,
-          entity_type: getCompanyDetails.EntityType,
-          company_status: getCompanyDetails.CompanyStatus,
-          company_number: getCompanyDetails.CompanyNumber,
-          registered_office_address: getCompanyDetails.RegisteredOfficeAddress,
-          incorporation_date: getCompanyDetails.IncorporationDate,
-          incorporation_in: getCompanyDetails.IncorporationIn,
-          vat_registered: getCompanyDetails.VATRegistered,
-          vat_number: getCompanyDetails.VATNumber,
-          website: getCompanyDetails.Website,
-          trading_name: getCompanyDetails.TradingName,
-          trading_address: getCompanyDetails.TradingAddress,
-          contactDetails: contacts,
+          trading_address: getSoleTraderDetails.tradingAddress,
+          vat_registered: getSoleTraderDetails.vatRegistered,
+          vat_number: getSoleTraderDetails.vatNumber,
+          website: getSoleTraderDetails.website,
+          contactDetails: [
+            {
+              contact_id: getSoleTraderDetails.contact_id,
+              customer_contact_person_role_id: null,
+              customer_contact_person_role_name: null,
+              first_name: getSoleTraderDetails.first_name,
+              last_name: getSoleTraderDetails.last_name,
+              email: getSoleTraderDetails.email,
+              phone: getSoleTraderDetails.phone,
+              residential_address: getSoleTraderDetails.residentialAddress,
+              phone_code: getSoleTraderDetails.phone_code,
+            },
+          ],
         };
-
         await dispatch(Edit_Customer({ req, authToken: token }))
           .unwrap()
           .then((response) => {
@@ -431,73 +497,193 @@ const Information = ({ id, pageStatus }) => {
             }
           });
       }
-    }
-    if (customerType == 3 && validate3() && ManagerType != "") {
-      let formIsValid = true;
-      const newErrors =
-        contacts1 &&
-        contacts1.map((contact, index) => {
-          const error = {
-            first_name: contact.first_name
-              ? ""
-              : EDIT_CUSTOMER.REQUIRED_FIRST_NAME,
-            last_name: contact.last_name
-              ? ""
-              : EDIT_CUSTOMER.REQUIRES_LAST_NAME,
+      else {
 
-            email:
-              contact.email === ""
-                ? EDIT_CUSTOMER.REQUIRE_EMAIL
-                : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+        console.log("errors1", errors1);
+        scrollToFirstError(errors1);
+      }
+    }
+    if (customerType == 2 && ManagerType != "") {
+      if (validate2()) {
+        let formIsValid = true;
+        const newErrors =
+          contacts &&
+          contacts.map((contact, index) => {
+            const error = {
+              first_name: contact.first_name
                 ? ""
-                : EDIT_CUSTOMER.VALID_EMAIL,
+                : EDIT_CUSTOMER.REQUIRED_FIRST_NAME,
+              last_name: contact.last_name
+                ? ""
+                : EDIT_CUSTOMER.REQUIRES_LAST_NAME,
+              email:
+                contact.email === ""
+                  ? EDIT_CUSTOMER.REQUIRE_EMAIL
+                  : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+                    ? ""
+                    : EDIT_CUSTOMER.VALID_EMAIL,
+            };
+
+            if (
+              error.first_name ||
+              error.last_name ||
+              error.customer_contact_person_role_id ||
+              error.phone ||
+              error.email
+            ) {
+              formIsValid = false;
+            }
+            return error;
+          });
+        setErrors(newErrors);
+        if (formIsValid) {
+          const req = {
+            pageStatus: "1",
+            customer_type: "2",
+            staff_id: id.staff_id,
+            account_manager_id: id.account_manager_id,
+            customer_id: id.id,
+            customer_code: id.customer_code,
+            company_name: getCompanyDetails.CompanyName,
+            entity_type: getCompanyDetails.EntityType,
+            company_status: getCompanyDetails.CompanyStatus,
+            company_number: getCompanyDetails.CompanyNumber,
+            registered_office_address: getCompanyDetails.RegisteredOfficeAddress,
+            incorporation_date: getCompanyDetails.IncorporationDate,
+            incorporation_in: getCompanyDetails.IncorporationIn,
+            vat_registered: getCompanyDetails.VATRegistered,
+            vat_number: getCompanyDetails.VATNumber,
+            website: getCompanyDetails.Website,
+            trading_name: getCompanyDetails.TradingName,
+            trading_address: getCompanyDetails.TradingAddress,
+            contactDetails: contacts,
           };
 
-          if (
-            error.first_name ||
-            error.last_name ||
-            error.customer_contact_person_role_id ||
-            error.phone ||
-            error.email
-          ) {
-            formIsValid = false;
-          }
-          return error;
-        });
-      setContactsErrors(newErrors);
-      if (formIsValid) {
-        const req = {
-          customer_id: id.id,
-          pageStatus: "1",
-          customer_type: "3",
-          staff_id: id.staff_id,
-          account_manager_id: id.account_manager_id,
-          trading_name: getPartnershipDetails.TradingName,
-          customer_code: id.customer_code,
-          trading_address: getPartnershipDetails.TradingAddress,
-          vat_registered: getPartnershipDetails.VATRegistered,
-          vat_number: getPartnershipDetails.VATNumber,
-          website: getPartnershipDetails.Website,
-          contactDetails: contacts1,
-        };
+          await dispatch(Edit_Customer({ req, authToken: token }))
+            .unwrap()
+            .then((response) => {
+              if (response.status) {
+                next(id.id);
+              } else {
+                Swal.fire({
+                  icon: "error",
+                  title: response.message,
+                  timerProgressBar: true,
+                  timer: 1500,
+                });
+              }
+            });
+        }
+        else {
 
-        await dispatch(Edit_Customer({ req, authToken: token }))
-          .unwrap()
-          .then((response) => {
-            if (response.status) {
-              next(id.id);
-            } else {
-              Swal.fire({
-                icon: "error",
-                title: response.message,
-                timerProgressBar: true,
-                timer: 1500,
-              });
+          scrollToFirstError1(errors);
+        }
+      }
+      else {
+        scrollToFirstError(errors2);
+      }
+    }
+    if (customerType == 3 && ManagerType != "") {
+      if (validate3()) {
+        let formIsValid = true;
+        const newErrors =
+          contacts1 &&
+          contacts1.map((contact, index) => {
+            const error = {
+              first_name: contact.first_name
+                ? ""
+                : EDIT_CUSTOMER.REQUIRED_FIRST_NAME,
+              last_name: contact.last_name
+                ? ""
+                : EDIT_CUSTOMER.REQUIRES_LAST_NAME,
+
+              email:
+                contact.email === ""
+                  ? EDIT_CUSTOMER.REQUIRE_EMAIL
+                  : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+                    ? ""
+                    : EDIT_CUSTOMER.VALID_EMAIL,
+            };
+
+            if (
+              error.first_name ||
+              error.last_name ||
+              error.customer_contact_person_role_id ||
+              error.phone ||
+              error.email
+            ) {
+              formIsValid = false;
             }
+            return error;
           });
+        setContactsErrors(newErrors);
+        if (formIsValid) {
+          const req = {
+            customer_id: id.id,
+            pageStatus: "1",
+            customer_type: "3",
+            staff_id: id.staff_id,
+            account_manager_id: id.account_manager_id,
+            trading_name: getPartnershipDetails.TradingName,
+            customer_code: id.customer_code,
+            trading_address: getPartnershipDetails.TradingAddress,
+            vat_registered: getPartnershipDetails.VATRegistered,
+            vat_number: getPartnershipDetails.VATNumber,
+            website: getPartnershipDetails.Website,
+            contactDetails: contacts1,
+          };
+
+          await dispatch(Edit_Customer({ req, authToken: token }))
+            .unwrap()
+            .then((response) => {
+              if (response.status) {
+                next(id.id);
+              } else {
+                Swal.fire({
+                  icon: "error",
+                  title: response.message,
+                  timerProgressBar: true,
+                  timer: 1500,
+                });
+              }
+            });
+        }
+        else {
+          scrollToFirstError1(contactsErrors);
+        }
+      }
+      else {
+        scrollToFirstError(errors3);
       }
     }
   };
+
+  const scrollToFirstError = (errors) => {
+
+    const errorField = Object.keys(errors)[0];
+    const errorElement = document.getElementById(errorField);
+    if (errorElement) {
+      errorElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const scrollToFirstError1 = (errors) => {
+    errors.forEach((errorObj, index) => {
+      for (const field in errorObj) {
+        if (errorObj[field]) {
+          const fieldId = `${field}-${index}`;
+          const errorElement = document.getElementById(fieldId);
+          console.log("fieldId", fieldId);
+
+          if (errorElement) {
+            errorElement.scrollIntoView({ behavior: 'smooth' });
+          }
+          return;
+        }
+      }
+    });
+  };
+
 
   const handleChange2 = (e) => {
     const { name, value } = e.target;
@@ -506,34 +692,37 @@ const Information = ({ id, pageStatus }) => {
         return;
       }
     }
-    validate2();
+    validate2(name, value);
     setCompanyDetails({ ...getCompanyDetails, [name]: value });
   };
 
-  const validate2 = () => {
-    const newErrors = {};
-    for (const key in getCompanyDetails) {
-      if (!getCompanyDetails[key]) {
-        if (key == "CompanyName") newErrors[key] = EDIT_CUSTOMER.COMPANY_NAME;
-        else if (key == "EntityType")
-          newErrors[key] = EDIT_CUSTOMER.ENTITY_TYPE;
-        else if (key == "CompanyStatus")
-          newErrors[key] = EDIT_CUSTOMER.COMPANY_STATUS;
-        else if (key == "CompanyNumber")
-          newErrors[key] = EDIT_CUSTOMER.COMPANY_NUMBER;
-        else if (key == "RegisteredOfficeAddress")
-          newErrors[key] = EDIT_CUSTOMER.REGISTRER_OFFICE_ADDRESS;
-        else if (key == "IncorporationDate")
-          newErrors[key] = EDIT_CUSTOMER.INCORPORATION_DATE;
-        else if (key == "IncorporationIn")
-          newErrors[key] = EDIT_CUSTOMER.INCORPORATION_IN;
-        else if (key == "TradingName")
-          newErrors[key] = EDIT_CUSTOMER.ENTER_TRADING_NAME;
-      }
+  const validate2 = (name, value) => {
+    const newErrors = { ...errors2 };
+    if (!value) {
+      if (name === "CompanyName")
+        newErrors[name] = EDIT_CUSTOMER.COMPANY_NAME;
+      else if (name === "EntityType")
+        newErrors[name] = EDIT_CUSTOMER.ENTITY_TYPE;
+      else if (name === "CompanyStatus")
+        newErrors[name] = EDIT_CUSTOMER.COMPANY_STATUS;
+      else if (name === "CompanyNumber")
+        newErrors[name] = EDIT_CUSTOMER.COMPANY_NUMBER;
+      else if (name === "RegisteredOfficeAddress")
+        newErrors[name] = EDIT_CUSTOMER.REGISTRER_OFFICE_ADDRESS;
+      else if (name === "IncorporationDate")
+        newErrors[name] = EDIT_CUSTOMER.INCORPORATION_DATE;
+      else if (name === "IncorporationIn")
+        newErrors[name] = EDIT_CUSTOMER.INCORPORATION_IN;
+      else if (name === "TradingName")
+        newErrors[name] = EDIT_CUSTOMER.ENTER_TRADING_NAME;
+    }
+    else {
+      delete newErrors[name];
     }
     setErrors2(newErrors);
     return Object.keys(newErrors).length === 0 ? true : false;
   };
+
 
   const handleChange = (index, field, value) => {
     const newContacts =
@@ -581,8 +770,8 @@ const Information = ({ id, pageStatus }) => {
           value === ""
             ? ""
             : /^\d{9,12}$/.test(value)
-            ? ""
-            : EDIT_CUSTOMER.PHONE_VALIDATION;
+              ? ""
+              : EDIT_CUSTOMER.PHONE_VALIDATION;
         break;
 
       default:
@@ -599,27 +788,26 @@ const Information = ({ id, pageStatus }) => {
         return;
       }
     }
-    validate3();
+    validate3(name, value);
     setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
   };
 
-  const validate3 = () => {
-    const newErrors = {};
-    for (const key in getPartnershipDetails) {
-      if (!getPartnershipDetails[key]) {
-        if (key === "ClientIndustry") {
-          newErrors[key] = EDIT_CUSTOMER.SELECT_CLIENT_INDUSTRIES;
-        } else if (key === "TradingName") {
-          newErrors[key] = EDIT_CUSTOMER.ENTER_TRADING_NAME;
-        }
-      }
+  const validate3 = (name, value) => {
+    const newErrors = { ...errors3 };
+    if (!value) {
+      if (name === "TradingName")
+        newErrors[name] = EDIT_CUSTOMER.ENTER_TRADING_NAME;
+      else if (name === "ClientIndustry")
+        newErrors[name] = EDIT_CUSTOMER.SELECT_CLIENT_INDUSTRIES;
     }
-
+    else {
+      delete newErrors[name];
+    }
     setErrors3(newErrors);
-
     return Object.keys(newErrors).length === 0 ? true : false;
   };
 
+    
   const handleChange4 = (index, field, value) => {
     let newValue = value;
     if (field == EDIT_CUSTOMER.AUTHORISED) {
@@ -672,8 +860,8 @@ const Information = ({ id, pageStatus }) => {
           value === ""
             ? ""
             : /^\d{9,12}$/.test(value)
-            ? ""
-            : EDIT_CUSTOMER.PHONE_VALIDATION;
+              ? ""
+              : EDIT_CUSTOMER.PHONE_VALIDATION;
         break;
 
       default:
@@ -719,151 +907,6 @@ const Information = ({ id, pageStatus }) => {
     if (!string) return "";
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   };
-
-  useEffect(() => {
-    Get_Company();
-  }, [searchItem]);
-
-  useEffect(() => {
-    FilterSearchDetails();
-  }, [searchItem]);
-
-  useEffect(() => {
-    setCustomerType(id.customer_type);
-    setManagerType(id.account_manager_id);
-
-    if (customerDetails && customerDetails) {
-      if (id.customer_type == "1") {
-        setSoleTraderDetails((prevState) => ({
-          ...prevState,
-          tradingName:
-            customerDetails.customer && customerDetails.customer.trading_name,
-          tradingAddress:
-            customerDetails.customer &&
-            customerDetails.customer.trading_address,
-          vatRegistered:
-            customerDetails.customer && customerDetails.customer.vat_registered,
-          vatNumber:
-            customerDetails.customer && customerDetails.customer.vat_number,
-          website: customerDetails.customer && customerDetails.customer.website,
-          first_name:
-            customerDetails.contact_details &&
-            customerDetails.contact_details[0].first_name,
-          last_name:
-            customerDetails.contact_details &&
-            customerDetails.contact_details[0].last_name,
-          phone:
-            customerDetails.contact_details &&
-            customerDetails.contact_details[0].phone,
-          email:
-            customerDetails.contact_details &&
-            customerDetails.contact_details[0].email,
-          residentialAddress:
-            customerDetails.contact_details &&
-            customerDetails.contact_details[0].residential_address,
-          phone_code:
-            customerDetails.contact_details &&
-            customerDetails.contact_details[0].phone_code,
-          contact_id:
-            customerDetails.contact_details &&
-            customerDetails.contact_details[0].contact_id,
-        }));
-      }
-      if (id.customer_type == "2") {
-        setCompanyDetails((prevState) => ({
-          ...prevState,
-          CompanyName:
-            customerDetails.company_details &&
-            customerDetails.company_details.company_name,
-          EntityType:
-            customerDetails.company_details &&
-            customerDetails.company_details.entity_type,
-          CompanyStatus:
-            customerDetails.company_details &&
-            customerDetails.company_details.company_status,
-          CompanyNumber:
-            customerDetails.company_details &&
-            customerDetails.company_details.company_number,
-          RegisteredOfficeAddress:
-            customerDetails.company_details &&
-            customerDetails.company_details.registered_office_address,
-          IncorporationDate:
-            customerDetails.company_details &&
-            customerDetails.company_details.incorporation_date
-              ? customerDetails.company_details &&
-                customerDetails.company_details.incorporation_date
-              : "",
-          IncorporationIn:
-            customerDetails.company_details &&
-            customerDetails.company_details.incorporation_in,
-
-          VATRegistered:
-            customerDetails.customer && customerDetails.customer.vat_registered,
-          VATNumber:
-            customerDetails.customer && customerDetails.customer.vat_number,
-          Website: customerDetails.customer && customerDetails.customer.website,
-
-          TradingName:
-            customerDetails.customer && customerDetails.customer.trading_name,
-          TradingAddress:
-            customerDetails.customer &&
-            customerDetails.customer.trading_address,
-        }));
-        setContacts(customerDetails.contact_details);
-      }
-      if (id.customer_type == "3") {
-        setPartnershipDetails((prevState) => ({
-          ...prevState,
-          TradingName:
-            customerDetails.customer && customerDetails.customer.trading_name,
-          TradingAddress:
-            customerDetails.customer &&
-            customerDetails.customer.trading_address,
-          VATRegistered:
-            customerDetails.customer && customerDetails.customer.vat_registered,
-          VATNumber:
-            customerDetails.customer && customerDetails.customer.vat_number,
-          Website: customerDetails.customer && customerDetails.customer.website,
-        }));
-        setContacts1(customerDetails && customerDetails.contact_details);
-
-        if (customerDetails && customerDetails.contact_details?.length > 0) {
-          const newErrors =
-            customerDetails.contact_details &&
-            customerDetails.contact_details.map((contact) => ({
-              first_name: "",
-              last_name: "",
-              customer_contact_person_role_id: "",
-              phone: "",
-              email: "",
-            }));
-          setContactsErrors(newErrors);
-        }
-      }
-    }
-  }, [customerDetails]);
-
-  useEffect(() => {
-    const firstErrorKey = Object.keys(errors3).find((key) => errors3[key]);
-    if (firstErrorKey && refs.current[firstErrorKey]) {
-      refs.current[firstErrorKey].scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-      refs.current[firstErrorKey].focus();
-    }
-  }, [errors3]);
-
-  useEffect(() => {
-    if (getAccountMangerIdErr && managerSelectRef.current) {
-      managerSelectRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-
-      managerSelectRef.current.focus();
-    }
-  }, [getAccountMangerIdErr]);
 
   return (
     <>
@@ -970,6 +1013,7 @@ const Information = ({ id, pageStatus }) => {
                               <input
                                 type="text"
                                 name="tradingName"
+                                id="tradingName"
                                 className="form-control"
                                 placeholder="Trading Name"
                                 onChange={(e) => handleChange1(e)}
@@ -994,6 +1038,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="form-control"
                                 placeholder="Trading Address"
                                 name="tradingAddress"
+                                id="tradingAddress"
                                 onChange={(e) => handleChange1(e)}
                                 value={getSoleTraderDetails.tradingAddress}
                                 maxLength={200}
@@ -1010,6 +1055,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="form-select "
                                 aria-label="Default select example"
                                 name="vatRegistered"
+                                id="vatRegistered"
                                 value={getSoleTraderDetails.vatRegistered}
                                 onChange={(e) => handleChange1(e)}
                               >
@@ -1035,6 +1081,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="form-control"
                                 placeholder="VAT Number"
                                 name="vatNumber"
+                                id="vatNumber"
                                 value={getSoleTraderDetails.vatNumber}
                                 onChange={(e) => handleChange1(e)}
                                 maxLength={9}
@@ -1049,6 +1096,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="form-control"
                                 placeholder="URL"
                                 name="website"
+                                id="website"
                                 value={getSoleTraderDetails.website}
                                 onChange={(e) => handleChange1(e)}
                                 maxLength={200}
@@ -1080,6 +1128,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="form-control"
                                 placeholder="First Name"
                                 name="first_name"
+                                id="first_name"
                                 value={getSoleTraderDetails.first_name}
                                 onChange={(e) => handleChange1(e)}
                                 maxLength={50}
@@ -1101,6 +1150,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="form-control"
                                 placeholder="Last Name"
                                 name="last_name"
+                                id="last_name"
                                 value={getSoleTraderDetails.last_name}
                                 onChange={(e) => handleChange1(e)}
                                 maxLength={50}
@@ -1121,6 +1171,7 @@ const Information = ({ id, pageStatus }) => {
                                     className="form-select"
                                     onChange={(e) => handleChange1(e)}
                                     name="phone_code"
+                                    id="phone_code"
                                     value={getSoleTraderDetails.phone_code}
                                   >
                                     {countryDataAll &&
@@ -1140,6 +1191,8 @@ const Information = ({ id, pageStatus }) => {
                                     className="form-control"
                                     placeholder="Phone Number"
                                     name="phone"
+                                    id="phone"
+
                                     value={getSoleTraderDetails.phone}
                                     onChange={(e) => handleChange1(e)}
                                     maxLength={12}
@@ -1164,6 +1217,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="form-control"
                                 placeholder="Enter Email ID"
                                 name="email"
+                                id="email"
                                 value={getSoleTraderDetails.email}
                                 onChange={(e) => handleChange1(e)}
                               />
@@ -1186,6 +1240,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="form-control"
                                 placeholder="Residential Address"
                                 name="residentialAddress"
+                                id="residentialAddress"
                                 value={getSoleTraderDetails.residentialAddress}
                                 onChange={(e) => handleChange1(e)}
                               />
@@ -1221,7 +1276,7 @@ const Information = ({ id, pageStatus }) => {
                                   <input
                                     type="text"
                                     className="form-control"
-                                    required
+
                                     placeholder=" Search Company"
                                     name="SearchCompany"
                                     onChange={(e) =>
@@ -1232,7 +1287,7 @@ const Information = ({ id, pageStatus }) => {
                                     style={{ cursor: "pointer" }}
                                   />
                                   {getAllSearchCompany.length > 0 &&
-                                  showDropdown ? (
+                                    showDropdown ? (
                                     <div className="dropdown-list">
                                       {getAllSearchCompany &&
                                         getAllSearchCompany.map(
@@ -1270,6 +1325,7 @@ const Information = ({ id, pageStatus }) => {
                                   className="form-control input_bg"
                                   placeholder="Enter Company Name"
                                   name="CompanyName"
+                                  id="CompanyName"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails.CompanyName}
                                 />
@@ -1291,6 +1347,7 @@ const Information = ({ id, pageStatus }) => {
                                   className="form-control input_bg"
                                   placeholder="Enter Entity Type"
                                   name="EntityType"
+                                  id="EntityType"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails.EntityType}
                                 />
@@ -1312,6 +1369,7 @@ const Information = ({ id, pageStatus }) => {
                                   className="form-control input_bg"
                                   placeholder="Enter Company Status"
                                   name="CompanyStatus"
+                                  id="CompanyStatus"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails.CompanyStatus}
                                 />
@@ -1330,6 +1388,7 @@ const Information = ({ id, pageStatus }) => {
                                 </label>
                                 <input
                                   type="text"
+                                  id="CompanyNumber"
                                   className="form-control input_bg"
                                   placeholder="Enter Company Number"
                                   name="CompanyNumber"
@@ -1355,6 +1414,7 @@ const Information = ({ id, pageStatus }) => {
                                   className="form-control input_bg"
                                   placeholder="Enter Incorporation Date"
                                   name="IncorporationDate"
+                                  id="IncorporationDate"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails.IncorporationDate}
                                 />
@@ -1377,6 +1437,7 @@ const Information = ({ id, pageStatus }) => {
                                   className="form-control input_bg"
                                   placeholder={EDIT_CUSTOMER.INCORPORATION_IN}
                                   name="IncorporationIn"
+                                  id="IncorporationIn"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails.IncorporationIn}
                                 />
@@ -1399,6 +1460,7 @@ const Information = ({ id, pageStatus }) => {
                                   className="form-control input_bg"
                                   placeholder="Suite Winsor & Netwon Building, White Fridrs Avenue, England,HA3 5RN"
                                   name="RegisteredOfficeAddress"
+                                  id="RegisteredOfficeAddress"
                                   onChange={(e) => handleChange2(e)}
                                   value={
                                     getCompanyDetails.RegisteredOfficeAddress
@@ -1419,6 +1481,7 @@ const Information = ({ id, pageStatus }) => {
                                 <select
                                   className="form-select "
                                   name="VATRegistered"
+                                  id="VATRegistered"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails.VATRegistered}
                                 >
@@ -1446,6 +1509,7 @@ const Information = ({ id, pageStatus }) => {
                                     className="form-control "
                                     placeholder="VAT Number"
                                     name="VATNumber"
+                                    id="VATNumber"
                                     onChange={(e) => handleChange2(e)}
                                     value={getCompanyDetails.VATNumber}
                                     maxLength={9}
@@ -1466,6 +1530,7 @@ const Information = ({ id, pageStatus }) => {
                                   className="form-control "
                                   placeholder="URL"
                                   name="Website"
+                                  id="Website"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails.Website}
                                   maxLength={200}
@@ -1496,6 +1561,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="form-control"
                                 placeholder="Trading Name"
                                 name="TradingName"
+                                id="TradingName"
                                 onChange={(e) => handleChange2(e)}
                                 value={getCompanyDetails.TradingName}
                               />
@@ -1517,6 +1583,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="form-control"
                                 placeholder="Trading Address"
                                 name="TradingAddress"
+                                id="TradingAddress"
                                 onChange={(e) => handleChange2(e)}
                                 value={getCompanyDetails.TradingAddress}
                               />
@@ -1833,6 +1900,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="form-control"
                                 placeholder="Trading Name"
                                 name="TradingName"
+                                id="TradingName"
                                 value={getPartnershipDetails.TradingName}
                                 onChange={(e) => handleChange3(e)}
                                 maxLength={100}
@@ -1856,6 +1924,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="form-control"
                                 placeholder="Trading Address"
                                 name="TradingAddress"
+                                id="TradingAddress"
                                 value={getPartnershipDetails.TradingAddress}
                                 onChange={(e) => handleChange3(e)}
                                 maxLength={200}
@@ -1877,6 +1946,7 @@ const Information = ({ id, pageStatus }) => {
                                 <select
                                   className="form-select "
                                   name="VATRegistered"
+                                  id="VATRegistered"
                                   value={getPartnershipDetails.VATRegistered}
                                   onChange={(e) => handleChange3(e)}
                                 >
@@ -1906,6 +1976,7 @@ const Information = ({ id, pageStatus }) => {
                                   className="form-control "
                                   placeholder="VAT Number"
                                   name="VATNumber"
+                                  id="VATNumber"
                                   value={getPartnershipDetails.VATNumber}
                                   onChange={(e) => handleChange3(e)}
                                   maxLength={9}
@@ -1926,6 +1997,7 @@ const Information = ({ id, pageStatus }) => {
                                 className="form-control "
                                 placeholder="URL"
                                 name="Website"
+                                id="Website"
                                 value={getPartnershipDetails.Website}
                                 onChange={(e) => handleChange3(e)}
                                 maxLength={200}
@@ -2001,6 +2073,7 @@ const Information = ({ id, pageStatus }) => {
                                             className="form-control"
                                             placeholder="First Name"
                                             name="first_name"
+                                            id={`first_name-${index}`}
                                             value={contact.first_name}
                                             onChange={(e) =>
                                               handleChange4(
@@ -2012,13 +2085,13 @@ const Information = ({ id, pageStatus }) => {
                                           />
                                           {contactsErrors[index]
                                             ?.first_name && (
-                                            <div
-                                              className="error-text"
-                                              style={{ color: "red" }}
-                                            >
-                                              {contactsErrors[index].first_name}
-                                            </div>
-                                          )}
+                                              <div
+                                                className="error-text"
+                                                style={{ color: "red" }}
+                                              >
+                                                {contactsErrors[index].first_name}
+                                              </div>
+                                            )}
                                         </div>
                                       </div>
                                       <div className="col-lg-4">
@@ -2034,6 +2107,7 @@ const Information = ({ id, pageStatus }) => {
                                             className="form-control"
                                             placeholder="Last Name"
                                             name="last_name"
+                                            id={`last_name-${index}`}
                                             value={contact.last_name}
                                             onChange={(e) =>
                                               handleChange4(
@@ -2092,16 +2166,16 @@ const Information = ({ id, pageStatus }) => {
                                           </select>
                                           {contactsErrors[index]
                                             ?.customer_contact_person_role_id && (
-                                            <div
-                                              className="error-text"
-                                              style={{ color: "red" }}
-                                            >
-                                              {
-                                                contactsErrors[index]
-                                                  .customer_contact_person_role_id
-                                              }
-                                            </div>
-                                          )}
+                                              <div
+                                                className="error-text"
+                                                style={{ color: "red" }}
+                                              >
+                                                {
+                                                  contactsErrors[index]
+                                                    .customer_contact_person_role_id
+                                                }
+                                              </div>
+                                            )}
                                         </div>
                                       </div>
 
@@ -2122,6 +2196,7 @@ const Information = ({ id, pageStatus }) => {
                                                   )
                                                 }
                                                 name="phone_code"
+                                                id={`phone_code-${index}`}
                                                 value={contact.phone_code}
                                               >
                                                 {countryDataAll &&
@@ -2178,6 +2253,7 @@ const Information = ({ id, pageStatus }) => {
                                             className="form-control"
                                             placeholder="Enter Email"
                                             name="email"
+                                            id={`email-${index}`}
                                             value={contact.email}
                                             onChange={(e) =>
                                               handleChange4(

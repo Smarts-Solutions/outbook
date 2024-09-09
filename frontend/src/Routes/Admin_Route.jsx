@@ -51,6 +51,8 @@ import Documents from "../layouts/Admin/Jobs/Documents";
 
 import CreateJob from "../layouts/Admin/Jobs/JobAction/CreateJob";
 import JobEdit from "../layouts/Admin/Jobs/JobAction/EditJob";
+
+ 
  
 
 const Admin_Route = () => {
@@ -200,6 +202,7 @@ const Admin_Route = () => {
             <Route path="/job/documents" element={<Documents />} />
             <Route path="/job/jobtimeline" element={<JobTimeline />} />
             <Route path="/job/jobinformation" element={<JobInformation />} />
+             
           </Routes>
         </div>
       </div>
