@@ -209,13 +209,13 @@ const getByIdChecklist = async(checklist) => {
     checklists.id AS checklists_id,
     checklists.check_list_name AS check_list_name,
     checklists.status AS status,
+    checklists.client_type_id AS client_type_id,
     customers.id AS customer_id,
     services.id AS service_id,
     services.name AS service_name,
     job_types.id AS job_type_id,
     job_types.type AS job_type_type,
-    client_types.id AS client_type_id,
-    client_types.type AS client_type_type,
+ 
     checklist_tasks.id AS checklist_tasks_id,
     checklist_tasks.task_id AS task_id,
     checklist_tasks.task_name AS task_name,
@@ -227,8 +227,7 @@ const getByIdChecklist = async(checklist) => {
          services ON services.id = checklists.service_id
     JOIN
          job_types ON job_types.id = checklists.job_type_id
-    JOIN
-         client_types ON client_types.id = checklists.client_type_id
+
     JOIN
          checklist_tasks ON checklist_tasks.checklist_id = checklists.id
     WHERE checklists.id = ?
@@ -237,6 +236,10 @@ const getByIdChecklist = async(checklist) => {
     try {
     const [rows] = await pool.execute(query, [checklist_id]);
     let result = {}
+
+   
+
+
     if(rows.length > 0){
         result = {
             checklists_id: rows[0].checklists_id,
@@ -247,8 +250,8 @@ const getByIdChecklist = async(checklist) => {
             service_name: rows[0].service_name,
             job_type_id: rows[0].job_type_id,
             job_type_type: rows[0].job_type_type,
-            client_type_id: rows[0].client_type_id,
-            client_type_type: rows[0].client_type_type,
+            client_type_id: rows[0].client_type_id.length > 0 ? rows[0].client_type_id.split(",") :[],
+            // client_type_type: rows[0].client_type_type,
             task: rows.map(row => ({
                 checklist_tasks_id: row.checklist_tasks_id,
                 task_id: row.task_id,

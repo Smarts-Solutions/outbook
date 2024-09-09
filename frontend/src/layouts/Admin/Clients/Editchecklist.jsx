@@ -9,6 +9,7 @@ import {
   UpdateChecklistData,
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
+import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
 
 const CreateCheckList = () => {
   const location = useLocation();
@@ -28,11 +29,20 @@ const CreateCheckList = () => {
   const [tasks, setTasks] = useState([
     { task_id: "", task_name: "", budgeted_hour: "", checklist_tasks_id: "" },
   ]);
-  const [errors, setErrors] = useState({});
 
+  const [data, setData] = useState(false);
+  const [errors, setErrors] = useState({});
   const [serviceList, setServiceList] = useState([]);
   const [clientTypeList, setClientTypeList] = useState([]);
   const [jobTypeList, setJobTypeList] = useState([]);
+  const [selectedClientType, setSelectedClientType] = useState([]);
+
+  const options = [
+    { key: "1", label: "Sole Trader" },
+    { key: "2", label: "Company" },
+    { key: "3", label: "Partnership" },
+    { key: "4", label: "Individual" },
+  ];
 
   useEffect(() => {
     if (location.state?.checklist_id) {
@@ -48,6 +58,7 @@ const CreateCheckList = () => {
           if (response.status) {
             const checklistData = response.data;
 
+            setSelectedClientType(checklistData.client_type_id);
 
             getJobTypeData(checklistData.service_id);
 
@@ -69,6 +80,7 @@ const CreateCheckList = () => {
                 }))
               );
             }
+            setData(true);
           }
         })
         .catch((error) => {
@@ -84,8 +96,7 @@ const CreateCheckList = () => {
         .unwrap()
         .then((response) => {
           if (response.status) {
-            // Assuming response.data is an array of services
-            setServiceList(response.data); // Store the list of services
+            setServiceList(response.data);
             setFormData((prevData) => ({
               ...prevData,
               service_id: response.data.find(
@@ -96,7 +107,9 @@ const CreateCheckList = () => {
             }));
           }
         })
-        .catch((error) => console.error("Error fetching services:", error));
+        .catch((error) => {
+          console.log("Error fetching services:", error);
+        });
     }
 
     // Fetch client types
@@ -128,12 +141,66 @@ const CreateCheckList = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+
   const handleTaskChange = (index, e) => {
     const { name, value } = e.target;
     const newTasks = [...tasks];
-    newTasks[index][name] = value;
+  
+
+    if (name === "hours" || name === "minutes") {
+
+      const existingBudgetedHour = newTasks[index].budgeted_hour || "00:00";
+      const [hours, minutes] = existingBudgetedHour.split(":");
+  
+      if (name === "hours") {
+        const numericValue = Number(value);
+  
+      
+        if (!isNaN(numericValue) && numericValue >= 0) {
+          newTasks[index].budgeted_hour = 
+            value === '' ? '' : numericValue.toString().padStart(2, "0") + ":" + minutes;
+        }
+      } else if (name === "minutes") {
+        const numericValue = Number(value);
+  
+      
+        if (value === '' || (numericValue >= 0 && numericValue <= 59)) {
+          newTasks[index].budgeted_hour = 
+            hours + ":" + (value === '' ? '' : numericValue.toString().padStart(2, "0"));
+        } else {
+          
+          e.target.value = "59";
+          newTasks[index].budgeted_hour = hours + ":59";
+        }
+      }
+    } else {
+  
+      newTasks[index][name] = value;
+    }
+  
+
+  
     setTasks(newTasks);
   };
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   const addTask = () => {
     setTasks([
@@ -174,7 +241,7 @@ const CreateCheckList = () => {
       validationErrors.service_id = "Service Type is required";
     if (!formData.job_type_id)
       validationErrors.job_type_id = "Job Type is required";
-    if (!formData.client_type_id)
+    if (selectedClientType.length === 0)
       validationErrors.client_type_id = "Client Type is required";
     if (!formData.check_list_name)
       validationErrors.check_list_name = "Check List Name is required";
@@ -193,9 +260,16 @@ const CreateCheckList = () => {
       return;
     }
 
+    let ClienTypeArr = "";
+    selectedClientType.map((item) => {
+      ClienTypeArr += item + ",";
+    });
+
+
     const req = {
       checklists_id: location.state.checklist_id,
       ...formData,
+      client_type_id: ClienTypeArr.slice(0, -1),
       task: tasks.map((task) => ({
         task_name: task.task_name,
         budgeted_hour: task.budgeted_hour,
@@ -234,13 +308,23 @@ const CreateCheckList = () => {
       });
   };
 
+  const handleMultipleSelect = (e) => {
+    if (e.length === 0) {
+      setErrors({ ...errors, client_type_id: "Please Select Client Type" });
+    } else {
+      const { client_type_id, ...rest } = errors;
+      setErrors(rest);
+    }
+
+    setSelectedClientType(e);
+  };
+
+
   return (
     <div className="container-fluid">
-   
       <div className="card mt-4">
-      <div className="card-header step-header-blue d-flex ">
-
-  <button
+        <div className="card-header step-header-blue d-flex ">
+          <button
             type="button"
             className="btn p-0"
             onClick={() =>
@@ -249,243 +333,216 @@ const CreateCheckList = () => {
               })
             }
           >
-              <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" />
+            <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" />
           </button>
-  <h3 className="card-title mb-0">Update Checklist</h3>
-</div>
+          <h3 className="card-title mb-0">Update Checklist</h3>
+        </div>
 
-        <div className="card-body">
-          <div className="row">
-            <div className="col-lg-4 ">
-              <div className="row">
-                <div className="col-lg-12">
-                <label className="form-label"> Select Service Type</label>
-                  <select
-                    className="default-select wide form-select"
-                    name="service_id"
-                    value={formData.service_id}
-                    onChange={(e) => {
-                      handleInputChange(e);
-                      getJobTypeData(e.target.value);
-                    }}
-                    disabled={true}
-                  >
-                    <option value="">Please Select Service Type</option>
-                    {serviceList.map((service) => (
-                      <option
-                        key={service.service_id}
-                        value={service.service_id}
-                      >
-                        {service.service_name}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.service_id && (
-                    <p className="text-danger">{errors.service_id}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-4 ">
-              <div className="row">
-                <div className="col-lg-12">
-                <label className="form-label"> Select Job Typ</label>
-                  <select
-                    className="default-select wide form-select"
-                    name="job_type_id"
-                    value={formData.job_type_id}
-                    disabled={true}
-                    onChange={(e) => {
-                      handleInputChange(e);
-                      // getTaskData(e.target.value);
-                    }}
-                  >
-                    <option value="">Please Select Job Type</option>
-                    {jobTypeList &&
-                      jobTypeList.map((job) => (
-                        <option key={job.id} value={job.id}>
-                          {job.type}
+        {data && (
+          <div className="card-body">
+            <div className="row">
+              <div className="col-lg-4 ">
+                <div className="row">
+                  <div className="col-lg-12">
+                    <label className="form-label"> Select Service Type</label>
+                    <select
+                      className="default-select wide form-select"
+                      name="service_id"
+                      value={formData.service_id}
+                      onChange={(e) => {
+                        handleInputChange(e);
+                        getJobTypeData(e.target.value);
+                      }}
+                      disabled={true}
+                    >
+                      <option value="">Please Select Service Type</option>
+                      {serviceList.map((service) => (
+                        <option
+                          key={service.service_id}
+                          value={service.service_id}
+                        >
+                          {service.service_name}
                         </option>
                       ))}
-                  </select>
-                  {errors.job_type_id && (
-                    <p className="text-danger">{errors.job_type_id}</p>
-                  )}
+                    </select>
+                    {errors.service_id && (
+                      <p className="text-danger">{errors.service_id}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="col-lg-4 ">
+                <div className="row">
+                  <div className="col-lg-12">
+                    <label className="form-label"> Select Job Typ</label>
+                    <select
+                      className="default-select wide form-select"
+                      name="job_type_id"
+                      value={formData.job_type_id}
+                      disabled={true}
+                      onChange={(e) => {
+                        handleInputChange(e);
+                        // getTaskData(e.target.value);
+                      }}
+                    >
+                      <option value="">Please Select Job Type</option>
+                      {jobTypeList &&
+                        jobTypeList.map((job) => (
+                          <option key={job.id} value={job.id}>
+                            {job.type}
+                          </option>
+                        ))}
+                    </select>
+                    {errors.job_type_id && (
+                      <p className="text-danger">{errors.job_type_id}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="col-lg-4 ">
+                <div className="row">
+                  <div className="col-lg-12">
+                    <label className="form-label">Select Client Type</label>
+                    <DropdownMultiselect
+                      options={options}
+                      name="client_type_id"
+                      handleOnChange={(e) => handleMultipleSelect(e)}
+                      selected={
+                        selectedClientType.length > 0 ? selectedClientType : []
+                      } // Ensure it's an array
+                      placeholder="Select Client Type"
+                    />
+                    {errors.client_type_id && (
+                      <p className="error-text">{errors.client_type_id}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="col-lg-4 mt-4">
+                <div className="row">
+                  <div className="col-lg-12">
+                    <label className="form-label">Check List Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter Check List Name"
+                      name="check_list_name"
+                      value={formData.check_list_name}
+                      onChange={handleInputChange}
+                    />
+                    {errors.check_list_name && (
+                      <p className="text-danger">{errors.check_list_name}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="col-lg-4 mt-4">
+                <div className="row">
+                  <div className="col-lg-12">
+                    <label className="form-label">Status</label>
+                    <select
+                      className="default-select wide form-select"
+                      name="status"
+                      value={formData.status}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Please Select Status</option>
+                      <option value="1">Active</option>
+                      <option value="0">Inactive</option>
+                    </select>
+                    {errors.status && (
+                      <p className="text-danger">{errors.status}</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="col-lg-4 ">
-              <div className="row">
-                <div className="col-lg-12">
-                <label className="form-label">Select Client Type</label>
-                  <select
-                    className="default-select wide form-select"
-                    name="client_type_id"
-                    value={formData.client_type_id}
-                    onChange={handleInputChange}
-                    disabled={true}
-                  >
-                    <option value="">Please Select Client Type</option>
-                    {clientTypeList.map((client) => (
-                      <option key={client.id} value={client.id}>
-                        {client.type}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.client_type_id && (
-                    <p className="text-danger">{errors.client_type_id}</p>
-                  )}
-                </div>
+            <div className="row">
+              <div className="col-lg-12 mt-4">
+                <button
+                  type="button"
+                  className="btn btn-secondary ms-2"
+                  onClick={addTask}
+                >
+                  <i className="fa fa-plus"></i> Add Task
+                </button>
               </div>
             </div>
-            <div className="col-lg-4 mt-4">
-              <div className="row">
-                <div className="col-lg-12">
-                <label className="form-label">Check List Name</label>
+            {tasks.map((task, index) => (
+              <div key={index} className="row mt-4 align-items-end">
+                <div className="col-lg-5">
+                  <label className="form-label">Task Name</label>
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="Enter Check List Name"
-                    name="check_list_name"
-                    value={formData.check_list_name}
-                    onChange={handleInputChange}
+                    placeholder="Enter Task Name"
+                    name="task_name"
+                    defaultValue={task.task_name}
+                    disabled={task.task_id}
+                    onChange={(e) => handleTaskChange(index, e)}
                   />
-                  {errors.check_list_name && (
-                    <p className="text-danger">{errors.check_list_name}</p>
+                  {errors[`task_name_${index}`] && (
+                    <p className="text-danger">
+                      {errors[`task_name_${index}`]}
+                    </p>
                   )}
                 </div>
-              </div>
-            </div>
-            <div className="col-lg-4 mt-4">
-              <div className="row">
-                <div className="col-lg-12">
-                <label className="form-label">Status</label>
-                  <select
-                    className="default-select wide form-select"
-                    name="status"
-                    value={formData.status}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Please Select Status</option>
-                    <option value="1">Active</option>
-                    <option value="0">Inactive</option>
-                  </select>
-                  {errors.status && (
-                    <p className="text-danger">{errors.status}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-lg-12 mt-4">
-            <button
-                    type="button"
-                    className="btn btn-secondary ms-2"
-                    onClick={addTask}
-                  >
-                   <i className="fa fa-plus"></i> Add Task
-                  </button>
-          </div>
-          </div>
-          {tasks.map((task, index) => (
-            <div key={index} className="row mt-4 align-items-end">
-              <div className="col-lg-5">
-              <label className="form-label">Task Name</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Enter Task Name"
-                  name="task_name"
-                  value={task.task_name}
-                  disabled={task.task_id}
-                  onChange={(e) => handleTaskChange(index, e)}
-                />
-                {errors[`task_name_${index}`] && (
-                  <p className="text-danger">{errors[`task_name_${index}`]}</p>
-                )}
-              </div>
-              <div className="col-lg-5">
-              <label className="form-label">Budgeted Hours</label>
-              <div className="input-group">
-                      {/* Hours Input */}
-                      <input
-                        type="number"
-                        className="form-control"
-                        placeholder="Hours"
-                        name="hours"
-                        defaultValue={task.budgeted_hour?.hours || ""}
-                        onChange={(e) => handleTaskChange(index, e)}
-                      />
-                      {/* Hours Error */}
-                      
+                <div className="col-lg-5">
+                  <label className="form-label">Budgeted Hours</label>
+                  <div className="input-group">
+                    <input
+                      type="number"
+                      className="form-control"
+                      placeholder="Hours"
+                      name="hours"
+                      defaultValue={task.budgeted_hour?.split(":")[0] || ""}
+                      onChange={(e) => handleTaskChange(index, e)}
+                    />
 
-                      {/* Minutes Input */}
-                      <input
-                        type="number"
-                        className="form-control"
-                        placeholder="Minutes"
-                        name="minutes"
-                        min="0"
-                        max="59"
-                        defaultValue={task.budgeted_hour?.minutes || ""}
-                        onChange={(e) => handleTaskChange(index, e)}
-                      />
-                      {/* Minutes Error */}
-                      {errors[`budgeted_hour_${index}`] && (
-                  <p className="text-danger">
-                    {errors[`budgeted_hour_${index}`]}
-                  </p>
-                )}
-                    </div>
-                {/* <input
-                  type="number"
-                  className="form-control"
-                  placeholder="Enter Budgeted Hour"
-                  name="budgeted_hour"
-                  value={task.budgeted_hour}
-                  onChange={(e) => handleTaskChange(index, e)}
-                />
-                {errors[`budgeted_hour_${index}`] && (
-                  <p className="text-danger">
-                    {errors[`budgeted_hour_${index}`]}
-                  </p>
-                )} */}
+                    <input
+                      type="number"
+                      className="form-control"
+                      placeholder="Minutes"
+                      name="minutes"
+                      min="0"
+                      max="59"
+                      defaultValue={task.budgeted_hour?.split(":")[1] || ""}
+                      onChange={(e) => handleTaskChange(index, e)}
+                    />
+                    {/* Minutes Error */}
+                    {errors[`budgeted_hour_${index}`] && (
+                      <p className="text-danger">
+                        {errors[`budgeted_hour_${index}`]}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="col-lg-2 d-flex align-items-center">
+                  {tasks.length > 1 && (
+                    <button
+                      type="button"
+                      className="btn p-0"
+                      onClick={() => removeTask(index)}
+                    >
+                      <i className="ti-trash text-danger fs-4"></i>
+                    </button>
+                  )}
+                </div>
               </div>
-              <div className="col-lg-2 d-flex align-items-center">
-                {tasks.length > 1 && (
-                  <button
-                    type="button"
-                    className="btn p-0"
-                    onClick={() => removeTask(index)}
-                  >
-                   <i className="ti-trash text-danger fs-4"></i>
-                  </button>
-                )}
-                {/* {index === tasks.length - 1 && (
-                  <button
-                    type="button"
-                    className="btn btn-secondary ms-2"
-                    onClick={addTask}
-                  >
-                   <i className="fa fa-plus"></i> Add Task
-                  </button>
-                )} */}
+            ))}
+            <div className="row mt-4">
+              <div className="col-lg-12">
+                <button
+                  type="button"
+                  className="btn btn-info"
+                  onClick={handleSubmit}
+                >
+                  Submit
+                </button>
               </div>
-            </div>
-          ))}
-          <div className="row mt-4">
-            <div className="col-lg-12">
-              <button
-                type="button"
-                className="btn btn-info"
-                onClick={handleSubmit}
-              >
-                Submit
-              </button>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
