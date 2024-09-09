@@ -361,12 +361,11 @@ const ClientList = () => {
                   </div>
                 </div>
                 <div
-                  className="tab-pane fade "
+                  className="tab-pane fade"
                   id="alljob"
                   role="tabpanel"
                   aria-labelledby="alljob-tab"
                 >
-                  testwew
                 </div>
               </div>
               {/* <div className="datatable-wrapper ">

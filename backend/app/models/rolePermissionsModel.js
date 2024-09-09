@@ -61,16 +61,16 @@ const staffRole = async () => {
 };
 
 const deleteRole = async (roleId) => {
-    const query = `
-    DELETE FROM roles WHERE id = ?
-    `;
+    // const query = `
+    // DELETE FROM roles WHERE id = ?
+    // `;
 
-    try {
-        await pool.execute(query, [roleId]);
-    } catch (err) {
-        console.error('Error deleting data:', err);
-        throw err;
-    }
+    // try {
+    //     await pool.execute(query, [roleId]);
+    // } catch (err) {
+    //     console.error('Error deleting data:', err);
+    //     throw err;
+    // }
 };
 
 const getRoleById = async (roleId) => {
