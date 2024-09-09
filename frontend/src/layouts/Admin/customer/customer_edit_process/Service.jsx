@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Formik } from "formik";
 import { Button } from "antd";
 import { useDispatch } from "react-redux";
-
+import * as XLSX from "xlsx";
 import {
   Get_Service,
   GET_CUSTOMER_DATA,
@@ -32,14 +32,14 @@ const Service = () => {
   const [tempServices, setTempServices] = useState("");
   const [jobtype, SetJobtype] = useState(false);
   const [tasks, setTasks] = useState([]);
-  const [getServiceData, setServiceData] = useState([]);
+
   const [jobTypeData, setJobTypeData] = useState([]);
+  const [showJobTabel, setShowJobTabel] = useState("");
+  const [tasksGet, setTasksData] = useState([]);
   const [getCustomerService, setCustomerService] = useState({
     loading: true,
     data: [],
   });
-
-  const [tasksGet, setTasksData] = useState([]);
 
   useEffect(() => {
     JobTypeDataAPi(services, 2);
@@ -208,7 +208,6 @@ const Service = () => {
       return;
     }
 
-    // Prepare the MatchData array
     const MatchData = GetAllService.data.map((service) => {
       const managerData = getManager.find(
         (item) => item.service_id === service.id
@@ -226,22 +225,12 @@ const Service = () => {
       services.includes(item.service_id)
     );
 
-
-    let TaskGet = [];
-    if (tasksGet.length > 0) {
-      TaskGet = tasksGet.map(({ hours, minutes, ...task }) => ({
-        ...task,
-        budgeted_hours: `${hours}:${minutes}`,
-      }));
-    }
-
     const req = {
       customer_id: address,
       pageStatus: "2",
       services: filteredMatchData,
-      Task: TaskGet,
+      Task: tasksGet,
     };
-
 
     try {
       const response = await dispatch(
@@ -317,6 +306,80 @@ const Service = () => {
       });
   };
 
+  const TaskUpdate = async (e, id, serviceId) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+
+        const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        const headers = rawData[0];
+        const rows = rawData.slice(1);
+
+        let result = [];
+        let currentId = null;
+        let currentChecklistName = null;
+        let taskList = [];
+
+        rows.forEach((row) => {
+          const idValue = row[headers.indexOf("id")];
+          const checklistName = row[headers.indexOf("Checklist Name")] || "";
+          const taskName = row[headers.indexOf("Task Name")] || "";
+          const budgetHours = row[headers.indexOf("Budget Hours")] || "";
+          const budgetMinutes = row[headers.indexOf("Budget Minutes")] || "";
+
+          if (idValue) {
+            if (currentId !== null) {
+              result.push({
+                id: currentId,
+                checklistName: currentChecklistName,
+                Task: taskList,
+              });
+            }
+
+            currentId = idValue;
+            currentChecklistName = checklistName;
+            taskList = [];
+          }
+
+          if (taskName) {
+            taskList.push({
+              TaskName: taskName,
+              BudgetHour: budgetHours + ":" + budgetMinutes,
+            });
+          }
+        });
+
+        // Push the last item
+        if (currentId !== null) {
+          result.push({
+            id: currentId,
+            checklistName: currentChecklistName,
+            Task: taskList,
+          });
+        }
+        setTasksData((prev) => [
+          ...prev,
+          ...result.map((item) => ({
+            ...item,
+            JobTypeId: id,
+            serviceId: serviceId,
+          })),
+        ]);
+      };
+
+      // Read the file as an ArrayBuffer
+      reader.readAsArrayBuffer(file);
+    }
+  };
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
@@ -350,11 +413,6 @@ const Service = () => {
                                 checked={services.includes(item.id)}
                                 onChange={(e) => {
                                   handleCheckboxChange(e, item);
-                                  setServiceData(item);
-
-                                  if (e.target.checked) {
-                                    SetJobtype(true);
-                                  }
                                 }}
                               />
                             </div>
@@ -362,7 +420,191 @@ const Service = () => {
 
                           <td className="customer_name">
                             <div className="customer-details d-flex align-items-center">
-                              <div>{item.name}</div>
+                              <div>{item.name}</div>{" "}
+                              <div
+                                className="customer-details d-flex align-items-center"
+                                style={{ marginLeft: "10px" }}
+                              >
+                                {services.includes(item.id) && (
+                                  <i
+                                    className="fa fa-down"
+                                    onClick={(e) =>
+                                      setShowJobTabel((pre) =>
+                                        pre == item.id ? "" : item.id
+                                      )
+                                    }
+                                  />
+                                )}
+
+                                <div
+                                  key={index}
+                                  style={{
+                                    margin: "20px",
+                                    overflowX: "auto",
+                                  }}
+                                >
+                                  <div
+                                    className="accordion"
+                                    id={`accordion-${index}`}
+                                  >
+                                    {showJobTabel === item.id &&
+                                      jobTypeData &&
+                                      jobTypeData
+                                        .filter(
+                                          (data) => data.service_id === item.id
+                                        )
+                                        .flatMap((data) =>
+                                          data.data.map((data1, index) => (
+                                            <div
+                                              className="accordion-item"
+                                              key={index}
+                                            >
+                                              <div
+                                                className="row accordion-header"
+                                                id={`heading-${index}`}
+                                                style={{
+                                                  backgroundColor: "#ebf4f7",
+                                                  width: "100%",
+                                                }}
+                                              >
+                                                <div
+                                                  className="col-lg-3"
+                                                  style={{
+                                                    whiteSpace: "normal",
+                                                    overflowWrap: "break-word",
+                                                  }}
+                                                >
+                                                  {data1.type}
+                                                </div>
+
+                                                <div className="col-lg-6">
+                                                  <input
+                                                    type="file"
+                                                    id="uploadButton"
+                                                    style={{
+                                                      cursor: "pointer",
+                                                    }}
+                                                    onChange={(e) =>
+                                                      TaskUpdate(
+                                                        e,
+                                                        data1.id,
+                                                        item.id
+                                                      )
+                                                    }
+                                                  />
+                                                </div>
+
+                                                <div
+                                                  className="col-lg-3 accordion-button collapsed"
+                                                  data-bs-toggle="collapse"
+                                                  data-bs-target={`#collapse-${index}`}
+                                                  aria-expanded="false"
+                                                  aria-controls={`collapse-${index}`}
+                                                  style={{
+                                                    cursor: "pointer",
+                                                  }}
+                                                ></div>
+                                              </div>
+
+                                              <div
+                                                id={`collapse-${index}`}
+                                                className="accordion-collapse collapse" // Keep accordion collapsed by default
+                                                aria-labelledby={`heading-${index}`}
+                                              >
+                                                <div className="accordion-body ">
+                                                  <table
+                                                    style={{
+                                                      width: "100%",
+                                                      borderCollapse:
+                                                        "collapse",
+                                                    }}
+                                                  >
+                                                    <thead>
+                                                      <tr
+                                                        style={{
+                                                          backgroundColor:
+                                                            "#f2f2f2",
+                                                          textAlign: "left",
+                                                        }}
+                                                      >
+                                                        <th
+                                                          style={{
+                                                            padding: "10px",
+                                                            border:
+                                                              "1px solid #ddd",
+                                                          }}
+                                                        >
+                                                          Checklist Name
+                                                        </th>
+                                                        <th
+                                                          style={{
+                                                            padding: "10px",
+                                                            border:
+                                                              "1px solid #ddd",
+                                                          }}
+                                                        >
+                                                          Tasks
+                                                        </th>
+                                                      </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                      {tasksGet &&
+                                                        tasksGet.map(
+                                                          (TaskShow) => {
+                                                            if (
+                                                              data1.id ==
+                                                                TaskShow.JobTypeId &&
+                                                              item.id ==
+                                                                TaskShow.serviceId
+                                                            ) {
+                                                              console.log(
+                                                                "TaskShow",
+                                                                TaskShow
+                                                              );
+                                                              return (
+                                                                <tr>
+                                                                  <td
+                                                                    style={{
+                                                                      padding:
+                                                                        "8px",
+                                                                      border:
+                                                                        "1px solid #ddd",
+                                                                    }}
+                                                                  >
+                                                                   {TaskShow.checklistName}
+                                                                  </td>
+                                                                  <td
+                                                                    style={{
+                                                                      padding:
+                                                                        "8px",
+                                                                      border:
+                                                                        "1px solid #ddd",
+                                                                    }}
+                                                                  >
+                                                                   {TaskShow && TaskShow.Task.map((TaskData)=>{
+                                                                      return(
+                                                                        <div>
+                                                                          <div>{TaskData.TaskName} {"     "}{TaskData.BudgetHour}</div>
+                                                                   
+                                                                        </div>
+                                                                      )
+                                                                   })   }
+                                                                  </td>
+                                                                </tr>
+                                                              );
+                                                            }
+                                                          }
+                                                        )}
+                                                    </tbody>
+                                                  </table>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          ))
+                                        )}
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </td>
 
@@ -392,166 +634,6 @@ const Service = () => {
               </div>
             </div>
           </div>
-          <CommanModal
-            isOpen={jobtype}
-            backdrop="static"
-            size="lg"
-            title="Job Type"
-            hideBtn={true}
-            handleClose={() => SetJobtype(false)}
-          >
-            <table className="table align-middle table-nowrap">
-              {jobTypeData && jobTypeData.map((data) => {
-                if (data.service_id === getServiceData.id) {
-                  return data.data.map((item, index) => (
-                    <React.Fragment key={index}>
-                      <thead className="table-light table-head-blue">
-                        <tr>
-                          <td className="p-0">
-                            <div className="form-group mb-0">
-                              <div className="checkbox">
-                                <label
-                                  data-toggle="collapse"
-                                  data-target={`#collapse${index}`}
-                                  aria-expanded="false"
-                                  aria-controls={`collapse${index}`}
-                                  className="accordion-button fs-16 fw-bold py-2"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    onChange={(e) =>
-                                      getCheckListData(getServiceData.id, item)
-                                    }
-                                  />{" "}
-                                  {item.type}
-                                </label>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td className="p-0">
-                            <div
-                              id={`collapse${index}`}
-                              aria-expanded="false"
-                              className="collapse p-2"
-                            >
-                              {tasks && tasks.length > 0 ? (
-                                tasks
-                                  .filter(
-                                    (task) =>
-                                      task.job_type_id === item.id &&
-                                      task.service_id === getServiceData.id
-                                  )
-                                  .map((task, taskIndex) => (
-                                    <div
-                                      className="row py-2 align-items-center"
-                                      key={taskIndex}
-                                    >
-                                      <div className="col-md-5">
-                                        <input
-                                          type="checkbox"
-                                          onChange={(e) => {
-                                            if (e.target.checked) {
-                                              setTasksData((pre) => [
-                                                ...pre,
-                                                {
-                                                  ...task,
-                                                  hours: "",
-                                                  minutes: "",
-                                                },
-                                              ]);
-                                            } else {
-                                              setTasksData((pre) =>
-                                                pre.filter(
-                                                  (t) => t.id !== task.id
-                                                )
-                                              );
-                                            }
-                                          }}
-                                        />{" "}
-                                        {task.name}
-                                      </div>
-                                      <div className="col-lg-7 ps-0">
-                                        <label className="form-label">
-                                          Budgeted Hours
-                                        </label>
-                                        <div className="input-group">
-                                          <input
-                                            type="number"
-                                            className="form-control"
-                                            placeholder="Hours"
-                                            name="hours"
-                                            min={0}
-                                            value={
-                                              tasksGet.find(
-                                                (t) => t.id === task.id
-                                              )?.hours || ""
-                                            }
-                                            onChange={(e) => {
-                                              const hours = e.target.value;
-                                              setTasksData((pre) =>
-                                                pre.map((t) =>
-                                                  t.id === task.id
-                                                    ? { ...t, hours }
-                                                    : t
-                                                )
-                                              );
-                                            }}
-                                          />
-                                          <input
-                                            type="number"
-                                            className="form-control"
-                                            placeholder="Minutes"
-                                            name="minutes"
-                                            min={0}
-                                            max={59}
-                                            value={
-                                              tasksGet.find(
-                                                (t) => t.id === task.id
-                                              )?.minutes || ""
-                                            }
-                                            onChange={(e) => {
-                                              const minutes = e.target.value;
-                                              setTasksData((pre) =>
-                                                pre.map((t) =>
-                                                  t.id === task.id
-                                                    ? { ...t, minutes }
-                                                    : t
-                                                )
-                                              );
-                                            }}
-                                          />
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))
-                              ) : (
-                                <p>No tasks available.</p>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </React.Fragment>
-                  ));
-                }
-                return null;
-              })}
-            </table>
-
-            <div className="d-flex justify-content-end">
-              <Button
-                className="btn btn-info"
-                color="primary"
-                onClick={(e) => SetJobtype(false)}
-              >
-                Submit
-              </Button>
-            </div>
-          </CommanModal>
 
           <CommanModal
             isOpen={getModal}

@@ -10109,3 +10109,7 @@ body .accordion-button:not(.collapsed)::after {
 .btn.p-0 .fa-arrow-left-long.text-white.fs-4 {
   padding-top: .25rem!important;
 }
+
+.accordion-button {
+  width: 20% !important;
+}
