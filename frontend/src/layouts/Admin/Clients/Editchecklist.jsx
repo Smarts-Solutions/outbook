@@ -185,23 +185,6 @@ const CreateCheckList = () => {
   
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   const addTask = () => {
     setTasks([
       ...tasks,

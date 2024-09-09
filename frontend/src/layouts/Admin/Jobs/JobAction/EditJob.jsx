@@ -189,8 +189,10 @@ const EditJob = () => {
     JobDetails()
   }, []);
 
+console.log("getJobDetails.data", getJobDetails.data)
+
   const getAllChecklist = async () => {
-    const req = { action: "getByServiceWithJobType", service_id: jobData.Service, customer_id: getJobDetails?.data?.customer_id || 0, job_type_id: jobData.JobType }
+    const req = { action: "getByServiceWithJobType", service_id: jobData.Service, customer_id: getJobDetails?.data?.customer_id || 0, job_type_id: jobData.JobType,clientId:  getJobDetails.data.client_id}
     const data = { req: req, authToken: token }
     await dispatch(GET_ALL_CHECKLIST(data))
       .unwrap()

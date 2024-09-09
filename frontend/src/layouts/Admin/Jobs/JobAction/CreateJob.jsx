@@ -120,34 +120,41 @@ const CreateJob = () => {
 
 
 
-
     const getAllChecklist = async () => {
-        const req = { action: "getByServiceWithJobType", service_id: jobData.Service, customer_id: AllJobData?.data?.customer?.customer_id, job_type_id: jobData.JobType }
+        if(
+            AllJobData?.data?.client?.[0]?.client_id &&
+            jobData?.Service &&
+            AllJobData?.data?.customer?.customer_id &&
+            jobData?.JobType
+        ) {
 
-        const data = { req: req, authToken: token }
-        await dispatch(GET_ALL_CHECKLIST(data))
-            .unwrap()
-            .then(async (response) => {
-                if (response.status) {
-                    setAllChecklist({
-                        loading: true,
-                        data: response.data
-                    })
-                } else {
-                    setAllChecklist({
-                        loading: true,
-                        data: []
-                    })
-                }
-            })
-            .catch((error) => {
-                console.log("Error", error);
-            });
+            const req = { action: "getByServiceWithJobType", service_id: jobData.Service, customer_id: AllJobData?.data?.customer?.customer_id, job_type_id: jobData.JobType,clientId:AllJobData?.data?.client[0]?.client_id }
+    
+            const data = { req: req, authToken: token }
+            await dispatch(GET_ALL_CHECKLIST(data))
+                .unwrap()
+                .then(async (response) => {
+                    if (response.status) {
+                        setAllChecklist({
+                            loading: true,
+                            data: response.data
+                        })
+                    } else {
+                        setAllChecklist({
+                            loading: true,
+                            data: []
+                        })
+                    }
+                })
+                .catch((error) => {
+                    console.log("Error", error);
+                });
+        }
     }
 
     useEffect(() => {
         getAllChecklist()
-    }, [jobData.JobType]);
+    }, [jobData.JobType,AllJobData?.data]);
 
     const GetJobType = async () => {
         const req = { action: "get", service_id: jobData.Service }
@@ -518,6 +525,7 @@ const CreateJob = () => {
 
 
 
+
     return (
         <div>
             <div className="container-fluid">
@@ -620,7 +628,9 @@ const CreateJob = () => {
                                                                     <div className="col-lg-4">
                                                                         <label className="form-label">Service</label>
                                                                         <select className="form-select"
-                                                                            name="Service" id='Service' onChange={HandleChange} value={jobData.Service}>
+                                                                            name="Service" id='Service' onChange={HandleChange} value={jobData.Service} 
+                                                                            disabled={jobData.Client == "" ? true : false}
+                                                                            >
                                                                             <option value="">Select Service</option>
                                                                             {
 
