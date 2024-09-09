@@ -232,7 +232,7 @@ const Engagement = () => {
       return;
     }
 
-    validate1();
+    validate1(name, value);
 
     setFormValues1({ ...formValues1, [name]: value });
   };
@@ -245,7 +245,7 @@ const Engagement = () => {
     if (value >= 100) {
       return;
     }
-    validate2();
+    validate2(name, value);
     setFormValues2({ ...formValues2, [name]: value });
   };
 
@@ -256,7 +256,7 @@ const Engagement = () => {
       return;
     }
 
-    validate3();
+    validate3(name, value);
     setFormValues3({ ...formValues3, [name]: value });
   };
 
@@ -269,7 +269,7 @@ const Engagement = () => {
     const newJobEntries = [...jobEntries];
     newJobEntries[index] = { ...newJobEntries[index], [name]: value };
 
-    validate4();
+    validate4(name, value);
     setJobEntries(newJobEntries);
   };
 
@@ -293,75 +293,75 @@ const Engagement = () => {
     setJobEntries(newJobEntries);
   };
 
-  const validate1 = () => {
-    const newErrors = {};
-    for (const key in formValues1) {
-      if (!formValues1[key]) {
-        if (key == "accountants")
-          newErrors[key] = "Please Enter Number of Accountants";
-        else if (key == "feePerAccountant")
-          newErrors[key] = "Please Enter Fee Per Accountant";
-        else if (key == "bookkeepers")
-          newErrors[key] = "Please Enter Number of Bookkeepers";
-        else if (key == "feePerBookkeeper")
-          newErrors[key] = "Please Enter Fee Per Bookkeeper";
-        else if (key == "payrollExperts")
-          newErrors[key] = "Please Enter Number of Payroll Experts";
-        else if (key == "feePerPayrollExpert")
-          newErrors[key] = "Please Enter Fee Per Payroll Expert";
-        else if (key == "taxExperts")
-          newErrors[key] = "Please Enter Number of Tax Experts";
-        else if (key == "feePerTaxExpert")
-          newErrors[key] = "Please Enter Fee Per Tax Expert";
-        else if (key == "numberOfAdmin")
-          newErrors[key] = "Please Enter Number of Admin/Other Staff";
-        else if (key == "feePerAdmin")
-          newErrors[key] = "Please Enter Fee Per Admin/Other Staff";
-      }
+  const validate1 = (name, value) => {
+    const newErrors = { ...errors1 };
+    if (!value) {
+      if (name == "accountants")
+        newErrors[name] = "Please Enter Number of Accountants";
+      else if (name == "feePerAccountant")
+        newErrors[name] = "Please Enter Fee Per Accountant";
+      else if (name == "bookkeepers")
+        newErrors[name] = "Please Enter Number of Bookkeepers";
+      else if (name == "feePerBookkeeper")
+        newErrors[name] = "Please Enter Fee Per Bookkeeper";
+      else if (name == "payrollExperts")
+        newErrors[name] = "Please Enter Number of Payroll Experts";
+      else if (name == "feePerPayrollExpert")
+        newErrors[name] = "Please Enter Fee Per Payroll Expert";
+      else if (name == "taxExperts")
+        newErrors[name] = "Please Enter Number of Tax Experts";
+      else if (name == "feePerTaxExpert")
+        newErrors[name] = "Please Enter Fee Per Tax Expert";
+      else if (name == "numberOfAdmin")
+        newErrors[name] = "Please Enter Number of Admin/Other Staff";
+      else if (name == "feePerAdmin")
+        newErrors[name] = "Please Enter Fee Per Admin/Other Staff";
+    }
+    else {
+      delete newErrors[name];
     }
     setErrors1(newErrors);
-
     return Object.keys(newErrors).length === 0 ? true : false;
   };
-
-  const validate2 = () => {
-    const newErrors = {};
-    for (const key in formValues2) {
-      if (!formValues2[key]) {
-        if (key == "total_outsourcing")
-          newErrors[key] = "Please Enter Total Outsourcing";
-        else if (key == "accountants")
-          newErrors[key] = "Please Enter Accountants";
-        else if (key == "bookkeepers")
-          newErrors[key] = "Please Enter Bookkeepers";
-        else if (key == "payroll_experts")
-          newErrors[key] = "Please Enter Payroll Experts";
-        else if (key == "tax_experts")
-          newErrors[key] = "Please Enter Tax Experts";
-        else if (key == "admin_staff")
-          newErrors[key] = "Please Enter Admin/Other Staff";
-      }
+  const validate2 = (name, value) => {
+    const newErrors = { ...errors2 };
+    if (!value) {
+      if (name == "total_outsourcing")
+        newErrors[name] = "Please Enter Total Outsourcing";
+      else if (name == "accountants")
+        newErrors[name] = "Please Enter Accountants";
+      else if (name == "bookkeepers")
+        newErrors[name] = "Please Enter Bookkeepers";
+      else if (name == "payroll_experts")
+        newErrors[name] = "Please Enter Payroll Experts";
+      else if (name == "tax_experts")
+        newErrors[name] = "Please Enter Tax Experts";
+      else if (name == "admin_staff")
+        newErrors[name] = "Please Enter Admin/Other Staff";
+    }
+    else {
+      delete newErrors[name];
     }
     setErrors2(newErrors);
-
     return Object.keys(newErrors).length === 0 ? true : false;
   };
 
-  const validate3 = () => {
-    const newErrors = {};
-    for (const key in formValues3) {
-      if (!formValues3[key]) {
-        if (key == "adhoc_accountants")
-          newErrors[key] = "Please Enter Accountants Fee Per Hour";
-        else if (key == "adhoc_bookkeepers")
-          newErrors[key] = "Please Enter Bookkeepers Fee Per Hour";
-        else if (key == "adhoc_payroll_experts")
-          newErrors[key] = "Please Enter Payroll Experts Fee Per Hour";
-        else if (key == "adhoc_tax_experts")
-          newErrors[key] = "Please Enter Tax Experts Fee Per Hour";
-        else if (key == "adhoc_admin_staff")
-          newErrors[key] = "Please Enter Admin/Other Staff Fee Per Hour";
-      }
+  const validate3 = (name, value) => {
+    const newErrors = {...errors3}
+    if (!value) {
+      if(name == "adhoc_accountants")
+        newErrors[name] = "Please Enter Accountants Fee Per Hour";
+      else if(name == "adhoc_bookkeepers")
+        newErrors[name] = "Please Enter Bookkeepers Fee Per Hour";
+      else if(name == "adhoc_payroll_experts")
+        newErrors[name] = "Please Enter Payroll Experts Fee Per Hour";
+      else if(name == "adhoc_tax_experts")
+        newErrors[name] = "Please Enter Tax Experts Fee Per Hour";
+      else if(name == "adhoc_admin_staff")
+        newErrors[name] = "Please Enter Admin/Other Staff Fee Per Hour";
+    }
+    else {
+      delete newErrors[name];
     }
     setErrors3(newErrors);
     return Object.keys(newErrors).length === 0 ? true : false;
@@ -416,6 +416,20 @@ const Engagement = () => {
       });
   };
 
+
+  const scrollToFirstError = (i) => {
+    const errors = [errors1, errors2, errors3, errors4];
+
+    console.log(errors[i]);
+    const errorField = Object.keys(errors[i])[0];
+    console.log('errorField', errorField);
+    const errorElement = document.getElementById(errorField);
+    if (errorElement) {
+      errorElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+
   const handleSubmit = async () => {
     if (!checkboxStates.some((state) => state === 1)) {
       alert("Please select at least one option.");
@@ -425,6 +439,7 @@ const Engagement = () => {
 
     for (let i = 0; i < checkboxStates.length; i++) {
       if (checkboxStates[i] === 1 && !validations[i]()) {
+        scrollToFirstError(i);
         return;
       }
     }
@@ -568,6 +583,7 @@ const Engagement = () => {
                                 label: "Accountants",
                                 name: "accountants",
                                 feeName: "Number of Accountants",
+
                               },
                               {
                                 label: "",
@@ -631,6 +647,7 @@ const Engagement = () => {
                                     type="text"
                                     className="form-control"
                                     name={field.name}
+                                    id={field.name}
                                     placeholder={field.feeName}
                                     value={formValues1[field.name]}
                                     onChange={(e) => handleChange1(e)}
@@ -713,6 +730,7 @@ const Engagement = () => {
                                     type="text"
                                     className="form-control"
                                     name={field.name}
+                                    id={field.name}
                                     value={formValues2[field.name]}
                                     placeholder={field.feeName}
                                     onChange={handleChange2}
@@ -790,6 +808,7 @@ const Engagement = () => {
                                     type="text"
                                     className="form-control"
                                     name={field.name}
+                                    id={field.name}
                                     value={formValues3[field.name]}
                                     placeholder={field.feeName}
                                     onChange={handleChange3}

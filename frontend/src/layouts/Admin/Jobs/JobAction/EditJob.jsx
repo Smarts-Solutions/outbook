@@ -441,7 +441,19 @@ const EditJob = () => {
           console.log("Error", error);
         });
     }
+    else {
+      scrollToFirstError();
+    }
   }
+
+  const scrollToFirstError = () => { 
+    const errorField = Object.keys(errors)[0]; 
+
+    const errorElement = document.getElementById(errorField);
+    if (errorElement) {
+      errorElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   const filteredData = AllJobData.data?.engagement_model?.[0]
     ? Object.keys(AllJobData.data.engagement_model[0])
@@ -563,18 +575,18 @@ const EditJob = () => {
   if (AddTaskArr.length > 0) {
 
     budgeted_hour_totalTime = AddTaskArr.reduce((acc, task) => {
-  
-      if(task.budgeted_hour != null){
-      const [hours, minutes] = task.budgeted_hour.split(':').map(Number);
 
-      acc.hours += hours;
-      acc.minutes += minutes;
+      if (task.budgeted_hour != null) {
+        const [hours, minutes] = task.budgeted_hour.split(':').map(Number);
 
-      // Convert every 60 minutes into an hour
-      if (acc.minutes >= 60) {
-        acc.hours += Math.floor(acc.minutes / 60);
-        acc.minutes = acc.minutes % 60;
-      }
+        acc.hours += hours;
+        acc.minutes += minutes;
+
+        // Convert every 60 minutes into an hour
+        if (acc.minutes >= 60) {
+          acc.hours += Math.floor(acc.minutes / 60);
+          acc.minutes = acc.minutes % 60;
+        }
       }
       return acc;
     }, { hours: 0, minutes: 0 });
@@ -609,7 +621,7 @@ const EditJob = () => {
                                   <div className="mb-3 col-lg-4">
                                     <label className="form-label"> Outbook Account Manager</label>
                                     <input type="text" className="form-control" placeholder="Account Manager" disabled
-                                      name="AccountManager" onChange={HandleChange} value={jobData.AccountManager} />
+                                      name="AccountManager" id='AccountManager' onChange={HandleChange} value={jobData.AccountManager} />
                                     {errors['AccountManager'] && (
                                       <div style={{ 'color': 'red' }}>{errors['AccountManager']}</div>
                                     )}
@@ -618,7 +630,7 @@ const EditJob = () => {
                                   <div id="invoiceremark" className="mb-3 col-lg-4">
                                     <label className="form-label">Customer</label>
                                     <input type="text" className="form-control" placeholder="Customer" disabled
-                                      name="Customer" onChange={HandleChange} value={jobData.Customer} />
+                                      name="Customer" id='Customer' onChange={HandleChange} value={jobData.Customer} />
                                     {errors['Customer'] && (
                                       <div style={{ 'color': 'red' }}>{errors['Customer']}</div>
                                     )}
@@ -628,7 +640,7 @@ const EditJob = () => {
                                       <div className="col-lg-4">
                                         <label className="form-label">Client</label>
                                         <select className="form-select mb-3"
-                                          name="Client" onChange={HandleChange} value={jobData.Client}>
+                                          name="Client" id='Client' onChange={HandleChange} value={jobData.Client}>
                                           <option value="">Select Client</option>
 
 
@@ -646,7 +658,7 @@ const EditJob = () => {
                                       <div className="col-lg-4">
                                         <label className="form-label">Client</label>
                                         <input type="text" className="form-control" placeholder="Client Job Code"
-                                          name="Client" onChange={HandleChange} value={jobData.Client} disabled />
+                                          name="Client" id='Client' onChange={HandleChange} value={jobData.Client} disabled />
                                         {errors['Client'] && (
                                           <div style={{ 'color': 'red' }}>{errors['Client']}</div>
                                         )}
@@ -656,7 +668,7 @@ const EditJob = () => {
                                   <div className="mb-3 col-lg-4">
                                     <label className="form-label">Client Job Code</label>
                                     <input type="text" className="form-control" placeholder="Client Job Code"
-                                      name="ClientJobCode" onChange={HandleChange} value={jobData.ClientJobCode}
+                                      name="ClientJobCode" id='ClientJobCode' onChange={HandleChange} value={jobData.ClientJobCode}
                                       maxLength={30}
                                     />
                                     {errors['ClientJobCode'] && (
@@ -667,7 +679,7 @@ const EditJob = () => {
                                   <div className="col-lg-4">
                                     <label className="form-label">Customer Account Manager(Officer)</label>
                                     <select className="form-select mb-3"
-                                      name="CustomerAccountManager" onChange={HandleChange} value={jobData.CustomerAccountManager}>
+                                      name="CustomerAccountManager" id='CustomerAccountManager' onChange={HandleChange} value={jobData.CustomerAccountManager}>
                                       <option value="">Select Customer Account Manager</option>
 
                                       {(AllJobData?.data?.customer_account_manager || []).map((customer_account_manager) => (
@@ -684,7 +696,7 @@ const EditJob = () => {
                                   <div className="col-lg-4">
                                     <label className="form-label">Service</label>
                                     <select className="form-select mb-3"
-                                      name="Service" onChange={HandleChange} value={jobData.Service}>
+                                      name="Service" id='Service' onChange={HandleChange} value={jobData.Service}>
                                       <option value="">Select Service</option>
 
                                       {
@@ -705,7 +717,7 @@ const EditJob = () => {
                                     <label className="form-label">Job Type</label>
                                     <select className="form-select mb-3 jobtype"
 
-                                      name="JobType" onChange={(e) => { HandleChange(e); openJobModal(e) }} value={jobData.JobType}>
+                                      name="JobType" id='JobType'  onChange={(e) => { HandleChange(e); openJobModal(e) }} value={jobData.JobType}>
                                       <option value="">Select Job Type</option>
                                       {get_Job_Type.loading && get_Job_Type.data &&
                                         get_Job_Type.data.map((jobtype) => (
@@ -1512,9 +1524,9 @@ const EditJob = () => {
 
                                                             <td>{checklist.task_name} </td>
                                                             <td>
-                                                              {checklist.budgeted_hour != null ?checklist.budgeted_hour.split(":")[0] :"0"}h 
-                                                              
-                                                              {checklist.budgeted_hour != null ? checklist.budgeted_hour.split(":")[1]:"0"}m
+                                                              {checklist.budgeted_hour != null ? checklist.budgeted_hour.split(":")[0] : "0"}h
+
+                                                              {checklist.budgeted_hour != null ? checklist.budgeted_hour.split(":")[1] : "0"}m
                                                             </td>
 
                                                             {/* <td>{checklist.budgeted_hour} hr</td> */}
