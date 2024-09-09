@@ -57,6 +57,25 @@ const jobTimeSheet = async (timeSheet) => {
   
 }
 
+//addMissingLog
+const addMissingLog = async (missingLog) => {
+  return taskTimeSheetModel.addMissingLog(missingLog);
+}
+
+const getMissingLog = async (missingLog) => {
+  const {action} = missingLog
+  if(action === "get"){
+    return taskTimeSheetModel.getMissingLog(missingLog);
+  }
+  else if(action === "getSingleView"){
+    return taskTimeSheetModel.getMissingLogSingleView(missingLog);
+  }
+  else{
+    return { status: false, message: 'Error getting Missing Log.' };
+  }
+  
+}
+
 
 
 module.exports = {
@@ -65,6 +84,8 @@ module.exports = {
   jobAction,
   jobUpdate,
   getTaskTimeSheet,
-  jobTimeSheet
+  jobTimeSheet,
+  addMissingLog,
+  getMissingLog
 
  };

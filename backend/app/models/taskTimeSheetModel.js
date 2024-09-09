@@ -93,8 +93,92 @@ const updateTaskTimeSheetStatus = async (timeSheet) => {
   }
 }
 
+// addMissingLog
+ const addMissingLog = async (missingLog) => {
+  
+
+const { job_id, missing_log, missing_paperwork, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,missing_paperwork_received_on,missing_log_document } = missingLog;
+
+  try {
+    const query = `
+     INSERT INTO 
+     missing_logs
+      (job_id, missing_log, missing_paperwork, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,missing_paperwork_received_on,missing_log_document)
+      VALUES
+      (?,?,?,?,?,?,?,?,?,?)
+      `;
+    const [rows] = await pool.execute(query, [job_id, missing_log, missing_paperwork, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,missing_paperwork_received_on,missing_log_document]);
+
+    console.log("rows ", rows)
+    return { status: true, message: 'Success.', data: rows };
+  } catch (error) {
+     console.log("error ",error)
+    return { status: false, message: 'Error addMissingLog .' };
+  }
+}
+
+const getMissingLog = async(missingLog) =>{
+  const {job_id} = missingLog
+  try {
+    const query = `
+     SELECT 
+     missing_logs.id AS id,
+     missing_logs.job_id AS job_id,
+     missing_logs.missing_log AS missing_log,
+     missing_logs.missing_paperwork AS missing_paperwork,
+     missing_logs.missing_log_sent_on AS missing_log_sent_on,
+     missing_logs.missing_log_prepared_date AS missing_log_prepared_date,
+     missing_logs.missing_log_title AS missing_log_title,
+     missing_logs.missing_log_reviewed_by AS missing_log_reviewed_by,
+     missing_logs.missing_log_reviewed_date AS missing_log_reviewed_date,
+     missing_logs.missing_paperwork_received_on AS missing_paperwork_received_on,
+     missing_logs.missing_log_document AS missing_log_document
+     FROM 
+     missing_logs
+     WHERE 
+     missing_logs.job_id = ?
+     ORDER BY
+     missing_logs.id DESC;
+     `;
+    const [rows] = await pool.execute(query, [job_id]);
+    console.log("rows ", rows)
+    return { status: true, message: 'Success.', data: rows };
+  } catch (error) {
+     console.log("error ",error)
+    return { status: false, message: 'Error getMissingLog .' };
+  }
+}
+
+const getMissingLogSingleView = async(missingLog) => {
+  const {id}=missingLog;
+  try {
+    const query = `
+     SELECT 
+     missing_logs.id AS id,
+     missing_logs.missing_log_sent_on AS missing_log_sent_on,
+     missing_logs.missing_paperwork_received_on AS missing_paperwork_received_on
+     FROM 
+     missing_logs
+     WHERE 
+     missing_logs.id = ?
+     ORDER BY
+     missing_logs.id DESC;
+     `;
+    const [rows] = await pool.execute(query, [id]);
+    console.log("rows ", rows)
+    return { status: true, message: 'Success.', data: rows };
+  } catch (error) {
+     console.log("error ",error)
+    return { status: false, message: 'Error getMissingLog .' };
+  }
+
+}
+
 module.exports = {
   getTaskTimeSheet,
   getjobTimeSheet,
-  updateTaskTimeSheetStatus
+  updateTaskTimeSheetStatus,
+  addMissingLog,
+  getMissingLog,
+  getMissingLogSingleView
 };
