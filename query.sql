@@ -597,9 +597,7 @@ CREATE TABLE jobs (
         FOREIGN KEY (job_id) REFERENCES jobs(id)
     );
 
-
-
-  /*--TABLE:- JOB TIMELINE PENDING */  
+    /*--TABLE:- JOB TIMELINE PENDING */ 
 
 
     /*--TABLE:- MISSING LOGS  */  
@@ -622,7 +620,7 @@ CREATE TABLE jobs (
         FOREIGN KEY (missing_log_reviewed_by) REFERENCES staffs(id)
     );
 
-
+    
      /*--TABLE:- QUERIES   */  
     CREATE TABLE queries (
         id INT AUTO_INCREMENT PRIMARY KEY,
