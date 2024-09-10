@@ -881,9 +881,9 @@ const Setting = () => {
         fields: [
           {
             type: "text",
-            name: "Incorporation ",
-            label: "Incorporation ",
-            placeholder: "Enter Incorporation ",
+            name: "Incorporation",
+            label: "Incorporation",
+            placeholder: "Enter Incorporation",
           },
         ],
         title: " Incorporation",
@@ -1220,6 +1220,8 @@ const Setting = () => {
     { id: "5", label: "Client Industry" },
     { id: "6", label: "Country" },
     { id: "7", label: "Incorporation" },
+    { id: "8", label: "Source" },
+
   ];
 
   return (
@@ -1374,9 +1376,7 @@ const Setting = () => {
                 </div>
               </div>
             </div>
-            {/* {/ Job Status end /} */}
-
-            {/* {/ Services Start /} */}
+           
             <div
               className={`tab-pane fade ${
                 getShowTabId === "4" ? "show active" : ""
@@ -1409,9 +1409,7 @@ const Setting = () => {
                 </div>
               </div>
             </div>
-            {/* {/ Services end /} */}
-
-            {/* {/ Client Industry Start /} */}
+           
             <div
               className={`tab-pane fade ${
                 getShowTabId === "5" ? "show active" : ""
@@ -1444,9 +1442,7 @@ const Setting = () => {
                 </div>
               </div>
             </div>
-            {/* {/ Client Industry end /} */}
-
-            {/* {/ Country Start /} */}
+         
             <div
               className={`tab-pane fade ${
                 getShowTabId === "6" ? "show active" : ""
@@ -1480,9 +1476,7 @@ const Setting = () => {
               </div>
             </div>
 
-            {/* {/ Country end /} */}
-
-            {/* Incorporation  Start */}
+        
             <div
               className={`tab-pane fade ${
                 getShowTabId === "7" ? "show active" : ""
@@ -1516,6 +1510,41 @@ const Setting = () => {
               </div>
             </div>
         
+
+
+            <div
+              className={`tab-pane fade ${
+                getShowTabId === "8" ? "show active" : ""
+              }`}
+            >
+              <div className="report-data">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div className="tab-title">
+                    <h3 className="mt-0">Source</h3>
+                  </div>
+                  {!showSettingInsertTab ? null : (
+                    <div>
+                      <button
+                        type="button"
+                        className="btn btn-info text-white float-end"
+                        onClick={(e) => handleAdd(e, "7")}
+                      >
+                        {" "}
+                        <i className="fa fa-plus" /> Add Source
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className="datatable-wrapper">
+                  <Datatable
+                    filter={true}
+                    columns={columnincorporation}
+                    data={incorporationDataAll}
+                  />
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
     

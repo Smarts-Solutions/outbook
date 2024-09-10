@@ -231,7 +231,6 @@ const Engagement = () => {
     }
 
     validate1(name, value);
-
     setFormValues1({ ...formValues1, [name]: value });
   };
 
@@ -314,8 +313,7 @@ const Engagement = () => {
         newErrors[name] = "Please Enter Number of Admin/Other Staff";
       else if (name == "feePerAdmin")
         newErrors[name] = "Please Enter Fee Per Admin/Other Staff";
-    }
-    else {
+    } else {
       delete newErrors[name];
     }
     setErrors1(newErrors);
@@ -336,8 +334,7 @@ const Engagement = () => {
         newErrors[name] = "Please Enter Tax Experts";
       else if (name == "admin_staff")
         newErrors[name] = "Please Enter Admin/Other Staff";
-    }
-    else {
+    } else {
       delete newErrors[name];
     }
     setErrors2(newErrors);
@@ -345,20 +342,19 @@ const Engagement = () => {
   };
 
   const validate3 = (name, value) => {
-    const newErrors = {...errors3}
+    const newErrors = { ...errors3 };
     if (!value) {
-      if(name == "adhoc_accountants")
+      if (name == "adhoc_accountants")
         newErrors[name] = "Please Enter Accountants Fee Per Hour";
-      else if(name == "adhoc_bookkeepers")
+      else if (name == "adhoc_bookkeepers")
         newErrors[name] = "Please Enter Bookkeepers Fee Per Hour";
-      else if(name == "adhoc_payroll_experts")
+      else if (name == "adhoc_payroll_experts")
         newErrors[name] = "Please Enter Payroll Experts Fee Per Hour";
-      else if(name == "adhoc_tax_experts")
+      else if (name == "adhoc_tax_experts")
         newErrors[name] = "Please Enter Tax Experts Fee Per Hour";
-      else if(name == "adhoc_admin_staff")
+      else if (name == "adhoc_admin_staff")
         newErrors[name] = "Please Enter Admin/Other Staff Fee Per Hour";
-    }
-    else {
+    } else {
       delete newErrors[name];
     }
     setErrors3(newErrors);
@@ -414,7 +410,6 @@ const Engagement = () => {
       });
   };
 
-
   const scrollToFirstError = (i) => {
     const errors = [errors1, errors2, errors3, errors4];
 
@@ -422,12 +417,18 @@ const Engagement = () => {
 
     const errorElement = document.getElementById(errorField);
     if (errorElement) {
-      errorElement.scrollIntoView({ behavior: 'smooth' });
+      errorElement.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-
   const handleSubmit = async () => {
+
+    if (!validateForm()) {
+      return;
+    }
+
+console.log("formState", formState);
+
     if (!checkboxStates.some((state) => state === 1)) {
       alert("Please select at least one option.");
       return;
@@ -441,6 +442,8 @@ const Engagement = () => {
       }
     }
 
+   
+
     let req = {
       customer_id: address,
       pageStatus: "3",
@@ -448,6 +451,7 @@ const Engagement = () => {
       percentage_model: checkboxStates[1].toString(),
       adhoc_payg_hourly: checkboxStates[2].toString(),
       customised_pricing: checkboxStates[3].toString(),
+      ...formState,
     };
 
     if (checkboxStates[0] === 1) {
@@ -521,6 +525,51 @@ const Engagement = () => {
     GetJobTypeApi();
   }, []);
 
+  const [formState, setFormState] = useState({
+    customerJoiningDate: "",
+    customerSource: "",
+    customerSubSource: "",
+  });
+
+  const [formErrors, setFormErrors] = useState({
+    customerJoiningDate: "",
+    customerSource: "",
+    customerSubSource: "",
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormState({
+      ...formState,
+      [name]: value,
+    });
+    setFormErrors({
+      ...formErrors,
+      [name]: "", // Reset the error message once the input changes
+    });
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+    const errors = {};
+
+    if (!formState.customerJoiningDate) {
+      errors.customerJoiningDate = "Customer Joining Date is required";
+      isValid = false;
+    }
+    if (!formState.customerSource) {
+      errors.customerSource = "Customer Source is required";
+      isValid = false;
+    }
+    if (!formState.customerSubSource) {
+      errors.customerSubSource = "Customer Sub-Source is required";
+      isValid = false;
+    }
+
+    setFormErrors(errors);
+    return isValid;
+  };
+
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
       {({ handleSubmit }) => {
@@ -538,6 +587,64 @@ const Engagement = () => {
 
               <div className="card-body">
                 <div className="row">
+                  <div className="col-lg-4">
+                    <label className="form-label">Customer Joining Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      name="customerJoiningDate"
+                      value={formState.customerJoiningDate}
+                      onChange={handleInputChange}
+                    />
+                    {formErrors.customerJoiningDate && (
+                      <span className="error-text">
+                        {formErrors.customerJoiningDate}
+                      </span>
+                    )}
+                  </div>
+                  <div className="col-lg-4">
+                    <label className="form-label">Select Customer Source</label>
+                    <select
+                      className="form-select"
+                      name="customerSource"
+                      value={formState.customerSource}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Select Customer Source</option>
+                      <option value="Google">Google</option>
+                      <option value="Facebook">Facebook</option>
+                      <option value="Instagram">Instagram</option>
+                    </select>
+                    {formErrors.customerSource && (
+                      <span className="error-text">
+                        {formErrors.customerSource}
+                      </span>
+                    )}
+                  </div>
+                  <div className="col-lg-4">
+                    <label className="form-label">
+                      Select Customer Sub-Source
+                    </label>
+                    <select
+                      className="form-select"
+                      name="customerSubSource"
+                      value={formState.customerSubSource}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Select Customer Sub-Source</option>
+                      <option value="Google">Google</option>
+                      <option value="Facebook">Facebook</option>
+                      <option value="Instagram">Instagram</option>
+                    </select>
+                    {formErrors.customerSubSource && (
+                      <span className="error-text">
+                        {formErrors.customerSubSource}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="row" style={{ marginTop: 15 }}>
                   {checkboxOptions.map((option, index) => (
                     <div className="col-lg-3" key={option.id}>
                       <div className="mb-3">
@@ -580,7 +687,6 @@ const Engagement = () => {
                                 label: "Accountants",
                                 name: "accountants",
                                 feeName: "Number of Accountants",
-
                               },
                               {
                                 label: "",

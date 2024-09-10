@@ -1,6 +1,7 @@
 const pool = require("../config/database");
 
 const createIncorporation = async (Incorporation) => {
+
   const { name } = Incorporation;
   const checkQuery = `SELECT 1 FROM incorporation_in WHERE name = ?`;
   const query = `
@@ -9,11 +10,11 @@ const createIncorporation = async (Incorporation) => {
     `;
 
   try {
-    const [check] = await pool.query(checkQuery, [name]);
+    const [check] = await pool.query(checkQuery, [Incorporation.Incorporation]);
     if (check.length > 0) {
       return { status: false, message: "Incorporation In already exists." };
     }
-    const [result] = await pool.query(query, [name]);
+    const [result] = await pool.query(query, [Incorporation.Incorporation]);
     return {
       status: true,
       message: "Incorporation In created successfully.",
