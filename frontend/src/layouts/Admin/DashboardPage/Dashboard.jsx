@@ -228,7 +228,7 @@ const Dashboard = () => {
                 >
                   <div className="row justify-content-center">
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col-12">
@@ -257,7 +257,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col-12">
@@ -275,7 +275,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col-12">
@@ -296,7 +296,7 @@ const Dashboard = () => {
                     </div>
 
                     <div className="col-md-6 col-lg-4 ">
-                      <div className="card report-card ">
+                      <div className="card report-card dashboard-card ">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col">
@@ -316,7 +316,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col-12">
@@ -336,7 +336,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col-12">
@@ -365,7 +365,7 @@ const Dashboard = () => {
                 >
                   <div className="row justify-content-center">
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col">
@@ -379,7 +379,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col">
@@ -391,7 +391,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col">
@@ -406,7 +406,7 @@ const Dashboard = () => {
                     </div>
 
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col">
@@ -420,7 +420,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col">
@@ -434,7 +434,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col">

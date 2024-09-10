@@ -140,13 +140,13 @@ const StaffPage = () => {
                     {row.role === "ADMIN" || row.role === "SUPERADMIN" ? (
                         showStaffDeleteTab && (
                         <button className='delete-icon' disabled>
-                            <i className="ti-trash" />
+                            <i className="ti-trash text-danger" />
                         </button>
                         )
                     ) : (
                         showStaffDeleteTab && (
                         <button className='delete-icon' onClick={(e) => DeleteStaff(row)}>
-                            <i className="ti-trash" />
+                            <i className="ti-trash text-danger" />
                         </button>
                         )
                     )}

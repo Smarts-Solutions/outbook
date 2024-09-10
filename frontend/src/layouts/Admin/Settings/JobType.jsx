@@ -92,7 +92,7 @@ const Setting = () => {
             cell: row => (
                 <div>
                     <button className='edit-icon' onClick={() => handleEdit(row)}> <i className="ti-pencil" /></button>
-                    <button className='delete-icon' onClick={() => handleDelete(row)}> <i className="ti-trash" /></button>
+                    <button className='delete-icon' onClick={() => handleDelete(row)}> <i className="ti-trash text-danger me-2" /></button>
                     <button className='btn btn-info text-white' onClick={(e) => { setShowAddTask(true); setJobTypeId(row) }}>Add Task</button>
 
                 </div>

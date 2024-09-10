@@ -55,16 +55,22 @@ const Sidebar = () => {
   return (
     <div ref={menuRef}>
       <div className="left-sidenav">
-        <div className="brand">
-          <a href="/dashboard/crm-index.html" className="logo">
-            <span>
-              <img
+        <div className="brand mt-4">
+        <Link
+                      to="/admin/dashboard"
+                      aria-expanded="false"
+                      onClick={(e) => handleLinkClick(e, "/admin/dashboard")}
+                    >
+                      <span className="sidebar-icons">
+                      <img
                 src="/assets/images/logo.png"
                 alt="logo-large"
                 className="logo-lg logo-light"
               />
-            </span>
-          </a>
+                      </span>
+                      
+                    </Link>
+          
         </div>
         <div className="menu-content h-100 mm-active" data-simplebar="init">
           <div className="simplebar-wrapper">

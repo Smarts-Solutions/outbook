@@ -425,7 +425,7 @@ const Setting = () => {
                     onClick={() => handleDelete(row, "1")}
                   >
                     {" "}
-                    <i className="ti-trash" />
+                    <i className="ti-trash text-danger" />
                   </button>
                 )}
               </div>
@@ -476,7 +476,7 @@ const Setting = () => {
                     onClick={() => handleDelete(row, "3")}
                   >
                     {" "}
-                    <i className="ti-trash" />
+                    <i className="ti-trash text-danger" />
                   </button>
                 )}
               </div>
@@ -527,12 +527,12 @@ const Setting = () => {
                     onClick={() => handleDelete(row, "4")}
                   >
                     {" "}
-                    <i className="ti-trash" />
+                    <i className="ti-trash text-danger" />
                   </button>
                 )}
                 {showSettingInsertTab && (
                   <button
-                    className="btn btn-info text-white"
+                    className="btn btn-info text-white ms-2"
                     onClick={(e) => handleJobType(row)}
                   >
                     Add Job Type
@@ -587,7 +587,7 @@ const Setting = () => {
                     onClick={() => handleDelete(row, "2")}
                   >
                     {" "}
-                    <i className="ti-trash" />
+                    <i className="ti-trash text-danger" />
                   </button>
                 )}
               </div>
@@ -642,7 +642,7 @@ const Setting = () => {
                     onClick={() => handleDelete(row, "5")}
                   >
                     {" "}
-                    <i className="ti-trash" />
+                    <i className="ti-trash text-danger" />
                   </button>
                 )}
               </div>
@@ -700,7 +700,7 @@ const Setting = () => {
                     onClick={() => handleDelete(row, "6")}
                   >
                     {" "}
-                    <i className="ti-trash" />
+                    <i className="ti-trash text-danger" />
                   </button>
                 )}
               </div>
@@ -744,7 +744,7 @@ const Setting = () => {
             onClick={() => handleDelete(row, "7")}
           >
             {" "}
-            <i className="ti-trash" />
+            <i className="ti-trash text-danger" />
           </button>
         </div>
       ),
