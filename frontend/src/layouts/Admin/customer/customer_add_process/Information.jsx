@@ -146,6 +146,14 @@ const Information = () => {
       });
   };
 
+  const scrollToFirstError = (errors) => { 
+    const errorField = Object.keys(errors)[0]; // Get the first error field
+    const errorElement = document.getElementById(errorField); // Find the element by its id
+    if (errorElement) {
+      errorElement.scrollIntoView({ behavior: 'smooth' }); // Scroll to the error element
+    }
+  };
+  
   const formik = useFormik({
     initialValues: {
       company_name: "",
@@ -162,12 +170,11 @@ const Information = () => {
       Trading_Name: "",
       Trading_Address: "",
       countryCode: "+44",
-
     },
     validate: (values) => {
       let errors = {};
-
-      if (formik.touched.Trading_Name == true && getAccountMangerId == "") {
+  
+      if (formik.touched.Trading_Name === true && getAccountMangerId === "") {
         setAccountMangerIdErr(ADD_CUSTOMER.ACCOUNT_MANAGER);
         return;
       } else if (!values.company_name) {
@@ -188,47 +195,45 @@ const Information = () => {
         errors.VAT_Number = ADD_CUSTOMER.VAT_NUMBER_VALIDATION;
       } else if (values.Website && values.Website.length > 200) {
         errors.Website = ADD_CUSTOMER.WEBSITE_VALIDATION;
-      } else if (
-        values.Trading_Name != undefined &&
-        !values.Trading_Name.trim()
-      ) {
+      } else if (values.Trading_Name && !values.Trading_Name.trim()) {
         errors.Trading_Name = ADD_CUSTOMER.TRADING_NAME;
       }
-
+  
+      console.log('errors' , errors);
+      scrollToFirstError(errors);
       return errors;
     },
-    onSubmit: async (values) => {
+    onSubmit: async (values, { setErrors }) => {
       let formIsValid = true;
-      const newErrors = contacts.map((contact, index) => {
+      const newErrors = contacts.map((contact) => {
         const error = {
           firstName: contact.firstName ? "" : ADD_CUSTOMER.REQ_FIRST_NAME,
           lastName: contact.lastName ? "" : ADD_CUSTOMER.REQ_LAST_NAME,
-          email:
-            contact.email == ""
-              ? ADD_CUSTOMER.REQ_EMAIL
-              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-              ? ""
-              : ADD_CUSTOMER.VALID_EMAIL,
+          email: contact.email === ""
+            ? ADD_CUSTOMER.REQ_EMAIL
+            : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+            ? ""
+            : ADD_CUSTOMER.VALID_EMAIL,
         };
-
-        if (
-          error.firstName ||
-          error.lastName ||
-          error.role ||
-          error.phoneNumber ||
-          error.email
-        ) {
+  
+        if (error.firstName || error.lastName || error.email) {
           formIsValid = false;
         }
         return error;
       });
-
+  
       setErrors(newErrors);
-      if (formIsValid) {
-        if (getAccountMangerId == "") {
+      if (!formIsValid) {
+        const allErrors = { ...newErrors, ...formik.errors };
+
+        console.log(allErrors);
+        scrollToFirstError(allErrors); // Scroll to the first error if form is invalid
+      } else {
+        if (getAccountMangerId === "") {
           return;
         }
-        let req = {
+  
+        const req = {
           customer_id: Number(customer_id),
           contact_id: customerDetails.data.contact_id,
           company_name: values.company_name,
@@ -253,6 +258,115 @@ const Information = () => {
       }
     },
   });
+  
+
+  // const formik = useFormik({
+  //   initialValues: {
+  //     company_name: "",
+  //     search_company_name: "",
+  //     entity_type: "",
+  //     company_status: "",
+  //     company_number: "",
+  //     Registered_Office_Addres: "",
+  //     Incorporation_Date: "",
+  //     Incorporation_in: "",
+  //     VAT_Registered: "0",
+  //     VAT_Number: "",
+  //     Website: "",
+  //     Trading_Name: "",
+  //     Trading_Address: "",
+  //     countryCode: "+44",
+
+  //   },
+  //   validate: (values) => {
+  //     let errors = {};
+
+  //     if (formik.touched.Trading_Name == true && getAccountMangerId == "") {
+  //       setAccountMangerIdErr(ADD_CUSTOMER.ACCOUNT_MANAGER);
+  //       return;
+  //     } else if (!values.company_name) {
+  //       errors.company_name = ADD_CUSTOMER.COMPANY_NAME;
+  //     } else if (!values.entity_type) {
+  //       errors.entity_type = ADD_CUSTOMER.ENTITY_TYPE;
+  //     } else if (!values.company_status) {
+  //       errors.company_status = ADD_CUSTOMER.COMPANY_STATUS;
+  //     } else if (!values.company_number) {
+  //       errors.company_number = ADD_CUSTOMER.COMPANY_NUMBER;
+  //     } else if (!values.Registered_Office_Addres) {
+  //       errors.Registered_Office_Addres = ADD_CUSTOMER.REG_OFFICE_ADDRESS;
+  //     } else if (!values.Incorporation_Date) {
+  //       errors.Incorporation_Date = ADD_CUSTOMER.INCORPORATION_DATE;
+  //     } else if (!values.Incorporation_in) {
+  //       errors.Incorporation_in = ADD_CUSTOMER.INCORPORATION_IN;
+  //     } else if (values.VAT_Number && values.VAT_Number.length > 9) {
+  //       errors.VAT_Number = ADD_CUSTOMER.VAT_NUMBER_VALIDATION;
+  //     } else if (values.Website && values.Website.length > 200) {
+  //       errors.Website = ADD_CUSTOMER.WEBSITE_VALIDATION;
+  //     } else if (
+  //       values.Trading_Name != undefined &&
+  //       !values.Trading_Name.trim()
+  //     ) {
+  //       errors.Trading_Name = ADD_CUSTOMER.TRADING_NAME;
+  //     }
+
+  //     return errors;
+  //   },
+  //   onSubmit: async (values) => {
+  //     let formIsValid = true;
+  //     const newErrors = contacts.map((contact, index) => {
+  //       const error = {
+  //         firstName: contact.firstName ? "" : ADD_CUSTOMER.REQ_FIRST_NAME,
+  //         lastName: contact.lastName ? "" : ADD_CUSTOMER.REQ_LAST_NAME,
+  //         email:
+  //           contact.email == ""
+  //             ? ADD_CUSTOMER.REQ_EMAIL
+  //             : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+  //             ? ""
+  //             : ADD_CUSTOMER.VALID_EMAIL,
+  //       };
+
+  //       if (
+  //         error.firstName ||
+  //         error.lastName ||
+  //         error.role ||
+  //         error.phoneNumber ||
+  //         error.email
+  //       ) {
+  //         formIsValid = false;
+  //       }
+  //       return error;
+  //     });
+
+  //     setErrors(newErrors);
+  //     if (formIsValid) {
+  //       if (getAccountMangerId == "") {
+  //         return;
+  //       }
+  //       let req = {
+  //         customer_id: Number(customer_id),
+  //         contact_id: customerDetails.data.contact_id,
+  //         company_name: values.company_name,
+  //         entity_type: values.entity_type,
+  //         company_status: values.company_status,
+  //         company_number: values.company_number,
+  //         Registered_Office_Addres: values.Registered_Office_Addres,
+  //         Incorporation_Date: values.Incorporation_Date,
+  //         Incorporation_in: values.Incorporation_in,
+  //         VAT_Registered: values.VAT_Registered,
+  //         VAT_Number: values.VAT_Number,
+  //         Website: values.Website,
+  //         Trading_Name: values.Trading_Name,
+  //         Trading_Address: values.Trading_Address,
+  //         contactDetails: contacts,
+  //         CustomerType: CustomerType,
+  //         PageStatus: "1",
+  //         account_manager_id: getAccountMangerId,
+  //         staff_id: staffDetails.id,
+  //       };
+  //       await AddCustomerFun(req);
+  //     }
+  //   },
+  // });
 
   const formik1 = useFormik({
     initialValues: {
@@ -570,7 +684,7 @@ const Information = () => {
       disable: false,
     },
   ];
-  
+
 
   const fields1 = [
     {
