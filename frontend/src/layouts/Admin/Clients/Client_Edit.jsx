@@ -939,6 +939,7 @@ const ClientEdit = () => {
                                     <select
                                       className="form-select mb-3"
                                       value={selectClientType}
+                                      disabled={true}
                                       onChange={(e) =>
                                         setSelectClientType(e.target.value)
                                       }
@@ -946,6 +947,8 @@ const ClientEdit = () => {
                                       <option value={1}>Sole Trader</option>
                                       <option value={2}>Company</option>
                                       <option value={3}>Partnership</option>
+                                      <option value={4}>Individual</option>
+
                                     </select>
                                   </div>
                                 </div>
@@ -2705,7 +2708,197 @@ const ClientEdit = () => {
                                 </div>
                               </div>
                             </div>
-                          ) : (
+                          ) : selectClientType == 4 ? (
+                            <div className="row">
+                              <div className="col-lg-12">
+                                
+                                <div className="card ">
+                                  <div className="card-header card-header-light-blue ">
+                                    <h4 className="card-title fs-16 mb-0">
+                                      Sole Trader Details
+                                    </h4>
+                                  </div>
+                                  <div className="card-body row">
+                                  <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <label className="form-label">
+                                            Trading Name
+                                            <span style={{ color: "red" }}>
+                                              *
+                                            </span>
+                                          </label>
+                                          <input
+                                            type="text"
+                                            name="tradingName"
+                                            className="form-control"
+                                            placeholder="Trading Name"
+                                            onChange={(e) => handleChange1(e)}
+                                            value={
+                                              getSoleTraderDetails.tradingName
+                                            }
+                                            maxLength={100}
+                                          />
+                                          {errors1["tradingName"] && (
+                                            <div className="error-text">
+                                              {errors1["tradingName"]}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+
+                                    <div className="col-lg-4">
+                                      <div className="mb-3">
+                                        <label className="form-label">
+                                          First Name
+                                          <span style={{ color: "red" }}>
+                                            *
+                                          </span>
+                                        </label>
+                                        <input
+                                          type="text"
+                                          className="form-control"
+                                          placeholder="First Name"
+                                          name="first_name"
+                                          value={
+                                            getSoleTraderDetails.first_name
+                                          }
+                                          onChange={(e) => handleChange1(e)}
+                                          maxLength={50}
+                                        />
+                                        {errors1["first_name"] && (
+                                          <div className="error-text">
+                                            {errors1["first_name"]}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <div className="mb-3">
+                                        <label className="form-label">
+                                          Last Name
+                                          <span style={{ color: "red" }}>
+                                            *
+                                          </span>
+                                        </label>
+                                        <input
+                                          type="text"
+                                          className="form-control"
+                                          placeholder="Last Name"
+                                          name="last_name"
+                                          value={getSoleTraderDetails.last_name}
+                                          onChange={(e) => handleChange1(e)}
+                                          maxLength={50}
+                                        />
+                                        {errors1["last_name"] && (
+                                          <div className="error-text">
+                                            {errors1["last_name"]}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    <div className="col-lg-4">
+                                      <div className="mb-3">
+                                        <label className="form-label">
+                                          Phone
+                                        </label>
+                                        <div className="row">
+                                          <div className="col-md-4 pe-0">
+                                            <select
+                                              className="form-select"
+                                              onChange={(e) => handleChange1(e)}
+                                              name="phone_code"
+                                              value={
+                                                getSoleTraderDetails.phone_code
+                                              }
+                                            >
+                                              {countryDataAll.data.map(
+                                                (data) => (
+                                                  <option
+                                                    key={data.code}
+                                                    value={data.code}
+                                                  >
+                                                    {data.code}
+                                                  </option>
+                                                )
+                                              )}
+                                            </select>
+                                          </div>
+                                          <div className="mb-3 col-md-8 ps-1">
+                                            <input
+                                              type="text"
+                                              className="form-control"
+                                              placeholder="Phone Number"
+                                              name="phone"
+                                              value={getSoleTraderDetails.phone}
+                                              onChange={(e) => handleChange1(e)}
+                                              maxLength={12}
+                                              minLength={9}
+                                            />
+                                            {errors1["phone"] && (
+                                              <div className="error-text">
+                                                {errors1["phone"]}
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div className="col-lg-4">
+                                      <div className="mb-3">
+                                        <label className="form-label">
+                                          Email
+                                          <span style={{ color: "red" }}>
+                                            *
+                                          </span>
+                                        </label>
+                                        <input
+                                          type="text"
+                                          className="form-control"
+                                          placeholder="Enter Email ID"
+                                          name="email"
+                                          value={getSoleTraderDetails.email}
+                                          onChange={(e) => handleChange1(e)}
+                                        />
+                                        {errors1["email"] && (
+                                          <div className="error-text">
+                                            {errors1["email"]}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    <div className="col-lg-6">
+                                      <div className="mb-3">
+                                        <label className="form-label">
+                                          Residential Address
+                                          <span style={{ color: "red" }}>
+                                            *
+                                          </span>
+                                        </label>
+                                        <input
+                                          type="text"
+                                          className="form-control"
+                                          placeholder="Residential Address"
+                                          name="residentialAddress"
+                                          value={
+                                            getSoleTraderDetails.residentialAddress
+                                          }
+                                          onChange={(e) => handleChange1(e)}
+                                        />
+                                        {errors1["residentialAddress"] && (
+                                          <div className="error-text">
+                                            {errors1["residentialAddress"]}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ): (
                             ""
                           )}
                         </section>
