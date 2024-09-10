@@ -22,3 +22,6 @@ module.exports = router;
 
 //incorporation_in
 router.post('/incorporation',verifyToken, controllers.IncorporationController.handleIncorporation);
+
+//customerSource
+router.post('/customerSource',verifyToken, controllers.customerSourceController.handleCustomerSource);
