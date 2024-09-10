@@ -923,6 +923,7 @@ const getJobById = async (job) => {
      DATE_FORMAT(jobs.invoice_date, '%Y-%m-%d') AS invoice_date,
      jobs.invoice_hours AS invoice_hours,
      jobs.invoice_remark AS invoice_remark,
+     jobs.status_type AS status_type,
      client_job_task.checklist_id AS checklist_id,
      checklist_tasks.budgeted_hour AS task_budgeted_hour,
      task.id AS task_id,
@@ -1033,6 +1034,7 @@ const getJobById = async (job) => {
         invoice_date: rows[0].invoice_date,
         invoice_hours: rows[0].invoice_hours,
         invoice_remark: rows[0].invoice_remark,
+        status_type: rows[0].status_type,
         tasks: {
           checklist_id: rows[0].checklist_id,
           task: tasks
@@ -1053,8 +1055,8 @@ const getJobById = async (job) => {
 }
 
 const jobUpdate = async (job) => {
-
-
+  
+ 
   const {
     job_id, // Assuming job_id is provided for the update
     account_manager_id,
@@ -1100,19 +1102,45 @@ const jobUpdate = async (job) => {
     invoice_value,
     invoice_date,
     invoice_hours,
-    invoice_remark
+    invoice_remark,
+    status_type
   } = job;
+
+ 
 
 
   const [ExistCustomer] = await pool.execute('SELECT trading_name FROM customers WHERE id = ?', [customer_id]);
   const [ExistClient] = await pool.execute('SELECT trading_name FROM clients WHERE id = ?', [client_id]);
-  const [ExistJob] = await pool.execute('SELECT job_id FROM jobs WHERE id = ?', [job_id]);
+  const [ExistJob] = await pool.execute('SELECT job_id ,status_type ,allocated_to ,reviewer FROM jobs WHERE id = ?', [job_id]);
 
   const lastCode = ExistJob[0].job_id.slice(ExistJob[0].job_id.lastIndexOf('_') + 1);
 
   const firstThreeLettersexistCustomerName = ExistCustomer[0].trading_name.substring(0, 3);
   const firstThreeLettersexistClientName = ExistClient[0].trading_name.substring(0, 3);
   const exit_job_id = firstThreeLettersexistCustomerName + "_" + firstThreeLettersexistClientName + "_" + lastCode;
+
+
+  let status_type_update = status_type;
+  if(status_type == null || status_type == 0 || status_type == 1){
+    if(allocated_to > 0){
+      status_type_update = 3
+    } 
+  
+    if(reviewer > 0){
+      status_type_update = 5
+    } 
+  }else{
+    if(status_type == 3){
+      if(reviewer > 0  && ExistJob[0].reviewer != 0){
+        status_type_update = 5
+      }
+     }else if(status_type == 5){
+      if(allocated_to > 0 && ExistJob[0].allocated_to != 0){
+      status_type_update = 3
+      }
+     }
+  }
+
 
   try {
     const query = `
@@ -1125,7 +1153,7 @@ const jobUpdate = async (job) => {
              filing_Companies_required = ?, filing_Companies_date = ?, filing_hmrc_required = ?, filing_hmrc_date = ?, 
              opening_balance_required = ?, opening_balance_date = ?, number_of_transaction = ?, number_of_balance_items = ?, 
              turnover = ?, number_of_employees = ?, vat_reconciliation = ?, bookkeeping = ?, processing_type = ?, 
-             invoiced = ?, currency = ?, invoice_value = ?, invoice_date = ?, invoice_hours = ?, invoice_remark = ?
+             invoiced = ?, currency = ?, invoice_value = ?, invoice_date = ?, invoice_hours = ?, invoice_remark = ?,status_type = ?
          WHERE id = ?
        `;
     const [result] = await pool.execute(query, [
@@ -1137,7 +1165,7 @@ const jobUpdate = async (job) => {
       filing_Companies_required, filing_Companies_date, filing_hmrc_required, filing_hmrc_date,
       opening_balance_required, opening_balance_date, number_of_transaction, number_of_balance_items,
       turnover, number_of_employees, vat_reconciliation, bookkeeping, processing_type,
-      invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark, job_id
+      invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark, status_type_update,job_id
     ]);
 
     if (result.affectedRows > 0) {
