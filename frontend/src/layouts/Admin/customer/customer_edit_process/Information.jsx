@@ -499,7 +499,7 @@ const Information = ({ id, pageStatus }) => {
       }
       else {
 
-        console.log("errors1", errors1);
+    
         scrollToFirstError(errors1);
       }
     }
@@ -673,7 +673,7 @@ const Information = ({ id, pageStatus }) => {
         if (errorObj[field]) {
           const fieldId = `${field}-${index}`;
           const errorElement = document.getElementById(fieldId);
-          console.log("fieldId", fieldId);
+      
 
           if (errorElement) {
             errorElement.scrollIntoView({ behavior: 'smooth' });

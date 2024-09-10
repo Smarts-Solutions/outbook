@@ -11,7 +11,6 @@ function CustomMultiSelect({ options, placeholder, onChange }) {
 
   const handleOptionClick = (e,option) => {
 
-    console.log('option', e.target.checked);
     const isSelected = selectedOptions.includes(option);
     let updatedOptions;
     

@@ -63,7 +63,8 @@ const CreateCheckList = () => {
           setFormData(data => ({ ...data, client_type_id: response.data }));
         }
       })
-      .catch(error => console.log("Error fetching service types:", error));
+      .catch((error) => {
+        console.log("Error fetching service types:", error)});
 
   }, [formData.customer_id, dispatch, token]);
 
@@ -150,7 +151,8 @@ const CreateCheckList = () => {
           setFormData(data => ({ ...data, job_type_id: response.data }));
         }
       })
-      .catch(error => console.log("Error fetching job types:", error));
+      .catch(error => {
+        console.log("Error fetching job types:", error)});
   };
 
   const getTaskData = async (job_type_id) => {
@@ -172,7 +174,8 @@ const CreateCheckList = () => {
           }
         }
       })
-      .catch((error) => console.log("Error fetching job types:", error));
+      .catch((error) =>{
+         console.log("Error fetching job types:", error)});
   };
 
  

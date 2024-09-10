@@ -557,10 +557,7 @@ const Service = () => {
                                                               item.id ==
                                                                 TaskShow.serviceId
                                                             ) {
-                                                              console.log(
-                                                                "TaskShow",
-                                                                TaskShow
-                                                              );
+                                                            
                                                               return (
                                                                 <tr>
                                                                   <td

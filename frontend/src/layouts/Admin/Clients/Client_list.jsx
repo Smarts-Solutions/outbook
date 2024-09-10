@@ -353,7 +353,7 @@ const ClientList = () => {
               };
             });
 
-            console.log("data", data);
+        
             setCheckList(data);
             setCheckList1(data);
           } else {
