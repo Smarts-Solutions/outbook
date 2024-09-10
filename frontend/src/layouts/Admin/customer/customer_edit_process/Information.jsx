@@ -1800,7 +1800,7 @@ const Information = ({ id, pageStatus }) => {
                                   className="btn btn-info text-white blue-btn"
                                   onClick={handleAddContact}
                                 >
-                                  Add Contact
+                                 <i className="fa fa-plus pe-1"></i> Add Contact
                                 </button>
                               </div>
                             </div>

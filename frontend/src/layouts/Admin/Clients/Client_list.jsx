@@ -89,7 +89,7 @@ const ClientList = () => {
         row.client_type_name == null ? "" : row.client_type_name,
       sortable: true,
     },
-    { name: "Email Address", selector: (row) => row.email, sortable: true },
+    { name: "Email Address", selector: (row) => row.email, sortable: true,width:'250px' },
     { name: "Phone", selector: (row) => row.phone, sortable: true },
     {
       name: "Status",
@@ -174,7 +174,7 @@ const ClientList = () => {
             <i className="ti-pencil" />
           </button>
           <button className="delete-icon" onClick={() => handleDelete(row, "job")}>
-            <i className="ti-trash" />
+            <i className="ti-trash text-danger" />
           </button>
         </div>
       ),

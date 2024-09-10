@@ -59,7 +59,7 @@ const Status = () => {
             <i className="ti-pencil" />
           </button>
           <button className="delete-icon" onClick={() => handleDelete(row)}>
-            <i className="ti-trash" />
+            <i className="ti-trash text-danger" />
           </button>
         </div>
       ),

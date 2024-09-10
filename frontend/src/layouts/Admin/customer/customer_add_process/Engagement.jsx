@@ -695,7 +695,47 @@ const Engagement = () => {
                 </div>
               </div>
             </div>
+            <div className="card report-data pricing-box p-0">
+              <div className="card-header step-header-blue">
+                <h4
+                  className="card-title mb-0 flex-grow-1"
+                  style={{ marginBottom: "20px !important" }}
+                >
+                  Additional information
+                </h4>
+              </div>
+  <div className="card-body">
+    <div className="row">
+      <div className="col-md-4">
+        <div className="mb-3">
+          <label className="form-label">Customer joining date</label>
+          <input type="date" className="form-control" />
+        </div>
+      </div>
+      <div className="col-md-4">
+      <div className="mb-3">
+          <label className="form-label">Customer Source</label>
+          <select  className="form-select " >
+  <option value="">Select Job Type</option>
+  <option value={1}>demo</option>
+</select>
 
+        </div>
+      </div>
+      <div className="col-md-4">
+      <div className="mb-3">
+          <label className="form-label">Customer Sub-source</label>
+          <select  className="form-select " >
+  <option value="">Select Job Type</option>
+  <option value={1}>demo</option>
+</select>
+
+        </div>
+      </div>
+    </div>
+  </div>
+             
+            </div>
             <div className="form__item button__items d-flex justify-content-between">
               <Button className="btn btn-secondary" type="default" onClick={prev}>
                 <i className="pe-2 fa-regular fa-arrow-left-long"></i> Previous
