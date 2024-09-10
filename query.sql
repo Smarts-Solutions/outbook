@@ -488,6 +488,7 @@ CREATE TABLE jobs (
     invoice_date  DATE DEFAULT NULL,
     invoice_hours DECIMAL(10, 2) DEFAULT NULL,
     invoice_remark TEXT DEFAULT NULL,
+    status_type  INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (account_manager_id) REFERENCES staffs(id),
