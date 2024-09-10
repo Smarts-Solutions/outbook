@@ -80,7 +80,7 @@ const ClientEdit = () => {
     Website: "",
   });
 
-  //  For Partnership
+
   const [contacts1, setContacts1] = useState([]);
   const [contactsErrors, setContactsErrors] = useState([
     {
@@ -102,7 +102,22 @@ const ClientEdit = () => {
       alternate_email: "",
     },
   ]);
+  const [contacts, setContacts] = useState([
+    {
+      authorised_signatory_status: 0,
+      contact_id: "",
+      first_name: "",
+      last_name: "",
+      customer_contact_person_role_id: "",
+      phone: "",
+      phone_code: "",
+      email: "",
+    },
+  ]);
 
+
+
+  
   const handleAddContact1 = () => {
     setContacts1([
       ...contacts1,
@@ -141,19 +156,159 @@ const ClientEdit = () => {
     setContactsErrors(newErrors);
   };
 
-  // for Company
-  const [contacts, setContacts] = useState([
-    {
-      authorised_signatory_status: 0,
-      contact_id: "",
-      first_name: "",
-      last_name: "",
-      customer_contact_person_role_id: "",
-      phone: "",
-      phone_code: "",
-      email: "",
-    },
-  ]);
+
+ 
+  useEffect(() => {
+    CountryData();
+    CustomerPersonRoleData();
+    GetClientDetails();
+    getClientIndustry();
+  }, []);
+
+  useEffect(() => {
+    Get_Company();
+  }, [searchItem]);
+
+  useEffect(() => {
+    setSelectClientType(
+      location.state.row.client_type_name == "SoleTrader"
+        ? 1
+        : location.state.row.client_type_name == "Company"
+          ? 2
+          : 3
+    );
+
+    if (location.state.row.client_type_name == "SoleTrader") {
+      setSoleTraderDetails((prevState) => ({
+        ...prevState,
+
+        IndustryType:
+          !getClientDetails.loading &&
+          getClientDetails.data.client.client_industry_id,
+        tradingName:
+          !getClientDetails.loading &&
+          getClientDetails.data.client.trading_name,
+        tradingAddress:
+          !getClientDetails.loading &&
+          getClientDetails.data.client.trading_address,
+        vatRegistered:
+          !getClientDetails.loading &&
+          getClientDetails.data.client.vat_registered,
+        vatNumber:
+          !getClientDetails.loading && getClientDetails.data.client.vat_number,
+        website:
+          !getClientDetails.loading && getClientDetails.data.client.website,
+        first_name:
+          !getClientDetails.loading &&
+          getClientDetails.data.contact_details[0].first_name,
+        last_name:
+          !getClientDetails.loading &&
+          getClientDetails.data.contact_details[0].last_name,
+        phone:
+          !getClientDetails.loading &&
+          getClientDetails.data.contact_details[0].phone,
+        email:
+          !getClientDetails.loading &&
+          getClientDetails.data.contact_details[0].email,
+        residentialAddress:
+          !getClientDetails.loading &&
+          getClientDetails.data.contact_details[0].residential_address,
+        phone_code:
+          !getClientDetails.loading &&
+          getClientDetails.data.contact_details[0].phone_code,
+      }));
+    }
+    if (location.state.row.client_type_name == "Company") {
+      setCompanyDetails((prevState) => ({
+        ...prevState,
+        CompanyName:
+          !getClientDetails.loading &&
+          getClientDetails.data.company_details.company_name,
+        EntityType:
+          !getClientDetails.loading &&
+          getClientDetails.data.company_details.entity_type,
+        CompanyStatus:
+          !getClientDetails.loading &&
+          getClientDetails.data.company_details.company_status,
+        CompanyNumber:
+          !getClientDetails.loading &&
+          getClientDetails.data.company_details.company_number,
+        RegisteredOfficeAddress:
+          !getClientDetails.loading &&
+          getClientDetails.data.company_details.registered_office_address,
+        IncorporationDate:
+          !getClientDetails.loading &&
+          getClientDetails.data.company_details.incorporation_date,
+        IncorporationIn:
+          !getClientDetails.loading &&
+          getClientDetails.data.company_details.incorporation_in,
+
+        VATRegistered:
+          !getClientDetails.loading &&
+          getClientDetails.data.client.vat_registered,
+        VATNumber:
+          !getClientDetails.loading && getClientDetails.data.client.vat_number,
+        Website:
+          !getClientDetails.loading && getClientDetails.data.client.website,
+        ClientIndustry:
+          !getClientDetails.loading &&
+          getClientDetails.data.client.client_industry_id,
+        TradingName:
+          !getClientDetails.loading &&
+          getClientDetails.data.client.trading_name,
+        TradingAddress:
+          !getClientDetails.loading &&
+          getClientDetails.data.client.trading_address,
+      }));
+      setContacts(
+        !getClientDetails.loading && getClientDetails.data.contact_details
+      );
+    }
+    if (location.state.row.client_type_name == "Partnership") {
+      setPartnershipDetails((prevState) => ({
+        ...prevState,
+        ClientIndustry:
+          !getClientDetails.loading &&
+          getClientDetails.data.client.client_industry_id,
+        TradingName:
+          !getClientDetails.loading &&
+          getClientDetails.data.client.trading_name,
+        TradingAddress:
+          !getClientDetails.loading &&
+          getClientDetails.data.client.trading_address,
+        VATRegistered:
+          !getClientDetails.loading &&
+          getClientDetails.data.client.vat_registered,
+        VATNumber:
+          !getClientDetails.loading && getClientDetails.data.client.vat_number,
+        Website:
+          !getClientDetails.loading && getClientDetails.data.client.website,
+      }));
+      setContacts1(
+        getClientDetails.data && getClientDetails.data.contact_details
+      );
+    }
+  }, [getClientDetails]);
+
+  useEffect(() => {
+    if (getSearchDetails.length > 0) {
+      setCompanyDetails((prevState) => ({
+        ...prevState,
+        CompanyName: getSearchDetails[0].title,
+        EntityType: getSearchDetails[0].company_type,
+        CompanyStatus: getSearchDetails[0].company_status,
+        CompanyNumber: getSearchDetails[0].company_number,
+        RegisteredOfficeAddress: getSearchDetails[0].address_snippet,
+        IncorporationDate: getSearchDetails[0].date_of_creation,
+        IncorporationIn: getSearchDetails[0].description,
+      }));
+    }
+  }, [getSearchDetails]);
+
+  useEffect(() => {
+    FilterSearchDetails();
+  }, [searchItem]);
+
 
   const [errors, setErrors] = useState([
     {
@@ -289,17 +444,6 @@ const ClientEdit = () => {
         console.log("Error", error);
       });
   };
-
-  useEffect(() => {
-    CountryData();
-    CustomerPersonRoleData();
-    GetClientDetails();
-    getClientIndustry();
-  }, []);
-
-  useEffect(() => {
-    Get_Company();
-  }, [searchItem]);
 
   const handleUpdate = async () => {
     if (selectClientType == 1 && validate1()) {
@@ -510,7 +654,6 @@ const ClientEdit = () => {
     }
   };
 
-  //  for sole trader
   const handleChange1 = (e) => {
     const { name, value } = e.target;
     if (name === "vatNumber" || name === "phone") {
@@ -547,7 +690,6 @@ const ClientEdit = () => {
     return Object.keys(newErrors).length === 0 ? true : false;
   };
 
-  // for company
   const handleChange2 = (e) => {
     const { name, value } = e.target;
     if (name === "VATNumber") {
@@ -640,7 +782,6 @@ const ClientEdit = () => {
     setErrors(newErrors);
   };
 
-  // for partnership
   const handleChange3 = (e) => {
     const { name, value } = e.target;
     if (name === "VATNumber") {
@@ -744,152 +885,12 @@ const ClientEdit = () => {
     setContactsErrors(errors);
   };
 
-  useEffect(() => {
-    setSelectClientType(
-      location.state.row.client_type_name == "SoleTrader"
-        ? 1
-        : location.state.row.client_type_name == "Company"
-          ? 2
-          : 3
-    );
-
-    if (location.state.row.client_type_name == "SoleTrader") {
-      setSoleTraderDetails((prevState) => ({
-        ...prevState,
-
-        IndustryType:
-          !getClientDetails.loading &&
-          getClientDetails.data.client.client_industry_id,
-        tradingName:
-          !getClientDetails.loading &&
-          getClientDetails.data.client.trading_name,
-        tradingAddress:
-          !getClientDetails.loading &&
-          getClientDetails.data.client.trading_address,
-        vatRegistered:
-          !getClientDetails.loading &&
-          getClientDetails.data.client.vat_registered,
-        vatNumber:
-          !getClientDetails.loading && getClientDetails.data.client.vat_number,
-        website:
-          !getClientDetails.loading && getClientDetails.data.client.website,
-        first_name:
-          !getClientDetails.loading &&
-          getClientDetails.data.contact_details[0].first_name,
-        last_name:
-          !getClientDetails.loading &&
-          getClientDetails.data.contact_details[0].last_name,
-        phone:
-          !getClientDetails.loading &&
-          getClientDetails.data.contact_details[0].phone,
-        email:
-          !getClientDetails.loading &&
-          getClientDetails.data.contact_details[0].email,
-        residentialAddress:
-          !getClientDetails.loading &&
-          getClientDetails.data.contact_details[0].residential_address,
-        phone_code:
-          !getClientDetails.loading &&
-          getClientDetails.data.contact_details[0].phone_code,
-      }));
-    }
-    if (location.state.row.client_type_name == "Company") {
-      setCompanyDetails((prevState) => ({
-        ...prevState,
-        CompanyName:
-          !getClientDetails.loading &&
-          getClientDetails.data.company_details.company_name,
-        EntityType:
-          !getClientDetails.loading &&
-          getClientDetails.data.company_details.entity_type,
-        CompanyStatus:
-          !getClientDetails.loading &&
-          getClientDetails.data.company_details.company_status,
-        CompanyNumber:
-          !getClientDetails.loading &&
-          getClientDetails.data.company_details.company_number,
-        RegisteredOfficeAddress:
-          !getClientDetails.loading &&
-          getClientDetails.data.company_details.registered_office_address,
-        IncorporationDate:
-          !getClientDetails.loading &&
-          getClientDetails.data.company_details.incorporation_date,
-        IncorporationIn:
-          !getClientDetails.loading &&
-          getClientDetails.data.company_details.incorporation_in,
-
-        VATRegistered:
-          !getClientDetails.loading &&
-          getClientDetails.data.client.vat_registered,
-        VATNumber:
-          !getClientDetails.loading && getClientDetails.data.client.vat_number,
-        Website:
-          !getClientDetails.loading && getClientDetails.data.client.website,
-        ClientIndustry:
-          !getClientDetails.loading &&
-          getClientDetails.data.client.client_industry_id,
-        TradingName:
-          !getClientDetails.loading &&
-          getClientDetails.data.client.trading_name,
-        TradingAddress:
-          !getClientDetails.loading &&
-          getClientDetails.data.client.trading_address,
-      }));
-      setContacts(
-        !getClientDetails.loading && getClientDetails.data.contact_details
-      );
-    }
-    if (location.state.row.client_type_name == "Partnership") {
-      setPartnershipDetails((prevState) => ({
-        ...prevState,
-        ClientIndustry:
-          !getClientDetails.loading &&
-          getClientDetails.data.client.client_industry_id,
-        TradingName:
-          !getClientDetails.loading &&
-          getClientDetails.data.client.trading_name,
-        TradingAddress:
-          !getClientDetails.loading &&
-          getClientDetails.data.client.trading_address,
-        VATRegistered:
-          !getClientDetails.loading &&
-          getClientDetails.data.client.vat_registered,
-        VATNumber:
-          !getClientDetails.loading && getClientDetails.data.client.vat_number,
-        Website:
-          !getClientDetails.loading && getClientDetails.data.client.website,
-      }));
-      setContacts1(
-        getClientDetails.data && getClientDetails.data.contact_details
-      );
-    }
-  }, [getClientDetails]);
-
-  useEffect(() => {
-    if (getSearchDetails.length > 0) {
-      setCompanyDetails((prevState) => ({
-        ...prevState,
-        CompanyName: getSearchDetails[0].title,
-        EntityType: getSearchDetails[0].company_type,
-        CompanyStatus: getSearchDetails[0].company_status,
-        CompanyNumber: getSearchDetails[0].company_number,
-        RegisteredOfficeAddress: getSearchDetails[0].address_snippet,
-        IncorporationDate: getSearchDetails[0].date_of_creation,
-        IncorporationIn: getSearchDetails[0].description,
-      }));
-    }
-  }, [getSearchDetails]);
-
   const FilterSearchDetails = () => {
     const filterData = getAllSearchCompany.filter(
       (data) => data.title === searchItem
     );
     setSearchDetails(filterData);
   };
-
-  useEffect(() => {
-    FilterSearchDetails();
-  }, [searchItem]);
 
   const HandleCancel = () => {
     navigate("/admin/Clientlist", { state: { id: location.state.id } });

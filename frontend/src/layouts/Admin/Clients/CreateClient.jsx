@@ -12,7 +12,9 @@ import {
   PersonRole,
   Country,
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
-import Search from "antd/es/transfer/search";
+
+
+
 const CreateClient = () => {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -23,14 +25,14 @@ const CreateClient = () => {
   const [selectClientType, setSelectClientType] = useState(1);
   const [showDropdown, setShowDropdown] = useState(true);
   const [getSearchDetails, setSearchDetails] = useState("");
-  const [personRoleDataAll, setPersonRoleDataAll] = useState({
-    loading: true,
-    data: [],
-  });
   const [searchItem, setSearchItem] = useState("");
   const [errors1, setErrors1] = useState({});
   const [errors2, setErrors2] = useState({});
   const [errors3, setErrors3] = useState({});
+  const [personRoleDataAll, setPersonRoleDataAll] = useState({
+    loading: true,
+    data: [],
+  });
   const [countryDataAll, setCountryDataAll] = useState({
     loading: true,
     data: [],
