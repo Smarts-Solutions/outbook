@@ -18,10 +18,15 @@ router.post('/country',verifyToken, controllers.countryController.handleCountry)
 
 // Customer Contact Person Role
 router.post('/customerContactPersonRole',verifyToken, controllers.customerContactPersonRoleController.handleCustomerContactPersonRole);
-module.exports = router;
 
 //incorporation_in
 router.post('/incorporation',verifyToken, controllers.IncorporationController.handleIncorporation);
 
 //customerSource
 router.post('/customerSource',verifyToken, controllers.customerSourceController.handleCustomerSource);
+
+//customerSubSource
+router.post('/customerSubSource',verifyToken, controllers.customerSubSourceController.handleCustomerSubSource);
+
+
+module.exports = router;

@@ -704,6 +704,18 @@ CREATE TABLE jobs (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+
+/*--TABLE:- customer sub source  DOCUMENTS  */
+ CREATE TABLE customer_sub_source (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_source_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_source_id) REFERENCES customer_source(id)
+);
+
     
 
 
