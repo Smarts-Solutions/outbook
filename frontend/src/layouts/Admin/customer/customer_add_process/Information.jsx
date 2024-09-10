@@ -33,7 +33,7 @@ const Information = () => {
     loading: true,
     data: [],
   });
-  
+
   const [personRoleDataAll, setPersonRoleDataAll] = useState({
     loading: true,
     data: [],
@@ -570,6 +570,7 @@ const Information = () => {
       disable: false,
     },
   ];
+  
 
   const fields1 = [
     {
