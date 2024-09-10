@@ -209,7 +209,8 @@ const getChecklist = async (checklist) => {
     job_types.id AS job_type_id,
     job_types.type AS job_type_type,
     client_types.id AS client_type_id,
-    client_types.type AS client_type_type
+    client_types.type AS client_type_type,
+    checklists.client_type_id  AS checklists_client_type_id
     FROM checklists 
     JOIN 
          customers ON customers.id = checklists.customer_id
