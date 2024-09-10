@@ -33,18 +33,23 @@ const Information = () => {
     loading: true,
     data: [],
   });
+  
   const [personRoleDataAll, setPersonRoleDataAll] = useState({
     loading: true,
     data: [],
   });
+
   const [errors, setErrors] = useState([
     { firstName: "", lastName: "", role: "", phoneNumber: "", email: "" },
   ]);
+
   const [getAllSearchCompany, setGetAllSearchCompany] = useState([]);
+
   const [countryDataAll, setCountryDataAll] = useState({
     loading: true,
     data: [],
   });
+
   const [contacts, setContacts] = useState([
     {
       authorised_signatory_status: false,
