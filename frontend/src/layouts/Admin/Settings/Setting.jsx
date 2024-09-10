@@ -535,7 +535,7 @@ const Setting = () => {
                     className="btn btn-info text-white"
                     onClick={(e) => handleJobType(row)}
                   >
-                    Add Job Type
+                    Add Sub Source
                   </button>
                 )}
               </div>
@@ -754,8 +754,73 @@ const Setting = () => {
     },
   ];
 
+
+  const columnCoustomerSource = [
+    { name: "Source Name", selector: (row) => row.name, sortable: true, width: "70%", },
+    {
+      name: "Status",
+      cell: (row) => (
+        <div>
+          <span
+            className={`badge ${
+              row.status === "1" ? "bg-success" : "bg-danger"
+            }`}
+          >
+            {row.status === "1" ? "Active" : "Deactive"}
+          </span>
+        </div>
+      ),
+    },
+
+    ...(showSettingUpdateTab || showSettingDeleteTab || showSettingInsertTab
+      ? [
+          {
+            name: "Actions",
+            cell: (row) => (
+              <div>
+                {showSettingUpdateTab && (
+                  <button
+                    className="edit-icon"
+                    onClick={() => handleEdit(row, "8")}
+                  >
+                    {" "}
+                    <i className="ti-pencil" />
+                  </button>
+                )}
+                {showSettingDeleteTab && (
+                  <button
+                    className="delete-icon"
+                    onClick={() => handleDelete(row, "8")}
+                  >
+                    {" "}
+                    <i className="ti-trash" />
+                  </button>
+                )}
+                {showSettingInsertTab && (
+                  <button
+                    className="btn btn-info text-white"
+                    onClick={(e) => handleSubSource(row)}
+                  >
+                    Add Sub Source Type
+                  </button>
+                )}
+              </div>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+            width: "20%",
+          },
+        ]
+      : []),
+  ];
+
   const handleJobType = (row) => {
     navigate("/admin/add/jobtype", { state: { Id: row.id } });
+  };
+
+  const handleSubSource = (row) => {
+    navigate("/admin/add/subSource", { state: { Id: row.id } });
   };
 
   const handleModalChange = (e) => {
@@ -887,6 +952,20 @@ const Setting = () => {
           },
         ],
         title: " Incorporation",
+        tabStatus: tabStatus,
+      });
+    } else if (tabStatus === "8") {
+      setModalData({
+        ...modalData,
+        fields: [
+          {
+            type: "text",
+            name: "SourceName",
+            label: "Source Name",
+            placeholder: "Enter Source Name",
+          },
+        ],
+        title: "Source",
         tabStatus: tabStatus,
       });
     }
@@ -1090,6 +1169,33 @@ const Setting = () => {
           },
         ],
         title: "Incorporation",
+        tabStatus: tabStatus,
+        id: data.id,
+      });
+    }else if (tabStatus === "8") {
+      setModalData({
+        ...modalData,
+        fields: [
+          {
+            type: "text",
+            name: "name",
+            label: "Source Name",
+            placeholder: "Enter Source Name",
+            value: data.name,
+          },
+          {
+            type: "select",
+            name: "status",
+            label: "Status",
+            placeholder: "Select Status",
+            value: data.status === "1" ? "1" : "0",
+            options: [
+              { label: "Active", value: "1" },
+              { label: "Deactive", value: "0" },
+            ],
+          },
+        ],
+        title: "Coustomer Source",
         tabStatus: tabStatus,
         id: data.id,
       });
@@ -1520,17 +1626,17 @@ const Setting = () => {
               <div className="report-data">
                 <div className="d-flex justify-content-between align-items-center">
                   <div className="tab-title">
-                    <h3 className="mt-0">Source</h3>
+                    <h3 className="mt-0">Coustomer Source</h3>
                   </div>
                   {!showSettingInsertTab ? null : (
                     <div>
                       <button
                         type="button"
                         className="btn btn-info text-white float-end"
-                        onClick={(e) => handleAdd(e, "7")}
+                        onClick={(e) => handleAdd(e, "8")}
                       >
                         {" "}
-                        <i className="fa fa-plus" /> Add Source
+                        <i className="fa fa-plus" /> Add Coustomer Source
                       </button>
                     </div>
                   )}
@@ -1538,8 +1644,8 @@ const Setting = () => {
                 <div className="datatable-wrapper">
                   <Datatable
                     filter={true}
-                    columns={columnincorporation}
-                    data={incorporationDataAll}
+                    columns={columnCoustomerSource}
+                    data={[{ name:"source",status:"1"},{ name:"source1",status:"1"},{ name:"source2",status:"0"}]}
                   />
                 </div>
               </div>
