@@ -219,7 +219,7 @@ const ClientList = () => {
   };
 
   function ClientEdit(row) {
-    console.log("row", row);
+
     navigate("/admin/client/edit", { state: { row, id: row } });
   }
 

@@ -65,7 +65,7 @@ const getjobTimeSheet = async (timeSheet) => {
   
      `;
     const [rows] = await pool.execute(query, [job_id]);
-    console.log("rows ", rows)
+   
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
      console.log("error ",error)
@@ -85,10 +85,10 @@ const updateTaskTimeSheetStatus = async (timeSheet) => {
      id = ?
      `;
     const [rows] = await pool.execute(query, [task_status, time, id]);
-    console.log("rows ", rows)
+    
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-     console.log("error ",error)
+ 
     return { status: false, message: 'Error getTaskTimeSheet .' };
   }
 }

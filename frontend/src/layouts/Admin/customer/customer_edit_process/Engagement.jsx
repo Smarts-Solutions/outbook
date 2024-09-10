@@ -225,8 +225,6 @@ const Engagement = () => {
 
   const handleChange1 = (e) => {
     const { name, value } = e.target;
-    console.log(value);
-    console.log(name);
 
     if (!/^\d*\.?\d*$/.test(value)) {
       return;
@@ -420,9 +418,8 @@ const Engagement = () => {
   const scrollToFirstError = (i) => {
     const errors = [errors1, errors2, errors3, errors4];
 
-    console.log(errors[i]);
     const errorField = Object.keys(errors[i])[0];
-    console.log('errorField', errorField);
+
     const errorElement = document.getElementById(errorField);
     if (errorElement) {
       errorElement.scrollIntoView({ behavior: 'smooth' });

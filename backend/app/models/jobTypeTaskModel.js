@@ -431,7 +431,7 @@ const getClientTypeChecklist = async (checklist) => {
 
 const getByServiceWithJobType = async (checklist) => {
   const { customer_id, service_id, job_type_id, clientId } = checklist;
-  //   console.log("clientId", clientId);
+
 
   //   const query = `
   //     SELECT
