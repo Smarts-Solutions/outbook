@@ -36,6 +36,8 @@ const ClientEdit = () => {
   const [errors1, setErrors1] = useState({});
   const [errors2, setErrors2] = useState({});
   const [errors3, setErrors3] = useState({});
+  const [errors4, setErrors4] = useState({});
+
   const [getClientDetails, setClientDetails] = useState({
     loading: true,
     data: [],
@@ -79,8 +81,6 @@ const ClientEdit = () => {
     VATNumber: "",
     Website: "",
   });
-
-
   const [contacts1, setContacts1] = useState([]);
   const [contactsErrors, setContactsErrors] = useState([
     {
@@ -114,51 +114,36 @@ const ClientEdit = () => {
       email: "",
     },
   ]);
+  const [errors, setErrors] = useState([
+    {
+      first_name: false,
+      last_name: false,
+      customer_contact_person_role_id: false,
+      phoneCode: false,
+      phone: false,
+      email: false,
+    },
+  ]);
+  const [getIndivisualDetails, setIndivisualDetails] = useState({
+    tradingName: "",
+    first_name: "",
+    last_name: "",
+    phone: "",
+    email: "",
+    residentialAddress: "",
+    phone_code: "+44",
+  });
 
-
-
-  
-  const handleAddContact1 = () => {
-    setContacts1([
-      ...contacts1,
-      {
-        authorised_signatory_status: 0,
-        contact_id: "",
-        first_name: "",
-        last_name: "",
-        customer_contact_person_role_id: "",
-        phone: "",
-        phone_code: "+44",
-        alternate_phone: "",
-        alternate_phone_code: "+44",
-        email: "",
-        alternate_email: "",
-      },
-    ]);
-    setContactsErrors([
-      ...contactsErrors,
-      {
-        first_name: "",
-        last_name: "",
-        customer_contact_person_role_id: "",
-        phone: "",
-        alternate_phone: "",
-        email: "",
-        alternate_email: "",
-      },
-    ]);
-  };
-
-  const handleDeleteContact1 = (index) => {
-    const newContacts = contacts1.filter((_, i) => i !== index);
-    const newErrors = contactsErrors.filter((_, i) => i !== index);
-    setContacts1(newContacts);
-    setContactsErrors(newErrors);
-  };
-
-
- 
   useEffect(() => {
+    setSelectClientType(
+      location.state.row.client_type_name == "SoleTrader"
+        ? 1
+        : location.state.row.client_type_name == "Company"
+        ? 2
+        : location.state.row.client_type_name == "Partnership"
+        ? 3
+        : 4
+    );
     CountryData();
     CustomerPersonRoleData();
     GetClientDetails();
@@ -170,14 +155,6 @@ const ClientEdit = () => {
   }, [searchItem]);
 
   useEffect(() => {
-    setSelectClientType(
-      location.state.row.client_type_name == "SoleTrader"
-        ? 1
-        : location.state.row.client_type_name == "Company"
-          ? 2
-          : 3
-    );
-
     if (location.state.row.client_type_name == "SoleTrader") {
       setSoleTraderDetails((prevState) => ({
         ...prevState,
@@ -288,6 +265,34 @@ const ClientEdit = () => {
         getClientDetails.data && getClientDetails.data.contact_details
       );
     }
+    if (location.state.row.client_type_name == "Individual") {
+      setIndivisualDetails((prevState) => ({
+        ...prevState,
+
+        tradingName:
+          !getClientDetails.loading &&
+          getClientDetails.data.client.trading_name,
+
+        first_name:
+          !getClientDetails.loading &&
+          getClientDetails.data.contact_details[0].first_name,
+        last_name:
+          !getClientDetails.loading &&
+          getClientDetails.data.contact_details[0].last_name,
+        phone:
+          !getClientDetails.loading &&
+          getClientDetails.data.contact_details[0].phone,
+        email:
+          !getClientDetails.loading &&
+          getClientDetails.data.contact_details[0].email,
+        residentialAddress:
+          !getClientDetails.loading &&
+          getClientDetails.data.contact_details[0].residential_address,
+        phone_code:
+          !getClientDetails.loading &&
+          getClientDetails.data.contact_details[0].phone_code,
+      }));
+    }
   }, [getClientDetails]);
 
   useEffect(() => {
@@ -309,17 +314,43 @@ const ClientEdit = () => {
     FilterSearchDetails();
   }, [searchItem]);
 
+  const handleAddContact1 = () => {
+    setContacts1([
+      ...contacts1,
+      {
+        authorised_signatory_status: 0,
+        contact_id: "",
+        first_name: "",
+        last_name: "",
+        customer_contact_person_role_id: "",
+        phone: "",
+        phone_code: "+44",
+        alternate_phone: "",
+        alternate_phone_code: "+44",
+        email: "",
+        alternate_email: "",
+      },
+    ]);
+    setContactsErrors([
+      ...contactsErrors,
+      {
+        first_name: "",
+        last_name: "",
+        customer_contact_person_role_id: "",
+        phone: "",
+        alternate_phone: "",
+        email: "",
+        alternate_email: "",
+      },
+    ]);
+  };
 
-  const [errors, setErrors] = useState([
-    {
-      first_name: false,
-      last_name: false,
-      customer_contact_person_role_id: false,
-      phoneCode: false,
-      phone: false,
-      email: false,
-    },
-  ]);
+  const handleDeleteContact1 = (index) => {
+    const newContacts = contacts1.filter((_, i) => i !== index);
+    const newErrors = contactsErrors.filter((_, i) => i !== index);
+    setContacts1(newContacts);
+    setContactsErrors(newErrors);
+  };
 
   const handleAddContact = () => {
     setContacts([
@@ -352,6 +383,323 @@ const ClientEdit = () => {
     const newErrors = errors.filter((_, i) => i !== index);
     setContacts(newContacts);
     setErrors(newErrors);
+  };
+
+  const handleChange1 = (e) => {
+    const { name, value } = e.target;
+    if (name === "vatNumber" || name === "phone") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    validate1();
+    setSoleTraderDetails({ ...getSoleTraderDetails, [name]: value });
+  };
+
+  const handleChange2 = (e) => {
+    const { name, value } = e.target;
+    if (name === "VATNumber") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    validate2();
+    setCompanyDetails({ ...getCompanyDetails, [name]: value });
+  };
+
+  const handleChange = (index, field, value) => {
+    const newContacts = contacts.map((contact, i) =>
+      i === index ? { ...contact, [field]: value } : contact
+    );
+
+    setContacts(newContacts);
+
+    validateField(index, field, value);
+  };
+
+  const handleChange3 = (e) => {
+    const { name, value } = e.target;
+    if (name === "VATNumber") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    validate3();
+    setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
+  };
+
+  const handleChange4 = (index, field, value) => {
+    let newValue = value;
+    if (field == "authorised_signatory_status") {
+      newValue = value ? 1 : 0;
+    }
+
+    const newContacts = contacts1.map((contact, i) =>
+      i === index ? { ...contact, [field]: newValue } : contact
+    );
+
+    setContacts1(newContacts);
+    validateField1(index, field, newValue);
+  };
+
+  const handleChange5 = (e) => {
+    const { name, value } = e.target;
+    if (name === "vatNumber" || name === "phone") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    validate1();
+    setIndivisualDetails({ ...getIndivisualDetails, [name]: value });
+  };
+
+  const handleUpdate = async () => {
+    if (selectClientType == 1 && validate1()) {
+      const req = {
+        client_type: "1",
+        client_id: location.state.row.id,
+        customer_id: location.state.id,
+        client_industry_id: getSoleTraderDetails.IndustryType,
+        trading_name: getSoleTraderDetails.tradingName,
+        trading_address: getSoleTraderDetails.tradingAddress,
+        vat_registered: getSoleTraderDetails.vatRegistered,
+        vat_number: getSoleTraderDetails.vatNumber,
+        website: getSoleTraderDetails.website,
+        first_name: getSoleTraderDetails.first_name,
+        last_name: getSoleTraderDetails.last_name,
+        phone: getSoleTraderDetails.phone,
+        email: getSoleTraderDetails.email,
+        residential_address: getSoleTraderDetails.residentialAddress,
+        client_code: location.state.row.id,
+        phone_code: getSoleTraderDetails.phone_code,
+      };
+      await dispatch(Edit_Client(req))
+        .unwrap()
+        .then((response) => {
+          if (response.status) {
+            Swal.fire({
+              icon: "success",
+              title: "Client Updated Successfully",
+              timerProgressBar: true,
+              timer: 1500,
+            });
+            setTimeout(() => {
+              navigate("/admin/Clientlist", {
+                state: { id: location.state.id },
+              });
+            }, 1500);
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: response.message,
+              timerProgressBar: true,
+              timer: 1500,
+            });
+          }
+        });
+    }
+    if (selectClientType == 2 && validate2()) {
+      let formIsValid = true;
+      const newErrors = contacts.map((contact, index) => {
+        const error = {
+          first_name: contact.first_name ? "" : "First Name is required",
+          last_name: contact.last_name ? "" : "Last Name is required",
+          phone:
+            contact.phone === ""
+              ? ""
+              : /^\d{9,12}$/.test(contact.phone)
+              ? ""
+              : "Phone Number must be between 9 to 12 digits",
+          email:
+            contact.email === ""
+              ? ""
+              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+              ? ""
+              : "Valid Email is required",
+        };
+
+        if (
+          error.first_name ||
+          error.last_name ||
+          error.customer_contact_person_role_id ||
+          error.phone ||
+          error.email
+        ) {
+          formIsValid = false;
+        }
+        return error;
+      });
+      setErrors(newErrors);
+      if (formIsValid) {
+        const req = {
+          client_type: "2",
+          client_id: location.state.row.id,
+          customer_id: location.state.id,
+          company_name: getCompanyDetails.CompanyName,
+          entity_type: getCompanyDetails.EntityType,
+          company_status: getCompanyDetails.CompanyStatus,
+          company_number: getCompanyDetails.CompanyNumber,
+          registered_office_address: getCompanyDetails.RegisteredOfficeAddress,
+          incorporation_date: getCompanyDetails.IncorporationDate,
+          incorporation_in: getCompanyDetails.IncorporationIn,
+          vat_registered: getCompanyDetails.VATRegistered,
+          vat_number: getCompanyDetails.VATNumber,
+          website: getCompanyDetails.Website,
+          client_industry_id: Number(getCompanyDetails.ClientIndustry),
+          trading_name: getCompanyDetails.TradingName,
+          trading_address: getCompanyDetails.TradingAddress,
+          contactDetails: contacts,
+        };
+        await dispatch(Edit_Client(req))
+          .unwrap()
+          .then((response) => {
+            if (response.status) {
+              Swal.fire({
+                icon: "success",
+                title: "Client Updated Successfully",
+                timerProgressBar: true,
+                timer: 1500,
+              });
+              setTimeout(() => {
+                navigate("/admin/Clientlist", {
+                  state: { id: location.state.id },
+                });
+              }, 1500);
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: response.message,
+                timerProgressBar: true,
+                timer: 1500,
+              });
+            }
+          });
+      }
+    }
+    if (selectClientType == 3 && validate3()) {
+      let formIsValid = true;
+      const newErrors = contacts1.map((contact, index) => {
+        const error = {
+          first_name: contact.first_name ? "" : "First Name is required",
+          last_name: contact.last_name ? "" : "Last Name is required",
+          phone:
+            contact.phone === ""
+              ? ""
+              : /^\d{9,12}$/.test(contact.phone)
+              ? ""
+              : "Phone Number must be between 9 to 12 digits",
+          alternate_phone:
+            contact.alternate_phone === ""
+              ? ""
+              : /^\d{9,12}$/.test(contact.alternate_phone)
+              ? ""
+              : "Alternate Phone Number must be between 9 to 12 digits",
+          email:
+            contact.email === ""
+              ? ""
+              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+              ? ""
+              : "Valid Email is required",
+          alternate_email:
+            contact.alternate_email === ""
+              ? ""
+              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.alternate_email)
+              ? ""
+              : "Valid Email is required",
+        };
+
+        if (
+          error.first_name ||
+          error.last_name ||
+          error.customer_contact_person_role_id ||
+          error.phone ||
+          error.email
+        ) {
+          formIsValid = false;
+        }
+        return error;
+      });
+      setContactsErrors(newErrors);
+      if (formIsValid) {
+        const req = {
+          client_type: "3",
+          client_id: location.state.row.id,
+          customer_id: location.state.id,
+          client_industry_id: getPartnershipDetails.ClientIndustry,
+          trading_name: getPartnershipDetails.TradingName,
+          trading_address: getPartnershipDetails.TradingAddress,
+          vat_registered: getPartnershipDetails.VATRegistered,
+          vat_number: getPartnershipDetails.VATNumber,
+          website: getPartnershipDetails.Website,
+          contactDetails: contacts1,
+        };
+        await dispatch(Edit_Client(req))
+          .unwrap()
+          .then((response) => {
+            if (response.status) {
+              Swal.fire({
+                icon: "success",
+                title: "Client Added Successfully",
+                timerProgressBar: true,
+                timer: 1500,
+              });
+              setTimeout(() => {
+                navigate("/admin/Clientlist", {
+                  state: { id: location.state.id },
+                });
+              }, 1500);
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: response.message,
+                timerProgressBar: true,
+                timer: 1500,
+              });
+            }
+          });
+      }
+    }
+    if (selectClientType == 4 && validate4()) {
+      const req = {
+        client_type: "4",
+        client_id: location.state.row.id,
+        customer_id: location.state.id,
+
+        trading_name: getIndivisualDetails.tradingName,
+
+        first_name: getIndivisualDetails.first_name,
+        last_name: getIndivisualDetails.last_name,
+        phone: getIndivisualDetails.phone,
+        email: getIndivisualDetails.email,
+        residential_address: getIndivisualDetails.residentialAddress,
+        client_code: location.state.row.id,
+        phone_code: getIndivisualDetails.phone_code,
+      };
+      await dispatch(Edit_Client(req))
+        .unwrap()
+        .then((response) => {
+          if (response.status) {
+            Swal.fire({
+              icon: "success",
+              title: "Client Updated Successfully",
+              timerProgressBar: true,
+              timer: 1500,
+            });
+            setTimeout(() => {
+              navigate("/admin/Clientlist", {
+                state: { id: location.state.id },
+              });
+            }, 1500);
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: response.message,
+              timerProgressBar: true,
+              timer: 1500,
+            });
+          }
+        });
+    }
   };
 
   const GetClientDetails = async () => {
@@ -445,226 +793,6 @@ const ClientEdit = () => {
       });
   };
 
-  const handleUpdate = async () => {
-    if (selectClientType == 1 && validate1()) {
-      const req = {
-        client_type: "1",
-        client_id: location.state.row.id,
-        customer_id: location.state.id,
-        client_industry_id: getSoleTraderDetails.IndustryType,
-        trading_name: getSoleTraderDetails.tradingName,
-        trading_address: getSoleTraderDetails.tradingAddress,
-        vat_registered: getSoleTraderDetails.vatRegistered,
-        vat_number: getSoleTraderDetails.vatNumber,
-        website: getSoleTraderDetails.website,
-        first_name: getSoleTraderDetails.first_name,
-        last_name: getSoleTraderDetails.last_name,
-        phone: getSoleTraderDetails.phone,
-        email: getSoleTraderDetails.email,
-        residential_address: getSoleTraderDetails.residentialAddress,
-        client_code: location.state.row.id,
-        phone_code: getSoleTraderDetails.phone_code,
-      };
-      await dispatch(Edit_Client(req))
-        .unwrap()
-        .then((response) => {
-          if (response.status) {
-            Swal.fire({
-              icon: "success",
-              title: "Client Updated Successfully",
-              timerProgressBar: true,
-              timer: 1500,
-            });
-            setTimeout(() => {
-              navigate("/admin/Clientlist", {
-                state: { id: location.state.id },
-              });
-            }, 1500);
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: response.message,
-              timerProgressBar: true,
-              timer: 1500,
-            });
-          }
-        });
-    }
-    if (selectClientType == 2 && validate2()) {
-      let formIsValid = true;
-      const newErrors = contacts.map((contact, index) => {
-        const error = {
-          first_name: contact.first_name ? "" : "First Name is required",
-          last_name: contact.last_name ? "" : "Last Name is required",
-          phone:
-            contact.phone === ""
-              ? ""
-              : /^\d{9,12}$/.test(contact.phone)
-                ? ""
-                : "Phone Number must be between 9 to 12 digits",
-          email:
-            contact.email === ""
-              ? ""
-              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-                ? ""
-                : "Valid Email is required",
-        };
-
-        if (
-          error.first_name ||
-          error.last_name ||
-          error.customer_contact_person_role_id ||
-          error.phone ||
-          error.email
-        ) {
-          formIsValid = false;
-        }
-        return error;
-      });
-      setErrors(newErrors);
-      if (formIsValid) {
-        const req = {
-          client_type: "2",
-          client_id: location.state.row.id,
-          customer_id: location.state.id,
-          company_name: getCompanyDetails.CompanyName,
-          entity_type: getCompanyDetails.EntityType,
-          company_status: getCompanyDetails.CompanyStatus,
-          company_number: getCompanyDetails.CompanyNumber,
-          registered_office_address: getCompanyDetails.RegisteredOfficeAddress,
-          incorporation_date: getCompanyDetails.IncorporationDate,
-          incorporation_in: getCompanyDetails.IncorporationIn,
-          vat_registered: getCompanyDetails.VATRegistered,
-          vat_number: getCompanyDetails.VATNumber,
-          website: getCompanyDetails.Website,
-          client_industry_id: Number(getCompanyDetails.ClientIndustry),
-          trading_name: getCompanyDetails.TradingName,
-          trading_address: getCompanyDetails.TradingAddress,
-          contactDetails: contacts,
-        };
-        await dispatch(Edit_Client(req))
-          .unwrap()
-          .then((response) => {
-            if (response.status) {
-              Swal.fire({
-                icon: "success",
-                title: "Client Updated Successfully",
-                timerProgressBar: true,
-                timer: 1500,
-              });
-              setTimeout(() => {
-                navigate("/admin/Clientlist", {
-                  state: { id: location.state.id },
-                });
-              }, 1500);
-            } else {
-              Swal.fire({
-                icon: "error",
-                title: response.message,
-                timerProgressBar: true,
-                timer: 1500,
-              });
-            }
-          });
-      }
-    }
-    if (selectClientType == 3 && validate3()) {
-      let formIsValid = true;
-      const newErrors = contacts1.map((contact, index) => {
-        const error = {
-          first_name: contact.first_name ? "" : "First Name is required",
-          last_name: contact.last_name ? "" : "Last Name is required",
-          phone:
-            contact.phone === ""
-              ? ""
-              : /^\d{9,12}$/.test(contact.phone)
-                ? ""
-                : "Phone Number must be between 9 to 12 digits",
-          alternate_phone:
-            contact.alternate_phone === ""
-              ? ""
-              : /^\d{9,12}$/.test(contact.alternate_phone)
-                ? ""
-                : "Alternate Phone Number must be between 9 to 12 digits",
-          email:
-            contact.email === ""
-              ? ""
-              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-                ? ""
-                : "Valid Email is required",
-          alternate_email:
-            contact.alternate_email === ""
-              ? ""
-              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.alternate_email)
-                ? ""
-                : "Valid Email is required",
-        };
-
-        if (
-          error.first_name ||
-          error.last_name ||
-          error.customer_contact_person_role_id ||
-          error.phone ||
-          error.email
-        ) {
-          formIsValid = false;
-        }
-        return error;
-      });
-      setContactsErrors(newErrors);
-      if (formIsValid) {
-        const req = {
-          client_type: "3",
-          client_id: location.state.row.id,
-          customer_id: location.state.id,
-          client_industry_id: getPartnershipDetails.ClientIndustry,
-          trading_name: getPartnershipDetails.TradingName,
-          trading_address: getPartnershipDetails.TradingAddress,
-          vat_registered: getPartnershipDetails.VATRegistered,
-          vat_number: getPartnershipDetails.VATNumber,
-          website: getPartnershipDetails.Website,
-          contactDetails: contacts1,
-        };
-        await dispatch(Edit_Client(req))
-          .unwrap()
-          .then((response) => {
-            if (response.status) {
-              Swal.fire({
-                icon: "success",
-                title: "Client Added Successfully",
-                timerProgressBar: true,
-                timer: 1500,
-              });
-              setTimeout(() => {
-                navigate("/admin/Clientlist", {
-                  state: { id: location.state.id },
-                });
-              }, 1500);
-            } else {
-              Swal.fire({
-                icon: "error",
-                title: response.message,
-                timerProgressBar: true,
-                timer: 1500,
-              });
-            }
-          });
-      }
-    } else {
-    }
-  };
-
-  const handleChange1 = (e) => {
-    const { name, value } = e.target;
-    if (name === "vatNumber" || name === "phone") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
-    validate1();
-    setSoleTraderDetails({ ...getSoleTraderDetails, [name]: value });
-  };
-
   const validate1 = () => {
     const newErrors = {};
     for (const key in getSoleTraderDetails) {
@@ -688,17 +816,6 @@ const ClientEdit = () => {
     }
     setErrors1(newErrors);
     return Object.keys(newErrors).length === 0 ? true : false;
-  };
-
-  const handleChange2 = (e) => {
-    const { name, value } = e.target;
-    if (name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
-    validate2();
-    setCompanyDetails({ ...getCompanyDetails, [name]: value });
   };
 
   const validate2 = () => {
@@ -730,14 +847,22 @@ const ClientEdit = () => {
     return Object.keys(newErrors).length === 0 ? true : false;
   };
 
-  const handleChange = (index, field, value) => {
-    const newContacts = contacts.map((contact, i) =>
-      i === index ? { ...contact, [field]: value } : contact
-    );
+  const validate3 = () => {
+    const newErrors = {};
+    for (const key in getPartnershipDetails) {
+      if (!getPartnershipDetails[key]) {
+        //  if (key === 'ClientIndustry') newErrors[key] = 'Please Select Client Industry';
+        if (key === "TradingName") newErrors[key] = "Please Enter Trading Name";
+        else if (key === "TradingAddress")
+          newErrors[key] = "Please Enter Trading Address";
+        else if (key === "VATRegistered")
+          newErrors[key] = "Please Enter VAT Registered";
+      }
+    }
 
-    setContacts(newContacts);
+    setErrors3(newErrors);
 
-    validateField(index, field, value);
+    return Object.keys(newErrors).length === 0 ? true : false;
   };
 
   const validateField = (index, field, value) => {
@@ -772,57 +897,14 @@ const ClientEdit = () => {
           value === ""
             ? ""
             : /^\d{9,12}$/.test(value)
-              ? ""
-              : "Phone Number must be between 9 to 12 digits";
+            ? ""
+            : "Phone Number must be between 9 to 12 digits";
 
         break;
       default:
         break;
     }
     setErrors(newErrors);
-  };
-
-  const handleChange3 = (e) => {
-    const { name, value } = e.target;
-    if (name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
-    validate3();
-    setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
-  };
-
-  const validate3 = () => {
-    const newErrors = {};
-    for (const key in getPartnershipDetails) {
-      if (!getPartnershipDetails[key]) {
-        //  if (key === 'ClientIndustry') newErrors[key] = 'Please Select Client Industry';
-        if (key === "TradingName") newErrors[key] = "Please Enter Trading Name";
-        else if (key === "TradingAddress")
-          newErrors[key] = "Please Enter Trading Address";
-        else if (key === "VATRegistered")
-          newErrors[key] = "Please Enter VAT Registered";
-      }
-    }
-
-    setErrors3(newErrors);
-
-    return Object.keys(newErrors).length === 0 ? true : false;
-  };
-
-  const handleChange4 = (index, field, value) => {
-    let newValue = value;
-    if (field == "authorised_signatory_status") {
-      newValue = value ? 1 : 0;
-    }
-
-    const newContacts = contacts1.map((contact, i) =>
-      i === index ? { ...contact, [field]: newValue } : contact
-    );
-
-    setContacts1(newContacts);
-    validateField1(index, field, newValue);
   };
 
   const validateField1 = (index, field, value) => {
@@ -858,8 +940,8 @@ const ClientEdit = () => {
           value === ""
             ? ""
             : /^\d{9,12}$/.test(value)
-              ? ""
-              : "Phone Number must be between 9 to 12 digits";
+            ? ""
+            : "Phone Number must be between 9 to 12 digits";
         break;
 
       case "alternate_phone":
@@ -867,8 +949,8 @@ const ClientEdit = () => {
           value === ""
             ? ""
             : /^\d{9,12}$/.test(value)
-              ? ""
-              : "Phone Number must be between 9 to 12 digits";
+            ? ""
+            : "Phone Number must be between 9 to 12 digits";
 
         break;
       case "customer_contact_person_role_id":
@@ -883,6 +965,27 @@ const ClientEdit = () => {
     }
 
     setContactsErrors(errors);
+  };
+
+  const validate4 = () => {
+    const newErrors = {};
+    for (const key in getIndivisualDetails) {
+      if (!getIndivisualDetails[key]) {
+        if (key == "tradingName") newErrors[key] = "Please enter Trading Name";
+        else if (key == "first_name")
+          newErrors[key] = "Please enter First Name";
+        else if (key == "last_name") newErrors[key] = "Please enter Last Name";
+      } else if (key == "email" && !Email_regex(getIndivisualDetails[key])) {
+        newErrors[key] = "Please enter valid Email";
+      } else if (
+        key == "phone" &&
+        !/^\d{9,12}$/.test(getIndivisualDetails[key])
+      ) {
+        newErrors[key] = "Phone Number must be between 9 to 12 digits";
+      }
+    }
+    setErrors4(newErrors);
+    return Object.keys(newErrors).length === 0 ? true : false;
   };
 
   const FilterSearchDetails = () => {
@@ -913,7 +1016,6 @@ const ClientEdit = () => {
                 <h4 className="card-title  mb-0">Edit Client</h4>
               </div>
 
-              {/* end card header */}
               <div className="card-body form-steps">
                 <div>
                   <div className="tab-content">
@@ -949,7 +1051,6 @@ const ClientEdit = () => {
                                       <option value={2}>Company</option>
                                       <option value={3}>Partnership</option>
                                       <option value={4}>Individual</option>
-
                                     </select>
                                   </div>
                                 </div>
@@ -1318,7 +1419,7 @@ const ClientEdit = () => {
                                                 style={{ cursor: "pointer" }}
                                               />
                                               {getAllSearchCompany.length > 0 &&
-                                                showDropdown ? (
+                                              showDropdown ? (
                                                 <div className="dropdown-list">
                                                   {getAllSearchCompany &&
                                                     getAllSearchCompany.map(
@@ -1498,14 +1599,14 @@ const ClientEdit = () => {
                                             {errors2[
                                               "RegisteredOfficeAddress"
                                             ] && (
-                                                <div style={{ color: "red" }}>
-                                                  {
-                                                    errors2[
+                                              <div style={{ color: "red" }}>
+                                                {
+                                                  errors2[
                                                     "RegisteredOfficeAddress"
-                                                    ]
-                                                  }
-                                                </div>
-                                              )}
+                                                  ]
+                                                }
+                                              </div>
+                                            )}
                                           </div>
                                         </div>
 
@@ -1752,7 +1853,8 @@ const ClientEdit = () => {
                                                               1
                                                             }
                                                           >
-                                                          <i className="ti-trash  pe-1"></i>  Delete
+                                                            <i className="ti-trash  pe-1"></i>{" "}
+                                                            Delete
                                                           </button>
                                                         </div>
                                                       </div>
@@ -2271,9 +2373,9 @@ const ClientEdit = () => {
                                                           }
                                                           disabled={
                                                             contacts1.length ===
-                                                              2
+                                                            2
                                                               ? index === 0 ||
-                                                              index === 1
+                                                                index === 1
                                                               : false
                                                           }
                                                         />
@@ -2297,7 +2399,8 @@ const ClientEdit = () => {
                                                                 1
                                                               }
                                                             >
-                                                           <i className="ti-trash  pe-1"></i>   Delete
+                                                              <i className="ti-trash  pe-1"></i>{" "}
+                                                              Delete
                                                             </button>
                                                           </div>
                                                         )}
@@ -2334,18 +2437,18 @@ const ClientEdit = () => {
                                                       />
                                                       {contactsErrors[index]
                                                         ?.first_name && (
-                                                          <div
-                                                            style={{
-                                                              color: "red",
-                                                            }}
-                                                          >
-                                                            {
-                                                              contactsErrors[
-                                                                index
-                                                              ].first_name
-                                                            }
-                                                          </div>
-                                                        )}
+                                                        <div
+                                                          style={{
+                                                            color: "red",
+                                                          }}
+                                                        >
+                                                          {
+                                                            contactsErrors[
+                                                              index
+                                                            ].first_name
+                                                          }
+                                                        </div>
+                                                      )}
                                                     </div>
                                                   </div>
                                                   <div className="col-lg-4">
@@ -2379,18 +2482,18 @@ const ClientEdit = () => {
                                                       />
                                                       {contactsErrors[index]
                                                         ?.last_name && (
-                                                          <div
-                                                            style={{
-                                                              color: "red",
-                                                            }}
-                                                          >
-                                                            {
-                                                              contactsErrors[
-                                                                index
-                                                              ].last_name
-                                                            }
-                                                          </div>
-                                                        )}
+                                                        <div
+                                                          style={{
+                                                            color: "red",
+                                                          }}
+                                                        >
+                                                          {
+                                                            contactsErrors[
+                                                              index
+                                                            ].last_name
+                                                          }
+                                                        </div>
+                                                      )}
                                                     </div>
                                                   </div>
                                                   <div className="col-lg-4">
@@ -2436,19 +2539,19 @@ const ClientEdit = () => {
                                                       </select>
                                                       {contactsErrors[index]
                                                         ?.customer_contact_person_role_id && (
-                                                          <div
-                                                            style={{
-                                                              color: "red",
-                                                            }}
-                                                          >
-                                                            {
-                                                              contactsErrors[
-                                                                index
-                                                              ]
-                                                                .customer_contact_person_role_id
-                                                            }
-                                                          </div>
-                                                        )}
+                                                        <div
+                                                          style={{
+                                                            color: "red",
+                                                          }}
+                                                        >
+                                                          {
+                                                            contactsErrors[
+                                                              index
+                                                            ]
+                                                              .customer_contact_person_role_id
+                                                          }
+                                                        </div>
+                                                      )}
                                                     </div>
                                                   </div>
                                                   <div className="col-lg-4 pe-0">
@@ -2512,9 +2615,7 @@ const ClientEdit = () => {
                                                             contactsErrors[
                                                               index
                                                             ].phone && (
-                                                              <div
-                                                                className="error-text"
-                                                              >
+                                                              <div className="error-text">
                                                                 {
                                                                   contactsErrors[
                                                                     index
@@ -2589,9 +2690,7 @@ const ClientEdit = () => {
                                                               index
                                                             ]
                                                               .alternate_phone && (
-                                                              <div
-                                                                className="error-text"
-                                                              >
+                                                              <div className="error-text">
                                                                 {
                                                                   contactsErrors[
                                                                     index
@@ -2632,18 +2731,18 @@ const ClientEdit = () => {
                                                       />
                                                       {contactsErrors[index]
                                                         ?.email && (
-                                                          <div
-                                                            style={{
-                                                              color: "red",
-                                                            }}
-                                                          >
-                                                            {
-                                                              contactsErrors[
-                                                                index
-                                                              ].email
-                                                            }
-                                                          </div>
-                                                        )}
+                                                        <div
+                                                          style={{
+                                                            color: "red",
+                                                          }}
+                                                        >
+                                                          {
+                                                            contactsErrors[
+                                                              index
+                                                            ].email
+                                                          }
+                                                        </div>
+                                                      )}
                                                     </div>
                                                   </div>
                                                   <div className="col-lg-4">
@@ -2676,16 +2775,14 @@ const ClientEdit = () => {
                                                       />
                                                       {contactsErrors[index]
                                                         ?.alternate_email && (
-                                                          <div
-                                                            className="error-text"
-                                                          >
-                                                            {
-                                                              contactsErrors[
-                                                                index
-                                                              ].alternate_email
-                                                            }
-                                                          </div>
-                                                        )}
+                                                        <div className="error-text">
+                                                          {
+                                                            contactsErrors[
+                                                              index
+                                                            ].alternate_email
+                                                          }
+                                                        </div>
+                                                      )}
                                                     </div>
                                                   </div>
                                                 </div>
@@ -2710,17 +2807,17 @@ const ClientEdit = () => {
                               </div>
                             </div>
                           ) : selectClientType == 4 ? (
-                            <div className="row">
-                              <div className="col-lg-12">
-                                
-                                <div className="card ">
-                                  <div className="card-header card-header-light-blue ">
-                                    <h4 className="card-title fs-16 mb-0">
-                                      Sole Trader Details
-                                    </h4>
-                                  </div>
-                                  <div className="card-body row">
-                                  <div className="col-lg-4">
+                            getIndivisualDetails && (
+                              <div className="row">
+                                <div className="col-lg-12">
+                                  <div className="card ">
+                                    <div className="card-header card-header-light-blue ">
+                                      <h4 className="card-title fs-16 mb-0">
+                                        Individual Details
+                                      </h4>
+                                    </div>
+                                    <div className="card-body row">
+                                      <div className="col-lg-4">
                                         <div className="mb-3">
                                           <label className="form-label">
                                             Trading Name
@@ -2733,173 +2830,182 @@ const ClientEdit = () => {
                                             name="tradingName"
                                             className="form-control"
                                             placeholder="Trading Name"
-                                            onChange={(e) => handleChange1(e)}
+                                            onChange={(e) => handleChange5(e)}
                                             value={
-                                              getSoleTraderDetails.tradingName
+                                              getIndivisualDetails.tradingName
                                             }
                                             maxLength={100}
                                           />
-                                          {errors1["tradingName"] && (
+                                          {errors4["tradingName"] && (
                                             <div className="error-text">
-                                              {errors1["tradingName"]}
+                                              {errors4["tradingName"]}
                                             </div>
                                           )}
                                         </div>
                                       </div>
 
-                                    <div className="col-lg-4">
-                                      <div className="mb-3">
-                                        <label className="form-label">
-                                          First Name
-                                          <span style={{ color: "red" }}>
-                                            *
-                                          </span>
-                                        </label>
-                                        <input
-                                          type="text"
-                                          className="form-control"
-                                          placeholder="First Name"
-                                          name="first_name"
-                                          value={
-                                            getSoleTraderDetails.first_name
-                                          }
-                                          onChange={(e) => handleChange1(e)}
-                                          maxLength={50}
-                                        />
-                                        {errors1["first_name"] && (
-                                          <div className="error-text">
-                                            {errors1["first_name"]}
-                                          </div>
-                                        )}
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <label className="form-label">
+                                            First Name
+                                            <span style={{ color: "red" }}>
+                                              *
+                                            </span>
+                                          </label>
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="First Name"
+                                            name="first_name"
+                                            value={
+                                              getIndivisualDetails.first_name
+                                            }
+                                            onChange={(e) => handleChange5(e)}
+                                            maxLength={50}
+                                          />
+                                          {errors4["first_name"] && (
+                                            <div className="error-text">
+                                              {errors4["first_name"]}
+                                            </div>
+                                          )}
+                                        </div>
                                       </div>
-                                    </div>
-                                    <div className="col-lg-4">
-                                      <div className="mb-3">
-                                        <label className="form-label">
-                                          Last Name
-                                          <span style={{ color: "red" }}>
-                                            *
-                                          </span>
-                                        </label>
-                                        <input
-                                          type="text"
-                                          className="form-control"
-                                          placeholder="Last Name"
-                                          name="last_name"
-                                          value={getSoleTraderDetails.last_name}
-                                          onChange={(e) => handleChange1(e)}
-                                          maxLength={50}
-                                        />
-                                        {errors1["last_name"] && (
-                                          <div className="error-text">
-                                            {errors1["last_name"]}
-                                          </div>
-                                        )}
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <label className="form-label">
+                                            Last Name
+                                            <span style={{ color: "red" }}>
+                                              *
+                                            </span>
+                                          </label>
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Last Name"
+                                            name="last_name"
+                                            value={
+                                              getIndivisualDetails.last_name
+                                            }
+                                            onChange={(e) => handleChange5(e)}
+                                            maxLength={50}
+                                          />
+                                          {errors4["last_name"] && (
+                                            <div className="error-text">
+                                              {errors4["last_name"]}
+                                            </div>
+                                          )}
+                                        </div>
                                       </div>
-                                    </div>
 
-                                    <div className="col-lg-4">
-                                      <div className="mb-3">
-                                        <label className="form-label">
-                                          Phone
-                                        </label>
-                                        <div className="row">
-                                          <div className="col-md-4 pe-0">
-                                            <select
-                                              className="form-select"
-                                              onChange={(e) => handleChange1(e)}
-                                              name="phone_code"
-                                              value={
-                                                getSoleTraderDetails.phone_code
-                                              }
-                                            >
-                                              {countryDataAll.data.map(
-                                                (data) => (
-                                                  <option
-                                                    key={data.code}
-                                                    value={data.code}
-                                                  >
-                                                    {data.code}
-                                                  </option>
-                                                )
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <label className="form-label">
+                                            Phone
+                                          </label>
+                                          <div className="row">
+                                            <div className="col-md-4 pe-0">
+                                              <select
+                                                className="form-select"
+                                                onChange={(e) =>
+                                                  handleChange5(e)
+                                                }
+                                                name="phone_code"
+                                                value={
+                                                  getIndivisualDetails.phone_code
+                                                }
+                                              >
+                                                {countryDataAll.data.map(
+                                                  (data) => (
+                                                    <option
+                                                      key={data.code}
+                                                      value={data.code}
+                                                    >
+                                                      {data.code}
+                                                    </option>
+                                                  )
+                                                )}
+                                              </select>
+                                            </div>
+                                            <div className="mb-3 col-md-8 ps-1">
+                                              <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="Phone Number"
+                                                name="phone"
+                                                value={
+                                                  getIndivisualDetails.phone
+                                                }
+                                                onChange={(e) =>
+                                                  handleChange5(e)
+                                                }
+                                                maxLength={12}
+                                                minLength={9}
+                                              />
+                                              {errors4["phone"] && (
+                                                <div className="error-text">
+                                                  {errors4["phone"]}
+                                                </div>
                                               )}
-                                            </select>
-                                          </div>
-                                          <div className="mb-3 col-md-8 ps-1">
-                                            <input
-                                              type="text"
-                                              className="form-control"
-                                              placeholder="Phone Number"
-                                              name="phone"
-                                              value={getSoleTraderDetails.phone}
-                                              onChange={(e) => handleChange1(e)}
-                                              maxLength={12}
-                                              minLength={9}
-                                            />
-                                            {errors1["phone"] && (
-                                              <div className="error-text">
-                                                {errors1["phone"]}
-                                              </div>
-                                            )}
+                                            </div>
                                           </div>
                                         </div>
                                       </div>
-                                    </div>
 
-                                    <div className="col-lg-4">
-                                      <div className="mb-3">
-                                        <label className="form-label">
-                                          Email
-                                          <span style={{ color: "red" }}>
-                                            *
-                                          </span>
-                                        </label>
-                                        <input
-                                          type="text"
-                                          className="form-control"
-                                          placeholder="Enter Email ID"
-                                          name="email"
-                                          value={getSoleTraderDetails.email}
-                                          onChange={(e) => handleChange1(e)}
-                                        />
-                                        {errors1["email"] && (
-                                          <div className="error-text">
-                                            {errors1["email"]}
-                                          </div>
-                                        )}
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <label className="form-label">
+                                            Email
+                                            <span style={{ color: "red" }}>
+                                              *
+                                            </span>
+                                          </label>
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Enter Email ID"
+                                            name="email"
+                                            value={getIndivisualDetails.email}
+                                            onChange={(e) => handleChange5(e)}
+                                          />
+                                          {errors4["email"] && (
+                                            <div className="error-text">
+                                              {errors4["email"]}
+                                            </div>
+                                          )}
+                                        </div>
                                       </div>
-                                    </div>
 
-                                    <div className="col-lg-6">
-                                      <div className="mb-3">
-                                        <label className="form-label">
-                                          Residential Address
-                                          <span style={{ color: "red" }}>
-                                            *
-                                          </span>
-                                        </label>
-                                        <input
-                                          type="text"
-                                          className="form-control"
-                                          placeholder="Residential Address"
-                                          name="residentialAddress"
-                                          value={
-                                            getSoleTraderDetails.residentialAddress
-                                          }
-                                          onChange={(e) => handleChange1(e)}
-                                        />
-                                        {errors1["residentialAddress"] && (
-                                          <div className="error-text">
-                                            {errors1["residentialAddress"]}
-                                          </div>
-                                        )}
+                                      <div className="col-lg-6">
+                                        <div className="mb-3">
+                                          <label className="form-label">
+                                            Residential Address
+                                            <span style={{ color: "red" }}>
+                                              *
+                                            </span>
+                                          </label>
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Residential Address"
+                                            name="residentialAddress"
+                                            value={
+                                              getIndivisualDetails.residentialAddress
+                                            }
+                                            onChange={(e) => handleChange5(e)}
+                                          />
+                                          {errors4["residentialAddress"] && (
+                                            <div className="error-text">
+                                              {errors4["residentialAddress"]}
+                                            </div>
+                                          )}
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          ): (
+                            )
+                          ) : (
                             ""
                           )}
                         </section>

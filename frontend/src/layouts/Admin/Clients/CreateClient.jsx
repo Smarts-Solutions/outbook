@@ -13,8 +13,6 @@ import {
   Country,
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
 
-
-
 const CreateClient = () => {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -29,6 +27,9 @@ const CreateClient = () => {
   const [errors1, setErrors1] = useState({});
   const [errors2, setErrors2] = useState({});
   const [errors3, setErrors3] = useState({});
+  const [errors4, setErrors4] = useState({});
+
+
   const [personRoleDataAll, setPersonRoleDataAll] = useState({
     loading: true,
     data: [],
@@ -37,7 +38,6 @@ const CreateClient = () => {
     loading: true,
     data: [],
   });
-
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     IndustryType: "",
     tradingName: "",
@@ -76,7 +76,6 @@ const CreateClient = () => {
     VATNumber: "",
     Website: "",
   });
-
   const [contacts, setContacts] = useState([
     {
       authorised_signatory_status: false,
@@ -88,7 +87,6 @@ const CreateClient = () => {
       email: "",
     },
   ]);
-
   const [contacts1, setContacts1] = useState([
     {
       authorised_signatory_status: true,
@@ -135,7 +133,6 @@ const CreateClient = () => {
       alternate_email: "",
     },
   ]);
-
   const [errors, setErrors] = useState([
     {
       first_name: false,
@@ -146,6 +143,50 @@ const CreateClient = () => {
       email: false,
     },
   ]);
+
+  const [getIndivisualDetails, setIndivisualDetails] = useState({
+   
+    tradingName: "",
+  
+    first_name: "",
+    last_name: "",
+    phone: "",
+    email: "",
+    residentialAddress: "",
+    phone_code: "+44",
+  });
+
+  useEffect(() => {
+    CustomerPersonRoleData();
+  }, []);
+
+  useEffect(() => {
+    CountryData();
+    getClientIndustry();
+  }, []);
+
+  useEffect(() => {
+    Get_Company();
+  }, [searchItem]);
+
+  useEffect(() => {
+    if (getSearchDetails.length > 0) {
+      setCompanyDetails((prevState) => ({
+        ...prevState,
+        CompanyName: getSearchDetails[0].title,
+        EntityType: getSearchDetails[0].company_type,
+        CompanyStatus: getSearchDetails[0].company_status,
+        CompanyNumber: getSearchDetails[0].company_number,
+        RegisteredOfficeAddress: getSearchDetails[0].address_snippet,
+        IncorporationDate: getSearchDetails[0].date_of_creation,
+        IncorporationIn: getSearchDetails[0].description,
+      }));
+    }
+  }, [getSearchDetails]);
+
+  useEffect(() => {
+    FilterSearchDetails();
+  }, [searchItem]);
 
   const handleAddContact = () => {
     setContacts([
@@ -227,9 +268,318 @@ const CreateClient = () => {
         console.log("Error", error);
       });
   };
-  useEffect(() => {
-    CustomerPersonRoleData();
-  }, []);
+
+  const handleChange1 = (e) => {
+    const { name, value } = e.target;
+    if (name === "vatNumber" || name === "phone") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    validate1();
+    setSoleTraderDetails({ ...getSoleTraderDetails, [name]: value });
+  };
+
+  const handleChange2 = (e) => {
+    const { name, value } = e.target;
+    if (name === "CompanyNumber" || name === "VATNumber") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    validate2();
+    setCompanyDetails({ ...getCompanyDetails, [name]: value });
+  };
+
+  const handleChange3 = (e) => {
+    const { name, value } = e.target;
+    if (name === "VATNumber") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    validate3();
+    setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
+  };
+
+
+  const handleChangeIndivisul = (e) => {
+    const { name, value } = e.target;
+    if (name === "vatNumber" || name === "phone") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    validate4();
+    setIndivisualDetails({ ...getIndivisualDetails, [name]: value });
+  };
+
+  const validate1 = () => {
+    const newErrors = {};
+    for (const key in getSoleTraderDetails) {
+      if (!getSoleTraderDetails[key]) {
+        // if (key == 'IndustryType') newErrors[key] = 'Select Client Industry';
+        if (key == "tradingName") newErrors[key] = "Please enter Trading Name";
+        else if (key == "tradingAddress")
+          newErrors[key] = "Please enter Trading Address";
+        else if (key == "vatRegistered")
+          newErrors[key] = "Please select VAT Registered";
+        // else if (getSoleTraderDetails.vatRegistered == 1 && key == 'vatNumber') newErrors[key] = 'Please enter VAT Number';
+        // else if (key == 'website') newErrors[key] = 'Please enter Website';
+        else if (key == "first_name")
+          newErrors[key] = "Please enter First Name";
+        else if (key == "last_name") newErrors[key] = "Please enter Last Name";
+        // else if (key == 'phone') newErrors[key] = 'Please enter Phone';
+        // else if (key == 'email') newErrors[key] = 'Please enter Email';
+        // else if (key == 'residentialAddress') newErrors[key] = 'Please enter Residential Address';
+      } else if (key == "email" && !Email_regex(getSoleTraderDetails[key])) {
+        newErrors[key] = "Please enter valid Email";
+      } else if (
+        key == "phone" &&
+        !/^\d{9,12}$/.test(getSoleTraderDetails[key])
+      ) {
+        newErrors[key] = "Phone Number must be between 9 to 12 digits";
+      }
+    }
+    setErrors1(newErrors);
+    return Object.keys(newErrors).length === 0 ? true : false;
+  };
+
+  const validate2 = () => {
+    const newErrors = {};
+    for (const key in getCompanyDetails) {
+      if (!getCompanyDetails[key]) {
+        if (key == "CompanyName") newErrors[key] = "Please Enter Company Name";
+        else if (key == "EntityType")
+          newErrors[key] = "Please Enter Entity Type";
+        else if (key == "CompanyStatus")
+          newErrors[key] = "Please Enter Company Status";
+        else if (key == "CompanyNumber")
+          newErrors[key] = "Please Enter Company Number";
+        else if (key == "RegisteredOfficeAddress")
+          newErrors[key] = "Please Enter Registered Office Address";
+        else if (key == "IncorporationDate")
+          newErrors[key] = "Please Enter Incorporation Date";
+        else if (key == "IncorporationIn")
+          newErrors[key] = "Please Enter Incorporation In";
+        else if (key == "VATRegistered")
+          newErrors[key] = "Please Enter VAT Registered";
+        // else if (getCompanyDetails.VATRegistered == 1 && key == 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
+        // else if (key == 'Website') newErrors[key] = 'Please Enter Website';
+        // else if (key == 'ClientIndustry') newErrors[key] = 'Please Enter Client Industry';
+        else if (key == "TradingName")
+          newErrors[key] = "Please Enter Trading Name";
+        else if (key == "TradingAddress")
+          newErrors[key] = "Please Enter Trading Address";
+      }
+    }
+    setErrors2(newErrors);
+    return Object.keys(newErrors).length === 0 ? true : false;
+  };
+
+  const validate3 = () => {
+    const newErrors = {};
+    for (const key in getPartnershipDetails) {
+      if (!getPartnershipDetails[key]) {
+        // if (key === 'ClientIndustry') newErrors[key] = 'Please Select Client Industry';
+        if (key === "TradingName") newErrors[key] = "Please Enter Trading Name";
+        else if (key === "TradingAddress")
+          newErrors[key] = "Please Enter Trading Address";
+        else if (key === "VATRegistered")
+          newErrors[key] = "Please Enter VAT Registered";
+        // else if (getPartnershipDetails.VATRegistered == 1 && key === 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
+        // else if (key === 'Website') newErrors[key] = 'Please Enter Website';
+      }
+    }
+
+    setErrors3(newErrors);
+
+    return Object.keys(newErrors).length === 0 ? true : false;
+  };
+
+  const validate4 = () => {
+    const newErrors = {};
+    for (const key in getIndivisualDetails) {
+      if (!getIndivisualDetails[key]) {
+        if (key == "tradingName") newErrors[key] = "Please enter Trading Name";
+        else if (key == "first_name")
+          newErrors[key] = "Please enter First Name";
+        else if (key == "last_name") newErrors[key] = "Please enter Last Name";
+      } else if (key == "email" && !Email_regex(getIndivisualDetails[key])) {
+        newErrors[key] = "Please enter valid Email";
+      } else if (key == "phone" && !/^\d{9,12}$/.test(getIndivisualDetails[key])) {
+        newErrors[key] = "Phone Number must be between 9 to 12 digits";
+      }
+    }
+    setErrors4(newErrors);
+    return Object.keys(newErrors).length === 0 ? true : false;
+  };
+
+  const getClientIndustry = async () => {
+    const req = { action: "get" };
+    const data = { req: req, authToken: token };
+    await dispatch(GetClientIndustry(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setClientIndustry(response.data);
+        } else {
+          setClientIndustry(response.data);
+        }
+      })
+      .catch((error) => {
+        console.log("Error", error);
+      });
+  };
+
+  const CountryData = async (req) => {
+    const data = { req: { action: "get" }, authToken: token };
+    await dispatch(Country(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setCountryDataAll({ loading: false, data: response.data });
+        } else {
+          setCountryDataAll({ loading: false, data: [] });
+        }
+      })
+      .catch((error) => {
+        console.log("Error", error);
+      });
+  };
+
+  const Get_Company = async () => {
+    const data = { search: searchItem };
+    await dispatch(GetAllCompany(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status) {
+          setGetAllSearchCompany(res.data.items);
+        } else {
+          setGetAllSearchCompany([]);
+        }
+      })
+      .catch((err) => {
+        console.log("Error", err);
+      });
+  };
+
+  const handleChange = (index, field, value) => {
+    const newContacts = [...contacts];
+    newContacts[index][field] = value;
+    setContacts(newContacts);
+    validateField(index, field, value);
+  };
+
+  const handleChange4 = (index, field, value) => {
+    const newContacts = [...contacts1];
+    newContacts[index][field] = value;
+    setContacts1(newContacts);
+    validateField1(index, field, value);
+  };
+
+  const validateField = (index, field, value) => {
+    const newErrors = [...errors];
+    switch (field) {
+      case "first_name":
+        newErrors[index].first_name = value ? "" : "First Name is required";
+        break;
+      case "last_name":
+        newErrors[index].last_name = value ? "" : "Last Name is required";
+        break;
+
+      case "email":
+        if (!value) {
+          newErrors[index].email = "";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          newErrors[index].email = "Valid Email is required";
+        } else {
+          newErrors[index].email = "";
+        }
+        break;
+      case "phone":
+        newErrors[index].phone =
+          value === ""
+            ? ""
+            : /^\d{9,12}$/.test(value)
+            ? ""
+            : "Phone Number must be between 9 to 12 digits";
+        break;
+      default:
+        break;
+    }
+    setErrors(newErrors);
+  };
+
+  const validateField1 = (index, field, value) => {
+    const newErrors = [...contactsErrors];
+    switch (field) {
+      case "first_name":
+        newErrors[index].first_name = value ? "" : "First Name is required";
+        break;
+      case "last_name":
+        newErrors[index].last_name = value ? "" : "Last Name is required";
+        break;
+      case "role":
+        // newErrors[index].role = value ? '' : 'Role is required';
+        break;
+      case "email":
+        if (!value) {
+          newErrors[index].email = "";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          newErrors[index].email = "Valid Email is required";
+        } else {
+          newErrors[index].email = "";
+        }
+        break;
+      case "alternate_email":
+        if (!value) {
+          newErrors[index].alternate_email = "";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          newErrors[index].alternate_email = "Valid Email is required";
+        } else {
+          newErrors[index].alternate_email = "";
+        }
+        break;
+      case "phone":
+        newErrors[index].phone =
+          value === ""
+            ? ""
+            : /^\d{9,12}$/.test(value)
+            ? ""
+            : "Phone Number must be between 9 to 12 digits";
+        break;
+
+      case "alternate_phone":
+        newErrors[index].alternate_phone =
+          value === ""
+            ? ""
+            : /^\d{9,12}$/.test(value)
+            ? ""
+            : "Phone Number must be between 9 to 12 digits";
+
+        break;
+      default:
+        break;
+    }
+    setContactsErrors(newErrors);
+  };
+
+  const FilterSearchDetails = () => {
+    const filterData = getAllSearchCompany.filter(
+      (data) => data.title === searchItem
+    );
+    setSearchDetails(filterData);
+  };
+
+  const HandleCancel = () => {
+    navigate("/admin/Clientlist", { state: { id: location.state.id } });
+  };
+
+
+
+
+  
 
   const handleSubmit = async () => {
     if (selectClientType == 1 && validate1()) {
@@ -432,313 +782,43 @@ const CreateClient = () => {
             }
           });
       }
-    } else {
     }
-  };
-
-  const handleChange1 = (e) => {
-    const { name, value } = e.target;
-    if (name === "vatNumber" || name === "phone") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
+    if (selectClientType == 4 && validate4()) {
+      const req = {
+        client_type: "4",
+        customer_id: location.state.id,
+        trading_name: getIndivisualDetails.tradingName,
+        first_name: getIndivisualDetails.first_name,
+        last_name: getIndivisualDetails.last_name,
+        phone: getIndivisualDetails.phone,
+        email: getIndivisualDetails.email,
+        residential_address: getIndivisualDetails.residentialAddress,
+        client_code: location.state.id,
+        phone_code: getIndivisualDetails.phone_code,
+      };
+      await dispatch(Add_Client(req))
+        .unwrap()
+        .then((response) => {
+          if (response.status) {
+            Swal.fire({
+              icon: "success",
+              title: "Client Added Successfully",
+              timerProgressBar: true,
+              timer: 1500,
+            });
+            setTimeout(() => {
+              navigate("/admin/Clientlist", { state: location.state });
+            }, 1500);
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: response.message,
+              timerProgressBar: true,
+              timer: 1500,
+            });
+          }
+        });
     }
-    validate1();
-    setSoleTraderDetails({ ...getSoleTraderDetails, [name]: value });
-  };
-
-  const handleChange2 = (e) => {
-    const { name, value } = e.target;
-    if (name === "CompanyNumber" || name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
-    validate2();
-    setCompanyDetails({ ...getCompanyDetails, [name]: value });
-  };
-
-  const handleChange3 = (e) => {
-    const { name, value } = e.target;
-    if (name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
-    validate3();
-    setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
-  };
-
-  const validate1 = () => {
-    const newErrors = {};
-    for (const key in getSoleTraderDetails) {
-      if (!getSoleTraderDetails[key]) {
-        // if (key == 'IndustryType') newErrors[key] = 'Select Client Industry';
-        if (key == "tradingName") newErrors[key] = "Please enter Trading Name";
-        else if (key == "tradingAddress")
-          newErrors[key] = "Please enter Trading Address";
-        else if (key == "vatRegistered")
-          newErrors[key] = "Please select VAT Registered";
-        // else if (getSoleTraderDetails.vatRegistered == 1 && key == 'vatNumber') newErrors[key] = 'Please enter VAT Number';
-        // else if (key == 'website') newErrors[key] = 'Please enter Website';
-        else if (key == "first_name")
-          newErrors[key] = "Please enter First Name";
-        else if (key == "last_name") newErrors[key] = "Please enter Last Name";
-        // else if (key == 'phone') newErrors[key] = 'Please enter Phone';
-        // else if (key == 'email') newErrors[key] = 'Please enter Email';
-        // else if (key == 'residentialAddress') newErrors[key] = 'Please enter Residential Address';
-      } else if (key == "email" && !Email_regex(getSoleTraderDetails[key])) {
-        newErrors[key] = "Please enter valid Email";
-      } else if (
-        key == "phone" &&
-        !/^\d{9,12}$/.test(getSoleTraderDetails[key])
-      ) {
-        newErrors[key] = "Phone Number must be between 9 to 12 digits";
-      }
-    }
-    setErrors1(newErrors);
-    return Object.keys(newErrors).length === 0 ? true : false;
-  };
-
-  const validate2 = () => {
-    const newErrors = {};
-    for (const key in getCompanyDetails) {
-      if (!getCompanyDetails[key]) {
-        if (key == "CompanyName") newErrors[key] = "Please Enter Company Name";
-        else if (key == "EntityType")
-          newErrors[key] = "Please Enter Entity Type";
-        else if (key == "CompanyStatus")
-          newErrors[key] = "Please Enter Company Status";
-        else if (key == "CompanyNumber")
-          newErrors[key] = "Please Enter Company Number";
-        else if (key == "RegisteredOfficeAddress")
-          newErrors[key] = "Please Enter Registered Office Address";
-        else if (key == "IncorporationDate")
-          newErrors[key] = "Please Enter Incorporation Date";
-        else if (key == "IncorporationIn")
-          newErrors[key] = "Please Enter Incorporation In";
-        else if (key == "VATRegistered")
-          newErrors[key] = "Please Enter VAT Registered";
-        // else if (getCompanyDetails.VATRegistered == 1 && key == 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
-        // else if (key == 'Website') newErrors[key] = 'Please Enter Website';
-        // else if (key == 'ClientIndustry') newErrors[key] = 'Please Enter Client Industry';
-        else if (key == "TradingName")
-          newErrors[key] = "Please Enter Trading Name";
-        else if (key == "TradingAddress")
-          newErrors[key] = "Please Enter Trading Address";
-      }
-    }
-    setErrors2(newErrors);
-    return Object.keys(newErrors).length === 0 ? true : false;
-  };
-
-  const validate3 = () => {
-    const newErrors = {};
-    for (const key in getPartnershipDetails) {
-      if (!getPartnershipDetails[key]) {
-        // if (key === 'ClientIndustry') newErrors[key] = 'Please Select Client Industry';
-        if (key === "TradingName") newErrors[key] = "Please Enter Trading Name";
-        else if (key === "TradingAddress")
-          newErrors[key] = "Please Enter Trading Address";
-        else if (key === "VATRegistered")
-          newErrors[key] = "Please Enter VAT Registered";
-        // else if (getPartnershipDetails.VATRegistered == 1 && key === 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
-        // else if (key === 'Website') newErrors[key] = 'Please Enter Website';
-      }
-    }
-
-    setErrors3(newErrors);
-
-    return Object.keys(newErrors).length === 0 ? true : false;
-  };
-
-  const getClientIndustry = async () => {
-    const req = { action: "get" };
-    const data = { req: req, authToken: token };
-    await dispatch(GetClientIndustry(data))
-      .unwrap()
-      .then((response) => {
-        if (response.status) {
-          setClientIndustry(response.data);
-        } else {
-          setClientIndustry(response.data);
-        }
-      })
-      .catch((error) => {
-        console.log("Error", error);
-      });
-  };
-
-  const CountryData = async (req) => {
-    const data = { req: { action: "get" }, authToken: token };
-    await dispatch(Country(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          setCountryDataAll({ loading: false, data: response.data });
-        } else {
-          setCountryDataAll({ loading: false, data: [] });
-        }
-      })
-      .catch((error) => {
-        console.log("Error", error);
-      });
-  };
-
-  useEffect(() => {
-    CountryData();
-    getClientIndustry();
-  }, []);
-
-  const Get_Company = async () => {
-    const data = { search: searchItem };
-    await dispatch(GetAllCompany(data))
-      .unwrap()
-      .then((res) => {
-        if (res.status) {
-          setGetAllSearchCompany(res.data.items);
-        } else {
-          setGetAllSearchCompany([]);
-        }
-      })
-      .catch((err) => {
-        console.log("Error", err);
-      });
-  };
-
-  useEffect(() => {
-    Get_Company();
-  }, [searchItem]);
-
-  const handleChange = (index, field, value) => {
-    const newContacts = [...contacts];
-    newContacts[index][field] = value;
-    setContacts(newContacts);
-    validateField(index, field, value);
-  };
-
-  const handleChange4 = (index, field, value) => {
-    const newContacts = [...contacts1];
-    newContacts[index][field] = value;
-    setContacts1(newContacts);
-    validateField1(index, field, value);
-  };
-
-  const validateField = (index, field, value) => {
-    const newErrors = [...errors];
-    switch (field) {
-      case "first_name":
-        newErrors[index].first_name = value ? "" : "First Name is required";
-        break;
-      case "last_name":
-        newErrors[index].last_name = value ? "" : "Last Name is required";
-        break;
-
-      case "email":
-        if (!value) {
-          newErrors[index].email = "";
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          newErrors[index].email = "Valid Email is required";
-        } else {
-          newErrors[index].email = "";
-        }
-        break;
-      case "phone":
-        newErrors[index].phone =
-          value === ""
-            ? ""
-            : /^\d{9,12}$/.test(value)
-            ? ""
-            : "Phone Number must be between 9 to 12 digits";
-        break;
-      default:
-        break;
-    }
-    setErrors(newErrors);
-  };
-
-  const validateField1 = (index, field, value) => {
-    const newErrors = [...contactsErrors];
-    switch (field) {
-      case "first_name":
-        newErrors[index].first_name = value ? "" : "First Name is required";
-        break;
-      case "last_name":
-        newErrors[index].last_name = value ? "" : "Last Name is required";
-        break;
-      case "role":
-        // newErrors[index].role = value ? '' : 'Role is required';
-        break;
-      case "email":
-        if (!value) {
-          newErrors[index].email = "";
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          newErrors[index].email = "Valid Email is required";
-        } else {
-          newErrors[index].email = "";
-        }
-        break;
-      case "alternate_email":
-        if (!value) {
-          newErrors[index].alternate_email = "";
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          newErrors[index].alternate_email = "Valid Email is required";
-        } else {
-          newErrors[index].alternate_email = "";
-        }
-        break;
-      case "phone":
-        newErrors[index].phone =
-          value === ""
-            ? ""
-            : /^\d{9,12}$/.test(value)
-            ? ""
-            : "Phone Number must be between 9 to 12 digits";
-        break;
-
-      case "alternate_phone":
-        newErrors[index].alternate_phone =
-          value === ""
-            ? ""
-            : /^\d{9,12}$/.test(value)
-            ? ""
-            : "Phone Number must be between 9 to 12 digits";
-
-        break;
-      default:
-        break;
-    }
-    setContactsErrors(newErrors);
-  };
-
-  useEffect(() => {
-    if (getSearchDetails.length > 0) {
-      setCompanyDetails((prevState) => ({
-        ...prevState,
-        CompanyName: getSearchDetails[0].title,
-        EntityType: getSearchDetails[0].company_type,
-        CompanyStatus: getSearchDetails[0].company_status,
-        CompanyNumber: getSearchDetails[0].company_number,
-        RegisteredOfficeAddress: getSearchDetails[0].address_snippet,
-        IncorporationDate: getSearchDetails[0].date_of_creation,
-        IncorporationIn: getSearchDetails[0].description,
-      }));
-    }
-  }, [getSearchDetails]);
-
-  const FilterSearchDetails = () => {
-    const filterData = getAllSearchCompany.filter(
-      (data) => data.title === searchItem
-    );
-    setSearchDetails(filterData);
-  };
-
-  useEffect(() => {
-    FilterSearchDetails();
-  }, [searchItem]);
-
-  const HandleCancel = () => {
-    navigate("/admin/Clientlist", { state: { id: location.state.id } });
   };
 
   return (
@@ -757,7 +837,7 @@ const CreateClient = () => {
                 </button>
                 <h4 className="card-title mb-0">Create New Client</h4>
               </div>
-              {/* end card header */}
+
               <div className="card-body form-steps">
                 <div>
                   <div className="tab-content">
@@ -792,7 +872,6 @@ const CreateClient = () => {
                                       <option value={2}>Company</option>
                                       <option value={3}>Partnership</option>
                                       <option value={4}>individual</option>
-
                                     </select>
                                   </div>
                                 </div>
@@ -2436,44 +2515,39 @@ const CreateClient = () => {
                           ) : selectClientType == 4 ? (
                             <div className="row">
                               <div className="col-lg-12">
-                                <div className="card card_shadow ">
-                                
-                               
-                               
-                                </div>
+                                <div className="card card_shadow "></div>
                                 <div className="card">
                                   <div className="card-header card-header-light-blue">
                                     <h4 className="card-title mb-0 fs-16 ">
-                                    Individual Details
+                                      Individual Details
                                     </h4>
                                   </div>
                                   <div className="card-body row">
-
-                                  <div className="col-lg-4">
-                                        <div className="mb-3">
-                                          <label className="form-label">
-                                            Trading Name
-                                            <span style={{ color: "red" }}>
-                                              *
-                                            </span>
-                                          </label>
-                                          <input
-                                            type="text"
-                                            name="tradingName"
-                                            className="form-control"
-                                            placeholder="Trading Name"
-                                            onChange={(e) => handleChange1(e)}
-                                            value={
-                                              getSoleTraderDetails.tradingName
-                                            }
-                                          />
-                                          {errors1["tradingName"] && (
-                                            <div className="error-text">
-                                              {errors1["tradingName"]}
-                                            </div>
-                                          )}
-                                        </div>
+                                    <div className="col-lg-4">
+                                      <div className="mb-3">
+                                        <label className="form-label">
+                                          Trading Name
+                                          <span style={{ color: "red" }}>
+                                            *
+                                          </span>
+                                        </label>
+                                        <input
+                                          type="text"
+                                          name="tradingName"
+                                          className="form-control"
+                                          placeholder="Trading Name"
+                                          onChange={(e) => handleChangeIndivisul(e)}
+                                          value={
+                                            getIndivisualDetails.tradingName
+                                          }
+                                        />
+                                        {errors4["tradingName"] && (
+                                          <div className="error-text">
+                                            {errors4["tradingName"]}
+                                          </div>
+                                        )}
                                       </div>
+                                    </div>
 
                                     <div className="col-lg-4">
                                       <div className="mb-3">
@@ -2489,13 +2563,13 @@ const CreateClient = () => {
                                           placeholder="First Name"
                                           name="first_name"
                                           value={
-                                            getSoleTraderDetails.first_name
+                                            getIndivisualDetails.first_name
                                           }
-                                          onChange={(e) => handleChange1(e)}
+                                          onChange={(e) => handleChangeIndivisul(e)}
                                         />
-                                        {errors1["first_name"] && (
+                                        {errors4["first_name"] && (
                                           <div className="error-text">
-                                            {errors1["first_name"]}
+                                            {errors4["first_name"]}
                                           </div>
                                         )}
                                       </div>
@@ -2513,12 +2587,12 @@ const CreateClient = () => {
                                           className="form-control"
                                           placeholder="Last Name"
                                           name="last_name"
-                                          value={getSoleTraderDetails.last_name}
-                                          onChange={(e) => handleChange1(e)}
+                                          value={getIndivisualDetails.last_name}
+                                          onChange={(e) => handleChangeIndivisul(e)}
                                         />
-                                        {errors1["last_name"] && (
+                                        {errors4["last_name"] && (
                                           <div className="error-text">
-                                            {errors1["last_name"]}
+                                            {errors4["last_name"]}
                                           </div>
                                         )}
                                       </div>
@@ -2533,10 +2607,10 @@ const CreateClient = () => {
                                           <div className="col-md-4 pe-0">
                                             <select
                                               className="form-select"
-                                              onChange={(e) => handleChange1(e)}
+                                              onChange={(e) => handleChangeIndivisul(e)}
                                               name="phone_code"
                                               value={
-                                                getSoleTraderDetails.phone_code
+                                                getIndivisualDetails.phone_code
                                               }
                                             >
                                               {countryDataAll.data.map(
@@ -2557,14 +2631,14 @@ const CreateClient = () => {
                                               className="form-control"
                                               placeholder="Phone Number"
                                               name="phone"
-                                              value={getSoleTraderDetails.phone}
-                                              onChange={(e) => handleChange1(e)}
+                                              value={getIndivisualDetails.phone}
+                                              onChange={(e) => handleChangeIndivisul(e)}
                                               maxLength={12}
                                               minLength={9}
                                             />
-                                            {errors1["phone"] && (
+                                            {errors4["phone"] && (
                                               <div className="error-text">
-                                                {errors1["phone"]}
+                                                {errors4["phone"]}
                                               </div>
                                             )}
                                           </div>
@@ -2585,12 +2659,12 @@ const CreateClient = () => {
                                           className="form-control"
                                           placeholder="Enter Email ID"
                                           name="email"
-                                          value={getSoleTraderDetails.email}
-                                          onChange={(e) => handleChange1(e)}
+                                          value={getIndivisualDetails.email}
+                                          onChange={(e) => handleChangeIndivisul(e)}
                                         />
-                                        {errors1["email"] && (
+                                        {errors4["email"] && (
                                           <div className="error-text">
-                                            {errors1["email"]}
+                                            {errors4["email"]}
                                           </div>
                                         )}
                                       </div>
@@ -2610,13 +2684,13 @@ const CreateClient = () => {
                                           placeholder="Residential Address"
                                           name="residentialAddress"
                                           value={
-                                            getSoleTraderDetails.residentialAddress
+                                            getIndivisualDetails.residentialAddress
                                           }
-                                          onChange={(e) => handleChange1(e)}
+                                          onChange={(e) => handleChangeIndivisul(e)}
                                         />
-                                        {errors1["residentialAddress"] && (
+                                        {errors4["residentialAddress"] && (
                                           <div className="error-text">
-                                            {errors1["residentialAddress"]}
+                                            {errors4["residentialAddress"]}
                                           </div>
                                         )}
                                       </div>
