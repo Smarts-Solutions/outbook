@@ -24,6 +24,10 @@ router.post('/getMissingLog',verifyToken, jobController.getMissingLog);
 router.post('/getQuerie',verifyToken, jobController.getQuerie);
 router.post('/addQuerie',verifyToken , uploadMultiple , jobController.addQuerie);
 
+//Draft
+router.post('/getDraft',verifyToken, jobController.getDraft);
+router.post('/addDraft',verifyToken, jobController.addDraft);
+
 
 
 

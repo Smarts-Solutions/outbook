@@ -156,6 +156,35 @@ const getQuerie = async (req,res) => {
  }
 }
 
+//Draft
+const getDraft = async (req,res) => {
+  try {
+    const { ...draft } = req.body;
+    const result = await jobService.getDraft(draft);
+    if(!result.status){
+     return  res.status(200).json({ status: false, message: result.message });  
+     }else{
+     return  res.status(200).json({ status: true, message: result.message , data : result.data});
+     }
+ } catch (error) {
+   res.status(500).json({ status:false, message: error.message});
+ }
+}
+
+const addDraft = async (req,res) => {
+  try {
+    const { ...draft } = req.body;
+    const result = await jobService.addDraft(draft);
+    if(!result.status){
+     return  res.status(200).json({ status: false, message: result.message });  
+     }else{
+     return  res.status(200).json({ status: true, message: result.message , data : result.data});
+     }
+ } catch (error) {
+   res.status(500).json({ status:false, message: error.message});
+ }
+}
+
 
 module.exports = {
   getAddJobData,
@@ -167,5 +196,7 @@ module.exports = {
   addMissingLog,
   getMissingLog,
   getQuerie,
-  addQuerie
+  addQuerie,
+  getDraft,
+  addDraft
 };
