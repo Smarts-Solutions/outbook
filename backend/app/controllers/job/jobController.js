@@ -185,6 +185,35 @@ const addDraft = async (req,res) => {
  }
 }
 
+// JobDocument
+const jobDocumentAction = async (req,res) => {
+  try {
+    const { ...document } = req.body;
+    const result = await jobService.jobDocumentAction(document);
+    if(!result.status){
+     return  res.status(200).json({ status: false, message: result.message });  
+     }else{
+     return  res.status(200).json({ status: true, message: result.message , data : result.data});
+     }
+ } catch (error) {
+   res.status(500).json({ status:false, message: error.message});
+ }
+}
+
+const addJobDocument = async (req,res) => {
+  try {
+    const { ...document } = req;
+    const result = await jobService.addJobDocument(document);
+    if(!result.status){
+     return  res.status(200).json({ status: false, message: result.message });  
+     }else{
+     return  res.status(200).json({ status: true, message: result.message , data : result.data});
+     }
+ } catch (error) {
+   res.status(500).json({ status:false, message: error.message});
+ }
+}
+
 
 module.exports = {
   getAddJobData,
@@ -198,5 +227,7 @@ module.exports = {
   getQuerie,
   addQuerie,
   getDraft,
-  addDraft
+  addDraft,
+  jobDocumentAction,
+  addJobDocument
 };

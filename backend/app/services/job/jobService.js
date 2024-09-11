@@ -114,6 +114,25 @@ const addDraft = async (draft) => {
   return taskTimeSheetModel.addDraft(draft);
 }
 
+//JobDocument
+const jobDocumentAction = async (jobDocument) => {
+  const {action} = jobDocument
+  if(action === "get"){
+    return taskTimeSheetModel.getJobDocument(jobDocument);
+  }
+  else if(action === "delete"){
+    return taskTimeSheetModel.deleteJobDocument(jobDocument);
+  }
+  else{
+    return { status: false, message: 'Error getting Job Document.' };
+  }
+
+}
+
+const addJobDocument = async (jobDocument) => {
+  return taskTimeSheetModel.addJobDocument(jobDocument);
+}
+
 
 
 
@@ -129,6 +148,8 @@ module.exports = {
   getQuerie,
   addQuerie,
   getDraft,
-  addDraft
+  addDraft,
+  jobDocumentAction,
+  addJobDocument
 
  };
