@@ -15,6 +15,7 @@ const MissingLogs = () => {
   const [viewmissinglogs, setViewmissinglogs] = useState(false);
   const [getMissingLogListData, setGetMissingLogListData] = useState([]);
   const [getProfileDetails, setGetProfileDetails] = useState([]);
+  const [singleMissionData, setSingleMissionData] = useState([]);
 
   const [missionLogAllInputData, setMissionAllInputLogData] = useState({
     missing_log: "",
@@ -22,7 +23,7 @@ const MissingLogs = () => {
     missing_log_sent_on: "",
     missing_log_prepared_date: "",
     missing_log_title: "",
-    missing_log_reviewed_by: staffDetails.role_name,
+    missing_log_reviewed_by: "",
     missing_log_reviewed_date: "",
     missing_paperwork_received_on: "",
     missing_log_document: "",
@@ -30,40 +31,35 @@ const MissingLogs = () => {
   });
 
 
-
   useEffect(() => {
+    Profile()
     GetMissingLogDetails();
   }, []);
 
 
-
   const Profile = async (e) => {
-    const req = { id: staffDetails.id  }
+    const req = { id: staffDetails.id }
     await dispatch(getProfile(req))
-        .unwrap()
-        .then(async (response) => {
-            if (response.status) {
-                setGetProfileDetails(response.data)   
-            }
-            else{
-                setGetProfileDetails([])   
-            }
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setGetProfileDetails(response.data)
+          setMissionAllInputLogData({ ...missionLogAllInputData, missing_log_reviewed_by: response.data.first_name + " " + response.data.last_name })
 
-        })
-        .catch((error) => {
-            console.log("Error", error);
-        });
-};
+        }
+        else {
+          setGetProfileDetails([])
+        }
 
+      })
+      .catch((error) => {
+        console.log("Error", error);
+      });
+  };
 
-
-
-useEffect(() => {
-    Profile()
-},[])
 
   const GetMissingLogDetails = async () => {
-    const req = { action: "get", job_id: location.state.job_id }
+    const req = { action: "get", job_id: 9 }
     const data = { req: req, authToken: token }
 
     await dispatch(GetMissingLog(data))
@@ -81,6 +77,24 @@ useEffect(() => {
       })
   }
 
+  const HandleMissionView = async (row) => {
+    const req = { action: "getSingleView", id: row.id }
+    const data = { req: req, authToken: token }
+    await dispatch(GetMissingLog(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setSingleMissionData(response.data[0]);
+        }
+        else {
+          setSingleMissionData([]);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+  }
+
 
   const columns = [
     { name: 'Missing Log Sent On', selector: row => row.missing_log_sent_on, sortable: true },
@@ -91,7 +105,7 @@ useEffect(() => {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="edit-icon" onClick={() => setViewmissinglogs(true)}>
+          <button className="edit-icon" onClick={() =>{ HandleMissionView(row); setViewmissinglogs(true)}}>
             <i className="fa fa-eye fs-6 text-secondary" />
           </button>
 
@@ -104,7 +118,8 @@ useEffect(() => {
   ];
 
 
-  console.log(getMissingLogListData);
+
+  console.log("singleMissionData", singleMissionData && singleMissionData);
 
 
   return (
@@ -134,8 +149,9 @@ useEffect(() => {
         size="lg"
         cancel_btn="true"
         btn_2="true"
+        btn_name="Save"
         title="Add Missing Log"
-        hideBtn={true}
+        hideBtn={false}
         handleClose={() => {
           setAddmissinglogs(false);
 
@@ -298,25 +314,39 @@ useEffect(() => {
                 <div>
                   <input
                     type="radio"
-                    id="html"
-                    name="fav_language"
-                    defaultValue="HTML"
-                    onChange={(e) => { setMissionAllInputLogData({ ...missionLogAllInputData, status: e.target.value }) }}
-                    value={missionLogAllInputData.status}
+                    id="complete"
+                    name="status"
+                    value="1"  // Send 1 for Complete
+                    onChange={(e) => {
+                      setMissionAllInputLogData({
+                        ...missionLogAllInputData,
+                        status: e.target.value
+                      });
+                    }}
+                    checked={missionLogAllInputData.status === "1"}
                   />
-                  &nbsp; <label htmlFor="html">Complete</label>
+                  &nbsp; <label htmlFor="complete">Complete</label>
                 </div>
                 &nbsp;
                 <div style={{ marginLeft: 10 }}>
                   <input
                     type="radio"
-                    id="html"
-                    name="fav_language"
-                    defaultValue="HTML"
+                    id="incomplete"
+                    name="status"
+                    value="0"  // Send 0 for Incomplete
+                    onChange={(e) => {
+                      setMissionAllInputLogData({
+                        ...missionLogAllInputData,
+                        status: e.target.value
+                      });
+                    }}
+                    checked={missionLogAllInputData.status === "0"}
                   />
-                  &nbsp; <label htmlFor="html">Incomplete</label>
+                  &nbsp; <label htmlFor="incomplete">Incomplete</label>
                 </div>
               </div>
+
+
             </div>
           </div>
         </div>
@@ -343,7 +373,7 @@ useEffect(() => {
               </label>
             </div>
             <div className="col-md-6">
-              <span className="text-muted">03/07/2023</span>
+              <span className="text-muted">{singleMissionData && singleMissionData?.missing_log_sent_on}</span>
             </div>
           </div>
           <div className="row">
@@ -353,7 +383,7 @@ useEffect(() => {
               </label>
             </div>
             <div className="col-md-6">
-              <span className="text-muted"> 03/07/2023</span>
+              <span className="text-muted">{singleMissionData && singleMissionData?.missing_paperwork_received_on}</span>
             </div>
           </div>
           <div className="row">
