@@ -202,5 +202,6 @@ module.exports = {
   updateTaskTimeSheetStatus,
   addMissingLog,
   getMissingLog,
-  getMissingLogSingleView
+  getMissingLogSingleView,
+  updateJobTimeTotalHours
 };
