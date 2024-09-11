@@ -81,6 +81,7 @@ const EditJob = () => {
     InvoiceDate: null,
     InvoiceHours: "",
     InvoiceRemark: "",
+    status_type: null,
   });
 
   const JobDetails = async () => {
@@ -90,7 +91,6 @@ const EditJob = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-
           if (Object.keys(response.data).length > 0) {
             setChecklistId(response.data.tasks?.checklist_id ?? 0);
             setTempChecklistId(response.data.tasks?.checklist_id ?? 0);
@@ -165,6 +165,7 @@ const EditJob = () => {
               InvoiceDate: response.data.invoice_date?.split("T")[0] ?? null,
               InvoiceHours: response.data.invoice_hours ?? "",
               InvoiceRemark: response.data.invoice_remark ?? "",
+              status_type: response.data.status_type ?? null,
             }));
           }
 
@@ -412,6 +413,7 @@ const EditJob = () => {
       invoice_date: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.InvoiceDate,
       invoice_hours: formatTime(invoiceTime.hours, invoiceTime.minutes),
       invoice_remark: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.InvoiceRemark,
+      status_type: jobData.status_type,
       tasks: {
         checklist_id: getChecklistId,
         task: AddTaskArr

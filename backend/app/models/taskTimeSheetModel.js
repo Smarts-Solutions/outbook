@@ -57,7 +57,9 @@ const getjobTimeSheet = async (timeSheet) => {
      SELECT 
      jobs.id AS job_id,
      jobs.budgeted_hours AS budgeted_hours,
-     jobs.job_id AS job_code_id
+     jobs.job_id AS job_code_id,
+     jobs.total_hours AS total_hours,
+     jobs.total_hours_status AS total_hours_status
      FROM 
      jobs
      WHERE 
@@ -89,6 +91,26 @@ const updateTaskTimeSheetStatus = async (timeSheet) => {
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
  
+    return { status: false, message: 'Error getTaskTimeSheet .' };
+  }
+}
+
+const updateJobTimeTotalHours = async(timeSheet)=> {
+  const {job_id, total_hours ,total_hours_status}  = timeSheet;
+  try {
+    const query = `
+     UPDATE 
+     jobs
+     SET
+     total_hours = ? , total_hours_status = ?
+     WHERE 
+     id = ?
+     `;
+    const [rows] = await pool.execute(query, [total_hours ,total_hours_status, job_id]);
+    console.log("rows ", rows)
+    return { status: true, message: 'Success.', data: rows };
+  } catch (error) {
+     console.log("error ",error)
     return { status: false, message: 'Error getTaskTimeSheet .' };
   }
 }
@@ -180,5 +202,6 @@ module.exports = {
   updateTaskTimeSheetStatus,
   addMissingLog,
   getMissingLog,
-  getMissingLogSingleView
+  getMissingLogSingleView,
+  updateJobTimeTotalHours
 };
