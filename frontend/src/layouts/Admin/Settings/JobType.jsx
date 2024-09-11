@@ -20,6 +20,7 @@ const Setting = () => {
     const [modalData, setModalData] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [showAddTask, setShowAddTask] = useState(false);
+    const [viewtask, setViewtask] = useState(false);
     const [getJobTypeId, setJobTypeId] = useState('');
 
 
@@ -92,7 +93,8 @@ const Setting = () => {
             cell: row => (
                 <div>
                     <button className='edit-icon' onClick={() => handleEdit(row)}> <i className="ti-pencil" /></button>
-                    <button className='delete-icon' onClick={() => handleDelete(row)}> <i className="ti-trash text-danger me-2" /></button>
+                    <button className='delete-icon' onClick={() => handleDelete(row)}> <i className="ti-trash text-danger" /></button>
+                    <button className='btn border-0' onClick={(e) => { setViewtask(true) }}> <i className="fa-regular fa-eye me-2" /></button>
                     <button className='btn btn-info text-white' onClick={(e) => { setShowAddTask(true); setJobTypeId(row) }}>Add Task</button>
 
                 </div>
@@ -449,15 +451,8 @@ const Setting = () => {
                                 />
                             </div>
 
-                            {/* <input type="file" className="form-control" placeholder="Job Name" id="firstNameinput" /> */}
                         </div>
-                        {/* <div className="col-lg-3">
-                            <div className="remove" style={{ float: 'right' }}>
-                                <a className="btn btn-sm add-btn-job_type add-btn-new">
-                                    UPLOAD
-                                </a>
-                            </div>
-                        </div> */}
+                       
                     </div>
                     <br />
                     <div style={{ border: '2px hidden black', margin: '5px' }} className="table-responsive table-card mt-3 mb-1">
@@ -480,6 +475,72 @@ const Setting = () => {
                                         <td>&nbsp;&nbsp;</td>
                                         <td>&nbsp;&nbsp;</td>
                                         <td>&nbsp;&nbsp;</td>
+                                        <td className="tabel_left">
+                                            <div className="d-flex gap-2">
+                                                <div className="remove">
+                                                    <a
+                                                        style={{ backgroundColor: 'rgb(75, 175, 75)', color: 'white', width: '60px',fontSize:'12px' }}
+                                                        className="btn btn-sm "
+                                                    >
+                                                        Enable
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="col-lg-12">
+                        <div className="remove" style={{ float: 'right' }}>
+                            <button className="btn btn-info text-white " onClick={(e) => handleSaveTask()}>
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+
+            </CommanModal >
+
+
+            <CommanModal
+                isOpen={viewtask}
+                backdrop="static"
+                size="ms-5"
+                title="View Task"
+                hideBtn={true}
+                handleClose={() => { setViewtask(false) }}
+            >
+
+
+
+                <div className="modal-body">
+                    <div className="mb-3" id="modal-id" style={{ display: 'none' }}>
+                        <label htmlFor="id-field" className="form-label">ID</label>
+                        <input type="text" id="id-field" className="form-control" placeholder="ID" readOnly />
+                    </div>
+                  
+                   
+                    <div style={{ border: '2px hidden black', margin: '5px' }} className="table-responsive table-card mt-3 mb-1">
+                        <table className="table align-middle table-nowrap" id="customerTable">
+                            <thead className="table-light">
+                                <tr>
+                                    <th className="">Task</th>
+                                   
+                                    <th className="tabel_left">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="list form-check-all">
+                                {tasks.map((task, index) => (
+                                    <tr className="tabel_new" key={index}>
+                                        <td>{task}</td>
+                                        
                                         <td className="tabel_left">
                                             <div className="d-flex gap-2">
                                                 <div className="remove">

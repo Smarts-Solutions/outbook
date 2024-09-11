@@ -9822,12 +9822,12 @@ margin: 0px auto;
 
 }
 
-thead.table-striped th,
-.table-head-blue th {
+thead.table-striped th, .table-head-blue th {
   background: #EBF4F7 !important;
   font-size: 14px;
   color: #4B4B4B;
   font-weight: 600;
+  padding: 10px 10px;
 }
 
 .new-checkbox {
@@ -10115,10 +10115,10 @@ body .accordion-button:not(.collapsed)::after {
   padding-top: .25rem!important;
 }
  
-.accordion-button {
+/* .accordion-button {
   width: 20% !important;
 }
- 
+  */
 
   
  
