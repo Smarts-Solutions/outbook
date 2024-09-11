@@ -227,7 +227,7 @@ const getMissingLogSingleView = async (missingLog) => {
 
 //Queries
 const addQuerie = async(querie) => {
-  const { job_id, query_title, queries_remaining, query_sent_date, response_received, response, final_query_response_received_date } = querie.body;
+  const { job_id, queries_remaining, query_title, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, response, final_query_response_received_date } = querie.body;
   const query_document = querie.files;
 
   try {
