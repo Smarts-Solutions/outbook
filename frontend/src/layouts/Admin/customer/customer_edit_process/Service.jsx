@@ -398,14 +398,16 @@ const Service = () => {
                         <div className="form-check"></div>
                       </th>
                       <th>Service Name</th>
-                      <th>Action</th>
+                      <th width='100'></th>
+                      <th className="">Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {GetAllService.data.length > 0 ? (
                       GetAllService.data.map((item, index) => (
                         <tr key={index}>
-                          <th scope="row">
+                          
+                          <th scope="row" className="align-top">
                             <div className="form-check">
                               <input
                                 className="form-check-input new_input new-checkbox"
@@ -419,15 +421,101 @@ const Service = () => {
                           </th>
 
                           <td className="customer_name">
-                            <div className="customer-details d-flex align-items-center">
-                              <div>{item.name}</div>{" "}
+
+                          <>
+  <div className="accordion" id="accordionExample">
+    <div className="accordion-item">
+      <h2 className="accordion-header" id="headingOne">
+        <button
+          className="accordion-button collapsed"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseOne"
+          aria-expanded="true"
+          aria-controls="collapseOne"
+        >
+          {item.name}
+        </button>
+      </h2>
+      <div
+        id="collapseOne"
+        className="accordion-collapse collapse "
+        aria-labelledby="headingOne"
+        data-bs-parent="#accordionExample"
+      >
+        <div className="accordion-body">
+          <div className="pb-3">
+          <input
+                                                    type="file"
+                                                 id="uploadButton"
+                                                 className="form-control"
+                                                    style={{
+                                                      cursor: "pointer",
+                                                    }}
+                                                    // onChange={(e) =>
+                                                    //   TaskUpdate(
+                                                    //     e,
+                                                    //     data1.id,
+                                                    //     item.id
+                                                    //   )
+                                                    // }
+                                                  />
+          </div>
+          <div className="accordion" id="sub-accordionExample">
+            <div className="accordion-item">
+              <h2 className="accordion-header" id="sub-headingOne">
+                <button
+                  className="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#sub-collapseOne"
+                  aria-expanded="true"
+                  aria-controls="collapseOne"
+                >
+                  View Uploaded Data
+                </button>
+              </h2>
+              <div
+                id="sub-collapseOne"
+                className="accordion-collapse collapse "
+                aria-labelledby="sub-headingOne"
+                data-bs-parent="#sub-accordionExample"
+              >
+                <div className="accordion-body">
+                  <table className="table table-light table-head-blue">
+                   <thead>
+                    <th>Checklist Name</th>
+                    <th>Tasks</th>
+                    <th>Budgeted Hour</th>
+                   </thead>
+                   <tbody>
+                    <td>
+                      ffgf
+                    </td>
+                   </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+           
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</>
+
+                            <div className="customer-details d-flex align-items-center justify-content-between">
+                              <div className="fs-18">{item.name}</div>{" "}
                               <div
                                 className="customer-details d-flex align-items-center"
                                 style={{ marginLeft: "10px" }}
                               >
                                 {services.includes(item.id) && (
+                                 
                                   <i
-                                    className="fa fa-down"
+                                    className="fa-solid fa-chevron-down fs-6"
                                     onClick={(e) =>
                                       setShowJobTabel((pre) =>
                                         pre == item.id ? "" : item.id
@@ -435,12 +523,15 @@ const Service = () => {
                                     }
                                   />
                                 )}
-
-                                <div
+</div>
+                               </div>
+                              
+                               <div
                                   key={index}
                                   style={{
-                                    margin: "20px",
-                                    overflowX: "auto",
+                                    marginTop:'10px',
+                                    marginLeft: "-50px",
+                                    
                                   }}
                                 >
                                   <div
@@ -460,27 +551,55 @@ const Service = () => {
                                               key={index}
                                             >
                                               <div
-                                                className="row accordion-header"
+                                                className=" accordion-header w-100 px-2 py-2"
                                                 id={`heading-${index}`}
                                                 style={{
                                                   backgroundColor: "#ebf4f7",
-                                                  width: "100%",
+                                                 
                                                 }}
                                               >
+                                                <div className="d-flex justify-content-between border-bottom">
                                                 <div
-                                                  className="col-lg-3"
-                                                  style={{
-                                                    whiteSpace: "normal",
-                                                    overflowWrap: "break-word",
-                                                  }}
+                                                  className=""
+                                                 
                                                 >
                                                   {data1.type}
                                                 </div>
+                                                <div
+                                                  className=" accordion-button w-auto collapsed"
+                                                  data-bs-toggle="collapse"
+                                                  data-bs-target={`#collapse-${index}`}
+                                                  aria-expanded="false"
+                                                  aria-controls={`collapse-${index}`}
+                                                  style={{
+                                                    cursor: "pointer",
+                                                  }}
+                                                ></div>
+                                                </div>
+                                                <div className="row">
+                                              
+                                                <div className="col-lg-12 pt-3 text-center">
+  <label htmlFor="uploadButton" style={{ cursor: "pointer" }} className="btn btn-outline-info bg-white">
+  <i className="fa-regular fa-cloud-arrow-up pe-2">
+    
+  </i>
+   {/* FontAwesome icon */}
+   Drop files here to upload
+  </label>
+  <input
+    type="file"
+    id="uploadButton"
+    style={{
+      display: "none", // Hides the actual file input
+    }}
+    onChange={(e) => TaskUpdate(e, data1.id, item.id)}
+  />
+</div>
 
                                                 <div className="col-lg-6">
                                                   <input
                                                     type="file"
-                                                    id="uploadButton"
+                                                 id="uploadButton"
                                                     style={{
                                                       cursor: "pointer",
                                                     }}
@@ -494,18 +613,9 @@ const Service = () => {
                                                   />
                                                 </div>
 
-                                                <div
-                                                  className="col-lg-3 accordion-button collapsed"
-                                                  data-bs-toggle="collapse"
-                                                  data-bs-target={`#collapse-${index}`}
-                                                  aria-expanded="false"
-                                                  aria-controls={`collapse-${index}`}
-                                                  style={{
-                                                    cursor: "pointer",
-                                                  }}
-                                                ></div>
+                                              
                                               </div>
-
+                                              </div>
                                               <div
                                                 id={`collapse-${index}`}
                                                 className="accordion-collapse collapse" // Keep accordion collapsed by default
@@ -545,6 +655,11 @@ const Service = () => {
                                                         >
                                                           Tasks
                                                         </th>
+                                                        <th  style={{
+                                                            padding: "10px",
+                                                            border:
+                                                              "1px solid #ddd",
+                                                          }}>Budgeted Hour</th>
                                                       </tr>
                                                     </thead>
                                                     <tbody>
@@ -581,7 +696,22 @@ const Service = () => {
                                                                    {TaskShow && TaskShow.Task.map((TaskData)=>{
                                                                       return(
                                                                         <div>
-                                                                          <div>{TaskData.TaskName} {"     "}{TaskData.BudgetHour}</div>
+                                                                          <div>{TaskData.TaskName}</div>
+                                                                   
+                                                                        </div>
+                                                                      )
+                                                                   })   }
+                                                                  </td>
+                                                                  <td style={{
+                                                                      padding:
+                                                                        "8px",
+                                                                      border:
+                                                                        "1px solid #ddd",
+                                                                    }}>
+                                                                  {TaskShow && TaskShow.Task.map((TaskData)=>{
+                                                                      return(
+                                                                        <div>
+                                                                          <div>{TaskData.BudgetHour}</div>
                                                                    
                                                                         </div>
                                                                       )
@@ -601,11 +731,10 @@ const Service = () => {
                                         )}
                                   </div>
                                 </div>
-                              </div>
-                            </div>
+                            
                           </td>
-
-                          <td>
+<td></td>
+                          <td className="align-top">
                             <button
                               className="btn btn-sm tn btn-outline-info remove-item-btn"
                               onClick={() => {
