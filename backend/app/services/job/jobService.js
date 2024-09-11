@@ -51,6 +51,9 @@ const jobTimeSheet = async (timeSheet) => {
   else if(action === "updateTaskTimeSheetStatus"){
     return taskTimeSheetModel.updateTaskTimeSheetStatus(timeSheet);
   }
+  else if(action === "updateJobTimeTotalHours"){
+    return taskTimeSheetModel.updateJobTimeTotalHours(timeSheet);
+  }
   else{
     return { status: false, message: 'Error getting Job TimeSheet.' };
   }
