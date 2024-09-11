@@ -29,15 +29,16 @@ const CreateClient = () => {
   const [errors3, setErrors3] = useState({});
   const [errors4, setErrors4] = useState({});
 
-
   const [personRoleDataAll, setPersonRoleDataAll] = useState({
     loading: true,
     data: [],
   });
+
   const [countryDataAll, setCountryDataAll] = useState({
     loading: true,
     data: [],
   });
+
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     IndustryType: "",
     tradingName: "",
@@ -52,6 +53,7 @@ const CreateClient = () => {
     residentialAddress: "",
     phone_code: "+44",
   });
+
   const [getCompanyDetails, setCompanyDetails] = useState({
     SearchCompany: "",
     CompanyName: "",
@@ -68,6 +70,7 @@ const CreateClient = () => {
     TradingName: "",
     TradingAddress: "",
   });
+
   const [getPartnershipDetails, setPartnershipDetails] = useState({
     ClientIndustry: "",
     TradingName: "",
@@ -76,6 +79,7 @@ const CreateClient = () => {
     VATNumber: "",
     Website: "",
   });
+
   const [contacts, setContacts] = useState([
     {
       authorised_signatory_status: false,
@@ -87,6 +91,7 @@ const CreateClient = () => {
       email: "",
     },
   ]);
+
   const [contacts1, setContacts1] = useState([
     {
       authorised_signatory_status: true,
@@ -113,6 +118,7 @@ const CreateClient = () => {
       alternate_email: "",
     },
   ]);
+
   const [contactsErrors, setContactsErrors] = useState([
     {
       first_name: "",
@@ -133,6 +139,7 @@ const CreateClient = () => {
       alternate_email: "",
     },
   ]);
+
   const [errors, setErrors] = useState([
     {
       first_name: false,
@@ -145,9 +152,7 @@ const CreateClient = () => {
   ]);
 
   const [getIndivisualDetails, setIndivisualDetails] = useState({
-   
     tradingName: "",
-  
     first_name: "",
     last_name: "",
     phone: "",
@@ -158,15 +163,13 @@ const CreateClient = () => {
 
   useEffect(() => {
     CustomerPersonRoleData();
-  }, []);
-
-  useEffect(() => {
     CountryData();
     getClientIndustry();
   }, []);
 
   useEffect(() => {
     Get_Company();
+    FilterSearchDetails();
   }, [searchItem]);
 
   useEffect(() => {
@@ -184,9 +187,6 @@ const CreateClient = () => {
     }
   }, [getSearchDetails]);
 
-  useEffect(() => {
-    FilterSearchDetails();
-  }, [searchItem]);
 
   const handleAddContact = () => {
     setContacts([
@@ -236,6 +236,7 @@ const CreateClient = () => {
       },
     ]);
   };
+
   const handleDeleteContact = (index) => {
     const newContacts = contacts.filter((_, i) => i !== index);
     const newErrors = contactsErrors.filter((_, i) => i !== index);
@@ -276,7 +277,7 @@ const CreateClient = () => {
         return;
       }
     }
-    validate1();
+    validate1(name, value);
     setSoleTraderDetails({ ...getSoleTraderDetails, [name]: value });
   };
 
@@ -287,7 +288,7 @@ const CreateClient = () => {
         return;
       }
     }
-    validate2();
+    validate2(name, value);
     setCompanyDetails({ ...getCompanyDetails, [name]: value });
   };
 
@@ -314,81 +315,142 @@ const CreateClient = () => {
     setIndivisualDetails({ ...getIndivisualDetails, [name]: value });
   };
 
-  const validate1 = () => {
-    const newErrors = {};
-    for (const key in getSoleTraderDetails) {
-      if (!getSoleTraderDetails[key]) {
-        // if (key == 'IndustryType') newErrors[key] = 'Select Client Industry';
-        if (key == "tradingName") newErrors[key] = "Please enter Trading Name";
-        else if (key == "tradingAddress")
-          newErrors[key] = "Please enter Trading Address";
-        else if (key == "vatRegistered")
-          newErrors[key] = "Please select VAT Registered";
-        // else if (getSoleTraderDetails.vatRegistered == 1 && key == 'vatNumber') newErrors[key] = 'Please enter VAT Number';
-        // else if (key == 'website') newErrors[key] = 'Please enter Website';
-        else if (key == "first_name")
-          newErrors[key] = "Please enter First Name";
-        else if (key == "last_name") newErrors[key] = "Please enter Last Name";
-        // else if (key == 'phone') newErrors[key] = 'Please enter Phone';
-        // else if (key == 'email') newErrors[key] = 'Please enter Email';
-        // else if (key == 'residentialAddress') newErrors[key] = 'Please enter Residential Address';
-      } else if (key == "email" && !Email_regex(getSoleTraderDetails[key])) {
-        newErrors[key] = "Please enter valid Email";
-      } else if (
-        key == "phone" &&
-        !/^\d{9,12}$/.test(getSoleTraderDetails[key])
-      ) {
-        newErrors[key] = "Phone Number must be between 9 to 12 digits";
+  const validate1 = (name, value) => {
+    const newErrors = { ...errors1 };
+    if (!value) {
+      switch (name) {
+        case "tradingName":
+          newErrors[name] = "Please enter Trading Name";
+          break;
+        case "tradingAddress":
+          newErrors[name] = "Please enter Trading Address";
+          break;
+        case "vatRegistered":
+          newErrors[name] = "Please select VAT Registered";
+          break;
+        case "first_name":
+          newErrors[name] = "Please enter First Name";
+          break;
+        case "last_name":
+          newErrors[name] = "Please enter Last Name";
+          break;
+        case "email":
+          newErrors[name] = "Please enter Email";
+          break;
+        default:
+          break;
       }
     }
-    setErrors1(newErrors);
+    else {
+      if (name === "email" && !Email_regex(value)) {
+        newErrors[name] = "Please enter valid Email";
+      } else if (name === "phone" && !/^\d{9,12}$/.test(value)) {
+        newErrors[name] = "Phone Number must be between 9 to 12 digits";
+      } else {
+        delete newErrors[name];
+        setErrors1((prevErrors) => {
+          const updatedErrors = { ...prevErrors };
+          delete updatedErrors[name];
+          return updatedErrors;
+        });
+      }
+    }
+
+
+    if (Object.keys(newErrors).length !== 0) {
+      setErrors1((prevErrors) => ({
+        ...prevErrors,
+        ...newErrors,
+      }));
+    }
+
     return Object.keys(newErrors).length === 0 ? true : false;
   };
 
-  const validate2 = () => {
-    const newErrors = {};
-    for (const key in getCompanyDetails) {
-      if (!getCompanyDetails[key]) {
-        if (key == "CompanyName") newErrors[key] = "Please Enter Company Name";
-        else if (key == "EntityType")
-          newErrors[key] = "Please Enter Entity Type";
-        else if (key == "CompanyStatus")
-          newErrors[key] = "Please Enter Company Status";
-        else if (key == "CompanyNumber")
-          newErrors[key] = "Please Enter Company Number";
-        else if (key == "RegisteredOfficeAddress")
-          newErrors[key] = "Please Enter Registered Office Address";
-        else if (key == "IncorporationDate")
-          newErrors[key] = "Please Enter Incorporation Date";
-        else if (key == "IncorporationIn")
-          newErrors[key] = "Please Enter Incorporation In";
-        else if (key == "VATRegistered")
-          newErrors[key] = "Please Enter VAT Registered";
-        // else if (getCompanyDetails.VATRegistered == 1 && key == 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
-        // else if (key == 'Website') newErrors[key] = 'Please Enter Website';
-        // else if (key == 'ClientIndustry') newErrors[key] = 'Please Enter Client Industry';
-        else if (key == "TradingName")
-          newErrors[key] = "Please Enter Trading Name";
-        else if (key == "TradingAddress")
-          newErrors[key] = "Please Enter Trading Address";
+  const validate2 = (name, value) => {
+    const newErrors = { ...errors2 };
+    if (!value) {
+      switch (name) {
+        case "CompanyName":
+          newErrors[name] = "Please Enter Company Name";
+          break;
+        case "EntityType":
+          newErrors[name] = "Please Enter Entity Type";
+          break;
+        case "CompanyStatus":
+          newErrors[name] = "Please Enter Company Status";
+          break;
+        case "CompanyNumber":
+          newErrors[name] = "Please Enter Company Number";
+          break;
+        case "RegisteredOfficeAddress":
+          newErrors[name] = "Please Enter Registered Office Address";
+          break;
+        case "IncorporationDate":
+          newErrors[name] = "Please Enter Incorporation Date";
+          break;
+        case "IncorporationIn":
+          newErrors[name] = "Please Enter Incorporation In";
+          break;
+        case "VATRegistered":
+          newErrors[name] = "Please Enter VAT Registered";
+          break;
+        case "TradingName":
+          newErrors[name] = "Please Enter Trading Name";
+          break;
+        case "TradingAddress":
+          newErrors[name] = "Please Enter Trading Address";
+          break;
+        default:
+          break;
       }
     }
-    setErrors2(newErrors);
+    else {
+      if (name === "VATNumber" && !/^[0-9+]*$/.test(value)) {
+        newErrors[name] = "Please enter valid VAT Number";
+      }
+      else {
+        delete newErrors[name];
+        setErrors2((prevErrors) => {
+          const updatedErrors = { ...prevErrors };
+          delete updatedErrors[name];
+          return updatedErrors;
+        });
+      }
+    }
+    if (Object.keys(newErrors).length !== 0) {
+      setErrors1((prevErrors) => ({
+        ...prevErrors,
+        ...newErrors,
+      }));
+    }
     return Object.keys(newErrors).length === 0 ? true : false;
   };
+
+  // validate all fields when submit
+  const validateAllFields = (type) => {
+    const customer_type = [getSoleTraderDetails, getCompanyDetails, getPartnershipDetails];
+    const validate = [validate1, validate2, validate3];
+
+    let isValid = true;
+    for (const key in customer_type[type - 1]) {
+      if (!validate[type - 1](key, customer_type[type - 1][key])) {
+        isValid = false;
+      }
+    }
+    return isValid;
+  };
+
 
   const validate3 = () => {
     const newErrors = {};
     for (const key in getPartnershipDetails) {
       if (!getPartnershipDetails[key]) {
-        // if (key === 'ClientIndustry') newErrors[key] = 'Please Select Client Industry';
         if (key === "TradingName") newErrors[key] = "Please Enter Trading Name";
         else if (key === "TradingAddress")
           newErrors[key] = "Please Enter Trading Address";
         else if (key === "VATRegistered")
           newErrors[key] = "Please Enter VAT Registered";
-        // else if (getPartnershipDetails.VATRegistered == 1 && key === 'VATNumber') newErrors[key] = 'Please Enter VAT Number';
-        // else if (key === 'Website') newErrors[key] = 'Please Enter Website';
       }
     }
 
@@ -502,8 +564,8 @@ const CreateClient = () => {
           value === ""
             ? ""
             : /^\d{9,12}$/.test(value)
-            ? ""
-            : "Phone Number must be between 9 to 12 digits";
+              ? ""
+              : "Phone Number must be between 9 to 12 digits";
         break;
       default:
         break;
@@ -546,8 +608,8 @@ const CreateClient = () => {
           value === ""
             ? ""
             : /^\d{9,12}$/.test(value)
-            ? ""
-            : "Phone Number must be between 9 to 12 digits";
+              ? ""
+              : "Phone Number must be between 9 to 12 digits";
         break;
 
       case "alternate_phone":
@@ -555,8 +617,8 @@ const CreateClient = () => {
           value === ""
             ? ""
             : /^\d{9,12}$/.test(value)
-            ? ""
-            : "Phone Number must be between 9 to 12 digits";
+              ? ""
+              : "Phone Number must be between 9 to 12 digits";
 
         break;
       default:
@@ -577,103 +639,25 @@ const CreateClient = () => {
   };
 
 
-
-
-  
-
   const handleSubmit = async () => {
-    if (selectClientType == 1 && validate1()) {
-      const req = {
-        client_type: "1",
-        customer_id: location.state.id,
-        client_industry_id: getSoleTraderDetails.IndustryType,
-        trading_name: getSoleTraderDetails.tradingName,
-        trading_address: getSoleTraderDetails.tradingAddress,
-        vat_registered: getSoleTraderDetails.vatRegistered,
-        vat_number: getSoleTraderDetails.vatNumber,
-        website: getSoleTraderDetails.website,
-        first_name: getSoleTraderDetails.first_name,
-        last_name: getSoleTraderDetails.last_name,
-        phone: getSoleTraderDetails.phone,
-        email: getSoleTraderDetails.email,
-        residential_address: getSoleTraderDetails.residentialAddress,
-        client_code: location.state.id,
-        phone_code: getSoleTraderDetails.phone_code,
-      };
-      await dispatch(Add_Client(req))
-        .unwrap()
-        .then((response) => {
-          if (response.status) {
-            Swal.fire({
-              icon: "success",
-              title: "Client Added Successfully",
-              timerProgressBar: true,
-              timer: 1500,
-            });
-            setTimeout(() => {
-              navigate("/admin/Clientlist", { state: location.state });
-            }, 1500);
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: response.message,
-              timerProgressBar: true,
-              timer: 1500,
-            });
-          }
-        });
-    }
-    if (selectClientType == 2 && validate2()) {
-      let formIsValid = true;
-      const newErrors = contacts.map((contact, index) => {
-        const error = {
-          first_name: contact.first_name ? "" : "First Name is required",
-          last_name: contact.last_name ? "" : "Last Name is required",
-          // role: contact.role ? '' : 'Role is required',
-          phone:
-            contact.phone === ""
-              ? ""
-              : /^\d{9,12}$/.test(contact.phone)
-              ? ""
-              : "Phone Number must be between 9 to 12 digits",
-          email:
-            contact.email === ""
-              ? ""
-              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-              ? ""
-              : "Valid Email is required",
-        };
-
-        if (
-          error.first_name ||
-          error.last_name ||
-          error.role ||
-          error.phone ||
-          error.email
-        ) {
-          formIsValid = false;
-        }
-        return error;
-      });
-      setErrors(newErrors);
-      if (formIsValid) {
+    if (selectClientType == 1) {
+      if (validateAllFields(1)) {
         const req = {
-          client_type: "2",
+          client_type: "1",
           customer_id: location.state.id,
-          company_name: getCompanyDetails.CompanyName,
-          entity_type: getCompanyDetails.EntityType,
-          company_status: getCompanyDetails.CompanyStatus,
-          company_number: getCompanyDetails.CompanyNumber,
-          registered_office_address: getCompanyDetails.RegisteredOfficeAddress,
-          incorporation_date: getCompanyDetails.IncorporationDate,
-          incorporation_in: getCompanyDetails.IncorporationIn,
-          vat_registered: getCompanyDetails.VATRegistered,
-          vat_number: getCompanyDetails.VATNumber,
-          website: getCompanyDetails.Website,
-          client_industry_id: Number(getCompanyDetails.ClientIndustry),
-          trading_name: getCompanyDetails.TradingName,
-          trading_address: getCompanyDetails.TradingAddress,
-          contactDetails: contacts,
+          client_industry_id: getSoleTraderDetails.IndustryType,
+          trading_name: getSoleTraderDetails.tradingName,
+          trading_address: getSoleTraderDetails.tradingAddress,
+          vat_registered: getSoleTraderDetails.vatRegistered,
+          vat_number: getSoleTraderDetails.vatNumber,
+          website: getSoleTraderDetails.website,
+          first_name: getSoleTraderDetails.first_name,
+          last_name: getSoleTraderDetails.last_name,
+          phone: getSoleTraderDetails.phone,
+          email: getSoleTraderDetails.email,
+          residential_address: getSoleTraderDetails.residentialAddress,
+          client_code: location.state.id,
+          phone_code: getSoleTraderDetails.phone_code,
         };
         await dispatch(Add_Client(req))
           .unwrap()
@@ -698,6 +682,90 @@ const CreateClient = () => {
             }
           });
       }
+      else {
+        scrollToFirstError(errors1);
+      }
+    }
+    if (selectClientType == 2) {
+      if (validateAllFields(2)) {
+        let formIsValid = true;
+        const newErrors = contacts.map((contact, index) => {
+          const error = {
+            first_name: contact.first_name ? "" : "First Name is required",
+            last_name: contact.last_name ? "" : "Last Name is required",
+            // role: contact.role ? '' : 'Role is required',
+            phone:
+              contact.phone === ""
+                ? ""
+                : /^\d{9,12}$/.test(contact.phone)
+                  ? ""
+                  : "Phone Number must be between 9 to 12 digits",
+            email:
+              contact.email === ""
+                ? ""
+                : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+                  ? ""
+                  : "Valid Email is required",
+          };
+
+          if (
+            error.first_name ||
+            error.last_name ||
+            error.role ||
+            error.phone ||
+            error.email
+          ) {
+            formIsValid = false;
+          }
+          return error;
+        });
+        setErrors(newErrors);
+        if (formIsValid) {
+          const req = {
+            client_type: "2",
+            customer_id: location.state.id,
+            company_name: getCompanyDetails.CompanyName,
+            entity_type: getCompanyDetails.EntityType,
+            company_status: getCompanyDetails.CompanyStatus,
+            company_number: getCompanyDetails.CompanyNumber,
+            registered_office_address: getCompanyDetails.RegisteredOfficeAddress,
+            incorporation_date: getCompanyDetails.IncorporationDate,
+            incorporation_in: getCompanyDetails.IncorporationIn,
+            vat_registered: getCompanyDetails.VATRegistered,
+            vat_number: getCompanyDetails.VATNumber,
+            website: getCompanyDetails.Website,
+            client_industry_id: Number(getCompanyDetails.ClientIndustry),
+            trading_name: getCompanyDetails.TradingName,
+            trading_address: getCompanyDetails.TradingAddress,
+            contactDetails: contacts,
+          };
+          await dispatch(Add_Client(req))
+            .unwrap()
+            .then((response) => {
+              if (response.status) {
+                Swal.fire({
+                  icon: "success",
+                  title: "Client Added Successfully",
+                  timerProgressBar: true,
+                  timer: 1500,
+                });
+                setTimeout(() => {
+                  navigate("/admin/Clientlist", { state: location.state });
+                }, 1500);
+              } else {
+                Swal.fire({
+                  icon: "error",
+                  title: response.message,
+                  timerProgressBar: true,
+                  timer: 1500,
+                });
+              }
+            });
+        }
+      }
+      else {
+        scrollToFirstError(errors2);
+      }
     }
     if (selectClientType == 3 && validate3()) {
       let formIsValid = true;
@@ -710,26 +778,26 @@ const CreateClient = () => {
             contact.phone === ""
               ? ""
               : /^\d{9,12}$/.test(contact.phone)
-              ? ""
-              : "Phone Number must be between 9 to 12 digits",
+                ? ""
+                : "Phone Number must be between 9 to 12 digits",
           alternate_phone:
             contact.alternate_phone === ""
               ? ""
               : /^\d{9,12}$/.test(contact.alternate_phone)
-              ? ""
-              : " Alternate Phone Number must be between 9 to 12 digits",
+                ? ""
+                : " Alternate Phone Number must be between 9 to 12 digits",
           email:
             contact.email === ""
               ? ""
               : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-              ? ""
-              : "Valid Email is required",
+                ? ""
+                : "Valid Email is required",
           alternate_email:
             contact.alternate_email === ""
               ? ""
               : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.alternate_email)
-              ? ""
-              : "Valid Email is required",
+                ? ""
+                : "Valid Email is required",
         };
 
         if (
@@ -821,6 +889,34 @@ const CreateClient = () => {
     }
   };
 
+  // scorll to first error
+  const scrollToFirstError = (errors) => {
+
+    const errorField = Object.keys(errors)[0];
+    const errorElement = document.getElementById(errorField);
+    if (errorElement) {
+      errorElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // scroll to first error for contact
+  const scrollToFirstError1 = (errors) => {
+    errors.forEach((errorObj, index) => {
+      for (const field in errorObj) {
+        if (errorObj[field]) {
+          const fieldId = `${field}-${index}`;
+          const errorElement = document.getElementById(fieldId);
+
+
+          if (errorElement) {
+            errorElement.scrollIntoView({ behavior: 'smooth' });
+          }
+          return;
+        }
+      }
+    });
+  };
+
   return (
     <div>
       <div className="container-fluid mt-4">
@@ -902,6 +998,7 @@ const CreateClient = () => {
                                             className="form-select "
                                             aria-label="Default select example"
                                             name="IndustryType"
+                                            id="IndustryType"
                                             value={
                                               getSoleTraderDetails.IndustryType
                                             }
@@ -941,6 +1038,7 @@ const CreateClient = () => {
                                           <input
                                             type="text"
                                             name="tradingName"
+                                            id="tradingName"
                                             className="form-control"
                                             placeholder="Trading Name"
                                             onChange={(e) => handleChange1(e)}
@@ -968,6 +1066,7 @@ const CreateClient = () => {
                                             className="form-control"
                                             placeholder="Trading Address"
                                             name="tradingAddress"
+                                            id="tradingAddress"
                                             onChange={(e) => handleChange1(e)}
                                             value={
                                               getSoleTraderDetails.tradingAddress
@@ -989,6 +1088,7 @@ const CreateClient = () => {
                                             className="form-select "
                                             aria-label="Default select example"
                                             name="vatRegistered"
+                                            id="vatRegistered"
                                             defaultValue={0}
                                             onChange={(e) => handleChange1(e)}
                                           >
@@ -1012,6 +1112,7 @@ const CreateClient = () => {
                                             className="form-control"
                                             placeholder="VAT Number"
                                             name="vatNumber"
+                                            id="vatNumber"
                                             value={
                                               getSoleTraderDetails.vatNumber
                                             }
@@ -1034,6 +1135,7 @@ const CreateClient = () => {
                                             className="form-control"
                                             placeholder="URL"
                                             name="website"
+                                            id="website"
                                             value={getSoleTraderDetails.website}
                                             onChange={(e) => handleChange1(e)}
                                           />
@@ -1067,6 +1169,7 @@ const CreateClient = () => {
                                           className="form-control"
                                           placeholder="First Name"
                                           name="first_name"
+                                          id="first_name"
                                           value={
                                             getSoleTraderDetails.first_name
                                           }
@@ -1092,6 +1195,7 @@ const CreateClient = () => {
                                           className="form-control"
                                           placeholder="Last Name"
                                           name="last_name"
+                                          id="last_name"
                                           value={getSoleTraderDetails.last_name}
                                           onChange={(e) => handleChange1(e)}
                                         />
@@ -1102,7 +1206,6 @@ const CreateClient = () => {
                                         )}
                                       </div>
                                     </div>
-
                                     <div className="col-lg-4">
                                       <div className="mb-3">
                                         <label className="form-label">
@@ -1114,6 +1217,7 @@ const CreateClient = () => {
                                               className="form-select"
                                               onChange={(e) => handleChange1(e)}
                                               name="phone_code"
+                                              id="phone_code"
                                               value={
                                                 getSoleTraderDetails.phone_code
                                               }
@@ -1136,6 +1240,7 @@ const CreateClient = () => {
                                               className="form-control"
                                               placeholder="Phone Number"
                                               name="phone"
+                                              id="phone"
                                               value={getSoleTraderDetails.phone}
                                               onChange={(e) => handleChange1(e)}
                                               maxLength={12}
@@ -1150,7 +1255,6 @@ const CreateClient = () => {
                                         </div>
                                       </div>
                                     </div>
-
                                     <div className="col-lg-4">
                                       <div className="mb-3">
                                         <label className="form-label">
@@ -1164,6 +1268,7 @@ const CreateClient = () => {
                                           className="form-control"
                                           placeholder="Enter Email ID"
                                           name="email"
+                                          id="email"
                                           value={getSoleTraderDetails.email}
                                           onChange={(e) => handleChange1(e)}
                                         />
@@ -1174,7 +1279,6 @@ const CreateClient = () => {
                                         )}
                                       </div>
                                     </div>
-
                                     <div className="col-lg-6">
                                       <div className="mb-3">
                                         <label className="form-label">
@@ -1188,6 +1292,7 @@ const CreateClient = () => {
                                           className="form-control"
                                           placeholder="Residential Address"
                                           name="residentialAddress"
+                                          id="residentialAddress"
                                           value={
                                             getSoleTraderDetails.residentialAddress
                                           }
@@ -1239,7 +1344,7 @@ const CreateClient = () => {
                                                 style={{ cursor: "pointer" }}
                                               />
                                               {getAllSearchCompany.length > 0 &&
-                                              showDropdown ? (
+                                                showDropdown ? (
                                                 <div className="dropdown-list">
                                                   {getAllSearchCompany &&
                                                     getAllSearchCompany.map(
@@ -1420,14 +1525,14 @@ const CreateClient = () => {
                                             {errors2[
                                               "RegisteredOfficeAddress"
                                             ] && (
-                                              <div className="error-text">
-                                                {
-                                                  errors2[
+                                                <div className="error-text">
+                                                  {
+                                                    errors2[
                                                     "RegisteredOfficeAddress"
-                                                  ]
-                                                }
-                                              </div>
-                                            )}
+                                                    ]
+                                                  }
+                                                </div>
+                                              )}
                                           </div>
                                         </div>
 
@@ -1698,13 +1803,13 @@ const CreateClient = () => {
                                                       />
                                                       {errors[index]
                                                         .first_name && (
-                                                        <div className="error-text">
-                                                          {
-                                                            errors[index]
-                                                              .first_name
-                                                          }
-                                                        </div>
-                                                      )}
+                                                          <div className="error-text">
+                                                            {
+                                                              errors[index]
+                                                                .first_name
+                                                            }
+                                                          </div>
+                                                        )}
                                                     </div>
                                                   </div>
                                                   <div className="col-lg-4">
@@ -1740,13 +1845,13 @@ const CreateClient = () => {
                                                       />
                                                       {errors[index]
                                                         .last_name && (
-                                                        <div className="error-text">
-                                                          {
-                                                            errors[index]
-                                                              .last_name
-                                                          }
-                                                        </div>
-                                                      )}
+                                                          <div className="error-text">
+                                                            {
+                                                              errors[index]
+                                                                .last_name
+                                                            }
+                                                          </div>
+                                                        )}
                                                     </div>
                                                   </div>
                                                   <div className="col-lg-4">
@@ -1844,13 +1949,13 @@ const CreateClient = () => {
                                                           />
                                                           {errors[index]
                                                             .phone && (
-                                                            <div className="error-text">
-                                                              {
-                                                                errors[index]
-                                                                  .phone
-                                                              }
-                                                            </div>
-                                                          )}
+                                                              <div className="error-text">
+                                                                {
+                                                                  errors[index]
+                                                                    .phone
+                                                                }
+                                                              </div>
+                                                            )}
                                                         </div>
                                                       </div>
                                                     </div>
@@ -2123,7 +2228,7 @@ const CreateClient = () => {
                                                         disabled={
                                                           contacts1.length === 2
                                                             ? index === 0 ||
-                                                              index === 1
+                                                            index === 1
                                                             : false
                                                         }
                                                       />
@@ -2183,13 +2288,13 @@ const CreateClient = () => {
                                                     />
                                                     {contactsErrors[index]
                                                       .first_name && (
-                                                      <div className="error-text">
-                                                        {
-                                                          contactsErrors[index]
-                                                            .first_name
-                                                        }
-                                                      </div>
-                                                    )}
+                                                        <div className="error-text">
+                                                          {
+                                                            contactsErrors[index]
+                                                              .first_name
+                                                          }
+                                                        </div>
+                                                      )}
                                                   </div>
                                                 </div>
                                                 <div className="col-lg-4">
@@ -2222,13 +2327,13 @@ const CreateClient = () => {
                                                     />
                                                     {contactsErrors[index]
                                                       .last_name && (
-                                                      <div className="error-text">
-                                                        {
-                                                          contactsErrors[index]
-                                                            .last_name
-                                                        }
-                                                      </div>
-                                                    )}
+                                                        <div className="error-text">
+                                                          {
+                                                            contactsErrors[index]
+                                                              .last_name
+                                                          }
+                                                        </div>
+                                                      )}
                                                   </div>
                                                 </div>
                                                 <div className="col-lg-4">
@@ -2271,13 +2376,13 @@ const CreateClient = () => {
                                                     </select>
                                                     {contactsErrors[index]
                                                       .role && (
-                                                      <div className="error-text">
-                                                        {
-                                                          contactsErrors[index]
-                                                            .role
-                                                        }
-                                                      </div>
-                                                    )}
+                                                        <div className="error-text">
+                                                          {
+                                                            contactsErrors[index]
+                                                              .role
+                                                          }
+                                                        </div>
+                                                      )}
                                                   </div>
                                                 </div>
 
@@ -2337,14 +2442,14 @@ const CreateClient = () => {
                                                         />
                                                         {contactsErrors[index]
                                                           .phone && (
-                                                          <div className="error-text">
-                                                            {
-                                                              contactsErrors[
-                                                                index
-                                                              ].phone
-                                                            }
-                                                          </div>
-                                                        )}
+                                                            <div className="error-text">
+                                                              {
+                                                                contactsErrors[
+                                                                  index
+                                                                ].phone
+                                                              }
+                                                            </div>
+                                                          )}
                                                       </div>
                                                     </div>
                                                   </div>
@@ -2403,14 +2508,14 @@ const CreateClient = () => {
                                                         />
                                                         {contactsErrors[index]
                                                           .alternate_phone && (
-                                                          <div className="error-text">
-                                                            {
-                                                              contactsErrors[
-                                                                index
-                                                              ].alternate_phone
-                                                            }
-                                                          </div>
-                                                        )}
+                                                            <div className="error-text">
+                                                              {
+                                                                contactsErrors[
+                                                                  index
+                                                                ].alternate_phone
+                                                              }
+                                                            </div>
+                                                          )}
                                                       </div>
                                                     </div>
                                                   </div>
@@ -2441,13 +2546,13 @@ const CreateClient = () => {
                                                     />
                                                     {contactsErrors[index]
                                                       .email && (
-                                                      <div className="error-text">
-                                                        {
-                                                          contactsErrors[index]
-                                                            .email
-                                                        }
-                                                      </div>
-                                                    )}
+                                                        <div className="error-text">
+                                                          {
+                                                            contactsErrors[index]
+                                                              .email
+                                                          }
+                                                        </div>
+                                                      )}
                                                   </div>
                                                 </div>
                                                 <div className="col-lg-4">
@@ -2479,13 +2584,13 @@ const CreateClient = () => {
                                                     />
                                                     {contactsErrors[index]
                                                       .alternate_email && (
-                                                      <div className="error-text">
-                                                        {
-                                                          contactsErrors[index]
-                                                            .alternate_email
-                                                        }
-                                                      </div>
-                                                    )}
+                                                        <div className="error-text">
+                                                          {
+                                                            contactsErrors[index]
+                                                              .alternate_email
+                                                          }
+                                                        </div>
+                                                      )}
                                                   </div>
                                                 </div>
                                               </div>
