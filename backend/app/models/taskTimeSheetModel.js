@@ -183,7 +183,7 @@ const getMissingLog = async (missingLog) => {
      missing_logs.missing_log_reviewed_by AS missing_log_reviewed_by,
      missing_logs.missing_log_reviewed_date AS missing_log_reviewed_date,
      missing_logs.missing_paperwork_received_on AS missing_paperwork_received_on,
-     missing_logs.missing_log_document AS missing_log_document
+     missing_logs.status AS status
      FROM 
      missing_logs
      WHERE 

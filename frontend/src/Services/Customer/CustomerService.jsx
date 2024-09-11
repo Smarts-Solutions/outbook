@@ -238,4 +238,16 @@ export async function GET_JOB_TIME_SHEET(data, token) {
     return await err;
   }
 }
+
+export async function GET_MISSING_LOG(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getMissingLog`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
  

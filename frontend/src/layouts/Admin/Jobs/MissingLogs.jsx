@@ -1,24 +1,100 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import Datatable from '../../../Components/ExtraComponents/Datatable';
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
+import { GetMissingLog } from '../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { getProfile } from '../../../ReduxStore/Slice/Staff/staffSlice';
 
 const MissingLogs = () => {
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const token = JSON.parse(localStorage.getItem("token"));
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [addmissinglogs, setAddmissinglogs] = useState(false);
   const [viewmissinglogs, setViewmissinglogs] = useState(false);
+  const [getMissingLogListData, setGetMissingLogListData] = useState([]);
+  const [getProfileDetails, setGetProfileDetails] = useState([]);
+
+  const [missionLogAllInputData, setMissionAllInputLogData] = useState({
+    missing_log: "",
+    missing_paperwork: "",
+    missing_log_sent_on: "",
+    missing_log_prepared_date: "",
+    missing_log_title: "",
+    missing_log_reviewed_by: staffDetails.role_name,
+    missing_log_reviewed_date: "",
+    missing_paperwork_received_on: "",
+    missing_log_document: "",
+    status: "",
+  });
+
+
+
+  useEffect(() => {
+    GetMissingLogDetails();
+  }, []);
+
+
+
+  const Profile = async (e) => {
+    const req = { id: staffDetails.id  }
+    await dispatch(getProfile(req))
+        .unwrap()
+        .then(async (response) => {
+            if (response.status) {
+                setGetProfileDetails(response.data)   
+            }
+            else{
+                setGetProfileDetails([])   
+            }
+
+        })
+        .catch((error) => {
+            console.log("Error", error);
+        });
+};
+
+
+
+
+useEffect(() => {
+    Profile()
+},[])
+
+  const GetMissingLogDetails = async () => {
+    const req = { action: "get", job_id: location.state.job_id }
+    const data = { req: req, authToken: token }
+
+    await dispatch(GetMissingLog(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setGetMissingLogListData(response.data);
+        }
+        else {
+          setGetMissingLogListData([]);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+  }
+
 
   const columns = [
-    { name: 'Trading Name', selector: row => row.TradingName , sortable: true },
-    { name: 'Customer Code', selector: row => row.Code, sortable: true },
-    { name: 'Customer Name', selector: row => row.CustomerName, sortable: true },
-    { name: 'Company Number', selector: row => row.AccountManager, sortable: true },
+    { name: 'Missing Log Sent On', selector: row => row.missing_log_sent_on, sortable: true },
+    { name: 'Missing Log Title', selector: row => row.missing_log_title, sortable: true },
+    { name: 'Missing Paperwork Received On', selector: row => row.missing_paperwork_received_on, sortable: true },
+    { name: 'status', selector: row => row.status == 1 ? "Completed" : "Incomplete", sortable: true },
     {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="edit-icon"  onClick={() => setViewmissinglogs(true)}>
+          <button className="edit-icon" onClick={() => setViewmissinglogs(true)}>
             <i className="fa fa-eye fs-6 text-secondary" />
           </button>
-        
+
         </div>
       ),
       ignoreRowClick: true,
@@ -27,11 +103,9 @@ const MissingLogs = () => {
     },
   ];
 
-  const data = [
-    { TradingName: 'W120', Code: '012_BlaK_T_1772', CustomerName: 'The Black T', AccountManager: 'Ajeet Aggarwal',  ServiceType: 'Admin/Support Tasks', JobType: 'Year End' },
-    { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal',  ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-    // other rows...
-  ];
+
+  console.log(getMissingLogListData);
+
 
   return (
     <div className=''>
@@ -46,12 +120,12 @@ const MissingLogs = () => {
             <button type="button" className="btn btn-info text-white float-end" onClick={() => setAddmissinglogs(true)}>
               <i className="fa-regular fa-plus pe-1"></i> Add Missing Logs
             </button>
-          </div>    
+          </div>
         </div>
       </div>
 
       <div className='datatable-wrapper '>
-        <Datatable filter={true} columns={columns} data={data} />
+        <Datatable filter={true} columns={columns} data={getMissingLogListData} />
       </div>
 
       <CommonModal
@@ -63,227 +137,239 @@ const MissingLogs = () => {
         title="Add Missing Log"
         hideBtn={true}
         handleClose={() => {
-           setAddmissinglogs(false);
-         
+          setAddmissinglogs(false);
+
         }}>
-    <div className="row">
+        <div className="row">
 
-  <div className="col-lg-6">
-    <div className="mb-3">
-      <label htmlFor="firstNameinput" className="form-label">
-        Missing Log?
-      </label>
-      <select
-        id="search-select"
-        className="form-select mb-3 ismissinglog"
-        aria-label="Default select example"
-        style={{ color: "#8a8c8e !important" }}
-      >
-        <option value="" selected="">
-          
-          Yes
-        </option>
-        <option value="">No</option>
-      </select>
-    </div>
-  </div>
-  <div id="MissingLog2" className="col-lg-6">
-    <div className="mb-3">
-      <label htmlFor="firstNameinput" className="form-label">
-        Missing Paperwork?
-      </label>
-      <select
-        id="search-select"
-        className="form-select mb-3"
-        aria-label="Default select example"
-        style={{ color: "#8a8c8e !important" }}
-      >
-        <option value="" selected="">
-          
-          Yes
-        </option>
-        <option value="">No</option>
-      </select>
-    </div>
-  </div>
-  <div id="MissingLog" className="col-lg-6">
-    <div className="mb-3">
-      <label htmlFor="firstNameinput" className="form-label">
-        Missing Log Sent On
-      </label>
-      <input
-        type="date"
-        className="form-control"
-        placeholder=""
-        id="firstNameinput"
-      />
-    </div>
-  </div>
-  <div id="MissingLog1" className="col-lg-6">
-    <div className="mb-3">
-      <label htmlFor="firstNameinput" className="form-label">
-        Missing Log Prepared Date
-      </label>
-      <input
-        type="date"
-        className="form-control"
-        placeholder=""
-        id="firstNameinput"
-      />
-    </div>
-  </div>
-  <div id="MissingLog3" className="mb-3 col-lg-6">
-    <label htmlFor="firstNameinput" className="form-label">
-      Missing Log Title
-    </label>
-    <input
-      type="text"
-      defaultValue=""
-      className="form-control"
-      placeholder="Missing Log Title"
-      id="firstNameinput"
-    />
-  </div>
-  <div id="MissingLog4" className="col-lg-6">
-    <div className="mb-3">
-      <label htmlFor="firstNameinput" className="form-label">
-        Missing Log Reviewed By
-      </label>
-      <select
-        id="search-select"
-        className="form-select mb-3 ismissinglog"
-        aria-label="Default select example"
-        style={{ color: "#8a8c8e !important" }}
-      >
-        <option value="" selected="">
-          
-          Ajeet Agarwal
-        </option>
-        <option value="">Hemant Agarwal</option>
-      </select>
-    </div>
-  </div>
-  <div id="MissingLog5" className="col-lg-6">
-    <div className="mb-3">
-      <label htmlFor="firstNameinput" className="form-label">
-        Missing Log Reviewed Date
-      </label>
-      <input
-        type="date"
-        className="form-control"
-        placeholder=""
-        id="firstNameinput"
-      />
-    </div>
-  </div>
-  <div id="MissingLog7" className="col-lg-6">
-    <div className="mb-3">
-      <label htmlFor="firstNameinput" className="form-label">
-        Missing Paperwork Received On
-      </label>
-      <input
-        type="date"
-        className="form-control"
-        data-provider="flatpickr"
-        id="EndleaveDate"
-        placeholder="Last Name"
-      />
-    </div>
-  </div>
+          <div className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Missing Log?
+              </label>
+              <select
+                id="search-select"
+                className="form-select mb-3 ismissinglog"
+                aria-label="Default select example"
+                style={{ color: "#8a8c8e !important" }}
+                onChange={(e) => { setMissionAllInputLogData({ ...missionLogAllInputData, missing_log: e.target.value }) }}
+                value={missionLogAllInputData.missing_log}
+              >
+                <option value="1" selected>Yes</option>
+                <option value="0">No</option>
+              </select>
+            </div>
+          </div>
+          <div id="MissingLog2" className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Missing Paperwork?
+              </label>
+              <select
+                id="search-select"
+                className="form-select mb-3"
+                aria-label="Default select example"
+                style={{ color: "#8a8c8e !important" }}
+                onChange={(e) => { setMissionAllInputLogData({ ...missionLogAllInputData, missing_paperwork: e.target.value }) }}
+                value={missionLogAllInputData.missing_paperwork}
+              >
+                <option value="1" selected>Yes</option>
+                <option value="0">No</option>
+              </select>
+            </div>
+          </div>
+          <div id="MissingLog" className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Missing Log Sent On
+              </label>
+              <input
+                type="date"
+                className="form-control"
+                placeholder=""
+                id="firstNameinput"
+                onChange={(e) => { setMissionAllInputLogData({ ...missionLogAllInputData, missing_log_sent_on: e.target.value }) }}
+                value={missionLogAllInputData.missing_log_sent_on}
+              />
+            </div>
+          </div>
+          <div id="MissingLog1" className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Missing Log Prepared Date
+              </label>
+              <input
+                type="date"
+                className="form-control"
+                placeholder=""
+                id="firstNameinput"
+                onChange={(e) => { setMissionAllInputLogData({ ...missionLogAllInputData, missing_log_prepared_date: e.target.value }) }}
+                value={missionLogAllInputData.missing_log_prepared_date}
+              />
+            </div>
+          </div>
+          <div id="MissingLog3" className="mb-3 col-lg-6">
+            <label htmlFor="firstNameinput" className="form-label">
+              Missing Log Title
+            </label>
+            <input
+              type="text"
+              defaultValue=""
+              className="form-control"
+              placeholder="Missing Log Title"
+              id="firstNameinput"
+              onChange={(e) => { setMissionAllInputLogData({ ...missionLogAllInputData, missing_log_title: e.target.value }) }}
+              value={missionLogAllInputData.missing_log_title
+              }
+            />
+          </div>
+          <div id="MissingLog4" className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Missing Log Reviewed By
+              </label>
+              <input
+                type="text"
+                defaultValue=""
+                className="form-control"
+                placeholder="Missing Log Reviewed By"
+                id="firstNameinput"
+                disabled={true}
+                onChange={(e) => { setMissionAllInputLogData({ ...missionLogAllInputData, missing_log_reviewed_by: e.target.value }) }}
+                value={missionLogAllInputData.missing_log_reviewed_by}
+              />
 
-  <div id="MissingLog8" className="col-lg-6">
-    <div className="mb-3">
-      <label htmlFor="firstNameinput" className="form-label">
-        Missing Log Document
-      </label>
-      <input
-        type="file"
-        className="form-control"
-        data-provider="flatpickr"
-        id="EndleaveDate"
-        placeholder="Last Name"
-      />
-    </div>
-  </div>
-  <div id="MissingLog6" className="col-lg-6">
-    <div className="mb-3">
-      <label htmlFor="firstNameinput" className="form-label">
-        Status
-      </label>
-      <div style={{ display: "flex" }}>
-        <div>
-          <input
-            type="radio"
-            id="html"
-            name="fav_language"
-            defaultValue="HTML"
-          />
-          &nbsp; <label htmlFor="html">Complete</label>
+            </div>
+          </div>
+          <div id="MissingLog5" className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Missing Log Reviewed Date
+              </label>
+              <input
+                type="date"
+                className="form-control"
+                placeholder=""
+                id="firstNameinput"
+                onChange={(e) => { setMissionAllInputLogData({ ...missionLogAllInputData, missing_log_reviewed_date: e.target.value }) }}
+                value={missionLogAllInputData.missing_log_reviewed_date}
+              />
+            </div>
+          </div>
+          <div id="MissingLog7" className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Missing Paperwork Received On
+              </label>
+              <input
+                type="date"
+                className="form-control"
+                data-provider="flatpickr"
+                id="EndleaveDate"
+                placeholder="Last Name"
+                onChange={(e) => { setMissionAllInputLogData({ ...missionLogAllInputData, missing_paperwork_received_on: e.target.value }) }}
+                value={missionLogAllInputData.missing_paperwork_received_on}
+              />
+            </div>
+          </div>
+
+          <div id="MissingLog8" className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Missing Log Document
+              </label>
+              <input
+                type="file"
+                className="form-control"
+                data-provider="flatpickr"
+                id="EndleaveDate"
+                placeholder="Last Name"
+                onChange={(e) => { setMissionAllInputLogData({ ...missionLogAllInputData, missing_log_document: e.target.value }) }}
+                value={missionLogAllInputData.missing_log_document}
+              />
+            </div>
+          </div>
+          <div id="MissingLog6" className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Status
+              </label>
+              <div style={{ display: "flex" }}>
+                <div>
+                  <input
+                    type="radio"
+                    id="html"
+                    name="fav_language"
+                    defaultValue="HTML"
+                    onChange={(e) => { setMissionAllInputLogData({ ...missionLogAllInputData, status: e.target.value }) }}
+                    value={missionLogAllInputData.status}
+                  />
+                  &nbsp; <label htmlFor="html">Complete</label>
+                </div>
+                &nbsp;
+                <div style={{ marginLeft: 10 }}>
+                  <input
+                    type="radio"
+                    id="html"
+                    name="fav_language"
+                    defaultValue="HTML"
+                  />
+                  &nbsp; <label htmlFor="html">Incomplete</label>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        &nbsp;
-        <div style={{ marginLeft: 10 }}>
-          <input
-            type="radio"
-            id="html"
-            name="fav_language"
-            defaultValue="HTML"
-          />
-          &nbsp; <label htmlFor="html">Incomplete</label>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 
-    </CommonModal>
+      </CommonModal>
 
-    <CommonModal
+      <CommonModal
         isOpen={viewmissinglogs}
         backdrop="static"
         size="md"
         title="View Missing Logs"
-        
+
         hideBtn={true}
         handleClose={() => {
-           setViewmissinglogs(false);
+          setViewmissinglogs(false);
           // formik.resetForm();
         }}>
-   <div className="av">
-  <div className="row">
-    <div className="col-md-6">
-      <label htmlFor="customername-field" className="form-label">
-        Missing Log Sent On
-      </label>
-    </div>
-    <div className="col-md-6">
-      <span className="text-muted">03/07/2023</span>
-    </div>
-  </div>
-  <div className="row">
-    <div className="col-md-6">
-      <label htmlFor="customername-field" className="form-label">
-        Missing Paperwork Received On
-      </label>
-    </div>
-    <div className="col-md-6">
-      <span className="text-muted"> 03/07/2023</span>
-    </div>
-  </div>
-  <div className="row">
-    <div className="col-md-6">
-      <label htmlFor="customername-field" className="form-label">
-        Status
-      </label>
-    </div>
-    <div className="col-md-6">
-      <span className="text-muted">On Hold</span>
-    </div>
-  </div>
-</div>
+        <div className="av">
+          <div className="row">
+            <div className="col-md-6">
+              <label htmlFor="customername-field" className="form-label">
+                Missing Log Sent On
+              </label>
+            </div>
+            <div className="col-md-6">
+              <span className="text-muted">03/07/2023</span>
+            </div>
+          </div>
+          <div className="row">
+            <div className="col-md-6">
+              <label htmlFor="customername-field" className="form-label">
+                Missing Paperwork Received On
+              </label>
+            </div>
+            <div className="col-md-6">
+              <span className="text-muted"> 03/07/2023</span>
+            </div>
+          </div>
+          <div className="row">
+            <div className="col-md-6">
+              <label htmlFor="customername-field" className="form-label">
+                Status
+              </label>
+            </div>
+            <div className="col-md-6">
+              <span className="text-muted">On Hold</span>
+            </div>
+          </div>
+        </div>
 
 
-    </CommonModal>
+      </CommonModal>
     </div>
   );
 }
