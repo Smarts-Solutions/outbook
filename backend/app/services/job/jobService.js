@@ -60,7 +60,7 @@ const jobTimeSheet = async (timeSheet) => {
   
 }
 
-//addMissingLog
+//MissingLog
 const addMissingLog = async (missingLog) => {
   return taskTimeSheetModel.addMissingLog(missingLog);
 }

@@ -115,21 +115,21 @@ const updateJobTimeTotalHours = async(timeSheet)=> {
   }
 }
 
-// addMissingLog
+// MissingLog
  const addMissingLog = async (missingLog) => {
   
 
-const { job_id, missing_log, missing_paperwork, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,missing_paperwork_received_on,missing_log_document } = missingLog;
+const { job_id, missing_log, missing_paperwork, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,missing_paperwork_received_on,missing_log_document,status } = missingLog;
 
   try {
     const query = `
      INSERT INTO 
      missing_logs
-      (job_id, missing_log, missing_paperwork, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,missing_paperwork_received_on,missing_log_document)
+      (job_id, missing_log, missing_paperwork, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,missing_paperwork_received_on,missing_log_document,status)
       VALUES
-      (?,?,?,?,?,?,?,?,?,?)
+      (?,?,?,?,?,?,?,?,?,?,?)
       `;
-    const [rows] = await pool.execute(query, [job_id, missing_log, missing_paperwork, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,missing_paperwork_received_on,missing_log_document]);
+    const [rows] = await pool.execute(query, [job_id, missing_log, missing_paperwork, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,missing_paperwork_received_on,missing_log_document,status]);
 
     console.log("rows ", rows)
     return { status: true, message: 'Success.', data: rows };

@@ -16,9 +16,12 @@ router.post('/jobUpdate',verifyToken, jobController.jobUpdate);
 router.post('/getTaskTimeSheet',verifyToken, jobController.getTaskTimeSheet);
 router.post('/jobTimeSheet',verifyToken, jobController.jobTimeSheet);
 
-//addMissingLog
+//MissingLog
 router.post('/addMissingLog',verifyToken, jobController.addMissingLog);
 router.post('/getMissingLog',verifyToken, jobController.getMissingLog);
+
+//Queries
+// router.post('/getQuerie',verifyToken, jobController.getQuerie);
 
 
 
