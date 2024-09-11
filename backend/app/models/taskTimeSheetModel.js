@@ -340,9 +340,8 @@ const getDraft = async (draft) => {
      SELECT 
       drafts.id AS id,
       drafts.job_id AS job_id,
-      drafts.draft AS draft,
-      drafts.draft_sent_on AS draft_sent_on,
-      drafts.draft_received_on AS draft_received_on
+      DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
+      DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on
      FROM 
       drafts
      WHERE 
@@ -359,19 +358,44 @@ const getDraft = async (draft) => {
   }
 }
 
+const getDraftSingleView = async(req,res) => {
+  const { id } = req;
+  try {
+    const query = `
+     SELECT 
+      drafts.id AS id,
+      DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
+      DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
+      drafts.feedback_received AS feedback_received,
+      drafts.feedback AS feedback
+     FROM 
+      drafts
+     WHERE 
+      drafts.id = ?
+     ORDER BY
+      drafts.id DESC;
+     `;
+    const [rows] = await pool.execute(query, [id]);
+    console.log("rows ", rows)
+    return { status: true, message: 'Success.', data: rows };
+  } catch (error) {
+    console.log("error ", error)
+    return { status: false, message: 'Error getDraft .' };
+  }
+}
 
 const addDraft = async (draft) => {
-  const { job_id,draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete } = draft;
+  const { job_id,draft_sent_on,final_draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete } = draft;
 
   try {
     const query = `
      INSERT INTO 
      drafts
-      (job_id,draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete)
+      (job_id,draft_sent_on,final_draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete)
       VALUES
-      (?,?,?,?,?,?)
+      (?,?,?,?,?,?,?)
       `;
-    const [rows] = await pool.execute(query, [job_id,draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete]);
+    const [rows] = await pool.execute(query, [job_id,draft_sent_on,final_draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete]);
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
     console.log("error ", error)
@@ -393,6 +417,7 @@ module.exports = {
   getQuerieSingleView,
   addQuerie,
   getDraft,
-  addDraft
+  addDraft,
+  getDraftSingleView
 
 };

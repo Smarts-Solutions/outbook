@@ -100,10 +100,10 @@ const getQuerie = async (querie) => {
 const getDraft = async (draft) => {
   const {action} = draft
   if(action === "get"){
-    return taskTimeSheetModel.getdraft(draft);
+    return taskTimeSheetModel.getDraft(draft);
   }
   else if(action === "getSingleView"){
-    return taskTimeSheetModel.getdraftSingleView(draft);
+    return taskTimeSheetModel.getDraftSingleView(draft);
   }
   else{
     return { status: false, message: 'Error getting Missing Log.' };
