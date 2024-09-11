@@ -64,7 +64,6 @@ const jobTimeSheet = async (timeSheet) => {
 const addMissingLog = async (missingLog) => {
   return taskTimeSheetModel.addMissingLog(missingLog);
 }
-
 const getMissingLog = async (missingLog) => {
   const {action} = missingLog
   if(action === "get"){
@@ -97,6 +96,25 @@ const getQuerie = async (querie) => {
   }
 }
 
+//Draft
+const getDraft = async (draft) => {
+  const {action} = draft
+  if(action === "get"){
+    return taskTimeSheetModel.getdraft(draft);
+  }
+  else if(action === "getSingleView"){
+    return taskTimeSheetModel.getdraftSingleView(draft);
+  }
+  else{
+    return { status: false, message: 'Error getting Missing Log.' };
+  }
+}
+
+const addDraft = async (draft) => {
+  return taskTimeSheetModel.addDraft(draft);
+}
+
+
 
 
 module.exports = {
@@ -109,6 +127,8 @@ module.exports = {
   addMissingLog,
   getMissingLog,
   getQuerie,
-  addQuerie
+  addQuerie,
+  getDraft,
+  addDraft
 
  };

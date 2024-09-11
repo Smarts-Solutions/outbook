@@ -177,13 +177,13 @@ const getMissingLog = async (missingLog) => {
      missing_logs.job_id AS job_id,
      missing_logs.missing_log AS missing_log,
      missing_logs.missing_paperwork AS missing_paperwork,
-     missing_logs.missing_log_sent_on AS missing_log_sent_on,
-     missing_logs.missing_log_prepared_date AS missing_log_prepared_date,
+     DATE_FORMAT(missing_logs.missing_log_sent_on, '%Y-%m-%d') AS missing_log_sent_on,
+     DATE_FORMAT(missing_logs.missing_log_prepared_date, '%Y-%m-%d') AS missing_log_prepared_date,
      missing_logs.missing_log_title AS missing_log_title,
      missing_logs.missing_log_reviewed_by AS missing_log_reviewed_by,
-     missing_logs.missing_log_reviewed_date AS missing_log_reviewed_date,
-     missing_logs.missing_paperwork_received_on AS missing_paperwork_received_on,
-     missing_logs.missing_log_document AS missing_log_document
+     DATE_FORMAT(missing_logs.missing_log_reviewed_date, '%Y-%m-%d') AS missing_log_reviewed_date,
+     DATE_FORMAT(missing_logs.missing_paperwork_received_on, '%Y-%m-%d') AS missing_paperwork_received_on,
+     missing_logs.status AS status
      FROM 
      missing_logs
      WHERE 
@@ -206,8 +206,8 @@ const getMissingLogSingleView = async (missingLog) => {
     const query = `
      SELECT 
      missing_logs.id AS id,
-     missing_logs.missing_log_sent_on AS missing_log_sent_on,
-     missing_logs.missing_paperwork_received_on AS missing_paperwork_received_on
+     DATE_FORMAT(missing_logs.missing_log_sent_on, '%Y-%m-%d') AS missing_log_sent_on,
+     DATE_FORMAT(missing_logs.missing_paperwork_received_on, '%Y-%m-%d') AS missing_paperwork_received_on
      FROM 
      missing_logs
      WHERE 
@@ -285,12 +285,11 @@ const getQuerie = async (querie) => {
       queries.queries_remaining AS queries_remaining,
       queries.query_title AS query_title,
       queries.reviewed_by AS reviewed_by,
-      queries.missing_queries_prepared_date AS missing_queries_prepared_date,
-      queries.query_sent_date AS query_sent_date,
+      DATE_FORMAT(queries.missing_queries_prepared_date, '%Y-%m-%d') AS missing_queries_prepared_date,
+      DATE_FORMAT(queries.query_sent_date, '%Y-%m-%d') AS query_sent_date,
       queries.response_received AS response_received,
       queries.response AS response,
-      queries.final_query_response_received_date AS final_query_response_received_date,
-      queries.query_document AS query_document
+      DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date
      FROM 
       queries
      WHERE 
@@ -314,7 +313,7 @@ const getQuerieSingleView = async(querie) => {
     const query = `
      SELECT 
       queries.id AS id,
-      queries.query_sent_date AS query_sent_date,
+      DATE_FORMAT(queries.query_sent_date, '%Y-%m-%d') AS query_sent_date,
       queries.response_received AS response_received,
       queries.response AS response
      FROM 
@@ -333,6 +332,55 @@ const getQuerieSingleView = async(querie) => {
   }
 }
 
+// Draft
+const getDraft = async (draft) => {
+  const { job_id } = draft;
+  try {
+    const query = `
+     SELECT 
+      drafts.id AS id,
+      drafts.job_id AS job_id,
+      drafts.draft AS draft,
+      drafts.draft_sent_on AS draft_sent_on,
+      drafts.draft_received_on AS draft_received_on
+     FROM 
+      drafts
+     WHERE 
+      drafts.job_id = ?
+     ORDER BY
+      drafts.id DESC;
+     `;
+    const [rows] = await pool.execute(query, [job_id]);
+    console.log("rows ", rows)
+    return { status: true, message: 'Success.', data: rows };
+  } catch (error) {
+    console.log("error ", error)
+    return { status: false, message: 'Error getDraft .' };
+  }
+}
+
+
+const addDraft = async (draft) => {
+  const { job_id,draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete } = draft;
+
+  try {
+    const query = `
+     INSERT INTO 
+     drafts
+      (job_id,draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete)
+      VALUES
+      (?,?,?,?,?,?)
+      `;
+    const [rows] = await pool.execute(query, [job_id,draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete]);
+    return { status: true, message: 'Success.', data: rows };
+  } catch (error) {
+    console.log("error ", error)
+    return { status: false, message: 'Error getDraft .' };
+  }
+}
+
+
+
 module.exports = {
   getTaskTimeSheet,
   getjobTimeSheet,
@@ -343,5 +391,8 @@ module.exports = {
   updateJobTimeTotalHours,
   getQuerie,
   getQuerieSingleView,
-  addQuerie
+  addQuerie,
+  getDraft,
+  addDraft
+
 };
