@@ -321,6 +321,7 @@ const Engagement = () => {
     setErrors1(newErrors);
     return Object.keys(newErrors).length === 0 ? true : false;
   };
+  
   const validate2 = (name, value) => {
     const newErrors = { ...errors2 };
     if (!value) {
