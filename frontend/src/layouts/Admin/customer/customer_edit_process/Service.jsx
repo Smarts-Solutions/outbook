@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Formik } from "formik";
 import { Button } from "antd";
 import { useDispatch } from "react-redux";
@@ -444,23 +445,7 @@ const Service = () => {
         data-bs-parent="#accordionExample"
       >
         <div className="accordion-body">
-          <div className="pb-3">
-          <input
-                                                    type="file"
-                                                 id="uploadButton"
-                                                 className="form-control"
-                                                    style={{
-                                                      cursor: "pointer",
-                                                    }}
-                                                    // onChange={(e) =>
-                                                    //   TaskUpdate(
-                                                    //     e,
-                                                    //     data1.id,
-                                                    //     item.id
-                                                    //   )
-                                                    // }
-                                                  />
-          </div>
+       
           <div className="accordion" id="sub-accordionExample">
             <div className="accordion-item">
               <h2 className="accordion-header" id="sub-headingOne">
@@ -482,6 +467,25 @@ const Service = () => {
                 data-bs-parent="#sub-accordionExample"
               >
                 <div className="accordion-body">
+                <div className="pb-3">
+
+<input
+                                          type="file"
+                                       id="uploadButton"
+                                       className="form-control"
+                                          style={{
+                                            cursor: "pointer",
+                                          }}
+                                          // onChange={(e) =>
+                                          //   TaskUpdate(
+                                          //     e,
+                                          //     data1.id,
+                                          //     item.id
+                                          //   )
+                                          // }
+                                        />
+                                        <Link className="fs-12 text-end">Download Sample File</Link>
+</div>
                   <table className="table table-light table-head-blue">
                    <thead>
                     <th>Checklist Name</th>
