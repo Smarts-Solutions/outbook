@@ -486,8 +486,11 @@ CREATE TABLE jobs (
     currency INT DEFAULT 0,
     invoice_value DECIMAL(15, 2) DEFAULT NULL,
     invoice_date  DATE DEFAULT NULL,
-    invoice_hours DECIMAL(10, 2) DEFAULT NULL,
+    invoice_hours TIME DEFAULT NULL,
     invoice_remark TEXT DEFAULT NULL,
+    status_type  INT DEFAULT NULL,
+    total_hours TIME DEFAULT NULL,
+    total_hours_status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (account_manager_id) REFERENCES staffs(id),
@@ -597,9 +600,7 @@ CREATE TABLE jobs (
         FOREIGN KEY (job_id) REFERENCES jobs(id)
     );
 
-
-
-  /*--TABLE:- JOB TIMELINE PENDING */  
+    /*--TABLE:- JOB TIMELINE PENDING */ 
 
 
     /*--TABLE:- MISSING LOGS  */  
@@ -622,7 +623,7 @@ CREATE TABLE jobs (
         FOREIGN KEY (missing_log_reviewed_by) REFERENCES staffs(id)
     );
 
-
+    
      /*--TABLE:- QUERIES   */  
     CREATE TABLE queries (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -695,6 +696,27 @@ CREATE TABLE jobs (
     status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+/*--TABLE:- customer source  DOCUMENTS  */
+ CREATE TABLE customer_source (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+/*--TABLE:- customer sub source  DOCUMENTS  */
+ CREATE TABLE customer_sub_source (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_source_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_source_id) REFERENCES customer_source(id)
 );
 
     

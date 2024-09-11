@@ -97,11 +97,43 @@ const jobTimeSheet = async (req,res) => {
  }
 }
 
+
+const addMissingLog = async (req,res) => {
+  try {
+    const { ...missingLog } = req.body;
+    const result = await jobService.addMissingLog(missingLog);
+    if(!result.status){
+     return  res.status(200).json({ status: false, message: result.message });  
+     }else{
+     return  res.status(200).json({ status: true, message: result.message , data : result.data});
+     }
+ } catch (error) {
+   res.status(500).json({ status:false, message: error.message});
+ }
+}
+
+const getMissingLog =async(req,res)=>{
+  try {
+    const { ...missingLog } = req.body;
+    const result = await jobService.getMissingLog(missingLog);
+    if(!result.status){
+     return  res.status(200).json({ status: false, message: result.message });  
+     }else{
+     return  res.status(200).json({ status: true, message: result.message , data : result.data});
+     }
+ } catch (error) {
+   res.status(500).json({ status:false, message: error.message});
+ }
+}
+
+
 module.exports = {
   getAddJobData,
   jobAdd,
   jobAction,
   jobUpdate,
   getTaskTimeSheet,
-  jobTimeSheet
+  jobTimeSheet,
+  addMissingLog,
+  getMissingLog
 };

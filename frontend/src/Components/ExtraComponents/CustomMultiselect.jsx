@@ -60,7 +60,7 @@ function CustomMultiSelect({ options, placeholder, onChange }) {
                 checked={selectedOptions.includes(option)}
                 onChange={(e) => handleOptionClick(e,option)}
               />
-              <span onClick={() => handleOptionClick(option)}>{option.label}</span>
+              <span className="form-control" onClick={() => handleOptionClick(option)}>{option.label}</span>
             </li>
           ))}
         </ul>

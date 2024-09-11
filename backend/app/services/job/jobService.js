@@ -51,8 +51,30 @@ const jobTimeSheet = async (timeSheet) => {
   else if(action === "updateTaskTimeSheetStatus"){
     return taskTimeSheetModel.updateTaskTimeSheetStatus(timeSheet);
   }
+  else if(action === "updateJobTimeTotalHours"){
+    return taskTimeSheetModel.updateJobTimeTotalHours(timeSheet);
+  }
   else{
     return { status: false, message: 'Error getting Job TimeSheet.' };
+  }
+  
+}
+
+//addMissingLog
+const addMissingLog = async (missingLog) => {
+  return taskTimeSheetModel.addMissingLog(missingLog);
+}
+
+const getMissingLog = async (missingLog) => {
+  const {action} = missingLog
+  if(action === "get"){
+    return taskTimeSheetModel.getMissingLog(missingLog);
+  }
+  else if(action === "getSingleView"){
+    return taskTimeSheetModel.getMissingLogSingleView(missingLog);
+  }
+  else{
+    return { status: false, message: 'Error getting Missing Log.' };
   }
   
 }
@@ -65,6 +87,8 @@ module.exports = {
   jobAction,
   jobUpdate,
   getTaskTimeSheet,
-  jobTimeSheet
+  jobTimeSheet,
+  addMissingLog,
+  getMissingLog
 
  };

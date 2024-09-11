@@ -4803,7 +4803,7 @@ pre[class*="lang-html"] {
   /* letter-spacing: 0.02em; */
   font-size: 20px;
   font-weight: 600;
-  margin: 0px 0 3px;
+  margin: 1px 0 3px;
   color: #333547;
   /* text-shadow: 0 0 1px rgba(241, 245, 250, 0.1); */
   font-family: "Inter", sans-serif;
@@ -7239,6 +7239,7 @@ hr.thick {
 
 .dastyle-profile .personal-detail li {
   color: #333547;
+  text-transform: none;
 }
 
 .education-activity {
@@ -9388,9 +9389,12 @@ span.sidebar-icons {
   box-shadow: none;
   border: none;
   border-radius: 6px;
+  transition: 0.3s linear;
   box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 }
-
+.dashboard-card:hover {
+  transform: translateY(-10px);
+}
 .activity-info-text p {
   font-size: 12px;
   color: #000;
@@ -9521,10 +9525,11 @@ button.btn.btn-info,
   border: 1px solid !important;
   border-radius: 0;
   padding: 10px 20px;
-  font-weight: 900;
+  font-weight: 600;
   font-size: 14px;
   line-height: 16.94px;
   height: auto;
+  border-radius: 5px;
 }
 
 .btn-danger:hover {
@@ -10109,7 +10114,11 @@ body .accordion-button:not(.collapsed)::after {
 .btn.p-0 .fa-arrow-left-long.text-white.fs-4 {
   padding-top: .25rem!important;
 }
-
+ 
 .accordion-button {
   width: 20% !important;
 }
+ 
+
+  
+ 
