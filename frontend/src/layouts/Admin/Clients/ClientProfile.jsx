@@ -117,8 +117,9 @@ const ClientList = () => {
     {
       name: "Timesheet",
       selector: (row) =>
-        // row.allocated_first_name + " " + row.allocated_last_name,
-        "",
+      row.total_hours_status =="1" && row.total_hours != null ?
+      row.total_hours.split(":")[0]+"h "+row.total_hours.split(":")[1]+"m"
+      :"",
       sortable: true,
     },
     {

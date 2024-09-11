@@ -60,7 +60,7 @@ const jobTimeSheet = async (timeSheet) => {
   
 }
 
-//addMissingLog
+//MissingLog
 const addMissingLog = async (missingLog) => {
   return taskTimeSheetModel.addMissingLog(missingLog);
 }
@@ -79,6 +79,24 @@ const getMissingLog = async (missingLog) => {
   
 }
 
+//Queries
+const addQuerie = async(querie) => {
+  return taskTimeSheetModel.addQuerie(querie);
+}
+
+const getQuerie = async (querie) => {
+  const {action} = querie
+  if(action === "get"){
+    return taskTimeSheetModel.getQuerie(querie);
+  }
+  else if(action === "getSingleView"){
+    return taskTimeSheetModel.getQuerieSingleView(querie);
+  }
+  else{
+    return { status: false, message: 'Error getting Missing Log.' };
+  }
+}
+
 
 
 module.exports = {
@@ -89,6 +107,8 @@ module.exports = {
   getTaskTimeSheet,
   jobTimeSheet,
   addMissingLog,
-  getMissingLog
+  getMissingLog,
+  getQuerie,
+  addQuerie
 
  };

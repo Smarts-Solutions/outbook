@@ -443,6 +443,8 @@ const getJobByCustomer = async (job) => {
         clients.trading_name AS client_trading_name,
         jobs.client_job_code AS client_job_code,
         jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
    
         staffs.id AS allocated_id,
         staffs.first_name AS allocated_first_name,
@@ -500,6 +502,9 @@ const getJobByCustomer = async (job) => {
         clients.trading_name AS client_trading_name,
         jobs.client_job_code AS client_job_code,
         jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+
    
         staffs.id AS allocated_id,
         staffs.first_name AS allocated_first_name,
@@ -555,6 +560,8 @@ const getJobByCustomer = async (job) => {
         clients.trading_name AS client_trading_name,
         jobs.client_job_code AS client_job_code,
         jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
    
         staffs.id AS allocated_id,
         staffs.first_name AS allocated_first_name,
@@ -628,6 +635,9 @@ const getJobByClient = async (job) => {
      clients.trading_name AS client_trading_name,
      jobs.client_job_code AS client_job_code,
      jobs.invoiced AS invoiced,
+     jobs.total_hours AS total_hours,
+     jobs.total_hours_status AS total_hours_status,
+
      staffs.id AS allocated_id,
      staffs.first_name AS allocated_first_name,
      staffs.last_name AS allocated_last_name,
@@ -683,6 +693,9 @@ const getJobByClient = async (job) => {
      clients.trading_name AS client_trading_name,
      jobs.client_job_code AS client_job_code,
      jobs.invoiced AS invoiced,
+     jobs.total_hours AS total_hours,
+     jobs.total_hours_status AS total_hours_status,
+
      staffs.id AS allocated_id,
      staffs.first_name AS allocated_first_name,
      staffs.last_name AS allocated_last_name,
@@ -737,6 +750,9 @@ const getJobByClient = async (job) => {
      clients.trading_name AS client_trading_name,
      jobs.client_job_code AS client_job_code,
      jobs.invoiced AS invoiced,
+     jobs.total_hours AS total_hours,
+     jobs.total_hours_status AS total_hours_status,
+
      staffs.id AS allocated_id,
      staffs.first_name AS allocated_first_name,
      staffs.last_name AS allocated_last_name,
@@ -807,6 +823,8 @@ const getByJobStaffId = async (job) => {
   clients.trading_name AS client_trading_name,
   jobs.client_job_code AS client_job_code,
   jobs.invoiced AS invoiced,
+  jobs.total_hours AS total_hours,
+  jobs.total_hours_status AS total_hours_status,
 
   staffs.id AS allocated_id,
   staffs.first_name AS allocated_first_name,
@@ -917,6 +935,8 @@ const getJobById = async (job) => {
      jobs.bookkeeping AS bookkeeping,
      jobs.processing_type AS processing_type,
      jobs.invoiced AS invoiced,
+     jobs.total_hours AS total_hours,
+     jobs.total_hours_status AS total_hours_status,
      countries.id AS currency_id,
      countries.currency AS currency,
      jobs.invoice_value AS invoice_value,
@@ -1028,6 +1048,8 @@ const getJobById = async (job) => {
         bookkeeping: rows[0].bookkeeping,
         processing_type: rows[0].processing_type,
         invoiced: rows[0].invoiced,
+        total_hours: rows[0].total_hours,
+        total_hours_status: rows[0].total_hours_status,
         currency_id: rows[0].currency_id,
         currency: rows[0].currency,
         invoice_value: rows[0].invoice_value,

@@ -223,13 +223,13 @@ const TaskTimesheet = () => {
               >
                 <i className="fa fa-plus pe-1"></i> Job Timesheet
               </button>
-              <button
+              {/* <button
                 type="button"
                 onClick={() => { setAddtask(true) }}
                 className="btn btn-info text-white float-end"
               >
                 <i className="fa-regular fa-plus pe-1"></i> Add
-              </button>
+              </button> */}
             </div>
           </div>
         </div>

@@ -2,14 +2,12 @@ const multer = require('multer');
 const path = require('path');
 
 const Filter = (req, file, cb) => {
-   
-
     const allowedMimeTypes = [
-        'application/pdf',       // PDF files
-        'image/png',             // PNG images
-        'image/jpeg',            // JPG and JPEG images
-        'application/msword',    // DOC files
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' // DOCX files
+        'application/pdf',     
+        'image/png',             
+        'image/jpeg',            
+        'application/msword',    
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
     ];
 
     if (allowedMimeTypes.includes(file.mimetype)) {
@@ -22,6 +20,8 @@ const Filter = (req, file, cb) => {
 const FilePath = path.join(__dirname, '../uploadFiles');
 
 const storage = multer.diskStorage({
+
+
     destination: (req, file, cb) => {
         cb(null, FilePath);
     },
@@ -32,7 +32,8 @@ const storage = multer.diskStorage({
 
 const uploadFile = multer({ storage: storage, fileFilter: Filter });
 
-// Middleware to handle multiple files
-const uploadMultiple = uploadFile.array('files[]', 20); // 'files' is the field name, 5 is the max file count
+
+
+const uploadMultiple = uploadFile.array('files[]', 20); 
 
 module.exports = uploadMultiple;

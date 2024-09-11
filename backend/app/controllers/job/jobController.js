@@ -98,9 +98,10 @@ const jobTimeSheet = async (req,res) => {
 }
 
 
+//MissingLog
 const addMissingLog = async (req,res) => {
   try {
-    const { ...missingLog } = req.body;
+    const { ...missingLog } = req;
     const result = await jobService.addMissingLog(missingLog);
     if(!result.status){
      return  res.status(200).json({ status: false, message: result.message });  
@@ -126,6 +127,35 @@ const getMissingLog =async(req,res)=>{
  }
 }
 
+//Queries
+
+const addQuerie = async (req,res) =>{
+  try {
+    const { ...query } = req;
+    const result = await jobService.addQuerie(query);
+    if(!result.status){
+     return  res.status(200).json({ status: false, message: result.message });  
+     }else{
+     return  res.status(200).json({ status: true, message: result.message , data : result.data});
+     }
+ } catch (error) {
+   res.status(500).json({ status:false, message: error.message});
+ }
+}
+const getQuerie = async (req,res) => {
+  try {
+    const { ...query } = req.body;
+    const result = await jobService.getQuerie(query);
+    if(!result.status){
+     return  res.status(200).json({ status: false, message: result.message });  
+     }else{
+     return  res.status(200).json({ status: true, message: result.message , data : result.data});
+     }
+ } catch (error) {
+   res.status(500).json({ status:false, message: error.message});
+ }
+}
+
 
 module.exports = {
   getAddJobData,
@@ -135,5 +165,7 @@ module.exports = {
   getTaskTimeSheet,
   jobTimeSheet,
   addMissingLog,
-  getMissingLog
+  getMissingLog,
+  getQuerie,
+  addQuerie
 };
