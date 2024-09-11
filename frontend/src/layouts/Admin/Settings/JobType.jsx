@@ -24,8 +24,8 @@ const Setting = () => {
 
 
     const [isEdit, setIsEdit] = useState(false);
-    const [taskInput, setTaskInput] = useState(''); // State to store the input value
-    const [tasks, setTasks] = useState([]); // State to store the list of tasks
+    const [taskInput, setTaskInput] = useState(''); 
+    const [tasks, setTasks] = useState([]); 
 
 
 

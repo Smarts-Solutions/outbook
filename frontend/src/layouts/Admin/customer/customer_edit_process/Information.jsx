@@ -265,7 +265,7 @@ const Information = ({ id, pageStatus }) => {
         IncorporationDate: getSearchDetails[0].date_of_creation
           ? getSearchDetails[0].date_of_creation
           : "",
-        IncorporationIn: getSearchDetails[0].description,
+        // IncorporationIn: getSearchDetails[0].description,
       }));
     }
   }, [getSearchDetails]);

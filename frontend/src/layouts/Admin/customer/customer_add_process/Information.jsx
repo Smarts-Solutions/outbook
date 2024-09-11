@@ -10,6 +10,7 @@ import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
 import {
   PersonRole,
   Country,
+  IncorporationApi
 } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import {
   AddCustomer,
@@ -39,6 +40,7 @@ const Information = ({ id, pageStatus }) => {
   const [errors3, setErrors3] = useState({});
   const [getAccountMangerIdErr, setAccountMangerIdErr] = useState("");
   const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
+  const [incorporationDataAll, setIncorporationDataAll] = useState([]);
 
 
   // state for sole trader
@@ -152,6 +154,7 @@ const Information = ({ id, pageStatus }) => {
 
   // use effect
   useEffect(() => {
+    incorporationData();
     CountryData();
     fetchStaffData();
     CustomerPersonRoleData();
@@ -174,7 +177,7 @@ const Information = ({ id, pageStatus }) => {
         IncorporationDate: getSearchDetails[0].date_of_creation
           ? getSearchDetails[0].date_of_creation
           : "",
-        IncorporationIn: getSearchDetails[0].description,
+        // IncorporationIn: getSearchDetails[0].description,
         TradingName: getSearchDetails[0].title,
         TradingAddress: getSearchDetails[0].address_snippet,
 
@@ -865,6 +868,24 @@ const Information = ({ id, pageStatus }) => {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   };
 
+
+  const incorporationData = async (req) => {
+    const data = { req: { action: "getAll" }, authToken: token };
+    await dispatch(IncorporationApi(data))
+      .unwrap()
+      .then(async (response) => {
+        console.log("response", response);
+        if (response.status) {
+          setIncorporationDataAll(response.data);
+        } else {
+          setIncorporationDataAll([]);
+        }
+      })
+      .catch((error) => {
+        console.log("Error", error);
+      });
+  };
+
   return (
     <>
       <Formik
@@ -1390,7 +1411,7 @@ const Information = ({ id, pageStatus }) => {
                                   Incorporation in{" "}
                                   <span style={{ color: "red" }}>*</span>{" "}
                                 </label>
-                                <input
+                                {/* <input
                                   type="text"
                                   className="form-control input_bg"
                                   placeholder={EDIT_CUSTOMER.INCORPORATION_IN}
@@ -1398,7 +1419,25 @@ const Information = ({ id, pageStatus }) => {
                                   id="IncorporationIn"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails.IncorporationIn}
-                                />
+                                /> */}
+
+<select
+                                  className="form-select"
+                                  name="IncorporationIn"
+                                  id="IncorporationIn"
+                                  onChange={(e) => handleChange2(e)}
+                                  value={getCompanyDetails.IncorporationIn}
+                                >
+                                  <option value="">
+                                    Please Select Incorporation In
+                                  </option>
+                                  {incorporationDataAll &&
+                                    incorporationDataAll.map((data) => (
+                                      <option key={data.id} value={data.id}>
+                                        {data.name}
+                                      </option>
+                                    ))}
+                                </select>
 
                                 {errors2["IncorporationIn"] && (
                                   <div className="error-text">

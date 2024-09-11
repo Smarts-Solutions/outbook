@@ -222,3 +222,29 @@ export async function incorporationApi(data, token) {
     }
 }
 
+
+export async function customerSource(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}customerSource`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+export async function customerSubSource(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}customerSubSource`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}

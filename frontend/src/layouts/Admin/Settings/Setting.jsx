@@ -8,6 +8,7 @@ import {
   ClientIndustry,
   Country,
   IncorporationApi,
+  customerSourceApi,
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import Modal from "../../../Components/ExtraComponents/Modals/Modal";
@@ -78,6 +79,8 @@ const Setting = () => {
   });
 
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);
+  const [ customerSourceDataDataAll, setCustomerSourceDataAll] = useState([]);
+
   const [addRoleName, setAddRoleName] = useState("");
   const [statusTypeDataAll, setStatusTypeDataAll] = useState({
     loading: true,
@@ -339,6 +342,41 @@ const Setting = () => {
       });
   };
 
+  const customerSourceData = async (req) => {
+    const data = { req: req, authToken: token };
+    await dispatch(customerSourceApi(data))
+      .unwrap()
+      .then(async (response) => {
+        if (req.action == "getAll") {
+          if (response.status) {
+            setCustomerSourceDataAll(response.data);
+          } else {
+            setCustomerSourceDataAll([]);
+          }
+        } else {
+          if (response.status) {
+            sweatalert.fire({
+              title: response.message,
+              icon: "success",
+              timer: 2000,
+            });
+            setTimeout(() => {
+              customerSourceData({ action: "getAll" });
+            }, 2000);
+          } else {
+            sweatalert.fire({
+              title: response.message,
+              icon: "error",
+              timer: 2000,
+            });
+          }
+        }
+      })
+      .catch((error) => {
+        console.log("Error", error);
+      });
+  };
+
   useEffect(() => {
     fetchApiData(tabStatus.current);
   }, [tabStatus.current]);
@@ -374,6 +412,9 @@ const Setting = () => {
         break;
       case "7":
         incorporationData(req);
+        break;
+      case "8":
+        customerSourceData(req);
         break;
       default:
         break;
@@ -490,7 +531,12 @@ const Setting = () => {
   ];
 
   const columnService = [
-    { name: "Service Name", selector: (row) => row.name, sortable: true, width: "70%", },
+    {
+      name: "Service Name",
+      selector: (row) => row.name,
+      sortable: true,
+      width: "70%",
+    },
     {
       name: "Status",
       cell: (row) => (
@@ -535,7 +581,7 @@ const Setting = () => {
                     className="btn btn-info text-white ms-2"
                     onClick={(e) => handleJobType(row)}
                   >
-                    Add Sub Source
+                    Add Job Type
                   </button>
                 )}
               </div>
@@ -713,7 +759,7 @@ const Setting = () => {
       : []),
   ];
 
-  const columnincorporation = [
+   const columnincorporation = [
     { name: "Incorporation Name", selector: (row) => row.name, sortable: true },
     {
       name: "Status",
@@ -754,9 +800,13 @@ const Setting = () => {
     },
   ];
 
-
   const columnCoustomerSource = [
-    { name: "Source Name", selector: (row) => row.name, sortable: true, width: "70%", },
+    {
+      name: "Source Name",
+      selector: (row) => row.name,
+      sortable: true,
+      width: "70%",
+    },
     {
       name: "Status",
       cell: (row) => (
@@ -960,7 +1010,7 @@ const Setting = () => {
         fields: [
           {
             type: "text",
-            name: "SourceName",
+            name: "name",
             label: "Source Name",
             placeholder: "Enter Source Name",
           },
@@ -1172,7 +1222,7 @@ const Setting = () => {
         tabStatus: tabStatus,
         id: data.id,
       });
-    }else if (tabStatus === "8") {
+    } else if (tabStatus === "8") {
       setModalData({
         ...modalData,
         fields: [
@@ -1253,6 +1303,9 @@ const Setting = () => {
       case "7":
         incorporationData(req);
         break;
+      case "8":
+        customerSourceData(req);
+        break;
       default:
         break;
     }
@@ -1306,6 +1359,10 @@ const Setting = () => {
             case "7":
               incorporationData(req);
               break;
+            case "8":
+              customerSourceData(req);
+              break;
+            
             default:
               break;
           }
@@ -1327,7 +1384,6 @@ const Setting = () => {
     { id: "6", label: "Country" },
     { id: "7", label: "Incorporation" },
     { id: "8", label: "Source" },
-
   ];
 
   return (
@@ -1482,7 +1538,7 @@ const Setting = () => {
                 </div>
               </div>
             </div>
-           
+
             <div
               className={`tab-pane fade ${
                 getShowTabId === "4" ? "show active" : ""
@@ -1515,7 +1571,7 @@ const Setting = () => {
                 </div>
               </div>
             </div>
-           
+
             <div
               className={`tab-pane fade ${
                 getShowTabId === "5" ? "show active" : ""
@@ -1548,7 +1604,7 @@ const Setting = () => {
                 </div>
               </div>
             </div>
-         
+
             <div
               className={`tab-pane fade ${
                 getShowTabId === "6" ? "show active" : ""
@@ -1582,7 +1638,6 @@ const Setting = () => {
               </div>
             </div>
 
-        
             <div
               className={`tab-pane fade ${
                 getShowTabId === "7" ? "show active" : ""
@@ -1615,8 +1670,6 @@ const Setting = () => {
                 </div>
               </div>
             </div>
-        
-
 
             <div
               className={`tab-pane fade ${
@@ -1645,24 +1698,21 @@ const Setting = () => {
                   <Datatable
                     filter={true}
                     columns={columnCoustomerSource}
-                    data={[{ name:"source",status:"1"},{ name:"source1",status:"1"},{ name:"source2",status:"0"}]}
+                    data={customerSourceDataDataAll}
                   />
                 </div>
               </div>
             </div>
-
           </div>
         </div>
-    
+
         <>
-      
           {isModalOpen && (
             <Modal
               modalId="exampleModal3"
               title={
                 isEdit ? "Edit " + modalData.title : "Add " + modalData.title
               }
-          
               fields={modalData.fields}
               onClose={() => {
                 setIsModalOpen(false);
