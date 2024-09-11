@@ -623,6 +623,19 @@ CREATE TABLE jobs (
         FOREIGN KEY (missing_log_reviewed_by) REFERENCES staffs(id)
     );
 
+    /*--TABLE:- MISSING LOGS DOCUMNET */
+    CREATE TABLE missing_logs_documents (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        missing_log_id INT NOT NULL,
+        file_name VARCHAR(255) NOT NULL,
+        original_name VARCHAR(255) NOT NULL,
+        file_type VARCHAR(50) NOT NULL,
+        file_size INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (missing_log_id) REFERENCES missing_logs(id)
+    );
+
     
      /*--TABLE:- QUERIES   */  
     CREATE TABLE queries (
@@ -630,17 +643,29 @@ CREATE TABLE jobs (
         job_id INT NOT NULL,
         queries_remaining ENUM('0', '1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
         query_title VARCHAR(100) NOT NULL,
-        reviewed_by INT NOT NULL,
+        reviewed_by ENUM('0', '1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
         missing_queries_prepared_date DATE NOT NULL,
         query_sent_date DATE NOT NULL,
         response_received ENUM('0', '1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
         response VARCHAR(255) NOT NULL,
         final_query_response_received_date DATE NOT NULL,
-        query_document VARCHAR(255) DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (job_id) REFERENCES jobs(id),
-        FOREIGN KEY (reviewed_by) REFERENCES staffs(id)
+        -- FOREIGN KEY (reviewed_by) REFERENCES staffs(id)
+    );
+
+    /*--TABLE:- QUERIES DOCUMNET */
+    CREATE TABLE queries_documents (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        query_id INT NOT NULL,
+        file_name VARCHAR(255) NOT NULL,
+        original_name VARCHAR(255) NOT NULL,
+        file_type VARCHAR(50) NOT NULL,
+        file_size INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (query_id) REFERENCES queries(id)
     );
 
 

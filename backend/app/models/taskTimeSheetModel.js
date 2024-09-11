@@ -41,7 +41,7 @@ const getTaskTimeSheet = async (timeSheet) => {
     console.log("rows ", rows)
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-     console.log("error ",error)
+    console.log("error ", error)
     return { status: false, message: 'Error getTaskTimeSheet .' };
   }
 
@@ -67,16 +67,16 @@ const getjobTimeSheet = async (timeSheet) => {
   
      `;
     const [rows] = await pool.execute(query, [job_id]);
-   
+
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-     console.log("error ",error)
+    console.log("error ", error)
     return { status: false, message: 'Error getTaskTimeSheet .' };
   }
 }
 const updateTaskTimeSheetStatus = async (timeSheet) => {
 
-  const { id, task_status , time } = timeSheet;
+  const { id, task_status, time } = timeSheet;
   try {
     const query = `
      UPDATE 
@@ -87,16 +87,16 @@ const updateTaskTimeSheetStatus = async (timeSheet) => {
      id = ?
      `;
     const [rows] = await pool.execute(query, [task_status, time, id]);
-    
+
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
- 
+
     return { status: false, message: 'Error getTaskTimeSheet .' };
   }
 }
 
-const updateJobTimeTotalHours = async(timeSheet)=> {
-  const {job_id, total_hours ,total_hours_status}  = timeSheet;
+const updateJobTimeTotalHours = async (timeSheet) => {
+  const { job_id, total_hours, total_hours_status } = timeSheet;
   try {
     const query = `
      UPDATE 
@@ -106,41 +106,70 @@ const updateJobTimeTotalHours = async(timeSheet)=> {
      WHERE 
      id = ?
      `;
-    const [rows] = await pool.execute(query, [total_hours ,total_hours_status, job_id]);
+    const [rows] = await pool.execute(query, [total_hours, total_hours_status, job_id]);
     console.log("rows ", rows)
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-     console.log("error ",error)
+    console.log("error ", error)
     return { status: false, message: 'Error getTaskTimeSheet .' };
   }
 }
 
 // MissingLog
- const addMissingLog = async (missingLog) => {
-  
+const addMissingLog = async (missingLog) => {
+  const { job_id, missing_log, missing_paperwork, missing_log_sent_on, missing_log_prepared_date, missing_log_title, missing_log_reviewed_by, missing_log_reviewed_date, missing_paperwork_received_on, status } = missingLog.body;
 
-const { job_id, missing_log, missing_paperwork, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,missing_paperwork_received_on,missing_log_document,status } = missingLog;
+  const missing_log_document = missingLog.files;
 
   try {
     const query = `
      INSERT INTO 
      missing_logs
-      (job_id, missing_log, missing_paperwork, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,missing_paperwork_received_on,missing_log_document,status)
+      (job_id, missing_log, missing_paperwork, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,missing_paperwork_received_on,status)
       VALUES
-      (?,?,?,?,?,?,?,?,?,?,?)
+      (?,?,?,?,?,?,?,?,?,?)
       `;
-    const [rows] = await pool.execute(query, [job_id, missing_log, missing_paperwork, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,missing_paperwork_received_on,missing_log_document,status]);
-
+    const [rows] = await pool.execute(query, [job_id, missing_log, missing_paperwork, missing_log_sent_on, missing_log_prepared_date, missing_log_title, missing_log_reviewed_by, missing_log_reviewed_date, missing_paperwork_received_on, status]);
     console.log("rows ", rows)
+
+    if (missing_log_document.length > 0) {
+      for (let file of missing_log_document) {
+        const file_name = file.filename;
+        const original_name = file.originalname;
+        const file_type = file.mimetype;
+        const file_size = file.size;
+  
+  
+        const insertQuery = `
+            INSERT INTO missing_logs_documents (
+                missing_log_id, file_name, original_name, file_type, file_size
+            ) VALUES (?, ?, ?, ?, ?)
+        `;
+  
+        try {
+            const [result] = await pool.execute(insertQuery, [
+                rows.insertId,
+                file_name,
+                original_name,
+                file_type,
+                file_size
+            ]);
+  
+        } catch (error) {
+            console.log('Error inserting file:', error);
+        }
+      }
+    }
+    
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-     console.log("error ",error)
+    console.log("error ", error)
     return { status: false, message: 'Error addMissingLog .' };
   }
 }
 
-const getMissingLog = async(missingLog) =>{
-  const {job_id} = missingLog
+const getMissingLog = async (missingLog) => {
+  const { job_id } = missingLog
   try {
     const query = `
      SELECT 
@@ -166,13 +195,13 @@ const getMissingLog = async(missingLog) =>{
     console.log("rows ", rows)
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-     console.log("error ",error)
+    console.log("error ", error)
     return { status: false, message: 'Error getMissingLog .' };
   }
 }
 
-const getMissingLogSingleView = async(missingLog) => {
-  const {id}=missingLog;
+const getMissingLogSingleView = async (missingLog) => {
+  const { id } = missingLog;
   try {
     const query = `
      SELECT 
@@ -190,10 +219,118 @@ const getMissingLogSingleView = async(missingLog) => {
     console.log("rows ", rows)
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-     console.log("error ",error)
+    console.log("error ", error)
     return { status: false, message: 'Error getMissingLog .' };
   }
 
+}
+
+//Queries
+const addQuerie = async(querie) => {
+  const { job_id, query_title, queries_remaining, query_sent_date, response_received, response, final_query_response_received_date } = querie.body;
+  const query_document = querie.files;
+
+  try {
+    const query = `
+     INSERT INTO 
+     queries
+      (job_id, queries_remaining, query_title, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received,response,final_query_response_received_date)
+      VALUES
+      (?,?,?,?,?,?,?,?,?)
+      `;
+    const [rows] = await pool.execute(query, [job_id, queries_remaining, query_title, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, response, final_query_response_received_date]);
+
+
+    if (query_document.length > 0) {
+      for (let file of query_document) {
+        const file_name = file.filename;
+        const original_name = file.originalname;
+        const file_type = file.mimetype;
+        const file_size = file.size;
+  
+  
+        const insertQuery = `
+            INSERT INTO queries_documents (
+                query_id, file_name, original_name, file_type, file_size
+            ) VALUES (?, ?, ?, ?, ?)
+        `;
+  
+        try {
+            const [result] = await pool.execute(insertQuery, [
+                rows.insertId,
+                file_name,
+                original_name,
+                file_type,
+                file_size
+            ]);
+  
+        } catch (error) {
+            console.log('Error inserting file:', error);
+        }
+      }
+    }
+    
+    return { status: true, message: 'Success.', data: rows };
+  } catch (error) {
+    console.log("error ", error)
+    return { status: false, message: 'Error querie .' };
+  }
+}
+const getQuerie = async (querie) => {
+  const { job_id } = querie;
+  try {
+    const query = `
+     SELECT 
+      queries.id AS id,
+      queries.queries_remaining AS queries_remaining,
+      queries.query_title AS query_title,
+      queries.reviewed_by AS reviewed_by,
+      queries.missing_queries_prepared_date AS missing_queries_prepared_date,
+      queries.query_sent_date AS query_sent_date,
+      queries.response_received AS response_received,
+      queries.response AS response,
+      queries.final_query_response_received_date AS final_query_response_received_date,
+      queries.query_document AS query_document
+     FROM 
+      queries
+     WHERE 
+      queries.job_id = ?
+     ORDER BY
+      queries.id DESC;
+     `;
+    const [rows] = await pool.execute(query, [job_id]);
+    console.log("rows ", rows)
+    return { status: true, message: 'Success.', data: rows };
+  } catch (error) {
+    console.log("error ", error)
+    return { status: false, message: 'Error querie .' };
+  }
+
+}
+
+const getQuerieSingleView = async(querie) => {
+  const { id } = querie;
+  try {
+    const query = `
+     SELECT 
+      queries.id AS id,
+      queries.query_sent_date AS query_sent_date,
+      queries.response_received AS response_received,
+      queries.response AS response
+     FROM 
+      queries
+     WHERE 
+      queries.id = ?
+     ORDER BY
+      queries.id DESC;
+     `;
+    const [rows] = await pool.execute(query, [id]);
+    console.log("rows ", rows)
+    return { status: true, message: 'Success.', data: rows };
+  } catch (error) {
+    console.log("error ", error)
+    return { status: false, message: 'Error querie .' };
+  }
 }
 
 module.exports = {
@@ -203,5 +340,8 @@ module.exports = {
   addMissingLog,
   getMissingLog,
   getMissingLogSingleView,
-  updateJobTimeTotalHours
+  updateJobTimeTotalHours,
+  getQuerie,
+  getQuerieSingleView,
+  addQuerie
 };
