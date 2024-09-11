@@ -220,7 +220,6 @@ const Service = () => {
       Task:TaskGet
     };
 
-    console.log("req", req);
 
     // Send request
     const data = { req: req, authToken: token };
@@ -300,8 +299,6 @@ const Service = () => {
       });
   };
 
-
-  console.log("tasksGet", tasksGet);
 
 
   return (

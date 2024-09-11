@@ -234,13 +234,6 @@ const Engagement = () => {
 
 
 
- 
-
-  
-
-
-
-
 
   const validate4 = () => {
     const newErrors = [];
@@ -291,6 +284,17 @@ const Engagement = () => {
       });
   }
 
+  const scrollToFirstError = (i) => {
+    const errors = [errors1, errors2, errors3, errors4];
+
+    const errorField = Object.keys(errors[i])[0];
+
+    const errorElement = document.getElementById(errorField);
+    if (errorElement) {
+      errorElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const handleSubmit = async () => {
 
     if (!checkboxStates.some(state => state === 1)) {
@@ -299,11 +303,9 @@ const Engagement = () => {
     }
     const validations = [validateAllFields1, validateAllFields2, validateAllFields3, validate4];
 
-
     for (let i = 0; i < checkboxStates.length; i++) {
-
       if (checkboxStates[i] == 1 && !validations[i]()) {
-
+        scrollToFirstError(i);
         return;
       }
     }
@@ -316,8 +318,6 @@ const Engagement = () => {
       "adhoc_payg_hourly": checkboxStates[2].toString(),
       "customised_pricing": checkboxStates[3].toString(),
     };
-
-
 
     if (checkboxStates[0] === 1) {
       req = {
@@ -475,6 +475,7 @@ const Engagement = () => {
                                       type="text"
                                       className="form-control"
                                       name={field.name}
+                                      id={field.name}
                                       placeholder={field.feeName}
                                       value={formValues1[field.name]}
                                       onChange={(e) => handleChange1(e)}
@@ -520,6 +521,7 @@ const Engagement = () => {
                                       type="text"
                                       className="form-control"
                                       name={field.name}
+                                      id={field.name}
                                       value={formValues2[field.name]}
                                       placeholder={field.feeName}
                                       onChange={handleChange2}
@@ -567,6 +569,7 @@ const Engagement = () => {
                                       type="text"
                                       className="form-control"
                                       name={field.name}
+                                      id={field.name}
                                       value={formValues3[field.name]}
                                       placeholder={field.feeName}
                                       onChange={handleChange3}
@@ -695,7 +698,47 @@ const Engagement = () => {
                 </div>
               </div>
             </div>
+            <div className="card report-data pricing-box p-0">
+              <div className="card-header step-header-blue">
+                <h4
+                  className="card-title mb-0 flex-grow-1"
+                  style={{ marginBottom: "20px !important" }}
+                >
+                  Additional information
+                </h4>
+              </div>
+  <div className="card-body">
+    <div className="row">
+      <div className="col-md-4">
+        <div className="mb-3">
+          <label className="form-label">Customer joining date</label>
+          <input type="date" className="form-control" />
+        </div>
+      </div>
+      <div className="col-md-4">
+      <div className="mb-3">
+          <label className="form-label">Customer Source</label>
+          <select  className="form-select " >
+  <option value="">Select Job Type</option>
+  <option value={1}>demo</option>
+</select>
 
+        </div>
+      </div>
+      <div className="col-md-4">
+      <div className="mb-3">
+          <label className="form-label">Customer Sub-source</label>
+          <select  className="form-select " >
+  <option value="">Select Job Type</option>
+  <option value={1}>demo</option>
+</select>
+
+        </div>
+      </div>
+    </div>
+  </div>
+             
+            </div>
             <div className="form__item button__items d-flex justify-content-between">
               <Button className="btn btn-secondary" type="default" onClick={prev}>
                 <i className="pe-2 fa-regular fa-arrow-left-long"></i> Previous

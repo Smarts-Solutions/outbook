@@ -575,6 +575,7 @@ const CreateJob = () => {
 
                                                                             <div className="col-lg-4">
                                                                                 <label className="form-label">Client</label>
+                                                                                
                                                                                 <select className="form-select"
                                                                                     name="Client" id='Client' onChange={HandleChange} value={jobData.Client}>
                                                                                     <option value="">Select Client</option>
@@ -583,6 +584,7 @@ const CreateJob = () => {
                                                                                     ))
                                                                                     }
                                                                                 </select>
+                                                                               
                                                                                 {errors['Client'] && (
                                                                                     <div className="error-text">{errors['Client']}</div>
                                                                                 )}
@@ -1389,10 +1391,10 @@ const CreateJob = () => {
                                                                         </select>
                                                                     </div>
                                                                     <div className="col-lg-6">
-                                                                        <div className="col-sm-auto" style={{ marginLeft: 250 }}>
-                                                                            <button className="btn btn-info text-white float-end blue-btn" disabled={getChecklistId == ""}
+                                                                        <div className="col-sm-auto" >
+                                                                            <button className="btn btn-secondary float-end blue-btn" disabled={getChecklistId == ""}
                                                                                 onClick={() => setShowAddJobModal(true)}>
-                                                                                Add Task
+                                                                                 <i className="fa fa-plus pe-1" />  Add Task
                                                                             </button>
                                                                         </div>
                                                                     </div>
@@ -1469,7 +1471,7 @@ const CreateJob = () => {
                                                                                                         {/* <td>{checklist.budgeted_hour} hr</td> */}
                                                                                                         <td>
                                                                                                             <div className="add">
-                                                                                                                <button className="delete-icon"><i className="ti-trash" onClick={() => RemoveTask(checklist.task_id)}></i></button>
+                                                                                                                <button className="delete-icon"><i className="ti-trash text-danger" onClick={() => RemoveTask(checklist.task_id)}></i></button>
                                                                                                             </div>
                                                                                                         </td>
                                                                                                     </tr>
