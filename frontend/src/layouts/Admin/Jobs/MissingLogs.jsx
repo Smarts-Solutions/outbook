@@ -21,7 +21,7 @@ const MissingLogs = () => {
   const [singleMissionData, setSingleMissionData] = useState([]);
   const [errors1, setErrors1] = useState({});
 
- 
+
   const [missionLogAllInputData, setMissionAllInputLogData] = useState({
     missing_log: "1",
     missing_paperwork: "1",
@@ -42,7 +42,7 @@ const MissingLogs = () => {
       missing_paperwork: "1",
       missing_log_sent_on: "",
       missing_log_prepared_date: "",
-      missing_log_title: "", 
+      missing_log_title: "",
       missing_log_reviewed_date: "",
       missing_paperwork_received_on: "",
       missing_log_document: "",
@@ -209,6 +209,7 @@ const MissingLogs = () => {
       .unwrap()
       .then((response) => {
         if (response.status) {
+          GetMissingLogDetails()
           setAddmissinglogs(false);
           resetForm();
           sweatalert.fire({
@@ -221,6 +222,13 @@ const MissingLogs = () => {
 
         }
         else {
+          sweatalert.fire({
+            icon: 'error',
+            title: response.message,
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 1500
+          });
 
         }
       })
@@ -280,7 +288,7 @@ const MissingLogs = () => {
         btn_name="Save"
         title="Add Missing Log"
         hideBtn={false}
-       
+
         handleClose={() => {
           setAddmissinglogs(false);
           resetForm();
@@ -507,7 +515,7 @@ const MissingLogs = () => {
                     checked={missionLogAllInputData.status === "1"}
                   />
                   &nbsp; <label htmlFor="complete">Complete</label>
-                 
+
                 </div>
                 &nbsp;
                 <div style={{ marginLeft: 10 }}>
@@ -520,16 +528,16 @@ const MissingLogs = () => {
                     checked={missionLogAllInputData.status === "0"}
                   />
                   &nbsp; <label htmlFor="incomplete">Incomplete</label>
-                   
+
                 </div>
-                
-              </div> 
+
+              </div>
               {errors1["status"] && (
-                    <div className="error-text">
-                      {errors1["status"]}
-                    </div>
-                  )}
-               
+                <div className="error-text">
+                  {errors1["status"]}
+                </div>
+              )}
+
             </div>
           </div>
 
