@@ -24,6 +24,10 @@ const TaskTimesheet = () => {
   const [BudgetedTime, setBudgetedTime] = useState({ hours: 0, minutes: 0 })
   const [GetTimeSheetTotalHours, setTimeSheetTotalHours] = useState({ hours: 0, minutes: 0 })
   const [GetTimeSheetStatus, setTimeSheetStatus] = useState('')
+  const [error, setError] = useState({})
+  const [error1, setError1] = useState({})
+
+
 
   useEffect(() => {
     GetAllTaskTimeSheetData()
@@ -106,6 +110,13 @@ const TaskTimesheet = () => {
 
   const handleSubmit = async (type) => {
     let req = {}
+    if (type === "AddTimesheet" && !validateAllfields()) {
+      return
+    }
+    else if (type === "TimeSheet" && !validateAllfiledsOfTimeSheet()) {
+      return
+    }
+
     if (type === "AddTimesheet") {
       req = {
         action: "updateJobTimeTotalHours",
@@ -157,8 +168,6 @@ const TaskTimesheet = () => {
 
   }
 
-
-
   const columns = [
     {
       name: "Task Name",
@@ -205,6 +214,153 @@ const TaskTimesheet = () => {
   ];
 
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    const isMinutesValid = (value === '' || (Number(value) >= 0 && Number(value) <= 59));
+
+    validate(name, value);
+
+    switch (name) {
+      case 'totalHours':
+        setTimeSheetTotalHours((prev) => ({ ...prev, hours: value }));
+        break;
+      case 'totalMinutes':
+        if (isMinutesValid) {
+          setTimeSheetTotalHours((prev) => ({ ...prev, minutes: value }));
+        }
+        break;
+      case 'budgetedHours':
+        setBudgetedTime((prev) => ({ ...prev, hours: value }));
+        break;
+      case 'budgetedMinutes':
+        if (isMinutesValid) {
+          setBudgetedTime((prev) => ({ ...prev, minutes: value }));
+        }
+        break;
+      case 'status':
+        setTimeSheetStatus(value);
+        break;
+      default:
+        break;
+    }
+
+  };
+
+  const handleChangeTimeSheet = (e) => {
+    const { name, value } = e.target;
+    const isMinutesValid = (value === '' || (Number(value) >= 0 && Number(value) <= 59));
+    validateTimeSheet(name, value);
+    switch (name) {
+      case 'TotalHours':
+        setTotalTime((prev) => ({ ...prev, hours: value }));
+        break;
+      case 'TotalMinutes':
+        if (isMinutesValid) {
+          setTotalTime((prev) => ({ ...prev, minutes: value }));
+        }
+        break;
+      case 'status':
+        setTaskStatus(value);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const validateTimeSheet = (name, value) => {
+    let errors = { ...error1 };
+    if (!value && name !== 'TotalHours' && name !== 'TotalMinutes') {
+      errors[name] = "This field is required";
+    }
+    else if ((name === 'TotalHours' && value == 0)) {
+      errors[name] = "This field is required";
+    }
+    else {
+      delete errors[name];
+      setError1((prevErrors) => {
+        const updatedErrors = { ...prevErrors };
+        delete updatedErrors[name];
+        return updatedErrors;
+      });
+    }
+    if (Object.keys(errors).length !== 0) {
+      setError1((prevErrors) => ({
+        ...prevErrors,
+        ...errors,
+      }));
+    }
+    return Object.keys(errors).length === 0;
+  }
+
+  const validateAllfiledsOfTimeSheet = () => {
+    let valid = true;
+    if (!TotalTime.hours && !TotalTime.minutes) {
+      valid = false;
+      setError1((prevErrors) => ({
+        ...prevErrors,
+
+        TotalHours: "This field is required",
+        TotalMinutes: "This field is required",
+      }));
+    }
+    if (!TaskStatus) {
+      valid = false;
+      setError1((prevErrors) => ({
+        ...prevErrors,
+        status: "This field is required",
+      }));
+    }
+    return valid;
+  }
+
+
+
+  const validate = (name, value) => {
+    let errors = { ...error };
+    if (!value && name !== 'budgetedHours' && name !== 'budgetedMinutes') {
+      errors[name] = "This field is required";
+    }
+    else if ((name === 'totalHours' && value == 0)) {
+      errors[name] = "This field is required";
+    }
+    else {
+      delete errors[name];
+      setError((prevErrors) => {
+        const updatedErrors = { ...prevErrors };
+        delete updatedErrors[name];
+        return updatedErrors;
+      });
+    }
+    if (Object.keys(errors).length !== 0) {
+      setError((prevErrors) => ({
+        ...prevErrors,
+        ...errors,
+      }));
+    }
+    return Object.keys(errors).length === 0;
+  }
+
+  const validateAllfields = () => {
+    let valid = true;
+    if (!GetTimeSheetTotalHours.hours && !GetTimeSheetTotalHours.minutes) {
+      valid = false;
+      setError((prevErrors) => ({
+        ...prevErrors,
+        totalHours: "This field is required",
+        totalMinutes: "This field is required",
+      }));
+    }
+    if (!GetTimeSheetStatus) {
+      valid = false;
+      setError((prevErrors) => ({
+        ...prevErrors,
+        status: "This field is required",
+      }));
+    }
+    return valid;
+  }
+
+
   return (
     <>
       <div className="">
@@ -247,10 +403,20 @@ const TaskTimesheet = () => {
         btn_name="Save"
         hideBtn={false}
         handleClose={() => {
-          setAddjobtimesheet(false); 
+          setAddjobtimesheet(false);
+          setBudgetedTime({ hours: 0, minutes: 0 })
+          setTimeSheetTotalHours({ hours: 0, minutes: 0 })
+          setTimeSheetStatus('')
+          setError({})
         }}
-        Submit_Cancel_Function={() => setAddjobtimesheet(false)}
-        Submit_Function={()=>handleSubmit("AddTimesheet")}
+        Submit_Cancel_Function={() => {
+          setAddjobtimesheet(false);
+          setBudgetedTime({ hours: 0, minutes: 0 })
+          setTimeSheetTotalHours({ hours: 0, minutes: 0 })
+          setTimeSheetStatus('')
+          setError({})
+        }}
+        Submit_Function={() => handleSubmit("AddTimesheet")}
       >
         <div className="row">
           <div className="col-lg-12">
@@ -265,7 +431,7 @@ const TaskTimesheet = () => {
                   name="budgetedHours"
                   defaultValue=""
                   disabled
-                  // onChange={(e) => handleChange(e)}  
+                  onChange={(e) => handleChange(e)}
                   value={BudgetedTime.hours}
                 />
                 <input
@@ -276,20 +442,11 @@ const TaskTimesheet = () => {
                   id="budgetedMinutes"
                   name="budgetedMinutes"
                   disabled
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
-                      setBudgetedTime((prevBudgetedTime) => ({
-                        ...prevBudgetedTime,
-                        minutes: value
-                      }));
-                    }
-                  }}
+                  onChange={(e) => handleChange(e)}
                   value={BudgetedTime.minutes}
                 />
               </div>
             </div>
-
           </div>
           <div className="col-lg-12">
             <div className="mb-3">
@@ -300,7 +457,9 @@ const TaskTimesheet = () => {
                   className="form-control"
                   placeholder="Hours"
                   defaultValue=""
-                  onChange={(e) => setTimeSheetTotalHours({ ...GetTimeSheetTotalHours, hours: e.target.value })}
+                  id="totalHours"
+                  name="totalHours"
+                  onChange={(e) => handleChange(e)}
                   value={GetTimeSheetTotalHours.hours}
                 />
                 <input
@@ -308,29 +467,32 @@ const TaskTimesheet = () => {
                   className="form-control"
                   placeholder="Minutes"
                   defaultValue=""
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
-                      setTimeSheetTotalHours({ ...GetTimeSheetTotalHours, minutes: e.target.value });
-                    }
-                  }
-                  }
+                  id="totalMinutes"
+                  name="totalMinutes"
+                  onChange={(e) => handleChange(e)}
                   value={GetTimeSheetTotalHours.minutes}
                 />
               </div>
+
+              {error['totalHours'] ? <div className="error-text">{error['totalHours']}</div> :
+                <div className="error-text">{error['totalMinutes']}</div>
+              }
             </div>
           </div>
           <div className="col-lg-12">
             <div className="mb-3">
               <label className="form-label">Status</label>
               <select className="form-select"
-                onChange={(e) => setTimeSheetStatus(e.target.value)}
+                id="status"
+                name="status"
+                onChange={(e) => handleChange(e)}
                 value={GetTimeSheetStatus}
               >
+                <option value={''}>Select Status</option>
                 <option value={'1'}>Active</option>
                 <option value={'0'}>Deactive</option>
-
               </select>
+              {error['status'] && <div className="error-text">{error['status']}</div>}
             </div>
           </div>
         </div>
@@ -491,10 +653,20 @@ const TaskTimesheet = () => {
         handleClose={() => {
           setViewtimesheet(false);
           setRowData({})
+          setTotalTime({ hours: 0, minutes: 0 })
+          setTaskStatus('')
+          setError1({})
         }}
-        Submit_Cancel_Function={() => setViewtimesheet(false)}
+        Submit_Cancel_Function={() => {
+          setViewtimesheet(false);
+          setRowData({})
+          setTotalTime({ hours: 0, minutes: 0 })
+          setTaskStatus('')
+          setError1({})
 
-        Submit_Function={()=>handleSubmit("TimeSheet")}
+        }}
+
+        Submit_Function={() => handleSubmit("TimeSheet")}
       >
         <div className="row">
           <div className="col-md-12">
@@ -542,16 +714,17 @@ const TaskTimesheet = () => {
                     <label htmlFor="firstNameinput" className="form-label">
                       Total Time
                     </label>
-
                     <div className="row">
                       <div className="col-md-6 pe-0">
                         <div className="input-group">
                           <input
                             type="text"
-                            className="form-control" 
+                            className="form-control"
                             aria-label="Recipient's username"
                             aria-describedby="basic-addon2"
-                            onChange={(e) => setTotalTime({ ...TotalTime, hours: e.target.value })}
+                            id="TotalHours"
+                            name="TotalHours"
+                            onChange={(e) => handleChangeTimeSheet(e)}
                             value={TotalTime.hours}
                             placeholder="Hours"
                           />
@@ -565,17 +738,12 @@ const TaskTimesheet = () => {
                           <input
                             type="text"
                             className="form-control"
-
                             aria-label="Recipient's username"
                             aria-describedby="basic-addon2"
                             placeholder="Minutes"
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
-                                setTotalTime({ ...TotalTime, minutes: e.target.value });
-                              }
-                            }}
-
+                            id="TotalMinutes"
+                            name="TotalMinutes"
+                            onChange={(e) => handleChangeTimeSheet(e)}
                             value={TotalTime.minutes}
                           />
                           <span className="input-group-text" id="basic-addon2">
@@ -583,6 +751,9 @@ const TaskTimesheet = () => {
                           </span>
                         </div>
                       </div>
+                      {error1['TotalHours'] ? <div className="error-text">{error1['TotalHours']}</div> :
+                        <div className="error-text">{error1['TotalMinutes']}</div>
+                      }
                     </div>
                   </div>
                   <div className="col-md-12">
@@ -593,11 +764,12 @@ const TaskTimesheet = () => {
                       <select
                         className="form-control"
                         data-trigger=""
-                        name="status-field"
-                        id="status-field"
-                        onChange={(e) => setTaskStatus(e.target.value)}
+                        name="status"
+                        id="status"
+                        onChange={(e) => handleChangeTimeSheet(e)}
                         value={TaskStatus}
                       >
+
                         <option value=""> Select Status</option>
                         {getMasterStatusArr && getMasterStatusArr.map((item) => {
                           return (
@@ -608,6 +780,7 @@ const TaskTimesheet = () => {
                         })}
 
                       </select>
+                      {error1['status'] && <div className="error-text">{error1['status']}</div>}
                     </div>
                   </div>
                 </div>
