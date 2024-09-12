@@ -509,6 +509,8 @@ const getCustomer = async (customer) => {
         LEFT JOIN 
             customer_company_information ON customers.id = customer_company_information.customer_id
         WHERE customer_service_account_managers.account_manager_id = ?
+        GROUP BY 
+        customers.id
         ORDER BY 
         customers.id DESC;
             `;
