@@ -480,6 +480,7 @@ const Service = () => {
                                   aria-labelledby={`heading-${index}`}
                                   data-bs-parent={`#accordionExample${index}`}
                                 >
+                                    {services.includes(item.id) &&
                                   <div className="accordion-body">
                                     <div
                                       className="accordion"
@@ -693,6 +694,7 @@ const Service = () => {
                                           )}
                                     </div>
                                   </div>
+}
                                 </div>
                               </div>
                             </div>
