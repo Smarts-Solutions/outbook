@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { Formik } from "formik";
 import { Button } from "antd";
 import { useDispatch } from "react-redux";
@@ -17,7 +16,7 @@ import {
   JobType,
   GETTASKDATA,
 } from "../../../../ReduxStore/Slice/Settings/settingSlice";
-// import Taskxl from '../../../../../public/Task.xlsx';
+import Swal from "sweetalert2";
 
 const Service = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
@@ -309,77 +308,88 @@ const Service = () => {
   };
 
   const TaskUpdate = async (e, id, serviceId) => {
-    const file = e.target.files[0];
+    if (e.target.files.length > 0) {
+      if (e.target.files[0].name !== "Task.xlsx") {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Please upload the correct file.",
+        });
+        return;
+      }
 
-    if (file) {
-      const reader = new FileReader();
+      const file = e.target.files[0];
 
-      reader.onload = (event) => {
-        const data = new Uint8Array(event.target.result);
-        const workbook = XLSX.read(data, { type: "array" });
+      if (file) {
+        const reader = new FileReader();
 
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
+        reader.onload = (event) => {
+          const data = new Uint8Array(event.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
 
-        const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
 
-        const headers = rawData[0];
-        const rows = rawData.slice(1);
+          const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-        let result = [];
-        let currentId = null;
-        let currentChecklistName = null;
-        let taskList = [];
+          const headers = rawData[0];
+          const rows = rawData.slice(1);
 
-        rows.forEach((row) => {
-          const idValue = row[headers.indexOf("id")];
-          const checklistName = row[headers.indexOf("Checklist Name")] || "";
-          const taskName = row[headers.indexOf("Task Name")] || "";
-          const budgetHours = row[headers.indexOf("Budget Hours")] || "";
-          const budgetMinutes = row[headers.indexOf("Budget Minutes")] || "";
+          let result = [];
+          let currentId = null;
+          let currentChecklistName = null;
+          let taskList = [];
 
-          if (idValue) {
-            if (currentId !== null) {
-              result.push({
-                id: currentId,
-                checklistName: currentChecklistName,
-                Task: taskList,
-              });
+          rows.forEach((row) => {
+            const idValue = row[headers.indexOf("id")];
+            const checklistName = row[headers.indexOf("Checklist Name")] || "";
+            const taskName = row[headers.indexOf("Task Name")] || "";
+            const budgetHours = row[headers.indexOf("Budget Hours")] || "";
+            const budgetMinutes = row[headers.indexOf("Budget Minutes")] || "";
+
+            if (idValue) {
+              if (currentId !== null) {
+                result.push({
+                  id: currentId,
+                  checklistName: currentChecklistName,
+                  Task: taskList,
+                });
+              }
+
+              currentId = idValue;
+              currentChecklistName = checklistName;
+              taskList = [];
             }
 
-            currentId = idValue;
-            currentChecklistName = checklistName;
-            taskList = [];
-          }
+            if (taskName) {
+              taskList.push({
+                TaskName: taskName,
+                BudgetHour: budgetHours + ":" + budgetMinutes,
+              });
+            }
+          });
 
-          if (taskName) {
-            taskList.push({
-              TaskName: taskName,
-              BudgetHour: budgetHours + ":" + budgetMinutes,
+          // Push the last item
+          if (currentId !== null) {
+            result.push({
+              id: currentId,
+              checklistName: currentChecklistName,
+              Task: taskList,
             });
           }
-        });
+          setTasksData((prev) => [
+            ...prev,
+            ...result.map((item) => ({
+              ...item,
+              JobTypeId: id,
+              serviceId: serviceId,
+            })),
+          ]);
+        };
 
-        // Push the last item
-        if (currentId !== null) {
-          result.push({
-            id: currentId,
-            checklistName: currentChecklistName,
-            Task: taskList,
-          });
-        }
-        setTasksData((prev) => [
-          ...prev,
-          ...result.map((item) => ({
-            ...item,
-            JobTypeId: id,
-            serviceId: serviceId,
-          })),
-        ]);
-      };
-
-      // Read the file as an ArrayBuffer
-      reader.readAsArrayBuffer(file);
+        // Read the file as an ArrayBuffer
+        reader.readAsArrayBuffer(file);
+      }
     }
   };
 
@@ -469,7 +479,8 @@ const Service = () => {
                                       className="accordion"
                                       id="sub-accordionExample"
                                     >
-                                      {jobTypeData &&
+                                      {services.includes(item.id) &&
+                                        jobTypeData &&
                                         jobTypeData
                                           .filter(
                                             (data) =>
@@ -483,13 +494,13 @@ const Service = () => {
                                               >
                                                 <h2
                                                   className="accordion-header"
-                                                  id="sub-headingOne"
+                                                 id={`sub-headingOne${jobIndex}`}
                                                 >
                                                   <button
                                                     className="accordion-button collapsed"
                                                     type="button"
                                                     data-bs-toggle="collapse"
-                                                    data-bs-target="#sub-collapseOne"
+                                                    data-bs-target={`#sub-collapseOne${jobIndex}`}
                                                     aria-expanded="true"
                                                     aria-controls="collapseOne"
                                                   >
@@ -497,35 +508,51 @@ const Service = () => {
                                                   </button>
                                                 </h2>
                                                 <div
-                                                  id="sub-collapseOne"
+                                                  id={`sub-collapseOne${jobIndex}`}
                                                   className="accordion-collapse collapse "
-                                                  aria-labelledby="sub-headingOne"
+                                                  aria-labelledby={`sub-headingOne${jobIndex}`}
                                                   data-bs-parent="#sub-accordionExample"
                                                 >
                                                   <div className="accordion-body">
                                                     <div className="pb-3">
-                                                      <input
-                                                        type="file"
-                                                        id="uploadButton"
-                                                        className="form-control"
-                                                        style={{
-                                                          cursor: "pointer",
-                                                        }}
-                                                        onChange={(e) =>
-                                                          TaskUpdate(
-                                                            e,
-                                                            data1.id,
-                                                            item.id
-                                                          )
-                                                        }
-                                                      />
-
-                                                      <button
-                                                        onClick={handleDownload}
-                                                        className="btn btn-primary"
-                                                      >
-                                                        Download Sample File
-                                                      </button>
+                                                      <div className="row align-items-center">
+                                                        <div className="col-auto">
+                                                          <label
+                                                            htmlFor="uploadButton"
+                                                            className="btn btn-secondary"
+                                                          >
+                                                            <i className="fas fa-upload me-2"></i>
+                                                            Upload File
+                                                            <input
+                                                              type="file"
+                                                              id="uploadButton"
+                                                              className="form-control d-none"
+                                                              style={{
+                                                                cursor:
+                                                                  "pointer",
+                                                              }}
+                                                              onChange={(e) =>
+                                                                TaskUpdate(
+                                                                  e,
+                                                                  data1.id,
+                                                                  item.id
+                                                                )
+                                                              }
+                                                            />
+                                                          </label>
+                                                        </div>
+                                                        <div className="col-auto">
+                                                          <button
+                                                            onClick={
+                                                              handleDownload
+                                                            }
+                                                            className="btn btn-primary"
+                                                          >
+                                                            <i className="fas fa-download me-2"></i>
+                                                            Download Sample File
+                                                          </button>
+                                                        </div>
+                                                      </div>
                                                     </div>
 
                                                     <table className="table table-bordered table-striped">
