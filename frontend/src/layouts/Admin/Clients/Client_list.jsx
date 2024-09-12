@@ -552,7 +552,12 @@ const ClientList = () => {
           </div>
         </div>
       </div>
+      <div className="row">
+        <div className="col-12">
+        <ol class="breadcrumb ps-2"><li class="breadcrumb-item"><a href=";">Dastyle</a></li><li class="breadcrumb-item active">Dashboard</li></ol>
 
+        </div>
+      </div>
       <div className="tab-content" id="pills-tabContent">
         {tabs1.map((tab) => (
           <div
