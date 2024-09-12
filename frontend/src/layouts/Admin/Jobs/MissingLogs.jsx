@@ -209,6 +209,7 @@ const MissingLogs = () => {
       .unwrap()
       .then((response) => {
         if (response.status) {
+          GetMissingLogDetails()
           setAddmissinglogs(false);
           resetForm();
           sweatalert.fire({
