@@ -292,3 +292,16 @@ export async function ADD_MISSION_LOG(data, token) {
     return err;
   }
 }
+
+
+export async function QUERY_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getQuerie`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
