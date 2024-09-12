@@ -18,7 +18,8 @@ import {
   GET_JOB_TIME_SHEET,
   GET_MISSING_LOG, 
   ADD_MISSION_LOG,
-  QUERY_ACTION
+  QUERY_ACTION,
+  ADD_QUERY,
    
 } from "../../../Services/Customer/CustomerService";
 
@@ -370,6 +371,22 @@ export const QueryAction = createAsyncThunk("getQuerie", async (data) => {
   }
 });
 
+export const AddQuery = createAsyncThunk("addQuerie", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await ADD_QUERY(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
 
  
 
@@ -398,7 +415,8 @@ const CustomerSlice = createSlice({
     getalltasktimesheet: [],
     jobtimesheetaction: [],
     getmissinglog: [],
-    queryaction: []
+    queryaction: [],
+    addquery: [],
     
   },
   reducers: {},
@@ -612,7 +630,19 @@ const CustomerSlice = createSlice({
       .addCase(QueryAction.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
-      });
+      })
+      .addCase(AddQuery.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(AddQuery.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.addquery = action.payload;
+      })
+      .addCase(AddQuery.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true
+      }
+      );
       
   },
 });
