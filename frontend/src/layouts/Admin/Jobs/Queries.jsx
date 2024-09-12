@@ -8,7 +8,7 @@ import {QueryAction} from '../../../ReduxStore/Slice/Customer/CustomerSlice'
 const Queries = () => {
   const location = useLocation();
   const dispatch = useDispatch();
-  const token = JSON.parse(localStorage.getItem("token"));s
+  const token = JSON.parse(localStorage.getItem("token"));
   const [addquery, setAddquery] = useState(false);
   const [viewquery, setViewquery] = useState(false);
   const [AllQueryList, setAllQueryList] = useState([]);
