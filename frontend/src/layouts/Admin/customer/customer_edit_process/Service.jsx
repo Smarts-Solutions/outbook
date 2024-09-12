@@ -33,7 +33,7 @@ const Service = () => {
   const [tempServices, setTempServices] = useState("");
   const [jobtype, SetJobtype] = useState(false);
   const [tasks, setTasks] = useState([]);
-
+  const [fileName, setFileName] = useState('No file selected');
   const [jobTypeData, setJobTypeData] = useState([]);
   const [showJobTabel, setShowJobTabel] = useState("");
   const [tasksGet, setTasksData] = useState([]);
@@ -319,7 +319,7 @@ const Service = () => {
       }
 
       const file = e.target.files[0];
-
+      setFileName(file.name);
       if (file) {
         const reader = new FileReader();
 
@@ -408,6 +408,12 @@ const Service = () => {
     document.body.appendChild(link);
     link.click();
     link.remove();
+  };
+
+  const handleClearFile = () => {
+    setFileName('No file selected');
+    // Clear the file input
+    document.getElementById('uploadButton').value = null;
   };
 
   return (
@@ -514,46 +520,53 @@ const Service = () => {
                                                   data-bs-parent="#sub-accordionExample"
                                                 >
                                                   <div className="accordion-body">
-                                                    <div className="pb-3">
-                                                      <div className="row align-items-center">
-                                                        <div className="col-auto">
-                                                          <label
-                                                            htmlFor="uploadButton"
-                                                            className="btn btn-secondary"
-                                                          >
-                                                            <i className="fas fa-upload me-2"></i>
-                                                            Upload File
-                                                            <input
-                                                              type="file"
-                                                              id="uploadButton"
-                                                              className="form-control d-none"
-                                                              style={{
-                                                                cursor:
-                                                                  "pointer",
-                                                              }}
-                                                              onChange={(e) =>
-                                                                TaskUpdate(
-                                                                  e,
-                                                                  data1.id,
-                                                                  item.id
-                                                                )
-                                                              }
-                                                            />
-                                                          </label>
-                                                        </div>
-                                                        <div className="col-auto">
-                                                          <button
-                                                            onClick={
-                                                              handleDownload
-                                                            }
-                                                            className="btn btn-primary"
-                                                          >
-                                                            <i className="fas fa-download me-2"></i>
-                                                            Download Sample File
-                                                          </button>
-                                                        </div>
-                                                      </div>
-                                                    </div>
+                                                  
+
+
+                                                  <div className="pb-3">
+      <div className="row align-items-center">
+        {/* Upload File Button */}
+        <div className="col-auto">
+          <label htmlFor="uploadButton" className="btn btn-secondary">
+            <i className="fas fa-upload me-2"></i>
+            Upload File
+            <input
+              type="file"
+              id="uploadButton"
+              className="form-control d-none"
+              style={{ cursor: 'pointer' }}
+              onChange={(e) => TaskUpdate(e, data1.id, item.id)}
+            />
+          </label>
+        </div>
+
+        {/* File Name Display and Clear Icon */}
+        <div className="col-auto d-flex align-items-center">
+          <span className="form-text me-2">{fileName}</span>
+          {fileName !== 'No file selected' && (
+            <i
+              className="fas fa-trash text-danger"
+              style={{ cursor: 'pointer' }}
+              onClick={handleClearFile}
+              title="Clear file"
+            ></i>
+          )}
+        </div>
+
+        {/* Download Button */}
+        <div className="col-auto ms-auto">
+          <button
+            onClick={handleDownload}
+            className="btn btn-primary"
+          >
+            <i className="fas fa-download me-2"></i>
+            Download Sample File
+          </button>
+        </div>
+      </div>
+    </div>
+
+
 
                                                     <table className="table table-bordered table-striped">
                                                       <thead className="table-primary">
