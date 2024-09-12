@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Datatable from '../../../Components/ExtraComponents/Datatable';
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { QueryAction , AddQuery } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
+import { QueryAction, AddQuery } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
 import sweatalert from 'sweetalert2';
 
 const Queries = () => {
@@ -86,9 +86,9 @@ const Queries = () => {
         console.log(err);
       })
   }
- 
-  const HandleAddQuery = async()=>{
-    if(!validateAllFields()){
+
+  const HandleAddQuery = async () => {
+    if (!validateAllFields()) {
       return;
     }
     const req = { action: "add", job_id: 9, data: AllQueryInputdata }
@@ -125,7 +125,7 @@ const Queries = () => {
 
   }
   const handleChange = (e) => {
-    const { name, value } = e.target; 
+    const { name, value } = e.target;
 
     if (name === 'QueryDocument') {
       const files = e.target.files;
@@ -143,7 +143,7 @@ const Queries = () => {
 
   const validate = (name, value) => {
     const newErrors = { ...errors1 };
-    
+
     if (!value) {
       switch (name) {
         case "QueriesRemaining":
@@ -161,7 +161,7 @@ const Queries = () => {
         case "QuerySentDate":
           newErrors.QuerySentDate = "Query Sent Date is required";
           break;
-       
+
         case "ResponseReceived":
           newErrors.ResponseReceived = "Response Received is required";
           break;
@@ -216,7 +216,7 @@ const Queries = () => {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="edit-icon" onClick={() =>{HandleQueryView(row); setViewquery(true)}}>
+          <button className="edit-icon" onClick={() => { HandleQueryView(row); setViewquery(true) }}>
             <i className="fa fa-eye fs-6 text-secondary" />
           </button>
 
@@ -262,15 +262,15 @@ const Queries = () => {
         btn_2="true"
         title="Queries (Last Query Sent on 20/03/2023)"
         hideBtn={false}
-         btn_name="Save"
+        btn_name="Save"
         handleClose={() => {
           setAddquery(false);
           resetForm();
           setErrors1({});
         }}
         Submit_Function={() => HandleAddQuery()}
-        Submit_Cancel_Function={() => {setAddquery(false) ; resetForm(); setErrors1({});}} 
-        >
+        Submit_Cancel_Function={() => { setAddquery(false); resetForm(); setErrors1({}); }}
+      >
         <div className="row">
           <div className="col-lg-6">
             <label htmlFor="firstNameinput" className="form-label">
@@ -383,7 +383,7 @@ const Queries = () => {
               <label htmlFor="firstNameinput" className="form-label">
                 Response Received
               </label>
-              <select 
+              <select
                 className="form-select"
                 aria-label="Default select example"
                 style={{ color: "#8a8c8e !important" }}
@@ -475,12 +475,22 @@ const Queries = () => {
         backdrop="static"
         size="md"
         title="Query"
+        // btn_name="Close"
+        hideBtn={false}
 
-        hideBtn={true}
+        cancel_btn="true"
+        btn_2="true"
+        btn_name="Save"
+
+
+
         handleClose={() => {
           setViewquery(false);
           // formik.resetForm();
-        }}>
+        }}
+        Submit_Cancel_Function={() => {  setViewquery(false); }}
+        Submit_Function={() =>  setViewquery(false)}
+        >
         <div className="row">
           <div className="card col-md-12">
             <div className="card-body">
@@ -491,7 +501,7 @@ const Queries = () => {
                   </label>
                 </div>
                 <div className="col-md-6">
-                  <span className="text-muted">03/05/2023</span>
+                  <span className="text-muted">{singleQueryData && singleQueryData.query_sent_date}</span>
                 </div>
               </div>
               <div className="row">
@@ -501,7 +511,7 @@ const Queries = () => {
                   </label>
                 </div>
                 <div className="col-md-6">
-                  <span className="text-muted">Yes</span>
+                  <span className="text-muted">{singleQueryData && singleQueryData.response_received == 1 ? "Yes" : "No"}</span>
                 </div>
               </div>
               <div className="row">
@@ -511,7 +521,7 @@ const Queries = () => {
                   </label>
                 </div>
                 <div className="col-md-6">
-                  <span className="text-muted">Response Text</span>
+                  <span className="text-muted">{singleQueryData && singleQueryData.response}</span>
                 </div>
               </div>
             </div>
