@@ -58,9 +58,9 @@ const Status = () => {
           <button className="edit-icon" onClick={() => handleEdit(row)}>
             <i className="ti-pencil" />
           </button>
-          <button className="delete-icon" onClick={() => handleDelete(row)}>
+          {/* <button className="delete-icon" onClick={() => handleDelete(row)}>
             <i className="ti-trash text-danger" />
-          </button>
+          </button> */}
         </div>
       ),
       ignoreRowClick: true,

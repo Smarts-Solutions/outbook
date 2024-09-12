@@ -28,6 +28,10 @@ router.post('/addQuerie',verifyToken , uploadMultiple , jobController.addQuerie)
 router.post('/getDraft',verifyToken, jobController.getDraft);
 router.post('/addDraft',verifyToken, jobController.addDraft);
 
+// JobDocument
+router.post('/jobDocumentAction',verifyToken, jobController.jobDocumentAction);
+router.post('/addJobDocument',verifyToken , uploadMultiple , jobController.addJobDocument);
+
 
 
 

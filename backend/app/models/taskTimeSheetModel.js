@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const deleteUploadFile = require('../../app/middlewares/deleteUploadFile');
 
 const getTaskTimeSheet = async (timeSheet) => {
   const { job_id } = timeSheet;
@@ -403,6 +404,86 @@ const addDraft = async (draft) => {
   }
 }
 
+// JobDocument
+const addJobDocument = async (jobDocument) => {
+  const {job_id} = jobDocument.body
+  const job_document = jobDocument.files;
+
+  if (job_document.length > 0) {
+    for (let file of job_document) {
+      const file_name = file.filename;
+      const original_name = file.originalname;
+      const file_type = file.mimetype;
+      const file_size = file.size;
+      const insertQuery = `
+          INSERT INTO job_documents (
+              job_id, file_name, original_name, file_type, file_size
+          ) VALUES (?, ?, ?, ?, ?)
+      `;
+      try {
+          const [result] = await pool.execute(insertQuery, [
+              job_id,
+              file_name,
+              original_name,
+              file_type,
+              file_size
+          ]);
+         
+      } catch (error) {
+          console.log('Error inserting file:', error);
+
+      }
+    }
+    return { status: true, message: 'success .', data: [] };
+  }else{
+    return { status: true, message: 'no data .', data: [] };
+  }
+}
+
+const getJobDocument = async(jobDocument) => {
+  const { job_id } = jobDocument;
+  try {
+    const query = `
+     SELECT 
+      job_documents.id AS id,
+      job_documents.job_id AS job_id,
+      job_documents.file_name AS file_name,
+      job_documents.original_name AS original_name,
+      job_documents.file_type AS file_type,
+      job_documents.file_size AS file_size
+     FROM 
+      job_documents
+     WHERE 
+      job_documents.job_id = ?
+     ORDER BY
+      job_documents.id DESC;
+     `;
+    const [rows] = await pool.execute(query, [job_id]);
+    return { status: true, message: 'Success.', data: rows };
+  } catch (error) {
+    console.log("error ", error)
+    return { status: false, message: 'Error getJobDocument .' };
+  }
+}
+
+const deleteJobDocument = async(jobDocument) => {
+  const { id ,file_name} = jobDocument;
+  try {
+    const query = `
+     DELETE FROM 
+      job_documents
+     WHERE 
+      job_documents.id = ?
+     `;
+    const [rows] = await pool.execute(query, [id]);
+    deleteUploadFile(file_name)
+    return { status: true, message: 'Success.', data: rows };
+  } catch (error) {
+    console.log("error ", error)
+    return { status: false, message: 'Error getJobDocument .' };
+  }
+}
+
 
 
 module.exports = {
@@ -418,6 +499,9 @@ module.exports = {
   addQuerie,
   getDraft,
   addDraft,
-  getDraftSingleView
+  getDraftSingleView,
+  addJobDocument,
+  getJobDocument,
+  deleteJobDocument
 
 };
