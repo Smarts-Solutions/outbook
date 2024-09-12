@@ -482,11 +482,11 @@ const getJobByCustomer = async (job) => {
         master_status ON master_status.id = jobs.status_type
         WHERE 
         jobs.customer_id = customers.id AND 
-        jobs.allocated_to = ?
+        jobs.allocated_to = ? AND jobs.customer_id = ?
         ORDER BY 
          jobs.id DESC;
         `;
-       const [rows] = await pool.execute(query, [ExistStaff[0].id]);
+       const [rows] = await pool.execute(query, [ExistStaff[0].id , customer_id]);
        result = rows
       }
       else if(ExistStaff[0].role_id == 6){
@@ -542,11 +542,11 @@ const getJobByCustomer = async (job) => {
         master_status ON master_status.id = jobs.status_type
         WHERE 
         jobs.customer_id = customers.id AND 
-        jobs.reviewer = ?
+        jobs.reviewer = ? AND jobs.customer_id = ? 
         ORDER BY 
          jobs.id DESC;
         `;
-       const [rows] = await pool.execute(query, [ExistStaff[0].id]);
+       const [rows] = await pool.execute(query, [ExistStaff[0].id , customer_id]);
        result = rows
       }else{
         const query = `
@@ -672,11 +672,11 @@ const getJobByClient = async (job) => {
      master_status ON master_status.id = jobs.status_type   
      WHERE 
      jobs.client_id = clients.id AND
-     jobs.allocated_to = ?
+     jobs.allocated_to = ? AND jobs.client_id = ? 
       ORDER BY
       jobs.id DESC;
      `;
-    const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id]);
+    const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id , client_id]);
     result = rowsAllocated
  
     }
@@ -730,11 +730,11 @@ const getJobByClient = async (job) => {
      master_status ON master_status.id = jobs.status_type   
      WHERE 
      jobs.client_id = clients.id AND
-     jobs.reviewer = ?
+     jobs.reviewer = ? AND jobs.client_id = ? 
       ORDER BY
       jobs.id DESC;
      `;
-    const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id]);
+    const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id ,client_id]);
     result = rowsAllocated
  
     }
