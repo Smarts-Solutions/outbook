@@ -246,11 +246,11 @@ const TaskTimesheet = () => {
         cancel_btn='true'
         btn_name="Save"
         hideBtn={false}
-        
         handleClose={() => {
           setAddjobtimesheet(false);
           // formik.resetForm();
         }}
+        Submit_Cancel_Function={() => setAddjobtimesheet(false)}
         Submit_Function={()=>handleSubmit("AddTimesheet")}
       >
         <div className="row">
@@ -494,6 +494,7 @@ const TaskTimesheet = () => {
           setViewtimesheet(false);
           setRowData({})
         }}
+        Submit_Cancel_Function={() => setViewtimesheet(false)}
 
         Submit_Function={()=>handleSubmit("TimeSheet")}
       >

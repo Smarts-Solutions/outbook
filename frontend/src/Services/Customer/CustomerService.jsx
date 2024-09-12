@@ -3,6 +3,7 @@ import axios from "axios";
 // import Files
 import * as Config from "../../Utils/Config";
 import { header } from "../../Utils/ApiHeader";
+const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
 
 // Search Company Name
 export async function GETALLCOMPANY(data) {
@@ -250,4 +251,44 @@ export async function GET_MISSING_LOG(data, token) {
     return await err;
   }
 }
- 
+
+export async function ADD_MISSION_LOG(data, token) {
+  try { 
+    const formData = new FormData();
+    formData.append('job_id', data.job_id);
+    formData.append('missing_log', data.missionDetails.missing_log);
+    formData.append('missing_paperwork', data.missionDetails.missing_paperwork);
+    formData.append('missing_log_sent_on', data.missionDetails.missing_log_sent_on);
+    formData.append('missing_log_prepared_date', data.missionDetails.missing_log_prepared_date);
+    formData.append('missing_log_title', data.missionDetails.missing_log_title);
+    formData.append('missing_log_reviewed_by', staffDetails.id);  
+    formData.append('missing_log_reviewed_date', data.missionDetails.missing_log_reviewed_date);
+    formData.append('missing_paperwork_received_on', data.missionDetails.missing_paperwork_received_on);
+    formData.append('status', data.missionDetails.status);
+
+    if (Array.isArray(data.missionDetails.missing_log_document)) {
+      data.missionDetails.missing_log_document.forEach((file) => {
+        formData.append('files[]', file);
+      });
+    } else if (data.missionDetails.missing_log_document) {
+      formData.append('files[]', data.missionDetails.missing_log_document);
+    }
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${Config.base_url}addMissingLog`,
+      headers: {
+        Authorization: token,
+        "Content-Type": "multipart/form-data",
+      },
+      data: formData,
+    };
+    const res = await axios.request(config);
+
+    return await res?.data;
+  } catch (err) {
+    console.error("Error:", err);
+    return err;
+  }
+}

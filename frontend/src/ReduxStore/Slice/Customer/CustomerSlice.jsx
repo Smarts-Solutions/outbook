@@ -17,6 +17,7 @@ import {
   GET_ALL_TASK_TIME_SHEET,
   GET_JOB_TIME_SHEET,
   GET_MISSING_LOG, 
+  ADD_MISSION_LOG
    
 } from "../../../Services/Customer/CustomerService";
 
@@ -336,6 +337,22 @@ export const GetMissingLog = createAsyncThunk("getMissingLog", async (data) => {
   }
 });
 
+export const AddMissionLog = createAsyncThunk("addMissingLog", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await ADD_MISSION_LOG(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
  
 
 
@@ -552,6 +569,17 @@ const CustomerSlice = createSlice({
         state.getmissinglog = action.payload;
       })
       .addCase(GetMissingLog.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(AddMissionLog.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(AddMissionLog.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.addmissinglog = action.payload;
+      })
+      .addCase(AddMissionLog.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       });

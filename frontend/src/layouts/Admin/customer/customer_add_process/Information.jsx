@@ -162,25 +162,41 @@ const Information = ({ id, pageStatus }) => {
     FilterSearchDetails();
   }, [searchItem]);
 
+
+  
   useEffect(() => {
     if (getSearchDetails && getSearchDetails.length > 0) {
+      // Update company details
       setCompanyDetails((prevState) => ({
         ...prevState,
-        CompanyName: getSearchDetails[0].title,
-        EntityType: getSearchDetails[0].company_type,
-        CompanyStatus: getSearchDetails[0].company_status,
-        CompanyNumber: getSearchDetails[0].company_number,
-        RegisteredOfficeAddress: getSearchDetails[0].address_snippet,
+        CompanyName: getSearchDetails[0].title || prevState.CompanyName,
+        EntityType: getSearchDetails[0].company_type || prevState.EntityType,
+        CompanyStatus: getSearchDetails[0].company_status || prevState.CompanyStatus,
+        CompanyNumber: getSearchDetails[0].company_number || prevState.CompanyNumber,
+        RegisteredOfficeAddress: getSearchDetails[0].address_snippet || prevState.RegisteredOfficeAddress,
         IncorporationDate: getSearchDetails[0].date_of_creation
           ? getSearchDetails[0].date_of_creation
-          : "",
-        IncorporationIn: getSearchDetails[0].description,
-        TradingName: getSearchDetails[0].title,
-        TradingAddress: getSearchDetails[0].address_snippet,
-
+          : prevState.IncorporationDate,
+        IncorporationIn: getSearchDetails[0].description || prevState.IncorporationIn,
+        TradingName: getSearchDetails[0].title || prevState.TradingName,
+        TradingAddress: getSearchDetails[0].address_snippet || prevState.TradingAddress,
       }));
+   
+      const newErrors = { ...errors2 };
+      if (getSearchDetails[0].title) delete newErrors["CompanyName"];
+      if (getSearchDetails[0].company_type) delete newErrors["EntityType"];
+      if (getSearchDetails[0].company_status) delete newErrors["CompanyStatus"];
+      if (getSearchDetails[0].company_number) delete newErrors["CompanyNumber"];
+      if (getSearchDetails[0].address_snippet) delete newErrors["RegisteredOfficeAddress"];
+      if (getSearchDetails[0].date_of_creation) delete newErrors["IncorporationDate"];
+      if (getSearchDetails[0].description) delete newErrors["IncorporationIn"];
+      if (getSearchDetails[0].title) delete newErrors["TradingName"];
+      if (getSearchDetails[0].address_snippet) delete newErrors["TradingAddress"];
+  
+      setErrors2(newErrors);
     }
   }, [getSearchDetails]);
+  
 
   //  Add company contact
   const handleAddContact = () => {
@@ -324,7 +340,7 @@ const Information = ({ id, pageStatus }) => {
         return;
       }
     }
-    validate2(name, value);
+    validate2(name, value,1);
     setCompanyDetails({ ...getCompanyDetails, [name]: value });
   };
 
@@ -423,6 +439,7 @@ const Information = ({ id, pageStatus }) => {
 
   // validate function company
   const validate2 = (name, value) => {
+
     const newErrors = { ...errors2 };
     if (!value) {
       switch (name) {
@@ -508,7 +525,6 @@ const Information = ({ id, pageStatus }) => {
   const validateAllFields = (type) => {
     const customer_type = [getSoleTraderDetails, getCompanyDetails, getPartnershipDetails];
     const validate = [validate1, validate2, validate3];
-
     let isValid = true;
     for (const key in customer_type[type - 1]) {
       if (!validate[type - 1](key, customer_type[type - 1][key])) {
@@ -1285,7 +1301,7 @@ const Information = ({ id, pageStatus }) => {
                                   name="CompanyName"
                                   id="CompanyName"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails.CompanyName}
+                                  defaultValue={getCompanyDetails.CompanyName}
                                 />
                                 {errors2["CompanyName"] && (
                                   <div className="error-text">
