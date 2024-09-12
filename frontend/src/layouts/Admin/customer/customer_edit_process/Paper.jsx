@@ -10,6 +10,7 @@ import {
   GET_CUSTOMER_DATA,
   DELETE_CUSTOMER_FILE,
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import Swal from "sweetalert2";
 
 const Paper = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
@@ -50,7 +51,13 @@ const Paper = () => {
     );
 
     if (validFiles.length !== fileArray.length) {
-      alert("Only PDFs, DOCS, PNG, JPG, and JPEG are allowed.");
+     
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Only PDFs, DOCS, PNG, JPG, and JPEG are allowed.",
+      });
+      return;
     }
 
     setNewFiles(validFiles);
