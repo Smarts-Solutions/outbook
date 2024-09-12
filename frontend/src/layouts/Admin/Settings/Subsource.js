@@ -1,64 +1,44 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  JobType,
-  AddTask,
-} from "../../../ReduxStore/Slice/Settings/settingSlice";
+import { customerSubSourceApi } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import Modal from "../../../Components/ExtraComponents/Modals/Modal";
 import sweatalert from "sweetalert2";
-import { useDispatch, useSelector } from "react-redux";
-import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
+import { useDispatch } from "react-redux";
 import { useFormik } from "formik";
-import * as XLSX from "xlsx";
 
 const Setting = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const location = useLocation();
-  const navigate = useNavigate();
+
   const dispatch = useDispatch();
-  const [jobTypeData, setJobTypeData] = useState({ loading: true, data: [] });
+  const [getSubSourceData, setSubSourceData] = useState({
+    loading: true,
+    data: [],
+  });
   const [modalData, setModalData] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [showAddTask, setShowAddTask] = useState(false);
-  const [getJobTypeId, setJobTypeId] = useState("");
   const [isEdit, setIsEdit] = useState(false);
-  const [taskInput, setTaskInput] = useState("");
-  const [tasks, setTasks] = useState([]);
 
-  const JobTypeData = async (req) => {
+  const customerSubSourceData = async (req) => {
     if (location.state.Id) {
       req = {
         ...req,
-        service_id: location.state.Id,
+        customer_source_id: location.state.Id,
       };
     }
     const data = { req: req, authToken: token };
-    await dispatch(JobType(data))
+    await dispatch(customerSubSourceApi(data))
       .unwrap()
       .then(async (response) => {
-        if (req.action == "get") {
-          if (response.status) {
-            setJobTypeData({ loading: false, data: response.data });
-          } else {
-            setJobTypeData({ loading: false, data: [] });
-          }
+  
+        if (req.action == "add" || req.action == "update" || req.action == "delete") {
+          customerSubSourceData({ action: "getAll" });
         } else {
           if (response.status) {
-            sweatalert.fire({
-              title: response.message,
-              icon: "success",
-              timer: 2000,
-            });
-            setTimeout(() => {
-              JobTypeData({ action: "get" });
-            }, 2000);
+            setSubSourceData({ loading: false, data: response.data });
           } else {
-            sweatalert.fire({
-              title: response.message,
-              icon: "error",
-              timer: 2000,
-            });
+            setSubSourceData({ loading: false, data: [] });
           }
         }
       })
@@ -73,15 +53,15 @@ const Setting = () => {
 
   const fetchApiData = () => {
     const req = {
-      action: "get",
+      action: "getAll",
     };
-    JobTypeData(req);
+    customerSubSourceData(req);
   };
 
   const columnJobType = [
     {
-      name: "Job Type",
-      selector: (row) => row.type,
+      name: "Sub Source Type",
+      selector: (row) => row.name,
       sortable: true,
       width: "85%",
     },
@@ -96,15 +76,6 @@ const Setting = () => {
           <button className="delete-icon" onClick={() => handleDelete(row)}>
             {" "}
             <i className="ti-trash" />
-          </button>
-          <button
-            className="btn btn-info text-white"
-            onClick={(e) => {
-              setShowAddTask(true);
-              setJobTypeId(row);
-            }}
-          >
-            Add Task
           </button>
         </div>
       ),
@@ -138,8 +109,6 @@ const Setting = () => {
     },
   });
 
-
-
   const handleModalChange = (e) => {
     const { name, value } = e.target;
     setModalData((prevModalData) => ({
@@ -156,12 +125,12 @@ const Setting = () => {
       fields: [
         {
           type: "text",
-          name: "type",
-          label: "Job Type",
-          placeholder: "Enter Job Type",
+          name: "name",
+          label: "Sub Source Type",
+          placeholder: "Enter Sub Source Type",
         },
       ],
-      title: " Job Type",
+      title: "Sub Source Type",
     });
     setIsEdit(false);
     setIsModalOpen(true);
@@ -173,10 +142,10 @@ const Setting = () => {
       fields: [
         {
           type: "text",
-          name: "type",
-          label: "Job Type",
-          placeholder: "Enter Job Type",
-          value: data.type,
+          name: "name",
+          label: "Sub Source Type",
+          placeholder: "Enter Sub Source Type",
+          value: data.name,
         },
         {
           type: "select",
@@ -190,7 +159,7 @@ const Setting = () => {
           ],
         },
       ],
-      title: "Job Type",
+      title: "Sub Source Type",
 
       id: data.id,
     });
@@ -224,7 +193,7 @@ const Setting = () => {
         req.status = field.value;
       }
     });
-    JobTypeData(req);
+    customerSubSourceData(req);
 
     setModalData({});
     setIsModalOpen(false);
@@ -247,7 +216,7 @@ const Setting = () => {
             action: "delete",
             id: data.id,
           };
-          JobTypeData(req);
+          customerSubSourceData(req);
           sweatalert.fire({
             title: "Deleted!",
             text: "Your file has been deleted.",
@@ -257,16 +226,16 @@ const Setting = () => {
       });
   };
 
-
-
-
-
   return (
     <div>
       <div className="container-fluid">
         <div className="card mt-4">
           <div className="card-header align-items-center step-header-blue d-flex">
-            <button type="button" className="btn p-0" onClick={() => window.history.back()} >
+            <button
+              type="button"
+              className="btn p-0"
+              onClick={() => window.history.back()}
+            >
               <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
             </button>
             <h4 className="card-title">Sub Source Type</h4>
@@ -288,7 +257,7 @@ const Setting = () => {
               <Datatable
                 filter={true}
                 columns={columnJobType}
-                data={[{ type:"source",status:"1"},{ type:"source1",status:"1"},{ type:"source2",status:"0"}]}
+                data={getSubSourceData.data || []}
               />
             </div>
           </div>
@@ -299,7 +268,6 @@ const Setting = () => {
         <Modal
           modalId="exampleModal3"
           title={isEdit ? "Edit " + modalData.title : "Add " + modalData.title}
-        
           fields={modalData.fields}
           onClose={() => {
             setIsModalOpen(false);
@@ -310,8 +278,6 @@ const Setting = () => {
           buttonName={isEdit ? "Update" : "Save"}
         />
       )}
-
-   
     </div>
   );
 };

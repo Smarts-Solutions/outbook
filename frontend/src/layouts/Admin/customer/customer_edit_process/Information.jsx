@@ -20,7 +20,7 @@ import {
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 const Information = ({ id, pageStatus }) => {
-  const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
+  const { address, setAddress, next } = useContext(MultiStepFormContext);
   const refs = useRef({});
   const managerSelectRef = useRef(null);
   const dispatch = useDispatch();
@@ -265,7 +265,7 @@ const Information = ({ id, pageStatus }) => {
         IncorporationDate: getSearchDetails[0].date_of_creation
           ? getSearchDetails[0].date_of_creation
           : "",
-        IncorporationIn: getSearchDetails[0].description,
+        // IncorporationIn: getSearchDetails[0].description,
       }));
     }
   }, [getSearchDetails]);

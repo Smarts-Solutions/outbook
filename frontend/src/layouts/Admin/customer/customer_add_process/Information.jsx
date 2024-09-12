@@ -7,18 +7,14 @@ import MultiStepFormContext from "./MultiStepFormContext";
 import { EDIT_CUSTOMER } from "../../../../Utils/Common_Message";
 import { Email_regex } from "../../../../Utils/Common_regex";
 import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
-import {
-  PersonRole,
-  Country,
-} from "../../../../ReduxStore/Slice/Settings/settingSlice";
-import {
-  AddCustomer,
+import { PersonRole,Country,IncorporationApi} from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import { AddCustomer,
   GetAllCompany,
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 
 const Information = ({ id, pageStatus }) => {
-  const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
+  const { address, setAddress, next } = useContext(MultiStepFormContext);
   const refs = useRef({});
   const managerSelectRef = useRef(null);
   const dispatch = useDispatch();
@@ -39,6 +35,7 @@ const Information = ({ id, pageStatus }) => {
   const [errors3, setErrors3] = useState({});
   const [getAccountMangerIdErr, setAccountMangerIdErr] = useState("");
   const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
+  const [incorporationDataAll, setIncorporationDataAll] = useState([]);
 
 
   // state for sole trader
@@ -152,6 +149,7 @@ const Information = ({ id, pageStatus }) => {
 
   // use effect
   useEffect(() => {
+    incorporationData();
     CountryData();
     fetchStaffData();
     CustomerPersonRoleData();
@@ -176,10 +174,11 @@ const Information = ({ id, pageStatus }) => {
         RegisteredOfficeAddress: getSearchDetails[0].address_snippet || prevState.RegisteredOfficeAddress,
         IncorporationDate: getSearchDetails[0].date_of_creation
           ? getSearchDetails[0].date_of_creation
-          : prevState.IncorporationDate,
-        IncorporationIn: getSearchDetails[0].description || prevState.IncorporationIn,
-        TradingName: getSearchDetails[0].title || prevState.TradingName,
-        TradingAddress: getSearchDetails[0].address_snippet || prevState.TradingAddress,
+          : "",
+        // IncorporationIn: getSearchDetails[0].description,
+        TradingName: getSearchDetails[0].title,
+        TradingAddress: getSearchDetails[0].address_snippet,
+
       }));
    
       const newErrors = { ...errors2 };
@@ -881,6 +880,24 @@ const Information = ({ id, pageStatus }) => {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   };
 
+
+  const incorporationData = async (req) => {
+    const data = { req: { action: "getAll" }, authToken: token };
+    await dispatch(IncorporationApi(data))
+      .unwrap()
+      .then(async (response) => {
+        console.log("response", response);
+        if (response.status) {
+          setIncorporationDataAll(response.data);
+        } else {
+          setIncorporationDataAll([]);
+        }
+      })
+      .catch((error) => {
+        console.log("Error", error);
+      });
+  };
+
   return (
     <>
       <Formik
@@ -1406,7 +1423,7 @@ const Information = ({ id, pageStatus }) => {
                                   Incorporation in{" "}
                                   <span style={{ color: "red" }}>*</span>{" "}
                                 </label>
-                                <input
+                                {/* <input
                                   type="text"
                                   className="form-control input_bg"
                                   placeholder={EDIT_CUSTOMER.INCORPORATION_IN}
@@ -1414,7 +1431,25 @@ const Information = ({ id, pageStatus }) => {
                                   id="IncorporationIn"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails.IncorporationIn}
-                                />
+                                /> */}
+
+<select
+                                  className="form-select"
+                                  name="IncorporationIn"
+                                  id="IncorporationIn"
+                                  onChange={(e) => handleChange2(e)}
+                                  value={getCompanyDetails.IncorporationIn}
+                                >
+                                  <option value="">
+                                    Please Select Incorporation In
+                                  </option>
+                                  {incorporationDataAll &&
+                                    incorporationDataAll.map((data) => (
+                                      <option key={data.id} value={data.id}>
+                                        {data.name}
+                                      </option>
+                                    ))}
+                                </select>
 
                                 {errors2["IncorporationIn"] && (
                                   <div className="error-text">

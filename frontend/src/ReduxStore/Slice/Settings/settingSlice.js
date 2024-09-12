@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE, CLIENTINDUSTRY, COUNTRY, JOBTYPE, ADDTASK, GetServicesByCustomer, GETTASK, getListAction, addChecklist, UpdateChecklist ,MasterStatus,incorporationApi} from "../../../Services/Settings/settingService";
+import { ROLE, STATUS_TYPE, SERVICE, PERSONROLE, CLIENTINDUSTRY, COUNTRY, JOBTYPE, ADDTASK, GetServicesByCustomer, GETTASK, getListAction, addChecklist, UpdateChecklist ,MasterStatus,incorporationApi,customerSource,customerSubSource} from "../../../Services/Settings/settingService";
 import axios from "axios";
 
 
@@ -230,6 +230,35 @@ export const IncorporationApi = createAsyncThunk("incorporation", async (data) =
   }
 });
 
+export const customerSourceApi = createAsyncThunk("customerSource", async (data) => {
+  try {
+    const { req, authToken } = data
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await customerSource(updatedReq, authToken);
+
+    return await res;
+  } catch
+  (err) {
+    return err;
+  }
+});
+
+
+export const customerSubSourceApi = createAsyncThunk("customerSubSource", async (data) => {
+  try {
+    const { req, authToken } = data
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const res = await customerSubSource(updatedReq, authToken);
+
+    return await res;
+  } catch
+  (err) {
+    return err;
+  }
+});
+
 //Setting Slice
 const SettingSlice = createSlice({
   name: "SettingSlice",
@@ -250,7 +279,9 @@ const SettingSlice = createSlice({
     addChecklistData: [],
     updatecheckdata: [],
     masterStatusData: [],
-    incorporationData: []
+    incorporationData: [],
+    customerSource: [],
+    customerSubSource:[]
   },
 
   reducers: {},
@@ -419,6 +450,28 @@ const SettingSlice = createSlice({
         state.incorporationData = action.payload;
       })
       .addCase(IncorporationApi.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(customerSourceApi.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(customerSourceApi.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.customerSource = action.payload;
+      })
+      .addCase(customerSourceApi.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(customerSubSourceApi.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(customerSubSourceApi.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.customerSubSource = action.payload;
+      })
+      .addCase(customerSubSourceApi.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
       });
