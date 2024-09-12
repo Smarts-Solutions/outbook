@@ -98,9 +98,10 @@ const jobTimeSheet = async (req,res) => {
 }
 
 
+//MissingLog
 const addMissingLog = async (req,res) => {
   try {
-    const { ...missingLog } = req.body;
+    const { ...missingLog } = req;
     const result = await jobService.addMissingLog(missingLog);
     if(!result.status){
      return  res.status(200).json({ status: false, message: result.message });  
@@ -126,6 +127,93 @@ const getMissingLog =async(req,res)=>{
  }
 }
 
+//Queries
+
+const addQuerie = async (req,res) =>{
+  try {
+    const { ...query } = req;
+    const result = await jobService.addQuerie(query);
+    if(!result.status){
+     return  res.status(200).json({ status: false, message: result.message });  
+     }else{
+     return  res.status(200).json({ status: true, message: result.message , data : result.data});
+     }
+ } catch (error) {
+   res.status(500).json({ status:false, message: error.message});
+ }
+}
+const getQuerie = async (req,res) => {
+  try {
+    const { ...query } = req.body;
+    const result = await jobService.getQuerie(query);
+    if(!result.status){
+     return  res.status(200).json({ status: false, message: result.message });  
+     }else{
+     return  res.status(200).json({ status: true, message: result.message , data : result.data});
+     }
+ } catch (error) {
+   res.status(500).json({ status:false, message: error.message});
+ }
+}
+
+//Draft
+const getDraft = async (req,res) => {
+  try {
+    const { ...draft } = req.body;
+    const result = await jobService.getDraft(draft);
+    if(!result.status){
+     return  res.status(200).json({ status: false, message: result.message });  
+     }else{
+     return  res.status(200).json({ status: true, message: result.message , data : result.data});
+     }
+ } catch (error) {
+   res.status(500).json({ status:false, message: error.message});
+ }
+}
+
+const addDraft = async (req,res) => {
+  try {
+    const { ...draft } = req.body;
+    const result = await jobService.addDraft(draft);
+    if(!result.status){
+     return  res.status(200).json({ status: false, message: result.message });  
+     }else{
+     return  res.status(200).json({ status: true, message: result.message , data : result.data});
+     }
+ } catch (error) {
+   res.status(500).json({ status:false, message: error.message});
+ }
+}
+
+// JobDocument
+const jobDocumentAction = async (req,res) => {
+  try {
+    const { ...document } = req.body;
+    const result = await jobService.jobDocumentAction(document);
+    if(!result.status){
+     return  res.status(200).json({ status: false, message: result.message });  
+     }else{
+     return  res.status(200).json({ status: true, message: result.message , data : result.data});
+     }
+ } catch (error) {
+   res.status(500).json({ status:false, message: error.message});
+ }
+}
+
+const addJobDocument = async (req,res) => {
+  try {
+    const { ...document } = req;
+    const result = await jobService.addJobDocument(document);
+    if(!result.status){
+     return  res.status(200).json({ status: false, message: result.message });  
+     }else{
+     return  res.status(200).json({ status: true, message: result.message , data : result.data});
+     }
+ } catch (error) {
+   res.status(500).json({ status:false, message: error.message});
+ }
+}
+
 
 module.exports = {
   getAddJobData,
@@ -135,5 +223,11 @@ module.exports = {
   getTaskTimeSheet,
   jobTimeSheet,
   addMissingLog,
-  getMissingLog
+  getMissingLog,
+  getQuerie,
+  addQuerie,
+  getDraft,
+  addDraft,
+  jobDocumentAction,
+  addJobDocument
 };

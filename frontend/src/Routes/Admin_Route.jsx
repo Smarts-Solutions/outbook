@@ -28,6 +28,7 @@ import Staff from "../layouts/Admin/Staff/Staff";
 import ViewLogs from "../layouts/Admin/Staff/ViewLogs";
 
 import JobType from "../layouts/Admin/Settings/JobType";
+import Subsource from '../layouts/Admin/Settings/Subsource';
 import { RoleAccess } from "../ReduxStore/Slice/Access/AccessSlice";
 
 import AddNewClient from "../layouts/Admin/Clients/CreateClient";
@@ -202,6 +203,8 @@ const Admin_Route = () => {
             <Route path="/job/documents" element={<Documents />} />
             <Route path="/job/jobtimeline" element={<JobTimeline />} />
             <Route path="/job/jobinformation" element={<JobInformation />} />
+            <Route path="/add/subSource" element={<Subsource />} />
+
              
           </Routes>
         </div>

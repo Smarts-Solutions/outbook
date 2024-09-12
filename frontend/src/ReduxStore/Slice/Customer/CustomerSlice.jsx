@@ -15,7 +15,10 @@ import {
   UPDATE_JOB,
   GETALLCHECKLIST,
   GET_ALL_TASK_TIME_SHEET,
-  GET_JOB_TIME_SHEET, 
+  GET_JOB_TIME_SHEET,
+  GET_MISSING_LOG, 
+  ADD_MISSION_LOG,
+  QUERY_ACTION
    
 } from "../../../Services/Customer/CustomerService";
 
@@ -286,9 +289,6 @@ export const GET_ALL_CHECKLIST = createAsyncThunk(
   }
 );
 
-
-
-
 export const getAllTaskTimeSheet = createAsyncThunk("getTaskTimeSheet", async (data) => {
   try {
     const { req, authToken } = data;
@@ -321,6 +321,56 @@ export const JobTimeSheetAction = createAsyncThunk("jobTimeSheet", async (data) 
   }
 });
 
+
+export const GetMissingLog = createAsyncThunk("getMissingLog", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await GET_MISSING_LOG(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const AddMissionLog = createAsyncThunk("addMissingLog", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await ADD_MISSION_LOG(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const QueryAction = createAsyncThunk("getQuerie", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await QUERY_ACTION(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+
  
 
 
@@ -347,6 +397,8 @@ const CustomerSlice = createSlice({
     getallchecklist: [],
     getalltasktimesheet: [],
     jobtimesheetaction: [],
+    getmissinglog: [],
+    queryaction: []
     
   },
   reducers: {},
@@ -525,6 +577,39 @@ const CustomerSlice = createSlice({
         state.jobtimesheetaction = action.payload;
       })
       .addCase(JobTimeSheetAction.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(GetMissingLog.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(GetMissingLog.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.getmissinglog = action.payload;
+      })
+      .addCase(GetMissingLog.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(AddMissionLog.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(AddMissionLog.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.addmissinglog = action.payload;
+      })
+      .addCase(AddMissionLog.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(QueryAction.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(QueryAction.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.queryaction = action.payload;
+      })
+      .addCase(QueryAction.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       });

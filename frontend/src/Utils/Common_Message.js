@@ -18,16 +18,16 @@ export const ADD_CUSTOMER = {
   TRADING_ADDRESS: "Please enter Trading Address",
 
   VAT_NUMBER_VALIDATION: "VAT Number cannot exceed 9 Numbers",
-  WEBSITE_VALIDATION:  "Website cannot exceed 200 characters",
+  WEBSITE_VALIDATION: "Website cannot exceed 200 characters",
 
 
   ENTER_FIRST_NAME: "Please enter First Name",
   LAST_NAME: "Please enter Last Name",
   EMAIL: "Please enter Email",
-  REQ_FIRST_NAME:"First Name is required",
-  REQ_LAST_NAME:"Last Name is required",
-  REQ_EMAIL:"Email is required",
-  VALID_EMAIL:"Valid Email is required"
+  REQ_FIRST_NAME: "First Name is required",
+  REQ_LAST_NAME: "Last Name is required",
+  REQ_EMAIL: "Email is required",
+  VALID_EMAIL: "Valid Email is required"
 };
 
 export const EDIT_CUSTOMER = {
@@ -56,7 +56,7 @@ export const EDIT_CUSTOMER = {
   INVALID_EMAIL_ERROR: "Invalid email address",
 };
 
- 
+
 
 export const FTEDedicatedErrorMessages = {
   'accountants': "Please Enter Number of Accountants",
@@ -71,7 +71,7 @@ export const FTEDedicatedErrorMessages = {
   'feePerAdmin': "Please Enter Fee Per Admin/Other Staff",
 }
 
-export const  PercentageModelErrorMessages = {
+export const PercentageModelErrorMessages = {
   'total_outsourcing': "Please Enter Total Outsourcing Fee Percentage between 0 and 100",
   'accountants': "Please Enter Accountants Fee Percentage between 0 and 100",
   'bookkeepers': "Please Enter Bookkeepers Fee Percentage between 0 and 100",
@@ -80,7 +80,7 @@ export const  PercentageModelErrorMessages = {
   'admin_staff': "Please Enter Admin/Other Staff Fee Percentage between 0 and 100",
 };
 
-export const  AdhocPAYGHourlyErrorMessages  = {
+export const AdhocPAYGHourlyErrorMessages = {
   'adhoc_accountants': "Please Enter Accountants Fee Per Hour between 7 and 25",
   'adhoc_bookkeepers': 'Please Enter Bookkeepers Fee Per Hour between 7 and 25',
   'adhoc_payroll_experts': "Please Enter Payroll Experts Fee Per Hour between 7 and 25",
@@ -88,6 +88,31 @@ export const  AdhocPAYGHourlyErrorMessages  = {
   'adhoc_admin_staff': "Please Enter Admin/Other Staff Fee Per Hour between 7 and 25",
 }
 
+export const AddMissionLogErros = {
+  'missing_log': 'Missing Log is required',
+  'missing_paperwork': 'Missing Paperwork is required',
+  'missing_log_sent_on': 'Missing Log Sent On is required',
+  'missing_log_prepared_date': 'Missing Log Prepared Date is required',
+  'missing_log_title': 'Missing Log Title is required',
+  'missing_log_reviewed_by': 'Missing Log Reviewed By is required',
+  'missing_log_reviewed_date': 'Missing Log Reviewed Date is required',
+  'missing_paperwork_received_on': 'Missing Paperwork Received On is required',
+  'missing_log_document': 'Missing Log Document is required',
+  'status': 'Status is required',
+}
+
+export const CreateJobErrorMessage = {
+  'AccountManager': 'Please Enter Account Manager',
+  'Customer': 'Please Enter Customer',
+  'Client': 'Please Select Client',
+  'CustomerAccountManager': 'Please Select Customer Account Manager',
+  'Service': 'Please Select Service',
+  'JobType': 'Please Select Job Type',
+  'NumberOfTransactions': 'Please Enter Number Of Transactions less than 1000000',
+  'NumberOfTrialBalanceItems': 'Please Enter Number Of Trial Balance Items less than 5000',
+  'Turnover': 'Please Enter Turnover less than 200000000',
+}
+ 
 const fieldErrors = {
   AccountManager: "Please Enter Account Manager",
   Customer: "Please Enter Customer",

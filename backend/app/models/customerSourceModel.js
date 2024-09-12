@@ -1,23 +1,22 @@
 const pool = require("../config/database");
 
-const createIncorporation = async (Incorporation) => {
-
-  const { name } = Incorporation;
-  const checkQuery = `SELECT 1 FROM incorporation_in WHERE name = ?`;
+const createCustomerSource = async (CustomerSource) => {
+  const { name } = CustomerSource;
+  const checkQuery = `SELECT 1 FROM customer_source WHERE name = ?`;
   const query = `
-    INSERT INTO incorporation_in (name)
+    INSERT INTO customer_source (name)
     VALUES (?)
     `;
 
   try {
-    const [check] = await pool.query(checkQuery, [Incorporation.Incorporation]);
+    const [check] = await pool.query(checkQuery, [name]);
     if (check.length > 0) {
-      return { status: false, message: "Incorporation In already exists." };
+      return { status: false, message: "CustomerSource In already exists." };
     }
-    const [result] = await pool.query(query, [Incorporation.Incorporation]);
+    const [result] = await pool.query(query, [name]);
     return {
       status: true,
-      message: "Incorporation In created successfully.",
+      message: "CustomerSource In created successfully.",
       data: result.insertId,
     };
   } catch (err) {
@@ -26,9 +25,9 @@ const createIncorporation = async (Incorporation) => {
   }
 };
 
-const getIncorporation = async () => {
+const getCustomerSource = async () => {
   const query = `
-    SELECT * FROM incorporation_in WHERE status = '1'
+    SELECT * FROM customer_source WHERE status = '1'
     ORDER BY id DESC
     `;
 
@@ -41,9 +40,9 @@ const getIncorporation = async () => {
   }
 };
 
-const getIncorporationAll = async () => {
+const getCustomerSourceAll = async () => {
   const query = `
-    SELECT * FROM incorporation_in
+    SELECT * FROM customer_source
     ORDER BY id DESC
     `;
 
@@ -56,22 +55,22 @@ const getIncorporationAll = async () => {
   }
 };
 
-const deleteIncorporation = async (IncorporationId) => {
+const deleteCustomerSource = async (CustomerSourceId) => {
   const query = `
-    DELETE FROM incorporation_in WHERE id = ?
+    DELETE FROM customer_source WHERE id = ?
     `;
 
   try {
-    await pool.execute(query, [IncorporationId]);
+    await pool.execute(query, [CustomerSourceId]);
   } catch (err) {
     console.error("Error deleting data:", err);
     throw err;
   }
 };
 
-const updateIncorporation = async (Incorporation) => {
-  const { id, ...fields } = Incorporation;
-  const name = Incorporation.name;
+const updateCustomerSource = async (CustomerSource) => {
+  const { id, ...fields } = CustomerSource;
+  const name = CustomerSource.name;
 
   const setClauses = [];
   const values = [];
@@ -87,21 +86,21 @@ const updateIncorporation = async (Incorporation) => {
   values.push(id);
 
   const query = `
-    UPDATE incorporation_in
+    UPDATE customer_source
     SET ${setClauses.join(", ")}
     WHERE id = ?
     `;
 
-  const checkQuery = `SELECT 1 FROM incorporation_in WHERE name = ? AND id != ?`;
+  const checkQuery = `SELECT 1 FROM customer_source WHERE name = ? AND id != ?`;
   try {
     const [check] = await pool.execute(checkQuery, [name, id]);
     if (check.length > 0) {
-      return { status: false, message: "Incorporation In already exists." };
+      return { status: false, message: "CustomerSource In already exists." };
     }
     const [result] = await pool.execute(query, values);
     return {
       status: true,
-      message: "Incorporation In updated successfully.",
+      message: "CustomerSource In updated successfully.",
       data: result.affectedRows,
     };
   } catch (err) {
@@ -111,9 +110,9 @@ const updateIncorporation = async (Incorporation) => {
 };
 
 module.exports = {
-  createIncorporation,
-  deleteIncorporation,
-  updateIncorporation,
-  getIncorporation,
-  getIncorporationAll,
+  createCustomerSource,
+  deleteCustomerSource,
+  updateCustomerSource,
+  getCustomerSource,
+  getCustomerSourceAll,
 };

@@ -16,9 +16,21 @@ router.post('/jobUpdate',verifyToken, jobController.jobUpdate);
 router.post('/getTaskTimeSheet',verifyToken, jobController.getTaskTimeSheet);
 router.post('/jobTimeSheet',verifyToken, jobController.jobTimeSheet);
 
-//addMissingLog
-router.post('/addMissingLog',verifyToken, jobController.addMissingLog);
+//MissingLog
+router.post('/addMissingLog',verifyToken , uploadMultiple , jobController.addMissingLog);
 router.post('/getMissingLog',verifyToken, jobController.getMissingLog);
+
+//Queries
+router.post('/getQuerie',verifyToken, jobController.getQuerie);
+router.post('/addQuerie',verifyToken , uploadMultiple , jobController.addQuerie);
+
+//Draft
+router.post('/getDraft',verifyToken, jobController.getDraft);
+router.post('/addDraft',verifyToken, jobController.addDraft);
+
+// JobDocument
+router.post('/jobDocumentAction',verifyToken, jobController.jobDocumentAction);
+router.post('/addJobDocument',verifyToken , uploadMultiple , jobController.addJobDocument);
 
 
 

@@ -486,8 +486,11 @@ CREATE TABLE jobs (
     currency INT DEFAULT 0,
     invoice_value DECIMAL(15, 2) DEFAULT NULL,
     invoice_date  DATE DEFAULT NULL,
-    invoice_hours DECIMAL(10, 2) DEFAULT NULL,
+    invoice_hours TIME DEFAULT NULL,
     invoice_remark TEXT DEFAULT NULL,
+    status_type  INT DEFAULT NULL,
+    total_hours TIME DEFAULT NULL,
+    total_hours_status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (account_manager_id) REFERENCES staffs(id),
@@ -620,6 +623,19 @@ CREATE TABLE jobs (
         FOREIGN KEY (missing_log_reviewed_by) REFERENCES staffs(id)
     );
 
+    /*--TABLE:- MISSING LOGS DOCUMNET */
+    CREATE TABLE missing_logs_documents (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        missing_log_id INT NOT NULL,
+        file_name VARCHAR(255) NOT NULL,
+        original_name VARCHAR(255) NOT NULL,
+        file_type VARCHAR(50) NOT NULL,
+        file_size INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (missing_log_id) REFERENCES missing_logs(id)
+    );
+
     
      /*--TABLE:- QUERIES   */  
     CREATE TABLE queries (
@@ -627,17 +643,29 @@ CREATE TABLE jobs (
         job_id INT NOT NULL,
         queries_remaining ENUM('0', '1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
         query_title VARCHAR(100) NOT NULL,
-        reviewed_by INT NOT NULL,
+        reviewed_by ENUM('0', '1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
         missing_queries_prepared_date DATE NOT NULL,
         query_sent_date DATE NOT NULL,
         response_received ENUM('0', '1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
         response VARCHAR(255) NOT NULL,
         final_query_response_received_date DATE NOT NULL,
-        query_document VARCHAR(255) DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (job_id) REFERENCES jobs(id),
-        FOREIGN KEY (reviewed_by) REFERENCES staffs(id)
+        -- FOREIGN KEY (reviewed_by) REFERENCES staffs(id)
+    );
+
+    /*--TABLE:- QUERIES DOCUMNET */
+    CREATE TABLE queries_documents (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        query_id INT NOT NULL,
+        file_name VARCHAR(255) NOT NULL,
+        original_name VARCHAR(255) NOT NULL,
+        file_type VARCHAR(50) NOT NULL,
+        file_size INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (query_id) REFERENCES queries(id)
     );
 
 
@@ -645,7 +673,8 @@ CREATE TABLE jobs (
     CREATE TABLE drafts (
         id INT AUTO_INCREMENT PRIMARY KEY,
         job_id INT NOT NULL,
-        draft_sent_on DATE NOT NULL,
+        draft_sent_on DATE DEFAULT NULL,
+        final_draft_sent_on DATE DEFAULT NULL,
         feedback_received ENUM('0', '1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
         updated_amendment ENUM('1', '2','3','4') NOT NULL DEFAULT '1' COMMENT '1:Amendment, 2: Update ,2: Both ,2: None',
         feedback TEXT,
@@ -662,6 +691,7 @@ CREATE TABLE jobs (
         id INT AUTO_INCREMENT PRIMARY KEY,
         job_id INT NOT NULL,
         file_name VARCHAR(255) NOT NULL,
+        original_name VARCHAR(255) NOT NULL,
         file_type VARCHAR(50) NOT NULL,
         file_size INT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -693,6 +723,27 @@ CREATE TABLE jobs (
     status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+/*--TABLE:- customer source  DOCUMENTS  */
+ CREATE TABLE customer_source (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+/*--TABLE:- customer sub source  DOCUMENTS  */
+ CREATE TABLE customer_sub_source (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_source_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_source_id) REFERENCES customer_source(id)
 );
 
     

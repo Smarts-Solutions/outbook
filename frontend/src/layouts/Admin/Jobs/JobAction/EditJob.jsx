@@ -5,8 +5,10 @@ import { GetAllJabData, UpdateJob, GET_ALL_CHECKLIST } from '../../../../ReduxSt
 import sweatalert from 'sweetalert2';
 import { JobAction } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { JobType } from '../../../../ReduxStore/Slice/Settings/settingSlice'
-
+import {ScrollToViewFirstError} from '../../../../Utils/Comman_function'
 import { Modal, Button } from 'react-bootstrap';
+import {CreateJobErrorMessage} from '../../../../Utils/Common_Message'
+
 const EditJob = () => {
   const location = useLocation()
   const navigate = useNavigate();
@@ -81,6 +83,7 @@ const EditJob = () => {
     InvoiceDate: null,
     InvoiceHours: "",
     InvoiceRemark: "",
+    status_type: null,
   });
 
   const JobDetails = async () => {
@@ -90,7 +93,6 @@ const EditJob = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-
           if (Object.keys(response.data).length > 0) {
             setChecklistId(response.data.tasks?.checklist_id ?? 0);
             setTempChecklistId(response.data.tasks?.checklist_id ?? 0);
@@ -165,6 +167,7 @@ const EditJob = () => {
               InvoiceDate: response.data.invoice_date?.split("T")[0] ?? null,
               InvoiceHours: response.data.invoice_hours ?? "",
               InvoiceRemark: response.data.invoice_remark ?? "",
+              status_type: response.data.status_type ?? null,
             }));
           }
 
@@ -312,47 +315,38 @@ const EditJob = () => {
   }
 
 
-  const fieldErrors = {
-    'AccountManager': 'Please Enter Account Manager',
-    'Customer': 'Please Enter Customer',
-    'Client': 'Please Select Client',
-    'CustomerAccountManager': 'Please Select Customer Account Manager',
-    'Service': 'Please Select Service',
-    'JobType': 'Please Select Job Type',
-    'NumberOfTransactions': 'Please Enter Number Of Transactions less than 1000000',
-    'NumberOfTrialBalanceItems': 'Please Enter Number Of Trial Balance Items less than 5000',
-    'Turnover': 'Please Enter Turnover less than 200000000',
-  };
-
 
   const validate = (name, value, isSubmitting = false) => {
     const newErrors = { ...errors };
     if (isSubmitting) {
-      for (const key in fieldErrors) {
+      for (const key in CreateJobErrorMessage) {
         if (!jobData[key] && key != "NumberOfTransactions" && key != "NumberOfTrialBalanceItems" && key != "Turnover") {
-          newErrors[key] = fieldErrors[key];
+          newErrors[key] = CreateJobErrorMessage[key];
         }
       }
     }
     else {
       if (!value && name != "NumberOfTransactions" && name != "NumberOfTrialBalanceItems" && name != "Turnover") {
-        if (fieldErrors[name]) {
-          newErrors[name] = fieldErrors[name];
+        if (CreateJobErrorMessage[name]) {
+          newErrors[name] = CreateJobErrorMessage[name];
         }
       }
       else if (name == "NumberOfTransactions" && (value > 1000000)) {
-        newErrors[name] = fieldErrors[name];
+        newErrors[name] = CreateJobErrorMessage[name];
       }
       else if (name == "NumberOfTrialBalanceItems" && (value > 5000)) {
-        newErrors[name] = fieldErrors[name];
+        newErrors[name] = CreateJobErrorMessage[name];
       }
       else if (name == "Turnover" && (value > 200000000)) {
-        newErrors[name] = fieldErrors[name];
+        newErrors[name] = CreateJobErrorMessage[name];
       }
       else {
         delete newErrors[name];
       }
     }
+
+    ScrollToViewFirstError(newErrors);
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -412,6 +406,7 @@ const EditJob = () => {
       invoice_date: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.InvoiceDate,
       invoice_hours: formatTime(invoiceTime.hours, invoiceTime.minutes),
       invoice_remark: jobData.EngagementModel == "fte_dedicated_staffing" ? "" : jobData.InvoiceRemark,
+      status_type: jobData.status_type,
       tasks: {
         checklist_id: getChecklistId,
         task: AddTaskArr
@@ -443,19 +438,11 @@ const EditJob = () => {
         });
     }
     else {
-      scrollToFirstError();
+     
     }
   }
 
-  const scrollToFirstError = () => { 
-    const errorField = Object.keys(errors)[0]; 
-
-    const errorElement = document.getElementById(errorField);
-    if (errorElement) {
-      errorElement.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
+  
   const filteredData = AllJobData.data?.engagement_model?.[0]
     ? Object.keys(AllJobData.data.engagement_model[0])
       .filter(key => AllJobData.data.engagement_model[0][key] === "1")

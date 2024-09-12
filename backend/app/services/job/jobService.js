@@ -51,17 +51,19 @@ const jobTimeSheet = async (timeSheet) => {
   else if(action === "updateTaskTimeSheetStatus"){
     return taskTimeSheetModel.updateTaskTimeSheetStatus(timeSheet);
   }
+  else if(action === "updateJobTimeTotalHours"){
+    return taskTimeSheetModel.updateJobTimeTotalHours(timeSheet);
+  }
   else{
     return { status: false, message: 'Error getting Job TimeSheet.' };
   }
   
 }
 
-//addMissingLog
+//MissingLog
 const addMissingLog = async (missingLog) => {
   return taskTimeSheetModel.addMissingLog(missingLog);
 }
-
 const getMissingLog = async (missingLog) => {
   const {action} = missingLog
   if(action === "get"){
@@ -76,6 +78,62 @@ const getMissingLog = async (missingLog) => {
   
 }
 
+//Queries
+const addQuerie = async(querie) => {
+  return taskTimeSheetModel.addQuerie(querie);
+}
+
+const getQuerie = async (querie) => {
+  const {action} = querie
+  if(action === "get"){
+    return taskTimeSheetModel.getQuerie(querie);
+  }
+  else if(action === "getSingleView"){
+    return taskTimeSheetModel.getQuerieSingleView(querie);
+  }
+  else{
+    return { status: false, message: 'Error getting Missing Log.' };
+  }
+}
+
+//Draft
+const getDraft = async (draft) => {
+  const {action} = draft
+  if(action === "get"){
+    return taskTimeSheetModel.getDraft(draft);
+  }
+  else if(action === "getSingleView"){
+    return taskTimeSheetModel.getDraftSingleView(draft);
+  }
+  else{
+    return { status: false, message: 'Error getting Missing Log.' };
+  }
+}
+
+const addDraft = async (draft) => {
+  return taskTimeSheetModel.addDraft(draft);
+}
+
+//JobDocument
+const jobDocumentAction = async (jobDocument) => {
+  const {action} = jobDocument
+  if(action === "get"){
+    return taskTimeSheetModel.getJobDocument(jobDocument);
+  }
+  else if(action === "delete"){
+    return taskTimeSheetModel.deleteJobDocument(jobDocument);
+  }
+  else{
+    return { status: false, message: 'Error getting Job Document.' };
+  }
+
+}
+
+const addJobDocument = async (jobDocument) => {
+  return taskTimeSheetModel.addJobDocument(jobDocument);
+}
+
+
 
 
 module.exports = {
@@ -86,6 +144,12 @@ module.exports = {
   getTaskTimeSheet,
   jobTimeSheet,
   addMissingLog,
-  getMissingLog
+  getMissingLog,
+  getQuerie,
+  addQuerie,
+  getDraft,
+  addDraft,
+  jobDocumentAction,
+  addJobDocument
 
  };

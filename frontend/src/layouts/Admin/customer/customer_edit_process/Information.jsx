@@ -11,6 +11,7 @@ import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
 import {
   PersonRole,
   Country,
+  IncorporationApi,
 } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import {
   GET_CUSTOMER_DATA,
@@ -19,7 +20,7 @@ import {
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 const Information = ({ id, pageStatus }) => {
-  const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
+  const { address, setAddress, next } = useContext(MultiStepFormContext);
   const refs = useRef({});
   const managerSelectRef = useRef(null);
   const dispatch = useDispatch();
@@ -40,6 +41,7 @@ const Information = ({ id, pageStatus }) => {
   const [getAccountMangerIdErr, setAccountMangerIdErr] = useState("");
   const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
   const [contacts1, setContacts1] = useState([]);
+  const [incorporationDataAll, setIncorporationDataAll] = useState([]);
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     tradingName: "",
     tradingAddress: "",
@@ -121,13 +123,12 @@ const Information = ({ id, pageStatus }) => {
     },
   ]);
 
-
-
   useEffect(() => {
     CountryData();
     fetchStaffData();
     GetCustomerDetails();
     CustomerPersonRoleData();
+    incorporationData();
   }, []);
   useEffect(() => {
     Get_Company();
@@ -198,9 +199,9 @@ const Information = ({ id, pageStatus }) => {
             customerDetails.company_details.registered_office_address,
           IncorporationDate:
             customerDetails.company_details &&
-              customerDetails.company_details.incorporation_date
+            customerDetails.company_details.incorporation_date
               ? customerDetails.company_details &&
-              customerDetails.company_details.incorporation_date
+                customerDetails.company_details.incorporation_date
               : "",
           IncorporationIn:
             customerDetails.company_details &&
@@ -252,7 +253,6 @@ const Information = ({ id, pageStatus }) => {
     }
   }, [customerDetails]);
 
-
   useEffect(() => {
     if (getSearchDetails && getSearchDetails.length > 0) {
       setCompanyDetails((prevState) => ({
@@ -265,12 +265,10 @@ const Information = ({ id, pageStatus }) => {
         IncorporationDate: getSearchDetails[0].date_of_creation
           ? getSearchDetails[0].date_of_creation
           : "",
-        IncorporationIn: getSearchDetails[0].description,
+        // IncorporationIn: getSearchDetails[0].description,
       }));
     }
   }, [getSearchDetails]);
-
-
 
   const handleAddContact = () => {
     setContacts([
@@ -304,8 +302,6 @@ const Information = ({ id, pageStatus }) => {
     setContacts(newContacts);
     setErrors(newErrors);
   };
-
-
 
   const handleAddContact1 = () => {
     setContacts1([
@@ -419,7 +415,6 @@ const Information = ({ id, pageStatus }) => {
     setSoleTraderDetails({ ...getSoleTraderDetails, [name]: value });
   };
 
-
   const validate1 = (field, value) => {
     const newErrors = { ...errors1 };
     if (!value) {
@@ -431,18 +426,14 @@ const Information = ({ id, pageStatus }) => {
         newErrors[field] = EDIT_CUSTOMER.ENTER_FIRST_NAME;
       else if (field === "last_name")
         newErrors[field] = EDIT_CUSTOMER.LAST_NAME;
-      else if (field === "email")
-        newErrors[field] = EDIT_CUSTOMER.EMAIL;
+      else if (field === "email") newErrors[field] = EDIT_CUSTOMER.EMAIL;
       else if (field === "residentialAddress")
         newErrors[field] = EDIT_CUSTOMER.RESIDENTIOAL_ADDRESS;
-    }
-    else if (field === "email" && !Email_regex(value)) {
+    } else if (field === "email" && !Email_regex(value)) {
       newErrors[field] = EDIT_CUSTOMER.invalidEmail;
-    }
-    else if (field === "phone" && !/^\d{9,12}$/.test(value)) {
+    } else if (field === "phone" && !/^\d{9,12}$/.test(value)) {
       newErrors[field] = EDIT_CUSTOMER.invalidPhone;
-    }
-    else {
+    } else {
       delete newErrors[field];
     }
 
@@ -451,9 +442,7 @@ const Information = ({ id, pageStatus }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-
   const handleSubmit = async () => {
-
     if (customerType == 1 && ManagerType != "") {
       if (validate1()) {
         const req = {
@@ -496,10 +485,7 @@ const Information = ({ id, pageStatus }) => {
               });
             }
           });
-      }
-      else {
-
-    
+      } else {
         scrollToFirstError(errors1);
       }
     }
@@ -520,8 +506,8 @@ const Information = ({ id, pageStatus }) => {
                 contact.email === ""
                   ? EDIT_CUSTOMER.REQUIRE_EMAIL
                   : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-                    ? ""
-                    : EDIT_CUSTOMER.VALID_EMAIL,
+                  ? ""
+                  : EDIT_CUSTOMER.VALID_EMAIL,
             };
 
             if (
@@ -548,7 +534,8 @@ const Information = ({ id, pageStatus }) => {
             entity_type: getCompanyDetails.EntityType,
             company_status: getCompanyDetails.CompanyStatus,
             company_number: getCompanyDetails.CompanyNumber,
-            registered_office_address: getCompanyDetails.RegisteredOfficeAddress,
+            registered_office_address:
+              getCompanyDetails.RegisteredOfficeAddress,
             incorporation_date: getCompanyDetails.IncorporationDate,
             incorporation_in: getCompanyDetails.IncorporationIn,
             vat_registered: getCompanyDetails.VATRegistered,
@@ -573,13 +560,10 @@ const Information = ({ id, pageStatus }) => {
                 });
               }
             });
-        }
-        else {
-
+        } else {
           scrollToFirstError1(errors);
         }
-      }
-      else {
+      } else {
         scrollToFirstError(errors2);
       }
     }
@@ -601,8 +585,8 @@ const Information = ({ id, pageStatus }) => {
                 contact.email === ""
                   ? EDIT_CUSTOMER.REQUIRE_EMAIL
                   : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-                    ? ""
-                    : EDIT_CUSTOMER.VALID_EMAIL,
+                  ? ""
+                  : EDIT_CUSTOMER.VALID_EMAIL,
             };
 
             if (
@@ -647,23 +631,20 @@ const Information = ({ id, pageStatus }) => {
                 });
               }
             });
-        }
-        else {
+        } else {
           scrollToFirstError1(contactsErrors);
         }
-      }
-      else {
+      } else {
         scrollToFirstError(errors3);
       }
     }
   };
 
   const scrollToFirstError = (errors) => {
-
     const errorField = Object.keys(errors)[0];
     const errorElement = document.getElementById(errorField);
     if (errorElement) {
-      errorElement.scrollIntoView({ behavior: 'smooth' });
+      errorElement.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -673,17 +654,15 @@ const Information = ({ id, pageStatus }) => {
         if (errorObj[field]) {
           const fieldId = `${field}-${index}`;
           const errorElement = document.getElementById(fieldId);
-      
 
           if (errorElement) {
-            errorElement.scrollIntoView({ behavior: 'smooth' });
+            errorElement.scrollIntoView({ behavior: "smooth" });
           }
           return;
         }
       }
     });
   };
-
 
   const handleChange2 = (e) => {
     const { name, value } = e.target;
@@ -699,8 +678,7 @@ const Information = ({ id, pageStatus }) => {
   const validate2 = (name, value) => {
     const newErrors = { ...errors2 };
     if (!value) {
-      if (name === "CompanyName")
-        newErrors[name] = EDIT_CUSTOMER.COMPANY_NAME;
+      if (name === "CompanyName") newErrors[name] = EDIT_CUSTOMER.COMPANY_NAME;
       else if (name === "EntityType")
         newErrors[name] = EDIT_CUSTOMER.ENTITY_TYPE;
       else if (name === "CompanyStatus")
@@ -715,14 +693,12 @@ const Information = ({ id, pageStatus }) => {
         newErrors[name] = EDIT_CUSTOMER.INCORPORATION_IN;
       else if (name === "TradingName")
         newErrors[name] = EDIT_CUSTOMER.ENTER_TRADING_NAME;
-    }
-    else {
+    } else {
       delete newErrors[name];
     }
     setErrors2(newErrors);
     return Object.keys(newErrors).length === 0 ? true : false;
   };
-
 
   const handleChange = (index, field, value) => {
     const newContacts =
@@ -770,8 +746,8 @@ const Information = ({ id, pageStatus }) => {
           value === ""
             ? ""
             : /^\d{9,12}$/.test(value)
-              ? ""
-              : EDIT_CUSTOMER.PHONE_VALIDATION;
+            ? ""
+            : EDIT_CUSTOMER.PHONE_VALIDATION;
         break;
 
       default:
@@ -799,15 +775,13 @@ const Information = ({ id, pageStatus }) => {
         newErrors[name] = EDIT_CUSTOMER.ENTER_TRADING_NAME;
       else if (name === "ClientIndustry")
         newErrors[name] = EDIT_CUSTOMER.SELECT_CLIENT_INDUSTRIES;
-    }
-    else {
+    } else {
       delete newErrors[name];
     }
     setErrors3(newErrors);
     return Object.keys(newErrors).length === 0 ? true : false;
   };
 
-    
   const handleChange4 = (index, field, value) => {
     let newValue = value;
     if (field == EDIT_CUSTOMER.AUTHORISED) {
@@ -860,8 +834,8 @@ const Information = ({ id, pageStatus }) => {
           value === ""
             ? ""
             : /^\d{9,12}$/.test(value)
-              ? ""
-              : EDIT_CUSTOMER.PHONE_VALIDATION;
+            ? ""
+            : EDIT_CUSTOMER.PHONE_VALIDATION;
         break;
 
       default:
@@ -906,6 +880,23 @@ const Information = ({ id, pageStatus }) => {
   const capitalizeFirstLetter = (string) => {
     if (!string) return "";
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+  };
+
+  const incorporationData = async (req) => {
+    const data = { req: { action: "getAll" }, authToken: token };
+    await dispatch(IncorporationApi(data))
+      .unwrap()
+      .then(async (response) => {
+        console.log("response", response);
+        if (response.status) {
+          setIncorporationDataAll(response.data);
+        } else {
+          setIncorporationDataAll([]);
+        }
+      })
+      .catch((error) => {
+        console.log("Error", error);
+      });
   };
 
   return (
@@ -1192,7 +1183,6 @@ const Information = ({ id, pageStatus }) => {
                                     placeholder="Phone Number"
                                     name="phone"
                                     id="phone"
-
                                     value={getSoleTraderDetails.phone}
                                     onChange={(e) => handleChange1(e)}
                                     maxLength={12}
@@ -1261,7 +1251,9 @@ const Information = ({ id, pageStatus }) => {
                   <div className="col-lg-12">
                     <div className="card card_shadow ">
                       <div className="card-header card-header-light-blue  step-card-header align-items-center d-flex">
-                        <h4 className="card-title mb-0 flex-grow-1">Company Information</h4>
+                        <h4 className="card-title mb-0 flex-grow-1">
+                          Company Information
+                        </h4>
                       </div>
                       {/* end card header */}
                       <div className="card-body">
@@ -1276,7 +1268,6 @@ const Information = ({ id, pageStatus }) => {
                                   <input
                                     type="text"
                                     className="form-control"
-
                                     placeholder=" Search Company"
                                     name="SearchCompany"
                                     onChange={(e) =>
@@ -1287,7 +1278,7 @@ const Information = ({ id, pageStatus }) => {
                                     style={{ cursor: "pointer" }}
                                   />
                                   {getAllSearchCompany.length > 0 &&
-                                    showDropdown ? (
+                                  showDropdown ? (
                                     <div className="dropdown-list">
                                       {getAllSearchCompany &&
                                         getAllSearchCompany.map(
@@ -1432,7 +1423,7 @@ const Information = ({ id, pageStatus }) => {
                                   Incorporation in{" "}
                                   <span style={{ color: "red" }}>*</span>{" "}
                                 </label>
-                                <input
+                                {/* <input
                                   type="text"
                                   className="form-control input_bg"
                                   placeholder={EDIT_CUSTOMER.INCORPORATION_IN}
@@ -1440,7 +1431,24 @@ const Information = ({ id, pageStatus }) => {
                                   id="IncorporationIn"
                                   onChange={(e) => handleChange2(e)}
                                   value={getCompanyDetails.IncorporationIn}
-                                />
+                                /> */}
+                                <select
+                                  className="form-select"
+                                  name="IncorporationIn"
+                                  id="IncorporationIn"
+                                  onChange={(e) => handleChange2(e)}
+                                  value={getCompanyDetails.IncorporationIn}
+                                >
+                                  <option value="">
+                                    Please Select Incorporation In
+                                  </option>
+                                  {incorporationDataAll &&
+                                    incorporationDataAll.map((data) => (
+                                      <option key={data.id} value={data.id}>
+                                        {data.name}
+                                      </option>
+                                    ))}
+                                </select>
 
                                 {errors2["IncorporationIn"] && (
                                   <div className="error-text">
@@ -2085,13 +2093,13 @@ const Information = ({ id, pageStatus }) => {
                                           />
                                           {contactsErrors[index]
                                             ?.first_name && (
-                                              <div
-                                                className="error-text"
-                                                style={{ color: "red" }}
-                                              >
-                                                {contactsErrors[index].first_name}
-                                              </div>
-                                            )}
+                                            <div
+                                              className="error-text"
+                                              style={{ color: "red" }}
+                                            >
+                                              {contactsErrors[index].first_name}
+                                            </div>
+                                          )}
                                         </div>
                                       </div>
                                       <div className="col-lg-4">
@@ -2166,16 +2174,16 @@ const Information = ({ id, pageStatus }) => {
                                           </select>
                                           {contactsErrors[index]
                                             ?.customer_contact_person_role_id && (
-                                              <div
-                                                className="error-text"
-                                                style={{ color: "red" }}
-                                              >
-                                                {
-                                                  contactsErrors[index]
-                                                    .customer_contact_person_role_id
-                                                }
-                                              </div>
-                                            )}
+                                            <div
+                                              className="error-text"
+                                              style={{ color: "red" }}
+                                            >
+                                              {
+                                                contactsErrors[index]
+                                                  .customer_contact_person_role_id
+                                              }
+                                            </div>
+                                          )}
                                         </div>
                                       </div>
 

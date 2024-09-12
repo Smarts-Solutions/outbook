@@ -319,7 +319,6 @@ const Engagement = () => {
     setErrors1(newErrors);
     return Object.keys(newErrors).length === 0 ? true : false;
   };
-  
   const validate2 = (name, value) => {
     const newErrors = { ...errors2 };
     if (!value) {
@@ -1085,17 +1084,7 @@ console.log("formState", formState);
                 </div>
               </div>
             </div>
-            <div className="card report-data pricing-box p-0">
-              <div className="card-header step-header-blue">
-                <h4
-                  className="card-title mb-0 flex-grow-1"
-                  style={{ marginBottom: "20px !important" }}
-                >
-                  Additional information
-                </h4>
-              </div>
-  <div className="card-body"></div>
-  </div>
+
             <div className="form__item button__items d-flex justify-content-between">
               <Button
                 className="btn btn-secondary"

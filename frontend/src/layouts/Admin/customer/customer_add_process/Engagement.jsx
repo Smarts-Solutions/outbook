@@ -234,13 +234,6 @@ const Engagement = () => {
 
 
 
- 
-
-  
-
-
-
-
 
   const validate4 = () => {
     const newErrors = [];
@@ -291,6 +284,17 @@ const Engagement = () => {
       });
   }
 
+  const scrollToFirstError = (i) => {
+    const errors = [errors1, errors2, errors3, errors4];
+
+    const errorField = Object.keys(errors[i])[0];
+
+    const errorElement = document.getElementById(errorField);
+    if (errorElement) {
+      errorElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const handleSubmit = async () => {
 
     if (!checkboxStates.some(state => state === 1)) {
@@ -299,11 +303,9 @@ const Engagement = () => {
     }
     const validations = [validateAllFields1, validateAllFields2, validateAllFields3, validate4];
 
-
     for (let i = 0; i < checkboxStates.length; i++) {
-
       if (checkboxStates[i] == 1 && !validations[i]()) {
-
+        scrollToFirstError(i);
         return;
       }
     }
@@ -316,8 +318,6 @@ const Engagement = () => {
       "adhoc_payg_hourly": checkboxStates[2].toString(),
       "customised_pricing": checkboxStates[3].toString(),
     };
-
-
 
     if (checkboxStates[0] === 1) {
       req = {
@@ -475,6 +475,7 @@ const Engagement = () => {
                                       type="text"
                                       className="form-control"
                                       name={field.name}
+                                      id={field.name}
                                       placeholder={field.feeName}
                                       value={formValues1[field.name]}
                                       onChange={(e) => handleChange1(e)}
@@ -520,6 +521,7 @@ const Engagement = () => {
                                       type="text"
                                       className="form-control"
                                       name={field.name}
+                                      id={field.name}
                                       value={formValues2[field.name]}
                                       placeholder={field.feeName}
                                       onChange={handleChange2}
@@ -567,6 +569,7 @@ const Engagement = () => {
                                       type="text"
                                       className="form-control"
                                       name={field.name}
+                                      id={field.name}
                                       value={formValues3[field.name]}
                                       placeholder={field.feeName}
                                       onChange={handleChange3}

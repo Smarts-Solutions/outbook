@@ -8,6 +8,7 @@ import {
   ClientIndustry,
   Country,
   IncorporationApi,
+  customerSourceApi,
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import Modal from "../../../Components/ExtraComponents/Modals/Modal";
@@ -78,6 +79,8 @@ const Setting = () => {
   });
 
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);
+  const [ customerSourceDataDataAll, setCustomerSourceDataAll] = useState([]);
+
   const [addRoleName, setAddRoleName] = useState("");
   const [statusTypeDataAll, setStatusTypeDataAll] = useState({
     loading: true,
@@ -339,6 +342,41 @@ const Setting = () => {
       });
   };
 
+  const customerSourceData = async (req) => {
+    const data = { req: req, authToken: token };
+    await dispatch(customerSourceApi(data))
+      .unwrap()
+      .then(async (response) => {
+        if (req.action == "getAll") {
+          if (response.status) {
+            setCustomerSourceDataAll(response.data);
+          } else {
+            setCustomerSourceDataAll([]);
+          }
+        } else {
+          if (response.status) {
+            sweatalert.fire({
+              title: response.message,
+              icon: "success",
+              timer: 2000,
+            });
+            setTimeout(() => {
+              customerSourceData({ action: "getAll" });
+            }, 2000);
+          } else {
+            sweatalert.fire({
+              title: response.message,
+              icon: "error",
+              timer: 2000,
+            });
+          }
+        }
+      })
+      .catch((error) => {
+        console.log("Error", error);
+      });
+  };
+
   useEffect(() => {
     fetchApiData(tabStatus.current);
   }, [tabStatus.current]);
@@ -374,6 +412,9 @@ const Setting = () => {
         break;
       case "7":
         incorporationData(req);
+        break;
+      case "8":
+        customerSourceData(req);
         break;
       default:
         break;
@@ -490,7 +531,12 @@ const Setting = () => {
   ];
 
   const columnService = [
-    { name: "Service Name", selector: (row) => row.name, sortable: true, width: "70%", },
+    {
+      name: "Service Name",
+      selector: (row) => row.name,
+      sortable: true,
+      width: "70%",
+    },
     {
       name: "Status",
       cell: (row) => (
@@ -713,7 +759,7 @@ const Setting = () => {
       : []),
   ];
 
-  const columnincorporation = [
+   const columnincorporation = [
     { name: "Incorporation Name", selector: (row) => row.name, sortable: true },
     {
       name: "Status",
@@ -754,8 +800,77 @@ const Setting = () => {
     },
   ];
 
+  const columnCoustomerSource = [
+    {
+      name: "Source Name",
+      selector: (row) => row.name,
+      sortable: true,
+      width: "70%",
+    },
+    {
+      name: "Status",
+      cell: (row) => (
+        <div>
+          <span
+            className={`badge ${
+              row.status === "1" ? "bg-success" : "bg-danger"
+            }`}
+          >
+            {row.status === "1" ? "Active" : "Deactive"}
+          </span>
+        </div>
+      ),
+    },
+
+    ...(showSettingUpdateTab || showSettingDeleteTab || showSettingInsertTab
+      ? [
+          {
+            name: "Actions",
+            cell: (row) => (
+              <div>
+                {showSettingUpdateTab && (
+                  <button
+                    className="edit-icon"
+                    onClick={() => handleEdit(row, "8")}
+                  >
+                    {" "}
+                    <i className="ti-pencil" />
+                  </button>
+                )}
+                {showSettingDeleteTab && (
+                  <button
+                    className="delete-icon"
+                    onClick={() => handleDelete(row, "8")}
+                  >
+                    {" "}
+                    <i className="ti-trash" />
+                  </button>
+                )}
+                {showSettingInsertTab && (
+                  <button
+                    className="btn btn-info text-white"
+                    onClick={(e) => handleSubSource(row)}
+                  >
+                    Add Sub Source Type
+                  </button>
+                )}
+              </div>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+            width: "20%",
+          },
+        ]
+      : []),
+  ];
+
   const handleJobType = (row) => {
     navigate("/admin/add/jobtype", { state: { Id: row.id } });
+  };
+
+  const handleSubSource = (row) => {
+    navigate("/admin/add/subSource", { state: { Id: row.id } });
   };
 
   const handleModalChange = (e) => {
@@ -881,12 +996,26 @@ const Setting = () => {
         fields: [
           {
             type: "text",
-            name: "Incorporation ",
-            label: "Incorporation ",
-            placeholder: "Enter Incorporation ",
+            name: "Incorporation",
+            label: "Incorporation",
+            placeholder: "Enter Incorporation",
           },
         ],
         title: " Incorporation",
+        tabStatus: tabStatus,
+      });
+    } else if (tabStatus === "8") {
+      setModalData({
+        ...modalData,
+        fields: [
+          {
+            type: "text",
+            name: "name",
+            label: "Source Name",
+            placeholder: "Enter Source Name",
+          },
+        ],
+        title: "Source",
         tabStatus: tabStatus,
       });
     }
@@ -1093,6 +1222,33 @@ const Setting = () => {
         tabStatus: tabStatus,
         id: data.id,
       });
+    } else if (tabStatus === "8") {
+      setModalData({
+        ...modalData,
+        fields: [
+          {
+            type: "text",
+            name: "name",
+            label: "Source Name",
+            placeholder: "Enter Source Name",
+            value: data.name,
+          },
+          {
+            type: "select",
+            name: "status",
+            label: "Status",
+            placeholder: "Select Status",
+            value: data.status === "1" ? "1" : "0",
+            options: [
+              { label: "Active", value: "1" },
+              { label: "Deactive", value: "0" },
+            ],
+          },
+        ],
+        title: "Coustomer Source",
+        tabStatus: tabStatus,
+        id: data.id,
+      });
     }
 
     //setModalData(data);
@@ -1147,6 +1303,9 @@ const Setting = () => {
       case "7":
         incorporationData(req);
         break;
+      case "8":
+        customerSourceData(req);
+        break;
       default:
         break;
     }
@@ -1200,6 +1359,10 @@ const Setting = () => {
             case "7":
               incorporationData(req);
               break;
+            case "8":
+              customerSourceData(req);
+              break;
+            
             default:
               break;
           }
@@ -1220,6 +1383,7 @@ const Setting = () => {
     { id: "5", label: "Client Industry" },
     { id: "6", label: "Country" },
     { id: "7", label: "Incorporation" },
+    { id: "8", label: "Source" },
   ];
 
   return (
@@ -1374,9 +1538,7 @@ const Setting = () => {
                 </div>
               </div>
             </div>
-            {/* {/ Job Status end /} */}
 
-            {/* {/ Services Start /} */}
             <div
               className={`tab-pane fade ${
                 getShowTabId === "4" ? "show active" : ""
@@ -1409,9 +1571,7 @@ const Setting = () => {
                 </div>
               </div>
             </div>
-            {/* {/ Services end /} */}
 
-            {/* {/ Client Industry Start /} */}
             <div
               className={`tab-pane fade ${
                 getShowTabId === "5" ? "show active" : ""
@@ -1444,9 +1604,7 @@ const Setting = () => {
                 </div>
               </div>
             </div>
-            {/* {/ Client Industry end /} */}
 
-            {/* {/ Country Start /} */}
             <div
               className={`tab-pane fade ${
                 getShowTabId === "6" ? "show active" : ""
@@ -1480,9 +1638,6 @@ const Setting = () => {
               </div>
             </div>
 
-            {/* {/ Country end /} */}
-
-            {/* Incorporation  Start */}
             <div
               className={`tab-pane fade ${
                 getShowTabId === "7" ? "show active" : ""
@@ -1515,19 +1670,49 @@ const Setting = () => {
                 </div>
               </div>
             </div>
-        
+
+            <div
+              className={`tab-pane fade ${
+                getShowTabId === "8" ? "show active" : ""
+              }`}
+            >
+              <div className="report-data">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div className="tab-title">
+                    <h3 className="mt-0">Coustomer Source</h3>
+                  </div>
+                  {!showSettingInsertTab ? null : (
+                    <div>
+                      <button
+                        type="button"
+                        className="btn btn-info text-white float-end"
+                        onClick={(e) => handleAdd(e, "8")}
+                      >
+                        {" "}
+                        <i className="fa fa-plus" /> Add Coustomer Source
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className="datatable-wrapper">
+                  <Datatable
+                    filter={true}
+                    columns={columnCoustomerSource}
+                    data={customerSourceDataDataAll}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-    
+
         <>
-      
           {isModalOpen && (
             <Modal
               modalId="exampleModal3"
               title={
                 isEdit ? "Edit " + modalData.title : "Add " + modalData.title
               }
-          
               fields={modalData.fields}
               onClose={() => {
                 setIsModalOpen(false);

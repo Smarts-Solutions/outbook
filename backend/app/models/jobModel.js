@@ -106,7 +106,7 @@ const getAddJobData = async (job) => {
     JOIN 
          roles ON staffs.role_id = roles.id
     WHERE  
-     staffs.role_id = 20   
+     staffs.role_id = 6   
     ORDER BY 
      staffs.id DESC;
    `;
@@ -276,8 +276,8 @@ async function generateNextUniqueCode() {
 }
 
 const jobAdd = async (job) => {
-
-
+ 
+ 
   const {
     staffCreatedId,
     account_manager_id,
@@ -326,6 +326,23 @@ const jobAdd = async (job) => {
     invoice_remark
   } = job;
 
+  // Set Status type
+  let status_type  = 0
+
+  if(allocated_to > 0){
+    status_type = 3
+  } 
+
+  if(reviewer > 0){
+    status_type = 5
+  } 
+
+  if(reviewer == 0 && allocated_to == 0){
+    status_type = 1
+  }
+
+
+
 
   let UniqueNo = await generateNextUniqueCode()
 
@@ -341,10 +358,10 @@ const jobAdd = async (job) => {
   try {
 
     const query = `
-INSERT INTO jobs (staff_created_id,job_id,account_manager_id,customer_id,client_id,client_job_code,customer_contact_details_id, service_id,job_type_id, budgeted_hours,reviewer, allocated_to,allocated_on,date_received_on,year_end,total_preparation_time, review_time, feedback_incorporation_time,total_time, engagement_model, expected_delivery_date,due_on,submission_deadline, customer_deadline_date, sla_deadline_date,internal_deadline_date, filing_Companies_required, filing_Companies_date,filing_hmrc_required, filing_hmrc_date, opening_balance_required,opening_balance_date, number_of_transaction, number_of_balance_items,turnover, number_of_employees, vat_reconciliation, bookkeeping,processing_type, invoiced, currency, invoice_value, invoice_date,invoice_hours, invoice_remark)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO jobs (staff_created_id,job_id,account_manager_id,customer_id,client_id,client_job_code,customer_contact_details_id, service_id,job_type_id, budgeted_hours,reviewer, allocated_to,allocated_on,date_received_on,year_end,total_preparation_time, review_time, feedback_incorporation_time,total_time, engagement_model, expected_delivery_date,due_on,submission_deadline, customer_deadline_date, sla_deadline_date,internal_deadline_date, filing_Companies_required, filing_Companies_date,filing_hmrc_required, filing_hmrc_date, opening_balance_required,opening_balance_date, number_of_transaction, number_of_balance_items,turnover, number_of_employees, vat_reconciliation, bookkeeping,processing_type, invoiced, currency, invoice_value, invoice_date,invoice_hours, invoice_remark,status_type)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `;
-    const [result] = await pool.execute(query, [staffCreatedId, job_id, account_manager_id, customer_id, client_id, client_job_code, customer_contact_details_id, service_id, job_type_id, budgeted_hours, reviewer, allocated_to, allocated_on, date_received_on, year_end, total_preparation_time, review_time, feedback_incorporation_time, total_time, engagement_model, expected_delivery_date, due_on, submission_deadline, customer_deadline_date, sla_deadline_date, internal_deadline_date, filing_Companies_required, filing_Companies_date, filing_hmrc_required, filing_hmrc_date, opening_balance_required, opening_balance_date, number_of_transaction, number_of_balance_items, turnover, number_of_employees, vat_reconciliation, bookkeeping, processing_type, invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark]);
+    const [result] = await pool.execute(query, [staffCreatedId, job_id, account_manager_id, customer_id, client_id, client_job_code, customer_contact_details_id, service_id, job_type_id, budgeted_hours, reviewer, allocated_to, allocated_on, date_received_on, year_end, total_preparation_time, review_time, feedback_incorporation_time, total_time, engagement_model, expected_delivery_date, due_on, submission_deadline, customer_deadline_date, sla_deadline_date, internal_deadline_date, filing_Companies_required, filing_Companies_date, filing_hmrc_required, filing_hmrc_date, opening_balance_required, opening_balance_date, number_of_transaction, number_of_balance_items, turnover, number_of_employees, vat_reconciliation, bookkeeping, processing_type, invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark,status_type]);
     if (result.insertId > 0) {
       if (tasks.task.length > 0) {
         const job_id = result.insertId;
@@ -426,6 +443,8 @@ const getJobByCustomer = async (job) => {
         clients.trading_name AS client_trading_name,
         jobs.client_job_code AS client_job_code,
         jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
    
         staffs.id AS allocated_id,
         staffs.first_name AS allocated_first_name,
@@ -437,7 +456,9 @@ const getJobByCustomer = async (job) => {
    
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
-        staffs3.last_name AS outbooks_acount_manager_last_name
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+
+        master_status.name AS status
    
         FROM 
         jobs
@@ -457,6 +478,8 @@ const getJobByCustomer = async (job) => {
         staffs AS staffs2 ON jobs.reviewer = staffs2.id
         LEFT JOIN 
         staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
         WHERE 
         jobs.customer_id = customers.id AND 
         jobs.allocated_to = ?
@@ -479,6 +502,9 @@ const getJobByCustomer = async (job) => {
         clients.trading_name AS client_trading_name,
         jobs.client_job_code AS client_job_code,
         jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+
    
         staffs.id AS allocated_id,
         staffs.first_name AS allocated_first_name,
@@ -490,7 +516,9 @@ const getJobByCustomer = async (job) => {
    
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
-        staffs3.last_name AS outbooks_acount_manager_last_name
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+
+        master_status.name AS status
    
         FROM 
         jobs
@@ -510,6 +538,8 @@ const getJobByCustomer = async (job) => {
         staffs AS staffs2 ON jobs.reviewer = staffs2.id
         LEFT JOIN 
         staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
         WHERE 
         jobs.customer_id = customers.id AND 
         jobs.reviewer = ?
@@ -530,6 +560,8 @@ const getJobByCustomer = async (job) => {
         clients.trading_name AS client_trading_name,
         jobs.client_job_code AS client_job_code,
         jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
    
         staffs.id AS allocated_id,
         staffs.first_name AS allocated_first_name,
@@ -541,7 +573,9 @@ const getJobByCustomer = async (job) => {
    
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
-        staffs3.last_name AS outbooks_acount_manager_last_name
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+
+        master_status.name AS status
    
         FROM 
         jobs
@@ -561,6 +595,8 @@ const getJobByCustomer = async (job) => {
         staffs AS staffs2 ON jobs.reviewer = staffs2.id
         LEFT JOIN 
         staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
         WHERE 
         jobs.customer_id = customers.id AND 
         jobs.customer_id = ?
@@ -599,6 +635,9 @@ const getJobByClient = async (job) => {
      clients.trading_name AS client_trading_name,
      jobs.client_job_code AS client_job_code,
      jobs.invoiced AS invoiced,
+     jobs.total_hours AS total_hours,
+     jobs.total_hours_status AS total_hours_status,
+
      staffs.id AS allocated_id,
      staffs.first_name AS allocated_first_name,
      staffs.last_name AS allocated_last_name,
@@ -609,7 +648,9 @@ const getJobByClient = async (job) => {
 
      staffs3.id AS outbooks_acount_manager_id,
      staffs3.first_name AS outbooks_acount_manager_first_name,
-     staffs3.last_name AS outbooks_acount_manager_last_name
+     staffs3.last_name AS outbooks_acount_manager_last_name,
+
+     master_status.name AS status
 
      FROM 
      jobs
@@ -626,7 +667,9 @@ const getJobByClient = async (job) => {
      LEFT JOIN 
      staffs AS staffs2 ON jobs.reviewer = staffs2.id
      LEFT JOIN 
-     staffs AS staffs3 ON jobs.account_manager_id = staffs3.id   
+     staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+     LEFT JOIN 
+     master_status ON master_status.id = jobs.status_type   
      WHERE 
      jobs.client_id = clients.id AND
      jobs.allocated_to = ?
@@ -650,6 +693,9 @@ const getJobByClient = async (job) => {
      clients.trading_name AS client_trading_name,
      jobs.client_job_code AS client_job_code,
      jobs.invoiced AS invoiced,
+     jobs.total_hours AS total_hours,
+     jobs.total_hours_status AS total_hours_status,
+
      staffs.id AS allocated_id,
      staffs.first_name AS allocated_first_name,
      staffs.last_name AS allocated_last_name,
@@ -660,7 +706,9 @@ const getJobByClient = async (job) => {
 
      staffs3.id AS outbooks_acount_manager_id,
      staffs3.first_name AS outbooks_acount_manager_first_name,
-     staffs3.last_name AS outbooks_acount_manager_last_name
+     staffs3.last_name AS outbooks_acount_manager_last_name,
+
+     master_status.name AS status
 
      FROM 
      jobs
@@ -677,7 +725,9 @@ const getJobByClient = async (job) => {
      LEFT JOIN 
      staffs AS staffs2 ON jobs.reviewer = staffs2.id
      LEFT JOIN 
-     staffs AS staffs3 ON jobs.account_manager_id = staffs3.id   
+     staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+     LEFT JOIN 
+     master_status ON master_status.id = jobs.status_type   
      WHERE 
      jobs.client_id = clients.id AND
      jobs.reviewer = ?
@@ -700,6 +750,9 @@ const getJobByClient = async (job) => {
      clients.trading_name AS client_trading_name,
      jobs.client_job_code AS client_job_code,
      jobs.invoiced AS invoiced,
+     jobs.total_hours AS total_hours,
+     jobs.total_hours_status AS total_hours_status,
+
      staffs.id AS allocated_id,
      staffs.first_name AS allocated_first_name,
      staffs.last_name AS allocated_last_name,
@@ -710,7 +763,9 @@ const getJobByClient = async (job) => {
 
      staffs3.id AS outbooks_acount_manager_id,
      staffs3.first_name AS outbooks_acount_manager_first_name,
-     staffs3.last_name AS outbooks_acount_manager_last_name
+     staffs3.last_name AS outbooks_acount_manager_last_name,
+
+     master_status.name AS status
 
      FROM 
      jobs
@@ -727,7 +782,9 @@ const getJobByClient = async (job) => {
      LEFT JOIN 
      staffs AS staffs2 ON jobs.reviewer = staffs2.id
      LEFT JOIN 
-     staffs AS staffs3 ON jobs.account_manager_id = staffs3.id   
+     staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+     LEFT JOIN 
+     master_status ON master_status.id = jobs.status_type   
      WHERE 
      jobs.client_id = clients.id AND
      jobs.client_id = ?
@@ -766,6 +823,8 @@ const getByJobStaffId = async (job) => {
   clients.trading_name AS client_trading_name,
   jobs.client_job_code AS client_job_code,
   jobs.invoiced AS invoiced,
+  jobs.total_hours AS total_hours,
+  jobs.total_hours_status AS total_hours_status,
 
   staffs.id AS allocated_id,
   staffs.first_name AS allocated_first_name,
@@ -777,7 +836,9 @@ const getByJobStaffId = async (job) => {
 
   staffs3.id AS outbooks_acount_manager_id,
   staffs3.first_name AS outbooks_acount_manager_first_name,
-  staffs3.last_name AS outbooks_acount_manager_last_name
+  staffs3.last_name AS outbooks_acount_manager_last_name,
+
+  master_status.name AS status
 
   FROM 
   jobs
@@ -799,6 +860,8 @@ const getByJobStaffId = async (job) => {
   staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
   LEFT JOIN 
   staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+  LEFT JOIN
+  master_status ON master_status.id = jobs.status_type
  WHERE 
   jobs.staff_created_id = ? OR 
   jobs.allocated_to = ? OR 
@@ -872,12 +935,15 @@ const getJobById = async (job) => {
      jobs.bookkeeping AS bookkeeping,
      jobs.processing_type AS processing_type,
      jobs.invoiced AS invoiced,
+     jobs.total_hours AS total_hours,
+     jobs.total_hours_status AS total_hours_status,
      countries.id AS currency_id,
      countries.currency AS currency,
      jobs.invoice_value AS invoice_value,
      DATE_FORMAT(jobs.invoice_date, '%Y-%m-%d') AS invoice_date,
      jobs.invoice_hours AS invoice_hours,
      jobs.invoice_remark AS invoice_remark,
+     jobs.status_type AS status_type,
      client_job_task.checklist_id AS checklist_id,
      checklist_tasks.budgeted_hour AS task_budgeted_hour,
      task.id AS task_id,
@@ -982,12 +1048,15 @@ const getJobById = async (job) => {
         bookkeeping: rows[0].bookkeeping,
         processing_type: rows[0].processing_type,
         invoiced: rows[0].invoiced,
+        total_hours: rows[0].total_hours,
+        total_hours_status: rows[0].total_hours_status,
         currency_id: rows[0].currency_id,
         currency: rows[0].currency,
         invoice_value: rows[0].invoice_value,
         invoice_date: rows[0].invoice_date,
         invoice_hours: rows[0].invoice_hours,
         invoice_remark: rows[0].invoice_remark,
+        status_type: rows[0].status_type,
         tasks: {
           checklist_id: rows[0].checklist_id,
           task: tasks
@@ -1008,8 +1077,8 @@ const getJobById = async (job) => {
 }
 
 const jobUpdate = async (job) => {
-
-
+  
+ 
   const {
     job_id, // Assuming job_id is provided for the update
     account_manager_id,
@@ -1055,19 +1124,45 @@ const jobUpdate = async (job) => {
     invoice_value,
     invoice_date,
     invoice_hours,
-    invoice_remark
+    invoice_remark,
+    status_type
   } = job;
+
+ 
 
 
   const [ExistCustomer] = await pool.execute('SELECT trading_name FROM customers WHERE id = ?', [customer_id]);
   const [ExistClient] = await pool.execute('SELECT trading_name FROM clients WHERE id = ?', [client_id]);
-  const [ExistJob] = await pool.execute('SELECT job_id FROM jobs WHERE id = ?', [job_id]);
+  const [ExistJob] = await pool.execute('SELECT job_id ,status_type ,allocated_to ,reviewer FROM jobs WHERE id = ?', [job_id]);
 
   const lastCode = ExistJob[0].job_id.slice(ExistJob[0].job_id.lastIndexOf('_') + 1);
 
   const firstThreeLettersexistCustomerName = ExistCustomer[0].trading_name.substring(0, 3);
   const firstThreeLettersexistClientName = ExistClient[0].trading_name.substring(0, 3);
   const exit_job_id = firstThreeLettersexistCustomerName + "_" + firstThreeLettersexistClientName + "_" + lastCode;
+
+
+  let status_type_update = status_type;
+  if(status_type == null || status_type == 0 || status_type == 1){
+    if(allocated_to > 0){
+      status_type_update = 3
+    } 
+  
+    if(reviewer > 0){
+      status_type_update = 5
+    } 
+  }else{
+    if(status_type == 3){
+      if(reviewer > 0  && ExistJob[0].reviewer != 0){
+        status_type_update = 5
+      }
+     }else if(status_type == 5){
+      if(allocated_to > 0 && ExistJob[0].allocated_to != 0){
+      status_type_update = 3
+      }
+     }
+  }
+
 
   try {
     const query = `
@@ -1080,7 +1175,7 @@ const jobUpdate = async (job) => {
              filing_Companies_required = ?, filing_Companies_date = ?, filing_hmrc_required = ?, filing_hmrc_date = ?, 
              opening_balance_required = ?, opening_balance_date = ?, number_of_transaction = ?, number_of_balance_items = ?, 
              turnover = ?, number_of_employees = ?, vat_reconciliation = ?, bookkeeping = ?, processing_type = ?, 
-             invoiced = ?, currency = ?, invoice_value = ?, invoice_date = ?, invoice_hours = ?, invoice_remark = ?
+             invoiced = ?, currency = ?, invoice_value = ?, invoice_date = ?, invoice_hours = ?, invoice_remark = ?,status_type = ?
          WHERE id = ?
        `;
     const [result] = await pool.execute(query, [
@@ -1092,7 +1187,7 @@ const jobUpdate = async (job) => {
       filing_Companies_required, filing_Companies_date, filing_hmrc_required, filing_hmrc_date,
       opening_balance_required, opening_balance_date, number_of_transaction, number_of_balance_items,
       turnover, number_of_employees, vat_reconciliation, bookkeeping, processing_type,
-      invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark, job_id
+      invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark, status_type_update,job_id
     ]);
 
     if (result.affectedRows > 0) {
