@@ -432,8 +432,8 @@ const Service = () => {
                       <th scope="col" style={{ width: 50 }}>
                         <div className="form-check"></div>
                       </th>
-                      <th>Service Name</th>
-                      <th width="100"></th>
+                      <th style={{width:'70%'}}>Service Name</th>
+                      {/* <th width="100"></th> */}
                       <th className="">Action</th>
                     </tr>
                   </thead>
