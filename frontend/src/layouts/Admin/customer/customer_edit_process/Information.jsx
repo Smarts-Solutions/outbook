@@ -20,7 +20,7 @@ import {
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 const Information = ({ id, pageStatus }) => {
-  const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
+  const { address, setAddress, next } = useContext(MultiStepFormContext);
   const refs = useRef({});
   const managerSelectRef = useRef(null);
   const dispatch = useDispatch();

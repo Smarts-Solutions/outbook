@@ -7,19 +7,14 @@ import MultiStepFormContext from "./MultiStepFormContext";
 import { EDIT_CUSTOMER } from "../../../../Utils/Common_Message";
 import { Email_regex } from "../../../../Utils/Common_regex";
 import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
-import {
-  PersonRole,
-  Country,
-  IncorporationApi
-} from "../../../../ReduxStore/Slice/Settings/settingSlice";
-import {
-  AddCustomer,
+import { PersonRole,Country,IncorporationApi} from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import { AddCustomer,
   GetAllCompany,
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 
 const Information = ({ id, pageStatus }) => {
-  const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
+  const { address, setAddress, next } = useContext(MultiStepFormContext);
   const refs = useRef({});
   const managerSelectRef = useRef(null);
   const dispatch = useDispatch();

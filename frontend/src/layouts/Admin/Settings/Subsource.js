@@ -4,7 +4,7 @@ import { customerSubSourceApi } from "../../../ReduxStore/Slice/Settings/setting
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import Modal from "../../../Components/ExtraComponents/Modals/Modal";
 import sweatalert from "sweetalert2";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useFormik } from "formik";
 
 const Setting = () => {
