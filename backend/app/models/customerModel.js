@@ -376,11 +376,14 @@ const createCustomer = async (customer) => {
 };
 
 const getCustomer = async (customer) => {
-    const { staff_id } = customer
+    const { staff_id } = customer;
+   console.log("staff_id ",staff_id)
     const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "'+staff_id+'" LIMIT 1');
     
     let result = []
     if(rows.length>0){
+
+        // Allocated to
         if(rows[0].role_id == 3){
 
             const query = `
@@ -425,7 +428,97 @@ const getCustomer = async (customer) => {
             result = resultAllocated
          
         }
-       else if(rows[0].role_id == 6){
+        // Account Manger
+        else if(rows[0].role_id == 4){
+
+            const query = `
+            SELECT  
+            customers.id AS id,
+            customers.customer_type AS customer_type,
+            customers.staff_id AS staff_id,
+            customers.account_manager_id AS account_manager_id,
+            customers.trading_name AS trading_name,
+            customers.customer_code AS customer_code,
+            customers.trading_address AS trading_address,
+            customers.vat_registered AS vat_registered,
+            customers.vat_number AS vat_number,
+            customers.website AS website,
+            customers.form_process AS form_process,
+            customers.created_at AS created_at,
+            customers.updated_at AS updated_at,
+            customers.status AS status,
+            staff1.first_name AS staff_firstname, 
+            staff1.last_name AS staff_lastname,
+            staff2.first_name AS account_manager_firstname, 
+            staff2.last_name AS account_manager_lastname,
+            customer_company_information.company_name AS company_name,
+            customer_company_information.company_number AS company_number
+        FROM 
+            customers
+        JOIN 
+            jobs ON jobs.customer_id = customers.id   
+        JOIN 
+            staffs AS staff1 ON customers.staff_id = staff1.id
+        JOIN 
+            staffs AS staff2 ON customers.account_manager_id = staff2.id
+        LEFT JOIN 
+            customer_company_information ON customers.id = customer_company_information.customer_id
+        WHERE jobs.account_manager_id = ?   
+        GROUP BY 
+        jobs.customer_id
+        ORDER BY 
+            customers.id DESC;
+            `;
+            const [resultAllocated] = await pool.execute(query, [staff_id]);
+            result = resultAllocated;
+
+            console.log("resultAllocated",resultAllocated.length )
+            if(resultAllocated.length === 0){
+                const query = `
+            SELECT  
+            customers.id AS id,
+            customers.customer_type AS customer_type,
+            customers.staff_id AS staff_id,
+            customers.account_manager_id AS account_manager_id,
+            customers.trading_name AS trading_name,
+            customers.customer_code AS customer_code,
+            customers.trading_address AS trading_address,
+            customers.vat_registered AS vat_registered,
+            customers.vat_number AS vat_number,
+            customers.website AS website,
+            customers.form_process AS form_process,
+            customers.created_at AS created_at,
+            customers.updated_at AS updated_at,
+            customers.status AS status,
+            staff1.first_name AS staff_firstname, 
+            staff1.last_name AS staff_lastname,
+            staff2.first_name AS account_manager_firstname, 
+            staff2.last_name AS account_manager_lastname,
+            customer_company_information.company_name AS company_name,
+            customer_company_information.company_number AS company_number
+        FROM 
+            customers
+        JOIN 
+            customer_services ON customer_services.customer_id = customers.id
+        JOIN 
+            customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
+        JOIN 
+            staffs AS staff1 ON customers.staff_id = staff1.id
+        JOIN 
+            staffs AS staff2 ON customers.account_manager_id = staff2.id
+        LEFT JOIN 
+            customer_company_information ON customers.id = customer_company_information.customer_id
+        WHERE customer_service_account_managers.account_manager_id = ?
+        ORDER BY 
+        customers.id DESC;
+            `;
+            const [resultAllocated] = await pool.execute(query, [staff_id]);
+            result = resultAllocated;
+            }
+         
+        }
+        // Reviewer
+        else if(rows[0].role_id == 6){
 
             const query = `
             SELECT  
