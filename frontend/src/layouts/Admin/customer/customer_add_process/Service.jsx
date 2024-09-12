@@ -13,6 +13,7 @@ import {
   JobType,
   GETTASKDATA,
 } from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import Swal from "sweetalert2";
 
 const Service = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
@@ -185,9 +186,13 @@ const Service = () => {
   };
 
   const handleSubmit = async (values) => {
-    // Check if services are selected
+    
     if (services.length === 0) {
-      alert("Please select services");
+      Swal.fire({
+        icon: "error",
+        title: "Please select services"
+      });
+
       return;
     }
 

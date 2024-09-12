@@ -211,7 +211,12 @@ const Service = () => {
 
   const handleSubmit = async (values) => {
     if (services.length === 0) {
-      alert("Please add at least one Service.");
+    
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Please select at least one service"
+      });
       return;
     }
 
@@ -404,10 +409,9 @@ const Service = () => {
   };
 
   const handleDownload = () => {
-    // Path to the file in the public directory
+   
     const fileUrl = "/Task.xlsx";
 
-    // Create an anchor element and trigger a download
     const link = document.createElement("a");
     link.href = fileUrl;
     link.setAttribute("download", "Task.xlsx");
@@ -418,16 +422,12 @@ const Service = () => {
 
   const handleClearFile = () => {
     setFileName("No file selected");
-    // Clear the file input
+
     document.getElementById("uploadButton").value = null;
   };
 
-  console.log("filteredData", filteredData);
-  console.log("getManager", getManager);
-  console.log("searchValue", searchValue);
-
   const handleSearchChange = (e) => {
-    console.log("e.target.value", e.target.value);
+ 
     setSearchValue(e.target.value);
   };
 

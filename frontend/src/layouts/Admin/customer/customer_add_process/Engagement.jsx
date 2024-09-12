@@ -5,9 +5,8 @@ import MultiStepFormContext from "./MultiStepFormContext";
 import { JobType } from '../../../../ReduxStore/Slice/Settings/settingSlice'
 import { useDispatch } from 'react-redux';
 import { FTEDedicatedErrorMessages, PercentageModelErrorMessages, AdhocPAYGHourlyErrorMessages } from '../../../../Utils/Common_Message';
-
 import { ADD_SERVICES_CUSTOMERS } from '../../../../ReduxStore/Slice/Customer/CustomerSlice';
-
+import Swal from "sweetalert2";
 
 const Engagement = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
@@ -298,7 +297,11 @@ const Engagement = () => {
   const handleSubmit = async () => {
 
     if (!checkboxStates.some(state => state === 1)) {
-      alert("Please select at least one option.");
+   
+      Swal.fire({
+        icon: 'error',
+        title: 'Please select at least one option.',
+      });
       return;
     }
     const validations = [validateAllFields1, validateAllFields2, validateAllFields3, validate4];
