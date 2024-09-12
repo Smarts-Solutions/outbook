@@ -25,8 +25,8 @@ const ClientList = () => {
       location.state.route == "Checklist"
       ? "checklist"
       : location.state.route == "job"
-      ? "job"
-      : "client"
+        ? "job"
+        : "client"
   );
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -82,18 +82,18 @@ const ClientList = () => {
 
     {
       name: "Client Code (cli+CustName+ClientName+UniqueNo)",
-      selector: (row) => row.client_code,
+      selector: (row) => row.client_code || "-",
       sortable: true,
     },
     {
       name: "Client Type",
       selector: (row) =>
-        row.client_type_name == null ? "" : row.client_type_name,
+        row.client_type_name == null ? "-" : row.client_type_name,
       sortable: true,
       width: "200px",
     },
-    { name: "Email Address", selector: (row) => row.email, sortable: true,width:'250px' },
-    { name: "Phone", selector: (row) => row.phone, sortable: true },
+    { name: "Email Address", selector: (row) => row.email || "-", sortable: true, width: '250px' },
+    { name: "Phone", selector: (row) => row.phone || "-", sortable: true },
     {
       name: "Status",
       selector: (row) => (row.status == "1" ? "Active" : "Deactive"),
@@ -141,7 +141,7 @@ const ClientList = () => {
 
     {
       name: "Job Type",
-      selector: (row) => row.job_type_name,
+      selector: (row) => row.job_type_name || "-",
       sortable: true,
     },
     {
@@ -149,12 +149,12 @@ const ClientList = () => {
       selector: (row) =>
         row.account_manager_officer_first_name +
         " " +
-        row.account_manager_officer_last_name,
+        row.account_manager_officer_last_name || "-",
       sortable: true,
     },
     {
       name: "Client Job Code",
-      selector: (row) => row.client_job_code,
+      selector: (row) => row.client_job_code || "-",
       sortable: true,
     },
     {
@@ -162,21 +162,21 @@ const ClientList = () => {
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
         " " +
-        row.outbooks_acount_manager_last_name,
+        row.outbooks_acount_manager_last_name || "-",
       sortable: true,
     },
     {
       name: "Allocated To",
       selector: (row) =>
-        row.allocated_first_name + " " + row.allocated_last_name,
+        row.allocated_first_name==null ? "-" :  row.allocated_first_name  + " " + row.allocated_last_name==null ? "-" : row.allocated_last_name,
       sortable: true,
     },
     {
       name: "Timesheet",
       selector: (row) =>
-      row.total_hours_status =="1" && row.total_hours != null ?
-      row.total_hours.split(":")[0]+"h "+row.total_hours.split(":")[1]+"m"
-      :"",
+        row.total_hours_status == "1" && row.total_hours != null ?
+          row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
+          : "-",
       sortable: true,
     },
     {
@@ -188,9 +188,9 @@ const ClientList = () => {
     {
       name: "Status",
       selector: (row) =>
-      row.status ==null||row.status==0?"To Be Started - Not Yet Allocated Internally":row.status,
+        row.status == null || row.status == 0 ? "To Be Started - Not Yet Allocated Internally" : row.status,
       sortable: true,
-      width:"325px"
+      width: "325px"
     },
 
     {
@@ -233,9 +233,10 @@ const ClientList = () => {
       selector: (row) => row.service_name,
       sortable: true,
     },
-    { name: "Job Type",
-       selector: (row) => row.job_type_type, sortable: true ,
-    width: "120px"
+    {
+      name: "Job Type",
+      selector: (row) => row.job_type_type, sortable: true,
+      width: "120px"
     }
     ,
     {
@@ -366,12 +367,12 @@ const ClientList = () => {
                 checklists_id: item.checklists_id,
                 client_type_type: item.checklists_client_type_id.split(",").map(id => {
                   let matchedItem = Array.find(item => item.id === Number(id));
-                  return matchedItem ? matchedItem.name : null; 
-                }).filter(name => name !== null).join(", ") 
+                  return matchedItem ? matchedItem.name : null;
+                }).filter(name => name !== null).join(", ")
               };
             });
 
-        
+
             setCheckList(data);
             setCheckList1(data);
           } else {
@@ -498,9 +499,8 @@ const ClientList = () => {
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
                       <button
-                        className={`nav-link ${
-                          activeTab === tab.id ? "active" : ""
-                        }`}
+                        className={`nav-link ${activeTab === tab.id ? "active" : ""
+                          }`}
                         id={`${tab.id}-tab`}
                         data-bs-toggle="pill"
                         data-bs-target={`#${tab.id}`}
@@ -518,9 +518,9 @@ const ClientList = () => {
               </div>
               <div className="col-md-4 col-auto">
                 {activeTab === "client" ||
-                activeTab === "checklist" ||
-                activeTab === "" ||
-                activeTab === "job" ? (
+                  activeTab === "checklist" ||
+                  activeTab === "" ||
+                  activeTab === "job" ? (
                   <>
                     <div
                       className="btn btn-info text-white float-end blue-btn"
@@ -528,16 +528,16 @@ const ClientList = () => {
                         activeTab === "client"
                           ? handleAddClient
                           : activeTab === "checklist"
-                          ? handleClick
-                          : handleAddJob
+                            ? handleClick
+                            : handleAddJob
                       }
                     >
                       <i className="fa fa-plus pe-1" />
                       {activeTab === "client"
                         ? "Add Client"
                         : activeTab === "checklist"
-                        ? "Add Checklist"
-                        : "Create Job"}
+                          ? "Add Checklist"
+                          : "Create Job"}
                     </div>
                     <div
                       className="btn btn-info text-white float-end blue-btn"
@@ -557,9 +557,8 @@ const ClientList = () => {
         {tabs1.map((tab) => (
           <div
             key={tab.key}
-            className={`tab-pane fade ${
-              activeTab == tab.key ? "show active" : ""
-            }`}
+            className={`tab-pane fade ${activeTab == tab.key ? "show active" : ""
+              }`}
             id={tab.key}
             role="tabpanel"
             aria-labelledby={`${tab.key}-tab`}

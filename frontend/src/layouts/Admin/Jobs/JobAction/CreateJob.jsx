@@ -5,6 +5,8 @@ import { GetAllJabData, AddAllJobType, GET_ALL_CHECKLIST } from '../../../../Red
 import sweatalert from 'sweetalert2';
 import { JobType } from '../../../../ReduxStore/Slice/Settings/settingSlice'
 import { Modal, Button } from 'react-bootstrap';
+import {ScrollToViewFirstError} from '../../../../Utils/Comman_function'
+import {CreateJobErrorMessage} from '../../../../Utils/Common_Message'
 
 const CreateJob = () => {
     const location = useLocation();
@@ -121,15 +123,15 @@ const CreateJob = () => {
 
 
     const getAllChecklist = async () => {
-        if(
+        if (
             AllJobData?.data?.client?.[0]?.client_id &&
             jobData?.Service &&
             AllJobData?.data?.customer?.customer_id &&
             jobData?.JobType
         ) {
 
-            const req = { action: "getByServiceWithJobType", service_id: jobData.Service, customer_id: AllJobData?.data?.customer?.customer_id, job_type_id: jobData.JobType,clientId:AllJobData?.data?.client[0]?.client_id }
-    
+            const req = { action: "getByServiceWithJobType", service_id: jobData.Service, customer_id: AllJobData?.data?.customer?.customer_id, job_type_id: jobData.JobType, clientId: AllJobData?.data?.client[0]?.client_id }
+
             const data = { req: req, authToken: token }
             await dispatch(GET_ALL_CHECKLIST(data))
                 .unwrap()
@@ -154,7 +156,7 @@ const CreateJob = () => {
 
     useEffect(() => {
         getAllChecklist()
-    }, [jobData.JobType,AllJobData?.data]);
+    }, [jobData.JobType, AllJobData?.data]);
 
     const GetJobType = async () => {
         const req = { action: "get", service_id: jobData.Service }
@@ -232,49 +234,41 @@ const CreateJob = () => {
         validate(name, value);
     }
 
-    const fieldErrors = {
-        'AccountManager': 'Please Enter Account Manager',
-        'Customer': 'Please Enter Customer',
-        'Client': 'Please Select Client',
-        'CustomerAccountManager': 'Please Select Customer Account Manager',
-        'Service': 'Please Select Service',
-        'JobType': 'Please Select Job Type',
-        'NumberOfTransactions': 'Please Enter Number Of Transactions less than 1000000',
-        'NumberOfTrialBalanceItems': 'Please Enter Number Of Trial Balance Items less than 5000',
-        'Turnover': 'Please Enter Turnover less than 200000000',
-
-    };
+  
 
     const validate = (name, value, isSubmitting = false) => {
         const newErrors = { ...errors };
 
         if (isSubmitting) {
-            for (const key in fieldErrors) {
+            for (const key in CreateJobErrorMessage) {
                 if (!jobData[key] && key != "NumberOfTransactions" && key != "NumberOfTrialBalanceItems" && key != "Turnover") {
-                    newErrors[key] = fieldErrors[key];
+                    newErrors[key] = CreateJobErrorMessage[key];
                 }
             }
         }
-        
+
         else {
             if (!value && name != "NumberOfTransactions" && name != "NumberOfTrialBalanceItems" && name != "Turnover") {
-                if (fieldErrors[name]) {
-                    newErrors[name] = fieldErrors[name];
+                if (CreateJobErrorMessage[name]) {
+                    newErrors[name] = CreateJobErrorMessage[name];
                 }
             }
             else if (name == "NumberOfTransactions" && (value > 1000000)) {
-                newErrors[name] = fieldErrors[name];
+                newErrors[name] = CreateJobErrorMessage[name];
             }
             else if (name == "NumberOfTrialBalanceItems" && (value > 5000)) {
-                newErrors[name] = fieldErrors[name];
+                newErrors[name] = CreateJobErrorMessage[name];
             }
             else if (name == "Turnover" && (value > 200000000)) {
-                newErrors[name] = fieldErrors[name];
+                newErrors[name] = CreateJobErrorMessage[name];
             }
             else {
                 delete newErrors[name];
             }
         }
+
+        ScrollToViewFirstError(newErrors);
+        
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -368,6 +362,7 @@ const CreateJob = () => {
         setIsSubmitted(true);
         const isValid = validateAllFields();
 
+
         if (isValid) {
             await dispatch(AddAllJobType(data))
                 .unwrap()
@@ -392,19 +387,11 @@ const CreateJob = () => {
                 });
         }
         else {
-            scrollToFirstError();
+
+ 
         }
     }
-
-    const scrollToFirstError = () => { 
-        const errorField = Object.keys(errors)[0]; 
  
-        const errorElement = document.getElementById(errorField);
-        if (errorElement) {
-          errorElement.scrollIntoView({ behavior: 'smooth' });
-        }
-      };
-
     const filteredData = AllJobData.data?.engagement_model?.[0]
         ? Object.keys(AllJobData.data.engagement_model[0])
             .filter(key => AllJobData.data.engagement_model[0][key] === "1")
@@ -575,7 +562,7 @@ const CreateJob = () => {
 
                                                                             <div className="col-lg-4">
                                                                                 <label className="form-label">Client</label>
-                                                                                
+
                                                                                 <select className="form-select"
                                                                                     name="Client" id='Client' onChange={HandleChange} value={jobData.Client}>
                                                                                     <option value="">Select Client</option>
@@ -584,7 +571,7 @@ const CreateJob = () => {
                                                                                     ))
                                                                                     }
                                                                                 </select>
-                                                                               
+
                                                                                 {errors['Client'] && (
                                                                                     <div className="error-text">{errors['Client']}</div>
                                                                                 )}
@@ -630,9 +617,9 @@ const CreateJob = () => {
                                                                     <div className="col-lg-4">
                                                                         <label className="form-label">Service</label>
                                                                         <select className="form-select"
-                                                                            name="Service" id='Service' onChange={HandleChange} value={jobData.Service} 
+                                                                            name="Service" id='Service' onChange={HandleChange} value={jobData.Service}
                                                                             disabled={jobData.Client == "" ? true : false}
-                                                                            >
+                                                                        >
                                                                             <option value="">Select Service</option>
                                                                             {
 
@@ -677,7 +664,7 @@ const CreateJob = () => {
                                                                                     type="text"
                                                                                     className="form-control"
                                                                                     placeholder="Hours"
-                                                                                   
+
                                                                                     onChange={(e) => {
                                                                                         const value = e.target.value;
                                                                                         if (value === '' || Number(value) >= 0) {
@@ -1394,7 +1381,7 @@ const CreateJob = () => {
                                                                         <div className="col-sm-auto" >
                                                                             <button className="btn btn-secondary float-end blue-btn" disabled={getChecklistId == ""}
                                                                                 onClick={() => setShowAddJobModal(true)}>
-                                                                                 <i className="fa fa-plus pe-1" />  Add Task
+                                                                                <i className="fa fa-plus pe-1" />  Add Task
                                                                             </button>
                                                                         </div>
                                                                     </div>
@@ -1421,7 +1408,7 @@ const CreateJob = () => {
                                                                                                     <tr className="">
                                                                                                         <td>{checklist.task_name} </td>
 
-                                                                                                        <td> {checklist.budgeted_hour.split(":")[0]}h {" "+checklist.budgeted_hour.split(":")[1]}m </td>
+                                                                                                        <td> {checklist.budgeted_hour.split(":")[0]}h {" " + checklist.budgeted_hour.split(":")[1]}m </td>
                                                                                                         <td>
 
                                                                                                             <div className="add" >

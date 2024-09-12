@@ -101,6 +101,18 @@ export const AddMissionLogErros = {
   'status': 'Status is required',
 }
 
+export const CreateJobErrorMessage = {
+  'AccountManager': 'Please Enter Account Manager',
+  'Customer': 'Please Enter Customer',
+  'Client': 'Please Select Client',
+  'CustomerAccountManager': 'Please Select Customer Account Manager',
+  'Service': 'Please Select Service',
+  'JobType': 'Please Select Job Type',
+  'NumberOfTransactions': 'Please Enter Number Of Transactions less than 1000000',
+  'NumberOfTrialBalanceItems': 'Please Enter Number Of Trial Balance Items less than 5000',
+  'Turnover': 'Please Enter Turnover less than 200000000',
+}
+ 
 const fieldErrors = {
   AccountManager: "Please Enter Account Manager",
   Customer: "Please Enter Customer",

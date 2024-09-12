@@ -247,8 +247,7 @@ const TaskTimesheet = () => {
         btn_name="Save"
         hideBtn={false}
         handleClose={() => {
-          setAddjobtimesheet(false);
-          // formik.resetForm();
+          setAddjobtimesheet(false); 
         }}
         Submit_Cancel_Function={() => setAddjobtimesheet(false)}
         Submit_Function={()=>handleSubmit("AddTimesheet")}
@@ -262,14 +261,11 @@ const TaskTimesheet = () => {
                   type="number"
                   className="form-control"
                   placeholder="Hours"
+                  id="budgetedHours"
+                  name="budgetedHours"
                   defaultValue=""
                   disabled
-                  onChange={(e) =>
-                    setBudgetedTime((prevBudgetedTime) => ({
-                      ...prevBudgetedTime,
-                      hours: e.target.value
-                    }))
-                  }
+                  // onChange={(e) => handleChange(e)}  
                   value={BudgetedTime.hours}
                 />
                 <input
@@ -277,6 +273,8 @@ const TaskTimesheet = () => {
                   className="form-control"
                   placeholder="Minutes"
                   defaultValue=""
+                  id="budgetedMinutes"
+                  name="budgetedMinutes"
                   disabled
                   onChange={(e) => {
                     const value = e.target.value;
@@ -550,8 +548,7 @@ const TaskTimesheet = () => {
                         <div className="input-group">
                           <input
                             type="text"
-                            className="form-control"
-
+                            className="form-control" 
                             aria-label="Recipient's username"
                             aria-describedby="basic-addon2"
                             onChange={(e) => setTotalTime({ ...TotalTime, hours: e.target.value })}
