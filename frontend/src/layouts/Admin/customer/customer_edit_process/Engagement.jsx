@@ -464,7 +464,7 @@ const Engagement = () => {
   const customerSubSourceData = async () => {
     const req = {
       action: "getAll",
-      customer_source_id: 4,
+      customer_source_id: formState1.customerSource,
     };
     const data = { req: req, authToken: token };
     await dispatch(customerSubSourceApi(data))
@@ -589,8 +589,7 @@ const Engagement = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log("name", name);
-    console.log("value", value);
+    
    
     setFormState1(({
         ...formState1,
@@ -627,7 +626,6 @@ const Engagement = () => {
     return Object.keys(errors).length === 0; // Return true if no errors
   };
 
-  console.log("formState1", formState1);
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
