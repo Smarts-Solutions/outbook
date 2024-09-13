@@ -101,7 +101,6 @@ const Service = () => {
 
   useEffect(() => {
     if (searchValue.trim()) {
-    
       setFilteredData(
         staffDataAll.data.filter((data) =>
           data.first_name.toLowerCase().includes(searchValue.toLowerCase())
@@ -206,11 +205,10 @@ const Service = () => {
 
   const handleSubmit = async (values) => {
     if (services.length === 0) {
-    
       Swal.fire({
         icon: "error",
         title: "Oops...",
-        text: "Please select at least one service"
+        text: "Please select at least one service",
       });
       return;
     }
@@ -315,31 +313,32 @@ const Service = () => {
 
   const TaskUpdate = async (e, id, serviceId) => {
     if (e.target.files.length > 0) {
-      if (e.target.files[0].name !== "Task.xlsx") {
+      // ONLY xlsx file is allowed
+      if (!e.target.files[0].name.endsWith(".xlsx")) {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: "Please upload the correct file.",
+          text: "Please upload an xlsx file.",
         });
         return;
       }
 
-      const file = e.target.files[0];
+      let file = e.target.files[0];
       setFileName(file.name);
       if (file) {
-        const reader = new FileReader();
+        let reader = new FileReader();
 
         reader.onload = (event) => {
-          const data = new Uint8Array(event.target.result);
-          const workbook = XLSX.read(data, { type: "array" });
+          let data = new Uint8Array(event.target.result);
+          let workbook = XLSX.read(data, { type: "array" });
 
-          const sheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[sheetName];
+          let sheetName = workbook.SheetNames[0];
+          let worksheet = workbook.Sheets[sheetName];
 
-          const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+          let rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-          const headers = rawData[0];
-          const rows = rawData.slice(1);
+          let headers = rawData[0];
+          let rows = rawData.slice(1);
 
           let result = [];
           let currentId = null;
@@ -347,11 +346,18 @@ const Service = () => {
           let taskList = [];
 
           rows.forEach((row) => {
-            const idValue = row[headers.indexOf("id")];
-            const checklistName = row[headers.indexOf("Checklist Name")] || "";
-            const taskName = row[headers.indexOf("Task Name")] || "";
-            const budgetHours = row[headers.indexOf("Budget Hours")] || "";
-            const budgetMinutes = row[headers.indexOf("Budget Minutes")] || "";
+            let idValue = row[headers.indexOf("id")];
+            let checklistName = row[headers.indexOf("Checklist Name")] || "";
+            let taskName = row[headers.indexOf("Task Name")] || "";
+            let budgetHours = row[headers.indexOf("Budget Hours")] ||0;
+            let budgetMinutes = row[headers.indexOf("Budget Minutes")] || 0;
+
+            if (budgetMinutes > 59) {
+              let hours = Math.floor(budgetMinutes / 60);
+              let minutes = budgetMinutes % 60;
+              budgetHours = parseInt(budgetHours) + hours;
+              budgetMinutes = minutes;
+            }
 
             if (idValue) {
               if (currentId !== null) {
@@ -404,7 +410,6 @@ const Service = () => {
   };
 
   const handleDownload = () => {
-   
     const fileUrl = "/Task.xlsx";
 
     const link = document.createElement("a");
@@ -419,10 +424,10 @@ const Service = () => {
     setFileName("No file selected");
 
     document.getElementById("uploadButton").value = null;
+    setTasksData([]);
   };
 
   const handleSearchChange = (e) => {
- 
     setSearchValue(e.target.value);
   };
 
@@ -442,7 +447,7 @@ const Service = () => {
                       <th scope="col" style={{ width: 50 }}>
                         <div className="form-check"></div>
                       </th>
-                      <th style={{width:'70%'}}>Service Name</th>
+                      <th style={{ width: "70%" }}>Service Name</th>
                       {/* <th width="100"></th> */}
                       <th className="">Action</th>
                     </tr>
