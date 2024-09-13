@@ -479,7 +479,7 @@ const Service = () => {
                                   id={`heading-${index}`}
                                 >
                                   <button
-                                    className="accordion-button collapsed"
+                                    className="accordion-button collapsed fw-bold"
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target={`#collapse-${index}`}
@@ -595,7 +595,7 @@ const Service = () => {
                                                                 onClick={
                                                                   handleDownload
                                                                 }
-                                                                className="btn btn-primary"
+                                                                className="btn btn-info"
                                                               >
                                                                 <i className="fas fa-download me-2"></i>
                                                                 Download Sample
@@ -605,14 +605,14 @@ const Service = () => {
                                                           </div>
                                                         </div>
 
-                                                        <table className="table table-bordered table-striped">
+                                                        <table className="table table-light table-head-blue">
                                                           <thead className="table-primary">
                                                             <tr>
                                                               <th>
                                                                 Checklist Name
                                                               </th>
                                                               <th>Tasks</th>
-                                                              <th>
+                                                              <th style={{width:'280px'}}>
                                                                 Budgeted Hour
                                                               </th>
                                                               <th>Action</th>
@@ -707,15 +707,15 @@ const Service = () => {
                                                                         </td>
                                                                         <td>
                                                                           <button
-                                                                            className="btn btn-sm btn-outline-danger"
+                                                                            className="btn "
                                                                             onClick={() =>
                                                                               handleDelete(
                                                                                 TaskShow.id
                                                                               )
                                                                             }
                                                                           >
-                                                                            Delete
-                                                                            <i className="ms-1 fa fa-trash"></i>
+                                                                            {/* Delete */}
+                                                                            <i className="ms-1  ti-trash fs-4 text-danger"></i>
                                                                           </button>
                                                                         </td>
                                                                       </tr>

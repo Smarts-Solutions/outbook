@@ -398,12 +398,14 @@ const CreateCheckList = () => {
               <div className="row">
                 <div className="col-lg-12">
                   <label className="form-label">Select Client Type</label>
+                  <div className="custom-multiselect">
                   <DropdownMultiselect
                     options={options}
                     name="client_type_id"
+                    className=""
                     handleOnChange={(e) => handleMultipleSelect(e)}
                   />
-
+</div>
                   {errors.client_type_id && (
                     <p className="error-text">{errors.client_type_id}</p>
                   )}
