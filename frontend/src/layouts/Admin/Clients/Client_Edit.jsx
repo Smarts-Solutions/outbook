@@ -1,18 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import {
-  GetClientIndustry,
-  Edit_Client,
-  ClientAction,
-} from "../../../ReduxStore/Slice/Client/ClientSlice";
+import { GetClientIndustry, Edit_Client, ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { GetAllCompany } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { Email_regex } from "../../../Utils/Common_regex";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import {
-  PersonRole,
-  Country,
-} from "../../../ReduxStore/Slice/Settings/settingSlice";
+import { ScrollToViewFirstError , ScrollToViewFirstErrorContactForm } from '../../../Utils/Comman_function'
+import { PersonRole, Country } from "../../../ReduxStore/Slice/Settings/settingSlice";
 
 const ClientEdit = () => {
   const dispatch = useDispatch();
@@ -137,10 +131,10 @@ const ClientEdit = () => {
       location.state.row.client_type_name == "SoleTrader"
         ? 1
         : location.state.row.client_type_name == "Company"
-        ? 2
-        : location.state.row.client_type_name == "Partnership"
-        ? 3
-        : 4
+          ? 2
+          : location.state.row.client_type_name == "Partnership"
+            ? 3
+            : 4
     );
     CountryData();
     CustomerPersonRoleData();
@@ -383,9 +377,6 @@ const ClientEdit = () => {
     setErrors(newErrors);
   };
 
- 
-
-
   const handleChange = (index, field, value) => {
     const newContacts = contacts.map((contact, i) =>
       i === index ? { ...contact, [field]: value } : contact
@@ -394,282 +385,6 @@ const ClientEdit = () => {
     setContacts(newContacts);
 
     validateField(index, field, value);
-  };
-
- 
-
-  const handleChange4 = (index, field, value) => {
-    let newValue = value;
-    if (field == "authorised_signatory_status") {
-      newValue = value ? 1 : 0;
-    }
-
-    const newContacts = contacts1.map((contact, i) =>
-      i === index ? { ...contact, [field]: newValue } : contact
-    );
-
-    setContacts1(newContacts);
-    validateField1(index, field, newValue);
-  };
-
-  const handleChange5 = (e) => {
-    const { name, value } = e.target;
-    if (name === "vatNumber" || name === "phone") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
-    validate1();
-    setIndivisualDetails({ ...getIndivisualDetails, [name]: value });
-  };
-
-  const handleUpdate = async () => {
-    if (selectClientType == 1 && validate1()) {
-      const req = {
-        client_type: "1",
-        client_id: location.state.row.id,
-        customer_id: location.state.id,
-        client_industry_id: getSoleTraderDetails.IndustryType,
-        trading_name: getSoleTraderDetails.tradingName,
-        trading_address: getSoleTraderDetails.tradingAddress,
-        vat_registered: getSoleTraderDetails.vatRegistered,
-        vat_number: getSoleTraderDetails.vatNumber,
-        website: getSoleTraderDetails.website,
-        first_name: getSoleTraderDetails.first_name,
-        last_name: getSoleTraderDetails.last_name,
-        phone: getSoleTraderDetails.phone,
-        email: getSoleTraderDetails.email,
-        residential_address: getSoleTraderDetails.residentialAddress,
-        client_code: location.state.row.id,
-        phone_code: getSoleTraderDetails.phone_code,
-      };
-      await dispatch(Edit_Client(req))
-        .unwrap()
-        .then((response) => {
-          if (response.status) {
-            Swal.fire({
-              icon: "success",
-              title: "Client Updated Successfully",
-              timerProgressBar: true,
-              timer: 1500,
-            });
-            setTimeout(() => {
-              navigate("/admin/Clientlist", {
-                state: { id: location.state.id },
-              });
-            }, 1500);
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: response.message,
-              timerProgressBar: true,
-              timer: 1500,
-            });
-          }
-        });
-    }
-    if (selectClientType == 2 && validate2()) {
-      let formIsValid = true;
-      const newErrors = contacts.map((contact, index) => {
-        const error = {
-          first_name: contact.first_name ? "" : "First Name is required",
-          last_name: contact.last_name ? "" : "Last Name is required",
-          phone:
-            contact.phone === ""
-              ? ""
-              : /^\d{9,12}$/.test(contact.phone)
-              ? ""
-              : "Phone Number must be between 9 to 12 digits",
-          email:
-            contact.email === ""
-              ? ""
-              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-              ? ""
-              : "Valid Email is required",
-        };
-
-        if (
-          error.first_name ||
-          error.last_name ||
-          error.customer_contact_person_role_id ||
-          error.phone ||
-          error.email
-        ) {
-          formIsValid = false;
-        }
-        return error;
-      });
-      setErrors(newErrors);
-      if (formIsValid) {
-        const req = {
-          client_type: "2",
-          client_id: location.state.row.id,
-          customer_id: location.state.id,
-          company_name: getCompanyDetails.CompanyName,
-          entity_type: getCompanyDetails.EntityType,
-          company_status: getCompanyDetails.CompanyStatus,
-          company_number: getCompanyDetails.CompanyNumber,
-          registered_office_address: getCompanyDetails.RegisteredOfficeAddress,
-          incorporation_date: getCompanyDetails.IncorporationDate,
-          incorporation_in: getCompanyDetails.IncorporationIn,
-          vat_registered: getCompanyDetails.VATRegistered,
-          vat_number: getCompanyDetails.VATNumber,
-          website: getCompanyDetails.Website,
-          client_industry_id: Number(getCompanyDetails.ClientIndustry),
-          trading_name: getCompanyDetails.TradingName,
-          trading_address: getCompanyDetails.TradingAddress,
-          contactDetails: contacts,
-        };
-        await dispatch(Edit_Client(req))
-          .unwrap()
-          .then((response) => {
-            if (response.status) {
-              Swal.fire({
-                icon: "success",
-                title: "Client Updated Successfully",
-                timerProgressBar: true,
-                timer: 1500,
-              });
-              setTimeout(() => {
-                navigate("/admin/Clientlist", {
-                  state: { id: location.state.id },
-                });
-              }, 1500);
-            } else {
-              Swal.fire({
-                icon: "error",
-                title: response.message,
-                timerProgressBar: true,
-                timer: 1500,
-              });
-            }
-          });
-      }
-    }
-    if (selectClientType == 3 && validate3()) {
-      let formIsValid = true;
-      const newErrors = contacts1.map((contact, index) => {
-        const error = {
-          first_name: contact.first_name ? "" : "First Name is required",
-          last_name: contact.last_name ? "" : "Last Name is required",
-          phone:
-            contact.phone === ""
-              ? ""
-              : /^\d{9,12}$/.test(contact.phone)
-              ? ""
-              : "Phone Number must be between 9 to 12 digits",
-          alternate_phone:
-            contact.alternate_phone === ""
-              ? ""
-              : /^\d{9,12}$/.test(contact.alternate_phone)
-              ? ""
-              : "Alternate Phone Number must be between 9 to 12 digits",
-          email:
-            contact.email === ""
-              ? ""
-              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-              ? ""
-              : "Valid Email is required",
-          alternate_email:
-            contact.alternate_email === ""
-              ? ""
-              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.alternate_email)
-              ? ""
-              : "Valid Email is required",
-        };
-
-        if (
-          error.first_name ||
-          error.last_name ||
-          error.customer_contact_person_role_id ||
-          error.phone ||
-          error.email
-        ) {
-          formIsValid = false;
-        }
-        return error;
-      });
-      setContactsErrors(newErrors);
-      if (formIsValid) {
-        const req = {
-          client_type: "3",
-          client_id: location.state.row.id,
-          customer_id: location.state.id,
-          client_industry_id: getPartnershipDetails.ClientIndustry,
-          trading_name: getPartnershipDetails.TradingName,
-          trading_address: getPartnershipDetails.TradingAddress,
-          vat_registered: getPartnershipDetails.VATRegistered,
-          vat_number: getPartnershipDetails.VATNumber,
-          website: getPartnershipDetails.Website,
-          contactDetails: contacts1,
-        };
-        await dispatch(Edit_Client(req))
-          .unwrap()
-          .then((response) => {
-            if (response.status) {
-              Swal.fire({
-                icon: "success",
-                title: "Client Added Successfully",
-                timerProgressBar: true,
-                timer: 1500,
-              });
-              setTimeout(() => {
-                navigate("/admin/Clientlist", {
-                  state: { id: location.state.id },
-                });
-              }, 1500);
-            } else {
-              Swal.fire({
-                icon: "error",
-                title: response.message,
-                timerProgressBar: true,
-                timer: 1500,
-              });
-            }
-          });
-      }
-    }
-    if (selectClientType == 4 && validate4()) {
-      const req = {
-        client_type: "4",
-        client_id: location.state.row.id,
-        customer_id: location.state.id,
-
-        trading_name: getIndivisualDetails.tradingName,
-
-        first_name: getIndivisualDetails.first_name,
-        last_name: getIndivisualDetails.last_name,
-        phone: getIndivisualDetails.phone,
-        email: getIndivisualDetails.email,
-        residential_address: getIndivisualDetails.residentialAddress,
-        client_code: location.state.row.id,
-        phone_code: getIndivisualDetails.phone_code,
-      };
-      await dispatch(Edit_Client(req))
-        .unwrap()
-        .then((response) => {
-          if (response.status) {
-            Swal.fire({
-              icon: "success",
-              title: "Client Updated Successfully",
-              timerProgressBar: true,
-              timer: 1500,
-            });
-            setTimeout(() => {
-              navigate("/admin/Clientlist", {
-                state: { id: location.state.id },
-              });
-            }, 1500);
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: response.message,
-              timerProgressBar: true,
-              timer: 1500,
-            });
-          }
-        });
-    }
   };
 
   const GetClientDetails = async () => {
@@ -691,7 +406,7 @@ const ClientEdit = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -710,7 +425,7 @@ const ClientEdit = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -727,7 +442,7 @@ const ClientEdit = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -743,7 +458,7 @@ const ClientEdit = () => {
         }
       })
       .catch((err) => {
-        console.log("Error", err);
+        return;
       });
   };
 
@@ -759,7 +474,7 @@ const ClientEdit = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -770,7 +485,7 @@ const ClientEdit = () => {
         return;
       }
     }
-    validate1(name , value);
+    validate1(name, value);
     setSoleTraderDetails({ ...getSoleTraderDetails, [name]: value });
   };
 
@@ -781,7 +496,7 @@ const ClientEdit = () => {
         return;
       }
     }
-    validate2(name , value);
+    validate2(name, value);
     setCompanyDetails({ ...getCompanyDetails, [name]: value });
   };
 
@@ -792,10 +507,32 @@ const ClientEdit = () => {
         return;
       }
     }
-    validate3(name , value);
+    validate3(name, value);
     setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
   };
+  const handleChange4 = (index, field, value) => {
+    let newValue = value;
+    if (field == "authorised_signatory_status") {
+      newValue = value ? 1 : 0;
+    }
 
+    const newContacts = contacts1.map((contact, i) =>
+      i === index ? { ...contact, [field]: newValue } : contact
+    );
+
+    setContacts1(newContacts);
+    validateField1(index, field, newValue);
+  };
+  const handleChange5 = (e) => {
+    const { name, value } = e.target;
+    if (name === "vatNumber" || name === "phone") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    validate4(name, value);
+    setIndivisualDetails({ ...getIndivisualDetails, [name]: value });
+  };
   const validate1 = (name, value) => {
     const newErrors = { ...errors1 };
     if (!value) {
@@ -837,6 +574,7 @@ const ClientEdit = () => {
       }
     }
 
+    ScrollToViewFirstError(newErrors);
 
     if (Object.keys(newErrors).length !== 0) {
       setErrors1((prevErrors) => ({
@@ -898,6 +636,9 @@ const ClientEdit = () => {
         });
       }
     }
+
+    ScrollToViewFirstError(newErrors);
+
     if (Object.keys(newErrors).length !== 0) {
       setErrors2((prevErrors) => ({
         ...prevErrors,
@@ -933,6 +674,9 @@ const ClientEdit = () => {
       });
 
     }
+
+    ScrollToViewFirstError(newErrors);
+
     if (Object.keys(newErrors).length !== 0) {
       setErrors3((prevErrors) => ({
         ...prevErrors,
@@ -941,8 +685,50 @@ const ClientEdit = () => {
     }
     return Object.keys(newErrors).length === 0 ? true : false;
   };
+  const validate4 = (name, value) => {
+    const newErrors = { ...errors4 };
+    if (!value) {
+      switch (name) {
+        case "tradingName":
+          newErrors[name] = "Please enter Trading Name";
+          break;
+        case "first_name":
+          newErrors[name] = "Please enter First Name";
+          break;
+        case "last_name":
+          newErrors[name] = "Please enter Last Name";
+          break;
+        default:
+          break;
+      }
 
-  const validateAllFields = (type) => { 
+    } else {
+      if (name === "email" && !Email_regex(value)) {
+        newErrors[name] = "Please enter valid Email";
+      } else if (name === "phone" && !/^\d{9,12}$/.test(value)) {
+        newErrors[name] = "Phone Number must be between 9 to 12 digits";
+      } else {
+        delete newErrors[name];
+        setErrors4((prevErrors) => {
+          const updatedErrors = { ...prevErrors };
+          delete updatedErrors[name];
+          return updatedErrors;
+        });
+      }
+    }
+
+    ScrollToViewFirstError(newErrors);
+
+    if (Object.keys(newErrors).length !== 0) {
+      setErrors4((prevErrors) => ({
+        ...prevErrors,
+        ...newErrors,
+      }));
+    }
+    return Object.keys(newErrors).length === 0 ? true : false;
+  };
+
+  const validateAllFields = (type) => {
     const customer_type = [getSoleTraderDetails, getCompanyDetails, getPartnershipDetails, getIndivisualDetails];
     const validate = [validate1, validate2, validate3, validate4];
 
@@ -954,7 +740,202 @@ const ClientEdit = () => {
     }
     return isValid;
   };
-  
+
+  // common submit function for all type of customer
+  const EditClientFun = async (req) => {
+    const data = { req: req, authToken: token };
+    await dispatch(Edit_Client(req))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          Swal.fire({
+            icon: "success",
+            title: "Client Updated Successfully",
+            timerProgressBar: true,
+            timer: 1500,
+          });
+          setTimeout(() => {
+            navigate("/admin/Clientlist", {
+              state: { id: location.state.id },
+            });
+          }, 1500);
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: response.message,
+            timerProgressBar: true,
+            timer: 1500,
+          });
+        }
+      })
+  };
+
+  const handleUpdate = async () => {
+    if (selectClientType == 1 && validateAllFields(1)) {
+      const req = {
+        client_type: "1",
+        client_id: location.state.row.id,
+        customer_id: location.state.id,
+        client_industry_id: getSoleTraderDetails.IndustryType,
+        trading_name: getSoleTraderDetails.tradingName,
+        trading_address: getSoleTraderDetails.tradingAddress,
+        vat_registered: getSoleTraderDetails.vatRegistered,
+        vat_number: getSoleTraderDetails.vatNumber,
+        website: getSoleTraderDetails.website,
+        first_name: getSoleTraderDetails.first_name,
+        last_name: getSoleTraderDetails.last_name,
+        phone: getSoleTraderDetails.phone,
+        email: getSoleTraderDetails.email,
+        residential_address: getSoleTraderDetails.residentialAddress,
+        client_code: location.state.row.id,
+        phone_code: getSoleTraderDetails.phone_code,
+      };
+      await EditClientFun(req);
+    }
+    if (selectClientType == 2 && validateAllFields(2)) {
+      let formIsValid = true;
+      const newErrors = contacts.map((contact, index) => {
+        const error = {
+          first_name: contact.first_name ? "" : "First Name is required",
+          last_name: contact.last_name ? "" : "Last Name is required",
+          phone:
+            contact.phone === ""
+              ? ""
+              : /^\d{9,12}$/.test(contact.phone)
+                ? ""
+                : "Phone Number must be between 9 to 12 digits",
+          email:
+            contact.email === ""
+              ? ""
+              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+                ? ""
+                : "Valid Email is required",
+        };
+
+        if (
+          error.first_name ||
+          error.last_name ||
+          error.customer_contact_person_role_id ||
+          error.phone ||
+          error.email
+        ) {
+          formIsValid = false;
+        }
+        return error;
+      });
+      setErrors(newErrors);
+      if (formIsValid) {
+        const req = {
+          client_type: "2",
+          client_id: location.state.row.id,
+          customer_id: location.state.id,
+          company_name: getCompanyDetails.CompanyName,
+          entity_type: getCompanyDetails.EntityType,
+          company_status: getCompanyDetails.CompanyStatus,
+          company_number: getCompanyDetails.CompanyNumber,
+          registered_office_address: getCompanyDetails.RegisteredOfficeAddress,
+          incorporation_date: getCompanyDetails.IncorporationDate,
+          incorporation_in: getCompanyDetails.IncorporationIn,
+          vat_registered: getCompanyDetails.VATRegistered,
+          vat_number: getCompanyDetails.VATNumber,
+          website: getCompanyDetails.Website,
+          client_industry_id: Number(getCompanyDetails.ClientIndustry),
+          trading_name: getCompanyDetails.TradingName,
+          trading_address: getCompanyDetails.TradingAddress,
+          contactDetails: contacts,
+        };
+        await EditClientFun(req);
+      }
+      else {
+        ScrollToViewFirstErrorContactForm(errors);
+      }
+
+
+    }
+    if (selectClientType == 3 && validateAllFields(3)) {
+      let formIsValid = true;
+      const newErrors = contacts1.map((contact, index) => {
+        const error = {
+          first_name: contact.first_name ? "" : "First Name is required",
+          last_name: contact.last_name ? "" : "Last Name is required",
+          phone:
+            contact.phone === ""
+              ? ""
+              : /^\d{9,12}$/.test(contact.phone)
+                ? ""
+                : "Phone Number must be between 9 to 12 digits",
+          alternate_phone:
+            contact.alternate_phone === ""
+              ? ""
+              : /^\d{9,12}$/.test(contact.alternate_phone)
+                ? ""
+                : "Alternate Phone Number must be between 9 to 12 digits",
+          email:
+            contact.email === ""
+              ? ""
+              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+                ? ""
+                : "Valid Email is required",
+          alternate_email:
+            contact.alternate_email === ""
+              ? ""
+              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.alternate_email)
+                ? ""
+                : "Valid Email is required",
+        };
+
+        if (
+          error.first_name ||
+          error.last_name ||
+          error.customer_contact_person_role_id ||
+          error.phone ||
+          error.email
+        ) {
+          formIsValid = false;
+        }
+        return error;
+      });
+      setContactsErrors(newErrors);
+      if (formIsValid) {
+        const req = {
+          client_type: "3",
+          client_id: location.state.row.id,
+          customer_id: location.state.id,
+          client_industry_id: getPartnershipDetails.ClientIndustry,
+          trading_name: getPartnershipDetails.TradingName,
+          trading_address: getPartnershipDetails.TradingAddress,
+          vat_registered: getPartnershipDetails.VATRegistered,
+          vat_number: getPartnershipDetails.VATNumber,
+          website: getPartnershipDetails.Website,
+          contactDetails: contacts1,
+        };
+        await EditClientFun(req);
+      }
+      else {
+        ScrollToViewFirstErrorContactForm(contactsErrors);
+      }
+    }
+    if (selectClientType == 4 && validateAllFields(4)) {
+      const req = {
+        client_type: "4",
+        client_id: location.state.row.id,
+        customer_id: location.state.id,
+
+        trading_name: getIndivisualDetails.tradingName,
+
+        first_name: getIndivisualDetails.first_name,
+        last_name: getIndivisualDetails.last_name,
+        phone: getIndivisualDetails.phone,
+        email: getIndivisualDetails.email,
+        residential_address: getIndivisualDetails.residentialAddress,
+        client_code: location.state.row.id,
+        phone_code: getIndivisualDetails.phone_code,
+      };
+      await EditClientFun(req);
+
+    }
+  };
+
   const validateField = (index, field, value) => {
     const newErrors = [...errors];
     if (!newErrors[index]) {
@@ -987,8 +968,8 @@ const ClientEdit = () => {
           value === ""
             ? ""
             : /^\d{9,12}$/.test(value)
-            ? ""
-            : "Phone Number must be between 9 to 12 digits";
+              ? ""
+              : "Phone Number must be between 9 to 12 digits";
 
         break;
       default:
@@ -1030,8 +1011,8 @@ const ClientEdit = () => {
           value === ""
             ? ""
             : /^\d{9,12}$/.test(value)
-            ? ""
-            : "Phone Number must be between 9 to 12 digits";
+              ? ""
+              : "Phone Number must be between 9 to 12 digits";
         break;
 
       case "alternate_phone":
@@ -1039,8 +1020,8 @@ const ClientEdit = () => {
           value === ""
             ? ""
             : /^\d{9,12}$/.test(value)
-            ? ""
-            : "Phone Number must be between 9 to 12 digits";
+              ? ""
+              : "Phone Number must be between 9 to 12 digits";
 
         break;
       case "customer_contact_person_role_id":
@@ -1057,27 +1038,6 @@ const ClientEdit = () => {
     setContactsErrors(errors);
   };
 
-  const validate4 = () => {
-    const newErrors = {};
-    for (const key in getIndivisualDetails) {
-      if (!getIndivisualDetails[key]) {
-        if (key == "tradingName") newErrors[key] = "Please enter Trading Name";
-        else if (key == "first_name")
-          newErrors[key] = "Please enter First Name";
-        else if (key == "last_name") newErrors[key] = "Please enter Last Name";
-      } else if (key == "email" && !Email_regex(getIndivisualDetails[key])) {
-        newErrors[key] = "Please enter valid Email";
-      } else if (
-        key == "phone" &&
-        !/^\d{9,12}$/.test(getIndivisualDetails[key])
-      ) {
-        newErrors[key] = "Phone Number must be between 9 to 12 digits";
-      }
-    }
-    setErrors4(newErrors);
-    return Object.keys(newErrors).length === 0 ? true : false;
-  };
-
   const FilterSearchDetails = () => {
     const filterData = getAllSearchCompany.filter(
       (data) => data.title === searchItem
@@ -1085,6 +1045,7 @@ const ClientEdit = () => {
     setSearchDetails(filterData);
   };
 
+   
   const HandleCancel = () => {
     navigate("/admin/Clientlist", { state: { id: location.state.id } });
   };
@@ -1312,6 +1273,7 @@ const ClientEdit = () => {
                                             className="form-control"
                                             placeholder="URL"
                                             name="website"
+                                            id="website"
                                             value={getSoleTraderDetails.website}
                                             onChange={(e) => handleChange1(e)}
                                             maxLength={200}
@@ -1341,6 +1303,7 @@ const ClientEdit = () => {
                                           className="form-control"
                                           placeholder="First Name"
                                           name="first_name"
+                                          id="first_name"
                                           value={
                                             getSoleTraderDetails.first_name
                                           }
@@ -1367,6 +1330,7 @@ const ClientEdit = () => {
                                           className="form-control"
                                           placeholder="Last Name"
                                           name="last_name"
+                                          id="last_name"
                                           value={getSoleTraderDetails.last_name}
                                           onChange={(e) => handleChange1(e)}
                                           maxLength={50}
@@ -1412,6 +1376,7 @@ const ClientEdit = () => {
                                               className="form-control"
                                               placeholder="Phone Number"
                                               name="phone"
+                                              id="phone"
                                               value={getSoleTraderDetails.phone}
                                               onChange={(e) => handleChange1(e)}
                                               maxLength={12}
@@ -1440,6 +1405,7 @@ const ClientEdit = () => {
                                           className="form-control"
                                           placeholder="Enter Email ID"
                                           name="email"
+                                          id="email"
                                           value={getSoleTraderDetails.email}
                                           onChange={(e) => handleChange1(e)}
                                         />
@@ -1464,6 +1430,7 @@ const ClientEdit = () => {
                                           className="form-control"
                                           placeholder="Residential Address"
                                           name="residentialAddress"
+                                          id="residentialAddress"
                                           value={
                                             getSoleTraderDetails.residentialAddress
                                           }
@@ -1504,6 +1471,7 @@ const ClientEdit = () => {
                                                 className="form-control"
                                                 placeholder="Search Company"
                                                 name="SearchCompany"
+                                                id="SearchCompany"
                                                 onChange={(e) =>
                                                   setSearchItem(e.target.value)
                                                 }
@@ -1514,7 +1482,7 @@ const ClientEdit = () => {
                                                 style={{ cursor: "pointer" }}
                                               />
                                               {getAllSearchCompany.length > 0 &&
-                                              showDropdown ? (
+                                                showDropdown ? (
                                                 <div className="dropdown-list">
                                                   {getAllSearchCompany &&
                                                     getAllSearchCompany.map(
@@ -1558,6 +1526,7 @@ const ClientEdit = () => {
                                               className="form-control input_bg"
                                               placeholder="Enter Company Name"
                                               name="CompanyName"
+                                              id="CompanyName"
                                               onChange={(e) => handleChange2(e)}
                                               value={
                                                 getCompanyDetails.CompanyName
@@ -1584,6 +1553,7 @@ const ClientEdit = () => {
                                               className="form-control input_bg"
                                               placeholder="LTD"
                                               name="EntityType"
+                                              id="EntityType"
                                               onChange={(e) => handleChange2(e)}
                                               value={
                                                 getCompanyDetails.EntityType
@@ -1610,6 +1580,7 @@ const ClientEdit = () => {
                                               className="form-control input_bg"
                                               placeholder="Active"
                                               name="CompanyStatus"
+                                              id="CompanyStatus"
                                               onChange={(e) => handleChange2(e)}
                                               value={
                                                 getCompanyDetails.CompanyStatus
@@ -1636,6 +1607,7 @@ const ClientEdit = () => {
                                               className="form-control input_bg"
                                               placeholder="Company Number"
                                               name="CompanyNumber"
+                                              id="CompanyNumber"
                                               onChange={(e) => handleChange2(e)}
                                               value={
                                                 getCompanyDetails.CompanyNumber
@@ -1659,6 +1631,7 @@ const ClientEdit = () => {
                                               className="form-control input_bg"
                                               placeholder="07-01-2023"
                                               name="IncorporationDate"
+                                              id="IncorporationDate"
                                               onChange={(e) => handleChange2(e)}
                                               value={
                                                 getCompanyDetails.IncorporationDate
@@ -1685,6 +1658,7 @@ const ClientEdit = () => {
                                               className="form-control input_bg"
                                               placeholder="Suite Winsor & Netwon Building, White Fridrs Avenue, England,HA3 5RN"
                                               name="RegisteredOfficeAddress"
+                                              id="RegisteredOfficeAddress"
                                               onChange={(e) => handleChange2(e)}
                                               value={
                                                 getCompanyDetails.RegisteredOfficeAddress
@@ -1694,14 +1668,14 @@ const ClientEdit = () => {
                                             {errors2[
                                               "RegisteredOfficeAddress"
                                             ] && (
-                                              <div style={{ color: "red" }}>
-                                                {
-                                                  errors2[
+                                                <div style={{ color: "red" }}>
+                                                  {
+                                                    errors2[
                                                     "RegisteredOfficeAddress"
-                                                  ]
-                                                }
-                                              </div>
-                                            )}
+                                                    ]
+                                                  }
+                                                </div>
+                                              )}
                                           </div>
                                         </div>
 
@@ -1719,6 +1693,7 @@ const ClientEdit = () => {
                                               className="form-control input_bg"
                                               placeholder="Please Enter Incorporation In"
                                               name="IncorporationIn"
+                                              id="IncorporationIn"
                                               onChange={(e) => handleChange2(e)}
                                               value={
                                                 getCompanyDetails.IncorporationIn
@@ -1741,6 +1716,7 @@ const ClientEdit = () => {
                                             <select
                                               className="form-select mb-3"
                                               name="VATRegistered"
+                                              id="VATRegistered"
                                               onChange={(e) => handleChange2(e)}
                                               value={
                                                 getCompanyDetails.VATRegistered
@@ -1770,6 +1746,7 @@ const ClientEdit = () => {
                                                 className="form-control "
                                                 placeholder="VAT Number"
                                                 name="VATNumber"
+                                                id="VATNumber"
                                                 onChange={(e) =>
                                                   handleChange2(e)
                                                 }
@@ -1796,6 +1773,7 @@ const ClientEdit = () => {
                                               className="form-control "
                                               placeholder="URL"
                                               name="Website"
+                                              id="Website"
                                               onChange={(e) => handleChange2(e)}
                                               value={getCompanyDetails.Website}
                                               maxLength={200}
@@ -1830,6 +1808,7 @@ const ClientEdit = () => {
                                           <select
                                             className="form-select mb-3"
                                             name="ClientIndustry"
+                                            id="ClientIndustry"
                                             onChange={(e) => handleChange2(e)}
                                             value={
                                               getCompanyDetails.ClientIndustry
@@ -1871,6 +1850,7 @@ const ClientEdit = () => {
                                             className="form-control"
                                             placeholder="Trading Name"
                                             name="TradingName"
+                                            id="TradingName"
                                             onChange={(e) => handleChange2(e)}
                                             value={
                                               getCompanyDetails.TradingName
@@ -1897,6 +1877,7 @@ const ClientEdit = () => {
                                             className="form-control"
                                             placeholder="Trading Address"
                                             name="TradingAddress"
+                                            id="TradingAddress"
                                             onChange={(e) => handleChange2(e)}
                                             value={
                                               getCompanyDetails.TradingAddress
@@ -2262,6 +2243,7 @@ const ClientEdit = () => {
                                           <select
                                             className="form-select mb-3"
                                             name="ClientIndustry"
+                                            id="ClientIndustry"
                                             value={
                                               getPartnershipDetails.ClientIndustry
                                             }
@@ -2303,6 +2285,7 @@ const ClientEdit = () => {
                                             className="form-control"
                                             placeholder="Trading Name"
                                             name="TradingName"
+                                            id="TradingName"
                                             value={
                                               getPartnershipDetails.TradingName
                                             }
@@ -2329,6 +2312,7 @@ const ClientEdit = () => {
                                             className="form-control"
                                             placeholder="Trading Address"
                                             name="TradingAddress"
+                                            id="TradingAddress"
                                             value={
                                               getPartnershipDetails.TradingAddress
                                             }
@@ -2351,6 +2335,7 @@ const ClientEdit = () => {
                                             <select
                                               className="form-select mb-3"
                                               name="VATRegistered"
+                                              id="VATRegistered"
                                               value={
                                                 getPartnershipDetails.VATRegistered
                                               }
@@ -2382,6 +2367,7 @@ const ClientEdit = () => {
                                               className="form-control "
                                               placeholder="VAT Number"
                                               name="VATNumber"
+                                              id="VATNumber"
                                               value={
                                                 getPartnershipDetails.VATNumber
                                               }
@@ -2406,6 +2392,7 @@ const ClientEdit = () => {
                                             className="form-control "
                                             placeholder="URL"
                                             name="Website"
+                                            id="Website"
                                             value={
                                               getPartnershipDetails.Website
                                             }
@@ -2468,9 +2455,9 @@ const ClientEdit = () => {
                                                           }
                                                           disabled={
                                                             contacts1.length ===
-                                                            2
+                                                              2
                                                               ? index === 0 ||
-                                                                index === 1
+                                                              index === 1
                                                               : false
                                                           }
                                                         />
@@ -2518,6 +2505,7 @@ const ClientEdit = () => {
                                                         className="form-control"
                                                         placeholder="First Name"
                                                         name="first_name"
+                                                        id={`first_name-${index}`}
                                                         value={
                                                           contact.first_name
                                                         }
@@ -2532,18 +2520,16 @@ const ClientEdit = () => {
                                                       />
                                                       {contactsErrors[index]
                                                         ?.first_name && (
-                                                        <div
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          {
-                                                            contactsErrors[
-                                                              index
-                                                            ].first_name
-                                                          }
-                                                        </div>
-                                                      )}
+                                                          <div
+                                                           className="error-text"
+                                                          >
+                                                            {
+                                                              contactsErrors[
+                                                                index
+                                                              ].first_name
+                                                            }
+                                                          </div>
+                                                        )}
                                                     </div>
                                                   </div>
                                                   <div className="col-lg-4">
@@ -2563,6 +2549,8 @@ const ClientEdit = () => {
                                                         className="form-control"
                                                         placeholder="Last Name"
                                                         name="last_name"
+                                                        id={`last_name-${index}`}
+
                                                         value={
                                                           contact.last_name
                                                         }
@@ -2577,18 +2565,16 @@ const ClientEdit = () => {
                                                       />
                                                       {contactsErrors[index]
                                                         ?.last_name && (
-                                                        <div
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          {
-                                                            contactsErrors[
-                                                              index
-                                                            ].last_name
-                                                          }
-                                                        </div>
-                                                      )}
+                                                          <div
+                                                            className="error-text"
+                                                          >
+                                                            {
+                                                              contactsErrors[
+                                                                index
+                                                              ].last_name
+                                                            }
+                                                          </div>
+                                                        )}
                                                     </div>
                                                   </div>
                                                   <div className="col-lg-4">
@@ -2634,19 +2620,17 @@ const ClientEdit = () => {
                                                       </select>
                                                       {contactsErrors[index]
                                                         ?.customer_contact_person_role_id && (
-                                                        <div
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          {
-                                                            contactsErrors[
-                                                              index
-                                                            ]
-                                                              .customer_contact_person_role_id
-                                                          }
-                                                        </div>
-                                                      )}
+                                                          <div
+                                                            className="error-text"
+                                                          >
+                                                            {
+                                                              contactsErrors[
+                                                                index
+                                                              ]
+                                                                .customer_contact_person_role_id
+                                                            }
+                                                          </div>
+                                                        )}
                                                     </div>
                                                   </div>
                                                   <div className="col-lg-4 pe-0">
@@ -2692,6 +2676,7 @@ const ClientEdit = () => {
                                                             className="form-control"
                                                             placeholder="Phone"
                                                             name="phone"
+                                                            id={`phone-${index}`}
                                                             value={
                                                               contact.phone
                                                             }
@@ -2740,6 +2725,8 @@ const ClientEdit = () => {
                                                               )
                                                             }
                                                             name="alternate_phone_code"
+                                                            id={`alternate_phone_code-${index}`}
+
                                                             value={
                                                               contact.alternate_phone_code
                                                             }
@@ -2766,6 +2753,7 @@ const ClientEdit = () => {
                                                             className="form-control"
                                                             placeholder="Alternate Phone"
                                                             name="alternate_phone"
+                                                            id={`alternate_phone-${index}`}
                                                             value={
                                                               contact.alternate_phone
                                                             }
@@ -2815,6 +2803,7 @@ const ClientEdit = () => {
                                                         className="form-control"
                                                         placeholder="Enter Email"
                                                         name="email"
+                                                        id={`email-${index}`}
                                                         value={contact.email}
                                                         onChange={(e) =>
                                                           handleChange4(
@@ -2826,18 +2815,14 @@ const ClientEdit = () => {
                                                       />
                                                       {contactsErrors[index]
                                                         ?.email && (
-                                                        <div
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          {
-                                                            contactsErrors[
-                                                              index
-                                                            ].email
-                                                          }
-                                                        </div>
-                                                      )}
+                                                          <div className="error-text" >
+                                                            {
+                                                              contactsErrors[
+                                                                index
+                                                              ].email
+                                                            }
+                                                          </div>
+                                                        )}
                                                     </div>
                                                   </div>
                                                   <div className="col-lg-4">
@@ -2857,6 +2842,7 @@ const ClientEdit = () => {
                                                         className="form-control"
                                                         placeholder="Enter Alternate Email"
                                                         name="alternate_email"
+                                                        id={`alternate_email-${index}`}
                                                         value={
                                                           contact.alternate_email
                                                         }
@@ -2870,14 +2856,14 @@ const ClientEdit = () => {
                                                       />
                                                       {contactsErrors[index]
                                                         ?.alternate_email && (
-                                                        <div className="error-text">
-                                                          {
-                                                            contactsErrors[
-                                                              index
-                                                            ].alternate_email
-                                                          }
-                                                        </div>
-                                                      )}
+                                                          <div className="error-text">
+                                                            {
+                                                              contactsErrors[
+                                                                index
+                                                              ].alternate_email
+                                                            }
+                                                          </div>
+                                                        )}
                                                     </div>
                                                   </div>
                                                 </div>
@@ -2923,6 +2909,7 @@ const ClientEdit = () => {
                                           <input
                                             type="text"
                                             name="tradingName"
+                                            id="tradingName"
                                             className="form-control"
                                             placeholder="Trading Name"
                                             onChange={(e) => handleChange5(e)}
@@ -2952,6 +2939,7 @@ const ClientEdit = () => {
                                             className="form-control"
                                             placeholder="First Name"
                                             name="first_name"
+                                            id="first_name"
                                             value={
                                               getIndivisualDetails.first_name
                                             }
@@ -2978,6 +2966,7 @@ const ClientEdit = () => {
                                             className="form-control"
                                             placeholder="Last Name"
                                             name="last_name"
+                                            id="last_name"
                                             value={
                                               getIndivisualDetails.last_name
                                             }
@@ -3005,6 +2994,7 @@ const ClientEdit = () => {
                                                   handleChange5(e)
                                                 }
                                                 name="phone_code"
+                                                id="phone_code"
                                                 value={
                                                   getIndivisualDetails.phone_code
                                                 }
@@ -3027,6 +3017,7 @@ const ClientEdit = () => {
                                                 className="form-control"
                                                 placeholder="Phone Number"
                                                 name="phone"
+                                                id="phone"
                                                 value={
                                                   getIndivisualDetails.phone
                                                 }
@@ -3059,6 +3050,7 @@ const ClientEdit = () => {
                                             className="form-control"
                                             placeholder="Enter Email ID"
                                             name="email"
+                                            id="email"
                                             value={getIndivisualDetails.email}
                                             onChange={(e) => handleChange5(e)}
                                           />
@@ -3083,6 +3075,7 @@ const ClientEdit = () => {
                                             className="form-control"
                                             placeholder="Residential Address"
                                             name="residentialAddress"
+                                            id="residentialAddress"
                                             value={
                                               getIndivisualDetails.residentialAddress
                                             }

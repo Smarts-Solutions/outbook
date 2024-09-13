@@ -36,12 +36,8 @@ const Service = () => {
   const [tasks, setTasks] = useState([]);
   const [fileName, setFileName] = useState("No file selected");
   const [jobTypeData, setJobTypeData] = useState([]);
-  const [showJobTabel, setShowJobTabel] = useState("");
   const [tasksGet, setTasksData] = useState([]);
-  const [getCustomerService, setCustomerService] = useState({
-    loading: true,
-    data: [],
-  });
+ 
 
   useEffect(() => {
     JobTypeDataAPi(services, 2);
@@ -72,33 +68,11 @@ const Service = () => {
     fetchData();
   }, [dispatch, token]);
 
-  useEffect(() => {
-    if (getCustomerService.data.services) {
-      setServices(
-        getCustomerService.data.services.map((service) => service.service_id)
-      );
-
-      setManager(
-        getCustomerService.data.services.map((service) => ({
-          service_id: service.service_id,
-          account_manager_ids: service.account_manager_ids
-            ? service.account_manager_ids.map((id) =>
-                staffDataAll.data.find((staff) => staff.id === id)
-              )
-            : [],
-        }))
-      );
-    }
-  }, [getCustomerService.data, staffDataAll.data]);
+ 
 
   useEffect(() => {
     if (searchValue.trim()) {
-      console.log(
-        "staffDataAll.data",
-        staffDataAll.data.filter((data) =>
-          data.first_name.toLowerCase().includes(searchValue.toLowerCase())
-        )
-      );
+   
       setFilteredData(
         staffDataAll.data.filter((data) =>
           data.first_name.toLowerCase().includes(searchValue.toLowerCase())
@@ -244,7 +218,7 @@ const Service = () => {
         next(response.data);
       }
     } catch (error) {
-      console.log("Error updating services", error);
+      return;
     }
   };
 
@@ -306,7 +280,7 @@ const Service = () => {
         }
       })
       .catch((error) => {
-        console.log("Error fetching job types:", error);
+        return;
       });
   };
 

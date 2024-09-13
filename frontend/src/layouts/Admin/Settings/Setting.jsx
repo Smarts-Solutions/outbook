@@ -129,7 +129,7 @@ const Setting = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -164,7 +164,7 @@ const Setting = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -198,7 +198,7 @@ const Setting = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -233,7 +233,7 @@ const Setting = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -268,7 +268,7 @@ const Setting = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -303,7 +303,7 @@ const Setting = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -338,7 +338,7 @@ const Setting = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -373,7 +373,7 @@ const Setting = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -802,7 +802,7 @@ const Setting = () => {
     },
   ];
 
-  const columnCoustomerSource = [
+  const columnCustomerSource = [
     {
       name: "Source Name",
       selector: (row) => row.name,
@@ -1247,7 +1247,7 @@ const Setting = () => {
             ],
           },
         ],
-        title: "Coustomer Source",
+        title: "Customer Source",
         tabStatus: tabStatus,
         id: data.id,
       });
@@ -1681,7 +1681,7 @@ const Setting = () => {
               <div className="report-data">
                 <div className="d-flex justify-content-between align-items-center">
                   <div className="tab-title">
-                    <h3 className="mt-0">Coustomer Source</h3>
+                    <h3 className="mt-0">Customer Source</h3>
                   </div>
                   {!showSettingInsertTab ? null : (
                     <div>
@@ -1691,7 +1691,7 @@ const Setting = () => {
                         onClick={(e) => handleAdd(e, "8")}
                       >
                         {" "}
-                        <i className="fa fa-plus" /> Add Coustomer Source
+                        <i className="fa fa-plus" /> Add Customer Source
                       </button>
                     </div>
                   )}
@@ -1699,7 +1699,7 @@ const Setting = () => {
                 <div className="datatable-wrapper">
                   <Datatable
                     filter={true}
-                    columns={columnCoustomerSource}
+                    columns={columnCustomerSource}
                     data={customerSourceDataDataAll}
                   />
                 </div>

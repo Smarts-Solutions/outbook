@@ -108,7 +108,7 @@ const Status = () => {
       };
 
       const response = await dispatch(MasterStatusData(data)).unwrap();
-      console.log(response);
+ 
       if (response.status) {
         Swal.fire({
           title: "Updated!",
@@ -162,7 +162,7 @@ const Status = () => {
             }
           })
           .catch((error) => {
-            console.log("Error", error);
+            return;
           });
       }
     });
@@ -180,7 +180,7 @@ const Status = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -196,7 +196,7 @@ const Status = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -242,7 +242,7 @@ const Status = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 

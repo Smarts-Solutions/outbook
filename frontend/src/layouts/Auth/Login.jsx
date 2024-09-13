@@ -65,7 +65,7 @@ const Login = () => {
             .unwrap()
             .then(async (response) => {})
             .catch((error) => {
-              console.log("Error", error);
+              return;
             });
 
           navigate("/admin/dashboard");
@@ -79,7 +79,7 @@ const Login = () => {
         //continue....
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -111,7 +111,7 @@ const Login = () => {
               .unwrap()
               .then(async (response) => {})
               .catch((error) => {
-                console.log("Error", error);
+                return;
               });
 
             navigate("/admin/dashboard");
@@ -124,7 +124,7 @@ const Login = () => {
           }
         })
         .catch((error) => {
-          console.log("Error", error);
+          return;
         });
     }
   };
@@ -181,7 +181,7 @@ const Login = () => {
         });
       }
     } catch (error) {
-      console.log("Error fetching access data:", error);
+      return;
     }
   };
 

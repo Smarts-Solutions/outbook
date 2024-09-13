@@ -48,12 +48,12 @@ const login = async (credentials) => {
     const user = await staffModel.getStaffByEmail(email);
 
     if (!user) {
-      return {status:false,message:"Invalid Email."}
+      return {status:false,message:"Please enter a valid Email"}
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return {status:false,message:"Password Incorrect."}
+      return {status:false,message:"Please enter a valid password"}
     }
 
     if (user.status == '0') {

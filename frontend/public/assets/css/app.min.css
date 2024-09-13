@@ -10120,19 +10120,37 @@ body .accordion-button:not(.collapsed)::after {
 }
   */
 
-  .dropdown-toggle span ,button.actions-btn.btn.btn-light{
+  .custom-multiselect .dropdown .dropdown-toggle span ,button.actions-btn.btn.btn-light{
     font-size: 14px !important;
     color: #4B4B4B !important;
    
 }
-button.actions-btn.btn.btn-light:hover{
+.custom-multiselect button.actions-btn.btn.btn-light:hover{
   background: transparent !important;
   border: 0 !important;
+  cursor: unset;
 }
-.dropdown-toggle{
+.custom-multiselect .btn-group.btn-group-sm.btn-block {
+  width: 100%;
+  margin-bottom: 15px;
+}
+.custom-multiselect .dropdown .dropdown-toggle{
   font-size: 14px !important;
   color: #4B4B4B !important;
   background: transparent !important;
   border: 1px solid #dee2e6 !important;
   padding: .375rem 2.25rem .375rem .75rem;
+}
+ button.actions-btn.btn.btn-light:hover {
+  border: none !important;
+}
+.custom-multiselect button.actions-btn.btn.btn-light:focus
+{
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+.custom-multiselect .btn-group.btn-group-sm.btn-block button {
+  padding: 10px 0 !important;
+  outline: 0 !important;
+  border: 0;
 }

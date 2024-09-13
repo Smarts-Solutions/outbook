@@ -90,7 +90,7 @@ const Engagement = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -408,7 +408,7 @@ const Engagement = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -516,7 +516,7 @@ const Engagement = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 

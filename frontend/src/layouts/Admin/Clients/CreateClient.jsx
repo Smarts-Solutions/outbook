@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import {
-  GetClientIndustry,
-  Add_Client,
-} from "../../../ReduxStore/Slice/Client/ClientSlice";
+import { GetClientIndustry, Add_Client, } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { GetAllCompany } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { Email_regex } from "../../../Utils/Common_regex";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import {
-  PersonRole,
-  Country,
-} from "../../../ReduxStore/Slice/Settings/settingSlice";
+import { PersonRole, Country } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import { ScrollToViewFirstError, ScrollToViewFirstErrorContactForm } from '../../../Utils/Comman_function'
 
 const CreateClient = () => {
   const dispatch = useDispatch();
@@ -280,7 +275,7 @@ const CreateClient = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -369,6 +364,7 @@ const CreateClient = () => {
       }
     }
 
+    ScrollToViewFirstError(newErrors);
 
     if (Object.keys(newErrors).length !== 0) {
       setErrors1((prevErrors) => ({
@@ -431,6 +427,9 @@ const CreateClient = () => {
         });
       }
     }
+
+    ScrollToViewFirstError(newErrors);
+
     if (Object.keys(newErrors).length !== 0) {
       setErrors2((prevErrors) => ({
         ...prevErrors,
@@ -467,6 +466,9 @@ const CreateClient = () => {
       });
 
     }
+
+    ScrollToViewFirstError(newErrors);
+
     if (Object.keys(newErrors).length !== 0) {
       setErrors3((prevErrors) => ({
         ...prevErrors,
@@ -508,6 +510,9 @@ const CreateClient = () => {
         });
       }
     }
+
+    ScrollToViewFirstError(newErrors);
+
     if (Object.keys(newErrors).length !== 0) {
       setErrors4((prevErrors) => ({
         ...prevErrors,
@@ -518,7 +523,7 @@ const CreateClient = () => {
   };
 
   // validate all fields when submit
-  const validateAllFields = (type) => { 
+  const validateAllFields = (type) => {
     const customer_type = [getSoleTraderDetails, getCompanyDetails, getPartnershipDetails, getIndivisualDetails];
     const validate = [validate1, validate2, validate3, validate4];
 
@@ -530,7 +535,6 @@ const CreateClient = () => {
     }
     return isValid;
   };
-
 
   const getClientIndustry = async () => {
     const req = { action: "get" };
@@ -545,7 +549,7 @@ const CreateClient = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -561,7 +565,7 @@ const CreateClient = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -577,7 +581,7 @@ const CreateClient = () => {
         }
       })
       .catch((err) => {
-        console.log("Error", err);
+        return;
       });
   };
 
@@ -693,302 +697,217 @@ const CreateClient = () => {
     navigate("/admin/Clientlist", { state: { id: location.state.id } });
   };
 
+
+  // common submit function for all type of customer
+  const AddClientFun = async (req) => {
+    const data = { req: req, authToken: token };
+    await dispatch(Add_Client(req))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          Swal.fire({
+            icon: "success",
+            title: "Client Added Successfully",
+            timerProgressBar: true,
+            timer: 1500,
+          });
+          setTimeout(() => {
+            navigate("/admin/Clientlist", { state: location.state });
+          }, 1500);
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: response.message,
+            timerProgressBar: true,
+            timer: 1500,
+          });
+        }
+      });
+  };
+
   const handleSubmit = async () => {
-    if (selectClientType == 1) {
-      if (validateAllFields(1)) {
-        const req = {
-          client_type: "1",
-          customer_id: location.state.id,
-          client_industry_id: getSoleTraderDetails.IndustryType,
-          trading_name: getSoleTraderDetails.tradingName,
-          trading_address: getSoleTraderDetails.tradingAddress,
-          vat_registered: getSoleTraderDetails.vatRegistered,
-          vat_number: getSoleTraderDetails.vatNumber,
-          website: getSoleTraderDetails.website,
-          first_name: getSoleTraderDetails.first_name,
-          last_name: getSoleTraderDetails.last_name,
-          phone: getSoleTraderDetails.phone,
-          email: getSoleTraderDetails.email,
-          residential_address: getSoleTraderDetails.residentialAddress,
-          client_code: location.state.id,
-          phone_code: getSoleTraderDetails.phone_code,
+    if (selectClientType == 1 && validateAllFields(1)) {
+      const req = {
+        client_type: "1",
+        customer_id: location.state.id,
+        client_industry_id: getSoleTraderDetails.IndustryType,
+        trading_name: getSoleTraderDetails.tradingName,
+        trading_address: getSoleTraderDetails.tradingAddress,
+        vat_registered: getSoleTraderDetails.vatRegistered,
+        vat_number: getSoleTraderDetails.vatNumber,
+        website: getSoleTraderDetails.website,
+        first_name: getSoleTraderDetails.first_name,
+        last_name: getSoleTraderDetails.last_name,
+        phone: getSoleTraderDetails.phone,
+        email: getSoleTraderDetails.email,
+        residential_address: getSoleTraderDetails.residentialAddress,
+        client_code: location.state.id,
+        phone_code: getSoleTraderDetails.phone_code,
+      };
+      await AddClientFun(req);
+    }
+    if (selectClientType == 2 && validateAllFields(2)) {
+      let formIsValid = true;
+      const newErrors = contacts.map((contact, index) => {
+        const error = {
+          first_name: contact.first_name ? "" : "First Name is required",
+          last_name: contact.last_name ? "" : "Last Name is required",
+          // role: contact.role ? '' : 'Role is required',
+          phone:
+            contact.phone === ""
+              ? ""
+              : /^\d{9,12}$/.test(contact.phone)
+                ? ""
+                : "Phone Number must be between 9 to 12 digits",
+          email:
+            contact.email === ""
+              ? ""
+              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+                ? ""
+                : "Valid Email is required",
         };
-        await dispatch(Add_Client(req))
-          .unwrap()
-          .then((response) => {
-            if (response.status) {
-              Swal.fire({
-                icon: "success",
-                title: "Client Added Successfully",
-                timerProgressBar: true,
-                timer: 1500,
-              });
-              setTimeout(() => {
-                navigate("/admin/Clientlist", { state: location.state });
-              }, 1500);
-            } else {
-              Swal.fire({
-                icon: "error",
-                title: response.message,
-                timerProgressBar: true,
-                timer: 1500,
-              });
-            }
-          });
-      }
-      else {
-        scrollToFirstError(errors1);
-      }
-    }
-    if (selectClientType == 2) {
-      if (validateAllFields(2)) {
-        let formIsValid = true;
-        const newErrors = contacts.map((contact, index) => {
-          const error = {
-            first_name: contact.first_name ? "" : "First Name is required",
-            last_name: contact.last_name ? "" : "Last Name is required",
-            // role: contact.role ? '' : 'Role is required',
-            phone:
-              contact.phone === ""
-                ? ""
-                : /^\d{9,12}$/.test(contact.phone)
-                  ? ""
-                  : "Phone Number must be between 9 to 12 digits",
-            email:
-              contact.email === ""
-                ? ""
-                : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-                  ? ""
-                  : "Valid Email is required",
-          };
 
-          if (
-            error.first_name ||
-            error.last_name ||
-            error.role ||
-            error.phone ||
-            error.email
-          ) {
-            formIsValid = false;
-          }
-          return error;
-        });
-        setErrors(newErrors);
-        if (formIsValid) {
-          const req = {
-            client_type: "2",
-            customer_id: location.state.id,
-            company_name: getCompanyDetails.CompanyName,
-            entity_type: getCompanyDetails.EntityType,
-            company_status: getCompanyDetails.CompanyStatus,
-            company_number: getCompanyDetails.CompanyNumber,
-            registered_office_address: getCompanyDetails.RegisteredOfficeAddress,
-            incorporation_date: getCompanyDetails.IncorporationDate,
-            incorporation_in: getCompanyDetails.IncorporationIn,
-            vat_registered: getCompanyDetails.VATRegistered,
-            vat_number: getCompanyDetails.VATNumber,
-            website: getCompanyDetails.Website,
-            client_industry_id: Number(getCompanyDetails.ClientIndustry),
-            trading_name: getCompanyDetails.TradingName,
-            trading_address: getCompanyDetails.TradingAddress,
-            contactDetails: contacts,
-          };
-          await dispatch(Add_Client(req))
-            .unwrap()
-            .then((response) => {
-              if (response.status) {
-                Swal.fire({
-                  icon: "success",
-                  title: "Client Added Successfully",
-                  timerProgressBar: true,
-                  timer: 1500,
-                });
-                setTimeout(() => {
-                  navigate("/admin/Clientlist", { state: location.state });
-                }, 1500);
-              } else {
-                Swal.fire({
-                  icon: "error",
-                  title: response.message,
-                  timerProgressBar: true,
-                  timer: 1500,
-                });
-              }
-            });
+        if (
+          error.first_name ||
+          error.last_name ||
+          error.role ||
+          error.phone ||
+          error.email
+        ) {
+          formIsValid = false;
         }
-        else {
-          scrollToFirstError1(errors);
-        }
-      }
-      else {
-        scrollToFirstError(errors2);
-      }
-    }
-    if (selectClientType == 3) {
-      if (validateAllFields(3)) {
-        let formIsValid = true;
-        const newErrors = contacts1.map((contact, index) => {
-          const error = {
-            first_name: contact.first_name ? "" : "First Name is required",
-            last_name: contact.last_name ? "" : "Last Name is required",
-            // role: contact.role ? '' : 'Role is required',
-            phone:
-              contact.phone === ""
-                ? ""
-                : /^\d{9,12}$/.test(contact.phone)
-                  ? ""
-                  : "Phone Number must be between 9 to 12 digits",
-            alternate_phone:
-              contact.alternate_phone === ""
-                ? ""
-                : /^\d{9,12}$/.test(contact.alternate_phone)
-                  ? ""
-                  : " Alternate Phone Number must be between 9 to 12 digits",
-            email:
-              contact.email === ""
-                ? ""
-                : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-                  ? ""
-                  : "Valid Email is required",
-            alternate_email:
-              contact.alternate_email === ""
-                ? ""
-                : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.alternate_email)
-                  ? ""
-                  : "Valid Email is required",
-          };
-
-          if (
-            error.first_name ||
-            error.last_name ||
-            error.role ||
-            error.phone ||
-            error.email
-          ) {
-            formIsValid = false;
-          }
-          return error;
-        });
-        setContactsErrors(newErrors);
-        if (formIsValid) {
-          const req = {
-            client_type: "3",
-            customer_id: location.state.id,
-            client_industry_id: getPartnershipDetails.ClientIndustry,
-            trading_name: getPartnershipDetails.TradingName,
-            trading_address: getPartnershipDetails.TradingAddress,
-            vat_registered: getPartnershipDetails.VATRegistered,
-            vat_number: getPartnershipDetails.VATNumber,
-            website: getPartnershipDetails.Website,
-            contactDetails: contacts1,
-          };
-
-          await dispatch(Add_Client(req))
-            .unwrap()
-            .then((response) => {
-              if (response.status) {
-                Swal.fire({
-                  icon: "success",
-                  title: "Client Added Successfully",
-                  timerProgressBar: true,
-                  timer: 1500,
-                });
-                setTimeout(() => {
-                  navigate("/admin/Clientlist", {
-                    state: { id: location.state.id },
-                  });
-                }, 1500);
-              } else {
-                Swal.fire({
-                  icon: "error",
-                  title: response.message,
-                  timerProgressBar: true,
-                  timer: 1500,
-                });
-              }
-            });
-        }
-        else {
-          scrollToFirstError1(contactsErrors);
-        }
-      }
-      else {
-        scrollToFirstError(errors3);
-      }
-    }
-    if (selectClientType == 4) {
-      if (validateAllFields(4)) {
+        return error;
+      });
+      setErrors(newErrors);
+      if (formIsValid) {
         const req = {
-          client_type: "4",
+          client_type: "2",
           customer_id: location.state.id,
-          trading_name: getIndivisualDetails.tradingName,
-          first_name: getIndivisualDetails.first_name,
-          last_name: getIndivisualDetails.last_name,
-          phone: getIndivisualDetails.phone,
-          email: getIndivisualDetails.email,
-          residential_address: getIndivisualDetails.residentialAddress,
-          client_code: location.state.id,
-          phone_code: getIndivisualDetails.phone_code,
+          company_name: getCompanyDetails.CompanyName,
+          entity_type: getCompanyDetails.EntityType,
+          company_status: getCompanyDetails.CompanyStatus,
+          company_number: getCompanyDetails.CompanyNumber,
+          registered_office_address: getCompanyDetails.RegisteredOfficeAddress,
+          incorporation_date: getCompanyDetails.IncorporationDate,
+          incorporation_in: getCompanyDetails.IncorporationIn,
+          vat_registered: getCompanyDetails.VATRegistered,
+          vat_number: getCompanyDetails.VATNumber,
+          website: getCompanyDetails.Website,
+          client_industry_id: Number(getCompanyDetails.ClientIndustry),
+          trading_name: getCompanyDetails.TradingName,
+          trading_address: getCompanyDetails.TradingAddress,
+          contactDetails: contacts,
         };
-        await dispatch(Add_Client(req))
-          .unwrap()
-          .then((response) => {
-            if (response.status) {
-              Swal.fire({
-                icon: "success",
-                title: "Client Added Successfully",
-                timerProgressBar: true,
-                timer: 1500,
-              });
-              setTimeout(() => {
-                navigate("/admin/Clientlist", { state: location.state });
-              }, 1500);
-            } else {
-              Swal.fire({
-                icon: "error",
-                title: response.message,
-                timerProgressBar: true,
-                timer: 1500,
-              });
-            }
-          });
+        await AddClientFun(req);
       }
       else {
-        scrollToFirstError(errors4);
-
+        ScrollToViewFirstErrorContactForm(errors);  
       }
     }
+    if (selectClientType == 3 && validateAllFields(3)) {
+      let formIsValid = true;
+      const newErrors = contacts1.map((contact, index) => {
+        const error = {
+          first_name: contact.first_name ? "" : "First Name is required",
+          last_name: contact.last_name ? "" : "Last Name is required",
+          // role: contact.role ? '' : 'Role is required',
+          phone:
+            contact.phone === ""
+              ? ""
+              : /^\d{9,12}$/.test(contact.phone)
+                ? ""
+                : "Phone Number must be between 9 to 12 digits",
+          alternate_phone:
+            contact.alternate_phone === ""
+              ? ""
+              : /^\d{9,12}$/.test(contact.alternate_phone)
+                ? ""
+                : " Alternate Phone Number must be between 9 to 12 digits",
+          email:
+            contact.email === ""
+              ? ""
+              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+                ? ""
+                : "Valid Email is required",
+          alternate_email:
+            contact.alternate_email === ""
+              ? ""
+              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.alternate_email)
+                ? ""
+                : "Valid Email is required",
+        };
 
-  };
-
-  // scorll to first error
-  const scrollToFirstError = (errors) => {
-
-    const errorField = Object.keys(errors)[0];
-    const errorElement = document.getElementById(errorField);
-    if (errorElement) {
-      errorElement.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  // scroll to first error for contact
-  const scrollToFirstError1 = (errors) => {
-    errors.forEach((errorObj, index) => {
-      for (const field in errorObj) {
-        if (errorObj[field]) {
-          const fieldId = `${field}-${index}`;
-          const errorElement = document.getElementById(fieldId);
-
-
-          if (errorElement) {
-            errorElement.scrollIntoView({ behavior: 'smooth' });
-          }
-          return;
+        if (
+          error.first_name ||
+          error.last_name ||
+          error.role ||
+          error.phone ||
+          error.email
+        ) {
+          formIsValid = false;
         }
-      }
-    });
-  };
+        return error;
+      });
+      setContactsErrors(newErrors);
+      if (formIsValid) {
+        const req = {
+          client_type: "3",
+          customer_id: location.state.id,
+          client_industry_id: getPartnershipDetails.ClientIndustry,
+          trading_name: getPartnershipDetails.TradingName,
+          trading_address: getPartnershipDetails.TradingAddress,
+          vat_registered: getPartnershipDetails.VATRegistered,
+          vat_number: getPartnershipDetails.VATNumber,
+          website: getPartnershipDetails.Website,
+          contactDetails: contacts1,
+        };
 
+        await AddClientFun(req);
+
+      }
+      else {
+        ScrollToViewFirstErrorContactForm(contactsErrors);
+        
+      }
+    }
+    if (selectClientType == 4 && validateAllFields(4)) {
+      const req = {
+        client_type: "4",
+        customer_id: location.state.id,
+        trading_name: getIndivisualDetails.tradingName,
+        first_name: getIndivisualDetails.first_name,
+        last_name: getIndivisualDetails.last_name,
+        phone: getIndivisualDetails.phone,
+        email: getIndivisualDetails.email,
+        residential_address: getIndivisualDetails.residentialAddress,
+        client_code: location.state.id,
+        phone_code: getIndivisualDetails.phone_code,
+      };
+      await dispatch(Add_Client(req))
+        .unwrap()
+        .then((response) => {
+          if (response.status) {
+            Swal.fire({
+              icon: "success",
+              title: "Client Added Successfully",
+              timerProgressBar: true,
+              timer: 1500,
+            });
+            setTimeout(() => {
+              navigate("/admin/Clientlist", { state: location.state });
+            }, 1500);
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: response.message,
+              timerProgressBar: true,
+              timer: 1500,
+            });
+          }
+        });
+    }
+  };
+  
   return (
     <div>
       <div className="container-fluid mt-4">

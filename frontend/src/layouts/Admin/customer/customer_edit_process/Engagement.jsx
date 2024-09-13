@@ -2,7 +2,11 @@ import React, { useContext, useState, useEffect } from "react";
 import { Formik } from "formik";
 import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
-import { JobType } from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import {
+  JobType,
+  customerSourceApi,
+  customerSubSourceApi,
+} from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import { useDispatch } from "react-redux";
 import { Edit_Customer } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useLocation } from "react-router-dom";
@@ -70,6 +74,20 @@ const Engagement = () => {
   ]);
 
   const [jobType, setJobType] = useState([]);
+  const [coustomerSource, setCoustomerSource] = useState([]);
+  const [coustomerSubSource, setCoustomerSubSource] = useState([]);
+
+  const [formState1, setFormState1] = useState({});
+
+  const [formErrors, setFormErrors] = useState({
+    customerJoiningDate: "",
+    customerSource: "",
+    customerSubSource: "",
+  });
+
+  const [checkboxStates, setCheckboxStates] = useState(
+    Array(checkboxOptions.length).fill(0)
+  );
 
   const GetCustomerData = async () => {
     const req = { customer_id: location.state.id, pageStatus: "3" };
@@ -90,17 +108,18 @@ const Engagement = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
   useEffect(() => {
-    GetCustomerData();
+    GetJobTypeApi();
   }, []);
 
-  const [checkboxStates, setCheckboxStates] = useState(
-    Array(checkboxOptions.length).fill(0)
-  );
+  useEffect(() => {
+    customerSourceData();
+    GetCustomerData();
+  }, []);
 
   useEffect(() => {
     if (
@@ -217,6 +236,14 @@ const Engagement = () => {
     }
   }, [customerDetails]);
 
+  useEffect(() => {
+    if (checkboxStates[0] === 0) setErrors1({});
+    if (checkboxStates[1] === 0) setErrors2({});
+    if (checkboxStates[2] === 0) setErrors3({});
+    if (checkboxStates[3] === 0) setErrors4({});
+  }, [checkboxStates]);
+
+
   const handleCheckboxChange = (index) => {
     setCheckboxStates((prevStates) => {
       const newStates = [...prevStates];
@@ -321,7 +348,7 @@ const Engagement = () => {
     setErrors1(newErrors);
     return Object.keys(newErrors).length === 0 ? true : false;
   };
-  
+
   const validate2 = (name, value) => {
     const newErrors = { ...errors2 };
     if (!value) {
@@ -409,7 +436,48 @@ const Engagement = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
+      });
+  };
+
+  const customerSourceData = async () => {
+    const req = { action: "getAll" };
+    const data = { req: req, authToken: token };
+    await dispatch(customerSourceApi(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          console.log(response.data);
+          setCoustomerSource(response.data);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+  useEffect(() => {
+    if (formState1.customerSource) {
+      customerSubSourceData();
+    }
+  }, [formState1]);
+
+  const customerSubSourceData = async () => {
+    const req = {
+      action: "getAll",
+      customer_source_id: 4,
+    };
+    const data = { req: req, authToken: token };
+    await dispatch(customerSubSourceApi(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setCoustomerSubSource(response.data);
+        } else {
+          setCoustomerSubSource([]);
+        }
+      })
+      .catch((error) => {
+        return;
       });
   };
 
@@ -425,19 +493,13 @@ const Engagement = () => {
   };
 
   const handleSubmit = async () => {
-
-    if (!validateForm()) {
-      return;
-    }
-
-
+  
     if (!checkboxStates.some((state) => state === 1)) {
-
       Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Please select at least one option.',
-      })
+        icon: "error",
+        title: "Oops...",
+        text: "Please select at least one option.",
+      });
 
       return;
     }
@@ -450,8 +512,6 @@ const Engagement = () => {
       }
     }
 
-   
-
     let req = {
       customer_id: address,
       pageStatus: "3",
@@ -459,7 +519,7 @@ const Engagement = () => {
       percentage_model: checkboxStates[1].toString(),
       adhoc_payg_hourly: checkboxStates[2].toString(),
       customised_pricing: checkboxStates[3].toString(),
-      ...formState,
+      ...formState1,
     };
 
     if (checkboxStates[0] === 1) {
@@ -508,6 +568,11 @@ const Engagement = () => {
       };
     }
 
+    if (!validateForm()) {
+      return;
+    }
+
+
     const data = { req: req, authToken: token };
     await dispatch(Edit_Customer(data))
       .unwrap()
@@ -518,65 +583,51 @@ const Engagement = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
-  useEffect(() => {
-    if (checkboxStates[0] === 0) setErrors1({});
-    if (checkboxStates[1] === 0) setErrors2({});
-    if (checkboxStates[2] === 0) setErrors3({});
-    if (checkboxStates[3] === 0) setErrors4({});
-  }, [checkboxStates]);
-
-  useEffect(() => {
-    GetJobTypeApi();
-  }, []);
-
-  const [formState, setFormState] = useState({
-    customerJoiningDate: "",
-    customerSource: "",
-    customerSubSource: "",
-  });
-
-  const [formErrors, setFormErrors] = useState({
-    customerJoiningDate: "",
-    customerSource: "",
-    customerSubSource: "",
-  });
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormState({
-      ...formState,
-      [name]: value,
-    });
-    setFormErrors({
-      ...formErrors,
-      [name]: "", // Reset the error message once the input changes
-    });
+    console.log("name", name);
+    console.log("value", value);
+   
+    setFormState1(({
+        ...formState1,
+        [name]: value, 
+      }));
+    
+      setFormErrors((prevErrors) => ({
+        ...prevErrors,
+        [name]: "", 
+      }));
+  
+  
+ 
   };
+  
+
 
   const validateForm = () => {
-    let isValid = true;
-    const errors = {};
+    let errors = {};
 
-    if (!formState.customerJoiningDate) {
-      errors.customerJoiningDate = "Customer Joining Date is required";
-      isValid = false;
+
+    if (!formState1.customerJoiningDate) {
+      errors.customerJoiningDate = "Joining Date is required.";
     }
-    if (!formState.customerSource) {
-      errors.customerSource = "Customer Source is required";
-      isValid = false;
+    if (!formState1.customerSource) {
+      errors.customerSource = "Source is required.";
     }
-    if (!formState.customerSubSource) {
-      errors.customerSubSource = "Customer Sub-Source is required";
-      isValid = false;
+    if (!formState1.customerSubSource) {
+      errors.customerSubSource = "Sub-source is required.";
     }
 
     setFormErrors(errors);
-    return isValid;
+
+    return Object.keys(errors).length === 0; // Return true if no errors
   };
+
+  console.log("formState1", formState1);
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
@@ -594,64 +645,6 @@ const Engagement = () => {
               </div>
 
               <div className="card-body">
-                <div className="row">
-                  <div className="col-lg-4">
-                    <label className="form-label">Customer Joining Date</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      name="customerJoiningDate"
-                      value={formState.customerJoiningDate}
-                      onChange={handleInputChange}
-                    />
-                    {formErrors.customerJoiningDate && (
-                      <span className="error-text">
-                        {formErrors.customerJoiningDate}
-                      </span>
-                    )}
-                  </div>
-                  <div className="col-lg-4">
-                    <label className="form-label">Select Customer Source</label>
-                    <select
-                      className="form-select"
-                      name="customerSource"
-                      value={formState.customerSource}
-                      onChange={handleInputChange}
-                    >
-                      <option value="">Select Customer Source</option>
-                      <option value="Google">Google</option>
-                      <option value="Facebook">Facebook</option>
-                      <option value="Instagram">Instagram</option>
-                    </select>
-                    {formErrors.customerSource && (
-                      <span className="error-text">
-                        {formErrors.customerSource}
-                      </span>
-                    )}
-                  </div>
-                  <div className="col-lg-4">
-                    <label className="form-label">
-                      Select Customer Sub-Source
-                    </label>
-                    <select
-                      className="form-select"
-                      name="customerSubSource"
-                      value={formState.customerSubSource}
-                      onChange={handleInputChange}
-                    >
-                      <option value="">Select Customer Sub-Source</option>
-                      <option value="Google">Google</option>
-                      <option value="Facebook">Facebook</option>
-                      <option value="Instagram">Instagram</option>
-                    </select>
-                    {formErrors.customerSubSource && (
-                      <span className="error-text">
-                        {formErrors.customerSubSource}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
                 <div className="row" style={{ marginTop: 15 }}>
                   {checkboxOptions.map((option, index) => (
                     <div className="col-lg-3" key={option.id}>
@@ -1101,8 +1094,74 @@ const Engagement = () => {
                   Additional information
                 </h4>
               </div>
-  <div className="card-body"></div>
-  </div>
+              <div className="card-body">
+                <div className="row">
+                  <div className="col-lg-4">
+                    <label className="form-label">Customer Joining Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      name="customerJoiningDate"
+                      value={formState1.customerJoiningDate}
+                      onChange={handleInputChange}
+                    />
+                    {formErrors.customerJoiningDate && (
+                      <span className="error-text">
+                        {formErrors.customerJoiningDate}
+                      </span>
+                    )}
+                  </div>
+                  <div className="col-lg-4">
+                    <label className="form-label">Select Customer Source</label>
+                    <select
+                      className="form-select"
+                      name="customerSource"
+                      value={formState1.customerSource}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Select Customer Source</option>
+                      {coustomerSource &&
+                        coustomerSource.map((data) => (
+                          <option key={data.id} value={data.id}>
+                            {data.name}
+                          </option>
+                        ))}
+                    </select>
+                    {formErrors.customerSource && (
+                      <span className="error-text">
+                        {formErrors.customerSource}
+                      </span>
+                    )}
+                  </div>
+                  <div className="col-lg-4">
+                    <label className="form-label">
+                      Select Customer Sub-Source
+                    </label>
+                    <select
+                      className="form-select"
+                      name="customerSubSource"
+                      value={formState1.customerSubSource}
+                      onChange={(e) => handleInputChange(e)}
+                    >
+                      <option value="">Select Customer Sub-Source</option>
+                      {coustomerSubSource &&
+                        coustomerSubSource.map((data) => ( 
+                          data.customer_source_id == formState1.customerSource && (
+                          <option key={data.id} value={data.id}>
+                            {data.name}
+                          </option>
+                          )
+                        ))}
+                    </select>
+                    {formErrors.customerSubSource && (
+                      <span className="error-text">
+                        {formErrors.customerSubSource}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="form__item button__items d-flex justify-content-between">
               <Button
                 className="btn btn-secondary"

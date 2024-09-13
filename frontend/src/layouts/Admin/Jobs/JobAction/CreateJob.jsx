@@ -112,7 +112,7 @@ const CreateJob = () => {
                 }
             })
             .catch((error) => {
-                console.log("Error", error);
+                return;
             });
     }
 
@@ -149,7 +149,7 @@ const CreateJob = () => {
                     }
                 })
                 .catch((error) => {
-                    console.log("Error", error);
+                    return;
                 });
         }
     }
@@ -177,7 +177,7 @@ const CreateJob = () => {
                 }
             })
             .catch((error) => {
-                console.log("Error", error);
+                return;
             });
     }
 
@@ -206,7 +206,7 @@ const CreateJob = () => {
                 }
             })
             .catch((error) => {
-                console.log("Error", error);
+                return;
             });
     }
 
@@ -361,8 +361,6 @@ const CreateJob = () => {
         const data = { req: req, authToken: token }
         setIsSubmitted(true);
         const isValid = validateAllFields();
-
-
         if (isValid) {
             await dispatch(AddAllJobType(data))
                 .unwrap()
@@ -383,7 +381,7 @@ const CreateJob = () => {
                     }
                 })
                 .catch((error) => {
-                    console.log("Error", error);
+                    return;
                 });
         }
         else {
