@@ -105,3 +105,24 @@ export const ScrollToViewFirstError = (newErrors) => {
     }
   }
 }
+
+export const ScrollToViewFirstErrorContactForm = (errors) => {
+  errors.forEach((errorObj, index) => {
+    for (const field in errorObj) {
+      if (errorObj[field]) {
+        const fieldId = `${field}-${index}`;
+        const errorElement = document.getElementById(fieldId);
+
+        if (errorElement) {
+          const elementPosition = errorElement.getBoundingClientRect().top + window.pageYOffset;
+          const offset = 30;
+          window.scrollTo({
+            top: elementPosition - offset,
+            behavior: 'smooth',
+          });
+        }
+        return;
+      }
+    }
+  });
+};

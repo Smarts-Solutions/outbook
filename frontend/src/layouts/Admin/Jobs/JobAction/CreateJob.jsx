@@ -361,8 +361,6 @@ const CreateJob = () => {
         const data = { req: req, authToken: token }
         setIsSubmitted(true);
         const isValid = validateAllFields();
-
-
         if (isValid) {
             await dispatch(AddAllJobType(data))
                 .unwrap()
