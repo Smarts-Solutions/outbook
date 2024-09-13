@@ -425,6 +425,7 @@ const Information = ({ id, pageStatus }) => {
       }
     }
 
+    
     // Update state only if there are errors
     if (Object.keys(newErrors).length !== 0) {
       setErrors1((prevErrors) => ({
