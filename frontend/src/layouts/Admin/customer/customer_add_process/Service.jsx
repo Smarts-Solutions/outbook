@@ -7,6 +7,7 @@ import {
   Get_Service,
   GET_CUSTOMER_DATA,
   Edit_Customer,
+  ADD_SERVICES_CUSTOMERS
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import MultiStepFormContext from "./MultiStepFormContext";
 import CommanModal from "../../../../Components/ExtraComponents/Modals/CommanModal";
@@ -218,8 +219,8 @@ const Service = () => {
 
       return {
         service_id: service.id,
-        account_manager_ids: managerData
-          ? managerData.account_manager_ids.map((manager) => manager.id)
+        account_manager_id: managerData
+          ? managerData.account_manager_id.map((manager) => manager.id)
           : [],
       };
     });
@@ -237,7 +238,7 @@ const Service = () => {
 
     try {
       const response = await dispatch(
-        Edit_Customer({ req, authToken: token })
+        ADD_SERVICES_CUSTOMERS({ req, authToken: token })
       ).unwrap();
       if (response.status) {
         next(response.data);
