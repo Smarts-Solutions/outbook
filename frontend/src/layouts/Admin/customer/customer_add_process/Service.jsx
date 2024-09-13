@@ -372,7 +372,159 @@ const Service = () => {
                               />
                             </div>
                           </th>
-                          <td className="customer_name">{item.name}</td>
+                          {/* <td className="customer_name">{item.name}</td> */}
+                          <div className="accordion" id="accordionExample0">
+  <div className="accordion-item">
+    <h2 className="accordion-header" id="heading-0">
+      <button
+        className="accordion-button collapsed"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapse-0"
+        aria-expanded="false"
+        aria-controls="collapse-0"
+      >
+        VAT Return{" "}
+      </button>
+    </h2>
+    <div
+      id="collapse-0"
+      className="accordion-collapse collapse"
+      aria-labelledby="heading-0"
+      data-bs-parent="#accordionExample0"
+    >
+      <div className="accordion-body">
+        <div className="accordion" id="sub-accordionExample">
+          <div className="accordion-item">
+            <h2 className="accordion-header" id="sub-headingOne0">
+              <button
+                className="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#sub-collapseOne0"
+                aria-expanded="true"
+                aria-controls="collapseOne"
+              >
+                Vat5
+              </button>
+            </h2>
+            <div
+              id="sub-collapseOne0"
+              className="accordion-collapse collapse "
+              aria-labelledby="sub-headingOne0"
+              data-bs-parent="#sub-accordionExample"
+            >
+              <div className="accordion-body">
+                <div className="pb-3">
+                  <div className="row align-items-center">
+                    <div className="col-auto">
+                      <label
+                        htmlFor="uploadButton"
+                        className="btn btn-secondary"
+                      >
+                        <i className="fas fa-upload me-2" />
+                        Upload File
+                        <input
+                          type="file"
+                          id="uploadButton"
+                          className="form-control d-none"
+                          style={{ cursor: "pointer" }}
+                        />
+                      </label>
+                    </div>
+                    <div className="col-auto d-flex align-items-center">
+                      <span className="form-text me-2">No file selected</span>
+                    </div>
+                    <div className="col-auto ms-auto">
+                      <button className="btn btn-primary">
+                        <i className="fas fa-download me-2" />
+                        Download Sample File
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <table className="table table-bordered table-striped">
+                  <thead className="table-primary">
+                    <tr>
+                      <th>Checklist Name</th>
+                      <th>Tasks</th>
+                      <th>Budgeted Hour</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody />
+                </table>
+              </div>
+            </div>
+          </div>
+          <div className="accordion-item">
+            <h2 className="accordion-header" id="sub-headingOne1">
+              <button
+                className="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#sub-collapseOne1"
+                aria-expanded="true"
+                aria-controls="collapseOne"
+              >
+                VAT1
+              </button>
+            </h2>
+            <div
+              id="sub-collapseOne1"
+              className="accordion-collapse collapse "
+              aria-labelledby="sub-headingOne1"
+              data-bs-parent="#sub-accordionExample"
+            >
+              <div className="accordion-body">
+                <div className="pb-3">
+                  <div className="row align-items-center">
+                    <div className="col-auto">
+                      <label
+                        htmlFor="uploadButton"
+                        className="btn btn-secondary"
+                      >
+                        <i className="fas fa-upload me-2" />
+                        Upload File
+                        <input
+                          type="file"
+                          id="uploadButton"
+                          className="form-control d-none"
+                          style={{ cursor: "pointer" }}
+                        />
+                      </label>
+                    </div>
+                    <div className="col-auto d-flex align-items-center">
+                      <span className="form-text me-2">No file selected</span>
+                    </div>
+                    <div className="col-auto ms-auto">
+                      <button className="btn btn-primary">
+                        <i className="fas fa-download me-2" />
+                        Download Sample File
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <table className="table table-bordered table-striped">
+                  <thead className="table-primary">
+                    <tr>
+                      <th>Checklist Name</th>
+                      <th>Tasks</th>
+                      <th>Budgeted Hour</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody />
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
                           <td>
                             <div className="d-flex">
                               <div className="remove">
