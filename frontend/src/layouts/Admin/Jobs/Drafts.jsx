@@ -403,10 +403,7 @@ const Drafts = () => {
 
           </div>
         </>
-
-
-
-
+ 
       </CommonModal>
 
       <CommonModal
@@ -416,12 +413,9 @@ const Drafts = () => {
         title="Draft"
         btn_name="Save"
         cancel_btn="true"
-        hideBtn={false}
-
-      
+        hideBtn={false} 
         handleClose={() => {
-          setViewdraft(false);
-          // formik.resetForm();
+          setViewdraft(false); 
         }}
         Submit_Cancel_Function={() => { setViewdraft(false);}}
         Submit_Function={() =>  setViewdraft(false)}
