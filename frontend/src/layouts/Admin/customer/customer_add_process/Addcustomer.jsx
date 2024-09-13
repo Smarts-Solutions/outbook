@@ -27,7 +27,7 @@ const AddCustomer = () => {
     const [details, setDetails] = useState(detailsInitialState);
     const [address, setAddress] = useState(addressInitialState);
     const [coustomerId, setCoustomerId] = useState("");
-    const [currentStep, setCurrentStep] = useState(2);
+    const [currentStep, setCurrentStep] = useState(0);
    
 
     const { Step } = Steps;
