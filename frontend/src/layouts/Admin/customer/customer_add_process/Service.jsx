@@ -1,14 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Formik } from "formik";
 import { Button } from "antd";
-import MultiStepFormContext from "./MultiStepFormContext";
 import { useDispatch } from "react-redux";
+import * as XLSX from "xlsx";
+import {
+  Get_Service,
+  GET_CUSTOMER_DATA,
+  Edit_Customer,
+} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import MultiStepFormContext from "./MultiStepFormContext";
 import CommanModal from "../../../../Components/ExtraComponents/Modals/CommanModal";
 import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
-import {
-  ADD_SERVICES_CUSTOMERS,
-  Get_Service,
-} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { useLocation } from "react-router-dom";
 import {
   JobType,
   GETTASKDATA,
@@ -18,6 +21,7 @@ import Swal from "sweetalert2";
 const Service = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
   const token = JSON.parse(localStorage.getItem("token"));
+  const location = useLocation();
   const dispatch = useDispatch();
   const [GetAllService, setAllService] = useState({ loading: true, data: [] });
   const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
@@ -28,22 +32,72 @@ const Service = () => {
   const [services, setServices] = useState([]);
   const [tempServices, setTempServices] = useState("");
   const [jobtype, SetJobtype] = useState(false);
-  const [jobTypeData, setJobTypeData] = useState([]);
-  const [getServiceData, setServiceData] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [fileName, setFileName] = useState("No file selected");
+  const [jobTypeData, setJobTypeData] = useState([]);
+  const [showJobTabel, setShowJobTabel] = useState("");
   const [tasksGet, setTasksData] = useState([]);
-
-  useEffect(() => {
-    GetAllServiceData();
-    fetchStaffData();
-  }, []);
+  const [getCustomerService, setCustomerService] = useState({
+    loading: true,
+    data: [],
+  });
 
   useEffect(() => {
     JobTypeDataAPi(services, 2);
   }, [services]);
 
   useEffect(() => {
-    if (searchValue.trim() !== "") {
+    const fetchData = async () => {
+      try {
+        await Promise.all([
+       
+          dispatch(Get_Service({ req: { action: "get" }, authToken: token }))
+            .unwrap()
+            .then((response) =>
+              setAllService({ loading: false, data: response.data })
+            ),
+          dispatch(Staff({ req: { action: "getmanager" }, authToken: token }))
+            .unwrap()
+            .then((response) =>
+              setStaffDataAll({ loading: false, data: response.data })
+            ),
+        ]);
+      } catch (error) {
+        setAllService({ loading: false, data: [] });
+        setStaffDataAll({ loading: false, data: [] });
+      }
+    };
+
+    fetchData();
+  }, [dispatch, token]);
+
+  useEffect(() => {
+    if (getCustomerService.data.services) {
+      setServices(
+        getCustomerService.data.services.map((service) => service.service_id)
+      );
+
+      setManager(
+        getCustomerService.data.services.map((service) => ({
+          service_id: service.service_id,
+          account_manager_ids: service.account_manager_ids
+            ? service.account_manager_ids.map((id) =>
+                staffDataAll.data.find((staff) => staff.id === id)
+              )
+            : [],
+        }))
+      );
+    }
+  }, [getCustomerService.data, staffDataAll.data]);
+
+  useEffect(() => {
+    if (searchValue.trim()) {
+      console.log(
+        "staffDataAll.data",
+        staffDataAll.data.filter((data) =>
+          data.first_name.toLowerCase().includes(searchValue.toLowerCase())
+        )
+      );
       setFilteredData(
         staffDataAll.data.filter((data) =>
           data.first_name.toLowerCase().includes(searchValue.toLowerCase())
@@ -52,61 +106,28 @@ const Service = () => {
     } else {
       setFilteredData([]);
     }
-  }, [searchValue, staffDataAll]);
-
-  const GetAllServiceData = async () => {
-    const req = { action: "get" };
-    const data = { req: req, authToken: token };
-    await dispatch(Get_Service(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          setAllService({ loading: false, data: response.data });
-        } else {
-          setAllService({ loading: false, data: [] });
-        }
-      })
-      .catch((error) => {
-        setAllService({ loading: false, data: [] });
-      });
-  };
-
-  const fetchStaffData = async () => {
-    try {
-      const response = await dispatch(
-        Staff({ req: { action: "getmanager" }, authToken: token })
-      ).unwrap();
-      if (response.status) {
-        setStaffDataAll({ loading: false, data: response.data });
-      } else {
-        setStaffDataAll({ loading: false, data: [] });
-      }
-    } catch (error) {
-      console.error("Error fetching staff data", error);
-      setStaffDataAll({ loading: false, data: [] });
-    }
-  };
+  }, [searchValue, staffDataAll.data]);
 
   const ServicesUpdate = (value, type) => {
     if (type === 2) {
-      setServices((prevServices) => {
-        if (!prevServices.includes(value)) {
-          return [...prevServices, value];
-        }
-        return prevServices;
-      });
+      setServices((prevServices) =>
+        !prevServices.includes(value) ? [...prevServices, value] : prevServices
+      );
     } else if (type === 1) {
-      if (value.length === 0) {
-        setServices([]);
-      } else {
-        setServices(GetAllService.data.map((item) => item.id));
-      }
+      setServices(
+        value.length === 0 ? [] : GetAllService.data.map((item) => item.id)
+      );
     }
   };
 
-  const handleCheckboxChange = (e, item, type) => {
-    if (e) {
-      ServicesUpdate(item.id, type);
+  const handleCheckboxChange = (e, item) => {
+    if (e.target.checked) {
+      JobTypeDataAPi(item, 1);
+      setServices((prevServices) =>
+        !prevServices.includes(item.id)
+          ? [...prevServices, item.id]
+          : prevServices
+      );
     } else {
       setServices((prevServices) =>
         prevServices.filter((service) => service !== item.id)
@@ -116,17 +137,15 @@ const Service = () => {
 
   const handleSelectAllChange = (e) => {
     if (e.target.checked) {
-      ServicesUpdate(GetAllService.data, 1);
+      setServices(GetAllService.data.map((item) => item.id));
     } else {
-      ServicesUpdate([], 1);
+      setServices([]);
     }
   };
 
   const AddManager = () => {
     const trimmedValue = searchValue.trim();
-    if (trimmedValue === "") {
-      return;
-    }
+    if (!trimmedValue) return;
 
     const matchingData = staffDataAll.data.find(
       (data) => data.first_name === trimmedValue
@@ -143,11 +162,11 @@ const Service = () => {
           const existingService = updatedManagers[existingServiceIndex];
 
           if (
-            !existingService.account_manager_id.some(
+            !existingService.account_manager_ids.some(
               (manager) => manager.id === matchingData.id
             )
           ) {
-            existingService.account_manager_id.push(matchingData);
+            existingService.account_manager_ids.push(matchingData);
           }
 
           updatedManagers[existingServiceIndex] = existingService;
@@ -155,91 +174,77 @@ const Service = () => {
         } else {
           return [
             ...prevManager,
-            { service_id: tempServices, account_manager_id: [matchingData] },
+            { service_id: tempServices, account_manager_ids: [matchingData] },
           ];
         }
       });
     }
+
     setSearchValue("");
   };
 
   const removeManager = (id, serviceId) => {
     setManager((prevManager) =>
       prevManager
-        .map((manager) => {
-          if (manager.service_id === serviceId) {
-            return {
-              ...manager,
-              account_manager_id: manager.account_manager_id.filter(
-                (accountManager) => accountManager.id !== id
-              ),
-            };
-          }
-          return manager;
-        })
-        .filter((manager) => manager.account_manager_id.length > 0)
+        .map((manager) =>
+          manager.service_id === serviceId
+            ? {
+                ...manager,
+                account_manager_ids: manager.account_manager_ids.filter(
+                  (accountManager) => accountManager.id !== id
+                ),
+              }
+            : manager
+        )
+        .filter((manager) => manager.account_manager_ids.length > 0)
     );
   };
 
-  const AddServiceId = (id) => {
-    setTempServices(id);
-  };
-
   const handleSubmit = async (values) => {
-    
     if (services.length === 0) {
+    
       Swal.fire({
         icon: "error",
-        title: "Please select services"
+        title: "Oops...",
+        text: "Please select at least one service"
       });
-
       return;
     }
 
-    // Create MatchData
-    let MatchData = services.map((service_id) => {
-      let managerData = getManager.find(
-        (item) => item.service_id === service_id
+    const MatchData = GetAllService.data.map((service) => {
+      const managerData = getManager.find(
+        (item) => item.service_id === service.id
       );
+
       return {
-        service_id: service_id,
-        account_manager_id: managerData
-          ? managerData.account_manager_id.map((manager) => manager.id)
+        service_id: service.id,
+        account_manager_ids: managerData
+          ? managerData.account_manager_ids.map((manager) => manager.id)
           : [],
       };
     });
 
+    const filteredMatchData = MatchData.filter((item) =>
+      services.includes(item.service_id)
+    );
 
-    let TaskGet = [];
-    if (tasksGet.length > 0) {
-      TaskGet = tasksGet.map(({ hours, minutes, ...task }) => ({
-        ...task,
-        budgeted_hours: `${hours}:${minutes}`,
-      }));
-    }
-    // Create request object
-    var req = {
+    const req = {
       customer_id: address,
       pageStatus: "2",
-      services: MatchData,
-      Task:TaskGet
+      services: filteredMatchData,
+      Task: tasksGet,
     };
 
-
-    // Send request
-    const data = { req: req, authToken: token };
-    await dispatch(ADD_SERVICES_CUSTOMERS(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          next(response.data);
-        } else {
-          // Handle error if needed
-        }
-      })
-      .catch((error) => {
-        console.log("Error", error);
-      });
+    try {
+      const response = await dispatch(
+        Edit_Customer({ req, authToken: token })
+      ).unwrap();
+      if (response.status) {
+        next(response.data);
+      }
+    } catch (error) {
+      console.log("Error updating services", error);
+    }
   };
 
   const JobTypeDataAPi = async (req, id) => {
@@ -304,242 +309,438 @@ const Service = () => {
       });
   };
 
+  const TaskUpdate = async (e, id, serviceId) => {
+    if (e.target.files.length > 0) {
+      if (e.target.files[0].name !== "Task.xlsx") {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Please upload the correct file.",
+        });
+        return;
+      }
 
+      const file = e.target.files[0];
+      setFileName(file.name);
+      if (file) {
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+          const data = new Uint8Array(event.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+
+          const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+          const headers = rawData[0];
+          const rows = rawData.slice(1);
+
+          let result = [];
+          let currentId = null;
+          let currentChecklistName = null;
+          let taskList = [];
+
+          rows.forEach((row) => {
+            const idValue = row[headers.indexOf("id")];
+            const checklistName = row[headers.indexOf("Checklist Name")] || "";
+            const taskName = row[headers.indexOf("Task Name")] || "";
+            const budgetHours = row[headers.indexOf("Budget Hours")] || "";
+            const budgetMinutes = row[headers.indexOf("Budget Minutes")] || "";
+
+            if (idValue) {
+              if (currentId !== null) {
+                result.push({
+                  id: currentId,
+                  checklistName: currentChecklistName,
+                  Task: taskList,
+                });
+              }
+
+              currentId = idValue;
+              currentChecklistName = checklistName;
+              taskList = [];
+            }
+
+            if (taskName) {
+              taskList.push({
+                TaskName: taskName,
+                BudgetHour: budgetHours + ":" + budgetMinutes,
+              });
+            }
+          });
+
+          // Push the last item
+          if (currentId !== null) {
+            result.push({
+              id: currentId,
+              checklistName: currentChecklistName,
+              Task: taskList,
+            });
+          }
+          setTasksData((prev) => [
+            ...prev,
+            ...result.map((item) => ({
+              ...item,
+              JobTypeId: id,
+              serviceId: serviceId,
+            })),
+          ]);
+        };
+
+        // Read the file as an ArrayBuffer
+        reader.readAsArrayBuffer(file);
+      }
+    }
+  };
+
+  const handleDelete = (id) => {
+    setTasksData((prev) => prev.filter((task) => task.id !== id));
+  };
+
+  const handleDownload = () => {
+   
+    const fileUrl = "/Task.xlsx";
+
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.setAttribute("download", "Task.xlsx");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  const handleClearFile = () => {
+    setFileName("No file selected");
+
+    document.getElementById("uploadButton").value = null;
+  };
+
+  const handleSearchChange = (e) => {
+ 
+    setSearchValue(e.target.value);
+  };
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
       {({ handleSubmit }) => (
         <div className="details__wrapper">
-          <div className="card report-data pricing-box p-0">
+          <div className="card pricing-box m-2 mt-0">
             <div className="card-header step-header-blue">
-              <h4
-                className="card-title mb-0"
-                style={{ marginBottom: "20px !important" }}
-              >
-                Select Services
-              </h4>
+              <h4 className="card-title mb-0">Select Services</h4>
             </div>
-            <div className="row card-body pt-0">
-              <div className="table-responsive table-card mt-3 mb-1">
-                <table
-                  className="table align-middle table-nowrap"
-                  id="customerTable"
-                >
+            <div className="row card-body">
+              <div className="table-responsive table-card mb-1">
+                <table className="table align-middle table-nowrap">
                   <thead className="table-light table-head-blue">
                     <tr>
                       <th scope="col" style={{ width: 50 }}>
-                        <div className="form-check">
-                          <input
-                            className="form-check-input new_input new-checkbox"
-                            type="checkbox"
-                            id="checkAll"
-                            onChange={handleSelectAllChange}
-                            checked={
-                              services.length === GetAllService.data.length &&
-                              GetAllService.data.length > 0
-                            }
-                          />
-                        </div>
+                        <div className="form-check"></div>
                       </th>
-                      <th>Service Name</th>
-                      <th>Action</th>
+                      <th style={{width:'70%'}}>Service Name</th>
+                      {/* <th width="100"></th> */}
+                      <th className="">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="list form-check-all">
+                  <tbody>
                     {GetAllService.data.length > 0 ? (
                       GetAllService.data.map((item, index) => (
                         <tr key={index}>
-                          <th scope="row">
+                          <th scope="row" className="align-top">
                             <div className="form-check">
                               <input
                                 className="form-check-input new_input new-checkbox"
                                 type="checkbox"
-                                onChange={(e) => {
-                                  handleCheckboxChange(
-                                    e.target.checked,
-                                    item,
-                                    2
-                                  );
-
-
-                                  setServiceData(item);
-
-                                  if (e.target.checked) {
-                                    SetJobtype(true);
-                                  }
-                                }}
                                 checked={services.includes(item.id)}
+                                onChange={(e) => handleCheckboxChange(e, item)}
                               />
                             </div>
                           </th>
-                          {/* <td className="customer_name">{item.name}</td> */}
-                          <div className="accordion" id="accordionExample0">
-  <div className="accordion-item">
-    <h2 className="accordion-header" id="heading-0">
-      <button
-        className="accordion-button collapsed"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#collapse-0"
-        aria-expanded="false"
-        aria-controls="collapse-0"
-      >
-        VAT Return{" "}
-      </button>
-    </h2>
-    <div
-      id="collapse-0"
-      className="accordion-collapse collapse"
-      aria-labelledby="heading-0"
-      data-bs-parent="#accordionExample0"
-    >
-      <div className="accordion-body">
-        <div className="accordion" id="sub-accordionExample">
-          <div className="accordion-item">
-            <h2 className="accordion-header" id="sub-headingOne0">
-              <button
-                className="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#sub-collapseOne0"
-                aria-expanded="true"
-                aria-controls="collapseOne"
-              >
-                Vat5
-              </button>
-            </h2>
-            <div
-              id="sub-collapseOne0"
-              className="accordion-collapse collapse "
-              aria-labelledby="sub-headingOne0"
-              data-bs-parent="#sub-accordionExample"
-            >
-              <div className="accordion-body">
-                <div className="pb-3">
-                  <div className="row align-items-center">
-                    <div className="col-auto">
-                      <label
-                        htmlFor="uploadButton"
-                        className="btn btn-secondary"
-                      >
-                        <i className="fas fa-upload me-2" />
-                        Upload File
-                        <input
-                          type="file"
-                          id="uploadButton"
-                          className="form-control d-none"
-                          style={{ cursor: "pointer" }}
-                        />
-                      </label>
-                    </div>
-                    <div className="col-auto d-flex align-items-center">
-                      <span className="form-text me-2">No file selected</span>
-                    </div>
-                    <div className="col-auto ms-auto">
-                      <button className="btn btn-primary">
-                        <i className="fas fa-download me-2" />
-                        Download Sample File
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <table className="table table-bordered table-striped">
-                  <thead className="table-primary">
-                    <tr>
-                      <th>Checklist Name</th>
-                      <th>Tasks</th>
-                      <th>Budgeted Hour</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody />
-                </table>
-              </div>
-            </div>
-          </div>
-          <div className="accordion-item">
-            <h2 className="accordion-header" id="sub-headingOne1">
-              <button
-                className="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#sub-collapseOne1"
-                aria-expanded="true"
-                aria-controls="collapseOne"
-              >
-                VAT1
-              </button>
-            </h2>
-            <div
-              id="sub-collapseOne1"
-              className="accordion-collapse collapse "
-              aria-labelledby="sub-headingOne1"
-              data-bs-parent="#sub-accordionExample"
-            >
-              <div className="accordion-body">
-                <div className="pb-3">
-                  <div className="row align-items-center">
-                    <div className="col-auto">
-                      <label
-                        htmlFor="uploadButton"
-                        className="btn btn-secondary"
-                      >
-                        <i className="fas fa-upload me-2" />
-                        Upload File
-                        <input
-                          type="file"
-                          id="uploadButton"
-                          className="form-control d-none"
-                          style={{ cursor: "pointer" }}
-                        />
-                      </label>
-                    </div>
-                    <div className="col-auto d-flex align-items-center">
-                      <span className="form-text me-2">No file selected</span>
-                    </div>
-                    <div className="col-auto ms-auto">
-                      <button className="btn btn-primary">
-                        <i className="fas fa-download me-2" />
-                        Download Sample File
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <table className="table table-bordered table-striped">
-                  <thead className="table-primary">
-                    <tr>
-                      <th>Checklist Name</th>
-                      <th>Tasks</th>
-                      <th>Budgeted Hour</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody />
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
-                          <td>
-                            <div className="d-flex">
-                              <div className="remove">
-                                <button
-                                  className="btn btn-sm tn btn-outline-info remove-item-btn"
-                                  onClick={() => {
-                                    setModal(true);
-                                    AddServiceId(item.id);
-                                  }}
+                          <td className="customer_name">
+                            {/* Main Accordion */}
+                            <div
+                              className="accordion"
+                              id={`accordionExample${index}`}
+                            >
+                              <div className="accordion-item">
+                                <h2
+                                  className="accordion-header"
+                                  id={`heading-${index}`}
                                 >
-                                  Assign Account Manager{" "}
-                                  <i className="fa fa-user" />
-                                </button>
+                                  <button
+                                    className="accordion-button collapsed"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target={`#collapse-${index}`}
+                                    aria-expanded="false"
+                                    aria-controls={`collapse-${index}`}
+                                  >
+                                    {item.name}
+                                  </button>
+                                </h2>
+                                <div
+                                  id={`collapse-${index}`}
+                                  className="accordion-collapse collapse"
+                                  aria-labelledby={`heading-${index}`}
+                                  data-bs-parent={`#accordionExample${index}`}
+                                >
+                                  {services.includes(item.id) && (
+                                    <div className="accordion-body">
+                                      <div
+                                        className="accordion"
+                                        id="sub-accordionExample"
+                                      >
+                                        {services.includes(item.id) &&
+                                          jobTypeData &&
+                                          jobTypeData
+                                            .filter(
+                                              (data) =>
+                                                data.service_id === item.id
+                                            )
+                                            .flatMap((data, subIndex) =>
+                                              data.data.map(
+                                                (data1, jobIndex) => (
+                                                  <div
+                                                    className="accordion-item"
+                                                    key={jobIndex}
+                                                  >
+                                                    <h2
+                                                      className="accordion-header"
+                                                      id={`sub-headingOne${jobIndex}`}
+                                                    >
+                                                      <button
+                                                        className="accordion-button collapsed"
+                                                        type="button"
+                                                        data-bs-toggle="collapse"
+                                                        data-bs-target={`#sub-collapseOne${jobIndex}`}
+                                                        aria-expanded="true"
+                                                        aria-controls="collapseOne"
+                                                      >
+                                                        {data1.type}
+                                                      </button>
+                                                    </h2>
+                                                    <div
+                                                      id={`sub-collapseOne${jobIndex}`}
+                                                      className="accordion-collapse collapse "
+                                                      aria-labelledby={`sub-headingOne${jobIndex}`}
+                                                      data-bs-parent="#sub-accordionExample"
+                                                    >
+                                                      <div className="accordion-body">
+                                                        <div className="pb-3">
+                                                          <div className="row align-items-center">
+                                                            {/* Upload File Button */}
+                                                            <div className="col-auto">
+                                                              <label
+                                                                htmlFor="uploadButton"
+                                                                className="btn btn-secondary"
+                                                              >
+                                                                <i className="fas fa-upload me-2"></i>
+                                                                Upload File
+                                                                <input
+                                                                  type="file"
+                                                                  id="uploadButton"
+                                                                  className="form-control d-none"
+                                                                  style={{
+                                                                    cursor:
+                                                                      "pointer",
+                                                                  }}
+                                                                  onChange={(
+                                                                    e
+                                                                  ) =>
+                                                                    TaskUpdate(
+                                                                      e,
+                                                                      data1.id,
+                                                                      item.id
+                                                                    )
+                                                                  }
+                                                                />
+                                                              </label>
+                                                            </div>
+
+                                                            {/* File Name Display and Clear Icon */}
+                                                            <div className="col-auto d-flex align-items-center">
+                                                              <span className="form-text me-2">
+                                                                {fileName}
+                                                              </span>
+                                                              {fileName !==
+                                                                "No file selected" && (
+                                                                <i
+                                                                  className="fas fa-trash text-danger"
+                                                                  style={{
+                                                                    cursor:
+                                                                      "pointer",
+                                                                  }}
+                                                                  onClick={
+                                                                    handleClearFile
+                                                                  }
+                                                                  title="Clear file"
+                                                                ></i>
+                                                              )}
+                                                            </div>
+
+                                                            {/* Download Button */}
+                                                            <div className="col-auto ms-auto">
+                                                              <button
+                                                                onClick={
+                                                                  handleDownload
+                                                                }
+                                                                className="btn btn-primary"
+                                                              >
+                                                                <i className="fas fa-download me-2"></i>
+                                                                Download Sample
+                                                                File
+                                                              </button>
+                                                            </div>
+                                                          </div>
+                                                        </div>
+
+                                                        <table className="table table-bordered table-striped">
+                                                          <thead className="table-primary">
+                                                            <tr>
+                                                              <th>
+                                                                Checklist Name
+                                                              </th>
+                                                              <th>Tasks</th>
+                                                              <th>
+                                                                Budgeted Hour
+                                                              </th>
+                                                              <th>Action</th>
+                                                            </tr>
+                                                          </thead>
+                                                          <tbody>
+                                                            {tasksGet &&
+                                                              tasksGet.map(
+                                                                (TaskShow) => {
+                                                                  if (
+                                                                    data1.id ===
+                                                                      TaskShow.JobTypeId &&
+                                                                    item.id ===
+                                                                      TaskShow.serviceId
+                                                                  ) {
+                                                                    return (
+                                                                      <tr
+                                                                        key={
+                                                                          TaskShow.id
+                                                                        }
+                                                                      >
+                                                                        <td>
+                                                                          {
+                                                                            TaskShow.checklistName
+                                                                          }
+                                                                        </td>
+                                                                        <td>
+                                                                          {TaskShow.Task.map(
+                                                                            (
+                                                                              TaskData
+                                                                            ) => (
+                                                                              <div
+                                                                                key={
+                                                                                  TaskData.id
+                                                                                }
+                                                                                className="mb-2"
+                                                                              >
+                                                                                <input
+                                                                                  type="text"
+                                                                                  className="form-control"
+                                                                                  value={
+                                                                                    TaskData.TaskName
+                                                                                  }
+                                                                                  disabled
+                                                                                />
+                                                                              </div>
+                                                                            )
+                                                                          )}
+                                                                        </td>
+                                                                        <td>
+                                                                          {TaskShow.Task.map(
+                                                                            (
+                                                                              TaskData
+                                                                            ) => (
+                                                                              <div
+                                                                                key={
+                                                                                  TaskData.id
+                                                                                }
+                                                                                className="mb-2"
+                                                                              >
+                                                                                <div className="input-group">
+                                                                                  <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    value={
+                                                                                      TaskData.BudgetHour.split(
+                                                                                        ":"
+                                                                                      )[0]
+                                                                                    }
+                                                                                    disabled
+                                                                                  />
+                                                                                  <span className="input-group-text">
+                                                                                    Hours
+                                                                                  </span>
+                                                                                  <input
+                                                                                    type="text"
+                                                                                    className="form-control"
+                                                                                    value={
+                                                                                      TaskData.BudgetHour.split(
+                                                                                        ":"
+                                                                                      )[1]
+                                                                                    }
+                                                                                    disabled
+                                                                                  />
+                                                                                  <span className="input-group-text">
+                                                                                    Minutes
+                                                                                  </span>
+                                                                                </div>
+                                                                              </div>
+                                                                            )
+                                                                          )}
+                                                                        </td>
+                                                                        <td>
+                                                                          <button
+                                                                            className="btn btn-sm btn-outline-danger"
+                                                                            onClick={() =>
+                                                                              handleDelete(
+                                                                                TaskShow.id
+                                                                              )
+                                                                            }
+                                                                          >
+                                                                            Delete
+                                                                            <i className="ms-1 fa fa-trash"></i>
+                                                                          </button>
+                                                                        </td>
+                                                                      </tr>
+                                                                    );
+                                                                  }
+                                                                }
+                                                              )}
+                                                          </tbody>
+                                                        </table>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                                )
+                                              )
+                                            )}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
+                          </td>
+
+                          <td className="align-top">
+                            <button
+                              className="btn btn-sm btn-outline-info remove-item-btn"
+                              onClick={() => {
+                                setModal(true);
+                                setTempServices(item.id);
+                              }}
+                            >
+                              Assign Account Manager{" "}
+                              <i className="fa fa-user" />
+                            </button>
                           </td>
                         </tr>
                       ))
@@ -555,272 +756,111 @@ const Service = () => {
               </div>
             </div>
           </div>
-          <CommanModal
-            isOpen={jobtype}
-            backdrop="static"
-            size="lg"
-            title="Job Type"
-            hideBtn={true}
-            handleClose={() => SetJobtype(false)}
-          >
-            <table className="table align-middle table-nowrap">
-              {jobTypeData.map((data) => {
-                if (data.service_id === getServiceData.id) {
-                  return data.data.map((item, index) => (
-                    <React.Fragment key={index}>
-                      <thead className="table-light table-head-blue">
-                        <tr>
-                          <td className="p-0">
-                            <div className="form-group mb-0">
-                              <div className="checkbox">
-                                <label
-                                  data-toggle="collapse"
-                                  data-target={`#collapse${index}`}
-                                  aria-expanded="false"
-                                  aria-controls={`collapse${index}`}
-                                  className="accordion-button fs-16 fw-bold py-2"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    onChange={(e) =>
-                                      getCheckListData(getServiceData.id, item)
-                                    }
-                                  />{" "}
-                                  {item.type}
-                                </label>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td className="p-0">
-                            <div
-                              id={`collapse${index}`}
-                              aria-expanded="false"
-                              className="collapse p-2"
-                            >
-                              {tasks && tasks.length > 0 ? (
-                                tasks
-                                  .filter(
-                                    (task) =>
-                                      task.job_type_id === item.id &&
-                                      task.service_id === getServiceData.id
-                                  )
-                                  .map((task, taskIndex) => (
-                                    <div
-                                      className="row py-2 align-items-center"
-                                      key={taskIndex}
-                                    >
-                                      <div className="col-md-5">
-                                        <input
-                                          type="checkbox"
-                                          onChange={(e) => {
-                                            if (e.target.checked) {
-                                              setTasksData((pre) => [
-                                                ...pre,
-                                                {
-                                                  ...task,
-                                                  hours: "",
-                                                  minutes: "",
-                                                },
-                                              ]);
-                                            } else {
-                                              setTasksData((pre) =>
-                                                pre.filter(
-                                                  (t) => t.id !== task.id
-                                                )
-                                              );
-                                            }
-                                          }}
-                                        />{" "}
-                                        {task.name}
-                                      </div>
-                                      <div className="col-lg-7 ps-0">
-                                        <label className="form-label">
-                                          Budgeted Hours
-                                        </label>
-                                        <div className="input-group">
-                                          <input
-                                            type="number"
-                                            className="form-control"
-                                            placeholder="Hours"
-                                            name="hours"
-                                            min={0}
-                                            value={
-                                              tasksGet.find(
-                                                (t) => t.id === task.id
-                                              )?.hours || ""
-                                            }
-                                            onChange={(e) => {
-                                              const hours = e.target.value;
-                                              setTasksData((pre) =>
-                                                pre.map((t) =>
-                                                  t.id === task.id
-                                                    ? { ...t, hours }
-                                                    : t
-                                                )
-                                              );
-                                            }}
-                                          />
-                                          <input
-                                            type="number"
-                                            className="form-control"
-                                            placeholder="Minutes"
-                                            name="minutes"
-                                            min={0}
-                                            max={59}
-                                            value={
-                                              tasksGet.find(
-                                                (t) => t.id === task.id
-                                              )?.minutes || ""
-                                            }
-                                            onChange={(e) => {
-                                              const minutes = e.target.value;
-                                              setTasksData((pre) =>
-                                                pre.map((t) =>
-                                                  t.id === task.id
-                                                    ? { ...t, minutes }
-                                                    : t
-                                                )
-                                              );
-                                            }}
-                                          />
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))
-                              ) : (
-                                <p>No tasks available.</p>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </React.Fragment>
-                  ));
-                }
-                return null;
-              })}
-            </table>
 
-            <div className="d-flex justify-content-end">
-              <Button
-                className="btn btn-info"
-                color="primary"
-                onClick={(e) => SetJobtype(false)}
-              >
-                Submit
-              </Button>
-            </div>
-          </CommanModal>
           <CommanModal
             isOpen={getModal}
             backdrop="static"
-            size="ms"
+            size="ms-5"
             title="Add Account Manager"
             hideBtn={true}
             handleClose={() => setModal(false)}
           >
-            <div className="py-2">
-              <div className="row">
-                <div className="col-9">
-                  <div className="search-box">
-                    <i className="ri-search-line search-icon" />
-                    <input
-                      type="text"
-                      className="form-control search"
-                      placeholder="Search Manager..."
-                      value={searchValue}
-                      onChange={(e) => setSearchValue(e.target.value)}
-                    />
-                  </div>
-                  {filteredData.length > 0 && (
-                    <div className="search-results">
-                      {filteredData.map((data, index) => (
+            <div className="row">
+              <div className="col-9">
+                <div className="search-box">
+                  <i className="ri-search-line search-icon" />
+                  <input
+                    type="text"
+                    className="form-control search"
+                    placeholder="Search Manager..."
+                    value={searchValue}
+                    onChange={handleSearchChange}
+                  />
+                </div>
+
+                <div className="search-results">
+                  {searchValue.trim() === "" ? (
+                    <div className="no-results">
+                      <p>No search value entered</p>
+                    </div>
+                  ) : (
+                    staffDataAll.data
+                      .filter((data) =>
+                        data.first_name
+                          .toLowerCase()
+                          .includes(searchValue.toLowerCase())
+                      )
+                      .map((data, index) => (
                         <div
-                          key={index}
+                          key={data.id || index}
                           className="search-result-item"
                           onClick={() => setSearchValue(data.first_name)}
                         >
                           {data.first_name}
                         </div>
-                      ))}
-                    </div>
+                      ))
                   )}
                 </div>
+              </div>
 
-                <div className="col-3 ps-0">
-                  <div>
-                    <button
-                      type="button"
-                      className="btn btn-secondary add-btn"
-                      id="create-btn"
-                      onClick={AddManager}
-                    >
-                      <i className="pe-2 fa fa-plus"></i>
-                      Add
-                    </button>
-                  </div>
-                </div>
-                <div className="col-md-6" />
-                <div className="table-responsive mt-3 mb-1">
-                  <table
-                    className="table align-middle table-nowrap"
-                    id="customerTable"
-                  >
-                    <thead className="table-light table-head-blue">
-                      <tr>
-                        <th>Account Name</th>
-                        <th className="tabel_left text-align-right">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="list form-check-all">
-                      {getManager.length > 0 ? (
-                        getManager
-                          .filter(
-                            (manager) => manager.service_id === tempServices
-                          )
-                          .map((manager, managerIndex) =>
-                            manager.account_manager_id.map(
-                              (accountManager, accountManagerIndex) => (
-                                <tr
-                                  className="tabel_new"
-                                  key={`${managerIndex}-${accountManagerIndex}`}
-                                >
-                                  <td>{accountManager.first_name}</td>
-                                  <td className="tabel_left">
-                                    <div className="gap-6">
-                                      <div className="remove">
-                                        <a
-                                          onClick={() =>
-                                            removeManager(
-                                              accountManager.id,
-                                              manager.service_id
-                                            )
-                                          }
-                                          className="btn btn-sm text-danger fs-5 remove-item-btn"
-                                        >
-                                          <i className="ti-trash"></i>
-                                        </a>
-                                      </div>
-                                    </div>
-                                  </td>
-                                </tr>
-                              )
+              <div className="col-3">
+                <button
+                  type="button"
+                  className="btn btn-outline-info add-btn"
+                  onClick={AddManager}
+                >
+                  Add
+                  <i className="ps-2 ti-plus"></i>
+                </button>
+              </div>
+
+              <div className="table-responsive mt-3 mb-1">
+                <table className="table align-middle table-nowrap">
+                  <thead className="table-light">
+                    <tr>
+                      <th>Account Name</th>
+                      <th className="text-align-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {getManager.length > 0 ? (
+                      getManager
+                        .filter(
+                          (manager) => manager.service_id === tempServices
+                        )
+                        .flatMap((manager, managerIndex) =>
+                          manager.account_manager_ids.map(
+                            (accountManager, accountManagerIndex) => (
+                              <tr
+                                key={`${managerIndex}-${accountManagerIndex}`} // Ensure unique key for each row
+                              >
+                                <td>{accountManager.first_name}</td>
+                                <td className="text-align-right">
+                                  <button
+                                    onClick={() =>
+                                      removeManager(
+                                        accountManager.id,
+                                        manager.service_id
+                                      )
+                                    }
+                                    className="btn btn-sm remove-item-btn"
+                                  >
+                                    <i className="ti-trash text-danger fs-5"></i>
+                                  </button>
+                                </td>
+                              </tr>
                             )
                           )
-                      ) : (
-                        <tr>
-                          <td colSpan="2" className="text-center">
-                            No staff available
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                        )
+                    ) : (
+                      <tr>
+                        <td colSpan="2" className="text-center">
+                          No staff available
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           </CommanModal>

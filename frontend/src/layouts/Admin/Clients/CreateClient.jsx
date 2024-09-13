@@ -183,7 +183,21 @@ const CreateClient = () => {
         RegisteredOfficeAddress: getSearchDetails[0].address_snippet,
         IncorporationDate: getSearchDetails[0].date_of_creation,
         IncorporationIn: getSearchDetails[0].description,
+        TradingName: getSearchDetails[0].title,
+        TradingAddress: getSearchDetails[0].address_snippet,
       }));
+
+      const newErrors = { ...errors2 };
+      if (getSearchDetails[0].title) delete newErrors["CompanyName"];
+      if (getSearchDetails[0].company_type) delete newErrors["EntityType"];
+      if (getSearchDetails[0].company_status) delete newErrors["CompanyStatus"];
+      if (getSearchDetails[0].company_number) delete newErrors["CompanyNumber"];
+      if (getSearchDetails[0].address_snippet) delete newErrors["RegisteredOfficeAddress"];
+      if (getSearchDetails[0].date_of_creation) delete newErrors["IncorporationDate"];
+      if (getSearchDetails[0].description) delete newErrors["IncorporationIn"];
+      if (getSearchDetails[0].title) delete newErrors["TradingName"];
+      if (getSearchDetails[0].address_snippet) delete newErrors["TradingAddress"];
+      setErrors2(newErrors);
     }
   }, [getSearchDetails]);
 
@@ -299,7 +313,7 @@ const CreateClient = () => {
         return;
       }
     }
-    validate3();
+    validate3(name, value);
     setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
   };
 
@@ -310,7 +324,7 @@ const CreateClient = () => {
         return;
       }
     }
-    validate4();
+    validate4(name, value);
     setIndivisualDetails({ ...getIndivisualDetails, [name]: value });
   };
 
@@ -418,7 +432,84 @@ const CreateClient = () => {
       }
     }
     if (Object.keys(newErrors).length !== 0) {
-      setErrors1((prevErrors) => ({
+      setErrors2((prevErrors) => ({
+        ...prevErrors,
+        ...newErrors,
+      }));
+    }
+    return Object.keys(newErrors).length === 0 ? true : false;
+  };
+
+  const validate3 = (name, value) => {
+    const newErrors = { ...errors3 };
+    if (!value) {
+      switch (name) {
+        case "TradingName":
+          newErrors[name] = "Please Enter Trading Name";
+          break;
+        case "TradingAddress":
+          newErrors[name] = "Please Enter Trading Address";
+          break;
+        case "VATRegistered":
+          newErrors[name] = "Please Enter VAT Registered";
+          break;
+        default:
+          break;
+      }
+    }
+    else {
+
+      delete newErrors[name];
+      setErrors3((prevErrors) => {
+        const updatedErrors = { ...prevErrors };
+        delete updatedErrors[name];
+        return updatedErrors;
+      });
+
+    }
+    if (Object.keys(newErrors).length !== 0) {
+      setErrors3((prevErrors) => ({
+        ...prevErrors,
+        ...newErrors,
+      }));
+    }
+    return Object.keys(newErrors).length === 0 ? true : false;
+  };
+
+  const validate4 = (name, value) => {
+    const newErrors = { ...errors4 }
+    if (!value) {
+      switch (name) {
+        case "tradingName":
+          newErrors[name] = "Please enter Trading Name";
+          break;
+        case "first_name":
+          newErrors[name] = "Please enter First Name";
+          break;
+        case "last_name":
+          newErrors[name] = "Please enter Last Name";
+          break;
+        default:
+          break;
+      }
+    }
+    else {
+      if (name === "email" && !Email_regex(value)) {
+        newErrors[name] = "Please enter valid Email";
+      } else if (name === "phone" && !/^\d{9,12}$/.test(value)) {
+        newErrors[name] = "Phone Number must be between 9 to 12 digits";
+      } else {
+        delete newErrors[name];
+        setErrors4((prevErrors) => {
+
+          const updatedErrors = { ...prevErrors };
+          delete updatedErrors[name];
+          return updatedErrors;
+        });
+      }
+    }
+    if (Object.keys(newErrors).length !== 0) {
+      setErrors4((prevErrors) => ({
         ...prevErrors,
         ...newErrors,
       }));
@@ -427,9 +518,9 @@ const CreateClient = () => {
   };
 
   // validate all fields when submit
-  const validateAllFields = (type) => {
-    const customer_type = [getSoleTraderDetails, getCompanyDetails, getPartnershipDetails];
-    const validate = [validate1, validate2, validate3];
+  const validateAllFields = (type) => { 
+    const customer_type = [getSoleTraderDetails, getCompanyDetails, getPartnershipDetails, getIndivisualDetails];
+    const validate = [validate1, validate2, validate3, validate4];
 
     let isValid = true;
     for (const key in customer_type[type - 1]) {
@@ -440,40 +531,6 @@ const CreateClient = () => {
     return isValid;
   };
 
-  const validate3 = () => {
-    const newErrors = {};
-    for (const key in getPartnershipDetails) {
-      if (!getPartnershipDetails[key]) {
-        if (key === "TradingName") newErrors[key] = "Please Enter Trading Name";
-        else if (key === "TradingAddress")
-          newErrors[key] = "Please Enter Trading Address";
-        else if (key === "VATRegistered")
-          newErrors[key] = "Please Enter VAT Registered";
-      }
-    }
-
-    setErrors3(newErrors);
-
-    return Object.keys(newErrors).length === 0 ? true : false;
-  };
-
-  const validate4 = () => {
-    const newErrors = {};
-    for (const key in getIndivisualDetails) {
-      if (!getIndivisualDetails[key]) {
-        if (key == "tradingName") newErrors[key] = "Please enter Trading Name";
-        else if (key == "first_name")
-          newErrors[key] = "Please enter First Name";
-        else if (key == "last_name") newErrors[key] = "Please enter Last Name";
-      } else if (key == "email" && !Email_regex(getIndivisualDetails[key])) {
-        newErrors[key] = "Please enter valid Email";
-      } else if (key == "phone" && !/^\d{9,12}$/.test(getIndivisualDetails[key])) {
-        newErrors[key] = "Phone Number must be between 9 to 12 digits";
-      }
-    }
-    setErrors4(newErrors);
-    return Object.keys(newErrors).length === 0 ? true : false;
-  };
 
   const getClientIndustry = async () => {
     const req = { action: "get" };
@@ -760,71 +817,119 @@ const CreateClient = () => {
             });
         }
         else {
-          scrollToFirstError(errors);
+          scrollToFirstError1(errors);
         }
       }
       else {
         scrollToFirstError(errors2);
       }
     }
-    if (selectClientType == 3 && validate3()) {
-      let formIsValid = true;
-      const newErrors = contacts1.map((contact, index) => {
-        const error = {
-          first_name: contact.first_name ? "" : "First Name is required",
-          last_name: contact.last_name ? "" : "Last Name is required",
-          // role: contact.role ? '' : 'Role is required',
-          phone:
-            contact.phone === ""
-              ? ""
-              : /^\d{9,12}$/.test(contact.phone)
+    if (selectClientType == 3) {
+      if (validateAllFields(3)) {
+        let formIsValid = true;
+        const newErrors = contacts1.map((contact, index) => {
+          const error = {
+            first_name: contact.first_name ? "" : "First Name is required",
+            last_name: contact.last_name ? "" : "Last Name is required",
+            // role: contact.role ? '' : 'Role is required',
+            phone:
+              contact.phone === ""
                 ? ""
-                : "Phone Number must be between 9 to 12 digits",
-          alternate_phone:
-            contact.alternate_phone === ""
-              ? ""
-              : /^\d{9,12}$/.test(contact.alternate_phone)
+                : /^\d{9,12}$/.test(contact.phone)
+                  ? ""
+                  : "Phone Number must be between 9 to 12 digits",
+            alternate_phone:
+              contact.alternate_phone === ""
                 ? ""
-                : " Alternate Phone Number must be between 9 to 12 digits",
-          email:
-            contact.email === ""
-              ? ""
-              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+                : /^\d{9,12}$/.test(contact.alternate_phone)
+                  ? ""
+                  : " Alternate Phone Number must be between 9 to 12 digits",
+            email:
+              contact.email === ""
                 ? ""
-                : "Valid Email is required",
-          alternate_email:
-            contact.alternate_email === ""
-              ? ""
-              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.alternate_email)
+                : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+                  ? ""
+                  : "Valid Email is required",
+            alternate_email:
+              contact.alternate_email === ""
                 ? ""
-                : "Valid Email is required",
-        };
+                : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.alternate_email)
+                  ? ""
+                  : "Valid Email is required",
+          };
 
-        if (
-          error.first_name ||
-          error.last_name ||
-          error.role ||
-          error.phone ||
-          error.email
-        ) {
-          formIsValid = false;
+          if (
+            error.first_name ||
+            error.last_name ||
+            error.role ||
+            error.phone ||
+            error.email
+          ) {
+            formIsValid = false;
+          }
+          return error;
+        });
+        setContactsErrors(newErrors);
+        if (formIsValid) {
+          const req = {
+            client_type: "3",
+            customer_id: location.state.id,
+            client_industry_id: getPartnershipDetails.ClientIndustry,
+            trading_name: getPartnershipDetails.TradingName,
+            trading_address: getPartnershipDetails.TradingAddress,
+            vat_registered: getPartnershipDetails.VATRegistered,
+            vat_number: getPartnershipDetails.VATNumber,
+            website: getPartnershipDetails.Website,
+            contactDetails: contacts1,
+          };
+
+          await dispatch(Add_Client(req))
+            .unwrap()
+            .then((response) => {
+              if (response.status) {
+                Swal.fire({
+                  icon: "success",
+                  title: "Client Added Successfully",
+                  timerProgressBar: true,
+                  timer: 1500,
+                });
+                setTimeout(() => {
+                  navigate("/admin/Clientlist", {
+                    state: { id: location.state.id },
+                  });
+                }, 1500);
+              } else {
+                Swal.fire({
+                  icon: "error",
+                  title: response.message,
+                  timerProgressBar: true,
+                  timer: 1500,
+                });
+              }
+            });
         }
-        return error;
-      });
-      setContactsErrors(newErrors);
-      if (formIsValid) {
+        else {
+          scrollToFirstError1(contactsErrors);
+        }
+      }
+      else {
+        scrollToFirstError(errors3);
+      }
+    }
+    if (selectClientType == 4) {
+      if (validateAllFields(4)) {
         const req = {
-          client_type: "3",
+          client_type: "4",
           customer_id: location.state.id,
-          client_industry_id: getPartnershipDetails.ClientIndustry,
-          trading_name: getPartnershipDetails.TradingName,
-          trading_address: getPartnershipDetails.TradingAddress,
-          vat_registered: getPartnershipDetails.VATRegistered,
-          vat_number: getPartnershipDetails.VATNumber,
-          website: getPartnershipDetails.Website,
-          contactDetails: contacts1,
+          trading_name: getIndivisualDetails.tradingName,
+          first_name: getIndivisualDetails.first_name,
+          last_name: getIndivisualDetails.last_name,
+          phone: getIndivisualDetails.phone,
+          email: getIndivisualDetails.email,
+          residential_address: getIndivisualDetails.residentialAddress,
+          client_code: location.state.id,
+          phone_code: getIndivisualDetails.phone_code,
         };
-
         await dispatch(Add_Client(req))
           .unwrap()
           .then((response) => {
@@ -836,9 +941,7 @@ const CreateClient = () => {
                 timer: 1500,
               });
               setTimeout(() => {
-                navigate("/admin/Clientlist", {
-                  state: { id: location.state.id },
-                });
+                navigate("/admin/Clientlist", { state: location.state });
               }, 1500);
             } else {
               Swal.fire({
@@ -850,43 +953,12 @@ const CreateClient = () => {
             }
           });
       }
+      else {
+        scrollToFirstError(errors4);
+
+      }
     }
-    if (selectClientType == 4 && validate4()) {
-      const req = {
-        client_type: "4",
-        customer_id: location.state.id,
-        trading_name: getIndivisualDetails.tradingName,
-        first_name: getIndivisualDetails.first_name,
-        last_name: getIndivisualDetails.last_name,
-        phone: getIndivisualDetails.phone,
-        email: getIndivisualDetails.email,
-        residential_address: getIndivisualDetails.residentialAddress,
-        client_code: location.state.id,
-        phone_code: getIndivisualDetails.phone_code,
-      };
-      await dispatch(Add_Client(req))
-        .unwrap()
-        .then((response) => {
-          if (response.status) {
-            Swal.fire({
-              icon: "success",
-              title: "Client Added Successfully",
-              timerProgressBar: true,
-              timer: 1500,
-            });
-            setTimeout(() => {
-              navigate("/admin/Clientlist", { state: location.state });
-            }, 1500);
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: response.message,
-              timerProgressBar: true,
-              timer: 1500,
-            });
-          }
-        });
-    }
+
   };
 
   // scorll to first error
@@ -1334,6 +1406,7 @@ const CreateClient = () => {
                                                 className="form-control"
                                                 placeholder="Search Company"
                                                 name="SearchCompany"
+                                                id="SearchCompany"
                                                 onChange={(e) =>
                                                   setSearchItem(e.target.value)
                                                 }
@@ -1388,6 +1461,7 @@ const CreateClient = () => {
                                               className="form-control input_bg"
                                               placeholder="Enter Company Name"
                                               name="CompanyName"
+                                              id="CompanyName"
                                               onChange={(e) => handleChange2(e)}
                                               value={
                                                 getCompanyDetails.CompanyName
@@ -1414,6 +1488,7 @@ const CreateClient = () => {
                                               className="form-control input_bg"
                                               placeholder="Enter Entity Type"
                                               name="EntityType"
+                                              id="EntityType"
                                               onChange={(e) => handleChange2(e)}
                                               value={
                                                 getCompanyDetails.EntityType
@@ -1441,6 +1516,7 @@ const CreateClient = () => {
                                               className="form-control input_bg"
                                               placeholder="Company Status"
                                               name="CompanyStatus"
+                                              id="CompanyStatus"
                                               onChange={(e) => handleChange2(e)}
                                               value={
                                                 getCompanyDetails.CompanyStatus
@@ -1467,6 +1543,7 @@ const CreateClient = () => {
                                               className="form-control input_bg"
                                               placeholder="Enter Company Number"
                                               name="CompanyNumber"
+                                              id="CompanyNumber"
                                               onChange={(e) => handleChange2(e)}
                                               value={
                                                 getCompanyDetails.CompanyNumber
@@ -1490,6 +1567,7 @@ const CreateClient = () => {
                                               className="form-control input_bg"
                                               placeholder="Incorporation Date"
                                               name="IncorporationDate"
+                                              id="IncorporationDate"
                                               onChange={(e) => handleChange2(e)}
                                               value={
                                                 getCompanyDetails.IncorporationDate
@@ -1516,6 +1594,7 @@ const CreateClient = () => {
                                               className="form-control input_bg"
                                               placeholder="Registered Office Address"
                                               name="RegisteredOfficeAddress"
+                                              id="RegisteredOfficeAddress"
                                               onChange={(e) => handleChange2(e)}
                                               value={
                                                 getCompanyDetails.RegisteredOfficeAddress
@@ -1550,6 +1629,7 @@ const CreateClient = () => {
                                               className="form-control input_bg"
                                               placeholder="Please Enter Incorporation In"
                                               name="IncorporationIn"
+                                              id="IncorporationIn"
                                               onChange={(e) => handleChange2(e)}
                                               value={
                                                 getCompanyDetails.IncorporationIn
@@ -1572,6 +1652,7 @@ const CreateClient = () => {
                                             <select
                                               className="form-select "
                                               name="VATRegistered"
+                                              id="VATRegistered"
                                               onChange={(e) => handleChange2(e)}
                                               defaultValue={0}
                                             >
@@ -1596,6 +1677,7 @@ const CreateClient = () => {
                                                 className="form-control "
                                                 placeholder="VAT Number"
                                                 name="VATNumber"
+                                                id="VATNumber"
                                                 onChange={(e) =>
                                                   handleChange2(e)
                                                 }
@@ -1621,6 +1703,7 @@ const CreateClient = () => {
                                               className="form-control "
                                               placeholder="URL"
                                               name="Website"
+                                              id="Website"
                                               onChange={(e) => handleChange2(e)}
                                               value={getCompanyDetails.Website}
                                             />
@@ -1649,6 +1732,7 @@ const CreateClient = () => {
                                           <select
                                             className="form-select "
                                             name="ClientIndustry"
+                                            id="ClientIndustry"
                                             onChange={(e) => handleChange2(e)}
                                             value={
                                               getCompanyDetails.ClientIndustry
@@ -1690,6 +1774,7 @@ const CreateClient = () => {
                                             className="form-control"
                                             placeholder="Trading Name"
                                             name="TradingName"
+                                            id="TradingName"
                                             onChange={(e) => handleChange2(e)}
                                             value={
                                               getCompanyDetails.TradingName
@@ -1715,6 +1800,7 @@ const CreateClient = () => {
                                             className="form-control"
                                             placeholder="Trading Address"
                                             name="TradingAddress"
+                                            id="TradingAddress"
                                             onChange={(e) => handleChange2(e)}
                                             value={
                                               getCompanyDetails.TradingAddress
@@ -1754,19 +1840,10 @@ const CreateClient = () => {
                                                       <div className="form-check mb-3 d-flex justify-content-end">
                                                         <button
                                                           className="btn btn-danger"
-                                                          onClick={() =>
-                                                            handleDeleteContact(
-                                                              index
-                                                            )
-                                                          }
-                                                          disabled={
-                                                            contacts.length ===
-                                                            1
-                                                          }
+                                                          onClick={() => handleDeleteContact(index)}
+                                                          disabled={contacts.length === 1}
                                                         >
-                                                          <i className="ti-trash  pe-1"></i>{" "}
-                                                          Delete
-                                                        </button>
+                                                          <i className="ti-trash  pe-1"></i>{" "}Delete</button>
                                                       </div>
                                                     </div>
                                                   )}
@@ -1777,22 +1854,14 @@ const CreateClient = () => {
                                                         className="form-label"
                                                       >
                                                         First Name
-                                                        <span
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          *
-                                                        </span>
+                                                        <span style={{ color: "red", }} >*</span>
                                                       </label>
                                                       <input
                                                         type="text"
                                                         className="form-control"
                                                         placeholder="First Name"
                                                         id={`first_name-${index}`}
-                                                        value={
-                                                          contact.first_name
-                                                        }
+                                                        value={contact.first_name}
                                                         onChange={(e) =>
                                                           handleChange(
                                                             index,
@@ -2031,6 +2100,7 @@ const CreateClient = () => {
                                           <select
                                             className="form-select "
                                             name="ClientIndustry"
+                                            id="ClientIndustry"
                                             value={
                                               getPartnershipDetails.ClientIndustry
                                             }
@@ -2072,6 +2142,7 @@ const CreateClient = () => {
                                             className="form-control"
                                             placeholder="Trading Name"
                                             name="TradingName"
+                                            id="TradingName"
                                             value={
                                               getPartnershipDetails.TradingName
                                             }
@@ -2098,6 +2169,7 @@ const CreateClient = () => {
                                             className="form-control"
                                             placeholder="Trading Address"
                                             name="TradingAddress"
+                                            id="TradingAddress"
                                             value={
                                               getPartnershipDetails.TradingAddress
                                             }
@@ -2120,6 +2192,7 @@ const CreateClient = () => {
                                             <select
                                               className="form-select "
                                               name="VATRegistered"
+                                              id="VATRegistered"
                                               defaultValue={0}
                                               onChange={(e) => handleChange3(e)}
                                             >
@@ -2145,6 +2218,7 @@ const CreateClient = () => {
                                               className="form-control "
                                               placeholder="VAT Number"
                                               name="VATNumber"
+                                              id="VATNumber"
                                               value={
                                                 getPartnershipDetails.VATNumber
                                               }
@@ -2169,6 +2243,7 @@ const CreateClient = () => {
                                             className="form-control "
                                             placeholder="URL"
                                             name="Website"
+                                            id="Website"
                                             value={
                                               getPartnershipDetails.Website
                                             }
@@ -2274,6 +2349,7 @@ const CreateClient = () => {
                                                       className="form-control"
                                                       placeholder="First Name"
                                                       name="first_name"
+                                                      id={`first_name-${index}`}
                                                       value={
                                                         contacts1.first_name
                                                       }
@@ -2313,6 +2389,7 @@ const CreateClient = () => {
                                                       className="form-control"
                                                       placeholder=" Last Name"
                                                       name="last_name"
+                                                      id={`last_name-${index}`}
                                                       value={
                                                         contacts1.last_name
                                                       }
@@ -2395,6 +2472,7 @@ const CreateClient = () => {
                                                       <div className="col-md-4 pe-0">
                                                         <select
                                                           className="form-select"
+
                                                           onChange={(e) =>
                                                             handleChange4(
                                                               index,
@@ -2495,6 +2573,7 @@ const CreateClient = () => {
                                                           className="form-control"
                                                           placeholder=" Alternate Phone"
                                                           name="alternate_phone"
+                                                          id={`alternate_phone-${index}`}
                                                           value={
                                                             contacts1.alternate_phone
                                                           }
@@ -2535,6 +2614,7 @@ const CreateClient = () => {
                                                       className="form-control"
                                                       placeholder="Enter Email"
                                                       name="email"
+                                                      id={`email-${index}`}
                                                       value={contacts1.email}
                                                       onChange={(e) =>
                                                         handleChange4(
@@ -2571,6 +2651,7 @@ const CreateClient = () => {
                                                       className="form-control"
                                                       placeholder="Enter Alternate Email"
                                                       name="alternate_email"
+                                                      id={`alternate_email-${index}`}
                                                       value={
                                                         contacts1.alternate_email
                                                       }
@@ -2639,6 +2720,7 @@ const CreateClient = () => {
                                         <input
                                           type="text"
                                           name="tradingName"
+                                          id="tradingName"
                                           className="form-control"
                                           placeholder="Trading Name"
                                           onChange={(e) => handleChangeIndivisul(e)}
@@ -2667,6 +2749,8 @@ const CreateClient = () => {
                                           className="form-control"
                                           placeholder="First Name"
                                           name="first_name"
+                                          id="first_name"
+
                                           value={
                                             getIndivisualDetails.first_name
                                           }
@@ -2692,6 +2776,7 @@ const CreateClient = () => {
                                           className="form-control"
                                           placeholder="Last Name"
                                           name="last_name"
+                                          id="last_name"
                                           value={getIndivisualDetails.last_name}
                                           onChange={(e) => handleChangeIndivisul(e)}
                                         />
@@ -2714,6 +2799,7 @@ const CreateClient = () => {
                                               className="form-select"
                                               onChange={(e) => handleChangeIndivisul(e)}
                                               name="phone_code"
+                                              id="phone_code"
                                               value={
                                                 getIndivisualDetails.phone_code
                                               }
@@ -2736,6 +2822,7 @@ const CreateClient = () => {
                                               className="form-control"
                                               placeholder="Phone Number"
                                               name="phone"
+                                              id="phone"
                                               value={getIndivisualDetails.phone}
                                               onChange={(e) => handleChangeIndivisul(e)}
                                               maxLength={12}
@@ -2764,6 +2851,7 @@ const CreateClient = () => {
                                           className="form-control"
                                           placeholder="Enter Email ID"
                                           name="email"
+                                          id="email"
                                           value={getIndivisualDetails.email}
                                           onChange={(e) => handleChangeIndivisul(e)}
                                         />
@@ -2788,6 +2876,7 @@ const CreateClient = () => {
                                           className="form-control"
                                           placeholder="Residential Address"
                                           name="residentialAddress"
+                                          id="residentialAddress"
                                           value={
                                             getIndivisualDetails.residentialAddress
                                           }
