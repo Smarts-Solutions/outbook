@@ -180,7 +180,7 @@ const Setting = () => {
         icon: "warning",
         timer: 2000,
       });
-      // alert("Please enter " + modalData.fields[0].label);
+      
       return;
     }
     const req = { action: isEdit ? "update" : "add" };

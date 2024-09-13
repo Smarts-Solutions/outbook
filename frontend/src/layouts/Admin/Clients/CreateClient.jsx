@@ -303,7 +303,6 @@ const CreateClient = () => {
     setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
   };
 
-
   const handleChangeIndivisul = (e) => {
     const { name, value } = e.target;
     if (name === "vatNumber" || name === "phone") {
@@ -440,7 +439,6 @@ const CreateClient = () => {
     }
     return isValid;
   };
-
 
   const validate3 = () => {
     const newErrors = {};
@@ -638,7 +636,6 @@ const CreateClient = () => {
     navigate("/admin/Clientlist", { state: { id: location.state.id } });
   };
 
-
   const handleSubmit = async () => {
     if (selectClientType == 1) {
       if (validateAllFields(1)) {
@@ -761,6 +758,9 @@ const CreateClient = () => {
                 });
               }
             });
+        }
+        else {
+          scrollToFirstError(errors);
         }
       }
       else {

@@ -7,6 +7,8 @@ import { useDispatch } from "react-redux";
 import { Edit_Customer } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useLocation } from "react-router-dom";
 import { GET_CUSTOMER_DATA } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import Swal from "sweetalert2";
+
 const checkboxOptions = [
   { id: "formCheck1", label: "FTE/Dedicated Staffing" },
   { id: "formCheck2", label: "Percentage Model" },
@@ -428,10 +430,15 @@ const Engagement = () => {
       return;
     }
 
-console.log("formState", formState);
 
     if (!checkboxStates.some((state) => state === 1)) {
-      alert("Please select at least one option.");
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Please select at least one option.',
+      })
+
       return;
     }
     const validations = [validate1, validate2, validate3, validate4];
