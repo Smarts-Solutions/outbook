@@ -95,7 +95,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         customer_id,
         client_industry_id,
         trading_name,
-        client_code
+        client_code,
       ]);
       client_id = result.insertId;
     } catch (err) {
@@ -555,7 +555,7 @@ WHERE
     } else {
       return { status: false, message: "No customer found with the given ID." };
     }
-  }else  if (client_type == "4") {
+  } else if (client_type == "4") {
     const query = `
  SELECT 
     clients.id AS client_id, 
@@ -590,10 +590,10 @@ WHERE
         id: rows[0].client_id,
         client_type: rows[0].client_type,
         customer_id: rows[0].customer_id,
-      
+
         trading_name: rows[0].trading_name,
         client_code: rows[0].client_code,
-       
+
         status: rows[0].status,
       };
 
@@ -620,7 +620,7 @@ WHERE
     } else {
       return { status: false, message: "No customer found with the given ID." };
     }
-  }  else {
+  } else {
     return { status: false, message: "No customer found with the given ID." };
   }
 };
@@ -794,9 +794,9 @@ const clientUpdate = async (client) => {
     return { status: false, message: "Client Trading Name Already Exists." };
   }
 
-  if(client_type != "4"){
+  if (client_type != "4") {
     try {
-        const query = `
+      const query = `
          UPDATE clients
          SET 
              client_type = ?,
@@ -812,18 +812,21 @@ const clientUpdate = async (client) => {
       `;
       const [result] = await pool.execute(query, [
         client_type,
+        client_industry_id,
         trading_name,
         client_code,
-    
+        trading_address,
+        vat_registered,
+        vat_number,
+        website,
         client_id,
       ]);
     } catch (err) {
       return { status: false, message: "client update Err" };
     }
-  }else{
-  
+  } else {
     try {
-        const query = `
+      const query = `
          UPDATE clients
          SET 
              client_type = ?,
@@ -837,17 +840,13 @@ const clientUpdate = async (client) => {
         client_type,
         trading_name,
         client_code,
-        client_id
+        client_id,
       ]);
     } catch (err) {
-
-        console.log("err", err);
+      console.log("err", err);
       return { status: false, message: "client update Err" };
     }
   }
-
-  
-
 
   if (client_type == "1") {
     const { first_name, last_name, phone, email, residential_address } = client;
@@ -1062,7 +1061,7 @@ const clientUpdate = async (client) => {
       console.log("err", err);
       return { status: false, message: "client update Err Client Type 3" };
     }
-  } else  if (client_type == "4") {
+  } else if (client_type == "4") {
     const { first_name, last_name, phone, email, residential_address } = client;
     let phone_code = client.phone_code == undefined ? "" : client.phone_code;
     try {
