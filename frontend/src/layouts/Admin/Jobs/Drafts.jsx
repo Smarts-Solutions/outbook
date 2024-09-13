@@ -15,7 +15,7 @@ const Drafts = () => {
   const [viewdraft, setViewdraft] = useState(false);
   const [DraftListData, setDraftListData] = useState([]);
   const [errors, setErrors] = useState({});
-  const [SingleDraftData, setSingleDraftData] = useState({});
+  const [SingleDraftData, setSingleDraftData] = useState([]);
   const [AllDraftInputdata, setAllDraftInputdata] = useState({
     draft_sent_on: "",
     feedback_received: "",
@@ -209,6 +209,7 @@ const Drafts = () => {
     },
   ];
 
+  console.log("SingleDraftData" , SingleDraftData)
 
   return (
     <div className=''>
@@ -413,12 +414,19 @@ const Drafts = () => {
         backdrop="static"
         size="md"
         title="Draft"
+        btn_name="Save"
+        cancel_btn="true"
+        hideBtn={false}
 
-        hideBtn={true}
+      
         handleClose={() => {
           setViewdraft(false);
           // formik.resetForm();
-        }}>
+        }}
+        Submit_Cancel_Function={() => { setViewdraft(false);}}
+        Submit_Function={() =>  setViewdraft(false)}
+
+        >
         <div className="av ">
           <div className="row">
             <div className="col-md-6">
@@ -427,7 +435,7 @@ const Drafts = () => {
               </label>
             </div>
             <div className="col-md-6">
-              <span className="text-muted">03/07/2023</span>
+              <span className="text-muted">{SingleDraftData && SingleDraftData.draft_sent_on}</span>
             </div>
           </div>
           <div className="row">
@@ -437,7 +445,7 @@ const Drafts = () => {
               </label>
             </div>
             <div className="col-md-6">
-              <span className="text-muted"> 03/07/2023</span>
+              <span className="text-muted">{SingleDraftData && SingleDraftData.final_draft_sent_on}</span>
             </div>
           </div>
           <div className="row">
@@ -447,7 +455,7 @@ const Drafts = () => {
               </label>
             </div>
             <div className="col-md-6">
-              <span className="text-muted">Yes</span>
+              <span className="text-muted">{SingleDraftData && SingleDraftData.feedback_received==1 ? "Yes" : "No"}</span>
             </div>
           </div>
           <div className="row">
@@ -457,13 +465,10 @@ const Drafts = () => {
               </label>
             </div>
             <div className="col-md-6">
-              <span className="text-muted">This is Feedback from Job</span>
+              <span className="text-muted">{SingleDraftData && SingleDraftData.feedback}</span>
             </div>
           </div>
         </div>
-
-
-
 
       </CommonModal>
     </div>
