@@ -49,7 +49,7 @@ const Queries = () => {
   }, []);
 
   const GetQueryAllList = async () => {
-    const req = { action: "get", job_id: 9 }
+    const req = { action: "get", job_id: location.state.job_id }
     const data = { req: req, authToken: token }
     await dispatch(QueryAction(data))
       .unwrap()
@@ -90,7 +90,7 @@ const Queries = () => {
     if (!validateAllFields()) {
       return;
     }
-    const req = { action: "add", job_id: 9, data: AllQueryInputdata }
+    const req = { action: "add", job_id: location.state.job_id, data: AllQueryInputdata }
     const data = { req: req, authToken: token }
 
     await dispatch(AddQuery(data))
@@ -142,7 +142,6 @@ const Queries = () => {
 
   const validate = (name, value) => {
     const newErrors = { ...errors1 };
-
     if (!value) {
       switch (name) {
         case "QueriesRemaining":

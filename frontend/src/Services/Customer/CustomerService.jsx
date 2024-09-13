@@ -344,3 +344,15 @@ export async function ADD_QUERY(data, token) {
     return err;
   }
 }
+
+export async function DRAFT_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getDraft`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}

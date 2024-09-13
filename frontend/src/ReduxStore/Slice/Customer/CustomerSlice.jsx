@@ -20,6 +20,7 @@ import {
   ADD_MISSION_LOG,
   QUERY_ACTION,
   ADD_QUERY,
+  DRAFT_ACTION,
    
 } from "../../../Services/Customer/CustomerService";
 
@@ -387,6 +388,22 @@ export const AddQuery = createAsyncThunk("addQuerie", async (data) => {
   }
 });
 
+export const DraftAction = createAsyncThunk("getDraft", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await DRAFT_ACTION(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
 
  
 
@@ -417,6 +434,7 @@ const CustomerSlice = createSlice({
     getmissinglog: [],
     queryaction: [],
     addquery: [],
+    getdraftlist: [],
     
   },
   reducers: {},
@@ -641,8 +659,19 @@ const CustomerSlice = createSlice({
       .addCase(AddQuery.rejected, (state) => {
         state.isLoading = false;
         state.isError = true
-      }
-      );
+      })
+      .addCase(DraftAction.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(DraftAction.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.getdraftlist = action.payload;
+      })
+      .addCase(DraftAction.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      });
+
       
   },
 });
