@@ -476,17 +476,12 @@ const Queries = () => {
         size="md"
         title="Query"
         // btn_name="Close"
-        hideBtn={false}
-
+        hideBtn={false} 
         cancel_btn="true"
         btn_2="true"
-        btn_name="Save"
-
-
-
+        btn_name="Save" 
         handleClose={() => {
-          setViewquery(false);
-          // formik.resetForm();
+          setViewquery(false); 
         }}
         Submit_Cancel_Function={() => {  setViewquery(false); }}
         Submit_Function={() =>  setViewquery(false)}
