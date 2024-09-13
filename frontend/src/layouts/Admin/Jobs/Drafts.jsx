@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import Datatable from '../../../Components/ExtraComponents/Datatable';
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { DraftAction } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
+import { DraftAction , AddDraft } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
 import { useLocation } from "react-router-dom";
-
+import sweatalert from 'sweetalert2';
 
 
 const Drafts = () => {
@@ -19,9 +19,23 @@ const Drafts = () => {
     draft_sent_on: "",
     feedback_received: "",
     updated_amendments: "",
+    final_draft_sent_on: "",
     was_it_complete: "",
     enter_feedback: "",
   });
+
+  const resetForm = () => {
+    setAllDraftInputdata({
+      ...AllDraftInputdata,
+      draft_sent_on: "",
+      feedback_received: "",
+      updated_amendments: "",
+      final_draft_sent_on: "",
+      was_it_complete: "",
+      enter_feedback: "",
+
+    });
+  };
 
 
   useEffect(() => {
@@ -29,7 +43,7 @@ const Drafts = () => {
   }, []);
 
   const GetAllDraftList = async () => {
-    const req = { action: "get", job_id: 9 }
+    const req = { action: "get", job_id: location.state.job_id }
     const data = { req: req, authToken: token }
     await dispatch(DraftAction(data))
       .unwrap()
@@ -58,6 +72,9 @@ const Drafts = () => {
       switch (name) {
         case "draft_sent_on":
           newErrors.draft_sent_on = "Draft Sent On is required";
+          break;
+        case "final_draft_sent_on":
+          newErrors.final_draft_sent_on = "Final Draft Sent On is required";
           break;
         case "feedback_received":
           newErrors.feedback_received = "Feedback Received is required";
@@ -94,7 +111,6 @@ const Drafts = () => {
   };
 
 
-  console.log("AllDraftInputdata", AllDraftInputdata)
   const validateAllFields = () => {
     let isValid = true;
     for (const key in AllDraftInputdata) {
@@ -105,53 +121,50 @@ const Drafts = () => {
     return isValid;
   };
 
-  const AddDraft = async () => {
+ 
+  const HandleSubmitDraft = async () => {
+    if (!validateAllFields()) {
+      return;
+    }
     const req = {
       job_id: location.state.job_id,
       draft_sent_on: AllDraftInputdata.draft_sent_on,
-      // final_draft_sent_on: AllDraftInputdata.final_draft_sent_on,
+      final_draft_sent_on: AllDraftInputdata.final_draft_sent_on,
       feedback_received: AllDraftInputdata.feedback_received,
       updated_amendment: AllDraftInputdata.updated_amendments,
-      feedback: AllDraftInputdata.feedback,
-      was_it_complete: AllDraftInputdata.was_it_complete
-
+      feedback: AllDraftInputdata.enter_feedback,
+      was_it_complete: AllDraftInputdata.was_it_complete,
 
     }
- 
-    // if (!validateAllFields()) {
-    //   return;
-    // }
-    // const req = { action: "add", job_id: location.state.job_id, data: AllDraftInputdata }
-    // const data = { req: req, authToken: token }
-
-    // await dispatch(AddQuery(data))
-    //   .unwrap()
-    //   .then((response) => {
-    //     if (response.status) {
-    //       setAddquery(false)
-    //       GetQueryAllList()
-    //       resetForm()
-    //       sweatalert.fire({
-    //         icon: 'success',
-    //         title: response.message,
-    //         timerProgressBar: true,
-    //         showConfirmButton: true,
-    //         timer: 1500
-    //       });
-    //     }
-    //     else {
-    //       sweatalert.fire({
-    //         icon: 'error',
-    //         title: response.message,
-    //         timerProgressBar: true,
-    //         showConfirmButton: true,
-    //         timer: 1500
-    //       });
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     return ;
-    //   })
+    const data = { req: req, authToken: token }
+    await dispatch(AddDraft(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setAdddraft(false)
+          GetAllDraftList()
+          resetForm()
+          sweatalert.fire({
+            icon: 'success',
+            title: response.message,
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 1500
+          });
+        }
+        else {
+          sweatalert.fire({
+            icon: 'error',
+            title: response.message,
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 1500
+          });
+        }
+      })
+      .catch((error) => {
+        return ;
+      })
 
   }
 
@@ -204,16 +217,21 @@ const Drafts = () => {
       <CommonModal
         isOpen={adddraft}
         backdrop="static"
-        size="md"
+        size="lg"
         cancel_btn="true"
         btn_2="true"
-        title="Add Draft
-"
-        hideBtn={true}
+        title="Add Draft"
+        btn_name="Save"
+        hideBtn={false}
         handleClose={() => {
           setAdddraft(false);
-          // formik.resetForm();
-        }}>
+          resetForm();
+          setErrors({});
+          
+        }}
+        Submit_Function={() => HandleSubmitDraft()}
+        Submit_Cancel_Function={() => { setAdddraft(false); resetForm(); setErrors({}); }}
+      >
         <>
           <div className="row">
             <div className="col-lg-6">
@@ -233,6 +251,27 @@ const Drafts = () => {
                 {errors["draft_sent_on"] && (
                   <div className="error-text">
                     {errors["draft_sent_on"]}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="col-lg-6">
+              <div className="mb-3">
+                <label htmlFor="firstNameinput" className="form-label">
+                  Final Draft Sent On
+                </label>
+                <input
+                  type="date"
+                  className="form-control"
+                  placeholder=""
+                  name="final_draft_sent_on"
+                  id="final_draft_sent_on"
+                  onChange={(e) => handleInputChange(e)}
+                  value={AllDraftInputdata.final_draft_sent_on}
+                />
+                {errors["final_draft_sent_on"] && (
+                  <div className="error-text">
+                    {errors["final_draft_sent_on"]}
                   </div>
                 )}
               </div>
@@ -300,7 +339,7 @@ const Drafts = () => {
 
                   className="form-select DraftWasItComplete"
                   aria-label="Default select example"
-                  style={{ color: "#8a8c8e !important" }} 
+                  style={{ color: "#8a8c8e !important" }}
                   name="was_it_complete"
                   id="was_it_complete"
                   onChange={(e) => handleInputChange(e)}
@@ -317,7 +356,7 @@ const Drafts = () => {
                 )}
               </div>
             </div>
-            <div className="col-lg-12">
+            <div className="col-lg-6">
               <div className="mb-3">
                 <label htmlFor="firstNameinput" className="form-label">
                   Enter Feedback

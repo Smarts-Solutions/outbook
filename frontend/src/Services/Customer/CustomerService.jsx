@@ -356,3 +356,15 @@ export async function DRAFT_ACTION(data, token) {
     return await err;
   }
 }
+
+export async function ADD_DRAFT(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}addDraft`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}

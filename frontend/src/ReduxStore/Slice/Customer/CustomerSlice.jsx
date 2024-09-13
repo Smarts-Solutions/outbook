@@ -21,10 +21,12 @@ import {
   QUERY_ACTION,
   ADD_QUERY,
   DRAFT_ACTION,
+  ADD_DRAFT
    
 } from "../../../Services/Customer/CustomerService";
 
 import axios from "axios";
+import { add } from "date-fns";
 const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 
 export async function GET_IP(data, token) {
@@ -404,6 +406,21 @@ export const DraftAction = createAsyncThunk("getDraft", async (data) => {
   }
 });
 
+export const AddDraft = createAsyncThunk("addDraft", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await ADD_DRAFT(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
 
  
 
@@ -435,6 +452,7 @@ const CustomerSlice = createSlice({
     queryaction: [],
     addquery: [],
     getdraftlist: [],
+    adddraft: [],
     
   },
   reducers: {},
@@ -668,6 +686,17 @@ const CustomerSlice = createSlice({
         state.getdraftlist = action.payload;
       })
       .addCase(DraftAction.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(AddDraft.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(AddDraft.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.adddraft = action.payload;
+      })
+      .addCase(AddDraft.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       });
