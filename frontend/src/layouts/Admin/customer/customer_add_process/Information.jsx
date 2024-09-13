@@ -298,7 +298,7 @@ const Information = ({ id, pageStatus }) => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -315,7 +315,7 @@ const Information = ({ id, pageStatus }) => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -647,7 +647,7 @@ const Information = ({ id, pageStatus }) => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -871,7 +871,7 @@ const Information = ({ id, pageStatus }) => {
         }
       })
       .catch((err) => {
-        console.log("Error", err);
+        return;
       });
   };
 
@@ -886,7 +886,7 @@ const Information = ({ id, pageStatus }) => {
     await dispatch(IncorporationApi(data))
       .unwrap()
       .then(async (response) => {
-        console.log("response", response);
+      
         if (response.status) {
           setIncorporationDataAll(response.data);
         } else {
@@ -894,7 +894,7 @@ const Information = ({ id, pageStatus }) => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 

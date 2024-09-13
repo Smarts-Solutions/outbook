@@ -266,7 +266,7 @@ const CreateClient = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -488,7 +488,7 @@ const CreateClient = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -504,7 +504,7 @@ const CreateClient = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -520,7 +520,7 @@ const CreateClient = () => {
         }
       })
       .catch((err) => {
-        console.log("Error", err);
+        return;
       });
   };
 

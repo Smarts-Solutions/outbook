@@ -25,7 +25,7 @@ const Access = () => {
                 setRoleDataAll({ loading: false, data: [] });
             }
         } catch (error) {
-            console.error("Error fetching role data:", error);
+          
             setRoleDataAll({ loading: false, data: [] });
         }
     };
@@ -77,7 +77,7 @@ const Access = () => {
                 setAccessData({ loading: false, data: [] });
             }
         } catch (error) {
-            console.log("Error fetching role data:", error);
+           
             setAccessData({ loading: false, data: [] });
         }
     }
@@ -147,7 +147,7 @@ const Access = () => {
                 });
             }
         } catch (error) {
-            console.error("Error updating permissions:", error);
+          
             Swal.fire({
                 title: 'Error!',
                 text: 'An error occurred while updating permissions. Please try again later.',

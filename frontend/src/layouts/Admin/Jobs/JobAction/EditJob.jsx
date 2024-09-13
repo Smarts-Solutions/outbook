@@ -184,7 +184,7 @@ const EditJob = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   }
 
@@ -212,7 +212,7 @@ const EditJob = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   }
 
@@ -241,7 +241,7 @@ const EditJob = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   }
 
@@ -269,7 +269,7 @@ const EditJob = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
 
   }
@@ -297,7 +297,7 @@ const EditJob = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   }
 
@@ -434,7 +434,7 @@ const EditJob = () => {
           }
         })
         .catch((error) => {
-          console.log("Error", error);
+          return;
         });
     }
     else {

@@ -84,7 +84,7 @@ const CreateCheckList = () => {
           }
         })
         .catch((error) => {
-          console.log("Error fetching checklist data:", error);
+          return;
         });
     }
 
@@ -108,7 +108,7 @@ const CreateCheckList = () => {
           }
         })
         .catch((error) => {
-          console.log("Error fetching services:", error);
+          return;
         });
     }
 
@@ -132,7 +132,7 @@ const CreateCheckList = () => {
         }
       })
       .catch((error) => {
-        console.log("Error fetching client types:", error);
+        return;
       });
   }, [formData.customer_id, location.state?.checklist_id, dispatch, token]);
 
@@ -213,7 +213,7 @@ const CreateCheckList = () => {
         }
       })
       .catch((error) => {
-        console.log("Error fetching job types:", error);
+        return;
       });
   };
 
@@ -287,7 +287,7 @@ const CreateCheckList = () => {
         }
       })
       .catch((error) => {
-        console.log("Error fetching job types:", error);
+        return;
       });
   };
 

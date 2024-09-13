@@ -24,7 +24,7 @@ export const initializeMsal = async () => {
     try {
         await pca.initialize();
     } catch (error) {
-        console.error('Error initializing MSAL:', error);
+      return
     }
 };
 
@@ -35,7 +35,7 @@ export const azureLogin = async () => {
         await pca.loginPopup(loginRequest);
         return pca.getAllAccounts();
     } catch (error) {
-        console.error(error);
+
         return [];
     }
 };

@@ -61,7 +61,7 @@ const Paper = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 

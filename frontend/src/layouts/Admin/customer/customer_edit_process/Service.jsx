@@ -101,12 +101,7 @@ const Service = () => {
 
   useEffect(() => {
     if (searchValue.trim()) {
-      console.log(
-        "staffDataAll.data",
-        staffDataAll.data.filter((data) =>
-          data.first_name.toLowerCase().includes(searchValue.toLowerCase())
-        )
-      );
+    
       setFilteredData(
         staffDataAll.data.filter((data) =>
           data.first_name.toLowerCase().includes(searchValue.toLowerCase())
@@ -252,7 +247,7 @@ const Service = () => {
         next(response.data);
       }
     } catch (error) {
-      console.log("Error updating services", error);
+      return;
     }
   };
 
@@ -314,7 +309,7 @@ const Service = () => {
         }
       })
       .catch((error) => {
-        console.log("Error fetching job types:", error);
+        return;
       });
   };
 

@@ -97,7 +97,7 @@ const Paper = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -125,7 +125,7 @@ const Paper = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -165,7 +165,7 @@ const Paper = () => {
               );
             }
           } catch (error) {
-            console.log("Error", error);
+            return;
           }
         }
       });

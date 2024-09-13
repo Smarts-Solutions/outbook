@@ -43,7 +43,7 @@ const Setting = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 

@@ -68,7 +68,7 @@ const TaskTimesheet = () => {
         }
       })
       .catch((error) => {
-        console.log("error", error)
+        return;
       })
   }
 
@@ -86,7 +86,7 @@ const TaskTimesheet = () => {
         }
       })
       .catch((error) => {
-        console.log("error", error)
+        return;
       })
   }
 
@@ -104,7 +104,7 @@ const TaskTimesheet = () => {
         }
       })
       .catch((error) => {
-        console.log("error", error)
+        return;
       })
   }
 
@@ -163,7 +163,7 @@ const TaskTimesheet = () => {
         }
       })
       .catch((error) => {
-        console.log("error", error)
+        return;
       })
 
   }

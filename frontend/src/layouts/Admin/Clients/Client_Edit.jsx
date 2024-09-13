@@ -721,7 +721,7 @@ const ClientEdit = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+         return;
       });
   };
 
@@ -740,7 +740,7 @@ const ClientEdit = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+         return;
       });
   };
 
@@ -757,7 +757,7 @@ const ClientEdit = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+         return;
       });
   };
 
@@ -773,7 +773,7 @@ const ClientEdit = () => {
         }
       })
       .catch((err) => {
-        console.log("Error", err);
+        return;
       });
   };
 
@@ -789,7 +789,7 @@ const ClientEdit = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+         return;
       });
   };
 

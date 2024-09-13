@@ -323,7 +323,7 @@ const ClientList = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
   const GetAllClientData = async () => {
@@ -339,7 +339,7 @@ const ClientList = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
   const getCheckListData = async () => {
@@ -386,7 +386,7 @@ const ClientList = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
   const ChecklistDelete = async (row) => {
@@ -415,7 +415,7 @@ const ClientList = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
   const handleDelete = async (row, type) => {
@@ -448,7 +448,7 @@ const ClientList = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
   const HandleClientView = (row) => {

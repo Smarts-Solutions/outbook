@@ -112,7 +112,7 @@ const CreateJob = () => {
                 }
             })
             .catch((error) => {
-                console.log("Error", error);
+                return;
             });
     }
 
@@ -149,7 +149,7 @@ const CreateJob = () => {
                     }
                 })
                 .catch((error) => {
-                    console.log("Error", error);
+                    return;
                 });
         }
     }
@@ -177,7 +177,7 @@ const CreateJob = () => {
                 }
             })
             .catch((error) => {
-                console.log("Error", error);
+                return;
             });
     }
 
@@ -206,7 +206,7 @@ const CreateJob = () => {
                 }
             })
             .catch((error) => {
-                console.log("Error", error);
+                return;
             });
     }
 
@@ -383,7 +383,7 @@ const CreateJob = () => {
                     }
                 })
                 .catch((error) => {
-                    console.log("Error", error);
+                    return;
                 });
         }
         else {

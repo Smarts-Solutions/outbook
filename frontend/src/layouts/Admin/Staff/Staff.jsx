@@ -64,7 +64,7 @@ const StaffPage = () => {
                 }
             })
             .catch((error) => {
-                console.log("Error", error);
+                return;
             });
     };
 
@@ -80,7 +80,7 @@ const StaffPage = () => {
                 setServiceDataAll({ loading: false, data: [], staff_id: row.id });
             }
         } catch (error) {
-            console.log("Error", error);
+            return;
         }
 
     };
@@ -97,7 +97,7 @@ const StaffPage = () => {
                 }
             })
             .catch((error) => {
-                console.log("Error", error);
+                return;
             });
     };
 
@@ -222,7 +222,7 @@ const StaffPage = () => {
                     });
                 })
                 .catch((error) => {
-                    console.log("Error", error);
+                    return;
                 });
         }
     });
@@ -283,7 +283,7 @@ const StaffPage = () => {
                         }
                     })
                     .catch((error) => {
-                        console.log("Error", error);
+                        return;
                     });
             }
         })
@@ -322,7 +322,7 @@ const StaffPage = () => {
                 })
             }
         } catch (error) {
-            console.log("Error", error);
+            return;
         }
     };
 

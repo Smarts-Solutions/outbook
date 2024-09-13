@@ -288,7 +288,7 @@ export async function ADD_MISSION_LOG(data, token) {
 
     return await res?.data;
   } catch (err) {
-    console.error("Error:", err);
+
     return err;
   }
 }
@@ -340,7 +340,7 @@ export async function ADD_QUERY(data, token) {
 
     return await res?.data;
   } catch (err) {
-    console.error("Error:", err);
+  
     return err;
   }
 }
