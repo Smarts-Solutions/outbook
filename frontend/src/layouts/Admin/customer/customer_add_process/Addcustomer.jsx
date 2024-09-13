@@ -27,7 +27,7 @@ const AddCustomer = () => {
     const [details, setDetails] = useState(detailsInitialState);
     const [address, setAddress] = useState(addressInitialState);
     const [coustomerId, setCoustomerId] = useState("");
-    const [currentStep, setCurrentStep] = useState(0);
+    const [currentStep, setCurrentStep] = useState(2);
    
 
     const { Step } = Steps;
@@ -90,11 +90,7 @@ const AddCustomer = () => {
                         </div>
                 </div>
         <div className='report-data mt-4'>
-            {/* <div className='d-flex justify-content-between align-items-center'>
-                <div className='tab-title'>
-                    <h3 className='mt-0'>Create New Customer</h3>
-                </div>
-            </div> */}
+           
             <div className="col-sm-12">
                 <div className="page-title-box pt-3">
                
