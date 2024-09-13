@@ -612,7 +612,7 @@ const Service = () => {
                                                                 Checklist Name
                                                               </th>
                                                               <th>Tasks</th>
-                                                              <th>
+                                                              <th style={{width:'280px'}}>
                                                                 Budgeted Hour
                                                               </th>
                                                               <th>Action</th>
@@ -707,15 +707,15 @@ const Service = () => {
                                                                         </td>
                                                                         <td>
                                                                           <button
-                                                                            className="btn btn-sm btn-outline-danger"
+                                                                            className="btn "
                                                                             onClick={() =>
                                                                               handleDelete(
                                                                                 TaskShow.id
                                                                               )
                                                                             }
                                                                           >
-                                                                            Delete
-                                                                            <i className="ms-1 fa fa-trash"></i>
+                                                                            {/* Delete */}
+                                                                            <i className="ms-1  ti-trash fs-4 text-danger"></i>
                                                                           </button>
                                                                         </td>
                                                                       </tr>
