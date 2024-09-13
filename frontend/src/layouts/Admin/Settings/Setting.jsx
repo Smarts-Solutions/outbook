@@ -460,15 +460,17 @@ const Setting = () => {
                     <i className="ti-pencil" />
                   </button>
                 )}
-                {showSettingDeleteTab && (
-                  <button
-                    className="delete-icon"
-                    onClick={() => handleDelete(row, "1")}
-                  >
-                    {" "}
-                    <i className="ti-trash text-danger" />
-                  </button>
-                )}
+                {
+                // showSettingDeleteTab && (
+                //   <button
+                //     className="delete-icon"
+                //     onClick={() => handleDelete(row, "1")}
+                //   >
+                //     {" "}
+                //     <i className="ti-trash text-danger" />
+                //   </button>
+                // )
+                }
               </div>
             ),
             ignoreRowClick: true,
