@@ -41,6 +41,7 @@ const Service = () => {
     loading: true,
     data: [],
   });
+  const [uploadMessage, uploadSetMessage] = useState("");
 
   useEffect(() => {
     JobTypeDataAPi(services, 2);
@@ -323,6 +324,18 @@ const Service = () => {
         return;
       }
 
+
+      uploadSetMessage("File "+e.target.files[0].name+" has been uploaded successfully.")
+
+      // if (e.target.files[0].name !== "Task.xlsx") {
+      //   Swal.fire({
+      //     icon: "error",
+      //     title: "Oops...",
+      //     text: "Please upload the correct file.",
+      //   });
+      //   return;
+      // }
+
       let file = e.target.files[0];
       setFileName(file.name);
       if (file) {
@@ -349,8 +362,8 @@ const Service = () => {
             let idValue = row[headers.indexOf("id")];
             let checklistName = row[headers.indexOf("Checklist Name")] || "";
             let taskName = row[headers.indexOf("Task Name")] || "";
-            let budgetHours = row[headers.indexOf("Budget Hours")] ||0;
-            let budgetMinutes = row[headers.indexOf("Budget Minutes")] || 0;
+            let budgetHours = row[headers.indexOf("Budget Hours")] || "00";
+            let budgetMinutes = row[headers.indexOf("Budget Minutes")] || "00";
 
             if (budgetMinutes > 59) {
               let hours = Math.floor(budgetMinutes / 60);
@@ -425,6 +438,7 @@ const Service = () => {
 
     document.getElementById("uploadButton").value = null;
     setTasksData([]);
+    uploadSetMessage("");
   };
 
   const handleSearchChange = (e) => {
@@ -479,7 +493,7 @@ const Service = () => {
                                   id={`heading-${index}`}
                                 >
                                   <button
-                                    className="accordion-button collapsed fw-bold"
+                                    className="accordion-button collapsed"
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target={`#collapse-${index}`}
@@ -566,8 +580,9 @@ const Service = () => {
                                                                   }
                                                                 />
                                                               </label>
+                                                            
                                                             </div>
-
+                                                           
                                                             {/* File Name Display and Clear Icon */}
                                                             <div className="col-auto d-flex align-items-center">
                                                               <span className="form-text me-2">
@@ -595,7 +610,7 @@ const Service = () => {
                                                                 onClick={
                                                                   handleDownload
                                                                 }
-                                                                className="btn btn-info"
+                                                                className="btn btn-primary"
                                                               >
                                                                 <i className="fas fa-download me-2"></i>
                                                                 Download Sample
@@ -603,16 +618,19 @@ const Service = () => {
                                                               </button>
                                                             </div>
                                                           </div>
+                                                          <span className="form-text" style={{color:"green"}}>
+                                                                {uploadMessage}
+                                                              </span>
                                                         </div>
 
-                                                        <table className="table table-light table-head-blue">
+                                                        <table className="table table-bordered table-striped">
                                                           <thead className="table-primary">
                                                             <tr>
                                                               <th>
                                                                 Checklist Name
                                                               </th>
                                                               <th>Tasks</th>
-                                                              <th style={{width:'280px'}}>
+                                                              <th>
                                                                 Budgeted Hour
                                                               </th>
                                                               <th>Action</th>
@@ -707,15 +725,15 @@ const Service = () => {
                                                                         </td>
                                                                         <td>
                                                                           <button
-                                                                            className="btn "
+                                                                            className="btn btn-sm btn-outline-danger"
                                                                             onClick={() =>
                                                                               handleDelete(
                                                                                 TaskShow.id
                                                                               )
                                                                             }
                                                                           >
-                                                                            {/* Delete */}
-                                                                            <i className="ms-1  ti-trash fs-4 text-danger"></i>
+                                                                            Delete
+                                                                            <i className="ms-1 fa fa-trash"></i>
                                                                           </button>
                                                                         </td>
                                                                       </tr>
