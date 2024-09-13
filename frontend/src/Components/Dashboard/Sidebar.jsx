@@ -51,26 +51,23 @@ const Sidebar = () => {
     navigate(linkPathname);
   };
 
-
   return (
     <div ref={menuRef}>
       <div className="left-sidenav">
         <div className="brand mt-4">
-        <Link
-                      to="/admin/dashboard"
-                      aria-expanded="false"
-                      onClick={(e) => handleLinkClick(e, "/admin/dashboard")}
-                    >
-                      <span className="sidebar-icons">
-                      <img
+          <Link
+            to="/admin/dashboard"
+            aria-expanded="false"
+            onClick={(e) => handleLinkClick(e, "/admin/dashboard")}
+          >
+            <span className="sidebar-icons">
+              <img
                 src="/assets/images/logo.png"
                 alt="logo-large"
                 className="logo-lg logo-light"
               />
-                      </span>
-                      
-                    </Link>
-          
+            </span>
+          </Link>
         </div>
         <div className="menu-content h-100 mm-active" data-simplebar="init">
           <div className="simplebar-wrapper">
@@ -100,7 +97,7 @@ const Sidebar = () => {
                     </Link>
                   </li>
 
-                  {(updatedShowTab && updatedShowTab.customer ||
+                  {((updatedShowTab && updatedShowTab.customer) ||
                     role == "ADMIN" ||
                     role == "SUPERADMIN") && (
                     <li
@@ -124,7 +121,7 @@ const Sidebar = () => {
                     </li>
                   )}
 
-                  {(updatedShowTab && updatedShowTab.status ||
+                  {((updatedShowTab && updatedShowTab.status) ||
                     role == "ADMIN" ||
                     role == "SUPERADMIN") && (
                     <li
@@ -146,7 +143,7 @@ const Sidebar = () => {
                     </li>
                   )}
 
-                  {(updatedShowTab && updatedShowTab.staff ||
+                  {((updatedShowTab && updatedShowTab.staff) ||
                     role == "ADMIN" ||
                     role == "SUPERADMIN") && (
                     <li
@@ -187,26 +184,30 @@ const Sidebar = () => {
                       </Link>
                     </li>
                   )}
-
-                  <li
-                    className={activeLink === "/admin/reports" ? "active" : ""}
-                  >
-                    <Link
-                      to="/admin/reports"
-                      aria-expanded="false"
-                      onClick={(e) => handleLinkClick(e, "/admin/reports")}
+                  {((updatedShowTab && updatedShowTab.report) ||
+                    role == "ADMIN" ||
+                    role == "SUPERADMIN") && (
+                    <li
+                      className={
+                        activeLink === "/admin/reports" ? "active" : ""
+                      }
                     >
-                      <span className="sidebar-icons">
-                        <img
-                          src="/assets/images/sidebar-icons/reports.png"
-                          alt="Report"
-                        />
-                      </span>
-                      <span>Report</span>
-                    </Link>
-                  </li>
-
-                  {(updatedShowTab &&  updatedShowTab.customer ||
+                      <Link
+                        to="/admin/reports"
+                        aria-expanded="false"
+                        onClick={(e) => handleLinkClick(e, "/admin/reports")}
+                      >
+                        <span className="sidebar-icons">
+                          <img
+                            src="/assets/images/sidebar-icons/reports.png"
+                            alt="Report"
+                          />
+                        </span>
+                        <span>Report</span>
+                      </Link>
+                    </li>
+                  )}
+                  {((updatedShowTab && updatedShowTab.customer) ||
                     role == "ADMIN" ||
                     role == "SUPERADMIN") && (
                     <li
