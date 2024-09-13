@@ -70,6 +70,7 @@ const Admin_Route = () => {
     customer: true,
     staff: true,
     status: true,
+    report: true,
   });
 
   useEffect(() => {
@@ -96,6 +97,7 @@ const Admin_Route = () => {
       if (response.data) {
         response.data.forEach((item) => {
           if (!role == "ADMIN" || !role == "SUPERADMIN") {
+
             if (item.permission_name === "setting") {
               const settingView = item.items.find(
                 (item) => item.type === "view"
@@ -126,8 +128,18 @@ const Admin_Route = () => {
               if (statusView && statusView.is_assigned === 0) {
                 navigate("/admin/dashboard");
               }
+            } else if (item.permission_name === "report") {
+              const reportView = item.items.find(
+                (item) => item.type === "view"
+              );
+
+              if (reportView && reportView.is_assigned === 0) {
+                navigate("/admin/dashboard");
+              }
             }
           }
+
+
           const updatedShowTab = { ...showTab };
 
           response.data.forEach((item) => {
@@ -152,9 +164,16 @@ const Admin_Route = () => {
               );
               updatedShowTab.status =
                 statusView && statusView.is_assigned === 1;
+            }else if (item.permission_name === "report") {
+         
+              const reportView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.report =
+              reportView && reportView.is_assigned === 1;
             }
           });
-
+      
           localStorage.setItem(
             "updatedShowTab",
             JSON.stringify(updatedShowTab)
