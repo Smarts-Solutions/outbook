@@ -28,7 +28,7 @@ import Staff from "../layouts/Admin/Staff/Staff";
 import ViewLogs from "../layouts/Admin/Staff/ViewLogs";
 
 import JobType from "../layouts/Admin/Settings/JobType";
-import Subsource from '../layouts/Admin/Settings/Subsource';
+import Subsource from "../layouts/Admin/Settings/Subsource";
 import { RoleAccess } from "../ReduxStore/Slice/Access/AccessSlice";
 
 import AddNewClient from "../layouts/Admin/Clients/CreateClient";
@@ -52,9 +52,6 @@ import Documents from "../layouts/Admin/Jobs/Documents";
 
 import CreateJob from "../layouts/Admin/Jobs/JobAction/CreateJob";
 import JobEdit from "../layouts/Admin/Jobs/JobAction/EditJob";
-
- 
- 
 
 const Admin_Route = () => {
   const dispatch = useDispatch();
@@ -95,9 +92,10 @@ const Admin_Route = () => {
       ).unwrap();
 
       if (response.data) {
+        localStorage.setItem("accessData", JSON.stringify(response.data));
+
         response.data.forEach((item) => {
           if (!role == "ADMIN" || !role == "SUPERADMIN") {
-
             if (item.permission_name === "setting") {
               const settingView = item.items.find(
                 (item) => item.type === "view"
@@ -139,7 +137,6 @@ const Admin_Route = () => {
             }
           }
 
-
           const updatedShowTab = { ...showTab };
 
           response.data.forEach((item) => {
@@ -164,16 +161,15 @@ const Admin_Route = () => {
               );
               updatedShowTab.status =
                 statusView && statusView.is_assigned === 1;
-            }else if (item.permission_name === "report") {
-         
+            } else if (item.permission_name === "report") {
               const reportView = item.items.find(
                 (item) => item.type === "view"
               );
               updatedShowTab.report =
-              reportView && reportView.is_assigned === 1;
+                reportView && reportView.is_assigned === 1;
             }
           });
-      
+
           localStorage.setItem(
             "updatedShowTab",
             JSON.stringify(updatedShowTab)
@@ -223,8 +219,6 @@ const Admin_Route = () => {
             <Route path="/job/jobtimeline" element={<JobTimeline />} />
             <Route path="/job/jobinformation" element={<JobInformation />} />
             <Route path="/add/subSource" element={<Subsource />} />
-
-             
           </Routes>
         </div>
       </div>
