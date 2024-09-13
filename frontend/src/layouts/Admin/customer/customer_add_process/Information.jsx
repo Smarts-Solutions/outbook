@@ -1153,7 +1153,7 @@ const Information = ({ id, pageStatus }) => {
                               )}
                             </div>
                           </div>
-                          <div className="col-lg-4">
+                          <div className="col-lg-4 pe-0">
                             <div className="mb-3">
                               <label className="form-label">Phone</label>
                               <div className="row">
@@ -1176,7 +1176,7 @@ const Information = ({ id, pageStatus }) => {
                                       ))}
                                   </select>
                                 </div>
-                                <div className="mb-3 col-md-8">
+                                <div className="mb-3 col-md-8 ps-1">
                                   <input
                                     type="text"
                                     className="form-control"
@@ -1631,13 +1631,13 @@ const Information = ({ id, pageStatus }) => {
                                           <div className="col-lg-12">
                                             <div className="form-check mb-3 d-flex justify-content-end">
                                               <button
-                                                className="btn btn-danger"
+                                                className="btn "
                                                 onClick={() =>
                                                   handleDeleteContact(index)
                                                 }
                                                 disabled={contacts.length === 1}
                                               >
-                                                Delete
+                                                <i className="ti-trash text-danger fs-4"></i>
                                               </button>
                                             </div>
                                           </div>
@@ -1768,13 +1768,13 @@ const Information = ({ id, pageStatus }) => {
                                           </div>
                                         </div>
 
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 pe-0">
                                           <div className="mb-3">
                                             <label className="form-label">
                                               Phone
                                             </label>
                                             <div className="row">
-                                              <div className="col-md-4">
+                                              <div className="col-md-4 pe-0">
                                                 <select
                                                   className="form-select"
                                                   onChange={(e) =>
@@ -1800,7 +1800,7 @@ const Information = ({ id, pageStatus }) => {
                                                     )}
                                                 </select>
                                               </div>
-                                              <div className="mb-3 col-md-8">
+                                              <div className="mb-3 col-md-8 ps-1">
                                                 <input
                                                   type="text"
                                                   className="form-control"
@@ -1821,7 +1821,7 @@ const Information = ({ id, pageStatus }) => {
                                                 {errors[index] &&
                                                   errors[index].phoneNumber && (
                                                     <div
-                                                      style={{ color: "red" }}
+                                                      className="error-text"
                                                     >
                                                       {errors[index].phoneNumber}
                                                     </div>
@@ -2043,18 +2043,18 @@ const Information = ({ id, pageStatus }) => {
                                     <div className="row">
                                       <div className="col-lg-12">
                                         <div
-                                          className="form-check form-switch form-switch-md mb-3 d-flex justify-content-between"
+                                          className=" form-switch-md mb-3 d-flex justify-content-between"
                                           dir="ltr"
                                         >
                                           <div>
-                                            <label className="form-check-label">
+                                            <label className="form-check-label fw-bold fs-16">
                                               Partner {index + 1}
                                             </label>
                                           </div>
                                           {index !== 0 && index !== 1 && (
                                             <div>
                                               <button
-                                                className="btn btn-danger"
+                                                className="btn "
                                                 type="button"
                                                 onClick={() =>
                                                   handleDeleteContact1(index)
@@ -2063,7 +2063,7 @@ const Information = ({ id, pageStatus }) => {
                                                   contacts1.length === 1
                                                 }
                                               >
-                                                Delete
+                                               <i className="ti-trash text-danger"></i>
                                               </button>
                                             </div>
                                           )}
@@ -2188,7 +2188,7 @@ const Information = ({ id, pageStatus }) => {
                                         </div>
                                       </div>
 
-                                      <div className="col-lg-4">
+                                      <div className="col-lg-4 pe-1">
                                         <div className="mb-3">
                                           <label className="form-label">
                                             Phone
@@ -2219,7 +2219,7 @@ const Information = ({ id, pageStatus }) => {
                                                   ))}
                                               </select>
                                             </div>
-                                            <div className="mb-3 col-md-8">
+                                            <div className="mb-3 col-md-8 ps-0">
                                               <input
                                                 type="text"
                                                 className="form-control"
@@ -2294,7 +2294,7 @@ const Information = ({ id, pageStatus }) => {
                                   className="btn btn-info text-white blue-btn"
                                   onClick={handleAddContact1}
                                 >
-                                  Add Partner
+                                  <i className="fa fa-plus pe-2"></i>Add Partner
                                 </button>
                               </div>
                             </div>

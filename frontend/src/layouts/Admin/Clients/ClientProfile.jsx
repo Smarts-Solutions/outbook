@@ -428,15 +428,15 @@ const ClientList = () => {
                   <div className="col-lg-4 align-self-center">
                     <ul className="list-unstyled personal-detail mb-0">
                       <li className="row">
-                      <div className="col-md-3">
+                      <div className="col-md-12">
                         <b>Trading Name</b>:{" "}</div>
-                        <div className="col-md-9 ps-0">{informationData && informationData.trading_name}</div>
+                        <div className="col-md-12">{informationData && informationData.trading_name}</div>
                       </li>
                       <li className="mt-2 row">
-                      <div className="col-md-3">
+                      <div className="col-md-12">
                         <b>Trading Address</b>:
                         </div>
-                        <div className="col-md-9 ps-0">
+                        <div className="col-md-12">
                         {informationData && informationData.trading_address}
                         </div>
                       </li>
