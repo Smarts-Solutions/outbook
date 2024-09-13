@@ -72,7 +72,7 @@ const MissingLogs = () => {
 
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -177,7 +177,7 @@ const MissingLogs = () => {
         }
       })
       .catch((err) => {
-        console.log(err);
+     return;
       })
   }
 
@@ -195,7 +195,7 @@ const MissingLogs = () => {
         }
       })
       .catch((err) => {
-        console.log(err);
+     return;
       })
   }
 
@@ -233,7 +233,7 @@ const MissingLogs = () => {
         }
       })
       .catch((err) => {
-        console.log(err);
+     return;
       })
   }
 

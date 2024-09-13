@@ -609,7 +609,7 @@ const getCustomer = async (customer) => {
         return { status: true, message: 'Success..', data: result };
 
     } catch (err) {
-        // console.error('Error selecting data:', err);
+
         return { status: true, message: 'Error selecting data', data: err };
     }
 
@@ -622,7 +622,7 @@ const deleteCustomer = async (customer) => {
     //     await pool.execute('DELETE FROM customers WHERE id = ?', [customer_id]);
     //     await pool.execute('DELETE FROM customer_company_information WHERE customer_id = ?', [customer_id]);
     // } catch (err) {
-    //     console.error('Error deleting data:', err);
+
     //     throw err;
     // }
 
@@ -1147,7 +1147,6 @@ const updateProcessCustomerFileGet = async (customerProcessData) => {
         const [result] = await pool.execute(query, [customer_id]);
         return result;
     } catch (err) {
-        //console.error('Error selecting data:', err);
         return [];
     }
 

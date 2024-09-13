@@ -177,7 +177,7 @@ const Admin_Route = () => {
         });
       }
     } catch (error) {
-      console.log("Error fetching access data:", error);
+     return;
     }
   };
 

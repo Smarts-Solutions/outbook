@@ -51,7 +51,9 @@ const CreateCheckList = () => {
             setFormData(data => ({ ...data, service_id: response.data }));
           }
         })
-        .catch(error => console.error("Error fetching service types:", error));
+        .catch((error) =>{
+          return
+        });
     }
 
     const req = { "action": "getClientType" };
@@ -64,7 +66,9 @@ const CreateCheckList = () => {
         }
       })
       .catch((error) => {
-        console.log("Error fetching service types:", error)});
+        return;
+      
+      });
 
   }, [formData.customer_id, dispatch, token]);
 
@@ -152,7 +156,8 @@ const CreateCheckList = () => {
         }
       })
       .catch(error => {
-        console.log("Error fetching job types:", error)});
+        return; 
+      });
   };
 
   const getTaskData = async (job_type_id) => {
@@ -175,7 +180,8 @@ const CreateCheckList = () => {
         }
       })
       .catch((error) =>{
-         console.log("Error fetching job types:", error)});
+        return;  
+      });
   };
 
  
@@ -252,8 +258,10 @@ const CreateCheckList = () => {
           navigate('/admin/Clientlist', { state: { id: location.state.id, route: "Checklist" } });
         }
       })
-      .catch((error) =>
-        console.log("Error fetching job types:", error)
+      .catch((error) =>{
+        return;
+      }
+       
       );
   };
 

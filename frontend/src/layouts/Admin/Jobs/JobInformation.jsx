@@ -153,7 +153,7 @@ const JobInformationPage = ({ job_id }) => {
 
             })
             .catch((error) => {
-                console.log("Error", error);
+                return;
             });
     }
 
@@ -177,7 +177,7 @@ const JobInformationPage = ({ job_id }) => {
                 }
             })
             .catch((error) => {
-                console.log("Error", error);
+                return;
             });
 
     }
@@ -238,7 +238,7 @@ const JobInformationPage = ({ job_id }) => {
                 }
             })
             .catch((error) => {
-                console.log("Error", error);
+                return;
             });
     };
     

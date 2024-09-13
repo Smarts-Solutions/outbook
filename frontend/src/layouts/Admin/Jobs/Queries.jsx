@@ -16,7 +16,6 @@ const Queries = () => {
   const [errors1, setErrors1] = useState({});
   const [singleQueryData, setSingleQueryData] = useState([]);
 
-  console.log("singleQueryData", singleQueryData);
   const [AllQueryInputdata, setAllQueryInputdata] = useState({
     QueriesRemaining: "",
     QueryTitle: "",
@@ -63,7 +62,7 @@ const Queries = () => {
         }
       })
       .catch((error) => {
-        console.log("error", error)
+        return ;
       })
 
 
@@ -83,7 +82,7 @@ const Queries = () => {
         }
       })
       .catch((err) => {
-        console.log(err);
+        return ;
       })
   }
 
@@ -120,7 +119,7 @@ const Queries = () => {
         }
       })
       .catch((error) => {
-        console.log("error", error)
+        return ;
       })
 
   }
