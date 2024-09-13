@@ -42,7 +42,7 @@ const Information = ({ id, pageStatus }) => {
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     tradingName: "",
     tradingAddress: "",
-    vatRegistered: 0,
+    vatRegistered: "0",
     vatNumber: "",
     website: "",
     firstName: "",
@@ -57,7 +57,7 @@ const Information = ({ id, pageStatus }) => {
   const [getPartnershipDetails, setPartnershipDetails] = useState({
     TradingName: "",
     TradingAddress: "",
-    VATRegistered: 0,
+    VATRegistered: "0",
     VATNumber: "",
     Website: "",
   });
@@ -72,7 +72,7 @@ const Information = ({ id, pageStatus }) => {
     RegisteredOfficeAddress: "",
     IncorporationDate: "",
     IncorporationIn: "",
-    VATRegistered: 0,
+    VATRegistered: "0",
     VATNumber: "",
     Website: "",
     TradingName: "",
