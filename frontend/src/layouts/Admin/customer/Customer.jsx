@@ -13,6 +13,8 @@ const Customer = () => {
   const [customerData, setCustomerData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [activeTab, setActiveTab] = useState("this-year");
+  const role = JSON.parse(localStorage.getItem("role"));
+
   const [searchTerm, setSearchTerm] = useState("");
   const [getAccessData, setAccessData] = useState({
     insert: 0,
@@ -20,11 +22,11 @@ const Customer = () => {
     delete: 0,
   });
 
-  const accessData = JSON.parse(localStorage.getItem("accessData")).find(
-    (item) => item.permission_name === "customer"
-  )?.items || [];
+  const accessData =
+    JSON.parse(localStorage.getItem("accessData")).find(
+      (item) => item.permission_name === "customer"
+    )?.items || [];
 
-  // Access control setup
   useEffect(() => {
     const updatedAccess = { insert: 0, update: 0, delete: 0 };
 
@@ -56,8 +58,19 @@ const Customer = () => {
     {
       name: "Trading Name",
       cell: (row) => (
-        <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "150px" }}>
-          <a onClick={() => HandleClientView(row)} style={{ cursor: "pointer", color: "#26bdf0" }} title={row.trading_name}>
+        <div
+          style={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            maxWidth: "150px",
+          }}
+        >
+          <a
+            onClick={() => HandleClientView(row)}
+            style={{ cursor: "pointer", color: "#26bdf0" }}
+            title={row.trading_name}
+          >
             {row.trading_name}
           </a>
         </div>
@@ -75,7 +88,14 @@ const Customer = () => {
     {
       name: "Company Name",
       cell: (row) => (
-        <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "200px" }}>
+        <div
+          style={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            maxWidth: "200px",
+          }}
+        >
           <a title={row.company_name}>{row.company_name}</a>
         </div>
       ),
@@ -103,7 +123,8 @@ const Customer = () => {
     },
     {
       name: "Account Manager",
-      selector: (row) => row.account_manager_firstname + " " + row.account_manager_lastname,
+      selector: (row) =>
+        row.account_manager_firstname + " " + row.account_manager_lastname,
       sortable: true,
       width: "180px",
     },
@@ -123,18 +144,44 @@ const Customer = () => {
     },
     {
       name: "Actions",
-      cell: (row) => (
-        <div style={{ textAlign: "center" }}>
+      cell: (row) => {
+        const hasUpdateAccess = getAccessData.update === 1;
+        const hasDeleteAccess = getAccessData.delete === 1;
 
-     {getAccessData.update === 1 &&     <button className="edit-icon" onClick={() => handleEdit(row)}>
-            <i className="ti-pencil" />
-          </button>}
-          {getAccessData.delete === 1 &&  
-          <button className="delete-icon" onClick={() => handleDelete(row)}>
-            <i className="ti-trash text-danger" />
-          </button>}
-        </div>
-      ),
+        return (
+          <div style={{ textAlign: "center" }}>
+            {role === "ADMIN" || role === "SUPERADMIN" ? (
+              <>
+                <button className="edit-icon" onClick={() => handleEdit(row)}>
+                  <i className="ti-pencil" />
+                </button>
+                <button
+                  className="delete-icon"
+                  onClick={() => handleDelete(row)}
+                >
+                  <i className="ti-trash text-danger" />
+                </button>
+              </>
+            ) : (
+              <>
+                {hasUpdateAccess && (
+                  <button className="edit-icon" onClick={() => handleEdit(row)}>
+                    <i className="ti-pencil" />
+                  </button>
+                )}
+                {hasDeleteAccess && (
+                  <button
+                    className="delete-icon"
+                    onClick={() => handleDelete(row)}
+                  >
+                    <i className="ti-trash text-danger" />
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        );
+      },
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
@@ -205,12 +252,26 @@ const Customer = () => {
               <h3 className="mt-0">Customers</h3>
             </div>
           </div>
-          {getAccessData.insert === 1 && (
+          {role === "ADMIN" || role === "SUPERADMIN" ? (
             <div className="col-md-4">
-              <Link to="/admin/addcustomer" className="btn btn-info text-white float-end blue-btn">
+              <Link
+                to="/admin/addcustomer"
+                className="btn btn-info text-white float-end blue-btn"
+              >
                 <i className="fa fa-plus" /> Add Customer
               </Link>
             </div>
+          ) : (
+            getAccessData.insert === 1 && (
+              <div className="col-md-4">
+                <Link
+                  to="/admin/addcustomer"
+                  className="btn btn-info text-white float-end blue-btn"
+                >
+                  <i className="fa fa-plus" /> Add Customer
+                </Link>
+              </div>
+            )
           )}
         </div>
       </div>
@@ -220,11 +281,17 @@ const Customer = () => {
           <div className="page-title-box pt-0">
             <div className="row align-items-start">
               <div className="col-md-8">
-                <ul className="nav nav-pills rounded-tabs" id="pills-tab" role="tablist">
+                <ul
+                  className="nav nav-pills rounded-tabs"
+                  id="pills-tab"
+                  role="tablist"
+                >
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
                       <button
-                        className={`nav-link ${activeTab === tab.id ? "active" : ""}`}
+                        className={`nav-link ${
+                          activeTab === tab.id ? "active" : ""
+                        }`}
                         id={`${tab.id}-tab`}
                         data-bs-toggle="pill"
                         data-bs-target={`#${tab.id}`}
@@ -257,7 +324,9 @@ const Customer = () => {
           {tabs.map((tab) => (
             <div
               key={tab.id}
-              className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""}`}
+              className={`tab-pane fade ${
+                activeTab === tab.id ? "show active" : ""
+              }`}
               id={tab.id}
               role="tabpanel"
               aria-labelledby={`${tab.id}-tab`}
