@@ -15,6 +15,7 @@ const Drafts = () => {
   const [viewdraft, setViewdraft] = useState(false);
   const [DraftListData, setDraftListData] = useState([]);
   const [errors, setErrors] = useState({});
+  const [SingleDraftData, setSingleDraftData] = useState({});
   const [AllDraftInputdata, setAllDraftInputdata] = useState({
     draft_sent_on: "",
     feedback_received: "",
@@ -57,6 +58,24 @@ const Drafts = () => {
       })
       .catch((error) => {
         return;
+      })
+  }
+
+  const HandleDraftView = async (row) => {
+    const req = { action: "getSingleView", id: row.id }
+    const data = { req: req, authToken: token }
+    await dispatch(DraftAction(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setSingleDraftData(response.data[0]);
+        }
+        else {
+          setSingleDraftData([]);
+        }
+      })
+      .catch((err) => {
+        return ;
       })
   }
 
@@ -178,7 +197,7 @@ const Drafts = () => {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="edit-icon" onClick={() => setViewdraft(true)}>
+          <button className="edit-icon" onClick={() => {HandleDraftView(row) ; setViewdraft(true)}}>
             <i className="fa fa-eye fs-6 text-secondary" />
           </button>
 
