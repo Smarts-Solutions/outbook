@@ -476,9 +476,9 @@ const CreateClient = () => {
     return Object.keys(newErrors).length === 0 ? true : false;
   };
 
-  const validate4 = (name , value) => {
-    const newErrors = {...errors4}
-    if(!value){
+  const validate4 = (name, value) => {
+    const newErrors = { ...errors4 }
+    if (!value) {
       switch (name) {
         case "tradingName":
           newErrors[name] = "Please enter Trading Name";
@@ -517,29 +517,10 @@ const CreateClient = () => {
     return Object.keys(newErrors).length === 0 ? true : false;
   };
 
-    
-
-  //   for (const key in getIndivisualDetails) {
-  //     if (!getIndivisualDetails[key]) {
-  //       if (key == "tradingName") newErrors[key] = "Please enter Trading Name";
-  //       else if (key == "first_name")
-  //         newErrors[key] = "Please enter First Name";
-  //       else if (key == "last_name") newErrors[key] = "Please enter Last Name";
-  //     } else if (key == "email" && !Email_regex(getIndivisualDetails[key])) {
-  //       newErrors[key] = "Please enter valid Email";
-  //     } else if (key == "phone" && !/^\d{9,12}$/.test(getIndivisualDetails[key])) {
-  //       newErrors[key] = "Phone Number must be between 9 to 12 digits";
-  //     }
-  //   }
-  //   setErrors4(newErrors);
-  //   return Object.keys(newErrors).length === 0 ? true : false;
-  // };
- 
   // validate all fields when submit
-  const validateAllFields = (type) => {
-    console.log("type", type);
-    const customer_type = [getSoleTraderDetails, getCompanyDetails, getPartnershipDetails];
-    const validate = [validate1, validate2, validate3];
+  const validateAllFields = (type) => { 
+    const customer_type = [getSoleTraderDetails, getCompanyDetails, getPartnershipDetails, getIndivisualDetails];
+    const validate = [validate1, validate2, validate3, validate4];
 
     let isValid = true;
     for (const key in customer_type[type - 1]) {
@@ -550,9 +531,6 @@ const CreateClient = () => {
     return isValid;
   };
 
-
-
- 
 
   const getClientIndustry = async () => {
     const req = { action: "get" };
@@ -938,7 +916,7 @@ const CreateClient = () => {
         scrollToFirstError(errors3);
       }
     }
-    if (selectClientType == 4 && validate4()) {
+    if (selectClientType == 4) {
       if (validateAllFields(4)) {
         const req = {
           client_type: "4",
@@ -2742,6 +2720,7 @@ const CreateClient = () => {
                                         <input
                                           type="text"
                                           name="tradingName"
+                                          id="tradingName"
                                           className="form-control"
                                           placeholder="Trading Name"
                                           onChange={(e) => handleChangeIndivisul(e)}
@@ -2770,6 +2749,8 @@ const CreateClient = () => {
                                           className="form-control"
                                           placeholder="First Name"
                                           name="first_name"
+                                          id="first_name"
+
                                           value={
                                             getIndivisualDetails.first_name
                                           }
@@ -2795,6 +2776,7 @@ const CreateClient = () => {
                                           className="form-control"
                                           placeholder="Last Name"
                                           name="last_name"
+                                          id="last_name"
                                           value={getIndivisualDetails.last_name}
                                           onChange={(e) => handleChangeIndivisul(e)}
                                         />
@@ -2817,6 +2799,7 @@ const CreateClient = () => {
                                               className="form-select"
                                               onChange={(e) => handleChangeIndivisul(e)}
                                               name="phone_code"
+                                              id="phone_code"
                                               value={
                                                 getIndivisualDetails.phone_code
                                               }
@@ -2839,6 +2822,7 @@ const CreateClient = () => {
                                               className="form-control"
                                               placeholder="Phone Number"
                                               name="phone"
+                                              id="phone"
                                               value={getIndivisualDetails.phone}
                                               onChange={(e) => handleChangeIndivisul(e)}
                                               maxLength={12}
@@ -2867,6 +2851,7 @@ const CreateClient = () => {
                                           className="form-control"
                                           placeholder="Enter Email ID"
                                           name="email"
+                                          id="email"
                                           value={getIndivisualDetails.email}
                                           onChange={(e) => handleChangeIndivisul(e)}
                                         />
@@ -2891,6 +2876,7 @@ const CreateClient = () => {
                                           className="form-control"
                                           placeholder="Residential Address"
                                           name="residentialAddress"
+                                          id="residentialAddress"
                                           value={
                                             getIndivisualDetails.residentialAddress
                                           }

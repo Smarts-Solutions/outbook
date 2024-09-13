@@ -24,6 +24,42 @@ const ClientEdit = () => {
   const [selectClientType, setSelectClientType] = useState(1);
   const [showDropdown, setShowDropdown] = useState(true);
   const [getSearchDetails, setSearchDetails] = useState("");
+  const [searchItem, setSearchItem] = useState("");
+  const [contacts1, setContacts1] = useState([]);
+  const [errors1, setErrors1] = useState({});
+  const [errors2, setErrors2] = useState({});
+  const [errors3, setErrors3] = useState({});
+  const [errors4, setErrors4] = useState({});
+  const [errors, setErrors] = useState([
+    {
+      first_name: false,
+      last_name: false,
+      customer_contact_person_role_id: false,
+      phoneCode: false,
+      phone: false,
+      email: false,
+    },
+  ]);
+  const [contactsErrors, setContactsErrors] = useState([
+    {
+      first_name: "",
+      last_name: "",
+      customer_contact_person_role_id: "",
+      phone: "",
+      alternate_phone: "",
+      email: "",
+      alternate_email: "",
+    },
+    {
+      first_name: "",
+      last_name: "",
+      customer_contact_person_role_id: "",
+      phone: "",
+      alternate_phone: "",
+      email: "",
+      alternate_email: "",
+    },
+  ]);
   const [personRoleDataAll, setPersonRoleDataAll] = useState({
     loading: true,
     data: [],
@@ -32,17 +68,10 @@ const ClientEdit = () => {
     loading: true,
     data: [],
   });
-  const [searchItem, setSearchItem] = useState("");
-  const [errors1, setErrors1] = useState({});
-  const [errors2, setErrors2] = useState({});
-  const [errors3, setErrors3] = useState({});
-  const [errors4, setErrors4] = useState({});
-
   const [getClientDetails, setClientDetails] = useState({
     loading: true,
     data: [],
   });
-
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     IndustryType: "",
     tradingName: "",
@@ -81,27 +110,6 @@ const ClientEdit = () => {
     VATNumber: "",
     Website: "",
   });
-  const [contacts1, setContacts1] = useState([]);
-  const [contactsErrors, setContactsErrors] = useState([
-    {
-      first_name: "",
-      last_name: "",
-      customer_contact_person_role_id: "",
-      phone: "",
-      alternate_phone: "",
-      email: "",
-      alternate_email: "",
-    },
-    {
-      first_name: "",
-      last_name: "",
-      customer_contact_person_role_id: "",
-      phone: "",
-      alternate_phone: "",
-      email: "",
-      alternate_email: "",
-    },
-  ]);
   const [contacts, setContacts] = useState([
     {
       authorised_signatory_status: 0,
@@ -112,16 +120,6 @@ const ClientEdit = () => {
       phone: "",
       phone_code: "",
       email: "",
-    },
-  ]);
-  const [errors, setErrors] = useState([
-    {
-      first_name: false,
-      last_name: false,
-      customer_contact_person_role_id: false,
-      phoneCode: false,
-      phone: false,
-      email: false,
     },
   ]);
   const [getIndivisualDetails, setIndivisualDetails] = useState({
@@ -385,27 +383,8 @@ const ClientEdit = () => {
     setErrors(newErrors);
   };
 
-  const handleChange1 = (e) => {
-    const { name, value } = e.target;
-    if (name === "vatNumber" || name === "phone") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
-    validate1();
-    setSoleTraderDetails({ ...getSoleTraderDetails, [name]: value });
-  };
+ 
 
-  const handleChange2 = (e) => {
-    const { name, value } = e.target;
-    if (name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
-    validate2();
-    setCompanyDetails({ ...getCompanyDetails, [name]: value });
-  };
 
   const handleChange = (index, field, value) => {
     const newContacts = contacts.map((contact, i) =>
@@ -417,16 +396,7 @@ const ClientEdit = () => {
     validateField(index, field, value);
   };
 
-  const handleChange3 = (e) => {
-    const { name, value } = e.target;
-    if (name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
-    validate3();
-    setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
-  };
+ 
 
   const handleChange4 = (index, field, value) => {
     let newValue = value;
@@ -793,78 +763,198 @@ const ClientEdit = () => {
       });
   };
 
-  const validate1 = () => {
-    const newErrors = {};
-    for (const key in getSoleTraderDetails) {
-      if (!getSoleTraderDetails[key]) {
-        if (key == "tradingName") newErrors[key] = "Please enter Trading Name";
-        else if (key == "tradingAddress")
-          newErrors[key] = "Please enter Trading Address";
-        else if (key == "vatRegistered")
-          newErrors[key] = "Please select VAT Registered";
-        else if (key == "first_name")
-          newErrors[key] = "Please enter First Name";
-        else if (key == "last_name") newErrors[key] = "Please enter Last Name";
-      } else if (key == "email" && !Email_regex(getSoleTraderDetails[key])) {
-        newErrors[key] = "Please enter valid Email";
-      } else if (
-        key == "phone" &&
-        !/^\d{9,12}$/.test(getSoleTraderDetails[key])
-      ) {
-        newErrors[key] = "Phone Number must be between 9 to 12 digits";
+  const handleChange1 = (e) => {
+    const { name, value } = e.target;
+    if (name === "vatNumber" || name === "phone") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
       }
     }
-    setErrors1(newErrors);
+    validate1(name , value);
+    setSoleTraderDetails({ ...getSoleTraderDetails, [name]: value });
+  };
+
+  const handleChange2 = (e) => {
+    const { name, value } = e.target;
+    if (name === "VATNumber") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    validate2(name , value);
+    setCompanyDetails({ ...getCompanyDetails, [name]: value });
+  };
+
+  const handleChange3 = (e) => {
+    const { name, value } = e.target;
+    if (name === "VATNumber") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    validate3(name , value);
+    setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
+  };
+
+  const validate1 = (name, value) => {
+    const newErrors = { ...errors1 };
+    if (!value) {
+      switch (name) {
+        case "tradingName":
+          newErrors[name] = "Please enter Trading Name";
+          break;
+        case "tradingAddress":
+          newErrors[name] = "Please enter Trading Address";
+          break;
+        case "vatRegistered":
+          newErrors[name] = "Please select VAT Registered";
+          break;
+        case "first_name":
+          newErrors[name] = "Please enter First Name";
+          break;
+        case "last_name":
+          newErrors[name] = "Please enter Last Name";
+          break;
+        case "email":
+          newErrors[name] = "Please enter Email";
+          break;
+        default:
+          break;
+      }
+    }
+    else {
+      if (name === "email" && !Email_regex(value)) {
+        newErrors[name] = "Please enter valid Email";
+      } else if (name === "phone" && !/^\d{9,12}$/.test(value)) {
+        newErrors[name] = "Phone Number must be between 9 to 12 digits";
+      } else {
+        delete newErrors[name];
+        setErrors1((prevErrors) => {
+          const updatedErrors = { ...prevErrors };
+          delete updatedErrors[name];
+          return updatedErrors;
+        });
+      }
+    }
+
+
+    if (Object.keys(newErrors).length !== 0) {
+      setErrors1((prevErrors) => ({
+        ...prevErrors,
+        ...newErrors,
+      }));
+    }
+
+    return Object.keys(newErrors).length === 0 ? true : false;
+  };
+  const validate2 = (name, value) => {
+    const newErrors = { ...errors2 };
+    if (!value) {
+      switch (name) {
+        case "CompanyName":
+          newErrors[name] = "Please Enter Company Name";
+          break;
+        case "EntityType":
+          newErrors[name] = "Please Enter Entity Type";
+          break;
+        case "CompanyStatus":
+          newErrors[name] = "Please Enter Company Status";
+          break;
+        case "CompanyNumber":
+          newErrors[name] = "Please Enter Company Number";
+          break;
+        case "RegisteredOfficeAddress":
+          newErrors[name] = "Please Enter Registered Office Address";
+          break;
+        case "IncorporationDate":
+          newErrors[name] = "Please Enter Incorporation Date";
+          break;
+        case "IncorporationIn":
+          newErrors[name] = "Please Enter Incorporation In";
+          break;
+        case "VATRegistered":
+          newErrors[name] = "Please Enter VAT Registered";
+          break;
+        case "TradingName":
+          newErrors[name] = "Please Enter Trading Name";
+          break;
+        case "TradingAddress":
+          newErrors[name] = "Please Enter Trading Address";
+          break;
+        default:
+          break;
+      }
+    }
+    else {
+      if (name === "VATNumber" && !/^[0-9+]*$/.test(value)) {
+        newErrors[name] = "Please enter valid VAT Number";
+      }
+      else {
+        delete newErrors[name];
+        setErrors2((prevErrors) => {
+          const updatedErrors = { ...prevErrors };
+          delete updatedErrors[name];
+          return updatedErrors;
+        });
+      }
+    }
+    if (Object.keys(newErrors).length !== 0) {
+      setErrors2((prevErrors) => ({
+        ...prevErrors,
+        ...newErrors,
+      }));
+    }
+    return Object.keys(newErrors).length === 0 ? true : false;
+  };
+  const validate3 = (name, value) => {
+    const newErrors = { ...errors3 };
+    if (!value) {
+      switch (name) {
+        case "TradingName":
+          newErrors[name] = "Please Enter Trading Name";
+          break;
+        case "TradingAddress":
+          newErrors[name] = "Please Enter Trading Address";
+          break;
+        case "VATRegistered":
+          newErrors[name] = "Please Enter VAT Registered";
+          break;
+        default:
+          break;
+      }
+    }
+    else {
+
+      delete newErrors[name];
+      setErrors3((prevErrors) => {
+        const updatedErrors = { ...prevErrors };
+        delete updatedErrors[name];
+        return updatedErrors;
+      });
+
+    }
+    if (Object.keys(newErrors).length !== 0) {
+      setErrors3((prevErrors) => ({
+        ...prevErrors,
+        ...newErrors,
+      }));
+    }
     return Object.keys(newErrors).length === 0 ? true : false;
   };
 
-  const validate2 = () => {
-    const newErrors = {};
-    for (const key in getCompanyDetails) {
-      if (!getCompanyDetails[key]) {
-        if (key == "CompanyName") newErrors[key] = "Please Enter Company Name";
-        else if (key == "EntityType")
-          newErrors[key] = "Please Enter Entity Type";
-        else if (key == "CompanyStatus")
-          newErrors[key] = "Please Enter Company Status";
-        else if (key == "CompanyNumber")
-          newErrors[key] = "Please Enter Company Number";
-        else if (key == "RegisteredOfficeAddress")
-          newErrors[key] = "Please Enter Registered Office Address";
-        else if (key == "IncorporationDate")
-          newErrors[key] = "Please Enter Incorporation Date";
-        else if (key == "IncorporationIn")
-          newErrors[key] = "Please Enter Incorporation In";
-        else if (key == "VATRegistered")
-          newErrors[key] = "Please Enter VAT Registered";
-        else if (key == "TradingName")
-          newErrors[key] = "Please Enter Trading Name";
-        else if (key == "TradingAddress")
-          newErrors[key] = "Please Enter Trading Address";
+  const validateAllFields = (type) => { 
+    const customer_type = [getSoleTraderDetails, getCompanyDetails, getPartnershipDetails, getIndivisualDetails];
+    const validate = [validate1, validate2, validate3, validate4];
+
+    let isValid = true;
+    for (const key in customer_type[type - 1]) {
+      if (!validate[type - 1](key, customer_type[type - 1][key])) {
+        isValid = false;
       }
     }
-    setErrors2(newErrors);
-    return Object.keys(newErrors).length === 0 ? true : false;
+    return isValid;
   };
-
-  const validate3 = () => {
-    const newErrors = {};
-    for (const key in getPartnershipDetails) {
-      if (!getPartnershipDetails[key]) {
-        //  if (key === 'ClientIndustry') newErrors[key] = 'Please Select Client Industry';
-        if (key === "TradingName") newErrors[key] = "Please Enter Trading Name";
-        else if (key === "TradingAddress")
-          newErrors[key] = "Please Enter Trading Address";
-        else if (key === "VATRegistered")
-          newErrors[key] = "Please Enter VAT Registered";
-      }
-    }
-
-    setErrors3(newErrors);
-
-    return Object.keys(newErrors).length === 0 ? true : false;
-  };
-
+  
   const validateField = (index, field, value) => {
     const newErrors = [...errors];
     if (!newErrors[index]) {
@@ -1081,6 +1171,7 @@ const ClientEdit = () => {
                                             className="form-select mb-3"
                                             aria-label="Default select example"
                                             name="IndustryType"
+                                            id="IndustryType"
                                             value={
                                               getSoleTraderDetails.IndustryType
                                             }
@@ -1115,6 +1206,7 @@ const ClientEdit = () => {
                                           <input
                                             type="text"
                                             name="tradingName"
+                                            id="tradingName"
                                             className="form-control"
                                             placeholder="Trading Name"
                                             onChange={(e) => handleChange1(e)}
@@ -1143,6 +1235,7 @@ const ClientEdit = () => {
                                             className="form-control"
                                             placeholder="Trading Address"
                                             name="tradingAddress"
+                                            id="tradingAddress"
                                             onChange={(e) => handleChange1(e)}
                                             value={
                                               getSoleTraderDetails.tradingAddress
@@ -1165,6 +1258,7 @@ const ClientEdit = () => {
                                             className="form-select mb-3"
                                             aria-label="Default select example"
                                             name="vatRegistered"
+                                            id="vatRegistered"
                                             value={
                                               getSoleTraderDetails.vatRegistered
                                             }
@@ -1196,6 +1290,7 @@ const ClientEdit = () => {
                                             className="form-control"
                                             placeholder="VAT Number"
                                             name="vatNumber"
+                                            id="vatNumber"
                                             value={
                                               getSoleTraderDetails.vatNumber
                                             }
