@@ -153,6 +153,8 @@ const addChecklist = async (checklist) => {
     for (const valTask of task) {
       const { task_id, task_name, budgeted_hour } = valTask;
       if (task_id == "" || task_id == null || task_id == undefined) {
+      
+      
         const InsertTaskquery = `
             INSERT INTO task (name,service_id,job_type_id)
             VALUES (?, ?, ?)

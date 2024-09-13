@@ -699,7 +699,6 @@ CREATE TABLE jobs (
         FOREIGN KEY (job_id) REFERENCES jobs(id)
     );
 
-
    /*--TABLE:- STAFF LOGS DOCUMENTS  */
  CREATE TABLE staff_logs (
   id INT AUTO_INCREMENT PRIMARY KEY,
