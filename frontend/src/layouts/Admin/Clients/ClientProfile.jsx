@@ -288,9 +288,42 @@ const ClientList = () => {
               </div>
             )}
           </div>
+          </div>
+          <div className="row">
+            <div className="col-12">
+          <div className="breadcrumb">
+    <a href="#" className="active">
+      <span className="breadcrumb__inner">
+        <span className="breadcrumb__title">Customer</span>
+        <span className="breadcrumb__desc">First Item</span>
+      </span>
+    </a>
+    <a href="#" className="active" >
+      <span className="breadcrumb__inner">
+        <span className="breadcrumb__title">Client</span>
+        <span className="breadcrumb__desc">Second Item</span>
+      </span>
+    </a>
+    <a href="#">
+      <span className="breadcrumb__inner">
+        <span className="breadcrumb__title">Job</span>
+        <span className="breadcrumb__desc">Third Item</span>
+      </span>
+    </a>
+    <a href="#">
+      <span className="breadcrumb__inner">
+        <span className="breadcrumb__title">Page Depth 04</span>
+        <span className="breadcrumb__desc">Fourth Item</span>
+       
+      </span>
+    </a>
+  
+  </div>
+  </div>
+          </div>
         </div>
-      </div>
-
+      
+<div className="mt-4">
       {activeTab == "NoOfJobs" && (
         <div
           className={`tab-pane fade ${activeTab == "NoOfJobs" ? "show active" : ""
@@ -299,7 +332,7 @@ const ClientList = () => {
           role="tabpanel"
           aria-labelledby={`NoOfJobs-tab`}
         >
-          <div className="container-fluid">
+          <div className="">
             <div className="report-data mt-4 ">
               <div className="d-flex justify-content-between align-items-center">
                 <ul className="nav nav-tabs border-0 mb-3" role="tablist">
@@ -623,6 +656,7 @@ const ClientList = () => {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };
