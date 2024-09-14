@@ -53,6 +53,9 @@ import Documents from "../layouts/Admin/Jobs/Documents";
 import CreateJob from "../layouts/Admin/Jobs/JobAction/CreateJob";
 import JobEdit from "../layouts/Admin/Jobs/JobAction/EditJob";
 
+
+ 
+
 const Admin_Route = () => {
   const dispatch = useDispatch();
   const { pathname } = useLocation();
@@ -177,7 +180,7 @@ const Admin_Route = () => {
         });
       }
     } catch (error) {
-     return;
+      return;
     }
   };
 
@@ -187,6 +190,7 @@ const Admin_Route = () => {
       <div className="page-wrapper">
         <Header />
         <div className="page-content">
+         
           <Routes>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />

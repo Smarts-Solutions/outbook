@@ -114,10 +114,10 @@ const Customer = () => {
         row.customer_type === 1
           ? "Sole Trader"
           : row.customer_type === 2
-          ? "Company"
-          : row.customer_type === 3
-          ? "Partnership"
-          : "-",
+            ? "Company"
+            : row.customer_type === 3
+              ? "Partnership"
+              : "-",
       sortable: true,
       width: "150px",
     },
@@ -276,6 +276,7 @@ const Customer = () => {
         </div>
       </div>
 
+
       <div className="report-data mt-4">
         <div className="col-sm-12">
           <div className="page-title-box pt-0">
@@ -289,9 +290,8 @@ const Customer = () => {
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
                       <button
-                        className={`nav-link ${
-                          activeTab === tab.id ? "active" : ""
-                        }`}
+                        className={`nav-link ${activeTab === tab.id ? "active" : ""
+                          }`}
                         id={`${tab.id}-tab`}
                         data-bs-toggle="pill"
                         data-bs-target={`#${tab.id}`}
@@ -324,9 +324,8 @@ const Customer = () => {
           {tabs.map((tab) => (
             <div
               key={tab.id}
-              className={`tab-pane fade ${
-                activeTab === tab.id ? "show active" : ""
-              }`}
+              className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""
+                }`}
               id={tab.id}
               role="tabpanel"
               aria-labelledby={`${tab.id}-tab`}
