@@ -168,7 +168,41 @@ const JobLogs = () => {
         </div>
 
       </div>
-      <div className="tab-content report-data" id="pills-tabContent">
+      <div className="row ">
+        <div className="col-sm-12">
+        <div className="breadcrumb">
+    <a href="#" className='active'>
+      <span className="breadcrumb__inner">
+        <span className="breadcrumb__title">Customer</span>
+        <span className="breadcrumb__desc">First Item</span>
+      </span>
+    </a>
+    <a href="#" className='active'>
+      <span className="breadcrumb__inner">
+        <span className="breadcrumb__title">Client</span>
+        <span className="breadcrumb__desc">Second Item</span>
+      </span>
+    </a>
+    <a href="#" className='active'>
+      <span className="breadcrumb__inner">
+        <span className="breadcrumb__title">Job</span>
+        <span className="breadcrumb__desc">Third Item</span>
+      </span>
+    </a>
+    <a href="#">
+      <span className="breadcrumb__inner">
+        <span className="breadcrumb__title">Page Depth 04</span>
+        <span className="breadcrumb__desc">Fourth Item</span>
+       
+      </span>
+    </a>
+  
+  </div>
+
+        </div>
+
+      </div>
+      <div className="tab-content report-data mt-4" id="pills-tabContent">
 
         <div
           className="tab-pane fade show active"

@@ -554,7 +554,38 @@ const ClientList = () => {
       </div>
       <div className="row">
         <div className="col-12">
-        <ol class="breadcrumb ps-2"><li class="breadcrumb-item"><a href=";">Outbook</a></li><li class="breadcrumb-item active">Dashboard</li></ol>
+        <div className="">
+  <div className="breadcrumb">
+    <a href="#" className="active">
+      <span className="breadcrumb__inner ">
+        <span className="breadcrumb__title">Customer</span>
+        <span className="breadcrumb__desc">CROWN ACADEMY OF...</span>
+      </span>
+    </a>
+    <a href="#">
+      <span className="breadcrumb__inner">
+        <span className="breadcrumb__title">Client</span>
+        <span className="breadcrumb__desc">Crown Acadmy Of...</span>
+      </span>
+    </a>
+    <a href="#">
+      <span className="breadcrumb__inner">
+        <span className="breadcrumb__title">Job</span>
+        <span className="breadcrumb__desc">Third Item</span>
+      </span>
+    </a>
+    <a href="#">
+      <span className="breadcrumb__inner">
+        <span className="breadcrumb__title">Page Depth 04</span>
+        <span className="breadcrumb__desc">Fourth Item</span>
+       
+      </span>
+    </a>
+   
+  </div>
+</div>
+
+       
 
         </div>
       </div>
@@ -568,7 +599,7 @@ const ClientList = () => {
             role="tabpanel"
             aria-labelledby={`${tab.key}-tab`}
           >
-            <div className="container-fluid">
+          
               <div className="report-data mt-4">
                 <div className="d-flex justify-content-between align-items-center">
                   <div className="tab-title">
@@ -612,7 +643,7 @@ const ClientList = () => {
                 </div>
               </div>
             </div>
-          </div>
+          
         ))}
       </div>
     </div>
