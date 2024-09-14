@@ -112,6 +112,24 @@ export const CreateJobErrorMessage = {
   'NumberOfTrialBalanceItems': 'Please Enter Number Of Trial Balance Items less than 5000',
   'Turnover': 'Please Enter Turnover less than 200000000',
 }
+
+export const ClientErrorMessages = {
+  TradingName: "Please enter Trading Name",
+  TradingAddress: "Please enter Trading Address",
+  VATRegistered: "Please select VAT Registered",
+  first_name: "Please enter First Name",
+  last_name: "Please enter Last Name",
+  email: "Please enter Email",
+  phone: "Please enter Phone Number",
+  CompanyName: "Please Enter Company Name",
+  EntityType: "Please Enter Entity Type",
+  CompanyStatus: "Please Enter Company Status",
+  CompanyNumber: "Please Enter Company Number",
+  RegisteredOfficeAddress: "Please Enter Registered Office Address",
+  IncorporationDate: "Please Enter Incorporation Date",
+  IncorporationIn: "Please Enter Incorporation In",
+};
+
  
 const fieldErrors = {
   AccountManager: "Please Enter Account Manager",

@@ -2,10 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { GetClientIndustry, Edit_Client, ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { GetAllCompany } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
-import { Email_regex } from "../../../Utils/Common_regex";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { ScrollToViewFirstError , ScrollToViewFirstErrorContactForm } from '../../../Utils/Comman_function'
+import { validate, ScrollToViewFirstErrorContactForm } from '../../../Utils/Comman_function'
 import { PersonRole, Country } from "../../../ReduxStore/Slice/Settings/settingSlice";
 
 const ClientEdit = () => {
@@ -19,12 +18,12 @@ const ClientEdit = () => {
   const [showDropdown, setShowDropdown] = useState(true);
   const [getSearchDetails, setSearchDetails] = useState("");
   const [searchItem, setSearchItem] = useState("");
-  const [contacts1, setContacts1] = useState([]);
+  const [partnershipContacts, setPartnershipContacts] = useState([]);
   const [errors1, setErrors1] = useState({});
   const [errors2, setErrors2] = useState({});
   const [errors3, setErrors3] = useState({});
   const [errors4, setErrors4] = useState({});
-  const [errors, setErrors] = useState([
+  const [companyContactsErrors, setCompanyContactsErrors] = useState([
     {
       first_name: false,
       last_name: false,
@@ -34,7 +33,7 @@ const ClientEdit = () => {
       email: false,
     },
   ]);
-  const [contactsErrors, setContactsErrors] = useState([
+  const [PartnershiContactsErrors, setPartnershipContactsErrors] = useState([
     {
       first_name: "",
       last_name: "",
@@ -68,10 +67,10 @@ const ClientEdit = () => {
   });
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     IndustryType: "",
-    tradingName: "",
-    tradingAddress: "",
-    vatRegistered: "",
-    vatNumber: "",
+    TradingName: "",
+    TradingAddress: "",
+    VATRegistered: "",
+    VATNumber: "",
     website: "",
     first_name: "",
     last_name: "",
@@ -104,7 +103,7 @@ const ClientEdit = () => {
     VATNumber: "",
     Website: "",
   });
-  const [contacts, setContacts] = useState([
+  const [CompanyContacts, setCompanyContacts] = useState([
     {
       authorised_signatory_status: 0,
       contact_id: "",
@@ -117,7 +116,7 @@ const ClientEdit = () => {
     },
   ]);
   const [getIndivisualDetails, setIndivisualDetails] = useState({
-    tradingName: "",
+    TradingName: "",
     first_name: "",
     last_name: "",
     phone: "",
@@ -128,12 +127,9 @@ const ClientEdit = () => {
 
   useEffect(() => {
     setSelectClientType(
-      location.state.row.client_type_name == "SoleTrader"
-        ? 1
-        : location.state.row.client_type_name == "Company"
-          ? 2
-          : location.state.row.client_type_name == "Partnership"
-            ? 3
+      location.state.row.client_type_name == "SoleTrader" ? 1
+        : location.state.row.client_type_name == "Company" ? 2
+          : location.state.row.client_type_name == "Partnership" ? 3
             : 4
     );
     CountryData();
@@ -150,20 +146,19 @@ const ClientEdit = () => {
     if (location.state.row.client_type_name == "SoleTrader") {
       setSoleTraderDetails((prevState) => ({
         ...prevState,
-
         IndustryType:
           !getClientDetails.loading &&
           getClientDetails.data.client.client_industry_id,
-        tradingName:
+        TradingName:
           !getClientDetails.loading &&
           getClientDetails.data.client.trading_name,
-        tradingAddress:
+        TradingAddress:
           !getClientDetails.loading &&
           getClientDetails.data.client.trading_address,
-        vatRegistered:
+        VATRegistered:
           !getClientDetails.loading &&
           getClientDetails.data.client.vat_registered,
-        vatNumber:
+        VATNumber:
           !getClientDetails.loading && getClientDetails.data.client.vat_number,
         website:
           !getClientDetails.loading && getClientDetails.data.client.website,
@@ -229,7 +224,7 @@ const ClientEdit = () => {
           !getClientDetails.loading &&
           getClientDetails.data.client.trading_address,
       }));
-      setContacts(
+      setCompanyContacts(
         !getClientDetails.loading && getClientDetails.data.contact_details
       );
     }
@@ -253,7 +248,7 @@ const ClientEdit = () => {
         Website:
           !getClientDetails.loading && getClientDetails.data.client.website,
       }));
-      setContacts1(
+      setPartnershipContacts(
         getClientDetails.data && getClientDetails.data.contact_details
       );
     }
@@ -261,7 +256,7 @@ const ClientEdit = () => {
       setIndivisualDetails((prevState) => ({
         ...prevState,
 
-        tradingName:
+        TradingName:
           !getClientDetails.loading &&
           getClientDetails.data.client.trading_name,
 
@@ -306,9 +301,9 @@ const ClientEdit = () => {
     FilterSearchDetails();
   }, [searchItem]);
 
-  const handleAddContact1 = () => {
-    setContacts1([
-      ...contacts1,
+  const handleAddPartnershipContact = () => {
+    setPartnershipContacts([
+      ...partnershipContacts,
       {
         authorised_signatory_status: 0,
         contact_id: "",
@@ -323,8 +318,8 @@ const ClientEdit = () => {
         alternate_email: "",
       },
     ]);
-    setContactsErrors([
-      ...contactsErrors,
+    setPartnershipContactsErrors([
+      ...PartnershiContactsErrors,
       {
         first_name: "",
         last_name: "",
@@ -337,16 +332,16 @@ const ClientEdit = () => {
     ]);
   };
 
-  const handleDeleteContact1 = (index) => {
-    const newContacts = contacts1.filter((_, i) => i !== index);
-    const newErrors = contactsErrors.filter((_, i) => i !== index);
-    setContacts1(newContacts);
-    setContactsErrors(newErrors);
+  const handleDeletePartnershipContact = (index) => {
+    const newContacts = partnershipContacts.filter((_, i) => i !== index);
+    const newErrors = PartnershiContactsErrors.filter((_, i) => i !== index);
+    setPartnershipContacts(newContacts);
+    setPartnershipContactsErrors(newErrors);
   };
 
-  const handleAddContact = () => {
-    setContacts([
-      ...contacts,
+  const handleAddCompanyContact = () => {
+    setCompanyContacts([
+      ...CompanyContacts,
       {
         authorised_signatory_status: 0,
         contact_id: "",
@@ -358,8 +353,8 @@ const ClientEdit = () => {
         email: "",
       },
     ]);
-    setErrors([
-      ...errors,
+    setCompanyContactsErrors([
+      ...companyContactsErrors,
       {
         first_name: "",
         last_name: "",
@@ -370,21 +365,11 @@ const ClientEdit = () => {
     ]);
   };
 
-  const handleDeleteContact = (index) => {
-    const newContacts = contacts.filter((_, i) => i !== index);
-    const newErrors = errors.filter((_, i) => i !== index);
-    setContacts(newContacts);
-    setErrors(newErrors);
-  };
-
-  const handleChange = (index, field, value) => {
-    const newContacts = contacts.map((contact, i) =>
-      i === index ? { ...contact, [field]: value } : contact
-    );
-
-    setContacts(newContacts);
-
-    validateField(index, field, value);
+  const handleDeleteCompanyContact = (index) => {
+    const newContacts = CompanyContacts.filter((_, i) => i !== index);
+    const newErrors = companyContactsErrors.filter((_, i) => i !== index);
+    setCompanyContacts(newContacts);
+    setCompanyContactsErrors(newErrors);
   };
 
   const GetClientDetails = async () => {
@@ -478,267 +463,124 @@ const ClientEdit = () => {
       });
   };
 
-  const handleChange1 = (e) => {
+  const ClientTypeArr = [getSoleTraderDetails, getCompanyDetails, getPartnershipDetails, getIndivisualDetails];
+  const errorsArr = [errors1, errors2, errors3, errors4];
+  const setErrorsArr = [setErrors1, setErrors2, setErrors3, setErrors4];
+
+
+  const handleInputsChange = (e, type) => {
     const { name, value } = e.target;
-    if (name === "vatNumber" || name === "phone") {
+    if (name === "VATNumber" || name === "phone") {
       if (!/^[0-9+]*$/.test(value)) {
         return;
       }
     }
-    validate1(name, value);
-    setSoleTraderDetails({ ...getSoleTraderDetails, [name]: value });
+
+    validate(name, value, errorsArr[type - 1], setErrorsArr[type - 1]);
+
+    if (type == 1) {
+      setSoleTraderDetails({ ...getSoleTraderDetails, [name]: value });
+    }
+    if (type == 2) {
+      setCompanyDetails({ ...getCompanyDetails, [name]: value });
+    }
+    if (type == 3) {
+      setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
+    }
+    if (type == 4) {
+      setIndivisualDetails({ ...getIndivisualDetails, [name]: value });
+    }
   };
 
-  const handleChange2 = (e) => {
-    const { name, value } = e.target;
-    if (name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
+  const validateAllFields = (type) => {
+    let isValid = true;
+    for (const key in ClientTypeArr[type - 1]) {
+      if (!validate(key, ClientTypeArr[type - 1][key], errorsArr[type - 1], setErrorsArr[type - 1])) {
+        isValid = false;
       }
     }
-    validate2(name, value);
-    setCompanyDetails({ ...getCompanyDetails, [name]: value });
+    return isValid;
   };
 
-  const handleChange3 = (e) => {
-    const { name, value } = e.target;
-    if (name === "VATNumber") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
-    validate3(name, value);
-    setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
-  };
-  const handleChange4 = (index, field, value) => {
+
+  const ContactsArr = [CompanyContacts, partnershipContacts,];
+  const ErrorsArr = [companyContactsErrors, PartnershiContactsErrors,]
+  const setContactErrorsArr = [setCompanyContactsErrors, setPartnershipContactsErrors]
+
+  const handleContactInputChange = (index, field, value, type) => {
     let newValue = value;
     if (field == "authorised_signatory_status") {
       newValue = value ? 1 : 0;
     }
 
-    const newContacts = contacts1.map((contact, i) =>
-      i === index ? { ...contact, [field]: newValue } : contact
+    const newContacts = ContactsArr[type - 1].map((contact, i) =>
+      i === index ? { ...contact, [field]: value } : contact
     );
 
-    setContacts1(newContacts);
-    validateField1(index, field, newValue);
-  };
-  const handleChange5 = (e) => {
-    const { name, value } = e.target;
-    if (name === "vatNumber" || name === "phone") {
-      if (!/^[0-9+]*$/.test(value)) {
-        return;
-      }
-    }
-    validate4(name, value);
-    setIndivisualDetails({ ...getIndivisualDetails, [name]: value });
-  };
-  const validate1 = (name, value) => {
-    const newErrors = { ...errors1 };
-    if (!value) {
-      switch (name) {
-        case "tradingName":
-          newErrors[name] = "Please enter Trading Name";
-          break;
-        case "tradingAddress":
-          newErrors[name] = "Please enter Trading Address";
-          break;
-        case "vatRegistered":
-          newErrors[name] = "Please select VAT Registered";
-          break;
-        case "first_name":
-          newErrors[name] = "Please enter First Name";
-          break;
-        case "last_name":
-          newErrors[name] = "Please enter Last Name";
-          break;
-        case "email":
-          newErrors[name] = "Please enter Email";
-          break;
-        default:
-          break;
-      }
-    }
-    else {
-      if (name === "email" && !Email_regex(value)) {
-        newErrors[name] = "Please enter valid Email";
-      } else if (name === "phone" && !/^\d{9,12}$/.test(value)) {
-        newErrors[name] = "Phone Number must be between 9 to 12 digits";
-      } else {
-        delete newErrors[name];
-        setErrors1((prevErrors) => {
-          const updatedErrors = { ...prevErrors };
-          delete updatedErrors[name];
-          return updatedErrors;
-        });
-      }
-    }
+    if (type == 1) setCompanyContacts(newContacts);
+    if (type == 2) setPartnershipContacts(newContacts);
 
-    ScrollToViewFirstError(newErrors);
-
-    if (Object.keys(newErrors).length !== 0) {
-      setErrors1((prevErrors) => ({
-        ...prevErrors,
-        ...newErrors,
-      }));
-    }
-
-    return Object.keys(newErrors).length === 0 ? true : false;
-  };
-  const validate2 = (name, value) => {
-    const newErrors = { ...errors2 };
-    if (!value) {
-      switch (name) {
-        case "CompanyName":
-          newErrors[name] = "Please Enter Company Name";
-          break;
-        case "EntityType":
-          newErrors[name] = "Please Enter Entity Type";
-          break;
-        case "CompanyStatus":
-          newErrors[name] = "Please Enter Company Status";
-          break;
-        case "CompanyNumber":
-          newErrors[name] = "Please Enter Company Number";
-          break;
-        case "RegisteredOfficeAddress":
-          newErrors[name] = "Please Enter Registered Office Address";
-          break;
-        case "IncorporationDate":
-          newErrors[name] = "Please Enter Incorporation Date";
-          break;
-        case "IncorporationIn":
-          newErrors[name] = "Please Enter Incorporation In";
-          break;
-        case "VATRegistered":
-          newErrors[name] = "Please Enter VAT Registered";
-          break;
-        case "TradingName":
-          newErrors[name] = "Please Enter Trading Name";
-          break;
-        case "TradingAddress":
-          newErrors[name] = "Please Enter Trading Address";
-          break;
-        default:
-          break;
-      }
-    }
-    else {
-      if (name === "VATNumber" && !/^[0-9+]*$/.test(value)) {
-        newErrors[name] = "Please enter valid VAT Number";
-      }
-      else {
-        delete newErrors[name];
-        setErrors2((prevErrors) => {
-          const updatedErrors = { ...prevErrors };
-          delete updatedErrors[name];
-          return updatedErrors;
-        });
-      }
-    }
-
-    ScrollToViewFirstError(newErrors);
-
-    if (Object.keys(newErrors).length !== 0) {
-      setErrors2((prevErrors) => ({
-        ...prevErrors,
-        ...newErrors,
-      }));
-    }
-    return Object.keys(newErrors).length === 0 ? true : false;
-  };
-  const validate3 = (name, value) => {
-    const newErrors = { ...errors3 };
-    if (!value) {
-      switch (name) {
-        case "TradingName":
-          newErrors[name] = "Please Enter Trading Name";
-          break;
-        case "TradingAddress":
-          newErrors[name] = "Please Enter Trading Address";
-          break;
-        case "VATRegistered":
-          newErrors[name] = "Please Enter VAT Registered";
-          break;
-        default:
-          break;
-      }
-    }
-    else {
-
-      delete newErrors[name];
-      setErrors3((prevErrors) => {
-        const updatedErrors = { ...prevErrors };
-        delete updatedErrors[name];
-        return updatedErrors;
-      });
-
-    }
-
-    ScrollToViewFirstError(newErrors);
-
-    if (Object.keys(newErrors).length !== 0) {
-      setErrors3((prevErrors) => ({
-        ...prevErrors,
-        ...newErrors,
-      }));
-    }
-    return Object.keys(newErrors).length === 0 ? true : false;
-  };
-  const validate4 = (name, value) => {
-    const newErrors = { ...errors4 };
-    if (!value) {
-      switch (name) {
-        case "tradingName":
-          newErrors[name] = "Please enter Trading Name";
-          break;
-        case "first_name":
-          newErrors[name] = "Please enter First Name";
-          break;
-        case "last_name":
-          newErrors[name] = "Please enter Last Name";
-          break;
-        default:
-          break;
-      }
-
-    } else {
-      if (name === "email" && !Email_regex(value)) {
-        newErrors[name] = "Please enter valid Email";
-      } else if (name === "phone" && !/^\d{9,12}$/.test(value)) {
-        newErrors[name] = "Phone Number must be between 9 to 12 digits";
-      } else {
-        delete newErrors[name];
-        setErrors4((prevErrors) => {
-          const updatedErrors = { ...prevErrors };
-          delete updatedErrors[name];
-          return updatedErrors;
-        });
-      }
-    }
-
-    ScrollToViewFirstError(newErrors);
-
-    if (Object.keys(newErrors).length !== 0) {
-      setErrors4((prevErrors) => ({
-        ...prevErrors,
-        ...newErrors,
-      }));
-    }
-    return Object.keys(newErrors).length === 0 ? true : false;
+    validateField(index, field, value, type);
   };
 
-  const validateAllFields = (type) => {
-    const customer_type = [getSoleTraderDetails, getCompanyDetails, getPartnershipDetails, getIndivisualDetails];
-    const validate = [validate1, validate2, validate3, validate4];
+  const validateField = (index, field, value, Type) => {
+    const errors = ErrorsArr[Type - 1];
+    const newErrors = [...errors];
+    switch (field) {
+      case "first_name":
+      case "last_name":
+        if (!value.trim()) {
+          newErrors[index] = {
+            ...newErrors[index],
+            [field]: "This field is required",
+          };
+        } else {
+          delete newErrors[index][field];
+        }
+        break;
+      case "email":
+      case "alternate_email":
+        if (!value.trim()) {
+          newErrors[index] = { ...newErrors[index], [field]: "" };
+        } else if (!/\S+@\S+\.\S+/.test(value)) {
+          newErrors[index] = {
+            ...newErrors[index],
+            [field]: "Invalid email address",
+          };
+        } else {
+          delete newErrors[index][field];
+        }
+        break;
+      case "phone":
+        newErrors[index].phone =
+          value === ""
+            ? ""
+            : /^\d{9,12}$/.test(value)
+              ? ""
+              : "Phone Number must be between 9 to 12 digits";
+        break;
 
-    let isValid = true;
-    for (const key in customer_type[type - 1]) {
-      if (!validate[type - 1](key, customer_type[type - 1][key])) {
-        isValid = false;
-      }
+      case "alternate_phone":
+        newErrors[index].alternate_phone =
+          value === ""
+            ? ""
+            : /^\d{9,12}$/.test(value)
+              ? ""
+              : "Phone Number must be between 9 to 12 digits";
+
+        break;
+      case "customer_contact_person_role_id":
+        if (!value) {
+          newErrors[index] = { ...newErrors[index], [field]: "" };
+        } else {
+          delete newErrors[index][field];
+        }
+        break;
+      default:
+        break;
     }
-    return isValid;
+
+    setContactErrorsArr[Type - 1](newErrors);
   };
 
   // common submit function for all type of customer
@@ -777,10 +619,10 @@ const ClientEdit = () => {
         client_id: location.state.row.id,
         customer_id: location.state.id,
         client_industry_id: getSoleTraderDetails.IndustryType,
-        trading_name: getSoleTraderDetails.tradingName,
-        trading_address: getSoleTraderDetails.tradingAddress,
-        vat_registered: getSoleTraderDetails.vatRegistered,
-        vat_number: getSoleTraderDetails.vatNumber,
+        trading_name: getSoleTraderDetails.TradingName,
+        trading_address: getSoleTraderDetails.TradingAddress,
+        vat_registered: getSoleTraderDetails.VATRegistered,
+        vat_number: getSoleTraderDetails.VATNumber,
         website: getSoleTraderDetails.website,
         first_name: getSoleTraderDetails.first_name,
         last_name: getSoleTraderDetails.last_name,
@@ -794,7 +636,7 @@ const ClientEdit = () => {
     }
     if (selectClientType == 2 && validateAllFields(2)) {
       let formIsValid = true;
-      const newErrors = contacts.map((contact, index) => {
+      const newErrors = CompanyContacts.map((contact, index) => {
         const error = {
           first_name: contact.first_name ? "" : "First Name is required",
           last_name: contact.last_name ? "" : "Last Name is required",
@@ -823,7 +665,7 @@ const ClientEdit = () => {
         }
         return error;
       });
-      setErrors(newErrors);
+      setCompanyContactsErrors(newErrors);
       if (formIsValid) {
         const req = {
           client_type: "2",
@@ -842,19 +684,19 @@ const ClientEdit = () => {
           client_industry_id: Number(getCompanyDetails.ClientIndustry),
           trading_name: getCompanyDetails.TradingName,
           trading_address: getCompanyDetails.TradingAddress,
-          contactDetails: contacts,
+          contactDetails: CompanyContacts,
         };
         await EditClientFun(req);
       }
       else {
-        ScrollToViewFirstErrorContactForm(errors);
+        ScrollToViewFirstErrorContactForm(companyContactsErrors);
       }
 
 
     }
     if (selectClientType == 3 && validateAllFields(3)) {
       let formIsValid = true;
-      const newErrors = contacts1.map((contact, index) => {
+      const newErrors = partnershipContacts.map((contact, index) => {
         const error = {
           first_name: contact.first_name ? "" : "First Name is required",
           last_name: contact.last_name ? "" : "Last Name is required",
@@ -895,7 +737,7 @@ const ClientEdit = () => {
         }
         return error;
       });
-      setContactsErrors(newErrors);
+      setPartnershipContactsErrors(newErrors);
       if (formIsValid) {
         const req = {
           client_type: "3",
@@ -907,12 +749,12 @@ const ClientEdit = () => {
           vat_registered: getPartnershipDetails.VATRegistered,
           vat_number: getPartnershipDetails.VATNumber,
           website: getPartnershipDetails.Website,
-          contactDetails: contacts1,
+          contactDetails: partnershipContacts,
         };
         await EditClientFun(req);
       }
       else {
-        ScrollToViewFirstErrorContactForm(contactsErrors);
+        ScrollToViewFirstErrorContactForm(PartnershiContactsErrors);
       }
     }
     if (selectClientType == 4 && validateAllFields(4)) {
@@ -921,7 +763,7 @@ const ClientEdit = () => {
         client_id: location.state.row.id,
         customer_id: location.state.id,
 
-        trading_name: getIndivisualDetails.tradingName,
+        trading_name: getIndivisualDetails.TradingName,
 
         first_name: getIndivisualDetails.first_name,
         last_name: getIndivisualDetails.last_name,
@@ -936,107 +778,6 @@ const ClientEdit = () => {
     }
   };
 
-  const validateField = (index, field, value) => {
-    const newErrors = [...errors];
-    if (!newErrors[index]) {
-      newErrors[index] = {
-        first_name: "",
-        last_name: "",
-        customer_contact_person_role_id: "",
-        phone: "",
-        email: "",
-      };
-    }
-    switch (field) {
-      case "first_name":
-        newErrors[index].first_name = value ? "" : "First Name is required";
-        break;
-      case "last_name":
-        newErrors[index].last_name = value ? "" : "Last Name is required";
-        break;
-      case "email":
-        if (!value) {
-          newErrors[index].email = "";
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          newErrors[index].email = "Valid Email is required";
-        } else {
-          newErrors[index].email = "";
-        }
-        break;
-      case "phone":
-        newErrors[index].phone =
-          value === ""
-            ? ""
-            : /^\d{9,12}$/.test(value)
-              ? ""
-              : "Phone Number must be between 9 to 12 digits";
-
-        break;
-      default:
-        break;
-    }
-    setErrors(newErrors);
-  };
-
-  const validateField1 = (index, field, value) => {
-    const errors = [...contactsErrors];
-
-    switch (field) {
-      case "first_name":
-      case "last_name":
-        if (!value.trim()) {
-          errors[index] = {
-            ...errors[index],
-            [field]: "This field is required",
-          };
-        } else {
-          delete errors[index][field];
-        }
-        break;
-      case "email":
-      case "alternate_email":
-        if (!value.trim()) {
-          errors[index] = { ...errors[index], [field]: "" };
-        } else if (!/\S+@\S+\.\S+/.test(value)) {
-          errors[index] = {
-            ...errors[index],
-            [field]: "Invalid email address",
-          };
-        } else {
-          delete errors[index][field];
-        }
-        break;
-      case "phone":
-        errors[index].phone =
-          value === ""
-            ? ""
-            : /^\d{9,12}$/.test(value)
-              ? ""
-              : "Phone Number must be between 9 to 12 digits";
-        break;
-
-      case "alternate_phone":
-        errors[index].alternate_phone =
-          value === ""
-            ? ""
-            : /^\d{9,12}$/.test(value)
-              ? ""
-              : "Phone Number must be between 9 to 12 digits";
-
-        break;
-      case "customer_contact_person_role_id":
-        if (!value) {
-          errors[index] = { ...errors[index], [field]: "" };
-        } else {
-          delete errors[index][field];
-        }
-        break;
-      default:
-        break;
-    }
-
-    setContactsErrors(errors);
-  };
 
   const FilterSearchDetails = () => {
     const filterData = getAllSearchCompany.filter(
@@ -1045,7 +786,7 @@ const ClientEdit = () => {
     setSearchDetails(filterData);
   };
 
-   
+
   const HandleCancel = () => {
     navigate("/admin/Clientlist", { state: { id: location.state.id } });
   };
@@ -1136,7 +877,7 @@ const ClientEdit = () => {
                                             value={
                                               getSoleTraderDetails.IndustryType
                                             }
-                                            onChange={(e) => handleChange1(e)}
+                                            onChange={(e) => handleInputsChange(e, 1)}
                                           >
                                             <option value={0}>
                                               Select Client Industry
@@ -1166,19 +907,19 @@ const ClientEdit = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            name="tradingName"
-                                            id="tradingName"
+                                            name="TradingName"
+                                            id="TradingName"
                                             className="form-control"
                                             placeholder="Trading Name"
-                                            onChange={(e) => handleChange1(e)}
+                                            onChange={(e) => handleInputsChange(e, 1)}
                                             value={
-                                              getSoleTraderDetails.tradingName
+                                              getSoleTraderDetails.TradingName
                                             }
                                             maxLength={100}
                                           />
-                                          {errors1["tradingName"] && (
+                                          {errors1["TradingName"] && (
                                             <div className="error-text">
-                                              {errors1["tradingName"]}
+                                              {errors1["TradingName"]}
                                             </div>
                                           )}
                                         </div>
@@ -1195,17 +936,17 @@ const ClientEdit = () => {
                                             type="text"
                                             className="form-control"
                                             placeholder="Trading Address"
-                                            name="tradingAddress"
-                                            id="tradingAddress"
-                                            onChange={(e) => handleChange1(e)}
+                                            name="TradingAddress"
+                                            id="TradingAddress"
+                                            onChange={(e) => handleInputsChange(e, 1)}
                                             value={
-                                              getSoleTraderDetails.tradingAddress
+                                              getSoleTraderDetails.TradingAddress
                                             }
                                             maxLength={200}
                                           />
-                                          {errors1["tradingAddress"] && (
+                                          {errors1["TradingAddress"] && (
                                             <div className="error-text">
-                                              {errors1["tradingAddress"]}
+                                              {errors1["TradingAddress"]}
                                             </div>
                                           )}
                                         </div>
@@ -1218,12 +959,12 @@ const ClientEdit = () => {
                                           <select
                                             className="form-select mb-3"
                                             aria-label="Default select example"
-                                            name="vatRegistered"
-                                            id="vatRegistered"
+                                            name="VATRegistered"
+                                            id="VATRegistered"
                                             value={
-                                              getSoleTraderDetails.vatRegistered
+                                              getSoleTraderDetails.VATRegistered
                                             }
-                                            onChange={(e) => handleChange1(e)}
+                                            onChange={(e) => handleInputsChange(e, 1)}
                                           >
                                             <option selected="">
                                               Please Select VAT Registered
@@ -1231,9 +972,9 @@ const ClientEdit = () => {
                                             <option value={1}>Yes</option>
                                             <option value={0}>No</option>
                                           </select>
-                                          {errors1["vatRegistered"] && (
+                                          {errors1["VATRegistered"] && (
                                             <div className="error-text">
-                                              {errors1["vatRegistered"]}
+                                              {errors1["VATRegistered"]}
                                             </div>
                                           )}
                                         </div>
@@ -1250,12 +991,12 @@ const ClientEdit = () => {
                                             type="text"
                                             className="form-control"
                                             placeholder="VAT Number"
-                                            name="vatNumber"
-                                            id="vatNumber"
+                                            name="VATNumber"
+                                            id="VATNumber"
                                             value={
-                                              getSoleTraderDetails.vatNumber
+                                              getSoleTraderDetails.VATNumber
                                             }
-                                            onChange={(e) => handleChange1(e)}
+                                            onChange={(e) => handleInputsChange(e, 1)}
                                             maxLength={9}
                                           />
                                         </div>
@@ -1275,7 +1016,7 @@ const ClientEdit = () => {
                                             name="website"
                                             id="website"
                                             value={getSoleTraderDetails.website}
-                                            onChange={(e) => handleChange1(e)}
+                                            onChange={(e) => handleInputsChange(e, 1)}
                                             maxLength={200}
                                           />
                                         </div>
@@ -1307,7 +1048,7 @@ const ClientEdit = () => {
                                           value={
                                             getSoleTraderDetails.first_name
                                           }
-                                          onChange={(e) => handleChange1(e)}
+                                          onChange={(e) => handleInputsChange(e, 1)}
                                           maxLength={50}
                                         />
                                         {errors1["first_name"] && (
@@ -1332,7 +1073,7 @@ const ClientEdit = () => {
                                           name="last_name"
                                           id="last_name"
                                           value={getSoleTraderDetails.last_name}
-                                          onChange={(e) => handleChange1(e)}
+                                          onChange={(e) => handleInputsChange(e, 1)}
                                           maxLength={50}
                                         />
                                         {errors1["last_name"] && (
@@ -1352,7 +1093,7 @@ const ClientEdit = () => {
                                           <div className="col-md-4 pe-0">
                                             <select
                                               className="form-select"
-                                              onChange={(e) => handleChange1(e)}
+                                              onChange={(e) => handleInputsChange(e, 1)}
                                               name="phone_code"
                                               value={
                                                 getSoleTraderDetails.phone_code
@@ -1378,7 +1119,7 @@ const ClientEdit = () => {
                                               name="phone"
                                               id="phone"
                                               value={getSoleTraderDetails.phone}
-                                              onChange={(e) => handleChange1(e)}
+                                              onChange={(e) => handleInputsChange(e, 1)}
                                               maxLength={12}
                                               minLength={9}
                                             />
@@ -1407,7 +1148,7 @@ const ClientEdit = () => {
                                           name="email"
                                           id="email"
                                           value={getSoleTraderDetails.email}
-                                          onChange={(e) => handleChange1(e)}
+                                          onChange={(e) => handleInputsChange(e, 1)}
                                         />
                                         {errors1["email"] && (
                                           <div className="error-text">
@@ -1434,7 +1175,7 @@ const ClientEdit = () => {
                                           value={
                                             getSoleTraderDetails.residentialAddress
                                           }
-                                          onChange={(e) => handleChange1(e)}
+                                          onChange={(e) => handleInputsChange(e, 1)}
                                         />
                                         {errors1["residentialAddress"] && (
                                           <div className="error-text">
@@ -1527,7 +1268,7 @@ const ClientEdit = () => {
                                               placeholder="Enter Company Name"
                                               name="CompanyName"
                                               id="CompanyName"
-                                              onChange={(e) => handleChange2(e)}
+                                              onChange={(e) => handleInputsChange(e, 2)}
                                               value={
                                                 getCompanyDetails.CompanyName
                                               }
@@ -1554,7 +1295,7 @@ const ClientEdit = () => {
                                               placeholder="LTD"
                                               name="EntityType"
                                               id="EntityType"
-                                              onChange={(e) => handleChange2(e)}
+                                              onChange={(e) => handleInputsChange(e, 2)}
                                               value={
                                                 getCompanyDetails.EntityType
                                               }
@@ -1581,7 +1322,7 @@ const ClientEdit = () => {
                                               placeholder="Active"
                                               name="CompanyStatus"
                                               id="CompanyStatus"
-                                              onChange={(e) => handleChange2(e)}
+                                              onChange={(e) => handleInputsChange(e, 2)}
                                               value={
                                                 getCompanyDetails.CompanyStatus
                                               }
@@ -1608,7 +1349,7 @@ const ClientEdit = () => {
                                               placeholder="Company Number"
                                               name="CompanyNumber"
                                               id="CompanyNumber"
-                                              onChange={(e) => handleChange2(e)}
+                                              onChange={(e) => handleInputsChange(e, 2)}
                                               value={
                                                 getCompanyDetails.CompanyNumber
                                               }
@@ -1632,7 +1373,7 @@ const ClientEdit = () => {
                                               placeholder="07-01-2023"
                                               name="IncorporationDate"
                                               id="IncorporationDate"
-                                              onChange={(e) => handleChange2(e)}
+                                              onChange={(e) => handleInputsChange(e, 2)}
                                               value={
                                                 getCompanyDetails.IncorporationDate
                                               }
@@ -1659,7 +1400,7 @@ const ClientEdit = () => {
                                               placeholder="Suite Winsor & Netwon Building, White Fridrs Avenue, England,HA3 5RN"
                                               name="RegisteredOfficeAddress"
                                               id="RegisteredOfficeAddress"
-                                              onChange={(e) => handleChange2(e)}
+                                              onChange={(e) => handleInputsChange(e, 2)}
                                               value={
                                                 getCompanyDetails.RegisteredOfficeAddress
                                               }
@@ -1694,7 +1435,7 @@ const ClientEdit = () => {
                                               placeholder="Please Enter Incorporation In"
                                               name="IncorporationIn"
                                               id="IncorporationIn"
-                                              onChange={(e) => handleChange2(e)}
+                                              onChange={(e) => handleInputsChange(e, 2)}
                                               value={
                                                 getCompanyDetails.IncorporationIn
                                               }
@@ -1717,7 +1458,7 @@ const ClientEdit = () => {
                                               className="form-select mb-3"
                                               name="VATRegistered"
                                               id="VATRegistered"
-                                              onChange={(e) => handleChange2(e)}
+                                              onChange={(e) => handleInputsChange(e, 2)}
                                               value={
                                                 getCompanyDetails.VATRegistered
                                               }
@@ -1747,9 +1488,7 @@ const ClientEdit = () => {
                                                 placeholder="VAT Number"
                                                 name="VATNumber"
                                                 id="VATNumber"
-                                                onChange={(e) =>
-                                                  handleChange2(e)
-                                                }
+                                                onChange={(e) => handleInputsChange(e, 2)}
                                                 value={
                                                   getCompanyDetails.VATNumber
                                                 }
@@ -1774,7 +1513,7 @@ const ClientEdit = () => {
                                               placeholder="URL"
                                               name="Website"
                                               id="Website"
-                                              onChange={(e) => handleChange2(e)}
+                                              onChange={(e) => handleInputsChange(e, 2)}
                                               value={getCompanyDetails.Website}
                                               maxLength={200}
                                             />
@@ -1809,7 +1548,7 @@ const ClientEdit = () => {
                                             className="form-select mb-3"
                                             name="ClientIndustry"
                                             id="ClientIndustry"
-                                            onChange={(e) => handleChange2(e)}
+                                            onChange={(e) => handleInputsChange(e, 2)}
                                             value={
                                               getCompanyDetails.ClientIndustry
                                             }
@@ -1851,7 +1590,7 @@ const ClientEdit = () => {
                                             placeholder="Trading Name"
                                             name="TradingName"
                                             id="TradingName"
-                                            onChange={(e) => handleChange2(e)}
+                                            onChange={(e) => handleInputsChange(e, 2)}
                                             value={
                                               getCompanyDetails.TradingName
                                             }
@@ -1878,7 +1617,7 @@ const ClientEdit = () => {
                                             placeholder="Trading Address"
                                             name="TradingAddress"
                                             id="TradingAddress"
-                                            onChange={(e) => handleChange2(e)}
+                                            onChange={(e) => handleInputsChange(e, 2)}
                                             value={
                                               getCompanyDetails.TradingAddress
                                             }
@@ -1906,8 +1645,8 @@ const ClientEdit = () => {
                                     <div className="row">
                                       <div className="card-body">
                                         <div className="row">
-                                          {contacts.length > 0 &&
-                                            contacts.map((contact, index) => (
+                                          {CompanyContacts.length > 0 &&
+                                            CompanyContacts.map((contact, index) => (
                                               <div
                                                 className="col-xl-12 col-lg-12 mt-3"
                                                 key={index}
@@ -1920,12 +1659,12 @@ const ClientEdit = () => {
                                                           <button
                                                             className="btn btn-danger"
                                                             onClick={() =>
-                                                              handleDeleteContact(
+                                                              handleDeleteCompanyContact(
                                                                 index
                                                               )
                                                             }
                                                             disabled={
-                                                              contacts.length ===
+                                                              CompanyContacts.length ===
                                                               1
                                                             }
                                                           >
@@ -1959,20 +1698,21 @@ const ClientEdit = () => {
                                                             contact.first_name
                                                           }
                                                           onChange={(e) =>
-                                                            handleChange(
+                                                            handleContactInputChange(
                                                               index,
                                                               "first_name",
-                                                              e.target.value
+                                                              e.target.value,
+                                                              1
                                                             )
                                                           }
                                                           maxLength={50}
                                                         />
-                                                        {errors[index] &&
-                                                          errors[index]
+                                                        {companyContactsErrors[index] &&
+                                                          companyContactsErrors[index]
                                                             .first_name && (
                                                             <div className="error-text">
                                                               {
-                                                                errors[index]
+                                                                companyContactsErrors[index]
                                                                   .first_name
                                                               }
                                                             </div>
@@ -2003,20 +1743,21 @@ const ClientEdit = () => {
                                                             contact.last_name
                                                           }
                                                           onChange={(e) =>
-                                                            handleChange(
+                                                            handleContactInputChange(
                                                               index,
                                                               "last_name",
-                                                              e.target.value
+                                                              e.target.value,
+                                                              1
                                                             )
                                                           }
                                                           maxLength={50}
                                                         />
-                                                        {errors[index] &&
-                                                          errors[index]
+                                                        {companyContactsErrors[index] &&
+                                                          companyContactsErrors[index]
                                                             .last_name && (
                                                             <div className="error-text">
                                                               {
-                                                                errors[index]
+                                                                companyContactsErrors[index]
                                                                   .last_name
                                                               }
                                                             </div>
@@ -2045,10 +1786,11 @@ const ClientEdit = () => {
                                                             contact.customer_contact_person_role_id
                                                           }
                                                           onChange={(e) =>
-                                                            handleChange(
+                                                            handleContactInputChange(
                                                               index,
                                                               "customer_contact_person_role_id",
-                                                              e.target.value
+                                                              e.target.value,
+                                                              1
                                                             )
                                                           }
                                                         >
@@ -2071,12 +1813,12 @@ const ClientEdit = () => {
                                                               )
                                                             )}
                                                         </select>
-                                                        {errors[index] &&
-                                                          errors[index]
+                                                        {companyContactsErrors[index] &&
+                                                          companyContactsErrors[index]
                                                             .customer_contact_person_role_id && (
                                                             <div className="error-text">
                                                               {
-                                                                errors[index]
+                                                                companyContactsErrors[index]
                                                                   .customer_contact_person_role_id
                                                               }
                                                             </div>
@@ -2094,10 +1836,11 @@ const ClientEdit = () => {
                                                             <select
                                                               className="form-select"
                                                               onChange={(e) =>
-                                                                handleChange(
+                                                                handleContactInputChange(
                                                                   index,
                                                                   "phone_code",
-                                                                  e.target.value
+                                                                  e.target.value,
+                                                                  1
                                                                 )
                                                               }
                                                               name="phone_code"
@@ -2131,17 +1874,18 @@ const ClientEdit = () => {
                                                                 contact.phone
                                                               }
                                                               onChange={(e) =>
-                                                                handleChange(
+                                                                handleContactInputChange(
                                                                   index,
                                                                   "phone",
-                                                                  e.target.value
+                                                                  e.target.value,
+                                                                  1
                                                                 )
                                                               }
                                                               maxLength={12}
                                                               minLength={9}
                                                             />
-                                                            {errors[index] &&
-                                                              errors[index]
+                                                            {companyContactsErrors[index] &&
+                                                              companyContactsErrors[index]
                                                                 .phone && (
                                                                 <div
                                                                   style={{
@@ -2150,7 +1894,7 @@ const ClientEdit = () => {
                                                                   }}
                                                                 >
                                                                   {
-                                                                    errors[
+                                                                    companyContactsErrors[
                                                                       index
                                                                     ].phone
                                                                   }
@@ -2183,19 +1927,20 @@ const ClientEdit = () => {
                                                           id={`email-${index}`}
                                                           value={contact.email}
                                                           onChange={(e) =>
-                                                            handleChange(
+                                                            handleContactInputChange(
                                                               index,
                                                               "email",
-                                                              e.target.value
+                                                              e.target.value,
+                                                              1
                                                             )
                                                           }
                                                         />
-                                                        {errors[index] &&
-                                                          errors[index]
+                                                        {companyContactsErrors[index] &&
+                                                          companyContactsErrors[index]
                                                             .email && (
                                                             <div className="error-text">
                                                               {
-                                                                errors[index]
+                                                                companyContactsErrors[index]
                                                                   .email
                                                               }
                                                             </div>
@@ -2209,7 +1954,7 @@ const ClientEdit = () => {
                                           <div className="justify-content-end d-flex align-items-center">
                                             <button
                                               className="btn btn-info text-white blue-btn"
-                                              onClick={handleAddContact}
+                                              onClick={handleAddCompanyContact}
                                             >
                                               <i className="fa fa-plus pe-1"></i>
                                               Add Officer
@@ -2247,7 +1992,7 @@ const ClientEdit = () => {
                                             value={
                                               getPartnershipDetails.ClientIndustry
                                             }
-                                            onChange={(e) => handleChange3(e)}
+                                            onChange={(e) => handleInputsChange(e, 3)}
                                           >
                                             <option value={0}>
                                               Select Client Industry
@@ -2289,7 +2034,7 @@ const ClientEdit = () => {
                                             value={
                                               getPartnershipDetails.TradingName
                                             }
-                                            onChange={(e) => handleChange3(e)}
+                                            onChange={(e) => handleInputsChange(e, 3)}
                                             maxLength={100}
                                           />
                                           {errors3["TradingName"] && (
@@ -2316,7 +2061,7 @@ const ClientEdit = () => {
                                             value={
                                               getPartnershipDetails.TradingAddress
                                             }
-                                            onChange={(e) => handleChange3(e)}
+                                            onChange={(e) => handleInputsChange(e, 3)}
                                             maxLength={200}
                                           />
                                           {errors3["TradingAddress"] && (
@@ -2339,7 +2084,7 @@ const ClientEdit = () => {
                                               value={
                                                 getPartnershipDetails.VATRegistered
                                               }
-                                              onChange={(e) => handleChange3(e)}
+                                              onChange={(e) => handleInputsChange(e, 3)}
                                             >
                                               <option value="">
                                                 Select VAT Registered
@@ -2371,7 +2116,7 @@ const ClientEdit = () => {
                                               value={
                                                 getPartnershipDetails.VATNumber
                                               }
-                                              onChange={(e) => handleChange3(e)}
+                                              onChange={(e) => handleInputsChange(e, 3)}
                                               maxLength={9}
                                             />
                                             {errors3["VATNumber"] && (
@@ -2396,7 +2141,7 @@ const ClientEdit = () => {
                                             value={
                                               getPartnershipDetails.Website
                                             }
-                                            onChange={(e) => handleChange3(e)}
+                                            onChange={(e) => handleInputsChange(e, 3)}
                                             maxLength={200}
                                           />
 
@@ -2421,8 +2166,8 @@ const ClientEdit = () => {
                                     </div>
                                     <div className="card-body">
                                       <div className="row">
-                                        {contacts1 &&
-                                          contacts1.map((contact, index) => (
+                                        {partnershipContacts &&
+                                          partnershipContacts.map((contact, index) => (
                                             <div
                                               className="col-xxl-12 col-lg-12"
                                               key={contact.contact_id}
@@ -2443,10 +2188,11 @@ const ClientEdit = () => {
                                                             contact.authorised_signatory_status
                                                           }
                                                           onChange={(e) =>
-                                                            handleChange4(
+                                                            handleContactInputChange(
                                                               index,
                                                               "authorised_signatory_status",
-                                                              e.target.checked
+                                                              e.target.checked,
+                                                              2
                                                             )
                                                           }
                                                           defaultChecked={
@@ -2454,7 +2200,7 @@ const ClientEdit = () => {
                                                             index === 1
                                                           }
                                                           disabled={
-                                                            contacts1.length ===
+                                                            partnershipContacts.length ===
                                                               2
                                                               ? index === 0 ||
                                                               index === 1
@@ -2472,12 +2218,12 @@ const ClientEdit = () => {
                                                               className="btn btn-danger"
                                                               type="button"
                                                               onClick={() =>
-                                                                handleDeleteContact1(
+                                                                handleDeletePartnershipContact(
                                                                   index
                                                                 )
                                                               }
                                                               disabled={
-                                                                contacts1.length ===
+                                                                partnershipContacts.length ===
                                                                 1
                                                               }
                                                             >
@@ -2510,21 +2256,22 @@ const ClientEdit = () => {
                                                           contact.first_name
                                                         }
                                                         onChange={(e) =>
-                                                          handleChange4(
+                                                          handleContactInputChange(
                                                             index,
                                                             "first_name",
-                                                            e.target.value
+                                                            e.target.value,
+                                                            2
                                                           )
                                                         }
                                                         maxLength={50}
                                                       />
-                                                      {contactsErrors[index]
+                                                      {PartnershiContactsErrors[index]
                                                         ?.first_name && (
                                                           <div
-                                                           className="error-text"
+                                                            className="error-text"
                                                           >
                                                             {
-                                                              contactsErrors[
+                                                              PartnershiContactsErrors[
                                                                 index
                                                               ].first_name
                                                             }
@@ -2555,21 +2302,22 @@ const ClientEdit = () => {
                                                           contact.last_name
                                                         }
                                                         onChange={(e) =>
-                                                          handleChange4(
+                                                          handleContactInputChange(
                                                             index,
                                                             "last_name",
-                                                            e.target.value
+                                                            e.target.value,
+                                                            2
                                                           )
                                                         }
                                                         maxLength={50}
                                                       />
-                                                      {contactsErrors[index]
+                                                      {PartnershiContactsErrors[index]
                                                         ?.last_name && (
                                                           <div
                                                             className="error-text"
                                                           >
                                                             {
-                                                              contactsErrors[
+                                                              PartnershiContactsErrors[
                                                                 index
                                                               ].last_name
                                                             }
@@ -2596,10 +2344,11 @@ const ClientEdit = () => {
                                                           contact.customer_contact_person_role_id
                                                         }
                                                         onChange={(e) =>
-                                                          handleChange4(
+                                                          handleContactInputChange(
                                                             index,
                                                             "customer_contact_person_role_id",
-                                                            e.target.value
+                                                            e.target.value,
+                                                            2
                                                           )
                                                         }
                                                       >
@@ -2618,13 +2367,13 @@ const ClientEdit = () => {
                                                             )
                                                           )}
                                                       </select>
-                                                      {contactsErrors[index]
+                                                      {PartnershiContactsErrors[index]
                                                         ?.customer_contact_person_role_id && (
                                                           <div
                                                             className="error-text"
                                                           >
                                                             {
-                                                              contactsErrors[
+                                                              PartnershiContactsErrors[
                                                                 index
                                                               ]
                                                                 .customer_contact_person_role_id
@@ -2643,10 +2392,11 @@ const ClientEdit = () => {
                                                           <select
                                                             className="form-select"
                                                             onChange={(e) =>
-                                                              handleChange4(
+                                                              handleContactInputChange(
                                                                 index,
                                                                 "phone_code",
-                                                                e.target.value
+                                                                e.target.value,
+                                                                2
                                                               )
                                                             }
                                                             name="phone_code"
@@ -2681,23 +2431,24 @@ const ClientEdit = () => {
                                                               contact.phone
                                                             }
                                                             onChange={(e) =>
-                                                              handleChange4(
+                                                              handleContactInputChange(
                                                                 index,
                                                                 "phone",
-                                                                e.target.value
+                                                                e.target.value,
+                                                                2
                                                               )
                                                             }
                                                             maxLength={12}
                                                           />
-                                                          {contactsErrors[
+                                                          {PartnershiContactsErrors[
                                                             index
                                                           ] &&
-                                                            contactsErrors[
+                                                            PartnershiContactsErrors[
                                                               index
                                                             ].phone && (
                                                               <div className="error-text">
                                                                 {
-                                                                  contactsErrors[
+                                                                  PartnershiContactsErrors[
                                                                     index
                                                                   ].phone
                                                                 }
@@ -2718,10 +2469,11 @@ const ClientEdit = () => {
                                                           <select
                                                             className="form-select"
                                                             onChange={(e) =>
-                                                              handleChange4(
+                                                              handleContactInputChange(
                                                                 index,
                                                                 "alternate_phone_code",
-                                                                e.target.value
+                                                                e.target.value,
+                                                                2
                                                               )
                                                             }
                                                             name="alternate_phone_code"
@@ -2758,24 +2510,25 @@ const ClientEdit = () => {
                                                               contact.alternate_phone
                                                             }
                                                             onChange={(e) =>
-                                                              handleChange4(
+                                                              handleContactInputChange(
                                                                 index,
                                                                 "alternate_phone",
-                                                                e.target.value
+                                                                e.target.value,
+                                                                2
                                                               )
                                                             }
                                                             maxLength={12}
                                                           />
-                                                          {contactsErrors[
+                                                          {PartnershiContactsErrors[
                                                             index
                                                           ] &&
-                                                            contactsErrors[
+                                                            PartnershiContactsErrors[
                                                               index
                                                             ]
                                                               .alternate_phone && (
                                                               <div className="error-text">
                                                                 {
-                                                                  contactsErrors[
+                                                                  PartnershiContactsErrors[
                                                                     index
                                                                   ]
                                                                     .alternate_phone
@@ -2806,18 +2559,19 @@ const ClientEdit = () => {
                                                         id={`email-${index}`}
                                                         value={contact.email}
                                                         onChange={(e) =>
-                                                          handleChange4(
+                                                          handleContactInputChange(
                                                             index,
                                                             "email",
-                                                            e.target.value
+                                                            e.target.value,
+                                                            2
                                                           )
                                                         }
                                                       />
-                                                      {contactsErrors[index]
+                                                      {PartnershiContactsErrors[index]
                                                         ?.email && (
                                                           <div className="error-text" >
                                                             {
-                                                              contactsErrors[
+                                                              PartnershiContactsErrors[
                                                                 index
                                                               ].email
                                                             }
@@ -2847,18 +2601,19 @@ const ClientEdit = () => {
                                                           contact.alternate_email
                                                         }
                                                         onChange={(e) =>
-                                                          handleChange4(
+                                                          handleContactInputChange(
                                                             index,
                                                             "alternate_email",
-                                                            e.target.value
+                                                            e.target.value,
+                                                            2
                                                           )
                                                         }
                                                       />
-                                                      {contactsErrors[index]
+                                                      {PartnershiContactsErrors[index]
                                                         ?.alternate_email && (
                                                           <div className="error-text">
                                                             {
-                                                              contactsErrors[
+                                                              PartnershiContactsErrors[
                                                                 index
                                                               ].alternate_email
                                                             }
@@ -2875,7 +2630,7 @@ const ClientEdit = () => {
                                           <div>
                                             <button
                                               className="btn btn-info text-white blue-btn"
-                                              onClick={handleAddContact1}
+                                              onClick={handleAddPartnershipContact}
                                             >
                                               Add Partner
                                             </button>
@@ -2908,19 +2663,19 @@ const ClientEdit = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            name="tradingName"
-                                            id="tradingName"
+                                            name="TradingName"
+                                            id="TradingName"
                                             className="form-control"
                                             placeholder="Trading Name"
-                                            onChange={(e) => handleChange5(e)}
+                                            onChange={(e) => handleInputsChange(e, 4)}
                                             value={
-                                              getIndivisualDetails.tradingName
+                                              getIndivisualDetails.TradingName
                                             }
                                             maxLength={100}
                                           />
-                                          {errors4["tradingName"] && (
+                                          {errors4["TradingName"] && (
                                             <div className="error-text">
-                                              {errors4["tradingName"]}
+                                              {errors4["TradingName"]}
                                             </div>
                                           )}
                                         </div>
@@ -2943,7 +2698,7 @@ const ClientEdit = () => {
                                             value={
                                               getIndivisualDetails.first_name
                                             }
-                                            onChange={(e) => handleChange5(e)}
+                                            onChange={(e) => handleInputsChange(e, 4)}
                                             maxLength={50}
                                           />
                                           {errors4["first_name"] && (
@@ -2970,7 +2725,7 @@ const ClientEdit = () => {
                                             value={
                                               getIndivisualDetails.last_name
                                             }
-                                            onChange={(e) => handleChange5(e)}
+                                            onChange={(e) => handleInputsChange(e, 4)}
                                             maxLength={50}
                                           />
                                           {errors4["last_name"] && (
@@ -2990,9 +2745,7 @@ const ClientEdit = () => {
                                             <div className="col-md-4 pe-0">
                                               <select
                                                 className="form-select"
-                                                onChange={(e) =>
-                                                  handleChange5(e)
-                                                }
+                                                onChange={(e) => handleInputsChange(e, 4)}
                                                 name="phone_code"
                                                 id="phone_code"
                                                 value={
@@ -3021,9 +2774,7 @@ const ClientEdit = () => {
                                                 value={
                                                   getIndivisualDetails.phone
                                                 }
-                                                onChange={(e) =>
-                                                  handleChange5(e)
-                                                }
+                                                onChange={(e) => handleInputsChange(e, 4)}
                                                 maxLength={12}
                                                 minLength={9}
                                               />
@@ -3052,7 +2803,7 @@ const ClientEdit = () => {
                                             name="email"
                                             id="email"
                                             value={getIndivisualDetails.email}
-                                            onChange={(e) => handleChange5(e)}
+                                            onChange={(e) => handleInputsChange(e, 4)}
                                           />
                                           {errors4["email"] && (
                                             <div className="error-text">
@@ -3079,7 +2830,7 @@ const ClientEdit = () => {
                                             value={
                                               getIndivisualDetails.residentialAddress
                                             }
-                                            onChange={(e) => handleChange5(e)}
+                                            onChange={(e) => handleInputsChange(e, 4)}
                                           />
                                           {errors4["residentialAddress"] && (
                                             <div className="error-text">
