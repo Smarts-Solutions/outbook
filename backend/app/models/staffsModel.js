@@ -28,16 +28,16 @@ const getManagerStaff = async () => {
 };
 
 const deleteStaff = async (staffId) => {
-    const query = `
-    DELETE FROM staffs WHERE id = ?
-    `;
+    // const query = `
+    // DELETE FROM staffs WHERE id = ?
+    // `;
 
-    try {
-        await pool.execute(query, [staffId]);
-    } catch (err) {
-        console.error('Error deleting data:', err);
-        throw err;
-    }
+    // try {
+    //     await pool.execute(query, [staffId]);
+    // } catch (err) {
+    //     console.error('Error deleting data:', err);
+    //     throw err;
+    // }
 };
 
 const updateStaff = async (staff) => {
