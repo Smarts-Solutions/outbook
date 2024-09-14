@@ -9393,7 +9393,7 @@ span.sidebar-icons {
   box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 }
 .dashboard-card:hover {
-  transform: translateY(-10px);
+  transform: scale(1.03);
 }
 .activity-info-text p {
   font-size: 12px;

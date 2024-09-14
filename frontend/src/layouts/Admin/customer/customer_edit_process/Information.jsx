@@ -1156,7 +1156,7 @@ const Information = ({ id, pageStatus }) => {
                             <div className="mb-3">
                               <label className="form-label">Phone</label>
                               <div className="row">
-                                <div className="col-md-4">
+                                <div className="col-md-4 pe-1">
                                   <select
                                     className="form-select"
                                     onChange={(e) => handleChange1(e)}
@@ -1175,7 +1175,7 @@ const Information = ({ id, pageStatus }) => {
                                       ))}
                                   </select>
                                 </div>
-                                <div className="mb-3 col-md-8">
+                                <div className="mb-3 col-md-8 ps-0">
                                   <input
                                     type="text"
                                     className="form-control"

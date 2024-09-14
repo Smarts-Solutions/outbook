@@ -262,7 +262,7 @@ const ClientList = () => {
           </button>
           <button className="delete-icon" onClick={() => ChecklistDelete(row)}>
             {" "}
-            <i className="ti-trash" />
+            <i className="ti-trash text-danger" />
           </button>
         </div>
       ),
@@ -554,7 +554,7 @@ const ClientList = () => {
       </div>
       <div className="row">
         <div className="col-12">
-        <ol class="breadcrumb ps-2"><li class="breadcrumb-item"><a href=";">Dastyle</a></li><li class="breadcrumb-item active">Dashboard</li></ol>
+        <ol class="breadcrumb ps-2"><li class="breadcrumb-item"><a href=";">Outbook</a></li><li class="breadcrumb-item active">Dashboard</li></ol>
 
         </div>
       </div>
