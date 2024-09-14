@@ -6,7 +6,6 @@ import { DraftAction , AddDraft } from '../../../ReduxStore/Slice/Customer/Custo
 import { useLocation } from "react-router-dom";
 import sweatalert from 'sweetalert2';
 
-
 const Drafts = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const location = useLocation()
@@ -37,7 +36,6 @@ const Drafts = () => {
 
     });
   };
-
 
   useEffect(() => {
     GetAllDraftList();
@@ -129,7 +127,6 @@ const Drafts = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-
   const validateAllFields = () => {
     let isValid = true;
     for (const key in AllDraftInputdata) {
@@ -139,7 +136,6 @@ const Drafts = () => {
     }
     return isValid;
   };
-
  
   const HandleSubmitDraft = async () => {
     if (!validateAllFields()) {
@@ -187,7 +183,6 @@ const Drafts = () => {
 
   }
 
-
   const columns = [
     { name: 'Draft Sent On', selector: row => row.draft_sent_on, sortable: true },
     { name: 'Final Draft Sent On', selector: row => row.final_draft_sent_on, sortable: true },
@@ -208,8 +203,6 @@ const Drafts = () => {
       button: true,
     },
   ];
-
-  console.log("SingleDraftData" , SingleDraftData)
 
   return (
     <div className=''>

@@ -21,7 +21,8 @@ import {
   QUERY_ACTION,
   ADD_QUERY,
   DRAFT_ACTION,
-  ADD_DRAFT
+  ADD_DRAFT,
+  JOBDOCUMENT_ACTION,
    
 } from "../../../Services/Customer/CustomerService";
 
@@ -422,6 +423,22 @@ export const AddDraft = createAsyncThunk("addDraft", async (data) => {
   }
 });
 
+export const JobDocumentAction = createAsyncThunk("jobDocumentAction", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await JOBDOCUMENT_ACTION(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
  
 
 
@@ -453,6 +470,7 @@ const CustomerSlice = createSlice({
     addquery: [],
     getdraftlist: [],
     adddraft: [],
+    jobdocumentaction: [],
     
   },
   reducers: {},
@@ -697,6 +715,17 @@ const CustomerSlice = createSlice({
         state.adddraft = action.payload;
       })
       .addCase(AddDraft.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(JobDocumentAction.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(JobDocumentAction.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.jobdocumentaction = action.payload;
+      })
+      .addCase(JobDocumentAction.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       });
