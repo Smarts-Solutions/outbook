@@ -10265,3 +10265,14 @@ body .accordion-button:not(.collapsed)::after {
     transform: scale(0.707) rotate(45deg);
   }
 }
+
+span.breadcrumb__title {
+  FONT-SIZE: 19px;
+}
+span.breadcrumb__desc {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 180px;
+  font-size: 14px;
+}

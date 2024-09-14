@@ -559,13 +559,13 @@ const ClientList = () => {
     <a href="#" className="active">
       <span className="breadcrumb__inner ">
         <span className="breadcrumb__title">Customer</span>
-        <span className="breadcrumb__desc">First Item</span>
+        <span className="breadcrumb__desc">CROWN ACADEMY OF...</span>
       </span>
     </a>
     <a href="#">
       <span className="breadcrumb__inner">
         <span className="breadcrumb__title">Client</span>
-        <span className="breadcrumb__desc">Second Item</span>
+        <span className="breadcrumb__desc">Crown Acadmy Of...</span>
       </span>
     </a>
     <a href="#">
