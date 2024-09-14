@@ -16,8 +16,7 @@ const Documents = () => {
   useEffect(() => {
     GetAllDocumentList();
   }, []);
-
-  console.log(jobDocumentListData);
+ 
 
   const GetAllDocumentList = async () => {
     const req = { action: "get", job_id: 9 }
