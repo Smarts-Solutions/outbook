@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { useDispatch } from "react-redux";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { BrowserRouter as Router,  Route,  Routes,  useLocation,  useNavigate} from "react-router-dom";
 import Sidebar from "../Components/Dashboard/Sidebar";
 import Header from "../Components/Dashboard/Header";
 import Profile from "../Components/Dashboard/Profile";
@@ -189,8 +183,7 @@ const Admin_Route = () => {
       <Sidebar />
       <div className="page-wrapper">
         <Header />
-        <div className="page-content">
-         
+        <div className="page-content"> 
           <Routes>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
