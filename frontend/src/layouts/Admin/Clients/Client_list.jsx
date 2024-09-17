@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch  } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -19,7 +19,7 @@ const ClientList = () => {
   const [getJobDetails, setGetJobDetails] = useState([]);
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
-  
+  const [hararchyData, setHararchyData] = useState({customer : location.state});
   
 
   const [activeTab, setActiveTab] = useState(
@@ -31,8 +31,9 @@ const ClientList = () => {
     ? "job"
     : "client"
   );
+ 
+
   const [searchQuery, setSearchQuery] = useState("");
-  console.log(location.state);
   
   const SetTab = (e) => {
     setActiveTab(e);
@@ -455,14 +456,36 @@ const ClientList = () => {
         return;
       });
   };
+
   const HandleClientView = (row) => {
-    navigate("/admin/client/profile", { state: { Client_id: row.id } });
-  };
-  const HandleJobView = (row) => {
-    navigate("/admin/job/logs", {
-      state: { job_id: row.job_id, goto: "Customer" },
+    setHararchyData(prevState => {
+      const updatedData = {
+        ...prevState,
+        client: row
+      };
+      navigate("/admin/client/profile", { state: { Client_id: row.id, data: updatedData } }); 
+      return updatedData;
     });
   };
+
+  const HandleJobView = (row) => {
+    setHararchyData(prevState => {
+      const updatedData = {
+        ...prevState,
+        job: row
+      };
+      navigate("/admin/job/logs", { state: { job_id: row.job_id, goto: "Customer" ,  data: updatedData } }); 
+      return updatedData;
+    });
+  };
+
+
+  // const HandleJobView = (row) => {  
+  //   navigate("/admin/job/logs", {
+  //     state: { job_id: row.job_id, goto: "Customer" },
+  //   });
+  // };
+
   const handleAddClient = () => {
     navigate("/admin/addclient", { state: { id: location.state.id } });
   };
@@ -480,7 +503,7 @@ const ClientList = () => {
     });
   }
   const handleClick = () => {
-    navigate("/admin/create/checklist", { state: { id: location.state.id } });
+    navigate("/admin/create/checklist", { state: { id: location.state.id ,  } });
   };
   const EditChecklist = (row) => {
     navigate("/admin/edit/checklist", {
@@ -555,8 +578,8 @@ const ClientList = () => {
             </div>
           </div>
         </div>
-      </div> 
-      <Hierarchy show={["Customer" , activeTab  ]} active={1} id={location.state}/>
+      </div>  
+      <Hierarchy show={["Customer" , activeTab  ]} active={1} data={hararchyData}/>
 
       <div className="tab-content" id="pills-tabContent">
         {tabs1.map((tab) => (

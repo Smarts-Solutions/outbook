@@ -15,8 +15,9 @@ import Hierarchy from '../../../Components/ExtraComponents/Hierarchy';
 const JobLogs = () => {
   const location = useLocation();
   const [selectedTab, setSelectedTab] = useState('job information');
-
-  console.log(selectedTab)
+ 
+  console.log("CCPPP" , location.state.goto )
+ 
   return (
     <div className='container-fluid'>
 
@@ -151,7 +152,7 @@ const JobLogs = () => {
         </div> 
       </div>
 
-      <Hierarchy show={["Customer" , "Client" , "Job" , selectedTab  ]} active={3} id={location.state}/>
+      <Hierarchy show={location.state.goto=="Customer" ? ["Customer" , "Job" , selectedTab] : ["Customer" , "Client" , "Job" , selectedTab] } active={location.state.goto=="Customer" ? 2 : 3} data={location.state.data}/>
 
       <div className="tab-content report-data mt-4" id="pills-tabContent">
 

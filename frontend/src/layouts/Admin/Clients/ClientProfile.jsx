@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch , useSelector } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -18,8 +18,10 @@ const ClientList = () => {
   const [informationData, informationSetData] = useState([]);
   const [clientInformationData, setClientInformationData] = useState([]);
   const [companyDetails, setCompanyDetails] = useState([]);
+  const [hararchyData, setHararchyData] = useState(location.state.data);
 
 
+  console.log("hararchyData", hararchyData);
 
   useEffect(() => {
     GetAllJobList();
@@ -154,10 +156,20 @@ const ClientList = () => {
       button: true,
     },
   ];
-
+  
   const HandleJob = (row) => {
-    navigate("/admin/job/logs", { state: { job_id: row.job_id, goto: "client" } });
+    setHararchyData(prevState => {
+      const updatedData = {
+        ...prevState,
+        job: row
+      };
+       
+      navigate("/admin/job/logs", { state: { job_id: row.job_id, data: updatedData , goto: "client" } });
+       
+      return updatedData;
+    });
   };
+
 
   function handleEdit(row) {
     navigate("/admin/job/edit", { state: { job_id: row.job_id, goto: "client" } });
@@ -219,6 +231,7 @@ const ClientList = () => {
       });
     }
   };
+ 
 
   function ClientEdit(row) {
 
@@ -291,7 +304,7 @@ const ClientList = () => {
           </div>
         </div>
 
-        <Hierarchy show={["Customer" , "Client" , activeTab  ]} active={2} id={location.state}/>
+        <Hierarchy show={["Customer" , "Client" , activeTab  ]} active={2} data={hararchyData}/>
         
       </div>
 

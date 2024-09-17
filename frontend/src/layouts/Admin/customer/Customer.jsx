@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch , useSelector } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { GET_ALL_CUSTOMERS } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getDateRange } from "../../../Utils/Comman_function";
+
 
 const Customer = () => {
   const navigate = useNavigate();
@@ -22,22 +23,23 @@ const Customer = () => {
     delete: 0,
   });
 
-  const accessData =
-    JSON.parse(localStorage.getItem("accessData")).find(
-      (item) => item.permission_name === "customer"
-    )?.items || [];
+  const accessData = 
+  JSON.parse(localStorage.getItem("accessData") || "[]").find(
+    (item) => item.permission_name === "customer"
+  )?.items || [];
 
-  useEffect(() => {
-    const updatedAccess = { insert: 0, update: 0, delete: 0 };
+useEffect(() => { 
+  if (accessData.length === 0) return; 
+  const updatedAccess = { insert: 0, update: 0, delete: 0 }; 
+  accessData.forEach((item) => {
+    if (item.type === "insert") updatedAccess.insert = item.is_assigned;
+    if (item.type === "update") updatedAccess.update = item.is_assigned;
+    if (item.type === "delete") updatedAccess.delete = item.is_assigned;
+  });
 
-    accessData.forEach((item) => {
-      if (item.type === "insert") updatedAccess.insert = item.is_assigned;
-      if (item.type === "update") updatedAccess.update = item.is_assigned;
-      if (item.type === "delete") updatedAccess.delete = item.is_assigned;
-    });
+  setAccessData(updatedAccess);
+}, []);  
 
-    setAccessData(updatedAccess);
-  }, [accessData]);
 
   useEffect(() => {
     GetAllCustomerData();
@@ -231,9 +233,10 @@ const Customer = () => {
     setFilteredData(filtered);
   };
 
-  const HandleClientView = (row) => {
+  const HandleClientView = (row) => {  
     navigate("/admin/Clientlist", { state: row });
-  };
+};
+  
 
   const handleEdit = (row) => {
     navigate("/admin/editcustomer", { state: row });
