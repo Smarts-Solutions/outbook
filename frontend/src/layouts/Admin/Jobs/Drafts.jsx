@@ -80,67 +80,67 @@ const Drafts = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setAllDraftInputdata({ ...AllDraftInputdata, [name]: value });
-    validate(name, value);
+    // validate(name, value);
   };
 
-  const validate = (name, value) => {
-    const newErrors = { ...errors };
-    if (!value) {
-      switch (name) {
-        case "draft_sent_on":
-          newErrors.draft_sent_on = "Draft Sent On is required";
-          break;
-        case "final_draft_sent_on":
-          newErrors.final_draft_sent_on = "Final Draft Sent On is required";
-          break;
-        case "feedback_received":
-          newErrors.feedback_received = "Feedback Received is required";
-          break;
-        case "updated_amendments":
-          newErrors.updated_amendments = "Updated/Amendments is required";
-          break;
-        case "was_it_complete":
-          newErrors.was_it_complete = "Was It Complete is required";
-          break;
-        case "enter_feedback":
-          newErrors.enter_feedback = "Enter Feedback is required";
-          break;
-        default:
-          break;
-      }
-    }
-    else {
-      delete newErrors[name];
-      setErrors((prevErrors) => {
-        const updatedErrors = { ...prevErrors };
-        delete updatedErrors[name];
-        return updatedErrors;
-      });
-    }
+  // const validate = (name, value) => {
+  //   const newErrors = { ...errors };
+  //   if (!value) {
+  //     switch (name) {
+  //       case "draft_sent_on":
+  //         newErrors.draft_sent_on = "Draft Sent On is required";
+  //         break;
+  //       case "final_draft_sent_on":
+  //         newErrors.final_draft_sent_on = "Final Draft Sent On is required";
+  //         break;
+  //       case "feedback_received":
+  //         newErrors.feedback_received = "Feedback Received is required";
+  //         break;
+  //       case "updated_amendments":
+  //         newErrors.updated_amendments = "Updated/Amendments is required";
+  //         break;
+  //       case "was_it_complete":
+  //         newErrors.was_it_complete = "Was It Complete is required";
+  //         break;
+  //       case "enter_feedback":
+  //         newErrors.enter_feedback = "Enter Feedback is required";
+  //         break;
+  //       default:
+  //         break;
+  //     }
+  //   }
+  //   else {
+  //     delete newErrors[name];
+  //     setErrors((prevErrors) => {
+  //       const updatedErrors = { ...prevErrors };
+  //       delete updatedErrors[name];
+  //       return updatedErrors;
+  //     });
+  //   }
 
-    if (Object.keys(newErrors).length !== 0) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        ...newErrors,
-      }));
-    }
-    return Object.keys(newErrors).length === 0;
-  };
+  //   if (Object.keys(newErrors).length !== 0) {
+  //     setErrors((prevErrors) => ({
+  //       ...prevErrors,
+  //       ...newErrors,
+  //     }));
+  //   }
+  //   return Object.keys(newErrors).length === 0;
+  // };
 
-  const validateAllFields = () => {
-    let isValid = true;
-    for (const key in AllDraftInputdata) {
-      if (!validate(key, AllDraftInputdata[key])) {
-        isValid = false;
-      }
-    }
-    return isValid;
-  };
+  // const validateAllFields = () => {
+  //   let isValid = true;
+  //   for (const key in AllDraftInputdata) {
+  //     if (!validate(key, AllDraftInputdata[key])) {
+  //       isValid = false;
+  //     }
+  //   }
+  //   return isValid;
+  // };
  
   const HandleSubmitDraft = async () => {
-    if (!validateAllFields()) {
-      return;
-    }
+    // if (!validateAllFields()) {
+    //   return;
+    // }
     const req = {
       job_id: location.state.job_id,
       draft_sent_on: AllDraftInputdata.draft_sent_on,
@@ -268,7 +268,7 @@ const Drafts = () => {
                 )}
               </div>
             </div>
-            <div className="col-lg-6">
+            {/* <div className="col-lg-6">
               <div className="mb-3">
                 <label htmlFor="firstNameinput" className="form-label">
                   Final Draft Sent On
@@ -288,7 +288,7 @@ const Drafts = () => {
                   </div>
                 )}
               </div>
-            </div>
+            </div> */}
             <div className="col-lg-6">
               <div className="mb-3">
                 <label htmlFor="firstNameinput" className="form-label">

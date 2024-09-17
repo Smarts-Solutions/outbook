@@ -18,12 +18,12 @@ const Queries = () => {
 
   const [AllQueryInputdata, setAllQueryInputdata] = useState({
     QueriesRemaining: "",
-    QueryTitle: "",
+    // QueryTitle: "",
     ReviewedBy: "",
     MissingQueriesPreparedDate: "",
     QuerySentDate: "",
     ResponseReceived: "",
-    Response: "",
+    status: "0",
     FinalQueryResponseReceivedDate: "",
     QueryDocument: "",
   });
@@ -32,12 +32,12 @@ const Queries = () => {
     setAllQueryInputdata({
       ...AllQueryInputdata,
       QueriesRemaining: "",
-      QueryTitle: "",
+      // QueryTitle: "",
       ReviewedBy: "",
       MissingQueriesPreparedDate: "",
       QuerySentDate: "",
       ResponseReceived: "",
-      Response: "",
+      status: "0",
       FinalQueryResponseReceivedDate: "",
       QueryDocument: "",
     });
@@ -87,9 +87,9 @@ const Queries = () => {
   }
 
   const HandleAddQuery = async () => {
-    if (!validateAllFields()) {
-      return;
-    }
+    // if (!validateAllFields()) {
+    //   return;
+    // }
     const req = { action: "add", job_id: location.state.job_id, data: AllQueryInputdata }
     const data = { req: req, authToken: token }
 
@@ -137,79 +137,79 @@ const Queries = () => {
     else {
       setAllQueryInputdata({ ...AllQueryInputdata, [name]: value });
     }
-    validate(name, value);
+    // validate(name, value);
   };
 
-  const validate = (name, value) => {
-    const newErrors = { ...errors1 };
-    if (!value) {
-      switch (name) {
-        case "QueriesRemaining":
-          newErrors.QueriesRemaining = "Queries Remaining is required";
-          break;
-        case "QueryTitle":
-          newErrors.QueryTitle = "Query Title is required";
-          break;
-        case "ReviewedBy":
-          newErrors.ReviewedBy = "Reviewed By is required";
-          break;
-        case "MissingQueriesPreparedDate":
-          newErrors.MissingQueriesPreparedDate = "Missing Queries Prepared Date is required";
-          break;
-        case "QuerySentDate":
-          newErrors.QuerySentDate = "Query Sent Date is required";
-          break;
+  // const validate = (name, value) => {
+  //   const newErrors = { ...errors1 };
+  //   if (!value) {
+  //     switch (name) {
+  //       case "QueriesRemaining":
+  //         newErrors.QueriesRemaining = "Queries Remaining is required";
+  //         break;
+  //       case "QueryTitle":
+  //         newErrors.QueryTitle = "Query Title is required";
+  //         break;
+  //       case "ReviewedBy":
+  //         newErrors.ReviewedBy = "Reviewed By is required";
+  //         break;
+  //       case "MissingQueriesPreparedDate":
+  //         newErrors.MissingQueriesPreparedDate = "Missing Queries Prepared Date is required";
+  //         break;
+  //       case "QuerySentDate":
+  //         newErrors.QuerySentDate = "Query Sent Date is required";
+  //         break;
 
-        case "ResponseReceived":
-          newErrors.ResponseReceived = "Response Received is required";
-          break;
-        case "Response":
-          newErrors.Response = "Response is required";
-          break;
-        case "FinalQueryResponseReceivedDate":
-          newErrors.FinalQueryResponseReceivedDate = "Final Query Response Received Date is required";
-          break;
-        case "QueryDocument":
-          newErrors.QueryDocument = "Query Document is required";
-          break;
-        default:
-          break;
-      }
-    }
-    else {
-      delete newErrors[name];
-      setErrors1((prevErrors) => {
-        const updatedErrors = { ...prevErrors };
-        delete updatedErrors[name];
-        return updatedErrors;
-      });
-    }
+  //       case "ResponseReceived":
+  //         newErrors.ResponseReceived = "Response Received is required";
+  //         break;
+  //       case "Response":
+  //         newErrors.Response = "Response is required";
+  //         break;
+  //       case "FinalQueryResponseReceivedDate":
+  //         newErrors.FinalQueryResponseReceivedDate = "Final Query Response Received Date is required";
+  //         break;
+  //       case "QueryDocument":
+  //         newErrors.QueryDocument = "Query Document is required";
+  //         break;
+  //       default:
+  //         break;
+  //     }
+  //   }
+  //   else {
+  //     delete newErrors[name];
+  //     setErrors1((prevErrors) => {
+  //       const updatedErrors = { ...prevErrors };
+  //       delete updatedErrors[name];
+  //       return updatedErrors;
+  //     });
+  //   }
 
-    if (Object.keys(newErrors).length !== 0) {
-      setErrors1((prevErrors) => ({
-        ...prevErrors,
-        ...newErrors,
-      }));
-    }
-    return Object.keys(newErrors).length === 0;
-  };
+  //   if (Object.keys(newErrors).length !== 0) {
+  //     setErrors1((prevErrors) => ({
+  //       ...prevErrors,
+  //       ...newErrors,
+  //     }));
+  //   }
+  //   return Object.keys(newErrors).length === 0;
+  // };
 
-  const validateAllFields = () => {
-    let isValid = true;
-    for (const key in AllQueryInputdata) {
-      if (!validate(key, AllQueryInputdata[key])) {
-        isValid = false;
-      }
-    }
-    return isValid;
-  };
+  // const validateAllFields = () => {
+  //   let isValid = true;
+  //   for (const key in AllQueryInputdata) {
+  //     if (!validate(key, AllQueryInputdata[key])) {
+  //       isValid = false;
+  //     }
+  //   }
+  //   return isValid;
+  // };
 
 
   const columns = [
     { name: 'Query Title', selector: row => row.query_title, sortable: true },
     { name: '	Query Sent Date', selector: row => row.query_sent_date, sortable: true },
     { name: 'Response Received', selector: row => row.response_received == 1 ? "YES" : "NO", sortable: true },
-    { name: 'Response', selector: row => row.response, sortable: true },
+    // { name: 'Response', selector: row => row.response, sortable: true },
     {
       name: "Actions",
       cell: (row) => (
@@ -292,26 +292,7 @@ const Queries = () => {
                 {errors1["QueriesRemaining"]}
               </div>
             )}
-          </div>
-          <div className="col-lg-6">
-            <div className="mb-3">
-              <label htmlFor="firstNameinput" className="form-label">Query Title</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Enter Query Title"
-                id="QueryTitle"
-                name="QueryTitle"
-                onChange={(e) => handleChange(e)}
-                value={AllQueryInputdata.QueryTitle}
-              />
-              {errors1["QueryTitle"] && (
-                <div className="error-text">
-                  {errors1["QueryTitle"]}
-                </div>
-              )}
-            </div>
-          </div>
+          </div> 
           <div className="col-lg-6">
             <label htmlFor="firstNameinput" className="form-label">Reviewed By</label>
             <select
@@ -401,27 +382,7 @@ const Queries = () => {
               )}
             </div>
           </div>
-          <div className="col-lg-6">
-            <div className="mb-3">
-              <label htmlFor="firstNameinput" className="form-label">
-                Response
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Enter Response"
-                id="Response"
-                name="Response"
-                onChange={(e) => handleChange(e)}
-                value={AllQueryInputdata.Response}
-              />
-              {errors1["Response"] && (
-                <div className="error-text">
-                  {errors1["Response"]}
-                </div>
-              )}
-            </div>
-          </div>
+           
           <div className="col-lg-6">
             <div className="mb-3">
               <label htmlFor="firstNameinput" className="form-label">
@@ -462,6 +423,47 @@ const Queries = () => {
                   {errors1["QueryDocument"]}
                 </div>
               )}
+            </div>
+          </div>
+          <div id="MissingLog6" className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Status
+              </label>
+              <div style={{ display: "flex" }}>
+                <div>
+                  <input
+                    type="radio"
+                    id="complete"
+                    name="status"
+                    value="1"
+                    onChange={(e) => handleChange(e)}
+                    checked={AllQueryInputdata.status === "1"}
+                  />
+                  &nbsp; <label htmlFor="complete">Complete</label>
+
+                </div>
+                &nbsp;
+                <div style={{ marginLeft: 10 }}>
+                  <input
+                    type="radio"
+                    id="incomplete"
+                    name="status"
+                    value="0"
+                    onChange={(e) => handleChange(e)}
+                    checked={AllQueryInputdata.status === "0"}
+                  />
+                  &nbsp; <label htmlFor="incomplete">Incomplete</label>
+
+                </div>
+
+              </div>
+              {errors1["status"] && (
+                <div className="error-text">
+                  {errors1["status"]}
+                </div>
+              )}
+
             </div>
           </div>
         </div>
@@ -507,7 +509,7 @@ const Queries = () => {
                   <span className="text-muted">{singleQueryData && singleQueryData.response_received == 1 ? "Yes" : "No"}</span>
                 </div>
               </div>
-              <div className="row">
+              {/* <div className="row">
                 <div className="col-md-6">
                   <label htmlFor="customername-field" className="form-label">
                     Response
@@ -516,7 +518,7 @@ const Queries = () => {
                 <div className="col-md-6">
                   <span className="text-muted">{singleQueryData && singleQueryData.response}</span>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

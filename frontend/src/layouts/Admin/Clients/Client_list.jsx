@@ -8,6 +8,7 @@ import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import Statuses from "./Statuses";
+import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -18,18 +19,21 @@ const ClientList = () => {
   const [getJobDetails, setGetJobDetails] = useState([]);
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
+  
+  
 
   const [activeTab, setActiveTab] = useState(
     location.state &&
-      location.state.route &&
-      location.state.route == "Checklist"
-      ? "checklist"
-      : location.state.route == "job"
-        ? "job"
-        : "client"
+    location.state.route &&
+    location.state.route == "Checklist"
+    ? "checklist"
+    : location.state.route == "job"
+    ? "job"
+    : "client"
   );
   const [searchQuery, setSearchQuery] = useState("");
-
+  console.log(location.state);
+  
   const SetTab = (e) => {
     setActiveTab(e);
   };
@@ -168,7 +172,7 @@ const ClientList = () => {
     {
       name: "Allocated To",
       selector: (row) =>
-        row.allocated_first_name==null ? "-" :  row.allocated_first_name  + " " + row.allocated_last_name==null ? "-" : row.allocated_last_name,
+        row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name,
       sortable: true,
     },
     {
@@ -551,44 +555,9 @@ const ClientList = () => {
             </div>
           </div>
         </div>
-      </div>
-      <div className="row">
-        <div className="col-12">
-        <div className="">
-  <div className="breadcrumb">
-    <a href="#" className="active">
-      <span className="breadcrumb__inner ">
-        <span className="breadcrumb__title">Customer</span>
-        <span className="breadcrumb__desc">CROWN ACADEMY OF...</span>
-      </span>
-    </a>
-    <a href="#">
-      <span className="breadcrumb__inner">
-        <span className="breadcrumb__title">Client</span>
-        <span className="breadcrumb__desc">Crown Acadmy Of...</span>
-      </span>
-    </a>
-    <a href="#">
-      <span className="breadcrumb__inner">
-        <span className="breadcrumb__title">Job</span>
-        <span className="breadcrumb__desc">Third Item</span>
-      </span>
-    </a>
-    <a href="#">
-      <span className="breadcrumb__inner">
-        <span className="breadcrumb__title">Page Depth 04</span>
-        <span className="breadcrumb__desc">Fourth Item</span>
-       
-      </span>
-    </a>
-   
-  </div>
-</div>
+      </div> 
+      <Hierarchy show={["Customer" , activeTab  ]} active={1} id={location.state}/>
 
-       
-
-        </div>
-      </div>
       <div className="tab-content" id="pills-tabContent">
         {tabs1.map((tab) => (
           <div
@@ -599,51 +568,51 @@ const ClientList = () => {
             role="tabpanel"
             aria-labelledby={`${tab.key}-tab`}
           >
-          
-              <div className="report-data mt-4">
-                <div className="d-flex justify-content-between align-items-center">
-                  <div className="tab-title">
-                    <h3 className="mt-0">{tab.title}</h3>
-                  </div>
 
-                  {tab.placeholder && (
-                    <div className="search-input">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder={tab.placeholder}
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                      />
-                    </div>
-                  )}
+            <div className="report-data mt-4">
+              <div className="d-flex justify-content-between align-items-center">
+                <div className="tab-title">
+                  <h3 className="mt-0">{tab.title}</h3>
                 </div>
 
-                <div className="datatable-wrapper">
-                  {tab.data && tab.data.length > 0 ? (
-                    <Datatable
-                      columns={tab.columns}
-                      data={tab.data}
-                      filter={false}
+                {tab.placeholder && (
+                  <div className="search-input">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder={tab.placeholder}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                  ) : (
-                    <div className="text-center">
-                      <img
-                        src="/assets/images/No-data-amico.png"
-                        alt="No records available"
-                        style={{
-                          width: "250px",
-                          height: "auto",
-                          objectFit: "contain",
-                        }}
-                      />
-                      <p>No data available.</p>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="datatable-wrapper">
+                {tab.data && tab.data.length > 0 ? (
+                  <Datatable
+                    columns={tab.columns}
+                    data={tab.data}
+                    filter={false}
+                  />
+                ) : (
+                  <div className="text-center">
+                    <img
+                      src="/assets/images/No-data-amico.png"
+                      alt="No records available"
+                      style={{
+                        width: "250px",
+                        height: "auto",
+                        objectFit: "contain",
+                      }}
+                    />
+                    <p>No data available.</p>
+                  </div>
+                )}
               </div>
             </div>
-          
+          </div>
+
         ))}
       </div>
     </div>

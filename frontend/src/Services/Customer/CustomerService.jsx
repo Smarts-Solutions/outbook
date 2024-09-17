@@ -257,10 +257,9 @@ export async function ADD_MISSION_LOG(data, token) {
     const formData = new FormData();
     formData.append('job_id', data.job_id);
     formData.append('missing_log', data.missionDetails.missing_log);
-    formData.append('missing_paperwork', data.missionDetails.missing_paperwork);
+     
     formData.append('missing_log_sent_on', data.missionDetails.missing_log_sent_on);
     formData.append('missing_log_prepared_date', data.missionDetails.missing_log_prepared_date);
-    formData.append('missing_log_title', data.missionDetails.missing_log_title);
     formData.append('missing_log_reviewed_by', staffDetails.id);  
     formData.append('missing_log_reviewed_date', data.missionDetails.missing_log_reviewed_date);
     formData.append('missing_paperwork_received_on', data.missionDetails.missing_paperwork_received_on);
@@ -311,12 +310,13 @@ export async function ADD_QUERY(data, token) {
     const formData = new FormData();
     formData.append('job_id', data.job_id);
     formData.append('queries_remaining', data.data.QueriesRemaining);
-    formData.append('query_title', data.data.QueryTitle);
+    // formData.append('query_title', data.data.QueryTitle);
     formData.append('reviewed_by', data.data.ReviewedBy); 
     formData.append('missing_queries_prepared_date', data.data.MissingQueriesPreparedDate);
     formData.append('query_sent_date', data.data.QuerySentDate);
     formData.append('response_received', data.data.ResponseReceived);
     formData.append('response', data.data.Response);
+    formData.append('status', data.data.status);
     formData.append('final_query_response_received_date',data.data.FinalQueryResponseReceivedDate);  
     if (Array.isArray(data.data.QueryDocument)) {
       data.data.QueryDocument.forEach((file) => {
