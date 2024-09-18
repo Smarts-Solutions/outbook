@@ -17,29 +17,29 @@ const Queries = () => {
   const [singleQueryData, setSingleQueryData] = useState([]);
 
   const [AllQueryInputdata, setAllQueryInputdata] = useState({
-    QueriesRemaining: "",
+    QueriesRemaining: null,
     // QueryTitle: "",
-    ReviewedBy: "",
-    MissingQueriesPreparedDate: "",
-    QuerySentDate: "",
-    ResponseReceived: "",
+    ReviewedBy: null,
+    MissingQueriesPreparedDate: null,
+    QuerySentDate: null,
+    ResponseReceived: null,
     status: "0",
-    FinalQueryResponseReceivedDate: "",
-    QueryDocument: "",
+    FinalQueryResponseReceivedDate: null,
+    QueryDocument: null,
   });
 
   const resetForm = () => {
     setAllQueryInputdata({
       ...AllQueryInputdata,
-      QueriesRemaining: "",
+      QueriesRemaining: null,
       // QueryTitle: "",
-      ReviewedBy: "",
-      MissingQueriesPreparedDate: "",
-      QuerySentDate: "",
-      ResponseReceived: "",
+      ReviewedBy: null,
+      MissingQueriesPreparedDate: null,
+      QuerySentDate: null,
+      ResponseReceived: null,
       status: "0",
-      FinalQueryResponseReceivedDate: "",
-      QueryDocument: "",
+      FinalQueryResponseReceivedDate: null,
+      QueryDocument: null,
     });
   };
 
