@@ -1,4 +1,5 @@
 
+const { query } = require('../../config/database');
 const jobModel = require('../../models/jobModel');
 const taskTimeSheetModel = require('../../models/taskTimeSheetModel');
 
@@ -78,6 +79,10 @@ const getMissingLog = async (missingLog) => {
   
 }
 
+const editMissingLog = async(missingLog) => {
+  return taskTimeSheetModel.editMissingLog(missingLog);
+}
+
 //Queries
 const addQuerie = async(querie) => {
   return taskTimeSheetModel.addQuerie(querie);
@@ -94,6 +99,10 @@ const getQuerie = async (querie) => {
   else{
     return { status: false, message: 'Error getting Missing Log.' };
   }
+}
+
+const editQuerie = async (query) => {
+  return taskTimeSheetModel.editQuerie(query);
 }
 
 //Draft
@@ -145,8 +154,10 @@ module.exports = {
   jobTimeSheet,
   addMissingLog,
   getMissingLog,
+  editMissingLog,
   getQuerie,
   addQuerie,
+  editQuerie,
   getDraft,
   addDraft,
   jobDocumentAction,

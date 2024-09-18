@@ -126,6 +126,19 @@ const getMissingLog =async(req,res)=>{
    res.status(500).json({ status:false, message: error.message});
  }
 }
+const editMissingLog = async(req,res) =>{
+  try {
+    const { ...missingLog } = req;
+    const result = await jobService.editMissingLog(missingLog);
+    if(!result.status){
+     return  res.status(200).json({ status: false, message: result.message });  
+     }else{
+     return  res.status(200).json({ status: true, message: result.message , data : result.data});
+     }
+ } catch (error) {
+   res.status(500).json({ status:false, message: error.message});
+ }
+}
 
 //Queries
 
@@ -146,6 +159,20 @@ const getQuerie = async (req,res) => {
   try {
     const { ...query } = req.body;
     const result = await jobService.getQuerie(query);
+    if(!result.status){
+     return  res.status(200).json({ status: false, message: result.message });  
+     }else{
+     return  res.status(200).json({ status: true, message: result.message , data : result.data});
+     }
+ } catch (error) {
+   res.status(500).json({ status:false, message: error.message});
+ }
+}
+
+const editQuerie = async(req,res) => {
+  try {
+    const { ...query } = req;
+    const result = await jobService.editQuerie(query);
     if(!result.status){
      return  res.status(200).json({ status: false, message: result.message });  
      }else{
@@ -224,8 +251,10 @@ module.exports = {
   jobTimeSheet,
   addMissingLog,
   getMissingLog,
+  editMissingLog,
   getQuerie,
   addQuerie,
+  editQuerie,
   getDraft,
   addDraft,
   jobDocumentAction,
