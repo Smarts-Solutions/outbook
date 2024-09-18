@@ -7,11 +7,9 @@ import StaffSlice from "../Slice/Staff/staffSlice";
 import AccessSlice from "../Slice/Access/AccessSlice";
 import CustomerSlice from "../Slice/Customer/CustomerSlice";
 import ClientSlice from "../Slice/Client/ClientSlice";
+import HierarchySlice from "../Slice/Hierarchy/HierarchySlice";
 
  
-
-
-
 const store = configureStore({
   reducer: {
     AuthSlice: AuthSlice.reducer,
@@ -19,7 +17,8 @@ const store = configureStore({
     StaffSlice: StaffSlice.reducer,
     AccessSlice: AccessSlice.reducer,
     CustomerSlice: CustomerSlice.reducer,
-    ClientSlice: ClientSlice.reducer
+    ClientSlice: ClientSlice.reducer,
+    HierarchySlice: HierarchySlice.reducer
 
   },
 });

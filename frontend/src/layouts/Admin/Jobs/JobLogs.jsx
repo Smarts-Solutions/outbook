@@ -1,4 +1,4 @@
-import React from 'react'
+import React , {useEffect , useState} from 'react'
 import Datatable from '../../../Components/ExtraComponents/Datatable';
 import TaskTimesheet from './TaskTimesheet';
 import MissingLogs from './MissingLogs';
@@ -9,31 +9,14 @@ import JobTimeline from './JobTimeline'
 import JobInformation from './JobInformation';
 import CommonModal from '../../../Components/ExtraComponents/Modals/Modal';
 import { useLocation } from 'react-router-dom';
-
-const data = [
-  { TradingName: 'W120', Code: '012_BlaK_T_1772', CustomerName: 'The Black T', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Admin/Support Tasks', JobType: 'Year End' },
-  { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-  { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-  { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-  { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-  { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-  { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-
-];
-
-
-const columns = [
-  { name: 'Trading Name', selector: row => row.TradingName, sortable: true },
-  { name: 'Customer Code', selector: row => row.Code, sortable: true },
-  { name: 'Customer Name', selector: row => row.CustomerName, sortable: true },
-  { name: 'Company Number', selector: row => row.AccountManager, sortable: true },
-  { name: 'Service Type', selector: row => row.ServiceType, sortable: true },
-  { name: 'Account Manager', selector: row => row.JobType, sortable: true },
-]
-
-
+import Hierarchy from '../../../Components/ExtraComponents/Hierarchy';
+ 
+ 
 const JobLogs = () => {
   const location = useLocation();
+  const [selectedTab, setSelectedTab] = useState('job information');
+ 
+  console.log("CCPPP" , location.state.goto )
  
   return (
     <div className='container-fluid'>
@@ -55,6 +38,7 @@ const JobLogs = () => {
                         role="tab"
                         aria-controls="job-information"
                         aria-selected="true"
+                        onClick={() => setSelectedTab('job information')}
                       >
                         Job Information
                       </button>
@@ -69,6 +53,7 @@ const JobLogs = () => {
                         role="tab"
                         aria-controls="task-timesheet"
                         aria-selected="false"
+                        onClick={() => setSelectedTab('task timesheet')}
                       >
                         Task Timesheet
                       </button>
@@ -83,6 +68,7 @@ const JobLogs = () => {
                         role="tab"
                         aria-controls="job-timeline"
                         aria-selected="false"
+                        onClick={() => setSelectedTab('job timeline')}
                       >
                         Job Timeline
                       </button>
@@ -97,6 +83,7 @@ const JobLogs = () => {
                         role="tab"
                         aria-controls="missing-logs"
                         aria-selected="false"
+                        onClick={() => setSelectedTab('missing logs')}
                       >
                         Missing Logs
                       </button>
@@ -111,6 +98,7 @@ const JobLogs = () => {
                         role="tab"
                         aria-controls="queries"
                         aria-selected="false"
+                        onClick={() => setSelectedTab('queries')}
                       >
                         Queries
                       </button>
@@ -125,6 +113,7 @@ const JobLogs = () => {
                         role="tab"
                         aria-controls="drafts"
                         aria-selected="false"
+                        onClick={() => setSelectedTab('drafts')}
                       >
                         Drafts
                       </button>
@@ -139,16 +128,13 @@ const JobLogs = () => {
                         role="tab"
                         aria-controls="documents"
                         aria-selected="false"
+                        onClick={() => setSelectedTab('documents')}
                       >
                         Documents
                       </button>
-                    </li>
-
-                  </ul>
-
-
-                </>
-
+                    </li> 
+                  </ul> 
+                </> 
               </div>
               <div className="col-md-4">
 
@@ -161,14 +147,14 @@ const JobLogs = () => {
                   </div>
                 </div>
               </div>
-            </div>
-
-          </div>
-
-        </div>
-
+            </div> 
+          </div> 
+        </div> 
       </div>
-      <div className="tab-content report-data" id="pills-tabContent">
+
+      <Hierarchy show={location.state.goto=="Customer" ? ["Customer" , "Job" , selectedTab] : ["Customer" , "Client" , "Job" , selectedTab] } active={location.state.goto=="Customer" ? 2 : 3} data={location.state.data}/>
+
+      <div className="tab-content report-data mt-4" id="pills-tabContent">
 
         <div
           className="tab-pane fade show active"
@@ -176,7 +162,7 @@ const JobLogs = () => {
           role="tabpanel"
           aria-labelledby="job-information-tab"
         >
-          <JobInformation job_id = {location.state.job_id} />
+          <JobInformation job_id={location.state.job_id} />
         </div>
 
         <div

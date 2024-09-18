@@ -23,30 +23,24 @@ const MissingLogs = () => {
 
 
   const [missionLogAllInputData, setMissionAllInputLogData] = useState({
-    missing_log: "1",
-    missing_paperwork: "1",
+    missing_log: "1", 
     missing_log_sent_on: "",
-    missing_log_prepared_date: "",
-    missing_log_title: "",
+    missing_log_prepared_date: "", 
     missing_log_reviewed_by: "",
-    missing_log_reviewed_date: "",
-    missing_paperwork_received_on: "",
+    missing_log_reviewed_date: "", 
     missing_log_document: "",
-    status: "",
+    status: "0",
   });
 
-  const resetForm = () => {
+  const resetForm = () => {            
     setMissionAllInputLogData({
       ...missionLogAllInputData,
-      missing_log: "1",
-      missing_paperwork: "1",
+      missing_log: "1", 
       missing_log_sent_on: "",
-      missing_log_prepared_date: "",
-      missing_log_title: "",
-      missing_log_reviewed_date: "",
-      missing_paperwork_received_on: "",
+      missing_log_prepared_date: "", 
+      missing_log_reviewed_date: "", 
       missing_log_document: "",
-      status: "",
+      status: "0",
     });
   };
 
@@ -90,75 +84,69 @@ const MissingLogs = () => {
     else {
       setMissionAllInputLogData({ ...missionLogAllInputData, [name]: value });
     }
-    validate(name, value);
+    // validate(name, value);
   };
 
 
-  const validate = (name, value) => {
-    const newErrors = { ...errors1 };
-    if (!value) {
-      switch (name) {
-        case "missing_log":
-          newErrors[name] = AddMissionLogErros.missing_log;
-          break;
-        case "missing_paperwork":
-          newErrors[name] = AddMissionLogErros.missing_paperwork;
-          break;
-        case "missing_log_sent_on":
-          newErrors[name] = AddMissionLogErros.missing_log_sent_on;
-          break;
-        case "missing_log_prepared_date":
-          newErrors[name] = AddMissionLogErros.missing_log_prepared_date;
-          break;
-        case "missing_log_title":
-          newErrors[name] = AddMissionLogErros.missing_log_title;
-          break;
-        case "missing_log_reviewed_by":
-          newErrors[name] = AddMissionLogErros.missing_log_reviewed_by;
-          break;
-        case "missing_log_reviewed_date":
-          newErrors[name] = AddMissionLogErros.missing_log_reviewed_date;
-          break;
-        case "missing_paperwork_received_on":
-          newErrors[name] = AddMissionLogErros.missing_paperwork_received_on;
-          break;
-        case "missing_log_document":
-          newErrors[name] = AddMissionLogErros.missing_log_document;
-          break;
-        case "status":
-          newErrors[name] = AddMissionLogErros.status;
-          break;
-        default:
-          break;
-      }
-    }
-    else {
-      delete newErrors[name];
-      setErrors1((prevErrors) => {
-        const updatedErrors = { ...prevErrors };
-        delete updatedErrors[name];
-        return updatedErrors;
-      });
-    }
+  // const validate = (name, value) => {
+  //   const newErrors = { ...errors1 };
+  //   if (!value) {
+  //     switch (name) {
+  //       case "missing_log":
+  //         newErrors[name] = AddMissionLogErros.missing_log;
+  //         break;
+         
+  //       case "missing_log_sent_on":
+  //         newErrors[name] = AddMissionLogErros.missing_log_sent_on;
+  //         break;
+  //       case "missing_log_prepared_date":
+  //         newErrors[name] = AddMissionLogErros.missing_log_prepared_date;
+  //         break;
+         
+  //       case "missing_log_reviewed_by":
+  //         newErrors[name] = AddMissionLogErros.missing_log_reviewed_by;
+  //         break;
+  //       case "missing_log_reviewed_date":
+  //         newErrors[name] = AddMissionLogErros.missing_log_reviewed_date;
+  //         break;
+         
+  //       case "missing_log_document":
+  //         newErrors[name] = AddMissionLogErros.missing_log_document;
+  //         break;
+  //       case "status":
+  //         newErrors[name] = AddMissionLogErros.status;
+  //         break;
+  //       default:
+  //         break;
+  //     }
+  //   }
+  //   else {
+  //     delete newErrors[name];
+  //     setErrors1((prevErrors) => {
+  //       const updatedErrors = { ...prevErrors };
+  //       delete updatedErrors[name];
+  //       return updatedErrors;
+  //     });
+  //   }
 
-    if (Object.keys(newErrors).length !== 0) {
-      setErrors1((prevErrors) => ({
-        ...prevErrors,
-        ...newErrors,
-      }));
-    }
-    return Object.keys(newErrors).length === 0;
-  };
+  //   if (Object.keys(newErrors).length !== 0) {
+  //     setErrors1((prevErrors) => ({
+  //       ...prevErrors,
+  //       ...newErrors,
+  //     }));
+  //   }
+  //   return Object.keys(newErrors).length === 0;
+  // };
 
-  const validateAllFields = () => {
-    let isValid = true;
-    for (const key in missionLogAllInputData) {
-      if (!validate(key, missionLogAllInputData[key])) {
-        isValid = false;
-      }
-    }
-    return isValid;
-  };
+  // const validateAllFields = () => {
+  //   let isValid = true;
+  //   for (const key in missionLogAllInputData) {
+  //     if (!validate(key, missionLogAllInputData[key])) {
+  //       isValid = false;
+  //     }
+  //   }
+  //   return isValid;
+  // };
 
 
 
@@ -200,9 +188,9 @@ const MissingLogs = () => {
   }
 
   const handleSubmit = async (e) => {
-    if (!validateAllFields()) {
-      return;
-    }
+    // if (!validateAllFields()) {
+    //   return;
+    // }
     const req = { action: "add", job_id: location.state.job_id, missionDetails: missionLogAllInputData }
     const data = { req: req, authToken: token }
     await dispatch(AddMissionLog(data))
@@ -239,8 +227,6 @@ const MissingLogs = () => {
 
   const columns = [
     { name: 'Missing Log Sent On', selector: row => row.missing_log_sent_on, sortable: true },
-    { name: 'Missing Log Title', selector: row => row.missing_log_title, sortable: true },
-    { name: 'Missing Paperwork Received On', selector: row => row.missing_paperwork_received_on, sortable: true },
     { name: 'status', selector: row => row.status == 1 ? "Completed" : "Incomplete", sortable: true },
     {
       name: "Actions",
@@ -320,31 +306,7 @@ const MissingLogs = () => {
                 </div>
               )}
             </div>
-          </div>
-          <div id="MissingLog2" className="col-lg-6">
-            <div className="mb-3">
-              <label htmlFor="firstNameinput" className="form-label">
-                Missing Paperwork?
-              </label>
-              <select
-                id="missing_paperwork"
-                name="missing_paperwork"
-                className="form-select mb-3"
-                aria-label="Default select example"
-                style={{ color: "#8a8c8e !important" }}
-                onChange={(e) => handleChange(e)}
-                value={missionLogAllInputData.missing_paperwork}
-              >
-                <option value="1" selected>Yes</option>
-                <option value="0">No</option>
-              </select>
-              {errors1["missing_paperwork"] && (
-                <div className="error-text">
-                  {errors1["missing_paperwork"]}
-                </div>
-              )}
-            </div>
-          </div>
+          </div> 
           <div className="col-lg-6">
             <div className="mb-3">
               <label htmlFor="firstNameinput" className="form-label">
@@ -389,28 +351,7 @@ const MissingLogs = () => {
 
             </div>
           </div>
-          <div id="MissingLog3" className="mb-3 col-lg-6">
-            <label htmlFor="firstNameinput" className="form-label">
-              Missing Log Title
-            </label>
-            <input
-              type="text"
-              defaultValue=""
-              className="form-control"
-              placeholder="Missing Log Title"
-              id="missing_log_title"
-              name="missing_log_title"
-
-              onChange={(e) => handleChange(e)}
-              value={missionLogAllInputData.missing_log_title
-              }
-            />
-            {errors1["missing_log_title"] && (
-              <div className="error-text">
-                {errors1["missing_log_title"]}
-              </div>
-            )}
-          </div>
+          
           <div id="MissingLog4" className="col-lg-6">
             <div className="mb-3">
               <label htmlFor="firstNameinput" className="form-label">
@@ -455,29 +396,7 @@ const MissingLogs = () => {
                 </div>
               )}
             </div>
-          </div>
-          <div id="MissingLog7" className="col-lg-6">
-            <div className="mb-3">
-              <label htmlFor="firstNameinput" className="form-label">
-                Missing Paperwork Received On
-              </label>
-              <input
-                type="date"
-                className="form-control"
-                data-provider="flatpickr"
-                id="missing_paperwork_received_on"
-                name="missing_paperwork_received_on"
-                placeholder="Last Name"
-                onChange={(e) => handleChange(e)}
-                value={missionLogAllInputData.missing_paperwork_received_on}
-              />
-              {errors1["missing_paperwork_received_on"] && (
-                <div className="error-text">
-                  {errors1["missing_paperwork_received_on"]}
-                </div>
-              )}
-            </div>
-          </div>
+          </div> 
           <div id="MissingLog8" className="col-lg-6">
             <div className="mb-3">
               <label htmlFor="firstNameinput" className="form-label">
@@ -569,7 +488,7 @@ const MissingLogs = () => {
               <span className="text-muted">{singleMissionData && singleMissionData?.missing_log_sent_on}</span>
             </div>
           </div>
-          <div className="row">
+          {/* <div className="row">
             <div className="col-md-6">
               <label htmlFor="customername-field" className="form-label">
                 Missing Paperwork Received On
@@ -578,7 +497,7 @@ const MissingLogs = () => {
             <div className="col-md-6">
               <span className="text-muted">{singleMissionData && singleMissionData?.missing_paperwork_received_on}</span>
             </div>
-          </div>
+          </div> */}
           {/* <div className="row">
             <div className="col-md-6">
               <label htmlFor="customername-field" className="form-label">

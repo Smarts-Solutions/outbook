@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch  } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -8,6 +8,7 @@ import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import Statuses from "./Statuses";
+import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -18,18 +19,22 @@ const ClientList = () => {
   const [getJobDetails, setGetJobDetails] = useState([]);
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
+  const [hararchyData, setHararchyData] = useState({customer : location.state});
+  
 
   const [activeTab, setActiveTab] = useState(
     location.state &&
-      location.state.route &&
-      location.state.route == "Checklist"
-      ? "checklist"
-      : location.state.route == "job"
-        ? "job"
-        : "client"
+    location.state.route &&
+    location.state.route == "Checklist"
+    ? "checklist"
+    : location.state.route == "job"
+    ? "job"
+    : "client"
   );
-  const [searchQuery, setSearchQuery] = useState("");
+ 
 
+  const [searchQuery, setSearchQuery] = useState("");
+  
   const SetTab = (e) => {
     setActiveTab(e);
   };
@@ -168,7 +173,7 @@ const ClientList = () => {
     {
       name: "Allocated To",
       selector: (row) =>
-        row.allocated_first_name==null ? "-" :  row.allocated_first_name  + " " + row.allocated_last_name==null ? "-" : row.allocated_last_name,
+        row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name,
       sortable: true,
     },
     {
@@ -451,14 +456,36 @@ const ClientList = () => {
         return;
       });
   };
+
   const HandleClientView = (row) => {
-    navigate("/admin/client/profile", { state: { Client_id: row.id } });
-  };
-  const HandleJobView = (row) => {
-    navigate("/admin/job/logs", {
-      state: { job_id: row.job_id, goto: "Customer" },
+    setHararchyData(prevState => {
+      const updatedData = {
+        ...prevState,
+        client: row
+      };
+      navigate("/admin/client/profile", { state: { Client_id: row.id, data: updatedData } }); 
+      return updatedData;
     });
   };
+
+  const HandleJobView = (row) => {
+    setHararchyData(prevState => {
+      const updatedData = {
+        ...prevState,
+        job: row
+      };
+      navigate("/admin/job/logs", { state: { job_id: row.job_id, goto: "Customer" ,  data: updatedData } }); 
+      return updatedData;
+    });
+  };
+
+
+  // const HandleJobView = (row) => {  
+  //   navigate("/admin/job/logs", {
+  //     state: { job_id: row.job_id, goto: "Customer" },
+  //   });
+  // };
+
   const handleAddClient = () => {
     navigate("/admin/addclient", { state: { id: location.state.id } });
   };
@@ -476,7 +503,7 @@ const ClientList = () => {
     });
   }
   const handleClick = () => {
-    navigate("/admin/create/checklist", { state: { id: location.state.id } });
+    navigate("/admin/create/checklist", { state: { id: location.state.id ,  } });
   };
   const EditChecklist = (row) => {
     navigate("/admin/edit/checklist", {
@@ -551,13 +578,9 @@ const ClientList = () => {
             </div>
           </div>
         </div>
-      </div>
-      <div className="row">
-        <div className="col-12">
-        <ol class="breadcrumb ps-2"><li class="breadcrumb-item"><a href=";">Outbook</a></li><li class="breadcrumb-item active">Dashboard</li></ol>
+      </div>  
+      <Hierarchy show={["Customer" , activeTab  ]} active={1} data={hararchyData}/>
 
-        </div>
-      </div>
       <div className="tab-content" id="pills-tabContent">
         {tabs1.map((tab) => (
           <div
@@ -568,51 +591,51 @@ const ClientList = () => {
             role="tabpanel"
             aria-labelledby={`${tab.key}-tab`}
           >
-            <div className="container-fluid">
-              <div className="report-data mt-4">
-                <div className="d-flex justify-content-between align-items-center">
-                  <div className="tab-title">
-                    <h3 className="mt-0">{tab.title}</h3>
-                  </div>
 
-                  {tab.placeholder && (
-                    <div className="search-input">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder={tab.placeholder}
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                      />
-                    </div>
-                  )}
+            <div className="report-data mt-4">
+              <div className="d-flex justify-content-between align-items-center">
+                <div className="tab-title">
+                  <h3 className="mt-0">{tab.title}</h3>
                 </div>
 
-                <div className="datatable-wrapper">
-                  {tab.data && tab.data.length > 0 ? (
-                    <Datatable
-                      columns={tab.columns}
-                      data={tab.data}
-                      filter={false}
+                {tab.placeholder && (
+                  <div className="search-input">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder={tab.placeholder}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                  ) : (
-                    <div className="text-center">
-                      <img
-                        src="/assets/images/No-data-amico.png"
-                        alt="No records available"
-                        style={{
-                          width: "250px",
-                          height: "auto",
-                          objectFit: "contain",
-                        }}
-                      />
-                      <p>No data available.</p>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="datatable-wrapper">
+                {tab.data && tab.data.length > 0 ? (
+                  <Datatable
+                    columns={tab.columns}
+                    data={tab.data}
+                    filter={false}
+                  />
+                ) : (
+                  <div className="text-center">
+                    <img
+                      src="/assets/images/No-data-amico.png"
+                      alt="No records available"
+                      style={{
+                        width: "250px",
+                        height: "auto",
+                        objectFit: "contain",
+                      }}
+                    />
+                    <p>No data available.</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
+
         ))}
       </div>
     </div>

@@ -1,4 +1,5 @@
-
+import { ClientErrorMessages } from "./Common_Message";
+import { Email_regex } from "./Common_regex";
 
 export const getDateRange = (tabId) => {
   const today = new Date();
@@ -125,4 +126,62 @@ export const ScrollToViewFirstErrorContactForm = (errors) => {
       }
     }
   });
+};
+
+const RemoveErrorFromErrors = (name, setErrors) => {
+  setErrors((prevErrors) => {
+    const updatedErrors = { ...prevErrors };
+    delete updatedErrors[name];
+    return updatedErrors;
+  });
+}
+
+export const validate = (name, value, errors, setErrors) => {
+  const newErrors = { ...errors };
+  if (!value && ClientErrorMessages[name]) {
+    newErrors[name] = ClientErrorMessages[name];
+  }
+  else {
+    switch (name) {
+      case "email":
+        if (!Email_regex(value)) {
+          newErrors[name] = "Please enter valid Email";
+        } else {
+          delete newErrors[name];
+          RemoveErrorFromErrors(name, setErrors);
+        }
+        break;
+
+      case "phone":
+        if (!/^\d{9,12}$/.test(value)) {
+          newErrors[name] = "Phone Number must be between 9 to 12 digits";
+        } else {
+          delete newErrors[name];
+          RemoveErrorFromErrors(name, setErrors);
+        }
+        break;
+      case "VATNumber":
+        if (!/^[0-9+]*$/.test(value)) {
+          newErrors[name] = "Please enter valid VAT Number";
+        } else {
+          delete newErrors[name];
+          RemoveErrorFromErrors(name, setErrors);
+        }
+      default:
+        delete newErrors[name];
+        RemoveErrorFromErrors(name, setErrors);
+        break;
+    }
+  }
+
+  ScrollToViewFirstError(newErrors);
+
+  if (Object.keys(newErrors).length !== 0) {
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      ...newErrors,
+    }));
+  }
+
+  return Object.keys(newErrors).length === 0;
 };
