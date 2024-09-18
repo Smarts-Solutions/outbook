@@ -47,6 +47,21 @@ const Queries = () => {
 
 
   useEffect(() => {
+    if (EditData) {
+      setAllQueryInputdata({
+        QueriesRemaining: EditData.queries_remaining,
+        // QueryTitle: EditData.query_title,
+        ReviewedBy: EditData.reviewed_by,
+        MissingQueriesPreparedDate: EditData.missing_queries_prepared_date,
+        QuerySentDate: EditData.query_sent_date,
+        ResponseReceived: EditData.response_received,
+        status: EditData.status,
+        FinalQueryResponseReceivedDate: EditData.final_query_response_received_date,
+        QueryDocument: EditData.query_document,
+      });
+    }
+  }, [EditData]);
+  useEffect(() => {
     GetQueryAllList();
   }, []);
 
@@ -485,12 +500,11 @@ const Queries = () => {
         hideBtn={false}
         btn_name="Save"
         handleClose={() => {
-          setAddquery(false);
-          resetForm();
-          setErrors1({});
+          setEditViewquery(false);
+          
         }}
         Submit_Function={() => HandleAddQuery()}
-        Submit_Cancel_Function={() => { setAddquery(false); resetForm(); setErrors1({}); }}
+        Submit_Cancel_Function={() => { setEditViewquery(false); }}
       >
         <div className="row">
           <div className="col-lg-6">

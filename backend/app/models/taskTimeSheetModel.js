@@ -108,7 +108,7 @@ const updateJobTimeTotalHours = async (timeSheet) => {
      id = ?
      `;
     const [rows] = await pool.execute(query, [total_hours, total_hours_status, job_id]);
-    console.log("rows ", rows)
+    console.log("rows mission ", rows)
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
     console.log("error ", error)
