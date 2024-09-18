@@ -253,11 +253,11 @@ export async function GET_MISSING_LOG(data, token) {
 }
 
 export async function ADD_MISSION_LOG(data, token) {
+ 
   try { 
     const formData = new FormData();
     formData.append('job_id', data.job_id);
     formData.append('missing_log', data.missionDetails.missing_log);
-     
     formData.append('missing_log_sent_on', data.missionDetails.missing_log_sent_on);
     formData.append('missing_log_prepared_date', data.missionDetails.missing_log_prepared_date);
     formData.append('missing_log_reviewed_by', staffDetails.id);  
