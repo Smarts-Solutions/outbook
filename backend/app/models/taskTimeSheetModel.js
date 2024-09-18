@@ -118,7 +118,9 @@ const updateJobTimeTotalHours = async (timeSheet) => {
 
 // MissingLog
 const addMissingLog = async (missingLog) => {
-  const { job_id, missing_log, missing_paperwork, missing_log_sent_on, missing_log_prepared_date, missing_log_title, missing_log_reviewed_by, missing_log_reviewed_date, missing_paperwork_received_on, status } = missingLog.body;
+  const { job_id, missing_log, missing_log_sent_on, missing_log_prepared_date,  missing_log_reviewed_by, missing_log_reviewed_date, status } = missingLog.body;
+
+  console.log("missingLog ", missingLog.body)
 
   const missing_log_document = missingLog.files;
 
@@ -126,11 +128,11 @@ const addMissingLog = async (missingLog) => {
     const query = `
      INSERT INTO 
      missing_logs
-      (job_id, missing_log, missing_paperwork, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,missing_paperwork_received_on,status)
+      (job_id, missing_log, missing_log_sent_on,missing_log_prepared_date,missing_log_reviewed_by,missing_log_reviewed_date,status)
       VALUES
-      (?,?,?,?,?,?,?,?,?,?)
+      (?,?,?,?,?,?,?)
       `;
-    const [rows] = await pool.execute(query, [job_id, missing_log, missing_paperwork, missing_log_sent_on, missing_log_prepared_date, missing_log_title, missing_log_reviewed_by, missing_log_reviewed_date, missing_paperwork_received_on, status]);
+    const [rows] = await pool.execute(query, [job_id, missing_log, missing_log_sent_on, missing_log_prepared_date,  missing_log_reviewed_by, missing_log_reviewed_date, status]);
     console.log("rows ", rows)
 
     if (missing_log_document.length > 0) {
@@ -228,18 +230,18 @@ const getMissingLogSingleView = async (missingLog) => {
 
 //Queries
 const addQuerie = async(querie) => {
-  const { job_id, queries_remaining, query_title, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, response, final_query_response_received_date } = querie.body;
+  const { job_id, queries_remaining, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date } = querie.body;
   const query_document = querie.files;
 
   try {
     const query = `
      INSERT INTO 
      queries
-      (job_id, queries_remaining, query_title, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received,response,final_query_response_received_date)
+      (job_id, queries_remaining, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received,final_query_response_received_date)
       VALUES
-      (?,?,?,?,?,?,?,?,?)
+      (?,?,?,?,?,?,?)
       `;
-    const [rows] = await pool.execute(query, [job_id, queries_remaining, query_title, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, response, final_query_response_received_date]);
+    const [rows] = await pool.execute(query, [job_id, queries_remaining, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date]);
 
 
     if (query_document.length > 0) {

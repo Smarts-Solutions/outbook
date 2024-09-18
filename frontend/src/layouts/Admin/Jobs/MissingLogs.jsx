@@ -22,13 +22,15 @@ const MissingLogs = () => {
   const [errors1, setErrors1] = useState({});
 
 
+
+
   const [missionLogAllInputData, setMissionAllInputLogData] = useState({
     missing_log: "1", 
-    missing_log_sent_on: "",
-    missing_log_prepared_date: "", 
-    missing_log_reviewed_by: "",
-    missing_log_reviewed_date: "", 
-    missing_log_document: "",
+    missing_log_sent_on: new Date().toISOString().substr(0, 10),
+    missing_log_prepared_date: null, 
+    missing_log_reviewed_by: null,
+    missing_log_reviewed_date: null, 
+    missing_log_document: null,
     status: "0",
   });
 
@@ -36,10 +38,10 @@ const MissingLogs = () => {
     setMissionAllInputLogData({
       ...missionLogAllInputData,
       missing_log: "1", 
-      missing_log_sent_on: "",
-      missing_log_prepared_date: "", 
-      missing_log_reviewed_date: "", 
-      missing_log_document: "",
+      missing_log_sent_on: new Date().toISOString().substr(0, 10),
+      missing_log_prepared_date: null, 
+      missing_log_reviewed_date: null, 
+      missing_log_document: null,
       status: "0",
     });
   };
