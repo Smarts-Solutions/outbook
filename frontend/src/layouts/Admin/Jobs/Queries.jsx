@@ -12,8 +12,10 @@ const Queries = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const [addquery, setAddquery] = useState(false);
   const [viewquery, setViewquery] = useState(false);
+  const [editViewquery, setEditViewquery] = useState(false);
   const [AllQueryList, setAllQueryList] = useState([]);
   const [errors1, setErrors1] = useState({});
+  const [EditData, setEditData] = useState({});
   const [singleQueryData, setSingleQueryData] = useState([]);
 
   const [AllQueryInputdata, setAllQueryInputdata] = useState({
@@ -206,7 +208,7 @@ const Queries = () => {
 
 
   const columns = [
-    { name: 'Query Title', selector: row => row.query_title, sortable: true },
+    // { name: 'Query Title', selector: row => row.query_title, sortable: true },
     { name: '	Query Sent Date', selector: row => row.query_sent_date, sortable: true },
     { name: 'Response Received', selector: row => row.response_received == 1 ? "YES" : "NO", sortable: true },
     // { name: 'Response', selector: row => row.response, sortable: true },
@@ -216,6 +218,9 @@ const Queries = () => {
         <div>
           <button className="edit-icon" onClick={() => { HandleQueryView(row); setViewquery(true) }}>
             <i className="fa fa-eye fs-6 text-secondary" />
+          </button>
+          <button className="edit-icon" onClick={() =>{setEditViewquery(true);setEditData(row)}}>
+            <i className="ti-pencil" />
           </button>
 
         </div>
@@ -254,6 +259,224 @@ const Queries = () => {
 
       <CommonModal
         isOpen={addquery}
+        backdrop="static"
+        size="lg"
+        cancel_btn="true"
+        btn_2="true"
+        title="Queries (Last Query Sent on 20/03/2023)"
+        hideBtn={false}
+        btn_name="Save"
+        handleClose={() => {
+          setAddquery(false);
+          resetForm();
+          setErrors1({});
+        }}
+        Submit_Function={() => HandleAddQuery()}
+        Submit_Cancel_Function={() => { setAddquery(false); resetForm(); setErrors1({}); }}
+      >
+        <div className="row">
+          <div className="col-lg-6">
+            <label htmlFor="firstNameinput" className="form-label">
+              Queries Remaining?
+            </label>
+            <select
+              className="form-select"
+              aria-label="Default select example"
+              name="QueriesRemaining"
+              id="QueriesRemaining"
+              style={{ color: "#8a8c8e !important" }}
+              onChange={(e) => handleChange(e)}
+              value={AllQueryInputdata.QueriesRemaining}
+            >
+              <option value="">Select</option>
+              <option value="1">Yes</option>
+              <option value="0" selected>No</option>
+            </select>
+            {errors1["QueriesRemaining"] && (
+              <div className="error-text">
+                {errors1["QueriesRemaining"]}
+              </div>
+            )}
+          </div> 
+          <div className="col-lg-6">
+            <label htmlFor="firstNameinput" className="form-label">Reviewed By</label>
+            <select
+              className="form-select "
+              aria-label="Default select example"
+              style={{ color: "#8a8c8e !important" }}
+              name="ReviewedBy"
+              id="ReviewedBy"
+              onChange={(e) => handleChange(e)}
+              value={AllQueryInputdata.ReviewedBy}
+            >
+              <option value="" selected="">Select</option>
+              <option value="1">Yes</option>
+              <option value="0">No</option>
+            </select>
+            {errors1["ReviewedBy"] && (
+              <div className="error-text">
+                {errors1["ReviewedBy"]}
+              </div>
+            )}
+          </div>
+          <div className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Missing Queries Prepared Date
+              </label>
+              <input
+                type="date"
+                className="form-control"
+                placeholder=""
+                id="MissingQueriesPreparedDate"
+                name="MissingQueriesPreparedDate"
+                onChange={(e) => handleChange(e)}
+                value={AllQueryInputdata.MissingQueriesPreparedDate}
+              />
+              {errors1["MissingQueriesPreparedDate"] && (
+                <div className="error-text">
+                  {errors1["MissingQueriesPreparedDate"]}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Query Sent Date
+              </label>
+              <input
+                type="date"
+                className="form-control"
+                placeholder=""
+
+                id="QuerySentDate"
+                name="QuerySentDate"
+                onChange={(e) => handleChange(e)}
+                value={AllQueryInputdata.QuerySentDate}
+              />
+              {errors1["QuerySentDate"] && (
+                <div className="error-text">
+                  {errors1["QuerySentDate"]}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Response Received
+              </label>
+              <select
+                className="form-select"
+                aria-label="Default select example"
+                style={{ color: "#8a8c8e !important" }}
+                name="ResponseReceived"
+                id="ResponseReceived"
+                onChange={(e) => handleChange(e)}
+                value={AllQueryInputdata.ResponseReceived}
+              >
+                <option value="">Select</option>
+                <option value="1">Yes</option>
+                <option value="0">No</option>
+              </select>
+              {errors1["ResponseReceived"] && (
+                <div className="error-text">
+                  {errors1["ResponseReceived"]}
+                </div>
+              )}
+            </div>
+          </div>
+           
+          <div className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Final Query Response Received Date
+              </label>
+              <input
+                type="date"
+                className="form-control"
+                placeholder=""
+                id="FinalQueryResponseReceivedDate"
+                name="FinalQueryResponseReceivedDate"
+                onChange={(e) => handleChange(e)}
+                value={AllQueryInputdata.FinalQueryResponseReceivedDate}
+              />
+              {errors1["FinalQueryResponseReceivedDate"] && (
+                <div className="error-text">
+                  {errors1["FinalQueryResponseReceivedDate"]}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Query Document
+              </label>
+              <input
+                type="file"
+                multiple
+                id="QueryDocument"
+                name="QueryDocument"
+                onChange={(event) => { handleChange(event) }}
+                className="custom-file-input form-control"
+              />
+              {errors1["QueryDocument"] && (
+                <div className="error-text">
+                  {errors1["QueryDocument"]}
+                </div>
+              )}
+            </div>
+          </div>
+          <div id="MissingLog6" className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Status
+              </label>
+              <div style={{ display: "flex" }}>
+                <div>
+                  <input
+                    type="radio"
+                    id="complete"
+                    name="status"
+                    value="1"
+                    onChange={(e) => handleChange(e)}
+                    checked={AllQueryInputdata.status === "1"}
+                  />
+                  &nbsp; <label htmlFor="complete">Complete</label>
+
+                </div>
+                &nbsp;
+                <div style={{ marginLeft: 10 }}>
+                  <input
+                    type="radio"
+                    id="incomplete"
+                    name="status"
+                    value="0"
+                    onChange={(e) => handleChange(e)}
+                    checked={AllQueryInputdata.status === "0"}
+                  />
+                  &nbsp; <label htmlFor="incomplete">Incomplete</label>
+
+                </div>
+
+              </div>
+              {errors1["status"] && (
+                <div className="error-text">
+                  {errors1["status"]}
+                </div>
+              )}
+
+            </div>
+          </div>
+        </div>
+
+      </CommonModal>
+
+      <CommonModal
+        isOpen={editViewquery}
         backdrop="static"
         size="lg"
         cancel_btn="true"
