@@ -20,9 +20,10 @@ const MissingLogs = () => {
   const [getMissingLogListData, setGetMissingLogListData] = useState([]);
   const [getProfileDetails, setGetProfileDetails] = useState([]);
   const [singleMissionData, setSingleMissionData] = useState([]);
-  const [getEditData, setGetEditData] = useState([]);
+  const [getEditData, setEditData] = useState([]);
   const [errors1, setErrors1] = useState({});
  
+  
 
   const [missionLogAllInputData, setMissionAllInputLogData] = useState({
     missing_log: "1",
@@ -291,7 +292,7 @@ const MissingLogs = () => {
           <button className="edit-icon" onClick={() => { HandleMissionView(row); setViewmissinglogs(true) }}>
             <i className="fa fa-eye fs-6 text-secondary" />
           </button>
-          <button className="edit-icon" onClick={() =>{setShowEditMissinglogsModal(true);setGetEditData(row)}}>
+          <button className="edit-icon" onClick={() =>{setShowEditMissinglogsModal(true); setEditData(row)}}>
             <i className="ti-pencil" />
           </button>
 
