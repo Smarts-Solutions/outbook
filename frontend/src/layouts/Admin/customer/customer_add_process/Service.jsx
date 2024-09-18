@@ -83,8 +83,8 @@ const Service = () => {
           service_id: service.service_id,
           account_manager_ids: service.account_manager_ids
             ? service.account_manager_ids.map((id) =>
-                staffDataAll.data.find((staff) => staff.id === id)
-              )
+              staffDataAll.data.find((staff) => staff.id === id)
+            )
             : [],
         }))
       );
@@ -184,11 +184,11 @@ const Service = () => {
         .map((manager) =>
           manager.service_id === serviceId
             ? {
-                ...manager,
-                account_manager_ids: manager.account_manager_ids.filter(
-                  (accountManager) => accountManager.id !== id
-                ),
-              }
+              ...manager,
+              account_manager_ids: manager.account_manager_ids.filter(
+                (accountManager) => accountManager.id !== id
+              ),
+            }
             : manager
         )
         .filter((manager) => manager.account_manager_ids.length > 0)
@@ -212,7 +212,7 @@ const Service = () => {
       const managerData = getManager.find(
         (item) => item.service_id == service
       );
- 
+
       return {
         service_id: service,
         account_manager_id: managerData
@@ -220,7 +220,7 @@ const Service = () => {
           : [],
       };
     });
-    
+
 
     const filteredMatchData = MatchData.filter((item) =>
       services.includes(item.service_id)
@@ -309,7 +309,7 @@ const Service = () => {
       });
   };
 
-  const TaskUpdate = async (e, id, serviceId) => {
+  const TaskUpdate = async (e, id, serviceId) => { 
     if (e.target.files.length > 0) {
       // ONLY xlsx file is allowed
       if (!e.target.files[0].name.endsWith(".xlsx")) {
@@ -324,15 +324,6 @@ const Service = () => {
       uploadSetMessage(
         "File " + e.target.files[0].name + " has been uploaded successfully."
       );
-
-      // if (e.target.files[0].name !== "Task.xlsx") {
-      //   Swal.fire({
-      //     icon: "error",
-      //     title: "Oops...",
-      //     text: "Please upload the correct file.",
-      //   });
-      //   return;
-      // }
 
       let file = e.target.files[0];
       setFileName(file.name);
@@ -358,7 +349,6 @@ const Service = () => {
 
           rows.forEach((row) => {
             let idValue = row[headers.indexOf("id")];
-            let checklistName = row[headers.indexOf("Checklist Name")] || "";
             let taskName = row[headers.indexOf("Task Name")] || "";
             let budgetHours = row[headers.indexOf("Budget Hours")] || "00";
             let budgetMinutes = row[headers.indexOf("Budget Minutes")] || "00";
@@ -380,7 +370,7 @@ const Service = () => {
               }
 
               currentId = idValue;
-              currentChecklistName = checklistName;
+              currentChecklistName = file.name.split(".")[0];;
               taskList = [];
             }
 
@@ -442,6 +432,7 @@ const Service = () => {
   const handleSearchChange = (e) => {
     setSearchValue(e.target.value);
   };
+  console.log("tasksGet", tasksGet);
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
@@ -527,6 +518,8 @@ const Service = () => {
                                                     className="accordion-item"
                                                     key={jobIndex}
                                                   >
+
+
                                                     <h2
                                                       className="accordion-header"
                                                       id={`sub-headingOne${jobIndex}`}
@@ -557,49 +550,45 @@ const Service = () => {
                                                                 htmlFor="uploadButton"
                                                                 className="btn btn-secondary"
                                                               >
-                                                                <i className="fas fa-upload me-2"></i>
-                                                                Upload File
+                                              
+                                                                {/* <i className="fas fa-upload me-2"></i>
+                                                                Upload File */}
                                                                 <input
                                                                   type="file"
                                                                   id="uploadButton"
-                                                                  className="form-control d-none"
-                                                                  style={{
-                                                                    cursor:
-                                                                      "pointer",
-                                                                  }}
-                                                                  onChange={(
-                                                                    e
-                                                                  ) =>
-                                                                    TaskUpdate(
-                                                                      e,
-                                                                      data1.id,
-                                                                      item.id
-                                                                    )
+                                                                  className="form-control "
+                                                                  style={{ cursor: "pointer"}}
+                                                                  onChange={(e) => {
+                                                                    console.log("item", data1.id);
+                                                                    TaskUpdate(e, data1.id, item.id)
+                                                                  }
                                                                   }
                                                                 />
+
+
                                                               </label>
                                                             </div>
 
                                                             {/* File Name Display and Clear Icon */}
-                                                            <div className="col-auto d-flex align-items-center">
+                                                            {/* <div className="col-auto d-flex align-items-center">
                                                               <span className="form-text me-2">
                                                                 {fileName}
                                                               </span>
                                                               {fileName !==
                                                                 "No file selected" && (
-                                                                <i
-                                                                  className="fas fa-trash text-danger"
-                                                                  style={{
-                                                                    cursor:
-                                                                      "pointer",
-                                                                  }}
-                                                                  onClick={
-                                                                    handleClearFile
-                                                                  }
-                                                                  title="Clear file"
-                                                                ></i>
-                                                              )}
-                                                            </div>
+                                                                  <i
+                                                                    className="fas fa-trash text-danger"
+                                                                    style={{
+                                                                      cursor:
+                                                                        "pointer",
+                                                                    }}
+                                                                    onClick={
+                                                                      handleClearFile
+                                                                    }
+                                                                    title="Clear file"
+                                                                  ></i>
+                                                                )}
+                                                            </div> */}
 
                                                             {/* Download Button */}
                                                             <div className="col-auto ms-auto">
@@ -615,14 +604,14 @@ const Service = () => {
                                                               </button>
                                                             </div>
                                                           </div>
-                                                          <span
+                                                          {/* <span
                                                             className="form-text"
                                                             style={{
                                                               color: "green",
                                                             }}
                                                           >
                                                             {uploadMessage}
-                                                          </span>
+                                                          </span> */}
                                                         </div>
 
                                                         <table className="table table-bordered table-striped">
@@ -644,9 +633,9 @@ const Service = () => {
                                                                 (TaskShow) => {
                                                                   if (
                                                                     data1.id ===
-                                                                      TaskShow.JobTypeId &&
+                                                                    TaskShow.JobTypeId &&
                                                                     item.id ===
-                                                                      TaskShow.serviceId
+                                                                    TaskShow.serviceId
                                                                   ) {
                                                                     return (
                                                                       <tr
