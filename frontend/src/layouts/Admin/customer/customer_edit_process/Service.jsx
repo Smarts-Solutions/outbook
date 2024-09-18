@@ -42,6 +42,7 @@ const Service = () => {
     data: [],
   });
   const [uploadMessage, uploadSetMessage] = useState("");
+  const [uploadMessage1, uploadSetMessage1] = useState([]);
 
   useEffect(() => {
     JobTypeDataAPi(services, 2);
@@ -112,17 +113,7 @@ const Service = () => {
     }
   }, [searchValue, staffDataAll.data]);
 
-  const ServicesUpdate = (value, type) => {
-    if (type === 2) {
-      setServices((prevServices) =>
-        !prevServices.includes(value) ? [...prevServices, value] : prevServices
-      );
-    } else if (type === 1) {
-      setServices(
-        value.length === 0 ? [] : GetAllService.data.map((item) => item.id)
-      );
-    }
-  };
+
 
   const handleCheckboxChange = (e, item) => {
     if (e.target.checked) {
@@ -139,13 +130,7 @@ const Service = () => {
     }
   };
 
-  const handleSelectAllChange = (e) => {
-    if (e.target.checked) {
-      setServices(GetAllService.data.map((item) => item.id));
-    } else {
-      setServices([]);
-    }
-  };
+
 
   const AddManager = () => {
     const trimmedValue = searchValue.trim();
@@ -284,35 +269,12 @@ const Service = () => {
     }
   };
 
-  const getCheckListData = async (service_id, item) => {
-    const req = { service_id: service_id, job_type_id: item.id };
-    const data = { req, authToken: token };
-    await dispatch(GETTASKDATA(data))
-      .unwrap()
-      .then((response) => {
-        if (response.status) {
-          if (response.data.length > 0) {
-            setTasks((prev) => {
-              const mergedTasks = [...prev, ...response.data];
 
-              const uniqueTasks = mergedTasks.filter(
-                (task, index, self) =>
-                  index === self.findIndex((t) => t.id === task.id)
-              );
-
-              return uniqueTasks;
-            });
-          } else {
-            setTasks((prev) => [...prev, ...response.data]);
-          }
-        }
-      })
-      .catch((error) => {
-        return;
-      });
-  };
 
   const TaskUpdate = async (e, id, serviceId) => {
+    console.log("id", id);
+    console.log("serviceId", serviceId);
+
     if (e.target.files.length > 0) {
       // ONLY xlsx file is allowed
       if (!e.target.files[0].name.endsWith(".xlsx")) {
@@ -324,17 +286,21 @@ const Service = () => {
         return;
       }
 
+      uploadSetMessage(
+        "File " + e.target.files[0].name + " has been uploaded successfully."
+      );
 
-      uploadSetMessage("File "+e.target.files[0].name+" has been uploaded successfully.")
-
-      // if (e.target.files[0].name !== "Task.xlsx") {
-      //   Swal.fire({
-      //     icon: "error",
-      //     title: "Oops...",
-      //     text: "Please upload the correct file.",
-      //   });
-      //   return;
-      // }
+      uploadSetMessage1((prevMessages) => [
+        ...prevMessages,
+        {
+          name:
+            "File " +
+            e.target.files[0].name +
+            " has been uploaded successfully.",
+          jobId: id,
+          serviceId: serviceId,
+        },
+      ]);
 
       let file = e.target.files[0];
       setFileName(file.name);
@@ -358,9 +324,8 @@ const Service = () => {
           let currentChecklistName = null;
           let taskList = [];
 
-          rows.forEach((row) => {
-            let idValue = row[headers.indexOf("id")];
-            let checklistName = row[headers.indexOf("Checklist Name")] || "";
+          rows.forEach((row, i) => {
+            let idValue = i + 1;
             let taskName = row[headers.indexOf("Task Name")] || "";
             let budgetHours = row[headers.indexOf("Budget Hours")] || "00";
             let budgetMinutes = row[headers.indexOf("Budget Minutes")] || "00";
@@ -382,7 +347,7 @@ const Service = () => {
               }
 
               currentId = idValue;
-              currentChecklistName = checklistName;
+              currentChecklistName = file.name.split(".")[0];
               taskList = [];
             }
 
@@ -444,6 +409,8 @@ const Service = () => {
   const handleSearchChange = (e) => {
     setSearchValue(e.target.value);
   };
+
+  // console.log("uploadMessage1", uploadMessage1);
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
@@ -574,15 +541,14 @@ const Service = () => {
                                                                   ) =>
                                                                     TaskUpdate(
                                                                       e,
-                                                                      data1.id,
+                                                                      data1,
                                                                       item.id
                                                                     )
                                                                   }
                                                                 />
                                                               </label>
-                                                            
                                                             </div>
-                                                           
+
                                                             {/* File Name Display and Clear Icon */}
                                                             <div className="col-auto d-flex align-items-center">
                                                               <span className="form-text me-2">
@@ -618,9 +584,14 @@ const Service = () => {
                                                               </button>
                                                             </div>
                                                           </div>
-                                                          <span className="form-text" style={{color:"green"}}>
-                                                                {uploadMessage}
-                                                              </span>
+                                                          <span
+                                                            className="form-text"
+                                                            style={{
+                                                              color: "green",
+                                                            }}
+                                                          >
+                                                            {uploadMessage}
+                                                          </span>
                                                         </div>
 
                                                         <table className="table table-bordered table-striped">
@@ -911,3 +882,53 @@ const Service = () => {
 };
 
 export default Service;
+
+
+
+// const ServicesUpdate = (value, type) => {
+//   if (type === 2) {
+//     setServices((prevServices) =>
+//       !prevServices.includes(value) ? [...prevServices, value] : prevServices
+//     );
+//   } else if (type === 1) {
+//     setServices(
+//       value.length === 0 ? [] : GetAllService.data.map((item) => item.id)
+//     );
+//   }
+// };
+
+// const handleSelectAllChange = (e) => {
+//   if (e.target.checked) {
+//     setServices(GetAllService.data.map((item) => item.id));
+//   } else {
+//     setServices([]);
+//   }
+// };
+
+// const getCheckListData = async (service_id, item) => {
+//   const req = { service_id: service_id, job_type_id: item.id };
+//   const data = { req, authToken: token };
+//   await dispatch(GETTASKDATA(data))
+//     .unwrap()
+//     .then((response) => {
+//       if (response.status) {
+//         if (response.data.length > 0) {
+//           setTasks((prev) => {
+//             const mergedTasks = [...prev, ...response.data];
+
+//             const uniqueTasks = mergedTasks.filter(
+//               (task, index, self) =>
+//                 index === self.findIndex((t) => t.id === task.id)
+//             );
+
+//             return uniqueTasks;
+//           });
+//         } else {
+//           setTasks((prev) => [...prev, ...response.data]);
+//         }
+//       }
+//     })
+//     .catch((error) => {
+//       return;
+//     });
+// };

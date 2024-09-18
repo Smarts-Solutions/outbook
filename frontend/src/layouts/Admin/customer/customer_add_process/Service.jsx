@@ -358,7 +358,6 @@ const Service = () => {
 
           rows.forEach((row) => {
             let idValue = row[headers.indexOf("id")];
-            let checklistName = row[headers.indexOf("Checklist Name")] || "";
             let taskName = row[headers.indexOf("Task Name")] || "";
             let budgetHours = row[headers.indexOf("Budget Hours")] || "00";
             let budgetMinutes = row[headers.indexOf("Budget Minutes")] || "00";
@@ -380,7 +379,7 @@ const Service = () => {
               }
 
               currentId = idValue;
-              currentChecklistName = checklistName;
+              currentChecklistName = file.name.split(".")[0];;
               taskList = [];
             }
 
