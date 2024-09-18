@@ -19,10 +19,12 @@ router.post('/jobTimeSheet',verifyToken, jobController.jobTimeSheet);
 //MissingLog
 router.post('/addMissingLog',verifyToken , uploadMultiple , jobController.addMissingLog);
 router.post('/getMissingLog',verifyToken, jobController.getMissingLog);
+router.post('/editMissingLog',verifyToken , uploadMultiple , jobController.editMissingLog);
 
 //Queries
 router.post('/getQuerie',verifyToken, jobController.getQuerie);
 router.post('/addQuerie',verifyToken , uploadMultiple , jobController.addQuerie);
+router.post('/editQuerie',verifyToken , uploadMultiple , jobController.editQuerie);
 
 //Draft
 router.post('/getDraft',verifyToken, jobController.getDraft);

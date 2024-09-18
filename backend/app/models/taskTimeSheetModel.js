@@ -201,6 +201,65 @@ const getMissingLog = async (missingLog) => {
   }
 }
 
+const editMissingLog = async(missingLog) => {
+  const { id, missing_log, missing_paperwork, missing_log_sent_on, missing_log_prepared_date, missing_log_reviewed_by, missing_log_reviewed_date, status } = missingLog.body;
+
+  const missing_log_document = missingLog.files;
+
+  try {
+    const query = `
+     UPDATE 
+     missing_logs
+     SET
+     missing_log = ?,
+     missing_paperwork = ?,
+     missing_log_sent_on = ?,
+     missing_log_prepared_date = ?,
+     missing_log_reviewed_by = ?,
+     missing_log_reviewed_date = ?,
+     status = ?
+     WHERE 
+     id = ?
+     `;
+    const [rows] = await pool.execute(query, [missing_log, missing_paperwork, missing_log_sent_on, missing_log_prepared_date, missing_log_reviewed_by, missing_log_reviewed_date, status, id]);
+    console.log("rows ", rows)
+
+    if (missing_log_document.length > 0) {
+      for (let file of missing_log_document) {
+        const file_name = file.filename;
+        const original_name = file.originalname;
+        const file_type = file.mimetype;
+        const file_size = file.size;
+  
+  
+        const insertQuery = `
+            INSERT INTO missing_logs_documents (
+                missing_log_id, file_name, original_name, file_type, file_size
+            ) VALUES (?, ?, ?, ?, ?)
+        `;
+  
+        try {
+            const [result] = await pool.execute(insertQuery, [
+                id,
+                file_name,
+                original_name,
+                file_type,
+                file_size
+            ]);
+  
+        } catch (error) {
+            console.log('Error inserting file:', error);
+        }
+      }
+    }
+    
+    return { status: true, message: 'Success.', data: rows };
+  } catch (error) {
+    console.log("error ", error)
+    return { status: false, message: 'Error editMissingLog .' };
+  }
+}
+
 const getMissingLogSingleView = async (missingLog) => {
   const { id } = missingLog;
   try {
@@ -330,6 +389,54 @@ const getQuerieSingleView = async(querie) => {
   } catch (error) {
     console.log("error ", error)
     return { status: false, message: 'Error querie .' };
+  }
+}
+
+const editQuerie = async (query) => {
+  const { id, queries_remaining, query_title, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, response, final_query_response_received_date } = query.body;
+  const query_document = query.files;
+
+  try {
+    const query = `
+     UPDATE 
+     queries
+     SET
+     queries_remaining = ?,
+     query_title = ?,
+     reviewed_by = ?,
+     missing_queries_prepared_date = ?,
+     query_sent_date = ?,
+     response_received = ?,
+     response = ?,
+     final_query_response_received_date = ?
+     WHERE 
+     id = ?
+     `;
+    const [rows] = await pool.execute(query, [queries_remaining, query_title, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, response, final_query_response_received_date, id]);
+    console.log("rows ", rows)
+
+    if (query_document.length > 0) {
+      for (let file of query_document) {
+        const file_name = file.filename;
+        const original_name = file.originalname;
+        const file_type = file.mimetype;
+        const file_size = file.size;
+  
+  
+        const insertQuery = `
+            INSERT INTO queries_documents (
+                query_id, file_name , original_name, file_type, file_size 
+            ) VALUES (?, ?, ?, ?, ?)
+        `;
+        const [rows] = await pool.execute(insertQuery, [id, file_name, original_name 
+          , file_type, file_size]);
+        }   
+}
+    return { status: true, message: 'Success.', data: rows };
+  }
+  catch (error) {
+    console.log("error ", error)
+    return { status: false, message: 'Error editQuerie .' };
   }
 }
 
@@ -492,11 +599,13 @@ module.exports = {
   updateTaskTimeSheetStatus,
   addMissingLog,
   getMissingLog,
+  editMissingLog,
   getMissingLogSingleView,
   updateJobTimeTotalHours,
   getQuerie,
   getQuerieSingleView,
   addQuerie,
+  editQuerie,
   getDraft,
   addDraft,
   getDraftSingleView,
