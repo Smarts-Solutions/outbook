@@ -113,8 +113,6 @@ const Service = () => {
     }
   }, [searchValue, staffDataAll.data]);
 
-
-
   const handleCheckboxChange = (e, item) => {
     if (e.target.checked) {
       JobTypeDataAPi(item, 1);
@@ -129,8 +127,6 @@ const Service = () => {
       );
     }
   };
-
-
 
   const AddManager = () => {
     const trimmedValue = searchValue.trim();
@@ -269,11 +265,8 @@ const Service = () => {
     }
   };
 
-
-
   const TaskUpdate = async (e, id, serviceId) => {
-    console.log("id", id);
-    console.log("serviceId", serviceId);
+
 
     if (e.target.files.length > 0) {
       // ONLY xlsx file is allowed
@@ -303,6 +296,7 @@ const Service = () => {
       ]);
 
       let file = e.target.files[0];
+      console.log("file", file);
       setFileName(file.name);
       if (file) {
         let reader = new FileReader();
@@ -323,7 +317,7 @@ const Service = () => {
           let currentId = null;
           let currentChecklistName = null;
           let taskList = [];
-
+          console.log("rows", rows);
           rows.forEach((row, i) => {
             let idValue = i + 1;
             let taskName = row[headers.indexOf("Task Name")] || "";
@@ -410,7 +404,7 @@ const Service = () => {
     setSearchValue(e.target.value);
   };
 
-  // console.log("uploadMessage1", uploadMessage1);
+  console.log("tasksGet", tasksGet);
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
@@ -526,12 +520,12 @@ const Service = () => {
                                                                 htmlFor="uploadButton"
                                                                 className="btn btn-secondary"
                                                               >
-                                                                <i className="fas fa-upload me-2"></i>
-                                                                Upload File
+                                                                {/* <i className="fas fa-upload me-2"></i>
+                                                                Upload File */}
                                                                 <input
                                                                   type="file"
                                                                   id="uploadButton"
-                                                                  className="form-control d-none"
+                                                                  className="form-control"
                                                                   style={{
                                                                     cursor:
                                                                       "pointer",
@@ -541,7 +535,7 @@ const Service = () => {
                                                                   ) =>
                                                                     TaskUpdate(
                                                                       e,
-                                                                      data1,
+                                                                      data1.id,
                                                                       item.id
                                                                     )
                                                                   }
@@ -550,7 +544,7 @@ const Service = () => {
                                                             </div>
 
                                                             {/* File Name Display and Clear Icon */}
-                                                            <div className="col-auto d-flex align-items-center">
+                                                            {/* <div className="col-auto d-flex align-items-center">
                                                               <span className="form-text me-2">
                                                                 {fileName}
                                                               </span>
@@ -568,7 +562,7 @@ const Service = () => {
                                                                   title="Clear file"
                                                                 ></i>
                                                               )}
-                                                            </div>
+                                                            </div> */}
 
                                                             {/* Download Button */}
                                                             <div className="col-auto ms-auto">
@@ -584,14 +578,14 @@ const Service = () => {
                                                               </button>
                                                             </div>
                                                           </div>
-                                                          <span
+                                                          {/* <span
                                                             className="form-text"
                                                             style={{
                                                               color: "green",
                                                             }}
                                                           >
                                                             {uploadMessage}
-                                                          </span>
+                                                          </span> */}
                                                         </div>
 
                                                         <table className="table table-bordered table-striped">
@@ -612,9 +606,9 @@ const Service = () => {
                                                               tasksGet.map(
                                                                 (TaskShow) => {
                                                                   if (
-                                                                    data1.id ===
+                                                                    data1.id ==
                                                                       TaskShow.JobTypeId &&
-                                                                    item.id ===
+                                                                    item.id ==
                                                                       TaskShow.serviceId
                                                                   ) {
                                                                     return (
@@ -882,8 +876,6 @@ const Service = () => {
 };
 
 export default Service;
-
-
 
 // const ServicesUpdate = (value, type) => {
 //   if (type === 2) {
