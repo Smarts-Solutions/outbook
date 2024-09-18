@@ -15,36 +15,52 @@ const MissingLogs = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [addmissinglogs, setAddmissinglogs] = useState(false);
+  const [showEditmissinglogsModal, setShowEditMissinglogsModal] = useState(false); 
   const [viewmissinglogs, setViewmissinglogs] = useState(false);
   const [getMissingLogListData, setGetMissingLogListData] = useState([]);
   const [getProfileDetails, setGetProfileDetails] = useState([]);
   const [singleMissionData, setSingleMissionData] = useState([]);
+  const [getEditData, setGetEditData] = useState([]);
   const [errors1, setErrors1] = useState({});
-
-
-
+ 
 
   const [missionLogAllInputData, setMissionAllInputLogData] = useState({
-    missing_log: "1", 
+    missing_log: "1",
     missing_log_sent_on: new Date().toISOString().substr(0, 10),
-    missing_log_prepared_date: null, 
+    missing_log_prepared_date: null,
     missing_log_reviewed_by: null,
-    missing_log_reviewed_date: null, 
+    missing_log_reviewed_date: null,
     missing_log_document: null,
     status: "0",
   });
 
-  const resetForm = () => {            
+  const resetForm = () => {
     setMissionAllInputLogData({
       ...missionLogAllInputData,
-      missing_log: "1", 
+      missing_log: "1",
       missing_log_sent_on: new Date().toISOString().substr(0, 10),
-      missing_log_prepared_date: null, 
-      missing_log_reviewed_date: null, 
+      missing_log_prepared_date: null,
+      missing_log_reviewed_date: null,
       missing_log_document: null,
       status: "0",
     });
   };
+
+  useEffect(() => {
+    if (getEditData) {
+      setMissionAllInputLogData({
+        ...missionLogAllInputData,
+        missing_log: getEditData.missing_log,
+        missing_log_sent_on: getEditData.missing_log_sent_on,
+        missing_log_prepared_date: getEditData.missing_log_prepared_date,
+        missing_log_reviewed_by: getProfileDetails?.first_name + " " + getProfileDetails?.last_name,
+        missing_log_reviewed_date: getEditData.missing_log_reviewed_date,
+        missing_log_document: getEditData.missing_log_document,
+        status: getEditData.status,
+      });
+    }
+  }, [getEditData]);
+
 
 
   useEffect(() => {
@@ -97,21 +113,21 @@ const MissingLogs = () => {
   //       case "missing_log":
   //         newErrors[name] = AddMissionLogErros.missing_log;
   //         break;
-         
+
   //       case "missing_log_sent_on":
   //         newErrors[name] = AddMissionLogErros.missing_log_sent_on;
   //         break;
   //       case "missing_log_prepared_date":
   //         newErrors[name] = AddMissionLogErros.missing_log_prepared_date;
   //         break;
-         
+
   //       case "missing_log_reviewed_by":
   //         newErrors[name] = AddMissionLogErros.missing_log_reviewed_by;
   //         break;
   //       case "missing_log_reviewed_date":
   //         newErrors[name] = AddMissionLogErros.missing_log_reviewed_date;
   //         break;
-         
+
   //       case "missing_log_document":
   //         newErrors[name] = AddMissionLogErros.missing_log_document;
   //         break;
@@ -167,7 +183,7 @@ const MissingLogs = () => {
         }
       })
       .catch((err) => {
-     return;
+        return;
       })
   }
 
@@ -185,7 +201,7 @@ const MissingLogs = () => {
         }
       })
       .catch((err) => {
-     return;
+        return;
       })
   }
 
@@ -223,7 +239,45 @@ const MissingLogs = () => {
         }
       })
       .catch((err) => {
-     return;
+        return;
+      })
+  }
+
+  const handleEditSubmit = async (e) => {
+    // if (!validateAllFields()) {
+    //   return;
+    // }
+    const req = { action: "add", job_id: location.state.job_id, missionDetails: missionLogAllInputData }
+    const data = { req: req, authToken: token }
+    await dispatch(AddMissionLog(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          GetMissingLogDetails()
+          setAddmissinglogs(false);
+          resetForm();
+          sweatalert.fire({
+            icon: 'success',
+            title: response.message,
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 1500
+          });
+
+        }
+        else {
+          sweatalert.fire({
+            icon: 'error',
+            title: response.message,
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 1500
+          });
+
+        }
+      })
+      .catch((err) => {
+        return;
       })
   }
 
@@ -236,6 +290,9 @@ const MissingLogs = () => {
         <div>
           <button className="edit-icon" onClick={() => { HandleMissionView(row); setViewmissinglogs(true) }}>
             <i className="fa fa-eye fs-6 text-secondary" />
+          </button>
+          <button className="edit-icon" onClick={() =>{setShowEditMissinglogsModal(true);setGetEditData(row)}}>
+            <i className="ti-pencil" />
           </button>
 
         </div>
@@ -308,7 +365,7 @@ const MissingLogs = () => {
                 </div>
               )}
             </div>
-          </div> 
+          </div>
           <div className="col-lg-6">
             <div className="mb-3">
               <label htmlFor="firstNameinput" className="form-label">
@@ -353,7 +410,7 @@ const MissingLogs = () => {
 
             </div>
           </div>
-          
+
           <div id="MissingLog4" className="col-lg-6">
             <div className="mb-3">
               <label htmlFor="firstNameinput" className="form-label">
@@ -398,7 +455,207 @@ const MissingLogs = () => {
                 </div>
               )}
             </div>
-          </div> 
+          </div>
+          <div id="MissingLog8" className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Missing Log Document
+              </label>
+              <input
+                type="file"
+                ref={fileInputRef}
+                multiple
+                id="missing_log_document"
+                name="missing_log_document"
+                onChange={(event) => { handleChange(event) }}
+                className="custom-file-input form-control"
+              />
+              {errors1["missing_log_document"] && (
+                <div className="error-text">
+                  {errors1["missing_log_document"]}
+                </div>
+              )}
+            </div>
+          </div>
+          <div id="MissingLog6" className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Status
+              </label>
+              <div style={{ display: "flex" }}>
+                <div>
+                  <input
+                    type="radio"
+                    id="complete"
+                    name="status"
+                    value="1"
+                    onChange={(e) => handleChange(e)}
+                    checked={missionLogAllInputData.status === "1"}
+                  />
+                  &nbsp; <label htmlFor="complete">Complete</label>
+
+                </div>
+                &nbsp;
+                <div style={{ marginLeft: 10 }}>
+                  <input
+                    type="radio"
+                    id="incomplete"
+                    name="status"
+                    value="0"
+                    onChange={(e) => handleChange(e)}
+                    checked={missionLogAllInputData.status === "0"}
+                  />
+                  &nbsp; <label htmlFor="incomplete">Incomplete</label>
+
+                </div>
+
+              </div>
+              {errors1["status"] && (
+                <div className="error-text">
+                  {errors1["status"]}
+                </div>
+              )}
+
+            </div>
+          </div>
+
+        </div>
+
+
+      </CommonModal>
+
+      <CommonModal
+        isOpen={showEditmissinglogsModal}
+        backdrop="static"
+        size="lg"
+        cancel_btn={false}
+        btn_2="true"
+        btn_name="Save"
+        title="Edit Missing Log"
+        hideBtn={false}
+
+        handleClose={() => {
+          setShowEditMissinglogsModal(false);
+          resetForm();
+        }}
+        Submit_Function={() => handleEditSubmit()}
+      >
+        <div className="row">
+
+          <div className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Missing Log?
+              </label>
+              <select
+                name="missing_log"
+                id="missing_log"
+                className="form-select mb-3 ismissinglog"
+                aria-label="Default select example"
+                style={{ color: "#8a8c8e !important" }}
+                onChange={(e) => handleChange(e)}
+                value={missionLogAllInputData.missing_log}
+              >
+                <option value="1" selected>Yes</option>
+                <option value="0">No</option>
+              </select>
+              {errors1["missing_log"] && (
+                <div className="error-text">
+                  {errors1["missing_log"]}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Missing Log Sent On
+              </label>
+              <input
+                type="date"
+                className="form-control"
+                placeholder=""
+                id="missing_log_sent_on"
+                name="missing_log_sent_on"
+                onChange={(e) => handleChange(e)}
+                value={missionLogAllInputData.missing_log_sent_on}
+              />
+              {errors1["missing_log_sent_on"] && (
+                <div className="error-text">
+                  {errors1["missing_log_sent_on"]}
+                </div>
+              )}
+            </div>
+          </div>
+          <div id="MissingLog1" className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Missing Log Prepared Date
+              </label>
+              <input
+                type="date"
+                className="form-control"
+                placeholder=""
+                id="missing_log_prepared_date"
+                name="missing_log_prepared_date"
+                onChange={(e) => handleChange(e)}
+                value={missionLogAllInputData.missing_log_prepared_date}
+              />
+              {errors1["missing_log_prepared_date"] && (
+                <div className="error-text">
+                  {errors1["missing_log_prepared_date"]}
+                </div>
+              )}
+
+
+            </div>
+          </div>
+
+          <div id="MissingLog4" className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Missing Log Reviewed By
+              </label>
+              <input
+                type="text"
+                defaultValue=""
+                className="form-control"
+                placeholder="Missing Log Reviewed By"
+                id="missing_log_reviewed_by"
+                name="missing_log_reviewed_by"
+                disabled={true}
+                onChange={(e) => handleChange(e)}
+                value={missionLogAllInputData.missing_log_reviewed_by}
+              />
+              {errors1["missing_log_reviewed_by"] && (
+                <div className="error-text">
+                  {errors1["missing_log_reviewed_by"]}
+                </div>
+              )}
+
+            </div>
+          </div>
+          <div id="MissingLog5" className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+                Missing Log Reviewed Date
+              </label>
+              <input
+                type="date"
+                className="form-control"
+                placeholder=""
+                id="missing_log_reviewed_date"
+                name="missing_log_reviewed_date"
+                onChange={(e) => handleChange(e)}
+                value={missionLogAllInputData.missing_log_reviewed_date}
+              />
+              {errors1["missing_log_reviewed_date"] && (
+                <div className="error-text">
+                  {errors1["missing_log_reviewed_date"]}
+                </div>
+              )}
+            </div>
+          </div>
           <div id="MissingLog8" className="col-lg-6">
             <div className="mb-3">
               <label htmlFor="firstNameinput" className="form-label">
