@@ -2133,7 +2133,6 @@ const customerUpdate = async (customer) => {
         const { services ,Task} = customer;
          
         console.log("pageStatus ",pageStatus)
-        console.log("req ",customer)
         
         
         const [ExistServiceids] = await pool.execute('SELECT service_id  FROM `customer_services` WHERE customer_id =' + customer_id);
