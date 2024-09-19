@@ -10177,7 +10177,6 @@ body .accordion-button:not(.collapsed)::after {
   padding: 0px 0px;
   transition: 0.3s linear;
 }
-
 .breadcrumb a {
   position: relative;
   display: flex;
@@ -10185,12 +10184,15 @@ body .accordion-button:not(.collapsed)::after {
   text-decoration: none;
   margin: auto;
   height: 100%;
- 
   padding-left: 38px;
   padding-right: 0;
   color: #666;
+  cursor: pointer;
 }
-
+.breadcrumb a:hover
+{
+text-decoration: underline;
+}
 .breadcrumb a:first-child {
   padding-left: 15.2px;
 }
