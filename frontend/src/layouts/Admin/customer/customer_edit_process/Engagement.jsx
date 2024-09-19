@@ -446,8 +446,7 @@ const Engagement = () => {
     await dispatch(customerSourceApi(data))
       .unwrap()
       .then(async (response) => {
-        if (response.status) {
-          console.log(response.data);
+        if (response.status) { 
           setCoustomerSource(response.data);
         }
       })

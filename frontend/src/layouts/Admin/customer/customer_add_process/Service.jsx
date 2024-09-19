@@ -225,8 +225,7 @@ const Service = () => {
     const filteredMatchData = MatchData.filter((item) =>
       services.includes(item.service_id)
     );
-
-    console.log("FILTERED", filteredMatchData);
+ 
 
     const req = {
       customer_id: address,
@@ -431,8 +430,7 @@ const Service = () => {
 
   const handleSearchChange = (e) => {
     setSearchValue(e.target.value);
-  };
-  console.log("tasksGet", tasksGet);
+  }; 
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
@@ -558,8 +556,7 @@ const Service = () => {
                                                                   id="uploadButton"
                                                                   className="form-control "
                                                                   style={{ cursor: "pointer"}}
-                                                                  onChange={(e) => {
-                                                                    console.log("item", data1.id);
+                                                                  onChange={(e) => { 
                                                                     TaskUpdate(e, data1.id, item.id)
                                                                   }
                                                                   }

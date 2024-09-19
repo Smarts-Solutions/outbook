@@ -304,23 +304,26 @@ const getMissingLogSingleView = async (missingLog) => {
 
 //Queries
 const addQuerie = async(querie) => {
-  const { job_id, queries_remaining, reviewed_by, query_sent_date, response_received } = querie.body;
+  const { job_id, queries_remaining, reviewed_by, query_sent_date, response_received , status } = querie.body;
   const query_document = querie.files;
 
     let missing_queries_prepared_date = querie.body.missing_queries_prepared_date == 'null' ? null : querie.body.missing_queries_prepared_date
 
   let final_query_response_received_date = querie.body.final_query_response_received_date == 'null' ? null : querie.body.final_query_response_received_date
 
+   
+
+
 
   try {
     const query = `
      INSERT INTO 
      queries
-      (job_id, queries_remaining, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received,final_query_response_received_date)
+      (job_id, queries_remaining, status , reviewed_by, missing_queries_prepared_date, query_sent_date, response_received,final_query_response_received_date)
       VALUES
-      (?,?,?,?,?,?,?)
+      (?,?,?,?,?,?,?,?)
       `;
-    const [rows] = await pool.execute(query, [job_id, queries_remaining, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date]);
+    const [rows] = await pool.execute(query, [job_id, queries_remaining, status, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date]);
 
 
     if (query_document.length > 0) {
@@ -371,7 +374,9 @@ const getQuerie = async (querie) => {
       DATE_FORMAT(queries.query_sent_date, '%Y-%m-%d') AS query_sent_date,
       queries.response_received AS response_received,
       queries.response AS response,
-      DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date
+      DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
+      queries.status AS status, 
+
      FROM 
       queries
      WHERE 
@@ -474,6 +479,9 @@ const getDraft = async (draft) => {
      SELECT 
       drafts.id AS id,
       drafts.job_id AS job_id,
+      drafts.feedback_received AS feedback_received,
+      drafts.updated_amendment AS updated_amendment,
+      drafts.was_it_complete AS was_it_complete,
       DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
       DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on
      FROM 
@@ -519,17 +527,17 @@ const getDraftSingleView = async(req,res) => {
 }
 
 const addDraft = async (draft) => {
-  const { job_id,draft_sent_on,final_draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete } = draft;
+  const { job_id,draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete } = draft;
 
   try {
     const query = `
      INSERT INTO 
      drafts
-      (job_id,draft_sent_on,final_draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete)
+      (job_id,draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete)
       VALUES
-      (?,?,?,?,?,?,?)
+      (?,?,?,?,?,?)
       `;
-    const [rows] = await pool.execute(query, [job_id,draft_sent_on,final_draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete]);
+    const [rows] = await pool.execute(query, [job_id,draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete]);
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
     console.log("error ", error)

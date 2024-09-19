@@ -23,10 +23,10 @@ const MissingLogs = () => {
   const [getEditData, setEditData] = useState([]);
   const [errors1, setErrors1] = useState({});
  
-  
+
 
   const [missionLogAllInputData, setMissionAllInputLogData] = useState({
-    missing_log: "1",
+    missing_log: "0",
     missing_log_sent_on: new Date().toISOString().substr(0, 10),
     missing_log_prepared_date: null,
     missing_log_reviewed_by: null,
@@ -38,7 +38,7 @@ const MissingLogs = () => {
   const resetForm = () => {
     setMissionAllInputLogData({
       ...missionLogAllInputData,
-      missing_log: "1",
+      missing_log: "0",
       missing_log_sent_on: new Date().toISOString().substr(0, 10),
       missing_log_prepared_date: null,
       missing_log_reviewed_date: null,
@@ -46,9 +46,10 @@ const MissingLogs = () => {
       status: "0",
     });
   };
+ 
 
   useEffect(() => {
-    if (getEditData) {
+    if (getEditData  && showEditmissinglogsModal) {
       setMissionAllInputLogData({
         ...missionLogAllInputData,
         missing_log: getEditData.missing_log,
@@ -60,7 +61,7 @@ const MissingLogs = () => {
         status: getEditData.status,
       });
     }
-  }, [getEditData]);
+  }, [getEditData , showEditmissinglogsModal]);
 
 
 
@@ -102,71 +103,11 @@ const MissingLogs = () => {
     }
     else {
       setMissionAllInputLogData({ ...missionLogAllInputData, [name]: value });
-    }
-    // validate(name, value);
+    } 
   };
 
 
-  // const validate = (name, value) => {
-  //   const newErrors = { ...errors1 };
-  //   if (!value) {
-  //     switch (name) {
-  //       case "missing_log":
-  //         newErrors[name] = AddMissionLogErros.missing_log;
-  //         break;
-
-  //       case "missing_log_sent_on":
-  //         newErrors[name] = AddMissionLogErros.missing_log_sent_on;
-  //         break;
-  //       case "missing_log_prepared_date":
-  //         newErrors[name] = AddMissionLogErros.missing_log_prepared_date;
-  //         break;
-
-  //       case "missing_log_reviewed_by":
-  //         newErrors[name] = AddMissionLogErros.missing_log_reviewed_by;
-  //         break;
-  //       case "missing_log_reviewed_date":
-  //         newErrors[name] = AddMissionLogErros.missing_log_reviewed_date;
-  //         break;
-
-  //       case "missing_log_document":
-  //         newErrors[name] = AddMissionLogErros.missing_log_document;
-  //         break;
-  //       case "status":
-  //         newErrors[name] = AddMissionLogErros.status;
-  //         break;
-  //       default:
-  //         break;
-  //     }
-  //   }
-  //   else {
-  //     delete newErrors[name];
-  //     setErrors1((prevErrors) => {
-  //       const updatedErrors = { ...prevErrors };
-  //       delete updatedErrors[name];
-  //       return updatedErrors;
-  //     });
-  //   }
-
-  //   if (Object.keys(newErrors).length !== 0) {
-  //     setErrors1((prevErrors) => ({
-  //       ...prevErrors,
-  //       ...newErrors,
-  //     }));
-  //   }
-  //   return Object.keys(newErrors).length === 0;
-  // };
-
-  // const validateAllFields = () => {
-  //   let isValid = true;
-  //   for (const key in missionLogAllInputData) {
-  //     if (!validate(key, missionLogAllInputData[key])) {
-  //       isValid = false;
-  //     }
-  //   }
-  //   return isValid;
-  // };
-
+   
 
 
   const GetMissingLogDetails = async () => {
@@ -357,8 +298,8 @@ const MissingLogs = () => {
                 onChange={(e) => handleChange(e)}
                 value={missionLogAllInputData.missing_log}
               >
-                <option value="1" selected>Yes</option>
-                <option value="0">No</option>
+                <option value="1" >Yes</option>
+                <option value="0" selected>No</option>
               </select>
               {errors1["missing_log"] && (
                 <div className="error-text">

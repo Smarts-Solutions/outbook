@@ -306,7 +306,7 @@ export async function QUERY_ACTION(data, token) {
 
 export async function ADD_QUERY(data, token) {
   try { 
-     
+      
     const formData = new FormData();
     formData.append('job_id', data.job_id);
     formData.append('queries_remaining', data.data.QueriesRemaining);

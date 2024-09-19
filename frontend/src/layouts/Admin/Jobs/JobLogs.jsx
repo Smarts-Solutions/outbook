@@ -15,8 +15,7 @@ import Hierarchy from '../../../Components/ExtraComponents/Hierarchy';
 const JobLogs = () => {
   const location = useLocation();
   const [selectedTab, setSelectedTab] = useState('job information');
- 
-  console.log("CCPPP" , location.state.goto )
+  
  
   return (
     <div className='container-fluid'>

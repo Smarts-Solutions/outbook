@@ -19,11 +19,10 @@ const Queries = () => {
   const [singleQueryData, setSingleQueryData] = useState([]);
 
   const [AllQueryInputdata, setAllQueryInputdata] = useState({
-    QueriesRemaining: null,
-    // QueryTitle: "",
+    QueriesRemaining: "0", 
     ReviewedBy: null,
     MissingQueriesPreparedDate: null,
-    QuerySentDate: null,
+    QuerySentDate:new Date().toISOString().substr(0, 10),
     ResponseReceived: null,
     status: "0",
     FinalQueryResponseReceivedDate: null,
@@ -33,24 +32,22 @@ const Queries = () => {
   const resetForm = () => {
     setAllQueryInputdata({
       ...AllQueryInputdata,
-      QueriesRemaining: null,
-      // QueryTitle: "",
+      QueriesRemaining: "0", 
       ReviewedBy: null,
       MissingQueriesPreparedDate: null,
-      QuerySentDate: null,
+      QuerySentDate: new Date().toISOString().substr(0, 10),
       ResponseReceived: null,
       status: "0",
       FinalQueryResponseReceivedDate: null,
       QueryDocument: null,
     });
   };
-
+ 
 
   useEffect(() => {
-    if (EditData) {
+    if (EditData && editViewquery) {
       setAllQueryInputdata({
-        QueriesRemaining: EditData.queries_remaining,
-        // QueryTitle: EditData.query_title,
+        QueriesRemaining: EditData.queries_remaining, 
         ReviewedBy: EditData.reviewed_by,
         MissingQueriesPreparedDate: EditData.missing_queries_prepared_date,
         QuerySentDate: EditData.query_sent_date,
@@ -60,7 +57,8 @@ const Queries = () => {
         QueryDocument: EditData.query_document,
       });
     }
-  }, [EditData]);
+  }, [EditData , editViewquery]);
+
   useEffect(() => {
     GetQueryAllList();
   }, []);
@@ -103,13 +101,9 @@ const Queries = () => {
       })
   }
 
-  const HandleAddQuery = async () => {
-    // if (!validateAllFields()) {
-    //   return;
-    // }
+  const HandleAddQuery = async () => { 
     const req = { action: "add", job_id: location.state.job_id, data: AllQueryInputdata }
-    const data = { req: req, authToken: token }
-
+    const data = { req: req, authToken: token } 
     await dispatch(AddQuery(data))
       .unwrap()
       .then((response) => {
@@ -143,6 +137,7 @@ const Queries = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+
     if (name === 'QueryDocument') {
       const files = e.target.files;
       var fileArray;
@@ -153,73 +148,10 @@ const Queries = () => {
     }
     else {
       setAllQueryInputdata({ ...AllQueryInputdata, [name]: value });
-    }
-    // validate(name, value);
+    } 
   };
 
-  // const validate = (name, value) => {
-  //   const newErrors = { ...errors1 };
-  //   if (!value) {
-  //     switch (name) {
-  //       case "QueriesRemaining":
-  //         newErrors.QueriesRemaining = "Queries Remaining is required";
-  //         break;
-  //       case "QueryTitle":
-  //         newErrors.QueryTitle = "Query Title is required";
-  //         break;
-  //       case "ReviewedBy":
-  //         newErrors.ReviewedBy = "Reviewed By is required";
-  //         break;
-  //       case "MissingQueriesPreparedDate":
-  //         newErrors.MissingQueriesPreparedDate = "Missing Queries Prepared Date is required";
-  //         break;
-  //       case "QuerySentDate":
-  //         newErrors.QuerySentDate = "Query Sent Date is required";
-  //         break;
-
-  //       case "ResponseReceived":
-  //         newErrors.ResponseReceived = "Response Received is required";
-  //         break;
-  //       case "Response":
-  //         newErrors.Response = "Response is required";
-  //         break;
-  //       case "FinalQueryResponseReceivedDate":
-  //         newErrors.FinalQueryResponseReceivedDate = "Final Query Response Received Date is required";
-  //         break;
-  //       case "QueryDocument":
-  //         newErrors.QueryDocument = "Query Document is required";
-  //         break;
-  //       default:
-  //         break;
-  //     }
-  //   }
-  //   else {
-  //     delete newErrors[name];
-  //     setErrors1((prevErrors) => {
-  //       const updatedErrors = { ...prevErrors };
-  //       delete updatedErrors[name];
-  //       return updatedErrors;
-  //     });
-  //   }
-
-  //   if (Object.keys(newErrors).length !== 0) {
-  //     setErrors1((prevErrors) => ({
-  //       ...prevErrors,
-  //       ...newErrors,
-  //     }));
-  //   }
-  //   return Object.keys(newErrors).length === 0;
-  // };
-
-  // const validateAllFields = () => {
-  //   let isValid = true;
-  //   for (const key in AllQueryInputdata) {
-  //     if (!validate(key, AllQueryInputdata[key])) {
-  //       isValid = false;
-  //     }
-  //   }
-  //   return isValid;
-  // };
+   
 
 
   const columns = [
@@ -304,7 +236,7 @@ const Queries = () => {
               value={AllQueryInputdata.QueriesRemaining}
             >
               <option value="">Select</option>
-              <option value="1">Yes</option>
+              <option value="1">Yes</option>                                                                                                                                        m                                                                                                      
               <option value="0" selected>No</option>
             </select>
             {errors1["QueriesRemaining"] && (
@@ -501,10 +433,11 @@ const Queries = () => {
         btn_name="Save"
         handleClose={() => {
           setEditViewquery(false);
+          resetForm();
           
         }}
         Submit_Function={() => HandleAddQuery()}
-        Submit_Cancel_Function={() => { setEditViewquery(false); }}
+        Submit_Cancel_Function={() => { setEditViewquery(false);   resetForm(); }}
       >
         <div className="row">
           <div className="col-lg-6">

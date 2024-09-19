@@ -21,7 +21,7 @@ const ClientList = () => {
   const [hararchyData, setHararchyData] = useState(location.state.data);
 
 
-  console.log("hararchyData", hararchyData);
+ 
 
   useEffect(() => {
     GetAllJobList();

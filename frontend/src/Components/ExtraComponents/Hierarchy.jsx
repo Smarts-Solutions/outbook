@@ -3,7 +3,7 @@ import {useNavigate} from 'react-router-dom'
 
 const Hierarchy = ({ show, active, data }) => {
    
-    console.log("SHOW" , show[1])
+  
     const navigate = useNavigate()
     const fun = (navigateTo , active) => {
         if(active<navigateTo){

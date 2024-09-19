@@ -408,8 +408,7 @@ const Engagement = () => {
     await dispatch(customerSourceApi(data))
       .unwrap()
       .then(async (response) => {
-        if (response.status) {
-          console.log(response.data);
+        if (response.status) { 
           setCoustomerSource(response.data);
         }
       })
@@ -445,8 +444,7 @@ const Engagement = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log("name", name);
-    console.log("value", value);
+ 
    
     setFormState1(({
         ...formState1,

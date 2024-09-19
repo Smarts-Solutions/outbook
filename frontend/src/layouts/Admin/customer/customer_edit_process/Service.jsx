@@ -295,8 +295,7 @@ const Service = () => {
         },
       ]);
 
-      let file = e.target.files[0];
-      console.log("file", file);
+      let file = e.target.files[0]; 
       setFileName(file.name);
       if (file) {
         let reader = new FileReader();
@@ -316,8 +315,7 @@ const Service = () => {
           let result = [];
           let currentId = null;
           let currentChecklistName = null;
-          let taskList = [];
-          console.log("rows", rows);
+          let taskList = []; 
           rows.forEach((row, i) => {
             let idValue = i + 1;
             let taskName = row[headers.indexOf("Task Name")] || "";
@@ -403,8 +401,7 @@ const Service = () => {
   const handleSearchChange = (e) => {
     setSearchValue(e.target.value);
   };
-
-  console.log("tasksGet", tasksGet);
+ 
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
