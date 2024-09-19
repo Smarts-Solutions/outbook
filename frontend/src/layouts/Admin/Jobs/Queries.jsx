@@ -20,10 +20,10 @@ const Queries = () => {
 
   const [AllQueryInputdata, setAllQueryInputdata] = useState({
     QueriesRemaining: "0", 
-    ReviewedBy: null,
+    ReviewedBy: '0',
     MissingQueriesPreparedDate: null,
     QuerySentDate:new Date().toISOString().substr(0, 10),
-    ResponseReceived: null,
+    ResponseReceived: '0',
     status: "0",
     id:null,
     FinalQueryResponseReceivedDate: null,
@@ -34,10 +34,10 @@ const Queries = () => {
     setAllQueryInputdata({
       ...AllQueryInputdata,
       QueriesRemaining: "0", 
-      ReviewedBy: null,
+      ReviewedBy: '0',
       MissingQueriesPreparedDate: null,
       QuerySentDate: new Date().toISOString().substr(0, 10),
-      ResponseReceived: null,
+      ResponseReceived: '0',
       status: "0",
       id:null,
       FinalQueryResponseReceivedDate: null,
@@ -147,7 +147,7 @@ const Queries = () => {
       .unwrap()
       .then((response) => {
         if (response.status) {
-          setAddquery(false)
+          setEditViewquery(false)
           GetQueryAllList()
           resetForm()
           sweatalert.fire({
@@ -293,7 +293,7 @@ const Queries = () => {
               onChange={(e) => handleChange(e)}
               value={AllQueryInputdata.ReviewedBy}
             >
-              <option value="" selected="">Select</option>
+              
               <option value="1">Yes</option>
               <option value="0">No</option>
             </select>
@@ -360,7 +360,7 @@ const Queries = () => {
                 onChange={(e) => handleChange(e)}
                 value={AllQueryInputdata.ResponseReceived}
               >
-                <option value="">Select</option>
+                 
                 <option value="1">Yes</option>
                 <option value="0">No</option>
               </select>
@@ -490,7 +490,7 @@ const Queries = () => {
               onChange={(e) => handleChange(e)}
               value={AllQueryInputdata.QueriesRemaining}
             >
-              <option value="">Select</option>
+              
               <option value="1">Yes</option>
               <option value="0" selected>No</option>
             </select>
@@ -511,7 +511,7 @@ const Queries = () => {
               onChange={(e) => handleChange(e)}
               value={AllQueryInputdata.ReviewedBy}
             >
-              <option value="" selected="">Select</option>
+              
               <option value="1">Yes</option>
               <option value="0">No</option>
             </select>
@@ -578,7 +578,7 @@ const Queries = () => {
                 onChange={(e) => handleChange(e)}
                 value={AllQueryInputdata.ResponseReceived}
               >
-                <option value="">Select</option>
+               
                 <option value="1">Yes</option>
                 <option value="0">No</option>
               </select>
