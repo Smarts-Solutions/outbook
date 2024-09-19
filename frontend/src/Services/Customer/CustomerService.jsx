@@ -292,6 +292,45 @@ export async function ADD_MISSION_LOG(data, token) {
   }
 }
 
+export async function EDIT_MISSION_LOG(data, token) {
+ 
+  try { 
+    const formData = new FormData();
+    formData.append('id', data.id);
+    formData.append('missing_log', data.missionDetails.missing_log);
+    formData.append('missing_log_sent_on', data.missionDetails.missing_log_sent_on);
+    formData.append('missing_log_prepared_date', data.missionDetails.missing_log_prepared_date);
+    formData.append('missing_log_reviewed_by', staffDetails.id);  
+    // formData.append('missing_paperwork', data.missionDetails.missing_log_paperwork);
+    formData.append('missing_log_reviewed_date', data.missionDetails.missing_log_reviewed_date);
+    formData.append('status', data.missionDetails.status); 
+    if (Array.isArray(data.missionDetails.missing_log_document)) {
+      data.missionDetails.missing_log_document.forEach((file) => {
+        formData.append('files[]', file);
+      });
+    } else if (data.missionDetails.missing_log_document) {
+      formData.append('files[]', data.missionDetails.missing_log_document);
+    }
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${Config.base_url}editMissingLog`,
+      headers: {
+        Authorization: token,
+        "Content-Type": "multipart/form-data",
+      },
+      data: formData,
+    };
+    const res = await axios.request(config);
+
+    return await res?.data;
+  } catch (err) {
+
+    return err;
+  }
+}
+
 export async function QUERY_ACTION(data, token) {
   try {
     const res = await axios.post(`${Config.base_url}getQuerie`, data, {
@@ -345,6 +384,46 @@ export async function ADD_QUERY(data, token) {
   }
 }
 
+export async function EDIT_QUERY(data, token) {
+  try { 
+      
+    const formData = new FormData();
+    formData.append('id', data.data.id);
+    formData.append('queries_remaining', data.data.QueriesRemaining);
+    // formData.append('query_title', data.data.QueryTitle);
+    formData.append('reviewed_by', data.data.ReviewedBy); 
+    formData.append('missing_queries_prepared_date', data.data.MissingQueriesPreparedDate);
+    formData.append('query_sent_date', data.data.QuerySentDate);
+    formData.append('response_received', data.data.ResponseReceived);
+    // formData.append('response', data.data.Response);
+    formData.append('status', data.data.status);
+    formData.append('final_query_response_received_date',data.data.FinalQueryResponseReceivedDate);  
+    if (Array.isArray(data.data.QueryDocument)) {
+      data.data.QueryDocument.forEach((file) => {
+        formData.append('files[]', file);
+      });
+    } else if (data.data.QueryDocument) {
+      formData.append('files[]', data.data.QueryDocument);
+    }
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${Config.base_url}editQuerie`,
+      headers: {
+        Authorization: token,
+        "Content-Type": "multipart/form-data",
+      },
+      data: formData,
+    };
+    const res = await axios.request(config);
+
+    return await res?.data;
+  } catch (err) {
+  
+    return err;
+  }
+}
 export async function DRAFT_ACTION(data, token) {
   try {
     const res = await axios.post(`${Config.base_url}getDraft`, data, {

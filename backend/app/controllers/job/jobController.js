@@ -155,6 +155,7 @@ const addQuerie = async (req,res) =>{
    res.status(500).json({ status:false, message: error.message});
  }
 }
+
 const getQuerie = async (req,res) => {
   try {
     const { ...query } = req.body;

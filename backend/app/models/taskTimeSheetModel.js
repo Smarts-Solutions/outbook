@@ -215,7 +215,7 @@ const getMissingLog = async (missingLog) => {
 }
 
 const editMissingLog = async(missingLog) => {
-  const { id, missing_log, missing_paperwork, missing_log_sent_on, missing_log_reviewed_by, status } = missingLog.body;
+  const { id, missing_log, missing_log_sent_on, missing_log_reviewed_by, status } = missingLog.body;
 
   let missing_log_prepared_date = missingLog.body.missing_log_prepared_date == 'null' ? null : missingLog.body.missing_log_prepared_date
 
@@ -229,7 +229,7 @@ const editMissingLog = async(missingLog) => {
      missing_logs
      SET
      missing_log = ?,
-     missing_paperwork = ?,
+  
      missing_log_sent_on = ?,
      missing_log_prepared_date = ?,
      missing_log_reviewed_by = ?,
@@ -238,7 +238,7 @@ const editMissingLog = async(missingLog) => {
      WHERE 
      id = ?
      `;
-    const [rows] = await pool.execute(query, [missing_log, missing_paperwork, missing_log_sent_on, missing_log_prepared_date, missing_log_reviewed_by, missing_log_reviewed_date, status, id]);
+    const [rows] = await pool.execute(query, [missing_log, missing_log_sent_on, missing_log_prepared_date, missing_log_reviewed_by, missing_log_reviewed_date, status, id]);
     console.log("rows ", rows)
 
     if (missing_log_document.length > 0) {
@@ -375,7 +375,7 @@ const getQuerie = async (querie) => {
       queries.response_received AS response_received,
       queries.response AS response,
       DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
-      queries.status AS status, 
+      queries.status AS status
 
      FROM 
       queries
@@ -481,6 +481,7 @@ const getDraft = async (draft) => {
       drafts.job_id AS job_id,
       drafts.feedback_received AS feedback_received,
       drafts.updated_amendment AS updated_amendment,
+      drafts.feedback AS feedback,
       drafts.was_it_complete AS was_it_complete,
       DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
       DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on

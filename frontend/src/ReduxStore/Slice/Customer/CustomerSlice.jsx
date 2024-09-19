@@ -23,6 +23,8 @@ import {
   DRAFT_ACTION,
   ADD_DRAFT,
   JOBDOCUMENT_ACTION,
+  EDIT_MISSION_LOG,
+  EDIT_QUERY,
    
 } from "../../../Services/Customer/CustomerService";
 
@@ -359,6 +361,25 @@ export const AddMissionLog = createAsyncThunk("addMissingLog", async (data) => {
   }
 });
 
+export const EditMissingLog = createAsyncThunk("editMissingLog", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await EDIT_MISSION_LOG(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+
+
+
 export const QueryAction = createAsyncThunk("getQuerie", async (data) => {
   try {
     const { req, authToken } = data;
@@ -385,6 +406,22 @@ export const AddQuery = createAsyncThunk("addQuerie", async (data) => {
       StaffUserId: StaffUserId.id,
     };
     const res = await ADD_QUERY(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const EditQuery = createAsyncThunk("editQuerie", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await EDIT_QUERY(updatedReq, authToken);
     return await res;
   } catch (err) {
     throw err;
@@ -471,6 +508,8 @@ const CustomerSlice = createSlice({
     getdraftlist: [],
     adddraft: [],
     jobdocumentaction: [],
+    editmissinglog: [],
+    editquery: [],
     
   },
   reducers: {},
@@ -726,6 +765,29 @@ const CustomerSlice = createSlice({
         state.jobdocumentaction = action.payload;
       })
       .addCase(JobDocumentAction.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(EditMissingLog.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(EditMissingLog.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.editmissinglog = action.payload;
+      })
+      .addCase(EditMissingLog.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+
+      .addCase(EditQuery.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(EditQuery.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.editquery = action.payload;
+      })
+      .addCase(EditQuery.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       });

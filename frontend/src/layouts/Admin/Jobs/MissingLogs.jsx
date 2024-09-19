@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Datatable from '../../../Components/ExtraComponents/Datatable';
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { GetMissingLog, AddMissionLog } from '../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { GetMissingLog, AddMissionLog, EditMissingLog } from '../../../ReduxStore/Slice/Customer/CustomerSlice';
 import { getProfile } from '../../../ReduxStore/Slice/Staff/staffSlice';
 import sweatalert from 'sweetalert2';
 import { AddMissionLogErros } from '../../../Utils/Common_Message';
@@ -15,41 +15,46 @@ const MissingLogs = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [addmissinglogs, setAddmissinglogs] = useState(false);
-  const [showEditmissinglogsModal, setShowEditMissinglogsModal] = useState(false); 
+  const [showEditmissinglogsModal, setShowEditMissinglogsModal] = useState(false);
   const [viewmissinglogs, setViewmissinglogs] = useState(false);
   const [getMissingLogListData, setGetMissingLogListData] = useState([]);
   const [getProfileDetails, setGetProfileDetails] = useState([]);
   const [singleMissionData, setSingleMissionData] = useState([]);
   const [getEditData, setEditData] = useState([]);
   const [errors1, setErrors1] = useState({});
- 
+
 
 
   const [missionLogAllInputData, setMissionAllInputLogData] = useState({
     missing_log: "0",
+  
     missing_log_sent_on: new Date().toISOString().substr(0, 10),
     missing_log_prepared_date: null,
     missing_log_reviewed_by: null,
     missing_log_reviewed_date: null,
     missing_log_document: null,
     status: "0",
+    id: null
   });
 
   const resetForm = () => {
     setMissionAllInputLogData({
       ...missionLogAllInputData,
       missing_log: "0",
+    
       missing_log_sent_on: new Date().toISOString().substr(0, 10),
       missing_log_prepared_date: null,
       missing_log_reviewed_date: null,
       missing_log_document: null,
       status: "0",
+      id: null
     });
   };
- 
+
+  console.log("getEditData", getEditData);
 
   useEffect(() => {
-    if (getEditData  && showEditmissinglogsModal) {
+    if (getEditData && showEditmissinglogsModal) {
       setMissionAllInputLogData({
         ...missionLogAllInputData,
         missing_log: getEditData.missing_log,
@@ -59,9 +64,11 @@ const MissingLogs = () => {
         missing_log_reviewed_date: getEditData.missing_log_reviewed_date,
         missing_log_document: getEditData.missing_log_document,
         status: getEditData.status,
+      
+        id: getEditData.id
       });
     }
-  }, [getEditData , showEditmissinglogsModal]);
+  }, [getEditData, showEditmissinglogsModal]);
 
 
 
@@ -103,11 +110,11 @@ const MissingLogs = () => {
     }
     else {
       setMissionAllInputLogData({ ...missionLogAllInputData, [name]: value });
-    } 
+    }
   };
 
 
-   
+
 
 
   const GetMissingLogDetails = async () => {
@@ -186,17 +193,15 @@ const MissingLogs = () => {
   }
 
   const handleEditSubmit = async (e) => {
-    // if (!validateAllFields()) {
-    //   return;
-    // }
-    const req = { action: "add", job_id: location.state.job_id, missionDetails: missionLogAllInputData }
+
+    const req = { action: "add", id: missionLogAllInputData.id, missionDetails: missionLogAllInputData }
     const data = { req: req, authToken: token }
-    await dispatch(AddMissionLog(data))
+    await dispatch(EditMissingLog(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
           GetMissingLogDetails()
-          setAddmissinglogs(false);
+          setShowEditMissinglogsModal(false);
           resetForm();
           sweatalert.fire({
             icon: 'success',
@@ -233,7 +238,7 @@ const MissingLogs = () => {
           <button className="edit-icon" onClick={() => { HandleMissionView(row); setViewmissinglogs(true) }}>
             <i className="fa fa-eye fs-6 text-secondary" />
           </button>
-          <button className="edit-icon" onClick={() =>{setShowEditMissinglogsModal(true); setEditData(row)}}>
+          <button className="edit-icon" onClick={() => { setShowEditMissinglogsModal(true); setEditData(row) }}>
             <i className="ti-pencil" />
           </button>
 
@@ -474,13 +479,12 @@ const MissingLogs = () => {
         btn_2="true"
         btn_name="Save"
         title="Edit Missing Log"
-        hideBtn={false}
-
+        hideBtn={false} 
         handleClose={() => {
           setShowEditMissinglogsModal(false);
           resetForm();
         }}
-        Submit_Function={() => handleEditSubmit()}
+        Submit_Function={() => { handleEditSubmit(); resetForm() }}
       >
         <div className="row">
 
@@ -508,6 +512,7 @@ const MissingLogs = () => {
               )}
             </div>
           </div>
+ 
           <div className="col-lg-6">
             <div className="mb-3">
               <label htmlFor="firstNameinput" className="form-label">

@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Datatable from '../../../Components/ExtraComponents/Datatable';
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { QueryAction, AddQuery } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
+import { QueryAction, AddQuery , EditQuery } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
 import sweatalert from 'sweetalert2';
 
 const Queries = () => {
@@ -25,6 +25,7 @@ const Queries = () => {
     QuerySentDate:new Date().toISOString().substr(0, 10),
     ResponseReceived: null,
     status: "0",
+    id:null,
     FinalQueryResponseReceivedDate: null,
     QueryDocument: null,
   });
@@ -38,6 +39,7 @@ const Queries = () => {
       QuerySentDate: new Date().toISOString().substr(0, 10),
       ResponseReceived: null,
       status: "0",
+      id:null,
       FinalQueryResponseReceivedDate: null,
       QueryDocument: null,
     });
@@ -55,6 +57,7 @@ const Queries = () => {
         status: EditData.status,
         FinalQueryResponseReceivedDate: EditData.final_query_response_received_date,
         QueryDocument: EditData.query_document,
+        id:EditData.id
       });
     }
   }, [EditData , editViewquery]);
@@ -134,6 +137,41 @@ const Queries = () => {
       })
 
   }
+
+  const HandleEditQuery = async () => { 
+    const req = { action: "add", data: AllQueryInputdata }
+    const data = { req: req, authToken: token } 
+    await dispatch(EditQuery(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setAddquery(false)
+          GetQueryAllList()
+          resetForm()
+          sweatalert.fire({
+            icon: 'success',
+            title: response.message,
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 1500
+          });
+        }
+        else {
+          sweatalert.fire({
+            icon: 'error',
+            title: response.message,
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 1500
+          });
+        }
+      })
+      .catch((error) => {
+        return ;
+      })
+
+  }
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -150,9 +188,6 @@ const Queries = () => {
       setAllQueryInputdata({ ...AllQueryInputdata, [name]: value });
     } 
   };
-
-   
-
 
   const columns = [
     // { name: 'Query Title', selector: row => row.query_title, sortable: true },
@@ -428,7 +463,7 @@ const Queries = () => {
         size="lg"
         cancel_btn="true"
         btn_2="true"
-        title="Queries (Last Query Sent on 20/03/2023)"
+        title="Edit Queries (Last Query Sent on 20/03/2023)"
         hideBtn={false}
         btn_name="Save"
         handleClose={() => {
@@ -436,7 +471,7 @@ const Queries = () => {
           resetForm();
           
         }}
-        Submit_Function={() => HandleAddQuery()}
+        Submit_Function={() => HandleEditQuery()}
         Submit_Cancel_Function={() => { setEditViewquery(false);   resetForm(); }}
       >
         <div className="row">

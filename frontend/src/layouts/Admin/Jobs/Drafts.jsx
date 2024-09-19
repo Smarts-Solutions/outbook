@@ -38,7 +38,7 @@ const Drafts = () => {
 
     });
   };
- 
+  
   useEffect(() => {
     if (EditData && showEditModal) {
       setAllDraftInputdata({
@@ -48,9 +48,7 @@ const Drafts = () => {
         updated_amendments: EditData.updated_amendments,
         final_draft_sent_on: EditData.final_draft_sent_on,
         was_it_complete: EditData.was_it_complete,
-        enter_feedback: EditData.enter_feedback,
-
-         
+        enter_feedback: EditData.feedback,   
       });
     }
   }, [EditData , showEditModal]);
