@@ -310,11 +310,7 @@ const addQuerie = async(querie) => {
     let missing_queries_prepared_date = querie.body.missing_queries_prepared_date == 'null' ? null : querie.body.missing_queries_prepared_date
 
   let final_query_response_received_date = querie.body.final_query_response_received_date == 'null' ? null : querie.body.final_query_response_received_date
-
-   
-
-
-
+ 
   try {
     const query = `
      INSERT INTO 
@@ -418,32 +414,32 @@ const getQuerieSingleView = async(querie) => {
     return { status: false, message: 'Error querie .' };
   }
 }
+   
 
 const editQuerie = async (query) => {
-  const { id, queries_remaining, query_title, reviewed_by, query_sent_date, response_received, response } = query.body;
-  const query_document = query.files;
-
-  let missing_queries_prepared_date = querie.body.missing_queries_prepared_date == 'null' ? null : querie.body.missing_queries_prepared_date
-
-  let final_query_response_received_date = querie.body.final_query_response_received_date == 'null' ? null : querie.body.final_query_response_received_date
-
+  const { id, queries_remaining, reviewed_by, query_sent_date, response_received , status } = query.body;
+  const query_document = query.files; 
+   
+  let missing_queries_prepared_date = query.body.missing_queries_prepared_date == 'null' ? null : query.body.missing_queries_prepared_date
+ 
+  let final_query_response_received_date = query.body.final_query_response_received_date == 'null' ? null : query.body.final_query_response_received_date
+  
   try {
     const query = `
      UPDATE 
      queries
      SET
      queries_remaining = ?,
-     query_title = ?,
+     status = ?,
      reviewed_by = ?,
      missing_queries_prepared_date = ?,
      query_sent_date = ?,
      response_received = ?,
-     response = ?,
      final_query_response_received_date = ?
      WHERE 
      id = ?
      `;
-    const [rows] = await pool.execute(query, [queries_remaining, query_title, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, response, final_query_response_received_date, id]);
+    const [rows] = await pool.execute(query, [queries_remaining, status , reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date, id]);
     console.log("rows ", rows)
 
     if (query_document.length > 0) {
@@ -540,6 +536,50 @@ const addDraft = async (draft) => {
       `;
     const [rows] = await pool.execute(query, [job_id,draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete]);
     return { status: true, message: 'Success.', data: rows };
+  } catch (error) {
+    console.log("error ", error)
+    return { status: false, message: 'Error getDraft .' };
+  }
+}
+
+const editDraft = async (draft) => {
+  const { job_id,draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete ,id} = draft.body;
+  try { 
+    let query = `UPDATE drafts SET `;
+    let queryArr = [];
+    let queryData = [];
+    if (job_id) {
+      queryArr.push(`job_id = ?`);
+      queryData.push(job_id);
+    }
+    if (draft_sent_on) {
+      queryArr.push(`draft_sent_on = ?`);
+      queryData.push(draft_sent_on);
+    }
+    if (feedback_received) {
+      queryArr.push(`feedback_received = ?`);
+      queryData.push(feedback_received);
+    }
+    if (updated_amendment) { 
+
+      queryArr.push(`updated_amendment = ?`);
+      queryData.push(updated_amendment);
+    }
+    if (feedback) {
+      queryArr.push(`feedback = ?`);
+      queryData.push(feedback);
+    }
+    if (was_it_complete) {
+      queryArr.push(`was_it_complete = ?`);
+      queryData.push(was_it_complete);
+    }
+    query += queryArr.join(', ');
+    query += ` WHERE id = ?`;
+    queryData.push(id); 
+    const [rows] = await pool.execute(query, queryData);
+    return { status: true, message: 'Success.', data: rows };
+
+
   } catch (error) {
     console.log("error ", error)
     return { status: false, message: 'Error getDraft .' };
@@ -646,6 +686,7 @@ module.exports = {
   getDraftSingleView,
   addJobDocument,
   getJobDocument,
-  deleteJobDocument
+  deleteJobDocument,
+  editDraft
 
 };

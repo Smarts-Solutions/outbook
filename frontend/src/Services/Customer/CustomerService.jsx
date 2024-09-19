@@ -388,7 +388,7 @@ export async function EDIT_QUERY(data, token) {
   try { 
       
     const formData = new FormData();
-    formData.append('id', data.data.id);
+    formData.append('id', Number(data.data.id));
     formData.append('queries_remaining', data.data.QueriesRemaining);
     // formData.append('query_title', data.data.QueryTitle);
     formData.append('reviewed_by', data.data.ReviewedBy); 
@@ -448,6 +448,17 @@ export async function ADD_DRAFT(data, token) {
   }
 }
 
+export async function EDIT_DRAFT(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}editDraft`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
 export async function JOBDOCUMENT_ACTION(data, token) {
   try {
     const res = await axios.post(`${Config.base_url}JobDocumentAction`, data, {

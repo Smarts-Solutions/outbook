@@ -25,6 +25,7 @@ import {
   JOBDOCUMENT_ACTION,
   EDIT_MISSION_LOG,
   EDIT_QUERY,
+  EDIT_DRAFT,
    
 } from "../../../Services/Customer/CustomerService";
 
@@ -454,6 +455,22 @@ export const AddDraft = createAsyncThunk("addDraft", async (data) => {
       StaffUserId: StaffUserId.id,
     };
     const res = await ADD_DRAFT(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const EditDraft = createAsyncThunk("editDraft", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await EDIT_DRAFT(updatedReq, authToken);
     return await res;
   } catch (err) {
     throw err;

@@ -123,6 +123,10 @@ const addDraft = async (draft) => {
   return taskTimeSheetModel.addDraft(draft);
 }
 
+const editDraft = async (draft) => {
+  return taskTimeSheetModel.editDraft(draft);
+}
+
 //JobDocument
 const jobDocumentAction = async (jobDocument) => {
   const {action} = jobDocument
@@ -161,6 +165,6 @@ module.exports = {
   getDraft,
   addDraft,
   jobDocumentAction,
-  addJobDocument
-
+  addJobDocument,
+  editDraft
  };

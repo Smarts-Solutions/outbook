@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import Datatable from '../../../Components/ExtraComponents/Datatable';
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { DraftAction , AddDraft } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
+import { DraftAction , AddDraft , EditDraft } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
 import { useLocation } from "react-router-dom";
 import sweatalert from 'sweetalert2';
+import { all } from "axios";
 
 const Drafts = () => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -24,6 +25,7 @@ const Drafts = () => {
     final_draft_sent_on: null,
     was_it_complete: '0',
     enter_feedback: null,
+    id: null
   });
 
   const resetForm = () => {
@@ -35,6 +37,7 @@ const Drafts = () => {
       final_draft_sent_on: null,
       was_it_complete: '0',
       enter_feedback: null,
+      id: null
 
     });
   };
@@ -45,10 +48,11 @@ const Drafts = () => {
         ...AllDraftInputdata,
         draft_sent_on: EditData.draft_sent_on,
         feedback_received: EditData.feedback_received,
-        updated_amendments: EditData.updated_amendments,
+        updated_amendments: EditData.updated_amendment,
         final_draft_sent_on: EditData.final_draft_sent_on,
         was_it_complete: EditData.was_it_complete,
-        enter_feedback: EditData.feedback,   
+        enter_feedback: EditData.feedback,
+        id: EditData.id   
       });
     }
   }, [EditData , showEditModal]);
@@ -118,6 +122,49 @@ const Drafts = () => {
       .then((response) => {
         if (response.status) {
           setAdddraft(false)
+          GetAllDraftList()
+          resetForm()
+          sweatalert.fire({
+            icon: 'success',
+            title: response.message,
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 1500
+          });
+        }
+        else {
+          sweatalert.fire({
+            icon: 'error',
+            title: response.message,
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 1500
+          });
+        }
+      })
+      .catch((error) => {
+        return ;
+      })
+
+  }
+
+  const HandleSubmitEditDraft = async () => {
+    const req = {
+      id: AllDraftInputdata.id,
+      draft_sent_on: AllDraftInputdata.draft_sent_on,
+      // final_draft_sent_on: AllDraftInputdata.final_draft_sent_on,
+      feedback_received: AllDraftInputdata.feedback_received,
+      updated_amendment: AllDraftInputdata.updated_amendments,
+      feedback: AllDraftInputdata.enter_feedback,
+      was_it_complete: AllDraftInputdata.was_it_complete,
+
+    }
+    const data = { req: req, authToken: token }
+    await dispatch(EditDraft(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setShowEditModal(false)
           GetAllDraftList()
           resetForm()
           sweatalert.fire({
@@ -375,11 +422,10 @@ const Drafts = () => {
         handleClose={() => {
           setShowEditModal(false);
           resetForm();
-          setErrors({});
           
         }}
-        Submit_Function={() => HandleSubmitDraft()}
-        Submit_Cancel_Function={() => { setShowEditModal(false); resetForm(); setErrors({}); }}
+        Submit_Function={() => HandleSubmitEditDraft()}
+        Submit_Cancel_Function={() => { setShowEditModal(false); resetForm();  }}
       >
         <>
           <div className="row">

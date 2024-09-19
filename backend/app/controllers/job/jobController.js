@@ -213,6 +213,20 @@ const addDraft = async (req,res) => {
  }
 }
 
+const editDraft = async (req,res) => {
+  try {
+    const { ...draft } = req;
+    const result = await jobService.editDraft(draft);
+    if(!result.status){
+     return  res.status(200).json({ status: false, message: result.message });  
+     }else{
+     return  res.status(200).json({ status: true, message: result.message , data : result.data});
+     }
+ } catch (error) {
+   res.status(500).json({ status:false, message: error.message});
+ }
+}
+
 // JobDocument
 const jobDocumentAction = async (req,res) => {
   try {
@@ -259,5 +273,6 @@ module.exports = {
   getDraft,
   addDraft,
   jobDocumentAction,
-  addJobDocument
+  addJobDocument,
+  editDraft
 };

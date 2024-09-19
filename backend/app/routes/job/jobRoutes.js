@@ -29,6 +29,7 @@ router.post('/editQuerie',verifyToken , uploadMultiple , jobController.editQueri
 //Draft
 router.post('/getDraft',verifyToken, jobController.getDraft);
 router.post('/addDraft',verifyToken, jobController.addDraft);
+router.post('/editDraft',verifyToken, jobController.editDraft);
 
 // JobDocument
 router.post('/jobDocumentAction',verifyToken, jobController.jobDocumentAction);

@@ -46,6 +46,8 @@ const Queries = () => {
   };
  
 
+  console.log("EditData", EditData);
+
   useEffect(() => {
     if (EditData && editViewquery) {
       setAllQueryInputdata({
@@ -245,7 +247,7 @@ const Queries = () => {
         size="lg"
         cancel_btn="true"
         btn_2="true"
-        title="Queries (Last Query Sent on 20/03/2023)"
+        title={`Queries ${AllQueryList?.length > 0 ? `(Last Query Sent on ${AllQueryList[0].query_sent_date})` : ""}`}
         hideBtn={false}
         btn_name="Save"
         handleClose={() => {
@@ -463,7 +465,7 @@ const Queries = () => {
         size="lg"
         cancel_btn="true"
         btn_2="true"
-        title="Edit Queries (Last Query Sent on 20/03/2023)"
+        title={`Edit Queries ${AllQueryList?.length > 0 ? `(Last Query Sent on ${AllQueryList[0].query_sent_date})` : ""}`}
         hideBtn={false}
         btn_name="Save"
         handleClose={() => {
