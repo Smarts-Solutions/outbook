@@ -90,8 +90,7 @@ const Setting = () => {
   const [serviceDataAll, setServiceDataAll] = useState({
     loading: true,
     data: [],
-  });
-  const [addService, setAddService] = useState("");
+  }); 
   const [modalData, setModalData] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [getShowTabId, setShowTabId] = useState("1");
@@ -867,6 +866,67 @@ const Setting = () => {
       : []),
   ];
 
+  const CheckListColumns = [
+    {
+      name: "Checklist Name",
+      cell: (row) => (
+        <div>
+          {/* <a
+            onClick={() => HandleClientView(row)}
+            style={{ cursor: "pointer", color: "#26bdf0" }}
+          > */}
+            {row.check_list_name}
+          {/* </a> */}
+        </div>
+      ),
+      selector: (row) => row.trading_name,
+      sortable: true,
+    },
+
+    {
+      name: "Service Type",
+      selector: (row) => row.service_name,
+      sortable: true,
+    },
+    {
+      name: "Job Type",
+      selector: (row) => row.job_type_type, sortable: true,
+      width: "120px"
+    }
+    ,
+    {
+      name: "Client Type",
+      selector: (row) => row.client_type_type,
+      sortable: true,
+      width: "400px",
+    },
+    {
+      name: "Status",
+      selector: (row) => (row.status == "1" ? "Active" : "Deactive"),
+      sortable: true,
+      width: "100px",
+
+    },
+    // {
+    //   name: "Actions",
+    //   cell: (row) => (
+    //     <div>
+    //       <button className="edit-icon" onClick={() => EditChecklist(row)}>
+    //         {" "}
+    //         <i className="ti-pencil" />
+    //       </button>
+    //       <button className="delete-icon" onClick={() => ChecklistDelete(row)}>
+    //         {" "}
+    //         <i className="ti-trash text-danger" />
+    //       </button>
+    //     </div>
+    //   ),
+    //   ignoreRowClick: true,
+    //   allowOverflow: true,
+    //   button: true,
+    // },
+  ];
+
   const handleJobType = (row) => {
     navigate("/admin/add/jobtype", { state: { Id: row.id } });
   };
@@ -1377,6 +1437,10 @@ const Setting = () => {
       });
   };
 
+  const HandleAddCheckList = () => {
+    navigate("/admin/setting/checklist");
+  };
+
   const tabsArr = [
     { id: "1", label: "Staff Role" },
     { id: "2", label: "Customer Contact Person Role" },
@@ -1386,6 +1450,8 @@ const Setting = () => {
     { id: "6", label: "Country" },
     { id: "7", label: "Incorporation" },
     { id: "8", label: "Source" },
+    { id: "9", label: "CreateCheckList" },
+
   ];
 
   return (
@@ -1705,6 +1771,41 @@ const Setting = () => {
                 </div>
               </div>
             </div>
+
+            <div
+              className={`tab-pane fade ${
+                getShowTabId === "9" ? "show active" : ""
+              }`}
+            >
+              <div className="report-data">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div className="tab-title">
+                    <h3 className="mt-0">CheckList</h3>
+                  </div>
+                  {!showSettingInsertTab ? null : (
+                    <div>
+                      <button
+                        type="button"
+                        className="btn btn-info text-white float-end"
+                        onClick={() => HandleAddCheckList()}
+                      >
+                        {" "}
+                        <i className="fa fa-plus" /> Add CheckList
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className="datatable-wrapper">
+                  <Datatable
+                    filter={true}
+                    columns={CheckListColumns}
+                    data={[]}
+                  />
+                </div>
+              </div>
+            </div>
+
+            
           </div>
         </div>
 

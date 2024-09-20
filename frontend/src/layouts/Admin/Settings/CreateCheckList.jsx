@@ -8,6 +8,9 @@ import {
   getList,
   addChecklists,
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
+
+import {Get_Service} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+
 import sweatalert from "sweetalert2";
 import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
 
@@ -41,6 +44,7 @@ const CreateCheckList = () => {
     status: "",
   });
 
+ 
   const options = [
     { key: "1", label: "Sole Trader" },
     { key: "2", label: "Company" },
@@ -77,6 +81,26 @@ const CreateCheckList = () => {
         return;
       });
   }, [formData.customer_id, dispatch, token]);
+
+  useEffect(() => {
+    getAllServices();
+    }, []);
+    
+  const getAllServices = async () => {
+    const req = { action: "get" };
+    const data = { req, authToken: token };
+    await dispatch(Get_Service(data))
+        .unwrap()
+        .then((response) => {
+            if (response.status) {
+                setFormData((data) => ({ ...data, service_id: response.data }));
+            }
+        })
+        .catch((error) => {
+            return;
+        });
+    };
+
 
   const fieldErrors = {
     service_id: "Please Select Service Type",
@@ -191,8 +215,12 @@ const CreateCheckList = () => {
   };
 
   const getJobTypeData = async (service_id) => {
+
+
     const req = { service_id, action: "get" };
     const data = { req, authToken: token };
+
+    console.log("data", data);
     await dispatch(JobType(data))
       .unwrap()
       .then((response) => {
@@ -274,6 +302,7 @@ const CreateCheckList = () => {
     };
 
      
+    console.log("req", req);
     return 
 
     const data = { req, authToken: token };
@@ -357,10 +386,10 @@ const CreateCheckList = () => {
                     {formData.service_id &&
                       formData.service_id.map((service) => (
                         <option
-                          key={service.service_id}
-                          value={service.service_id}
+                          key={service.id}
+                          value={service.id}
                         >
-                          {service.service_name}
+                          {service.name}
                         </option>
                       ))}
                   </select>
