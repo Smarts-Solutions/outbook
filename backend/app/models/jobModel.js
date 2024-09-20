@@ -3,8 +3,7 @@ const pool = require('../config/database');
 const getAddJobData = async (job) => {
 
   const { customer_id } = job;
-
-
+  
   // customer Client
   try {
     const queryCustomerWithClient = `
