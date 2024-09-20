@@ -49,9 +49,7 @@ const MissingLogs = () => {
       status: "0",
       id: null
     });
-  };
-
-  console.log("getEditData", getEditData);
+  }; 
 
   useEffect(() => {
     if (getEditData && showEditmissinglogsModal) {
