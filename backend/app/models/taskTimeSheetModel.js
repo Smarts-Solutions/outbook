@@ -117,13 +117,45 @@ const updateJobTimeTotalHours = async (timeSheet) => {
 }
 
 // MissingLog
-const addMissingLog = async (missingLog) => {
-  const { job_id, missing_log, missing_log_sent_on ,missing_log_reviewed_by, status } = missingLog.body;
 
+async function generateNextUniqueCode(module,job_id) {
+  
+  console.log("module",module)
+  console.log("job_id",job_id)
+  
+  const [rows] = await pool.execute('SELECT missing_log_title FROM '+module+' WHERE job_id = '+job_id+' ORDER BY id DESC LIMIT 1');
+
+  console.log("rows ",rows)
+  return
+  let newCode = '00001'; // Default code if table is empty
+  if (rows.length > 0) {
+    const inputString = rows[0].job_id;
+    const parts = inputString.split('_');
+    const lastPart = parts[parts.length - 1];
+    const lastCode = lastPart;
+    const nextCode = parseInt(lastCode, 10) + 1;
+
+    newCode = "0000" + nextCode
+    // newCode = nextCode.toString().padStart(5, '0');
+  }
+
+  return newCode;
+}
+
+
+const addMissingLog = async (missingLog) => {
+ 
+  
+  const { job_id, missing_log, missing_log_sent_on ,missing_log_reviewed_by, status } = missingLog.body;
+  
+  // const UniqueNo = await generateNextUniqueCode('missing_logs',job_id)
+
+  // console.log("UniqueNo",UniqueNo)
+
+  //  return
   let missing_log_prepared_date = missingLog.body.missing_log_prepared_date == 'null' ? null : missingLog.body.missing_log_prepared_date
 
   let missing_log_reviewed_date = missingLog.body.missing_log_reviewed_date == 'null' ? null : missingLog.body.missing_log_reviewed_date
-
 
   const missing_log_document = missingLog.files;
 
