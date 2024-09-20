@@ -453,7 +453,7 @@ const Service = () => {
                                   id={`heading-${index}`}
                                 >
                                   <button
-                                    className="accordion-button collapsed"
+                                    className="accordion-button collapsed fw-bold"
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target={`#collapse-${index}`}
@@ -517,7 +517,7 @@ const Service = () => {
                                                             <div className="col-auto">
                                                               <label
                                                                 htmlFor="uploadButton"
-                                                                className="btn btn-secondary"
+                                                                className=""
                                                               >
                                                                 {/* <i className="fas fa-upload me-2"></i>
                                                                 Upload File */}
@@ -569,7 +569,7 @@ const Service = () => {
                                                                 onClick={
                                                                   handleDownload
                                                                 }
-                                                                className="btn btn-primary"
+                                                                className="btn btn-outline-info"
                                                               >
                                                                 <i className="fas fa-download me-2"></i>
                                                                 Download Sample
@@ -587,7 +587,7 @@ const Service = () => {
                                                           </span> */}
                                                         </div>
 
-                                                        <table className="table table-bordered table-striped">
+                                                        <table className="table table-light table-head-blue">
                                                           <thead className="table-primary">
                                                             <tr>
                                                               <th>
@@ -697,7 +697,7 @@ const Service = () => {
                                                                             }
                                                                           >
                                                                             Delete
-                                                                            <i className="ms-1 fa fa-trash"></i>
+                                                                            <i className="ms-1 ti-trash"></i>
                                                                           </button>
                                                                         </td>
                                                                       </tr>
