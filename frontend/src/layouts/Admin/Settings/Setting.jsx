@@ -762,7 +762,7 @@ const Setting = () => {
   ];
 
    const columnincorporation = [
-    { name: "Incorporation Name", selector: (row) => row.name, sortable: true },
+    { name: "Incorporation Name", selector: (row) => row.name, sortable: true ,width:'80%'},
     {
       name: "Status",
       cell: (row) => (
@@ -807,7 +807,7 @@ const Setting = () => {
       name: "Source Name",
       selector: (row) => row.name,
       sortable: true,
-      width: "70%",
+      width: "65%",
     },
     {
       name: "Status",
@@ -845,7 +845,7 @@ const Setting = () => {
                     onClick={() => handleDelete(row, "8")}
                   >
                     {" "}
-                    <i className="ti-trash" />
+                    <i className="ti-trash text-danger" />
                   </button>
                 )}
                 {showSettingInsertTab && (
@@ -861,7 +861,7 @@ const Setting = () => {
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
-            width: "20%",
+            width: "25%",
           },
         ]
       : []),

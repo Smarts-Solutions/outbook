@@ -480,7 +480,7 @@ const Service = () => {
                                   id={`heading-${index}`}
                                 >
                                   <button
-                                    className="accordion-button collapsed"
+                                    className="accordion-button collapsed fw-bold "
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target={`#collapse-${index}`}
@@ -593,7 +593,7 @@ const Service = () => {
                                                                 onClick={
                                                                   handleDownload
                                                                 }
-                                                                className="btn btn-primary"
+                                                                className="btn btn-outline-info"
                                                               >
                                                                 <i className="fas fa-download me-2"></i>
                                                                 Download Sample

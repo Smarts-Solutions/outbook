@@ -936,7 +936,7 @@ const Engagement = () => {
                       onChange={handleInputChange}
                     />
                     {formErrors.customerJoiningDate && (
-                      <span className="error-text">
+                      <span className="error-text d-block">
                         {formErrors.customerJoiningDate}
                       </span>
                     )}
@@ -958,7 +958,7 @@ const Engagement = () => {
                         ))}
                     </select>
                     {formErrors.customerSource && (
-                      <span className="error-text">
+                      <span className="error-text d-block">
                         {formErrors.customerSource}
                       </span>
                     )}
@@ -984,7 +984,7 @@ const Engagement = () => {
                         ))}
                     </select>
                     {formErrors.customerSubSource && (
-                      <span className="error-text">
+                      <span className="error-text d-block">
                         {formErrors.customerSubSource}
                       </span>
                     )}
