@@ -7,8 +7,9 @@ import MultiStepFormContext from "./MultiStepFormContext";
 import { EDIT_CUSTOMER } from "../../../../Utils/Common_Message";
 import { Email_regex } from "../../../../Utils/Common_regex";
 import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
-import { PersonRole,Country,IncorporationApi} from "../../../../ReduxStore/Slice/Settings/settingSlice";
-import { AddCustomer,
+import { PersonRole, Country, IncorporationApi } from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import {
+  AddCustomer,
   GetAllCompany,
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
@@ -27,9 +28,13 @@ const Information = ({ id, pageStatus }) => {
   const [customerType, setCustomerType] = useState("1");
   const [ManagerType, setManagerType] = useState("");
   const [searchItem, setSearchItem] = useState("");
+  const [SearchResidentialAddress, setSearchResidentialAddress] = useState("");
+
   const [getAllSearchCompany, setGetAllSearchCompany] = useState([]);
   const [getSearchDetails, setSearchDetails] = useState("");
   const [showDropdown, setShowDropdown] = useState(true);
+  const [ShowResidentialAddressDropdown, setShowResidentialAddressDropdown] = useState(true);
+
   const [errors1, setErrors1] = useState({});
   const [errors2, setErrors2] = useState({});
   const [errors3, setErrors3] = useState({});
@@ -161,7 +166,7 @@ const Information = ({ id, pageStatus }) => {
   }, [searchItem]);
 
 
-  
+
   useEffect(() => {
     if (getSearchDetails && getSearchDetails.length > 0) {
       // Update company details
@@ -180,7 +185,7 @@ const Information = ({ id, pageStatus }) => {
         TradingAddress: getSearchDetails[0].address_snippet,
 
       }));
-   
+
       const newErrors = { ...errors2 };
       if (getSearchDetails[0].title) delete newErrors["CompanyName"];
       if (getSearchDetails[0].company_type) delete newErrors["EntityType"];
@@ -191,11 +196,11 @@ const Information = ({ id, pageStatus }) => {
       if (getSearchDetails[0].description) delete newErrors["IncorporationIn"];
       if (getSearchDetails[0].title) delete newErrors["TradingName"];
       if (getSearchDetails[0].address_snippet) delete newErrors["TradingAddress"];
-  
+
       setErrors2(newErrors);
     }
   }, [getSearchDetails]);
-  
+
 
   //  Add company contact
   const handleAddContact = () => {
@@ -339,7 +344,7 @@ const Information = ({ id, pageStatus }) => {
         return;
       }
     }
-    validate2(name, value,1);
+    validate2(name, value, 1);
     setCompanyDetails({ ...getCompanyDetails, [name]: value });
   };
 
@@ -425,7 +430,7 @@ const Information = ({ id, pageStatus }) => {
       }
     }
 
-    
+
     // Update state only if there are errors
     if (Object.keys(newErrors).length !== 0) {
       setErrors1((prevErrors) => ({
@@ -654,13 +659,13 @@ const Information = ({ id, pageStatus }) => {
 
   // submit function
   const handleSubmit = async () => {
-    if(ManagerType == ""){
+    if (ManagerType == "") {
       setAccountMangerIdErr("Please Select Manager");
       const errorElement = document.getElementById("accountManager");
       if (errorElement) {
         errorElement.scrollIntoView({ behavior: 'smooth' });
       }
-      return; 
+      return;
     }
     if (customerType == 1 && ManagerType != "") {
       if (validateAllFields(1)) {
@@ -887,7 +892,7 @@ const Information = ({ id, pageStatus }) => {
     await dispatch(IncorporationApi(data))
       .unwrap()
       .then(async (response) => {
-      
+
         if (response.status) {
           setIncorporationDataAll(response.data);
         } else {
@@ -1221,7 +1226,7 @@ const Information = ({ id, pageStatus }) => {
                             </div>
                           </div>
 
-                          <div className="col-lg-4">
+                          {/* <div className="col-lg-4">
                             <div className="mb-3">
                               <label className="form-label">
                                 Residential Address
@@ -1242,7 +1247,56 @@ const Information = ({ id, pageStatus }) => {
                                 </div>
                               )}
                             </div>
+                          </div> */}
+
+                          <div className="col-lg-4">
+                            <div className="mb-3">
+                              <div className="position-relative">
+                                <label className="form-label">
+                                  Residential Address
+                                  <span style={{ color: "red" }}>*</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  placeholder=" Search Residential Address"
+                                  name="residentialAddress"
+                                  id="residentialAddress"
+                                  onChange={(e) => setSearchResidentialAddress(e.target.value)}
+                                  value={SearchResidentialAddress}
+                                  onClick={() => setShowResidentialAddressDropdown(true)}
+                                  style={{ cursor: "pointer" }}
+                                />
+                                {getAllSearchCompany.length > 0 &&
+                                  ShowResidentialAddressDropdown ? (
+                                  <div className="dropdown-list">
+                                    {getAllSearchCompany &&
+                                      getAllSearchCompany.map(
+                                        (company, index) => (
+                                          <div
+                                            key={index}
+                                            onClick={() => {
+                                              setSearchResidentialAddress(company.title);
+                                              setShowResidentialAddressDropdown(false);
+                                            }}
+                                            style={{
+                                              cursor: "pointer",
+                                              padding: "8px 0",
+                                            }}
+                                          >
+                                            {company.title}
+                                          </div>
+                                        )
+                                      )}
+                                  </div>
+                                ) : (
+                                  ""
+                                )}
+                              </div>
+                            </div>
                           </div>
+
+
                         </div>
                       </div>
                     </div>
@@ -1434,7 +1488,7 @@ const Information = ({ id, pageStatus }) => {
                                   value={getCompanyDetails.IncorporationIn}
                                 /> */}
 
-<select
+                                <select
                                   className="form-select"
                                   name="IncorporationIn"
                                   id="IncorporationIn"
@@ -2064,7 +2118,7 @@ const Information = ({ id, pageStatus }) => {
                                                   contacts1.length === 1
                                                 }
                                               >
-                                               <i className="ti-trash text-danger"></i>
+                                                <i className="ti-trash text-danger"></i>
                                               </button>
                                             </div>
                                           )}

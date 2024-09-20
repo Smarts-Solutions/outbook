@@ -597,9 +597,10 @@ const ClientEdit = () => {
             timer: 1500,
           });
           setTimeout(() => {
-            navigate("/admin/Clientlist", {
-              state: { id: location.state.id },
-            });
+            window.history.back();
+            // navigate("/admin/Clientlist", {
+            //   state: { id: location.state.id },
+            // });
           }, 1500);
         } else {
           Swal.fire({
@@ -787,9 +788,7 @@ const ClientEdit = () => {
   };
 
 
-  const HandleCancel = () => {
-    navigate("/admin/Clientlist", { state: { id: location.state.id } });
-  };
+  const HandleCancel = () => { window.history.back()};
 
   return (
     <div>
