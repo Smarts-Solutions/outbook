@@ -1450,7 +1450,7 @@ const Setting = () => {
     { id: "6", label: "Country" },
     { id: "7", label: "Incorporation" },
     { id: "8", label: "Source" },
-    { id: "9", label: "CreateCheckList" },
+    { id: "9", label: "Checklist" },
 
   ];
 
