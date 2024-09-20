@@ -121,6 +121,9 @@ const getTask = async (task) => {
 };
 
 const addChecklist = async (checklist) => {
+
+
+
   const {
     customer_id,
     service_id,
@@ -130,6 +133,16 @@ const addChecklist = async (checklist) => {
     status,
     task,
   } = checklist;
+
+  // console.log("customer_id",customer_id);
+  // console.log("service_id",service_id);
+  // console.log("job_type_id",job_type_id);
+  // console.log("client_type_id",client_type_id);
+  // console.log("check_list_name",check_list_name);
+  // console.log("status",status);
+  // console.log("task",task);
+
+  
 
   try {
     const query = `
