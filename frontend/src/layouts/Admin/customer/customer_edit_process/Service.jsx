@@ -376,6 +376,8 @@ const Service = () => {
   };
 
   const handleDelete = (id) => {
+
+    
     setTasksData((prev) => prev.filter((task) => task.id !== id));
   };
 
