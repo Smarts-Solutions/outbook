@@ -326,60 +326,80 @@ const Service = () => {
 
       let file = e.target.files[0];
       setFileName(file.name);
-     
       if (file) {
         let reader = new FileReader();
-      
+
         reader.onload = (event) => {
           let data = new Uint8Array(event.target.result);
           let workbook = XLSX.read(data, { type: "array" });
-      
+
           let sheetName = workbook.SheetNames[0];
           let worksheet = workbook.Sheets[sheetName];
-      
+
           let rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-      
+
           let headers = rawData[0];
           let rows = rawData.slice(1);
-      
-          let tasks = [];
-      
+
+          let result = [];
+          let currentId = null;
+          let currentChecklistName = null;
+          let taskList = [];
+
           rows.forEach((row) => {
+            let idValue = row[headers.indexOf("id")];
             let taskName = row[headers.indexOf("Task Name")] || "";
             let budgetHours = row[headers.indexOf("Budget Hours")] || "00";
             let budgetMinutes = row[headers.indexOf("Budget Minutes")] || "00";
-      
+
             if (budgetMinutes > 59) {
               let hours = Math.floor(budgetMinutes / 60);
               let minutes = budgetMinutes % 60;
               budgetHours = parseInt(budgetHours) + hours;
               budgetMinutes = minutes;
             }
-      
+
+            if (idValue) {
+              if (currentId !== null) {
+                result.push({
+                  id: currentId,
+                  checklistName: currentChecklistName,
+                  Task: taskList,
+                });
+              }
+
+              currentId = idValue;
+              currentChecklistName = file.name.split(".")[0];;
+              taskList = [];
+            }
+
             if (taskName) {
-              tasks.push({
+              taskList.push({
                 TaskName: taskName,
-                BudgetHour: `${budgetHours}:${budgetMinutes}`,
+                BudgetHour: budgetHours + ":" + budgetMinutes,
               });
             }
           });
-      
-          setTasksListData((prev) => [...prev, ...tasks]);
-      
-          console.log("rows", rows);
-          console.log("tasksListData", tasks.length);
-    
+
+          // Push the last item
+          if (currentId !== null) {
+            result.push({
+              id: currentId,
+              checklistName: currentChecklistName,
+              Task: taskList,
+            });
+          }
           setTasksData((prev) => [
             ...prev,
-            {
+            ...result.map((item) => ({
+              ...item,
               JobTypeId: id,
               serviceId: serviceId,
-              Task: tasks,
-              checklistName: file.name.split(".")[0],
-            },
+            })),
           ]);
         };
-      
+
+        // Read the file as an ArrayBuffer
         reader.readAsArrayBuffer(file);
       }
     }

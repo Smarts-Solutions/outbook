@@ -41,8 +41,6 @@ const Service = () => {
     loading: true,
     data: [],
   });
-  const [tasksListData, setTasksListData] = useState([]);
-
   const [uploadMessage, uploadSetMessage] = useState("");
   const [uploadMessage1, uploadSetMessage1] = useState([]);
 
@@ -95,8 +93,8 @@ const Service = () => {
           service_id: service.service_id,
           account_manager_ids: service.account_manager_ids
             ? service.account_manager_ids.map((id) =>
-              staffDataAll.data.find((staff) => staff.id === id)
-            )
+                staffDataAll.data.find((staff) => staff.id === id)
+              )
             : [],
         }))
       );
@@ -176,11 +174,11 @@ const Service = () => {
         .map((manager) =>
           manager.service_id === serviceId
             ? {
-              ...manager,
-              account_manager_ids: manager.account_manager_ids.filter(
-                (accountManager) => accountManager.id !== id
-              ),
-            }
+                ...manager,
+                account_manager_ids: manager.account_manager_ids.filter(
+                  (accountManager) => accountManager.id !== id
+                ),
+              }
             : manager
         )
         .filter((manager) => manager.account_manager_ids.length > 0)
@@ -297,68 +295,89 @@ const Service = () => {
         },
       ]);
 
-      let file = e.target.files[0];
+      let file = e.target.files[0]; 
       setFileName(file.name);
       if (file) {
         let reader = new FileReader();
-      
+
         reader.onload = (event) => {
           let data = new Uint8Array(event.target.result);
           let workbook = XLSX.read(data, { type: "array" });
-      
+
           let sheetName = workbook.SheetNames[0];
           let worksheet = workbook.Sheets[sheetName];
-      
+
           let rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-      
+
           let headers = rawData[0];
           let rows = rawData.slice(1);
-      
-          let tasks = [];
-      
-          rows.forEach((row) => {
+
+          let result = [];
+          let currentId = null;
+          let currentChecklistName = null;
+          let taskList = []; 
+          rows.forEach((row, i) => {
+            let idValue = i + 1;
             let taskName = row[headers.indexOf("Task Name")] || "";
             let budgetHours = row[headers.indexOf("Budget Hours")] || "00";
             let budgetMinutes = row[headers.indexOf("Budget Minutes")] || "00";
-      
+
             if (budgetMinutes > 59) {
               let hours = Math.floor(budgetMinutes / 60);
               let minutes = budgetMinutes % 60;
               budgetHours = parseInt(budgetHours) + hours;
               budgetMinutes = minutes;
             }
-      
+
+            if (idValue) {
+              if (currentId !== null) {
+                result.push({
+                  id: currentId,
+                  checklistName: currentChecklistName,
+                  Task: taskList,
+                });
+              }
+
+              currentId = idValue;
+              currentChecklistName = file.name.split(".")[0];
+              taskList = [];
+            }
+
             if (taskName) {
-              tasks.push({
+              taskList.push({
                 TaskName: taskName,
-                BudgetHour: `${budgetHours}:${budgetMinutes}`,
+                BudgetHour: budgetHours + ":" + budgetMinutes,
               });
             }
           });
-      
-          setTasksListData((prev) => [...prev, ...tasks]);
-      
-          console.log("rows", rows);
-          console.log("tasksListData", tasks.length);
-    
+
+          // Push the last item
+          if (currentId !== null) {
+            result.push({
+              id: currentId,
+              checklistName: currentChecklistName,
+              Task: taskList,
+            });
+          }
           setTasksData((prev) => [
             ...prev,
-            {
+            ...result.map((item) => ({
+              ...item,
               JobTypeId: id,
               serviceId: serviceId,
-              Task: tasks,
-              checklistName: file.name.split(".")[0],
-            },
+            })),
           ]);
         };
-      
+
+        // Read the file as an ArrayBuffer
         reader.readAsArrayBuffer(file);
       }
-      
     }
   };
 
   const handleDelete = (id) => {
+
+    
     setTasksData((prev) => prev.filter((task) => task.id !== id));
   };
 
@@ -384,7 +403,7 @@ const Service = () => {
   const handleSearchChange = (e) => {
     setSearchValue(e.target.value);
   };
-
+ 
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
@@ -587,9 +606,9 @@ const Service = () => {
                                                                 (TaskShow) => {
                                                                   if (
                                                                     data1.id ==
-                                                                    TaskShow.JobTypeId &&
+                                                                      TaskShow.JobTypeId &&
                                                                     item.id ==
-                                                                    TaskShow.serviceId
+                                                                      TaskShow.serviceId
                                                                   ) {
                                                                     return (
                                                                       <tr
