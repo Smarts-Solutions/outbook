@@ -12,9 +12,7 @@ const Documents = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const [uploadfiles, setUploadfiles] = useState(false);
   const [jobDocumentListData, setJobDocumentListData] = useState([]);
-
-  console.log("jobDocumentListData", jobDocumentListData)
-
+ 
   useEffect(() => {
     GetAllDocumentList();
   }, []);
@@ -66,12 +64,6 @@ const Documents = () => {
 
   const handleChangeDocument = (e) => {
   }
- 
-
-
-
-
-
  
 
   return (
@@ -141,7 +133,13 @@ const Documents = () => {
               <div className="card-body">
                 <div className="upload-box" style={{ height: 150 }}> 
                   <div className="dz-message needsclick">
-                    <input type="file"  multiple className="form-control" onChange={handleChangeDocument}></input>
+                    <input 
+                    type="file" 
+                     multiple 
+                     id="upload_document"
+                     name="upload_document" 
+                     className="form-control" 
+                     onChange={(e)=>handleChangeDocument(e)}></input>
                     <div
                       className="mb-3"
                       style={{
