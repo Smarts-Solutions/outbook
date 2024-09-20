@@ -274,7 +274,7 @@ const CreateCheckList = () => {
     };
 
      
-    return 
+    
 
     const data = { req, authToken: token };
     await dispatch(addChecklists(data))
@@ -300,9 +300,7 @@ const CreateCheckList = () => {
           setTasks([{ task_id: "", task_name: "", budgeted_hour: "" }]);
 
           // Redirect to Clientlist
-          navigate("/admin/Clientlist", {
-            state: { id: location.state.id, route: "Checklist" },
-          });
+         window.history.back()
         }
       })
       .catch((error) => {
@@ -329,9 +327,10 @@ const CreateCheckList = () => {
             type="button"
             className="btn p-0"
             onClick={() =>
-              navigate("/admin/Clientlist", {
-                state: { id: location.state.id, route: "Checklist" },
-              })
+              // navigate("/admin/Clientlist", {
+              //   state: { id: location.state.id, route: "Checklist" },
+              // })
+              window.history.back()
             }
           >
             <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
@@ -529,9 +528,10 @@ const CreateCheckList = () => {
             <button
               className="btn btn-secondary "
               onClick={(e) =>
-                navigate("/admin/Clientlist", {
-                  state: { id: location.state.id, route: "Checklist" },
-                })
+                // navigate("/admin/Clientlist", {
+                //   state: { id: location.state.id, route: "Checklist" },
+                // })
+                window.history.back()
               }
             >
               Cancel

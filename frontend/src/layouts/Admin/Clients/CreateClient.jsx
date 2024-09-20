@@ -694,7 +694,8 @@ const CreateClient = () => {
   };
 
   const HandleCancel = () => {
-    navigate("/admin/Clientlist", { state: { id: location.state.id } });
+   // navigate("/admin/Clientlist", { state: { id: location.state.id } });
+   window.history.back()
   };
 
 
@@ -712,7 +713,8 @@ const CreateClient = () => {
             timer: 1500,
           });
           setTimeout(() => {
-            navigate("/admin/Clientlist", { state: location.state });
+            //navigate("/admin/Clientlist", { state: location.state });
+            window.history.back();
           }, 1500);
         } else {
           Swal.fire({
@@ -894,7 +896,8 @@ const CreateClient = () => {
               timer: 1500,
             });
             setTimeout(() => {
-              navigate("/admin/Clientlist", { state: location.state });
+              // navigate("/admin/Clientlist", { state: location.state });
+              window.history.back();
             }, 1500);
           } else {
             Swal.fire({

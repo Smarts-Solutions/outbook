@@ -281,9 +281,10 @@ const CreateCheckList = () => {
             status: "",
           });
           setTasks([{ task_id: "", task_name: "", budgeted_hour: "" }]);
-          navigate("/admin/Clientlist", {
-            state: { id: location.state.id, route: "Checklist" },
-          });
+          // navigate("/admin/Clientlist", {
+          //   state: { id: location.state.id, route: "Checklist" },
+          // });
+          window.history.back();
         }
       })
       .catch((error) => {
@@ -311,9 +312,10 @@ const CreateCheckList = () => {
             type="button"
             className="btn p-0"
             onClick={() =>
-              navigate("/admin/Clientlist", {
-                state: { id: location.state.id, route: "Checklist" },
-              })
+              // navigate("/admin/Clientlist", {
+              //   state: { id: location.state.id, route: "Checklist" },
+              // })
+              window.history.back()
             }
           >
             <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" />
@@ -391,7 +393,7 @@ const CreateCheckList = () => {
                       name="client_type_id"
                       handleOnChange={(e) => handleMultipleSelect(e)}
                       selected={
-                        selectedClientType.length > 0 ? selectedClientType : []
+                        selectedClientType?.length > 0 ? selectedClientType : []
                       } // Ensure it's an array
                       placeholder="Select Client Type"
                     />
