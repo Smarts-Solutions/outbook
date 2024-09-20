@@ -35,6 +35,7 @@ import CreateCheckList from "../layouts/Admin/Clients/CreateCheckList";
 import EditCheckList from "../layouts/Admin/Clients/Editchecklist";
 import Statuses from "../layouts/Admin/Clients/Statuses";
 import SettingCheckList from '../layouts/Admin/Settings/CreateCheckList'
+import EditSettingCheckList from '../layouts/Admin/Settings/EditCheckList'
 
 import JobLogs from "../layouts/Admin/Jobs/JobLogs";
 import JobInformation from "../layouts/Admin/Jobs/JobInformation";
@@ -216,6 +217,7 @@ const Admin_Route = () => {
             <Route path="/job/jobinformation" element={<JobInformation />} />
             <Route path="/add/subSource" element={<Subsource />} />
             <Route path="/setting/checklist" element={<SettingCheckList />} />
+            <Route path="/edit/setting/checklist" element={<EditSettingCheckList />} />
           </Routes>
         </div>
       </div>

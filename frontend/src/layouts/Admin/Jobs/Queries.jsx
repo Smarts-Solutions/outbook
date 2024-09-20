@@ -44,9 +44,7 @@ const Queries = () => {
       QueryDocument: null,
     });
   };
- 
-
-  console.log("EditData", EditData);
+  
 
   useEffect(() => {
     if (EditData && editViewquery) {
@@ -192,10 +190,10 @@ const Queries = () => {
   };
 
   const columns = [
-    // { name: 'Query Title', selector: row => row.query_title, sortable: true },
-    { name: '	Query Sent Date', selector: row => row.query_sent_date, sortable: true },
-    { name: 'Response Received', selector: row => row.response_received == 1 ? "YES" : "NO", sortable: true },
-    // { name: 'Response', selector: row => row.response, sortable: true },
+    { name: '	Query Sent Date', selector: row => row.query_sent_date, sortable: true }, 
+    { name: 'Missing Queries Prepared Date', selector: row => row.missing_queries_prepared_date, sortable: true },
+    { name: 'Final Query Response Received Date', selector: row => row.final_query_response_received_date, sortable: true },
+    { name: 'Status', selector: row => row.status == 1 ? "Complete" : "Incomplete", sortable: true },
     {
       name: "Actions",
       cell: (row) => (
@@ -683,10 +681,9 @@ const Queries = () => {
         size="md"
         title="Query"
         // btn_name="Close"
-        hideBtn={false} 
+        hideBtn={true} 
         cancel_btn="true"
-        btn_2="true"
-        btn_name="Save" 
+        btn_2="true" 
         handleClose={() => {
           setViewquery(false); 
         }}

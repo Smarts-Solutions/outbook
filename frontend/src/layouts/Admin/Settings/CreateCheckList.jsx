@@ -44,7 +44,6 @@ const CreateCheckList = () => {
     status: "",
   });
 
- 
   const options = [
     { key: "1", label: "Sole Trader" },
     { key: "2", label: "Company" },
@@ -53,21 +52,6 @@ const CreateCheckList = () => {
   ];
 
   useEffect(() => {
-    if (formData.customer_id) {
-      const req = { customer_id: formData.customer_id };
-      const data = { req, authToken: token };
-      dispatch(GetServicesByCustomers(data))
-        .unwrap()
-        .then((response) => {
-          if (response.status) {
-            setFormData((data) => ({ ...data, service_id: response.data }));
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-    }
-
     const req = { action: "getClientType" };
     const data = { req, authToken: token };
     dispatch(getList(data))
@@ -100,7 +84,6 @@ const CreateCheckList = () => {
             return;
         });
     };
-
 
   const fieldErrors = {
     service_id: "Please Select Service Type",
@@ -357,11 +340,7 @@ const CreateCheckList = () => {
           <button
             type="button"
             className="btn p-0"
-            onClick={() =>
-              navigate("/admin/Clientlist", {
-                state: { id: location.state.id, route: "Checklist" },
-              })
-            }
+            onClick={() =>window.history.back()}
           >
             <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
           </button>

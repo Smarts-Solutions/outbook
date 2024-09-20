@@ -13,13 +13,15 @@ const Documents = () => {
   const [uploadfiles, setUploadfiles] = useState(false);
   const [jobDocumentListData, setJobDocumentListData] = useState([]);
 
+  console.log("jobDocumentListData", jobDocumentListData)
+
   useEffect(() => {
     GetAllDocumentList();
   }, []);
  
 
   const GetAllDocumentList = async () => {
-    const req = { action: "get", job_id: 9 }
+    const req = { action: "get", job_id: location.state.job_id }
     const data = { req: req, authToken: token }
     await dispatch(JobDocumentAction(data))
       .unwrap()
@@ -42,8 +44,7 @@ const Documents = () => {
 
   const columns = [
     { name: 'File Name', selector: row => row.file_name, sortable: true },
-    { name: 'File Type', selector: row => row.file_type, sortable: true },
-    // { name: 'Date Modified', selector: row => row.CustomerName, sortable: true },
+    { name: 'File Type', selector: row => row.file_type, sortable: true }, 
     { name: 'Size', selector: row => convertKBToMb(row.file_size)+"MB", sortable: true },
     {
       name: "Actions",
@@ -62,6 +63,9 @@ const Documents = () => {
       button: true,
     },
   ];
+
+  const handleChangeDocument = (e) => {
+  }
  
 
   return (
@@ -104,10 +108,9 @@ const Documents = () => {
           <div className="col-lg-12">
             <div className="card">
               <div className="card-body">
-                <div className="upload-box" style={{ height: 150 }}>
-
+                <div className="upload-box" style={{ height: 150 }}> 
                   <div className="dz-message needsclick">
-                    <input type="file" className="form-control"></input>
+                    <input type="file" className="form-control" onChange={handleChangeDocument}></input>
                     <div
                       className="mb-3"
                       style={{
@@ -115,25 +118,18 @@ const Documents = () => {
                         alignItems: "center",
                         justifyContent: "center"
                       }}
-                    >
-
-
+                    > 
                     </div>
-                    <h6 className="text-center">
+                    {/* <h6 className="text-center">
                       <p>Or Drag File in here</p>
-                    </h6>
+                    </h6> */}
                   </div>
                 </div>
                 <ul className="list-unstyled mb-0" id="dropzone-preview"></ul>
               </div>
             </div>
           </div>
-        </div>
-
-
-
-
-
+        </div> 
       </CommonModal>
     </div>
   )

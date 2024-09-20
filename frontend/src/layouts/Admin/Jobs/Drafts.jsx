@@ -193,9 +193,9 @@ const Drafts = () => {
 
   const columns = [
     { name: 'Draft Sent On', selector: row => row.draft_sent_on, sortable: true },
-    // { name: 'Final Draft Sent On', selector: row => row.final_draft_sent_on, sortable: true },
-    // { name: '	Status', selector: row => row.CustomerName, sortable: true },
-
+    { name: 'Feedback Received', selector: row => row.feedback_received == 1 ? "Yes" : "No", sortable: true },
+    { name: 'Updated/Amendments', selector: row => row.updated_amendment == 1 ? "Amendment" : row.updated_amendment == 2 ? "Update" : row.updated_amendment == 3 ? "Both" : "None", sortable: true },
+    { name: 'Was It Complete', selector: row => row.was_it_complete == 1 ? "Yes" : "No", sortable: true },
     {
       name: "Actions",
       cell: (row) => (
@@ -586,9 +586,9 @@ const Drafts = () => {
         backdrop="static"
         size="md"
         title="Draft"
-        btn_name="Save"
+        // btn_name="Save"
         cancel_btn="true"
-        hideBtn={false} 
+        hideBtn={true} 
         handleClose={() => {
           setViewdraft(false); 
         }}
@@ -607,7 +607,7 @@ const Drafts = () => {
               <span className="text-muted">{SingleDraftData && SingleDraftData.draft_sent_on}</span>
             </div>
           </div>
-          <div className="row">
+          {/* <div className="row">
             <div className="col-md-6">
               <label htmlFor="customername-field" className="form-label">
                 Final Draft Sent On
@@ -616,7 +616,7 @@ const Drafts = () => {
             <div className="col-md-6">
               <span className="text-muted">{SingleDraftData && SingleDraftData.final_draft_sent_on}</span>
             </div>
-          </div>
+          </div> */}
           <div className="row">
             <div className="col-md-6">
               <label htmlFor="customername-field" className="form-label">
