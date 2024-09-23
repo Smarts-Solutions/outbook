@@ -1,37 +1,21 @@
 const pool = require('../config/database');
 const deleteUploadFile = require('../../app/middlewares/deleteUploadFile');
-const { SatffLogUpdateOperation } = require('../../app/utils/helper');
-//   deleteUploadFile('1722257591646-SSSSSSSS.jpg')
-
-async function generateNextUniqueCode() {
-    const [rows] = await pool.execute('SELECT customer_code FROM customers ORDER BY id DESC LIMIT 1');
-    let newCode = '00001'; // Default code if table is empty
-    if (rows.length > 0) {
-        const inputString = rows[0].customer_code;
-        const parts = inputString.split('_');
-        const lastPart = parts[parts.length - 1];
-        const lastCode = lastPart;
-        const nextCode = parseInt(lastCode, 10) + 1;
-
-        newCode = "0000" + nextCode
-        // newCode = nextCode.toString().padStart(5, '0');
-    }
-
-    return newCode;
-}
+const { SatffLogUpdateOperation, generateNextUniqueCode } = require('../../app/utils/helper');
 
 const createCustomer = async (customer) => {
     // Customer Code(cust+CustName+UniqueNo)
     const { customer_id } = customer;
 
     if (customer_id == undefined || customer_id == null || customer_id == "") {
-        let UniqueNo = await generateNextUniqueCode()
+
+        let data = {
+            table: 'customers',
+            field: 'customer_code'
+        }
+        const customer_code = await generateNextUniqueCode(data);
 
         if (customer.CustomerType == "1") {
             const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, First_Name, Last_Name, Phone, Email, Residential_Address } = customer;
-            const firstThreeLetters = Trading_Name.substring(0, 3)
-            const customer_code = "cust_" + firstThreeLetters + "_" + UniqueNo;
-
 
             const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
 
@@ -67,9 +51,6 @@ const createCustomer = async (customer) => {
         else if (customer.CustomerType == "2") {
 
             const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, company_name, entity_type, company_status, company_number, Registered_Office_Addres, Incorporation_Date, Incorporation_in, contactDetails } = customer;
-
-            const firstThreeLetters = Trading_Name.substring(0, 3)
-            const customer_code = "cust_" + firstThreeLetters + "_" + UniqueNo;
 
             const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
 
@@ -124,10 +105,6 @@ const createCustomer = async (customer) => {
         else if (customer.CustomerType == "3") {
 
             const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, contactDetails } = customer;
-
-            const firstThreeLetters = Trading_Name.substring(0, 3)
-            const customer_code = "cust_" + firstThreeLetters + "_" + UniqueNo;
-
 
             const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
 
@@ -377,12 +354,13 @@ const createCustomer = async (customer) => {
 
 const getCustomer = async (customer) => {
     const { staff_id } = customer;
+
     console.log("staff_id ", staff_id)
+
     const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + staff_id + '" LIMIT 1');
 
     let result = []
     if (rows.length > 0) {
-
         // Allocated to
         if (rows[0].role_id == 3) {
 
@@ -393,7 +371,7 @@ const getCustomer = async (customer) => {
             customers.staff_id AS staff_id,
             customers.account_manager_id AS account_manager_id,
             customers.trading_name AS trading_name,
-            customers.customer_code AS customer_code,
+           
             customers.trading_address AS trading_address,
             customers.vat_registered AS vat_registered,
             customers.vat_number AS vat_number,
@@ -407,7 +385,12 @@ const getCustomer = async (customer) => {
             staff2.first_name AS account_manager_firstname, 
             staff2.last_name AS account_manager_lastname,
             customer_company_information.company_name AS company_name,
-            customer_company_information.company_number AS company_number
+            customer_company_information.company_number AS company_number,
+         CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
         FROM 
             customers
         JOIN 
@@ -438,7 +421,6 @@ const getCustomer = async (customer) => {
             customers.staff_id AS staff_id,
             customers.account_manager_id AS account_manager_id,
             customers.trading_name AS trading_name,
-            customers.customer_code AS customer_code,
             customers.trading_address AS trading_address,
             customers.vat_registered AS vat_registered,
             customers.vat_number AS vat_number,
@@ -452,7 +434,12 @@ const getCustomer = async (customer) => {
             staff2.first_name AS account_manager_firstname, 
             staff2.last_name AS account_manager_lastname,
             customer_company_information.company_name AS company_name,
-            customer_company_information.company_number AS company_number
+            customer_company_information.company_number AS company_number,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
         FROM 
             customers
         JOIN 
@@ -529,7 +516,6 @@ const getCustomer = async (customer) => {
             customers.staff_id AS staff_id,
             customers.account_manager_id AS account_manager_id,
             customers.trading_name AS trading_name,
-            customers.customer_code AS customer_code,
             customers.trading_address AS trading_address,
             customers.vat_registered AS vat_registered,
             customers.vat_number AS vat_number,
@@ -543,7 +529,12 @@ const getCustomer = async (customer) => {
             staff2.first_name AS account_manager_firstname, 
             staff2.last_name AS account_manager_lastname,
             customer_company_information.company_name AS company_name,
-            customer_company_information.company_number AS company_number
+            customer_company_information.company_number AS company_number,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
         FROM 
             customers
         JOIN 
@@ -572,7 +563,6 @@ const getCustomer = async (customer) => {
             customers.staff_id AS staff_id,
             customers.account_manager_id AS account_manager_id,
             customers.trading_name AS trading_name,
-            customers.customer_code AS customer_code,
             customers.trading_address AS trading_address,
             customers.vat_registered AS vat_registered,
             customers.vat_number AS vat_number,
@@ -586,7 +576,12 @@ const getCustomer = async (customer) => {
             staff2.first_name AS account_manager_firstname, 
             staff2.last_name AS account_manager_lastname,
             customer_company_information.company_name AS company_name,
-            customer_company_information.company_number AS company_number
+            customer_company_information.company_number AS company_number,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
         FROM 
             customers
         JOIN 
@@ -753,80 +748,80 @@ const updateProcessCustomerServices = async (customerProcessData) => {
         }
     }
 
-        const resultTsk = {};
-        if (Task.length > 0) {
-            Task.forEach((item) => {
-                const checklistName = item.checklistName;
-                if (!resultTsk[checklistName]) {
-                    resultTsk[checklistName] = {
-                        checklistName,
-                        Task: [],
-                        JobTypeId: item.JobTypeId,
-                        serviceId: item.serviceId,
-                    };
-                }
-                resultTsk[checklistName].Task.push(...item.Task);
-            });
+    const resultTsk = {};
+    if (Task.length > 0) {
+        Task.forEach((item) => {
+            const checklistName = item.checklistName;
+            if (!resultTsk[checklistName]) {
+                resultTsk[checklistName] = {
+                    checklistName,
+                    Task: [],
+                    JobTypeId: item.JobTypeId,
+                    serviceId: item.serviceId,
+                };
+            }
+            resultTsk[checklistName].Task.push(...item.Task);
+        });
 
-            const outputArray = Object.values(resultTsk);
+        const outputArray = Object.values(resultTsk);
 
-            console.log("outputArray .", outputArray);
+        console.log("outputArray .", outputArray);
 
-            if (outputArray.length > 0) {
-                for (const tsk of outputArray) {
-                    const checklistName = tsk.checklistName;
-                    const Task = tsk.Task;
-                    const JobTypeId = tsk.JobTypeId;
-                    const serviceId = tsk.serviceId;
-                    const client_type_id = customer_type
-                    const checkQueryChecklist = `
+        if (outputArray.length > 0) {
+            for (const tsk of outputArray) {
+                const checklistName = tsk.checklistName;
+                const Task = tsk.Task;
+                const JobTypeId = tsk.JobTypeId;
+                const serviceId = tsk.serviceId;
+                const client_type_id = customer_type
+                const checkQueryChecklist = `
                 SELECT id FROM checklists WHERE customer_id = ? AND service_id = ? AND job_type_id = ? AND client_type_id = ? AND check_list_name = ?
                 `;
-                    const [existingChecklist] = await pool.execute(checkQueryChecklist, [customer_id, serviceId, JobTypeId, client_type_id, checklistName]);
-                    if (existingChecklist.length === 0) {
-                        const insertChecklistQuery = `
+                const [existingChecklist] = await pool.execute(checkQueryChecklist, [customer_id, serviceId, JobTypeId, client_type_id, checklistName]);
+                if (existingChecklist.length === 0) {
+                    const insertChecklistQuery = `
                     INSERT INTO checklists (customer_id,service_id,job_type_id,client_type_id,check_list_name)
                     VALUES (?, ?, ?, ?, ?)
                     `;
-                        const [result] = await pool.execute(insertChecklistQuery, [customer_id, serviceId, JobTypeId, client_type_id, checklistName]);
-                        const checklist_id = result.insertId;
+                    const [result] = await pool.execute(insertChecklistQuery, [customer_id, serviceId, JobTypeId, client_type_id, checklistName]);
+                    const checklist_id = result.insertId;
 
-                        if (Task.length > 0) {
-                            for (const tsk_name of Task) {
-                                const TaskName = tsk_name.TaskName;
-                                const BudgetHour = tsk_name.BudgetHour;
-                                const checkQuery = `SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?`;
-                                const [existing] = await pool.execute(checkQuery, [TaskName, serviceId, JobTypeId,
-                                ]);
-                                if (existing.length === 0) {
-                                    const InsertTaskquery = `
+                    if (Task.length > 0) {
+                        for (const tsk_name of Task) {
+                            const TaskName = tsk_name.TaskName;
+                            const BudgetHour = tsk_name.BudgetHour;
+                            const checkQuery = `SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?`;
+                            const [existing] = await pool.execute(checkQuery, [TaskName, serviceId, JobTypeId,
+                            ]);
+                            if (existing.length === 0) {
+                                const InsertTaskquery = `
                               INSERT INTO task (name,service_id,job_type_id)
                               VALUES (?, ?, ?)
                               `;
-                                    const [result] = await pool.execute(InsertTaskquery, [
-                                        TaskName,
-                                        serviceId,
-                                        JobTypeId,
-                                    ]);
-                                    const task_id = result.insertId;
-                                    const checklistTasksQuery = `
+                                const [result] = await pool.execute(InsertTaskquery, [
+                                    TaskName,
+                                    serviceId,
+                                    JobTypeId,
+                                ]);
+                                const task_id = result.insertId;
+                                const checklistTasksQuery = `
                               INSERT INTO checklist_tasks (checklist_id, task_id, task_name, budgeted_hour)
                               VALUES (?, ?, ?, ?)
                               `;
-                                    const [result1] = await pool.execute(checklistTasksQuery, [
-                                        checklist_id,
-                                        task_id,
-                                        TaskName,
-                                        BudgetHour,
-                                    ]);
-                                }
-
+                                const [result1] = await pool.execute(checklistTasksQuery, [
+                                    checklist_id,
+                                    task_id,
+                                    TaskName,
+                                    BudgetHour,
+                                ]);
                             }
+
                         }
                     }
                 }
             }
         }
+    }
     // Update customer process page
     let pageStatus = "2";
     await pool.execute('UPDATE customers SET form_process = ? WHERE id = ?', [pageStatus, customer_id]);
@@ -1265,7 +1260,6 @@ const getSingleCustomer = async (customer) => {
         customers.staff_id AS staff_id,
         customers.account_manager_id AS account_manager_id,
         customers.trading_name AS trading_name,
-        customers.customer_code AS customer_code,
         customers.trading_address AS trading_address,
         customers.vat_registered AS vat_registered,
         customers.vat_number AS vat_number,
@@ -1280,7 +1274,12 @@ const getSingleCustomer = async (customer) => {
         customer_contact_details.phone AS phone,
         customer_contact_details.residential_address AS residential_address,
         customer_contact_person_role.name AS customer_role_contact_name,
-        customer_contact_person_role.id AS customer_role_contact_id
+        customer_contact_person_role.id AS customer_role_contact_id,
+        CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
     FROM 
         customers
     JOIN 
@@ -1799,7 +1798,7 @@ const customerUpdate = async (customer) => {
     const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
     var account_manager_id = ExistCustomer[0].account_manager_id;
     const customer_type = ExistCustomer[0].customer_type;
-    const lastCode = ExistCustomer[0].customer_code.slice(ExistCustomer[0].customer_code.lastIndexOf('_') + 1);
+    const lastCode = ExistCustomer[0].customer_code;
 
     // Page Status 1 
     if (pageStatus === "1") {
@@ -1820,11 +1819,11 @@ const customerUpdate = async (customer) => {
 
         const query = `
         UPDATE customers
-        SET customer_type = ?, staff_id = ?, account_manager_id = ?, trading_name = ?, customer_code = ?, trading_address = ?, vat_registered = ?, vat_number = ?, website = ?
+        SET customer_type = ?, staff_id = ?, account_manager_id = ?, trading_name = ?, trading_address = ?, vat_registered = ?, vat_number = ?, website = ?
         WHERE id = ?
         `;
 
-        const [result] = await pool.execute(query, [customer_type, staff_id, account_manager_id, trading_name, customer_code, trading_address, vat_registered, vat_number, website, customer_id]);
+        const [result] = await pool.execute(query, [customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website, customer_id]);
 
         let cust_type = 'sole trader'
         if (customer_type === '2') {
@@ -2856,10 +2855,6 @@ const customerUpdate = async (customer) => {
 
     return { status: true, message: 'customers updated successfully.', data: customer_id };
 }
-
-
-
-
 
 
 module.exports = {

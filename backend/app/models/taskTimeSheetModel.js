@@ -1,9 +1,10 @@
 const pool = require('../config/database');
 const deleteUploadFile = require('../../app/middlewares/deleteUploadFile');
+const { SatffLogUpdateOperation, generateNextUniqueCodeJobLogTitle } = require('../../app/utils/helper');
 
 const getTaskTimeSheet = async (timeSheet) => {
   const { job_id } = timeSheet;
-  console.log("job_id ", job_id)
+  // console.log("job_id ", job_id)
   try {
     const query = `
      SELECT 
@@ -39,7 +40,7 @@ const getTaskTimeSheet = async (timeSheet) => {
      client_job_task.id DESC;
      `;
     const [rows] = await pool.execute(query, [job_id]);
-    console.log("rows ", rows)
+    // console.log("rows ", rows)
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
     console.log("error ", error)
@@ -52,7 +53,7 @@ const getTaskTimeSheet = async (timeSheet) => {
 }
 const getjobTimeSheet = async (timeSheet) => {
   const { job_id } = timeSheet;
-  console.log("job_id ", job_id)
+  // console.log("job_id ", job_id)
   try {
     const query = `
      SELECT 
@@ -117,42 +118,61 @@ const updateJobTimeTotalHours = async (timeSheet) => {
 }
 
 // MissingLog
+// async function generateNextUniqueCode(module, job_id, log_title_name, title_value) {
 
-async function generateNextUniqueCode(module,job_id) {
-  
-  console.log("module",module)
-  console.log("job_id",job_id)
-  
-  const [rows] = await pool.execute('SELECT missing_log_title FROM '+module+' WHERE job_id = '+job_id+' ORDER BY id DESC LIMIT 1');
+//   try {
 
-  console.log("rows ",rows)
-  return
-  let newCode = '00001'; // Default code if table is empty
-  if (rows.length > 0) {
-    const inputString = rows[0].job_id;
-    const parts = inputString.split('_');
-    const lastPart = parts[parts.length - 1];
-    const lastCode = lastPart;
-    const nextCode = parseInt(lastCode, 10) + 1;
+//     let newCode = '00001';
+//     const [rows] = await pool.execute('SELECT ' + log_title_name + ' FROM ' + module + ' WHERE job_id = ' + job_id + ' ORDER BY id DESC LIMIT 1');
 
-    newCode = "0000" + nextCode
-    // newCode = nextCode.toString().padStart(5, '0');
-  }
 
-  return newCode;
-}
+//     if (rows.length > 0 && rows[0][log_title_name] != null) {
+//       const inputString = rows[0][log_title_name];
+//       const parts = inputString.split('_');
+//       const lastPart = parts[parts.length - 1];
+//       const lastCode = lastPart;
+//       const nextCode = parseInt(lastCode, 10) + 1;
+//       newCode = "0000" + nextCode
+//       // newCode = nextCode.toString().padStart(5, '0');
+//     }
+
+//     return title_value + '_' + newCode
+
+// //     const query_get_code = `
+// //    SELECT 
+// //    CONCAT(
+// //      SUBSTRING(customers.trading_name, 1, 3), '_', 
+// //      SUBSTRING(clients.trading_name, 1, 3),'_${title_value}_${newCode}'
+// //    ) AS code
+// //    FROM jobs
+// //    JOIN customers ON customers.id = jobs.customer_id
+// //    JOIN clients ON clients.id = jobs.client_id
+// //    WHERE jobs.id = ? 
+// //    ORDER BY jobs.id DESC LIMIT 1
+// // `
+// //     const [rows1] = await pool.execute(query_get_code, [job_id]);
+// //     console.log("rows1 ", rows1);
+// //     return rows1[0].code
+//   } catch (error) {
+//     console.log("error  - Logs create", error)
+//     return newCode
+//   }
+// }
 
 
 const addMissingLog = async (missingLog) => {
+
+
+  const { job_id, missing_log, missing_log_sent_on, missing_log_reviewed_by, status } = missingLog.body;
  
-  
-  const { job_id, missing_log, missing_log_sent_on ,missing_log_reviewed_by, status } = missingLog.body;
-  
-  // const UniqueNo = await generateNextUniqueCode('missing_logs',job_id)
+  let data = {
+    table: 'missing_logs',
+    field: 'missing_log_title',
+    filter_id: `job_id = ${job_id}`,
+    prefix: 'M'
+  }
+  const UniqueNoTitle = await generateNextUniqueCodeJobLogTitle(data)
 
-  // console.log("UniqueNo",UniqueNo)
-
-  //  return
   let missing_log_prepared_date = missingLog.body.missing_log_prepared_date == 'null' ? null : missingLog.body.missing_log_prepared_date
 
   let missing_log_reviewed_date = missingLog.body.missing_log_reviewed_date == 'null' ? null : missingLog.body.missing_log_reviewed_date
@@ -163,20 +183,21 @@ const addMissingLog = async (missingLog) => {
     const query = `
      INSERT INTO 
      missing_logs
-      (job_id, missing_log, missing_log_sent_on,missing_log_prepared_date,missing_log_reviewed_by,missing_log_reviewed_date,status)
+      (job_id, missing_log, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,status)
       VALUES
-      (?,?,?,?,?,?,?)
+      (?,?,?,?,?,?,?,?)
       `;
-      const [rows] = await pool.execute(query, [
-        job_id, 
-        missing_log, 
-        missing_log_sent_on, 
-        missing_log_prepared_date, 
-        missing_log_reviewed_by, 
-        missing_log_reviewed_date, 
-        status
-      ]);
-    console.log("rows ", rows)
+    const [rows] = await pool.execute(query, [
+      job_id,
+      missing_log,
+      missing_log_sent_on,
+      missing_log_prepared_date,
+      UniqueNoTitle,
+      missing_log_reviewed_by,
+      missing_log_reviewed_date,
+      status
+    ]);
+    // console.log("rows ", rows)
 
     if (missing_log_document.length > 0) {
       for (let file of missing_log_document) {
@@ -184,29 +205,29 @@ const addMissingLog = async (missingLog) => {
         const original_name = file.originalname;
         const file_type = file.mimetype;
         const file_size = file.size;
-  
-  
+
+
         const insertQuery = `
             INSERT INTO missing_logs_documents (
                 missing_log_id, file_name, original_name, file_type, file_size
             ) VALUES (?, ?, ?, ?, ?)
         `;
-  
+
         try {
-            const [result] = await pool.execute(insertQuery, [
-                rows.insertId,
-                file_name,
-                original_name,
-                file_type,
-                file_size
-            ]);
-  
+          const [result] = await pool.execute(insertQuery, [
+            rows.insertId,
+            file_name,
+            original_name,
+            file_type,
+            file_size
+          ]);
+
         } catch (error) {
-            console.log('Error inserting file:', error);
+          console.log('Error inserting file:', error);
         }
       }
     }
-    
+
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
     console.log("error ", error)
@@ -218,27 +239,35 @@ const getMissingLog = async (missingLog) => {
   const { job_id } = missingLog
   try {
     const query = `
-     SELECT 
-     missing_logs.id AS id,
-     missing_logs.job_id AS job_id,
-     missing_logs.missing_log AS missing_log,
-     missing_logs.missing_paperwork AS missing_paperwork,
-     DATE_FORMAT(missing_logs.missing_log_sent_on, '%Y-%m-%d') AS missing_log_sent_on,
-     DATE_FORMAT(missing_logs.missing_log_prepared_date, '%Y-%m-%d') AS missing_log_prepared_date,
-     missing_logs.missing_log_title AS missing_log_title,
-     missing_logs.missing_log_reviewed_by AS missing_log_reviewed_by,
-     DATE_FORMAT(missing_logs.missing_log_reviewed_date, '%Y-%m-%d') AS missing_log_reviewed_date,
-     DATE_FORMAT(missing_logs.missing_paperwork_received_on, '%Y-%m-%d') AS missing_paperwork_received_on,
-     missing_logs.status AS status
-     FROM 
-     missing_logs
-     WHERE 
-     missing_logs.job_id = ?
-     ORDER BY
-     missing_logs.id DESC;
-     `;
+    SELECT 
+    missing_logs.id AS id,
+    missing_logs.job_id AS job_id,
+    missing_logs.missing_log AS missing_log,
+    missing_logs.missing_paperwork AS missing_paperwork,
+    DATE_FORMAT(missing_logs.missing_log_sent_on, '%Y-%m-%d') AS missing_log_sent_on,
+    DATE_FORMAT(missing_logs.missing_log_prepared_date, '%Y-%m-%d') AS missing_log_prepared_date,
+    missing_logs.missing_log_title AS missing_log_title,
+    missing_logs.missing_log_reviewed_by AS missing_log_reviewed_by,
+    DATE_FORMAT(missing_logs.missing_log_reviewed_date, '%Y-%m-%d') AS missing_log_reviewed_date,
+    DATE_FORMAT(missing_logs.missing_paperwork_received_on, '%Y-%m-%d') AS missing_paperwork_received_on,
+    missing_logs.status AS status,
+    CONCAT(
+      SUBSTRING(customers.trading_name, 1, 3), '_', 
+      SUBSTRING(clients.trading_name, 1, 3), '_',
+      SUBSTRING(missing_logs.missing_log_title, 1, 15)
+    ) AS title
+    FROM 
+    missing_logs
+    JOIN jobs ON jobs.id = missing_logs.job_id
+    JOIN customers ON customers.id = jobs.customer_id
+    JOIN clients ON clients.id = jobs.client_id
+    WHERE 
+    missing_logs.job_id = ?
+    ORDER BY
+    missing_logs.id DESC;
+`;
     const [rows] = await pool.execute(query, [job_id]);
-    console.log("rows ", rows)
+    // console.log("rows ", rows)
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
     console.log("error ", error)
@@ -246,7 +275,7 @@ const getMissingLog = async (missingLog) => {
   }
 }
 
-const editMissingLog = async(missingLog) => {
+const editMissingLog = async (missingLog) => {
   const { id, missing_log, missing_log_sent_on, missing_log_reviewed_by, status } = missingLog.body;
 
   let missing_log_prepared_date = missingLog.body.missing_log_prepared_date == 'null' ? null : missingLog.body.missing_log_prepared_date
@@ -271,7 +300,7 @@ const editMissingLog = async(missingLog) => {
      id = ?
      `;
     const [rows] = await pool.execute(query, [missing_log, missing_log_sent_on, missing_log_prepared_date, missing_log_reviewed_by, missing_log_reviewed_date, status, id]);
-    console.log("rows ", rows)
+    // console.log("rows ", rows)
 
     if (missing_log_document.length > 0) {
       for (let file of missing_log_document) {
@@ -279,29 +308,29 @@ const editMissingLog = async(missingLog) => {
         const original_name = file.originalname;
         const file_type = file.mimetype;
         const file_size = file.size;
-  
-  
+
+
         const insertQuery = `
             INSERT INTO missing_logs_documents (
                 missing_log_id, file_name, original_name, file_type, file_size
             ) VALUES (?, ?, ?, ?, ?)
         `;
-  
+
         try {
-            const [result] = await pool.execute(insertQuery, [
-                id,
-                file_name,
-                original_name,
-                file_type,
-                file_size
-            ]);
-  
+          const [result] = await pool.execute(insertQuery, [
+            id,
+            file_name,
+            original_name,
+            file_type,
+            file_size
+          ]);
+
         } catch (error) {
-            console.log('Error inserting file:', error);
+          console.log('Error inserting file:', error);
         }
       }
     }
-    
+
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
     console.log("error ", error)
@@ -325,7 +354,7 @@ const getMissingLogSingleView = async (missingLog) => {
      missing_logs.id DESC;
      `;
     const [rows] = await pool.execute(query, [id]);
-    console.log("rows ", rows)
+    // console.log("rows ", rows)
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
     console.log("error ", error)
@@ -335,23 +364,32 @@ const getMissingLogSingleView = async (missingLog) => {
 }
 
 //Queries
-const addQuerie = async(querie) => {
-  const { job_id, queries_remaining, reviewed_by, query_sent_date, response_received , status } = querie.body;
+const addQuerie = async (querie) => {
+  const { job_id, queries_remaining, reviewed_by, query_sent_date, response_received, status } = querie.body;
   const query_document = querie.files;
 
-    let missing_queries_prepared_date = querie.body.missing_queries_prepared_date == 'null' ? null : querie.body.missing_queries_prepared_date
+  let data = {
+    table: 'queries',
+    field: 'query_title',
+    filter_id: `job_id = ${job_id}`,
+    prefix : 'Q'
+  }
+
+  const UniqueNoTitle = await generateNextUniqueCodeJobLogTitle(data)
+
+  let missing_queries_prepared_date = querie.body.missing_queries_prepared_date == 'null' ? null : querie.body.missing_queries_prepared_date
 
   let final_query_response_received_date = querie.body.final_query_response_received_date == 'null' ? null : querie.body.final_query_response_received_date
- 
+
   try {
     const query = `
      INSERT INTO 
      queries
-      (job_id, queries_remaining, status , reviewed_by, missing_queries_prepared_date, query_sent_date, response_received,final_query_response_received_date)
+      (job_id, queries_remaining, status ,query_title, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received,final_query_response_received_date)
       VALUES
-      (?,?,?,?,?,?,?,?)
+      (?,?,?,?,?,?,?,?,?)
       `;
-    const [rows] = await pool.execute(query, [job_id, queries_remaining, status, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date]);
+    const [rows] = await pool.execute(query, [job_id, queries_remaining, status, UniqueNoTitle, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date]);
 
 
     if (query_document.length > 0) {
@@ -360,29 +398,29 @@ const addQuerie = async(querie) => {
         const original_name = file.originalname;
         const file_type = file.mimetype;
         const file_size = file.size;
-  
-  
+
+
         const insertQuery = `
             INSERT INTO queries_documents (
                 query_id, file_name, original_name, file_type, file_size
             ) VALUES (?, ?, ?, ?, ?)
         `;
-  
+
         try {
-            const [result] = await pool.execute(insertQuery, [
-                rows.insertId,
-                file_name,
-                original_name,
-                file_type,
-                file_size
-            ]);
-  
+          const [result] = await pool.execute(insertQuery, [
+            rows.insertId,
+            file_name,
+            original_name,
+            file_type,
+            file_size
+          ]);
+
         } catch (error) {
-            console.log('Error inserting file:', error);
+          console.log('Error inserting file:', error);
         }
       }
     }
-    
+
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
     console.log("error ", error)
@@ -403,17 +441,25 @@ const getQuerie = async (querie) => {
       queries.response_received AS response_received,
       queries.response AS response,
       DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
-      queries.status AS status
+      queries.status AS status,
+      CONCAT(
+      SUBSTRING(customers.trading_name, 1, 3), '_', 
+      SUBSTRING(clients.trading_name, 1, 3), '_',
+      SUBSTRING(queries.query_title, 1, 15)
+    ) AS title
 
      FROM 
       queries
+    JOIN jobs ON jobs.id = queries.job_id
+    JOIN customers ON customers.id = jobs.customer_id
+    JOIN clients ON clients.id = jobs.client_id 
      WHERE 
       queries.job_id = ?
      ORDER BY
       queries.id DESC;
      `;
     const [rows] = await pool.execute(query, [job_id]);
-    console.log("rows ", rows)
+    // console.log("rows ", rows)
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
     console.log("error ", error)
@@ -422,7 +468,7 @@ const getQuerie = async (querie) => {
 
 }
 
-const getQuerieSingleView = async(querie) => {
+const getQuerieSingleView = async (querie) => {
   const { id } = querie;
   try {
     const query = `
@@ -439,23 +485,23 @@ const getQuerieSingleView = async(querie) => {
       queries.id DESC;
      `;
     const [rows] = await pool.execute(query, [id]);
-    console.log("rows ", rows)
+    // console.log("rows ", rows)
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
     console.log("error ", error)
     return { status: false, message: 'Error querie .' };
   }
 }
-   
+
 
 const editQuerie = async (query) => {
-  const { id, queries_remaining, reviewed_by, query_sent_date, response_received , status } = query.body;
-  const query_document = query.files; 
-   
+  const { id, queries_remaining, reviewed_by, query_sent_date, response_received, status } = query.body;
+  const query_document = query.files;
+
   let missing_queries_prepared_date = query.body.missing_queries_prepared_date == 'null' ? null : query.body.missing_queries_prepared_date
- 
+
   let final_query_response_received_date = query.body.final_query_response_received_date == 'null' ? null : query.body.final_query_response_received_date
-  
+
   try {
     const query = `
      UPDATE 
@@ -471,8 +517,8 @@ const editQuerie = async (query) => {
      WHERE 
      id = ?
      `;
-    const [rows] = await pool.execute(query, [queries_remaining, status , reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date, id]);
-    console.log("rows ", rows)
+    const [rows] = await pool.execute(query, [queries_remaining, status, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date, id]);
+    // console.log("rows ", rows)
 
     if (query_document.length > 0) {
       for (let file of query_document) {
@@ -480,17 +526,17 @@ const editQuerie = async (query) => {
         const original_name = file.originalname;
         const file_type = file.mimetype;
         const file_size = file.size;
-  
-  
+
+
         const insertQuery = `
             INSERT INTO queries_documents (
                 query_id, file_name , original_name, file_type, file_size 
             ) VALUES (?, ?, ?, ?, ?)
         `;
-        const [rows] = await pool.execute(insertQuery, [id, file_name, original_name 
+        const [rows] = await pool.execute(insertQuery, [id, file_name, original_name
           , file_type, file_size]);
-        }   
-}
+      }
+    }
     return { status: true, message: 'Success.', data: rows };
   }
   catch (error) {
@@ -512,16 +558,24 @@ const getDraft = async (draft) => {
       drafts.feedback AS feedback,
       drafts.was_it_complete AS was_it_complete,
       DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
-      DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on
+      DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
+      CONCAT(
+      SUBSTRING(customers.trading_name, 1, 3), '_', 
+      SUBSTRING(clients.trading_name, 1, 3), '_',
+      SUBSTRING(drafts.draft_title, 1, 15)
+    ) AS title
      FROM 
       drafts
+    JOIN jobs ON jobs.id = drafts.job_id
+    JOIN customers ON customers.id = jobs.customer_id
+    JOIN clients ON clients.id = jobs.client_id  
      WHERE 
       drafts.job_id = ?
      ORDER BY
       drafts.id DESC;
      `;
     const [rows] = await pool.execute(query, [job_id]);
-    console.log("rows ", rows)
+    //  console.log("rows ", rows)
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
     console.log("error ", error)
@@ -529,7 +583,7 @@ const getDraft = async (draft) => {
   }
 }
 
-const getDraftSingleView = async(req,res) => {
+const getDraftSingleView = async (req, res) => {
   const { id } = req;
   try {
     const query = `
@@ -547,7 +601,7 @@ const getDraftSingleView = async(req,res) => {
       drafts.id DESC;
      `;
     const [rows] = await pool.execute(query, [id]);
-    console.log("rows ", rows)
+    // console.log("rows ", rows)
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
     console.log("error ", error)
@@ -556,17 +610,25 @@ const getDraftSingleView = async(req,res) => {
 }
 
 const addDraft = async (draft) => {
-  const { job_id,draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete } = draft;
+  const { job_id, draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete } = draft;
+ 
+  let data = {
+    table: 'drafts',
+    field: 'draft_title',
+    filter_id: `job_id = ${job_id}`,
+    prefix : 'D'
+  }
+  const UniqueNoTitle = await generateNextUniqueCodeJobLogTitle(data)
 
   try {
     const query = `
      INSERT INTO 
      drafts
-      (job_id,draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete)
+      (job_id,draft_sent_on,draft_title,feedback_received,updated_amendment,feedback,was_it_complete)
       VALUES
-      (?,?,?,?,?,?)
+      (?,?,?,?,?,?,?)
       `;
-    const [rows] = await pool.execute(query, [job_id,draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete]);
+    const [rows] = await pool.execute(query, [job_id, draft_sent_on, UniqueNoTitle, feedback_received, updated_amendment, feedback, was_it_complete]);
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
     console.log("error ", error)
@@ -575,8 +637,8 @@ const addDraft = async (draft) => {
 }
 
 const editDraft = async (draft) => {
-  const { job_id,draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete ,id} = draft.body;
-  try { 
+  const { job_id, draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete, id } = draft.body;
+  try {
     let query = `UPDATE drafts SET `;
     let queryArr = [];
     let queryData = [];
@@ -592,7 +654,7 @@ const editDraft = async (draft) => {
       queryArr.push(`feedback_received = ?`);
       queryData.push(feedback_received);
     }
-    if (updated_amendment) { 
+    if (updated_amendment) {
 
       queryArr.push(`updated_amendment = ?`);
       queryData.push(updated_amendment);
@@ -607,7 +669,7 @@ const editDraft = async (draft) => {
     }
     query += queryArr.join(', ');
     query += ` WHERE id = ?`;
-    queryData.push(id); 
+    queryData.push(id);
     const [rows] = await pool.execute(query, queryData);
     return { status: true, message: 'Success.', data: rows };
 
@@ -620,7 +682,7 @@ const editDraft = async (draft) => {
 
 // JobDocument
 const addJobDocument = async (jobDocument) => {
-  const {job_id} = jobDocument.body
+  const { job_id } = jobDocument.body
   const job_document = jobDocument.files;
 
   if (job_document.length > 0) {
@@ -635,26 +697,26 @@ const addJobDocument = async (jobDocument) => {
           ) VALUES (?, ?, ?, ?, ?)
       `;
       try {
-          const [result] = await pool.execute(insertQuery, [
-              job_id,
-              file_name,
-              original_name,
-              file_type,
-              file_size
-          ]);
-         
+        const [result] = await pool.execute(insertQuery, [
+          job_id,
+          file_name,
+          original_name,
+          file_type,
+          file_size
+        ]);
+
       } catch (error) {
-          console.log('Error inserting file:', error);
+        console.log('Error inserting file:', error);
 
       }
     }
     return { status: true, message: 'success .', data: [] };
-  }else{
+  } else {
     return { status: true, message: 'no data .', data: [] };
   }
 }
 
-const getJobDocument = async(jobDocument) => {
+const getJobDocument = async (jobDocument) => {
   const { job_id } = jobDocument;
   try {
     const query = `
@@ -680,8 +742,8 @@ const getJobDocument = async(jobDocument) => {
   }
 }
 
-const deleteJobDocument = async(jobDocument) => {
-  const { id ,file_name} = jobDocument;
+const deleteJobDocument = async (jobDocument) => {
+  const { id, file_name } = jobDocument;
   try {
     const query = `
      DELETE FROM 

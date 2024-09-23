@@ -227,6 +227,7 @@ const MissingLogs = () => {
   }
 
   const columns = [
+    { name: 'Missing Log Title', selector: row => row.title, sortable: true }, 
     { name: 'Missing Log Sent On', selector: row => row.missing_log_sent_on, sortable: true }, 
     { name: 'Missing Log Prepared Date', selector: row => row.missing_log_prepared_date, sortable: true }, 
     { name: 'Missing Log Reviewed Date', selector: row => row.missing_log_reviewed_date, sortable: true },

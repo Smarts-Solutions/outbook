@@ -190,7 +190,8 @@ const Queries = () => {
   };
 
   const columns = [
-    { name: '	Query Sent Date', selector: row => row.query_sent_date, sortable: true }, 
+    { name: 'Query Title', selector: row => row.title, sortable: true }, 
+    { name: 'Query Sent Date', selector: row => row.query_sent_date, sortable: true }, 
     { name: 'Missing Queries Prepared Date', selector: row => row.missing_queries_prepared_date, sortable: true },
     { name: 'Final Query Response Received Date', selector: row => row.final_query_response_received_date, sortable: true },
     { name: 'Status', selector: row => row.status == 1 ? "Complete" : "Incomplete", sortable: true },
