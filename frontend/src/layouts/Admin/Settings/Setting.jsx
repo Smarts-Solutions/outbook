@@ -18,14 +18,16 @@ import { useDispatch, useSelector } from "react-redux";
 import sweatalert from "sweetalert2";
 
 const Setting = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const tabStatus = useRef("1");
   const role = JSON.parse(localStorage.getItem("role"));
-  const accessData = useSelector(
-    (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data
-  );
-
   const [showSettingInsertTab, setShowSettingInsertTab] = useState(true);
   const [showSettingUpdateTab, setShowSettingUpdateTab] = useState(true);
   const [showSettingDeleteTab, setSettingDeleteTab] = useState(true);
+  const accessData = useSelector(
+    (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data
+  );
 
   useEffect(() => {
     if (
@@ -43,14 +45,12 @@ const Setting = () => {
             setShowSettingInsertTab(
               settingInsert && settingInsert.is_assigned == 1
             );
-
             const settingUpdate = item.items.find(
               (item) => item.type === "update"
             );
             setShowSettingUpdateTab(
               settingUpdate && settingUpdate.is_assigned == 1
             );
-
             const settingDelete = item.items.find(
               (item) => item.type === "delete"
             );
@@ -63,9 +63,6 @@ const Setting = () => {
   }, [accessData]);
 
   const token = JSON.parse(localStorage.getItem("token"));
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const tabStatus = useRef("1");
   const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
   const [personRoleDataAll, setPersonRoleDataAll] = useState({
     loading: true,
@@ -101,6 +98,14 @@ const Setting = () => {
 
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
+
+
+
+   console.log("getCheckList",getCheckList)
+
+
+
+
 
   const getCheckListData = async () => {
     const req = { action: "get", customer_id: 0 };
@@ -139,9 +144,6 @@ const Setting = () => {
           } else {
             setCheckList([]);
           }
-
-          // setCheckList(response.data);
-          // setCheckList1(response.data);
         } else {
           setCheckList([]);
         }
@@ -1294,8 +1296,7 @@ const Setting = () => {
             label: "Country Code",
             placeholder: "Enter Country Code",
             value: data.code,
-          },
-
+          }, 
           {
             type: "select",
             name: "status",
