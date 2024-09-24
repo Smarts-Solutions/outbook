@@ -9,4 +9,6 @@ module.exports = function (app) {
     app.use(require("./customers/customerRoutes"));
     app.use(require("./client/clientRoutes"));
     app.use(require("./job/jobRoutes"));
+    app.use(require("./dashboard/dashboardRoutes"));
+
 };

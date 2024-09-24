@@ -1831,6 +1831,9 @@ const customerUpdate = async (customer) => {
         } else if (customer_type === '3') {
             cust_type = 'partnership'
         }
+         
+         console.log("result ",result)
+
 
         if (result.changedRows > 0) {
             // Add Query Satff Logs
