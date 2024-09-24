@@ -1,9 +1,9 @@
 const pool = require('../config/database');
+const { SatffLogUpdateOperation, generateNextUniqueCode } = require('../../app/utils/helper');
 
 const getAddJobData = async (job) => {
 
   const { customer_id } = job;
-
 
   // customer Client
   try {
@@ -257,24 +257,6 @@ const getAddJobData = async (job) => {
 
 }
 
-async function generateNextUniqueCode() {
-
-  const [rows] = await pool.execute('SELECT job_id FROM jobs ORDER BY id DESC LIMIT 1');
-  let newCode = '00001'; // Default code if table is empty
-  if (rows.length > 0) {
-    const inputString = rows[0].job_id;
-    const parts = inputString.split('_');
-    const lastPart = parts[parts.length - 1];
-    const lastCode = lastPart;
-    const nextCode = parseInt(lastCode, 10) + 1;
-
-    newCode = "0000" + nextCode
-    // newCode = nextCode.toString().padStart(5, '0');
-  }
-
-  return newCode;
-}
-
 const jobAdd = async (job) => {
 
 
@@ -342,19 +324,12 @@ const jobAdd = async (job) => {
   }
 
 
-
-
-  let UniqueNo = await generateNextUniqueCode()
-
-  const [ExistCustomer] = await pool.execute('SELECT trading_name FROM customers WHERE id =' + customer_id);
-  const existCustomerName = ExistCustomer[0].trading_name
-  const firstThreeLettersexistCustomerName = existCustomerName.substring(0, 3);
-
-  const [ExistClient] = await pool.execute('SELECT trading_name FROM clients WHERE id =' + client_id);
-  const existClientName = ExistClient[0].trading_name
-  const firstThreeLettersexistClientName = existClientName.substring(0, 3);
-
-  const job_id = firstThreeLettersexistCustomerName + "_" + firstThreeLettersexistClientName + "_" + UniqueNo;
+  let data = {
+    table: 'jobs',
+    field: 'job_id'
+  }
+  //CUS_CLI_00001
+  const job_id = await generateNextUniqueCode(data);
   try {
 
     const query = `
@@ -436,7 +411,6 @@ const getJobByCustomer = async (job) => {
         const query = `
         SELECT 
         jobs.id AS job_id,
-        jobs.job_id AS job_code_id,
         job_types.type AS job_type_name,
         customer_contact_details.id AS account_manager_officer_id,
         customer_contact_details.first_name AS account_manager_officer_first_name,
@@ -446,20 +420,21 @@ const getJobByCustomer = async (job) => {
         jobs.invoiced AS invoiced,
         jobs.total_hours AS total_hours,
         jobs.total_hours_status AS total_hours_status,
-   
         staffs.id AS allocated_id,
         staffs.first_name AS allocated_first_name,
         staffs.last_name AS allocated_last_name,
-   
         staffs2.id AS reviewer_id,
         staffs2.first_name AS reviewer_first_name,
         staffs2.last_name AS reviewer_last_name,
-   
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
-
-        master_status.name AS status
+        master_status.name AS status,
+        CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id
    
         FROM 
         jobs
@@ -496,7 +471,6 @@ const getJobByCustomer = async (job) => {
         const query = `
         SELECT 
         jobs.id AS job_id,
-        jobs.job_id AS job_code_id,
         job_types.type AS job_type_name,
         customer_contact_details.id AS account_manager_officer_id,
         customer_contact_details.first_name AS account_manager_officer_first_name,
@@ -520,7 +494,12 @@ const getJobByCustomer = async (job) => {
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
 
-        master_status.name AS status
+        master_status.name AS status,
+        CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id
    
         FROM 
         jobs
@@ -554,7 +533,6 @@ const getJobByCustomer = async (job) => {
           const query = `
         SELECT 
         jobs.id AS job_id,
-        jobs.job_id AS job_code_id,
         job_types.type AS job_type_name,
         customer_contact_details.id AS account_manager_officer_id,
         customer_contact_details.first_name AS account_manager_officer_first_name,
@@ -578,7 +556,12 @@ const getJobByCustomer = async (job) => {
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
 
-        master_status.name AS status
+        master_status.name AS status,
+        CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id
    
         FROM 
       jobs
@@ -622,7 +605,6 @@ const getJobByCustomer = async (job) => {
         const query = `
         SELECT 
         jobs.id AS job_id,
-        jobs.job_id AS job_code_id,
         job_types.type AS job_type_name,
         customer_contact_details.id AS account_manager_officer_id,
         customer_contact_details.first_name AS account_manager_officer_first_name,
@@ -646,7 +628,12 @@ const getJobByCustomer = async (job) => {
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
 
-        master_status.name AS status
+        master_status.name AS status,
+        CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id
    
         FROM 
         jobs
@@ -681,7 +668,6 @@ const getJobByCustomer = async (job) => {
         const query = `
         SELECT 
         jobs.id AS job_id,
-        jobs.job_id AS job_code_id,
         job_types.type AS job_type_name,
         customer_contact_details.id AS account_manager_officer_id,
         customer_contact_details.first_name AS account_manager_officer_first_name,
@@ -703,9 +689,12 @@ const getJobByCustomer = async (job) => {
         staffs3.id AS outbooks_acount_manager_id,
         staffs3.first_name AS outbooks_acount_manager_first_name,
         staffs3.last_name AS outbooks_acount_manager_last_name,
-
-        master_status.name AS status
-   
+        master_status.name AS status,
+          CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id
         FROM 
         jobs
         LEFT JOIN 
@@ -757,7 +746,6 @@ const getJobByClient = async (job) => {
         const query = `
      SELECT 
      jobs.id AS job_id,
-     jobs.job_id AS job_code_id,
      job_types.type AS job_type_name,
      customer_contact_details.id AS account_manager_officer_id,
      customer_contact_details.first_name AS account_manager_officer_first_name,
@@ -780,7 +768,12 @@ const getJobByClient = async (job) => {
      staffs3.first_name AS outbooks_acount_manager_first_name,
      staffs3.last_name AS outbooks_acount_manager_last_name,
 
-     master_status.name AS status
+     master_status.name AS status,
+     CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id
 
      FROM 
      jobs
@@ -788,6 +781,8 @@ const getJobByClient = async (job) => {
      customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
      LEFT JOIN 
      clients ON jobs.client_id = clients.id
+     LEFT JOIN
+      customers ON jobs.customer_id = customers.id
      LEFT JOIN 
      job_types ON jobs.job_type_id = job_types.id
      LEFT JOIN 
@@ -816,7 +811,6 @@ const getJobByClient = async (job) => {
         const query = `
    SELECT 
    jobs.id AS job_id,
-   jobs.job_id AS job_code_id,
    job_types.type AS job_type_name,
    customer_contact_details.id AS account_manager_officer_id,
    customer_contact_details.first_name AS account_manager_officer_first_name,
@@ -839,7 +833,12 @@ const getJobByClient = async (job) => {
    staffs3.first_name AS outbooks_acount_manager_first_name,
    staffs3.last_name AS outbooks_acount_manager_last_name,
 
-   master_status.name AS status
+   master_status.name AS status,
+   CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id
 
    FROM 
    jobs
@@ -847,6 +846,8 @@ const getJobByClient = async (job) => {
    customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
    LEFT JOIN 
    clients ON jobs.client_id = clients.id
+   LEFT JOIN
+      customers ON jobs.customer_id = customers.id
    LEFT JOIN 
    job_types ON jobs.job_type_id = job_types.id
    LEFT JOIN 
@@ -871,7 +872,6 @@ const getJobByClient = async (job) => {
           const query = `
    SELECT 
    jobs.id AS job_id,
-   jobs.job_id AS job_code_id,
    job_types.type AS job_type_name,
    customer_contact_details.id AS account_manager_officer_id,
    customer_contact_details.first_name AS account_manager_officer_first_name,
@@ -894,10 +894,19 @@ const getJobByClient = async (job) => {
    staffs3.first_name AS outbooks_acount_manager_first_name,
    staffs3.last_name AS outbooks_acount_manager_last_name,
 
-   master_status.name AS status
+   master_status.name AS status,
+   CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id
 
    FROM 
-  jobs
+   jobs
+   LEFT JOIN 
+   clients ON jobs.client_id = clients.id
+   LEFT JOIN
+      customers ON jobs.customer_id = customers.id
    JOIN 
    services ON jobs.service_id = services.id
    JOIN
@@ -938,7 +947,6 @@ const getJobByClient = async (job) => {
         const query = `
      SELECT 
      jobs.id AS job_id,
-     jobs.job_id AS job_code_id,
      job_types.type AS job_type_name,
      customer_contact_details.id AS account_manager_officer_id,
      customer_contact_details.first_name AS account_manager_officer_first_name,
@@ -961,10 +969,19 @@ const getJobByClient = async (job) => {
      staffs3.first_name AS outbooks_acount_manager_first_name,
      staffs3.last_name AS outbooks_acount_manager_last_name,
 
-     master_status.name AS status
+     master_status.name AS status,
+     CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id
 
      FROM 
      jobs
+     LEFT JOIN 
+      clients ON jobs.client_id = clients.id
+      LEFT JOIN
+      customers ON jobs.customer_id = customers.id
      LEFT JOIN 
      customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
      LEFT JOIN 
@@ -995,7 +1012,6 @@ const getJobByClient = async (job) => {
         const query = `
      SELECT 
      jobs.id AS job_id,
-     jobs.job_id AS job_code_id,
      job_types.type AS job_type_name,
      customer_contact_details.id AS account_manager_officer_id,
      customer_contact_details.first_name AS account_manager_officer_first_name,
@@ -1018,7 +1034,12 @@ const getJobByClient = async (job) => {
      staffs3.first_name AS outbooks_acount_manager_first_name,
      staffs3.last_name AS outbooks_acount_manager_last_name,
 
-     master_status.name AS status
+     master_status.name AS status,
+     CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id
 
      FROM 
      jobs
@@ -1026,6 +1047,8 @@ const getJobByClient = async (job) => {
      customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
      LEFT JOIN 
      clients ON jobs.client_id = clients.id
+      LEFT JOIN
+      customers ON jobs.customer_id = customers.id
      LEFT JOIN 
      job_types ON jobs.job_type_id = job_types.id
      LEFT JOIN 
@@ -1053,7 +1076,7 @@ const getJobByClient = async (job) => {
 
     return { status: true, message: 'Success.', data: result };
   } catch (error) {
-
+    console.log("err -", error)
     return { status: false, message: 'Error getting job.' };
   }
 
@@ -1068,7 +1091,6 @@ const getByJobStaffId = async (job) => {
     const query = `
   SELECT 
   jobs.id AS job_id,
-  jobs.job_id AS job_code_id,
   job_types.type AS job_type_name,
   customer_contact_details.id AS account_manager_officer_id,
   customer_contact_details.first_name AS account_manager_officer_first_name,
@@ -1091,7 +1113,12 @@ const getByJobStaffId = async (job) => {
   staffs3.first_name AS outbooks_acount_manager_first_name,
   staffs3.last_name AS outbooks_acount_manager_last_name,
 
-  master_status.name AS status
+  master_status.name AS status,
+  CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id
 
   FROM 
   jobs
@@ -1236,7 +1263,7 @@ const getJobById = async (job) => {
     //  checklist_tasks.checklist_id = client_job_task.checklist_id AND checklist_tasks.task_id = client_job_task.task_id AND
     //  jobs.id = ?
     const [rows] = await pool.execute(query, [job_id]);
-    console.log("rows ", rows)
+    // console.log("rows ", rows)
     let result = {}
     if (rows.length > 0) {
       let tasks = []
@@ -1319,7 +1346,7 @@ const getJobById = async (job) => {
 
 
     }
-    console.log("result ", result)
+    // console.log("result ", result)
     return { status: true, message: 'Success.', data: result };
   } catch (error) {
     console.log("error ", error)
@@ -1384,15 +1411,7 @@ const jobUpdate = async (job) => {
 
 
 
-  const [ExistCustomer] = await pool.execute('SELECT trading_name FROM customers WHERE id = ?', [customer_id]);
-  const [ExistClient] = await pool.execute('SELECT trading_name FROM clients WHERE id = ?', [client_id]);
   const [ExistJob] = await pool.execute('SELECT job_id ,status_type ,allocated_to ,reviewer FROM jobs WHERE id = ?', [job_id]);
-
-  const lastCode = ExistJob[0].job_id.slice(ExistJob[0].job_id.lastIndexOf('_') + 1);
-
-  const firstThreeLettersexistCustomerName = ExistCustomer[0].trading_name.substring(0, 3);
-  const firstThreeLettersexistClientName = ExistClient[0].trading_name.substring(0, 3);
-  const exit_job_id = firstThreeLettersexistCustomerName + "_" + firstThreeLettersexistClientName + "_" + lastCode;
 
 
   let status_type_update = status_type;
@@ -1420,7 +1439,7 @@ const jobUpdate = async (job) => {
   try {
     const query = `
          UPDATE jobs 
-         SET job_id = ? ,account_manager_id = ?, customer_id = ?, client_id = ?, client_job_code = ?, customer_contact_details_id = ?, 
+         SET account_manager_id = ?, customer_id = ?, client_id = ?, client_job_code = ?, customer_contact_details_id = ?, 
              service_id = ?, job_type_id = ?, budgeted_hours = ?, reviewer = ?, allocated_to = ?, allocated_on = ?, 
              date_received_on = ?, year_end = ?, total_preparation_time = ?, review_time = ?, 
              feedback_incorporation_time = ?, total_time = ?, engagement_model = ?, expected_delivery_date = ?, due_on = ?, 
@@ -1432,7 +1451,7 @@ const jobUpdate = async (job) => {
          WHERE id = ?
        `;
     const [result] = await pool.execute(query, [
-      exit_job_id, account_manager_id, customer_id, client_id, client_job_code, customer_contact_details_id,
+      account_manager_id, customer_id, client_id, client_job_code, customer_contact_details_id,
       service_id, job_type_id, budgeted_hours, reviewer, allocated_to, allocated_on,
       date_received_on, year_end, total_preparation_time, review_time,
       feedback_incorporation_time, total_time, engagement_model, expected_delivery_date, due_on,
@@ -1467,9 +1486,9 @@ const jobUpdate = async (job) => {
         // Find task IDs that need to be deleted
         const tasksToDelete = existingTaskIds.filter(id => !providedTaskIds.includes(id));
 
-        console.log("tasksToDelete ", tasksToDelete)
-        console.log("job_id ", job_id)
-        console.log("checklist_id ", checklist_id)
+        // console.log("tasksToDelete ", tasksToDelete)
+        // console.log("job_id ", job_id)
+        // console.log("checklist_id ", checklist_id)
 
         if (tasksToDelete.length > 0) {
           // const deleteQuery = `

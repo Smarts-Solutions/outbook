@@ -9,7 +9,9 @@ import {
   Country,
   IncorporationApi,
   customerSourceApi,
+  getList
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
+
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import Modal from "../../../Components/ExtraComponents/Modals/Modal";
 import { useDispatch, useSelector } from "react-redux";
@@ -96,6 +98,59 @@ const Setting = () => {
   const [getShowTabId, setShowTabId] = useState("1");
 
   const [isEdit, setIsEdit] = useState(false);
+
+  const [getCheckList, setCheckList] = useState([]);
+  const [getCheckList1, setCheckList1] = useState([]);
+
+  const getCheckListData = async () => {
+    const req = { action: "get", customer_id: 0 };
+    const data = { req: req, authToken: token };
+    await dispatch(getList(data))
+      .unwrap()
+      .then(async (response) => {
+        console.log("response getCheckListData",response)
+        if (response.status) {
+
+          if (response.data.length > 0) {
+            let Array = [
+              { id: 1, name: "SoleTrader" },
+              { id: 2, name: "Company" },
+              { id: 3, name: "Partnership" },
+              { id: 4, name: "Individual" },
+            ];
+            let data = response.data.map((item) => {
+              return {
+                ...item,
+                check_list_name: item.check_list_name,
+                service_name: item.service_name,
+                job_type_type: item.job_type_type,
+                // client_type_type: item.client_type_type,
+                status: item.status,
+                checklists_id: item.checklists_id,
+                client_type_type: item.checklists_client_type_id.split(",").map(id => {
+                  let matchedItem = Array.find(item => item.id === Number(id));
+                  return matchedItem ? matchedItem.name : null;
+                }).filter(name => name !== null).join(", ")
+              };
+            });
+
+
+            setCheckList(data);
+            setCheckList1(data);
+          } else {
+            setCheckList([]);
+          }
+
+          // setCheckList(response.data);
+          // setCheckList1(response.data);
+        } else {
+          setCheckList([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
 
   const roleData = async (req) => {
     const data = { req: req, authToken: token };
@@ -414,6 +469,8 @@ const Setting = () => {
         break;
       case "8":
         customerSourceData(req);
+      case "9":
+        getCheckListData();  
         break;
       default:
         break;
@@ -905,7 +962,6 @@ const Setting = () => {
       selector: (row) => (row.status == "1" ? "Active" : "Deactive"),
       sortable: true,
       width: "100px",
-
     },
     // {
     //   name: "Actions",
@@ -1799,7 +1855,7 @@ const Setting = () => {
                   <Datatable
                     filter={true}
                     columns={CheckListColumns}
-                    data={[]}
+                    data={getCheckList}
                   />
                 </div>
               </div>

@@ -674,6 +674,7 @@ CREATE TABLE jobs (
         id INT AUTO_INCREMENT PRIMARY KEY,
         job_id INT NOT NULL,
         draft_sent_on DATE DEFAULT NULL,
+        draft_title VARCHAR(100) DEFAULT NULL,
         final_draft_sent_on DATE DEFAULT NULL,
         feedback_received ENUM('0', '1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
         updated_amendment ENUM('1', '2','3','4') NOT NULL DEFAULT '1' COMMENT '1:Amendment, 2: Update ,2: Both ,2: None',

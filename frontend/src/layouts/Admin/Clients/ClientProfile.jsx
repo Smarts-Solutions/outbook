@@ -20,6 +20,7 @@ const ClientList = () => {
   const [companyDetails, setCompanyDetails] = useState([]);
   const [hararchyData, setHararchyData] = useState(location.state.data);
 
+  console.log("location.state", location.state);
 
  
 
@@ -163,9 +164,7 @@ const ClientList = () => {
         ...prevState,
         job: row
       };
-       
-      navigate("/admin/job/logs", { state: { job_id: row.job_id, data: updatedData , goto: "client" } });
-       
+      navigate("/admin/job/logs", { state: { job_id: row.job_id, data: updatedData , goto: "client" } }); 
       return updatedData;
     });
   };
@@ -227,7 +226,7 @@ const ClientList = () => {
   const handleAddClient = (row) => {
     if (getClientDetails?.data?.client?.customer_id) {
       navigate("/admin/createjob", {
-        state: { customer_id: getClientDetails?.data?.client?.customer_id, goto: "client" },
+        state: { customer_id: getClientDetails?.data?.client?.customer_id,clientName: location?.state?.data?.client, goto: "client" },
       });
     }
   };
