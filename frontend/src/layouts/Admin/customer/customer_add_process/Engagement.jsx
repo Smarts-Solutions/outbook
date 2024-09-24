@@ -412,7 +412,7 @@ const Engagement = () => {
         }
       })
       .catch((error) => {
-        console.log(error);
+     return;
       });
   };
 

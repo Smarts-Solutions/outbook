@@ -21,10 +21,9 @@
             google.maps.event.addListener(autocomplete, 'place_changed', function () {
                 var place = autocomplete.getPlace();
                 if (place && place.geometry) {
-                    console.log("Selected Place:", place);
-                    // You can add more actions here, e.g., send place details to your API
+                 
                 } else {
-                    console.log("No details available for input: '" + place.name + "'");
+                   
                 }
             });
         });

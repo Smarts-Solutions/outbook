@@ -1259,11 +1259,9 @@ const getJobById = async (job) => {
       jobs.id = ? 
      `;
 
-    //  WHERE
-    //  checklist_tasks.checklist_id = client_job_task.checklist_id AND checklist_tasks.task_id = client_job_task.task_id AND
-    //  jobs.id = ?
+
     const [rows] = await pool.execute(query, [job_id]);
-    // console.log("rows ", rows)
+   
     let result = {}
     if (rows.length > 0) {
       let tasks = []
@@ -1346,7 +1344,7 @@ const getJobById = async (job) => {
 
 
     }
-    // console.log("result ", result)
+ 
     return { status: true, message: 'Success.', data: result };
   } catch (error) {
     console.log("error ", error)
@@ -1486,9 +1484,7 @@ const jobUpdate = async (job) => {
         // Find task IDs that need to be deleted
         const tasksToDelete = existingTaskIds.filter(id => !providedTaskIds.includes(id));
 
-        // console.log("tasksToDelete ", tasksToDelete)
-        // console.log("job_id ", job_id)
-        // console.log("checklist_id ", checklist_id)
+    
 
         if (tasksToDelete.length > 0) {
           // const deleteQuery = `

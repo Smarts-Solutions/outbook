@@ -4,7 +4,7 @@ const { SatffLogUpdateOperation, generateNextUniqueCodeJobLogTitle } = require('
 
 const getTaskTimeSheet = async (timeSheet) => {
   const { job_id } = timeSheet;
-  // console.log("job_id ", job_id)
+  
   try {
     const query = `
      SELECT 
@@ -40,10 +40,10 @@ const getTaskTimeSheet = async (timeSheet) => {
      client_job_task.id DESC;
      `;
     const [rows] = await pool.execute(query, [job_id]);
-    // console.log("rows ", rows)
+
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-    console.log("error ", error)
+  
     return { status: false, message: 'Error getTaskTimeSheet .' };
   }
 
@@ -53,7 +53,7 @@ const getTaskTimeSheet = async (timeSheet) => {
 }
 const getjobTimeSheet = async (timeSheet) => {
   const { job_id } = timeSheet;
-  // console.log("job_id ", job_id)
+  
   try {
     const query = `
      SELECT 
@@ -72,7 +72,7 @@ const getjobTimeSheet = async (timeSheet) => {
 
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-    console.log("error ", error)
+   
     return { status: false, message: 'Error getTaskTimeSheet .' };
   }
 }
@@ -109,10 +109,10 @@ const updateJobTimeTotalHours = async (timeSheet) => {
      id = ?
      `;
     const [rows] = await pool.execute(query, [total_hours, total_hours_status, job_id]);
-    console.log("rows mission ", rows)
+   
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-    console.log("error ", error)
+    
     return { status: false, message: 'Error getTaskTimeSheet .' };
   }
 }
@@ -151,10 +151,10 @@ const updateJobTimeTotalHours = async (timeSheet) => {
 // //    ORDER BY jobs.id DESC LIMIT 1
 // // `
 // //     const [rows1] = await pool.execute(query_get_code, [job_id]);
-// //     console.log("rows1 ", rows1);
+
 // //     return rows1[0].code
 //   } catch (error) {
-//     console.log("error  - Logs create", error)
+
 //     return newCode
 //   }
 // }
@@ -197,7 +197,7 @@ const addMissingLog = async (missingLog) => {
       missing_log_reviewed_date,
       status
     ]);
-    // console.log("rows ", rows)
+
 
     if (missing_log_document.length > 0) {
       for (let file of missing_log_document) {
@@ -223,14 +223,14 @@ const addMissingLog = async (missingLog) => {
           ]);
 
         } catch (error) {
-          console.log('Error inserting file:', error);
+        
         }
       }
     }
 
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-    console.log("error ", error)
+
     return { status: false, message: 'Error addMissingLog .' };
   }
 }
@@ -267,10 +267,10 @@ const getMissingLog = async (missingLog) => {
     missing_logs.id DESC;
 `;
     const [rows] = await pool.execute(query, [job_id]);
-    // console.log("rows ", rows)
+ 
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-    console.log("error ", error)
+   
     return { status: false, message: 'Error getMissingLog .' };
   }
 }
@@ -300,7 +300,7 @@ const editMissingLog = async (missingLog) => {
      id = ?
      `;
     const [rows] = await pool.execute(query, [missing_log, missing_log_sent_on, missing_log_prepared_date, missing_log_reviewed_by, missing_log_reviewed_date, status, id]);
-    // console.log("rows ", rows)
+
 
     if (missing_log_document.length > 0) {
       for (let file of missing_log_document) {
@@ -333,7 +333,7 @@ const editMissingLog = async (missingLog) => {
 
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-    console.log("error ", error)
+   
     return { status: false, message: 'Error editMissingLog .' };
   }
 }
@@ -354,10 +354,10 @@ const getMissingLogSingleView = async (missingLog) => {
      missing_logs.id DESC;
      `;
     const [rows] = await pool.execute(query, [id]);
-    // console.log("rows ", rows)
+
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-    console.log("error ", error)
+
     return { status: false, message: 'Error getMissingLog .' };
   }
 
@@ -459,7 +459,7 @@ const getQuerie = async (querie) => {
       queries.id DESC;
      `;
     const [rows] = await pool.execute(query, [job_id]);
-    // console.log("rows ", rows)
+ 
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
     console.log("error ", error)
@@ -485,7 +485,7 @@ const getQuerieSingleView = async (querie) => {
       queries.id DESC;
      `;
     const [rows] = await pool.execute(query, [id]);
-    // console.log("rows ", rows)
+ 
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
     console.log("error ", error)
@@ -518,7 +518,7 @@ const editQuerie = async (query) => {
      id = ?
      `;
     const [rows] = await pool.execute(query, [queries_remaining, status, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date, id]);
-    // console.log("rows ", rows)
+
 
     if (query_document.length > 0) {
       for (let file of query_document) {
@@ -575,10 +575,10 @@ const getDraft = async (draft) => {
       drafts.id DESC;
      `;
     const [rows] = await pool.execute(query, [job_id]);
-    //  console.log("rows ", rows)
+   
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-    console.log("error ", error)
+
     return { status: false, message: 'Error getDraft .' };
   }
 }
@@ -601,10 +601,10 @@ const getDraftSingleView = async (req, res) => {
       drafts.id DESC;
      `;
     const [rows] = await pool.execute(query, [id]);
-    // console.log("rows ", rows)
+ 
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-    console.log("error ", error)
+
     return { status: false, message: 'Error getDraft .' };
   }
 }

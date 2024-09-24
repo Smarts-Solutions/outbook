@@ -231,7 +231,7 @@ const Sidebar = () => {
                       </li>
                     )}
 
-                  {((updatedShowTab && updatedShowTab.setting) ||
+                  {((updatedShowTab && updatedShowTab.timesheet) ||
                     role == "ADMIN" ||
                     role == "SUPERADMIN") && (
                       <li
@@ -247,7 +247,7 @@ const Sidebar = () => {
                           <span className="sidebar-icons">
                             <img
                               src="/assets/images/sidebar-icons/setting.png"
-                              alt="Setting"
+                              alt="time sheet"
                             />
                           </span>
                           <span>Time Sheet</span>

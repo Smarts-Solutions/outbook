@@ -355,7 +355,6 @@ const createCustomer = async (customer) => {
 const getCustomer = async (customer) => {
     const { staff_id } = customer;
 
-    console.log("staff_id ", staff_id)
 
     const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + staff_id + '" LIMIT 1');
 
@@ -459,7 +458,6 @@ const getCustomer = async (customer) => {
             const [resultAllocated] = await pool.execute(query, [staff_id]);
             result = resultAllocated;
 
-            console.log("resultAllocated", resultAllocated.length)
             if (resultAllocated.length === 0) {
                 const query = `
             SELECT  
@@ -495,13 +493,13 @@ const getCustomer = async (customer) => {
             staffs AS staff2 ON customers.account_manager_id = staff2.id
         LEFT JOIN 
             customer_company_information ON customers.id = customer_company_information.customer_id
-        WHERE customer_service_account_managers.account_manager_id = ?
+        WHERE customer_service_account_managers.account_manager_id = ? OR customers.staff_id= ?
         GROUP BY 
         customers.id
         ORDER BY 
         customers.id DESC;
             `;
-                const [resultAllocated] = await pool.execute(query, [staff_id]);
+                const [resultAllocated] = await pool.execute(query, [staff_id,staff_id]);
                 result = resultAllocated;
             }
 
@@ -624,7 +622,7 @@ const deleteCustomer = async (customer) => {
 }
 
 const updateProcessCustomerServices = async (customerProcessData) => {
-    console.log("customerProcessData ", customerProcessData)
+
     const { customer_id, services, Task } = customerProcessData;
 
     const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
@@ -765,7 +763,6 @@ const updateProcessCustomerServices = async (customerProcessData) => {
 
         const outputArray = Object.values(resultTsk);
 
-        console.log("outputArray .", outputArray);
 
         if (outputArray.length > 0) {
             for (const tsk of outputArray) {
@@ -1715,7 +1712,6 @@ const getSingleCustomer = async (customer) => {
             let customised_pricing = {}
             if (rows[0].customised_pricing == "1") {
 
-console.log(rows)
 
                 customised_pricing = rows.map(row => ({
                     customised_pricing_id: row.customised_pricing_id,
@@ -2049,7 +2045,7 @@ const customerUpdate = async (customer) => {
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
-                console.log("err", err)
+               
                 return { status: false, message: 'Update Error Customer Type 2' };
             }
 
@@ -2089,16 +2085,14 @@ const customerUpdate = async (customer) => {
                     // let residential_address = detail.residential_address;
                     let authorised_signatory_status = detail.authorised_signatory_status;
                     if (contact_id == "" || contact_id == undefined || contact_id == null) {
-                        console.log("contact_id", [customer_id, customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, authorised_signatory_status])
-                        const query4 = `
+                         const query4 = `
                         INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email,authorised_signatory_status)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                         `;
                         const [result3, err3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, authorised_signatory_status]);
                         logUpdateRequired = true;
 
-                        console.log("result3", result3)
-                        console.log("err3", err3)
+               
                     } else {
 
                         arrayInterId.push(contact_id)
@@ -2161,7 +2155,7 @@ const customerUpdate = async (customer) => {
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
-                console.log("Error", err)
+              
                 return { status: false, message: 'Update Error Customer Type 3' };
             }
 
@@ -2173,7 +2167,6 @@ const customerUpdate = async (customer) => {
     else if (pageStatus === "2") {
         const { services, Task } = customer;
 
-        console.log("pageStatus ", pageStatus)
 
         const [ExistServiceids] = await pool.execute('SELECT service_id  FROM `customer_services` WHERE customer_id =' + customer_id);
         const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
@@ -2308,7 +2301,7 @@ const customerUpdate = async (customer) => {
 
             const outputArray = Object.values(resultTsk);
 
-            console.log("outputArray .", outputArray);
+      
 
             if (outputArray.length > 0) {
                 for (const tsk of outputArray) {
