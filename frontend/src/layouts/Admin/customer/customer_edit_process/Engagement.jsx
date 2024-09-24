@@ -10,7 +10,10 @@ import {
 import { useDispatch } from "react-redux";
 import { Edit_Customer } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useLocation } from "react-router-dom";
-import { GET_CUSTOMER_DATA } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import {
+  GET_CUSTOMER_DATA,
+  Get_Service,
+} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 
 const checkboxOptions = [
@@ -29,6 +32,7 @@ const Engagement = () => {
   const [errors2, setErrors2] = useState({});
   const [errors3, setErrors3] = useState({});
   const [errors4, setErrors4] = useState([]);
+  const [getAllServices, setAllServices] = useState([]);
 
   const [customerDetails, setCustomerDetails] = useState({
     loading: true,
@@ -68,6 +72,7 @@ const Engagement = () => {
     {
       minimum_number_of_jobs: "",
       job_type_id: "",
+      service_id:"",
       cost_per_job: "",
       customised_pricing_id: "",
     },
@@ -76,9 +81,7 @@ const Engagement = () => {
   const [jobType, setJobType] = useState([]);
   const [coustomerSource, setCoustomerSource] = useState([]);
   const [coustomerSubSource, setCoustomerSubSource] = useState([]);
-
   const [formState1, setFormState1] = useState({});
-
   const [formErrors, setFormErrors] = useState({
     customerJoiningDate: "",
     customerSource: "",
@@ -100,11 +103,7 @@ const Engagement = () => {
             loading: false,
             data: response.data,
           });
-          // console.log({
-          //   customerSource: response.data.customer?.customerSource,
-          //   customerSubSource: response.data.customer?.customerSubSource,
-          //   customerJoiningDate: response.data.customer?.customerJoiningDate,
-          // });
+         
 
           setFormState1({
             customerSource: response.data.customer?.customerSource,
@@ -128,6 +127,7 @@ const Engagement = () => {
   }, []);
 
   useEffect(() => {
+    GetAllServices();
     customerSourceData();
     GetCustomerData();
   }, []);
@@ -254,11 +254,25 @@ const Engagement = () => {
     if (checkboxStates[3] === 0) setErrors4({});
   }, [checkboxStates]);
 
-  useEffect(() => { 
+  useEffect(() => {
+   
     if (formState1.customerSource) {
       customerSubSourceData();
     }
   }, [formState1]);
+
+  const GetAllServices = async () => {
+    dispatch(Get_Service({ req: { action: "get" }, authToken: token }))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setAllServices(response.data);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   const handleCheckboxChange = (index) => {
     setCheckboxStates((prevStates) => {
@@ -321,6 +335,8 @@ const Engagement = () => {
       {
         minimum_number_of_jobs: "",
         job_type_id: "",
+        service_id: "",
+
         cost_per_job: "",
         customised_pricing_id: "",
       },
@@ -424,8 +440,12 @@ const Engagement = () => {
           "Minimum number of Jobs must be between 1 and 100";
       }
 
-      if (!entry.job_type_id) {
-        entryErrors.job_type_id = "Please select a job type";
+      // if (!entry.job_type_id) {
+      //   entryErrors.job_type_id = "Please select a job type";
+      // }
+
+      if (!entry.service_id) {
+        entryErrors.service_id = "Please select a Service";
       }
 
       if (!entry.cost_per_job) {
@@ -626,8 +646,6 @@ const Engagement = () => {
 
     return Object.keys(errors).length === 0; // Return true if no errors
   };
-
-
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
@@ -977,7 +995,7 @@ const Engagement = () => {
                                       )}
                                     </div>
                                   </div>
-                                  <div className="col-lg-4">
+                                  {/* <div className="col-lg-4">
                                     <div className="mb-3">
                                       <label
                                         htmlFor={`jobType_${index}`}
@@ -1011,6 +1029,46 @@ const Engagement = () => {
                                       {errors4[index] && (
                                         <div className="error-text">
                                           {errors4[index].job_type_id}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div> */}
+
+                                  <div className="col-lg-4">
+                                    <div className="mb-3">
+                                      <label
+                                        htmlFor={`service${index}`}
+                                        className="form-label"
+                                      >
+                                        Types Of Services
+                                      </label>
+                                      <select
+                                        id={`service${index}`}
+                                        className="form-select"
+                                        name="service_id"
+                                        value={job.service_id}
+                                        onChange={(e) =>
+                                          handleChange4(index, e)
+                                        }
+                                      >
+                                        {console.log(job.service_id)}
+                                        <option value="">
+                                          Select Services
+                                        </option>
+                                  
+                                        {getAllServices &&
+                                          getAllServices.map((data) => (
+                                            <option
+                                              key={data.id}
+                                              value={data.id}
+                                            >
+                                              {data.name}
+                                            </option>
+                                          ))}
+                                      </select>
+                                      {errors4[index] && (
+                                        <div className="error-text">
+                                          {errors4[index].service_id}
                                         </div>
                                       )}
                                     </div>
@@ -1157,12 +1215,12 @@ const Engagement = () => {
                         onChange={(e) => handleInputChange(e)}
                       >
                         <option value="">Select Customer Sub-Source</option>
-                        {coustomerSubSource && coustomerSubSource.map((data) => (
+                        {coustomerSubSource &&
+                          coustomerSubSource.map((data) => (
                             <option key={data.id} value={data.id}>
                               {data.name}
                             </option>
                           ))}
-
                       </select>
                       {formErrors.customerSubSource && (
                         <span className="error-text d-block">

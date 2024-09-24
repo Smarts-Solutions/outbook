@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch , useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { GET_ALL_CUSTOMERS } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getDateRange } from "../../../Utils/Comman_function";
-
+import Swal from "sweetalert2";
 
 const Customer = () => {
   const navigate = useNavigate();
@@ -23,31 +23,30 @@ const Customer = () => {
     delete: 0,
   });
 
-  const accessData = 
-  JSON.parse(localStorage.getItem("accessData") || "[]").find(
-    (item) => item.permission_name === "customer"
-  )?.items || [];
+  const accessData =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "customer"
+    )?.items || [];
 
+  useEffect(() => {
+    GetAllCustomerData();
+  }, []);
 
   useEffect(() => {
     GetAllCustomerData();
   }, [activeTab]);
 
+  useEffect(() => {
+    if (accessData.length === 0) return;
+    const updatedAccess = { insert: 0, update: 0, delete: 0 };
+    accessData.forEach((item) => {
+      if (item.type === "insert") updatedAccess.insert = item.is_assigned;
+      if (item.type === "update") updatedAccess.update = item.is_assigned;
+      if (item.type === "delete") updatedAccess.delete = item.is_assigned;
+    });
 
-useEffect(() => { 
-  if (accessData.length === 0) return; 
-  const updatedAccess = { insert: 0, update: 0, delete: 0 }; 
-  accessData.forEach((item) => {
-    if (item.type === "insert") updatedAccess.insert = item.is_assigned;
-    if (item.type === "update") updatedAccess.update = item.is_assigned;
-    if (item.type === "delete") updatedAccess.delete = item.is_assigned;
-  });
-
-  setAccessData(updatedAccess);
-}, []);  
-
-
- 
+    setAccessData(updatedAccess);
+  }, []);
 
   const tabs = [
     { id: "this-week", label: "This week" },
@@ -120,10 +119,10 @@ useEffect(() => {
         row.customer_type === 1
           ? "Sole Trader"
           : row.customer_type === 2
-            ? "Company"
-            : row.customer_type === 3
-              ? "Partnership"
-              : "-",
+          ? "Company"
+          : row.customer_type === 3
+          ? "Partnership"
+          : "-",
       sortable: true,
       width: "150px",
     },
@@ -237,10 +236,19 @@ useEffect(() => {
     setFilteredData(filtered);
   };
 
-  const HandleClientView = (row) => {  
-    navigate("/admin/Clientlist", { state: row });
-};
-  
+  const HandleClientView = (row) => {
+
+    if (row.form_process == "4") {
+      navigate("/admin/Clientlist", { state: row });
+    } else {
+      Swal.fire({
+        title: "Form not completed",
+        text: "Please complete the form",
+        icon: "error",
+        confirmButtonText: "Ok",
+      });
+    }
+  };
 
   const handleEdit = (row) => {
     navigate("/admin/editcustomer", { state: row });
@@ -283,7 +291,6 @@ useEffect(() => {
         </div>
       </div>
 
-
       <div className="report-data mt-4">
         <div className="col-sm-12">
           <div className="page-title-box pt-0">
@@ -297,8 +304,9 @@ useEffect(() => {
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
                       <button
-                        className={`nav-link ${activeTab === tab.id ? "active" : ""
-                          }`}
+                        className={`nav-link ${
+                          activeTab === tab.id ? "active" : ""
+                        }`}
                         id={`${tab.id}-tab`}
                         data-bs-toggle="pill"
                         data-bs-target={`#${tab.id}`}
@@ -331,8 +339,9 @@ useEffect(() => {
           {tabs.map((tab) => (
             <div
               key={tab.id}
-              className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                activeTab === tab.id ? "show active" : ""
+              }`}
               id={tab.id}
               role="tabpanel"
               aria-labelledby={`${tab.id}-tab`}
