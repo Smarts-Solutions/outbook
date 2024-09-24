@@ -20,9 +20,7 @@ const ClientList = () => {
   const [companyDetails, setCompanyDetails] = useState([]);
   const [hararchyData, setHararchyData] = useState(location.state.data);
 
-  console.log("location.state", location.state);
-
- 
+  
 
   useEffect(() => {
     GetAllJobList();
@@ -303,7 +301,7 @@ const ClientList = () => {
           </div>
         </div>
 
-        <Hierarchy show={["Customer" , "Client" , activeTab  ]} active={2} data={hararchyData}/>
+        <Hierarchy show={["Customer" , "Client" , activeTab  ]} active={2} data={hararchyData} NumberOfActive={customerData.length}/>
         
       </div>
 

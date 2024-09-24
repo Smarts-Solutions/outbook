@@ -90,8 +90,8 @@ const Admin_Route = () => {
       ).unwrap();
 
       if (response.data) {
-        localStorage.setItem("accessData", JSON.stringify(response.data));
-
+        localStorage.setItem("accessData", JSON.stringify(response.data)); 
+        
         response.data.forEach((item) => {
           if (!role == "ADMIN" || !role == "SUPERADMIN") {
             if (item.permission_name === "setting") {
