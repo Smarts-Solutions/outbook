@@ -197,6 +197,12 @@ const addMissingLog = async (missingLog) => {
       missing_log_reviewed_date,
       status
     ]);
+ 
+    if(rows.insertId > 0){
+      let update_status = 2;
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status,job_id]);
+    } 
+
 
 
     if (missing_log_document.length > 0) {
@@ -290,7 +296,6 @@ const editMissingLog = async (missingLog) => {
      missing_logs
      SET
      missing_log = ?,
-  
      missing_log_sent_on = ?,
      missing_log_prepared_date = ?,
      missing_log_reviewed_by = ?,
@@ -301,6 +306,11 @@ const editMissingLog = async (missingLog) => {
      `;
     const [rows] = await pool.execute(query, [missing_log, missing_log_sent_on, missing_log_prepared_date, missing_log_reviewed_by, missing_log_reviewed_date, status, id]);
 
+    if(rows.changedRows > 0){
+      const [job_id] = await pool.execute('SELECT job_id FROM  `missing_logs` WHERE id = ?', [id]);
+      let update_status = 2;
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status,job_id[0].job_id]);
+    }
 
     if (missing_log_document.length > 0) {
       for (let file of missing_log_document) {
@@ -390,6 +400,11 @@ const addQuerie = async (querie) => {
       (?,?,?,?,?,?,?,?,?)
       `;
     const [rows] = await pool.execute(query, [job_id, queries_remaining, status, UniqueNoTitle, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date]);
+
+    if(rows.insertId > 0){
+      let update_status = 4;
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status,job_id]);
+    } 
 
 
     if (query_document.length > 0) {
@@ -493,7 +508,6 @@ const getQuerieSingleView = async (querie) => {
   }
 }
 
-
 const editQuerie = async (query) => {
   const { id, queries_remaining, reviewed_by, query_sent_date, response_received, status } = query.body;
   const query_document = query.files;
@@ -518,6 +532,12 @@ const editQuerie = async (query) => {
      id = ?
      `;
     const [rows] = await pool.execute(query, [queries_remaining, status, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date, id]);
+
+    if(rows.changedRows > 0){
+      const [job_id] = await pool.execute('SELECT job_id FROM  `queries` WHERE id = ?', [id]);
+      let update_status = 4;
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status,job_id[0].job_id]);
+    }
 
 
     if (query_document.length > 0) {
