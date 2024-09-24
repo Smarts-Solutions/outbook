@@ -1298,6 +1298,24 @@ const Setting = () => {
             value: data.code,
           }, 
           {
+            type: "text",
+            name: "currency",
+            label: "Currency",
+            placeholder: "Enter Currency",
+            value: data.currency,
+          },
+          {
+            type: "select",
+            name: "status",
+            label: "Currency Status",
+            placeholder: "Enter Currency Status",
+            options: [
+              { label: "Active", value: "1" },
+              { label: "Deactive", value: "0" },
+            ],
+            value: data.status === "1" ? "1" : "0",
+          }, 
+          {
             type: "select",
             name: "status",
             label: "Status",
@@ -1307,6 +1325,7 @@ const Setting = () => {
               { label: "Active", value: "1" },
               { label: "Deactive", value: "0" },
             ],
+            
           },
         ],
         title: "Service",
