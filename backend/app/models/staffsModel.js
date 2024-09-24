@@ -1,15 +1,15 @@
 const pool = require('../../app/config/database');
 
 const createStaff = async (staff) => {
-    const { role_id, first_name, last_name, email, phone, password, status } = staff;
+    const { role_id, first_name, last_name, email, phone, password, status ,created_by } = staff;
 
     const query = `
-    INSERT INTO staffs (role_id, first_name, last_name, email, phone, password, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO staffs (role_id, first_name, last_name, email, phone, password, status ,created_by)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     try {
-        const [result] = await pool.execute(query, [role_id, first_name, last_name, email, phone, password, status]);
+        const [result] = await pool.execute(query, [role_id, first_name, last_name, email, phone, password, status,created_by]);
         return result.insertId;
     } catch (err) {
         console.error('Error inserting data:', err);

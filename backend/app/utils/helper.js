@@ -1,5 +1,6 @@
 const pool = require('../config/database');
   const SatffLogUpdateOperation = async (logData) => {
+    console.log("logData ",logData)
     try {
         let staff_id = logData.staff_id;
         let date = logData.date;
@@ -7,14 +8,15 @@ const pool = require('../config/database');
         let log_message = logData.log_message;
         let permission_type = logData.permission_type;
         let ip = logData.ip;
+        let module_id = logData.module_id ? logData.module_id : 0;
 
         const query = `
-        INSERT INTO staff_logs (staff_id,date,module_name,log_message,permission_type,ip)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO staff_logs (staff_id,date,module_name,module_id,log_message,permission_type,ip)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
-        const [result2] = await pool.execute(query, [staff_id,date,module_name,log_message,permission_type,ip]);
+        const [result2] = await pool.execute(query, [staff_id,date,module_name,module_id,log_message,permission_type,ip]);
     } catch (error) {
-   
+        console.log("error  - Logs create", error)
     }
   };
 

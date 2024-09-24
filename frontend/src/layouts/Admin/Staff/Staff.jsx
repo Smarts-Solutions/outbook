@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 
 const StaffPage = () => {
   const token = JSON.parse(localStorage.getItem("token"));
-
+  const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
   const role = JSON.parse(localStorage.getItem("role"));
   const accessData = useSelector(
     (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data
@@ -291,6 +291,7 @@ const StaffPage = () => {
         password: values.password,
         role_id: values.role,
         status: values.status,
+        created_by: StaffUserId.id
       };
 
       if (editStaff) {

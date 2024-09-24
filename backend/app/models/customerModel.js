@@ -849,8 +849,6 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
     const customerUpdateQuery = `UPDATE customers SET customerJoiningDate = ?, customerSource = ?, customerSubSource = ? WHERE id = ?`;   
     const [updateQuery]= await pool.execute(customerUpdateQuery, [customerJoiningDate, customerSource, customerSubSource, customer_id]);
 
-
-
     if (fte_dedicated_staffing === "1") {
 
         const { customer_id, fte_dedicated_staffing, number_of_accountants, fee_per_accountant, number_of_bookkeepers, fee_per_bookkeeper, number_of_payroll_experts, fee_per_payroll_expert, number_of_tax_experts, fee_per_tax_expert, number_of_admin_staff, fee_per_admin_staff } = customerProcessData;
@@ -1066,13 +1064,12 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
             for (const customisedVal of customised_pricing_data) {
 
                 let minimum_number_of_jobs = customisedVal.minimum_number_of_jobs
-                let job_type_id = customisedVal.job_type_id
                 let cost_per_job = customisedVal.cost_per_job
                 let service_id = customisedVal.service_id
 
 
-                const checkQuery4 = `SELECT id FROM customer_engagement_customised_pricing WHERE customer_engagement_model_id = ? AND minimum_number_of_jobs = ? AND job_type_id = ? AND cost_per_job = ? AND service_id = ?`;
-                const [exist4] = await pool.execute(checkQuery4, [customer_engagement_model_id, minimum_number_of_jobs, job_type_id, cost_per_job,service_id]);
+                const checkQuery4 = `SELECT id FROM customer_engagement_customised_pricing WHERE customer_engagement_model_id = ? AND minimum_number_of_jobs = ?  AND cost_per_job = ? AND service_id = ?`;
+                const [exist4] = await pool.execute(checkQuery4, [customer_engagement_model_id, minimum_number_of_jobs, cost_per_job,service_id]);
                 let customer_engagement_customised_pricing_id;
 
                 if (exist4.length === 0) {
@@ -1080,15 +1077,13 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
             INSERT INTO customer_engagement_customised_pricing (
                 customer_engagement_model_id,
                 minimum_number_of_jobs,
-                job_type_id,
                 cost_per_job,
                 service_id
-            ) VALUES (?, ?, ?, ?,?)
+            ) VALUES (?, ?, ?, ?)
         `;
                     const [result] = await pool.execute(insertQuery, [
                         customer_engagement_model_id,
                         minimum_number_of_jobs,
-                        job_type_id,
                         cost_per_job,
                         service_id
                     ]);
@@ -1609,7 +1604,7 @@ const getSingleCustomer = async (customer) => {
             customers.form_process AS form_process,
             customers.status AS status,
 
-            customers.customerJoiningDate AS customerJoiningDate,
+            DATE_FORMAT(customers.customerJoiningDate, '%Y-%m-%d') AS customerJoiningDate,
             customers.customerSource AS customerSource,
             customers.customerSubSource AS customerSubSource,
 
@@ -1850,6 +1845,9 @@ const customerUpdate = async (customer) => {
         } else if (customer_type === '3') {
             cust_type = 'partnership'
         }
+         
+         console.log("result ",result)
+
 
         if (result.changedRows > 0) {
             // Add Query Satff Logs
@@ -2717,7 +2715,6 @@ const customerUpdate = async (customer) => {
                 for (const customisedVal of customised_pricing_data) {
                     let customised_pricing_id = customisedVal.customised_pricing_id;
                     let minimum_number_of_jobs = customisedVal.minimum_number_of_jobs;
-                    let job_type_id = customisedVal.job_type_id;
                     let cost_per_job = customisedVal.cost_per_job;
                     let service_id = customisedVal.service_id;
 
@@ -2727,15 +2724,13 @@ const customerUpdate = async (customer) => {
                             INSERT INTO customer_engagement_customised_pricing (
                                 customer_engagement_model_id,
                                 minimum_number_of_jobs,
-                                job_type_id,
                                 cost_per_job,
                                 service_id
-                            ) VALUES (?, ?, ?, ?,?)
+                            ) VALUES (?, ?, ?, ?)
                         `;
                         const [result] = await pool.execute(insertQuery, [
                             customer_engagement_model_id,
                             minimum_number_of_jobs,
-                            job_type_id,
                             cost_per_job,
                             service_id
                         ]);
@@ -2746,12 +2741,11 @@ const customerUpdate = async (customer) => {
 
                         const updateQuery = `
                             UPDATE customer_engagement_customised_pricing SET
-                                minimum_number_of_jobs = ?, job_type_id = ?, cost_per_job = ?, service_id = ?
+                                minimum_number_of_jobs = ?,cost_per_job = ?, service_id = ?
                             WHERE id = ?
                         `;
                         const [result] = await pool.execute(updateQuery, [
                             minimum_number_of_jobs,
-                            job_type_id,
                             cost_per_job,
                             service_id,
                             customised_pricing_id
