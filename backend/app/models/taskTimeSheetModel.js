@@ -657,7 +657,8 @@ const addDraft = async (draft) => {
 }
 
 const editDraft = async (draft) => {
-  const { job_id, draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete, id } = draft.body;
+  console.log("draft ", draft.body)
+  const { job_id, draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete, final_draft_sent_on, id } = draft.body;
   try {
     let query = `UPDATE drafts SET `;
     let queryArr = [];
@@ -683,10 +684,16 @@ const editDraft = async (draft) => {
       queryArr.push(`feedback = ?`);
       queryData.push(feedback);
     }
+
     if (was_it_complete) {
       queryArr.push(`was_it_complete = ?`);
       queryData.push(was_it_complete);
     }
+    if (final_draft_sent_on) {
+      queryArr.push(`final_draft_sent_on = ?`);
+      queryData.push(final_draft_sent_on);
+    }
+    
     query += queryArr.join(', ');
     query += ` WHERE id = ?`;
     queryData.push(id);

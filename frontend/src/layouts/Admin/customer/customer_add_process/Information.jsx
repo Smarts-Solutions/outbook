@@ -11,6 +11,7 @@ import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
 import { PersonRole, Country, IncorporationApi } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import { AddCustomer, GetAllCompany, } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
+import { ScrollToViewFirstError, ScrollToViewFirstErrorContactForm } from '../../../../Utils/Comman_function'
 
 const Information = ({ id, pageStatus }) => {
   const { address, setAddress, next } = useContext(MultiStepFormContext);
@@ -36,7 +37,7 @@ const Information = ({ id, pageStatus }) => {
   const [getAccountMangerIdErr, setAccountMangerIdErr] = useState("");
   const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);
-  
+
   // state for sole trader
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     tradingName: "",
@@ -426,6 +427,8 @@ const Information = ({ id, pageStatus }) => {
       }
     }
 
+
+    ScrollToViewFirstError(newErrors);
     // Update state only if there are errors
     if (Object.keys(newErrors).length !== 0) {
       setErrors1((prevErrors) => ({
@@ -478,6 +481,7 @@ const Information = ({ id, pageStatus }) => {
       });
     }
 
+    ScrollToViewFirstError(newErrors);
     if (Object.keys(newErrors).length !== 0) {
       setErrors2((prevErrors) => ({
         ...prevErrors,
@@ -510,6 +514,9 @@ const Information = ({ id, pageStatus }) => {
         return updatedErrors;
       });
     }
+
+    ScrollToViewFirstError(newErrors);
+
     if (Object.keys(newErrors).length !== 0) {
       setErrors3((prevErrors) => ({
         ...prevErrors,
@@ -657,10 +664,15 @@ const Information = ({ id, pageStatus }) => {
   // submit function
   const handleSubmit = async () => {
     if (ManagerType == "") {
-      setAccountMangerIdErr("Please Select Manager");
+      setAccountMangerIdErr("Please Select Manager"); 
       const errorElement = document.getElementById("accountManager");
       if (errorElement) {
-        errorElement.scrollIntoView({ behavior: "smooth" });
+          const elementPosition = errorElement.getBoundingClientRect().top;  
+          const offsetPosition = elementPosition + window.pageYOffset - 50;
+          window.scrollTo({
+              top: offsetPosition,
+              behavior: "smooth"
+          });
       }
       return;
     }
@@ -685,9 +697,7 @@ const Information = ({ id, pageStatus }) => {
           staff_id: staffDetails.id,
         };
         await AddCustomerFun(req);
-      } else {
-        scrollToFirstError(errors1);
-      }
+      }  
     }
     if (customerType == 2 && ManagerType != "") {
       if (validateAllFields(2)) {
