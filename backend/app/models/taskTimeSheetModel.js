@@ -117,49 +117,6 @@ const updateJobTimeTotalHours = async (timeSheet) => {
   }
 }
 
-// MissingLog
-// async function generateNextUniqueCode(module, job_id, log_title_name, title_value) {
-
-//   try {
-
-//     let newCode = '00001';
-//     const [rows] = await pool.execute('SELECT ' + log_title_name + ' FROM ' + module + ' WHERE job_id = ' + job_id + ' ORDER BY id DESC LIMIT 1');
-
-
-//     if (rows.length > 0 && rows[0][log_title_name] != null) {
-//       const inputString = rows[0][log_title_name];
-//       const parts = inputString.split('_');
-//       const lastPart = parts[parts.length - 1];
-//       const lastCode = lastPart;
-//       const nextCode = parseInt(lastCode, 10) + 1;
-//       newCode = "0000" + nextCode
-//       // newCode = nextCode.toString().padStart(5, '0');
-//     }
-
-//     return title_value + '_' + newCode
-
-// //     const query_get_code = `
-// //    SELECT 
-// //    CONCAT(
-// //      SUBSTRING(customers.trading_name, 1, 3), '_', 
-// //      SUBSTRING(clients.trading_name, 1, 3),'_${title_value}_${newCode}'
-// //    ) AS code
-// //    FROM jobs
-// //    JOIN customers ON customers.id = jobs.customer_id
-// //    JOIN clients ON clients.id = jobs.client_id
-// //    WHERE jobs.id = ? 
-// //    ORDER BY jobs.id DESC LIMIT 1
-// // `
-// //     const [rows1] = await pool.execute(query_get_code, [job_id]);
-
-// //     return rows1[0].code
-//   } catch (error) {
-
-//     return newCode
-//   }
-// }
-
-
 const addMissingLog = async (missingLog) => {
 
 
@@ -630,8 +587,8 @@ const getDraftSingleView = async (req, res) => {
 }
 
 const addDraft = async (draft) => {
-  const { job_id, draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete } = draft;
- 
+  const { job_id, draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete ,final_draft_sent_on } = draft;
+  
   let data = {
     table: 'drafts',
     field: 'draft_title',
@@ -644,11 +601,18 @@ const addDraft = async (draft) => {
     const query = `
      INSERT INTO 
      drafts
-      (job_id,draft_sent_on,draft_title,feedback_received,updated_amendment,feedback,was_it_complete)
+      (job_id,draft_sent_on,draft_title,feedback_received,updated_amendment,feedback,was_it_complete,final_draft_sent_on)
       VALUES
-      (?,?,?,?,?,?,?)
+      (?,?,?,?,?,?,?,?)
       `;
-    const [rows] = await pool.execute(query, [job_id, draft_sent_on, UniqueNoTitle, feedback_received, updated_amendment, feedback, was_it_complete]);
+    const [rows] = await pool.execute(query, [job_id, draft_sent_on, UniqueNoTitle, feedback_received, updated_amendment, feedback, was_it_complete,final_draft_sent_on]);
+    if(rows.insertId > 0){
+      if(parseInt(was_it_complete)===1){
+      let update_status = 6;
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status, job_id]);
+      }
+    }
+
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
     console.log("error ", error)
@@ -698,6 +662,16 @@ const editDraft = async (draft) => {
     query += ` WHERE id = ?`;
     queryData.push(id);
     const [rows] = await pool.execute(query, queryData);
+    
+    if(rows.changedRows > 0){
+      if(parseInt(was_it_complete)===1){
+      const [rowJob] = await pool.execute('SELECT job_id FROM  `queries` WHERE id = ?', [id]);
+      let update_status = 6;
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status,rowJob[0].job_id]);
+      }
+    }
+
+
     return { status: true, message: 'Success.', data: rows };
 
 
