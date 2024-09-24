@@ -837,7 +837,7 @@ const updateProcessCustomerServices = async (customerProcessData) => {
 
 const updateProcessCustomerEngagementModel = async (customerProcessData) => {
 
-    const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing } = customerProcessData;
+    const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing,customerJoiningDate,customerSource,customerSubSource } = customerProcessData;
 
 
     const checkQuery = `SELECT id FROM customer_engagement_model WHERE customer_id = ? `;
@@ -851,8 +851,11 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
         customer_engagement_model_id = existCustomer[0].id;
     }
 
+    //SNEH
 
 
+    const customerUpdateQuery = `UPDATE customers SET customerJoiningDate = ?, customerSource = ?, customerSubSource = ? WHERE id = ?`;   
+    const [updateQuery]= await pool.execute(customerUpdateQuery, [customerJoiningDate, customerSource, customerSubSource, customer_id]);
 
 
 
@@ -1605,6 +1608,12 @@ const getSingleCustomer = async (customer) => {
             customers.website AS website,
             customers.form_process AS form_process,
             customers.status AS status,
+
+            customers.customerJoiningDate AS customerJoiningDate,
+            customers.customerSource AS customerSource,
+            customers.customerSubSource AS customerSubSource,
+
+
             customer_engagement_model.*, 
             customer_engagement_fte.*, 
             customer_engagement_percentage.*, 
@@ -1644,6 +1653,9 @@ const getSingleCustomer = async (customer) => {
                 website: rows[0].website,
                 form_process: rows[0].form_process,
                 status: rows[0].status,
+                customerJoiningDate: rows[0].customerJoiningDate,
+                customerSource: rows[0].customerSource,
+                customerSubSource: rows[0].customerSubSource,
             };
 
             const customer_engagement_model_status = {
@@ -2368,7 +2380,7 @@ const customerUpdate = async (customer) => {
     //  Page Status 3 Customer engagement model Part
     else if (pageStatus === "3") {
 
-        const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing } = customer;
+        const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing,customerJoiningDate,customerSource,customerSubSource } = customer;
 
         const checkQuery = `SELECT id FROM customer_engagement_model WHERE customer_id = ? `;
         const [existCustomer] = await pool.execute(checkQuery, [customer_id]);
@@ -2380,6 +2392,10 @@ const customerUpdate = async (customer) => {
         } else {
             customer_engagement_model_id = existCustomer[0].id;
         }
+
+         const customerUpdateQuery = `UPDATE customers SET customerJoiningDate = ?, customerSource = ?, customerSubSource = ? WHERE id = ?`;   
+         const [updateQuery]= await pool.execute(customerUpdateQuery, [customerJoiningDate, customerSource, customerSubSource, customer_id]);
+
 
 
 

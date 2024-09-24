@@ -100,6 +100,17 @@ const Engagement = () => {
             loading: false,
             data: response.data,
           });
+          console.log({
+            customerSource: response.data.customer?.customerSource,
+            customerSubSource: response.data.customer?.customerSubSource,
+            customerJoiningDate: response.data.customer?.customerJoiningDate,
+          });
+
+          setFormState1({
+            customerSource: response.data.customer?.customerSource,
+            customerSubSource: response.data.customer?.customerSubSource,
+            customerJoiningDate: response.data.customer?.customerJoiningDate,
+          });
         } else {
           setCustomerDetails({
             loading: false,
@@ -243,6 +254,12 @@ const Engagement = () => {
     if (checkboxStates[3] === 0) setErrors4({});
   }, [checkboxStates]);
 
+  useEffect(() => {
+    console.log("formState1", formState1.customerSource);
+    if (formState1.customerSource) {
+      customerSubSourceData();
+    }
+  }, [formState1]);
 
   const handleCheckboxChange = (index) => {
     setCheckboxStates((prevStates) => {
@@ -446,7 +463,7 @@ const Engagement = () => {
     await dispatch(customerSourceApi(data))
       .unwrap()
       .then(async (response) => {
-        if (response.status) { 
+        if (response.status) {
           setCoustomerSource(response.data);
         }
       })
@@ -454,11 +471,6 @@ const Engagement = () => {
         return;
       });
   };
-  useEffect(() => {
-    if (formState1.customerSource) {
-      customerSubSourceData();
-    }
-  }, [formState1]);
 
   const customerSubSourceData = async () => {
     const req = {
@@ -492,7 +504,6 @@ const Engagement = () => {
   };
 
   const handleSubmit = async () => {
-  
     if (!checkboxStates.some((state) => state === 1)) {
       Swal.fire({
         icon: "error",
@@ -571,7 +582,6 @@ const Engagement = () => {
       return;
     }
 
-
     const data = { req: req, authToken: token };
     await dispatch(Edit_Customer(data))
       .unwrap()
@@ -588,27 +598,20 @@ const Engagement = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
-   
-    setFormState1(({
-        ...formState1,
-        [name]: value, 
-      }));
-    
-      setFormErrors((prevErrors) => ({
-        ...prevErrors,
-        [name]: "", 
-      }));
-  
-  
- 
-  };
-  
 
+    setFormState1({
+      ...formState1,
+      [name]: value,
+    });
+
+    setFormErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "",
+    }));
+  };
 
   const validateForm = () => {
     let errors = {};
-
 
     if (!formState1.customerJoiningDate) {
       errors.customerJoiningDate = "Joining Date is required.";
@@ -624,6 +627,7 @@ const Engagement = () => {
 
     return Object.keys(errors).length === 0; // Return true if no errors
   };
+
 
 
   return (
@@ -1092,71 +1096,83 @@ const Engagement = () => {
                 </h4>
               </div>
               <div className="card-body">
-                <div className="row">
-                  <div className="col-lg-4">
-                    <label className="form-label">Customer Joining Date</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      name="customerJoiningDate"
-                      value={formState1.customerJoiningDate}
-                      onChange={handleInputChange}
-                    />
-                    {formErrors.customerJoiningDate && (
-                      <span className="error-text d-block">
-                        {formErrors.customerJoiningDate}
-                      </span>
-                    )}
+                {customerDetails?.data?.customer && (
+                  <div className="row">
+                    {/* Customer Joining Date */}
+                    <div className="col-lg-4">
+                      <label className="form-label">
+                        Customer Joining Date
+                      </label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        name="customerJoiningDate"
+                        defaultValue={
+                          customerDetails?.data?.customer
+                            ?.customerJoiningDate || ""
+                        }
+                        onChange={handleInputChange}
+                      />
+                      {formErrors.customerJoiningDate && (
+                        <span className="error-text d-block">
+                          {formErrors.customerJoiningDate}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Select Customer Source */}
+                    <div className="col-lg-4">
+                      <label className="form-label">
+                        Select Customer Source
+                      </label>
+                      <select
+                        className="form-select"
+                        name="customerSource"
+                        value={formState1.customerSource}
+                        onChange={handleInputChange}
+                      >
+                        <option value="">Select Customer Source</option>
+                        {coustomerSource &&
+                          coustomerSource.map((data) => (
+                            <option key={data.id} value={data.id}>
+                              {data.name}
+                            </option>
+                          ))}
+                      </select>
+                      {formErrors.customerSource && (
+                        <span className="error-text d-block">
+                          {formErrors.customerSource}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Select Customer Sub-Source */}
+                    <div className="col-lg-4">
+                      <label className="form-label">
+                        Select Customer Sub-Source
+                      </label>
+                      <select
+                        className="form-select"
+                        name="customerSubSource"
+                        value={formState1.customerSubSource}
+                        onChange={(e) => handleInputChange(e)}
+                      >
+                        <option value="">Select Customer Sub-Source</option>
+                        {coustomerSubSource && coustomerSubSource.map((data) => (
+                            <option key={data.id} value={data.id}>
+                              {data.name}
+                            </option>
+                          ))}
+
+                      </select>
+                      {formErrors.customerSubSource && (
+                        <span className="error-text d-block">
+                          {formErrors.customerSubSource}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="col-lg-4">
-                    <label className="form-label">Select Customer Source</label>
-                    <select
-                      className="form-select"
-                      name="customerSource"
-                      value={formState1.customerSource}
-                      onChange={handleInputChange}
-                    >
-                      <option value="">Select Customer Source</option>
-                      {coustomerSource &&
-                        coustomerSource.map((data) => (
-                          <option key={data.id} value={data.id}>
-                            {data.name}
-                          </option>
-                        ))}
-                    </select>
-                    {formErrors.customerSource && (
-                      <span className="error-text d-block">
-                        {formErrors.customerSource}
-                      </span>
-                    )}
-                  </div>
-                  <div className="col-lg-4">
-                    <label className="form-label">
-                      Select Customer Sub-Source
-                    </label>
-                    <select
-                      className="form-select"
-                      name="customerSubSource"
-                      value={formState1.customerSubSource}
-                      onChange={(e) => handleInputChange(e)}
-                    >
-                      <option value="">Select Customer Sub-Source</option>
-                      {coustomerSubSource &&
-                        coustomerSubSource.map((data) => ( 
-                          data.customer_source_id == formState1.customerSource && (
-                          <option key={data.id} value={data.id}>
-                            {data.name}
-                          </option>
-                          )
-                        ))}
-                    </select>
-                    {formErrors.customerSubSource && (
-                      <span className="error-text d-block">
-                        {formErrors.customerSubSource}
-                      </span>
-                    )}
-                  </div>
-                </div>
+                )}
               </div>
             </div>
             <div className="form__item button__items d-flex justify-content-between">

@@ -1388,7 +1388,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.CompanyName
                                               }
-                                              disabled
+                                              // disabled
                                             />
                                             {errors2["CompanyName"] && (
                                               <div className="error-text">
@@ -1415,7 +1415,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.EntityType
                                               }
-                                              disabled
+                                              // disabled
                                             />
                                             {errors2["EntityType"] && (
                                               <div className="error-text">
@@ -1443,7 +1443,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.CompanyStatus
                                               }
-                                              disabled
+                                              // disabled
                                             />
                                             {errors2["CompanyStatus"] && (
                                               <div className="error-text">
@@ -1470,7 +1470,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.CompanyNumber
                                               }
-                                              disabled
+                                              // disabled
                                             />
                                             {errors2["CompanyNumber"] && (
                                               <div className="error-text">
@@ -1494,7 +1494,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.IncorporationDate
                                               }
-                                              disabled
+                                              // disabled
                                             />
                                             {errors2["IncorporationDate"] && (
                                               <div className="error-text">
@@ -1521,7 +1521,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.RegisteredOfficeAddress
                                               }
-                                              disabled
+                                              // disabled
                                             />
                                             {errors2[
                                               "RegisteredOfficeAddress"
@@ -1556,7 +1556,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.IncorporationIn
                                               }
-                                              disabled
+                                              // disabled
                                             />
 
                                             {errors2["IncorporationIn"] && (
