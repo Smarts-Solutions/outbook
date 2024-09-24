@@ -544,10 +544,7 @@ const Service = () => {
                                                           <div className="row align-items-center">
                                                             {/* Upload File Button */}
                                                             <div className="col-auto">
-                                                              <label
-                                                                htmlFor="uploadButton"
-                                                                className="btn btn-secondary"
-                                                              >
+                                                              
                                               
                                                                 {/* <i className="fas fa-upload me-2"></i>
                                                                 Upload File */}
@@ -563,7 +560,7 @@ const Service = () => {
                                                                 />
 
 
-                                                              </label>
+                                                              
                                                             </div>
 
                                                             {/* File Name Display and Clear Icon */}
@@ -610,127 +607,86 @@ const Service = () => {
                                                             {uploadMessage}
                                                           </span> */}
                                                         </div>
+                                                        <div className="table-responsive">
+                                                        {tasksGet &&
+  tasksGet.filter(
+    (TaskShow) => data1.id === TaskShow.JobTypeId && item.id === TaskShow.serviceId
+  ).length > 0 && (
+    <table className="table table-bordered">
+      <thead className="table-head-blue">
+        <tr>
+          <th colSpan="3" className="fs-6 text-center card-header step-header-blue">
+            Checklist Name: {
+              tasksGet.find(
+                (TaskShow) => data1.id === TaskShow.JobTypeId && item.id === TaskShow.serviceId
+              ).checklistName
+            }
+          </th>
+        </tr>
+        <tr>
+          <th className="text-center">Tasks</th>
+          <th className="text-center">Budgeted Hour</th>
+          <th className="text-center">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {tasksGet.map((TaskShow) => {
+          if (data1.id === TaskShow.JobTypeId && item.id === TaskShow.serviceId) {
+            return (
+              <tr key={TaskShow.id}>
+                <td>
+                  {TaskShow.Task.map((TaskData) => (
+                    <div key={TaskData.id} className="mb-2">
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={TaskData.TaskName}
+                        disabled
+                      />
+                    </div>
+                  ))}
+                </td>
+                <td>
+                  {TaskShow.Task.map((TaskData) => (
+                    <div key={TaskData.id} className="mb-2">
+                      <div className="input-group">
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={TaskData.BudgetHour.split(":")[0]}
+                          disabled
+                        />
+                        <span className="input-group-text">Hours</span>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={TaskData.BudgetHour.split(":")[1]}
+                          disabled
+                        />
+                        <span className="input-group-text">Minutes</span>
+                      </div>
+                    </div>
+                  ))}
+                </td>
+                <td>
+                  <button
+                    className="btn btn-sm btn-outline-danger rounded-circle"
+                    onClick={() => handleDelete(TaskShow.id)}
+                  >
+                     <i className=" ti-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            );
+          }
+          return null;
+        })}
+      </tbody>
+    </table>
+  )}
+  </div>
 
-                                                        <table className="table table-bordered table-striped">
-                                                          <thead className="table-primary">
-                                                            <tr>
-                                                              <th>
-                                                                Checklist Name
-                                                              </th>
-                                                              <th>Tasks</th>
-                                                              <th>
-                                                                Budgeted Hour
-                                                              </th>
-                                                              <th>Action</th>
-                                                            </tr>
-                                                          </thead>
-                                                          <tbody>
-                                                            {tasksGet &&
-                                                              tasksGet.map(
-                                                                (TaskShow) => {
-                                                                  if (
-                                                                    data1.id ===
-                                                                    TaskShow.JobTypeId &&
-                                                                    item.id ===
-                                                                    TaskShow.serviceId
-                                                                  ) {
-                                                                    return (
-                                                                      <tr
-                                                                        key={
-                                                                          TaskShow.id
-                                                                        }
-                                                                      >
-                                                                        <td>
-                                                                          {
-                                                                            TaskShow.checklistName
-                                                                          }
-                                                                        </td>
-                                                                        <td>
-                                                                          {TaskShow.Task.map(
-                                                                            (
-                                                                              TaskData
-                                                                            ) => (
-                                                                              <div
-                                                                                key={
-                                                                                  TaskData.id
-                                                                                }
-                                                                                className="mb-2"
-                                                                              >
-                                                                                <input
-                                                                                  type="text"
-                                                                                  className="form-control"
-                                                                                  value={
-                                                                                    TaskData.TaskName
-                                                                                  }
-                                                                                  disabled
-                                                                                />
-                                                                              </div>
-                                                                            )
-                                                                          )}
-                                                                        </td>
-                                                                        <td>
-                                                                          {TaskShow.Task.map(
-                                                                            (
-                                                                              TaskData
-                                                                            ) => (
-                                                                              <div
-                                                                                key={
-                                                                                  TaskData.id
-                                                                                }
-                                                                                className="mb-2"
-                                                                              >
-                                                                                <div className="input-group">
-                                                                                  <input
-                                                                                    type="text"
-                                                                                    className="form-control"
-                                                                                    value={
-                                                                                      TaskData.BudgetHour.split(
-                                                                                        ":"
-                                                                                      )[0]
-                                                                                    }
-                                                                                    disabled
-                                                                                  />
-                                                                                  <span className="input-group-text">
-                                                                                    Hours
-                                                                                  </span>
-                                                                                  <input
-                                                                                    type="text"
-                                                                                    className="form-control"
-                                                                                    value={
-                                                                                      TaskData.BudgetHour.split(
-                                                                                        ":"
-                                                                                      )[1]
-                                                                                    }
-                                                                                    disabled
-                                                                                  />
-                                                                                  <span className="input-group-text">
-                                                                                    Minutes
-                                                                                  </span>
-                                                                                </div>
-                                                                              </div>
-                                                                            )
-                                                                          )}
-                                                                        </td>
-                                                                        <td>
-                                                                          <button
-                                                                            className="btn btn-sm btn-outline-danger"
-                                                                            onClick={() =>
-                                                                              handleDelete(
-                                                                                TaskShow.id
-                                                                              )
-                                                                            }
-                                                                          >
-                                                                            Delete
-                                                                            <i className="ms-1 fa fa-trash"></i>
-                                                                          </button>
-                                                                        </td>
-                                                                      </tr>
-                                                                    );
-                                                                  }
-                                                                }
-                                                              )}
-                                                          </tbody>
-                                                        </table>
+      
                                                       </div>
                                                     </div>
                                                   </div>
