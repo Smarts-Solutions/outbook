@@ -28,6 +28,12 @@ const Customer = () => {
     (item) => item.permission_name === "customer"
   )?.items || [];
 
+
+  useEffect(() => {
+    GetAllCustomerData();
+  }, [activeTab]);
+
+
 useEffect(() => { 
   if (accessData.length === 0) return; 
   const updatedAccess = { insert: 0, update: 0, delete: 0 }; 
@@ -41,9 +47,7 @@ useEffect(() => {
 }, []);  
 
 
-  useEffect(() => {
-    GetAllCustomerData();
-  }, [activeTab]);
+ 
 
   const tabs = [
     { id: "this-week", label: "This week" },
