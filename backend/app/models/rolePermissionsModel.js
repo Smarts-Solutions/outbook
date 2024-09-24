@@ -15,6 +15,27 @@ const createRole = async (Role) => {
           return  {status:false , message : "Role already exists"}
           }
         const [result] = await pool.execute(query, [role_name, role]);
+
+
+
+        const addQuery = `
+        INSERT INTO role_permissions (role_id, permission_id)
+        VALUES (?, ?), (?, ?), (?, ?), (?, ?)
+        ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP
+      `;
+      
+      const values = [
+        result.insertId, 29,  
+        result.insertId, 30,  
+        result.insertId, 31, 
+        result.insertId, 32   
+      ];
+      
+      await pool.execute(addQuery, values);
+      
+
+
+
         return {status:true , message : "Role created successfully" , data : result.insertId}
     } catch (err) {
         console.error('Error inserting data:', err);
