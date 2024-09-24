@@ -270,7 +270,7 @@ const Engagement = () => {
         }
       })
       .catch((error) => {
-        console.log(error);
+        return;
       });
   };
 
@@ -1051,7 +1051,7 @@ const Engagement = () => {
                                           handleChange4(index, e)
                                         }
                                       >
-                                        {console.log(job.service_id)}
+                                       
                                         <option value="">
                                           Select Services
                                         </option>

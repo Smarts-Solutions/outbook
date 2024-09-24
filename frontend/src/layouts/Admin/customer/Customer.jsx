@@ -21,11 +21,17 @@ const Customer = () => {
     insert: 0,
     update: 0,
     delete: 0,
+    client: 0,
   });
 
   const accessData =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
       (item) => item.permission_name === "customer"
+    )?.items || [];
+
+  const accessData1 =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "client"
     )?.items || [];
 
   useEffect(() => {
@@ -38,11 +44,15 @@ const Customer = () => {
 
   useEffect(() => {
     if (accessData.length === 0) return;
-    const updatedAccess = { insert: 0, update: 0, delete: 0 };
+    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0 };
     accessData.forEach((item) => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
       if (item.type === "delete") updatedAccess.delete = item.is_assigned;
+    });
+
+    accessData1.forEach((item) => {
+      if (item.type === "view") updatedAccess.client = item.is_assigned;
     });
 
     setAccessData(updatedAccess);
@@ -59,6 +69,7 @@ const Customer = () => {
     { id: "last-year", label: "Last year" },
   ];
 
+
   const columns = [
     {
       name: "Trading Name",
@@ -71,13 +82,23 @@ const Customer = () => {
             maxWidth: "150px",
           }}
         >
-          <a
-            onClick={() => HandleClientView(row)}
-            style={{ cursor: "pointer", color: "#26bdf0" }}
-            title={row.trading_name}
-          >
-            {row.trading_name}
-          </a>
+          {role === "ADMIN" || role === "SUPERADMIN" ? (
+            <a
+              onClick={() => HandleClientView(row)}
+              style={{ cursor: "pointer", color: "#26bdf0" }}
+              title={row.trading_name}
+            >
+              {row.trading_name}
+            </a>
+          ) : (
+            getAccessData.client == 1 ? <a
+              onClick={() => HandleClientView(row)}
+              style={{ cursor: "pointer", color: "#26bdf0" }}
+              title={row.trading_name}
+            >
+              {row.trading_name}
+            </a> :row.trading_name
+          )}
         </div>
       ),
       selector: (row) => row.trading_name,
@@ -237,7 +258,6 @@ const Customer = () => {
   };
 
   const HandleClientView = (row) => {
-
     if (row.form_process == "4") {
       navigate("/admin/Clientlist", { state: row });
     } else {

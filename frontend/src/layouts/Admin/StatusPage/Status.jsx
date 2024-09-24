@@ -51,22 +51,22 @@ const Status = () => {
       selector: (row) => row.status_type,
       sortable: true,
     },
-    {
-      name: "Actions",
-      cell: (row) => (
-        <div>
-          <button className="edit-icon" onClick={() => handleEdit(row)}>
-            <i className="ti-pencil" />
-          </button>
-          {/* <button className="delete-icon" onClick={() => handleDelete(row)}>
-            <i className="ti-trash text-danger" />
-          </button> */}
-        </div>
-      ),
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-    },
+    // {
+    //   name: "Actions",
+    //   cell: (row) => (
+    //     <div>
+    //       <button className="edit-icon" onClick={() => handleEdit(row)}>
+    //         <i className="ti-pencil" />
+    //       </button>
+    //       {/* <button className="delete-icon" onClick={() => handleDelete(row)}>
+    //         <i className="ti-trash text-danger" />
+    //       </button> */}
+    //     </div>
+    //   ),
+    //   ignoreRowClick: true,
+    //   allowOverflow: true,
+    //   button: true,
+    // },
   ];
 
   const formatDate = (date) => {
@@ -276,12 +276,12 @@ const Status = () => {
               >
                 <i className="fa fa-plus pe-1" /> Add Status
               </button>
-              <button
+              {/* <button
                 type="button"
                 className="btn btn-info text-white float-end "
               >
                 <i className="fa-regular fa-eye pe-1"></i> View Log
-              </button>
+              </button> */}
             </div>
           </div>
           <div className="datatable-wrapper mt-minus">

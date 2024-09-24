@@ -211,7 +211,6 @@ const addChecklist = async (checklist) => {
 const getChecklist = async (checklist) => {
   const { customer_id } = checklist;
  
- console.log("customer_id",customer_id)
  let query = `
     SELECT
     checklists.id AS checklists_id,
@@ -528,14 +527,14 @@ const getByServiceWithJobType = async (checklist) => {
       customer_id,
     ]);
 
-    // console.log("result", result);
+  
     return {
       status: true,
       message: "checklist get successfully.",
       data: result,
     };
   } catch (err) {
-    console.log("Error", err);
+   
     return { status: false, message: "Error get checklist." };
   }
 };

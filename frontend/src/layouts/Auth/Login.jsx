@@ -182,6 +182,12 @@ const Login = () => {
               );
               updatedShowTab.status =
                 statusView && statusView.is_assigned === 1;
+            }else if (item.permission_name === "timesheet") {
+              const timesheetView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.timesheet =
+                timesheetView && timesheetView.is_assigned === 1;
             }
           });
 

@@ -825,7 +825,7 @@ const clientUpdate = async (client) => {
         client_id
       ]);
     } catch (err) {
-      console.log("err", err);
+    
       return { status: false, message: "client update Err" };
     }
   }
