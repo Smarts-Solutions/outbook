@@ -556,8 +556,7 @@ const MissingLogs = () => {
                   {errors1["missing_log_prepared_date"]}
                 </div>
               )}
-
-
+ 
             </div>
           </div>
 
