@@ -192,6 +192,7 @@ const Drafts = () => {
   }
 
   const columns = [
+    { name: 'Draft Title', selector: row => row.title, sortable: true },
     { name: 'Draft Sent On', selector: row => row.draft_sent_on, sortable: true },
     { name: 'Feedback Received', selector: row => row.feedback_received == 1 ? "Yes" : "No", sortable: true },
     { name: 'Updated/Amendments', selector: row => row.updated_amendment == 1 ? "Amendment" : row.updated_amendment == 2 ? "Update" : row.updated_amendment == 3 ? "Both" : "None", sortable: true },
