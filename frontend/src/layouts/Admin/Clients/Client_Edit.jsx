@@ -654,7 +654,6 @@ const ClientEdit = () => {
                 ? ""
                 : "Valid Email is required",
         };
-
         if (
           error.first_name ||
           error.last_name ||
@@ -692,8 +691,6 @@ const ClientEdit = () => {
       else {
         ScrollToViewFirstErrorContactForm(companyContactsErrors);
       }
-
-
     }
     if (selectClientType == 3 && validateAllFields(3)) {
       let formIsValid = true;
@@ -763,9 +760,7 @@ const ClientEdit = () => {
         client_type: "4",
         client_id: location.state.row.id,
         customer_id: location.state.id,
-
         trading_name: getIndivisualDetails.TradingName,
-
         first_name: getIndivisualDetails.first_name,
         last_name: getIndivisualDetails.last_name,
         phone: getIndivisualDetails.phone,
@@ -1271,7 +1266,7 @@ const ClientEdit = () => {
                                               value={
                                                 getCompanyDetails.CompanyName
                                               }
-                                              disabled
+                                              // disabled
                                             />
                                             {errors2["CompanyName"] && (
                                               <div className="error-text">
@@ -1298,7 +1293,7 @@ const ClientEdit = () => {
                                               value={
                                                 getCompanyDetails.EntityType
                                               }
-                                              disabled
+                                              // disabled
                                             />
                                             {errors2["EntityType"] && (
                                               <div className="error-text">
@@ -1325,7 +1320,7 @@ const ClientEdit = () => {
                                               value={
                                                 getCompanyDetails.CompanyStatus
                                               }
-                                              disabled
+                                              // disabled
                                             />
                                             {errors2["CompanyStatus"] && (
                                               <div className="error-text">
@@ -1352,7 +1347,7 @@ const ClientEdit = () => {
                                               value={
                                                 getCompanyDetails.CompanyNumber
                                               }
-                                              disabled
+                                              // disabled
                                             />
                                             {errors2["CompanyNumber"] && (
                                               <div className="error-text">
@@ -1376,7 +1371,7 @@ const ClientEdit = () => {
                                               value={
                                                 getCompanyDetails.IncorporationDate
                                               }
-                                              disabled
+                                              // disabled
                                             />
                                             {errors2["IncorporationDate"] && (
                                               <div className="error-text">
@@ -1403,7 +1398,7 @@ const ClientEdit = () => {
                                               value={
                                                 getCompanyDetails.RegisteredOfficeAddress
                                               }
-                                              disabled
+                                              // disabled
                                             />
                                             {errors2[
                                               "RegisteredOfficeAddress"
@@ -1438,7 +1433,7 @@ const ClientEdit = () => {
                                               value={
                                                 getCompanyDetails.IncorporationIn
                                               }
-                                              disabled
+                                              // disabled
                                             />
 
                                             {errors2["IncorporationIn"] && (

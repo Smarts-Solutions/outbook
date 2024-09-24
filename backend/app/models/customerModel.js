@@ -832,7 +832,7 @@ const updateProcessCustomerServices = async (customerProcessData) => {
 
 const updateProcessCustomerEngagementModel = async (customerProcessData) => {
 
-    const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing } = customerProcessData;
+    const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing,customerJoiningDate,customerSource,customerSubSource } = customerProcessData;
 
 
     const checkQuery = `SELECT id FROM customer_engagement_model WHERE customer_id = ? `;
@@ -846,8 +846,11 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
         customer_engagement_model_id = existCustomer[0].id;
     }
 
+    //SNEH
 
 
+    const customerUpdateQuery = `UPDATE customers SET customerJoiningDate = ?, customerSource = ?, customerSubSource = ? WHERE id = ?`;   
+    const [updateQuery]= await pool.execute(customerUpdateQuery, [customerJoiningDate, customerSource, customerSubSource, customer_id]);
 
 
 
@@ -1068,9 +1071,11 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
                 let minimum_number_of_jobs = customisedVal.minimum_number_of_jobs
                 let job_type_id = customisedVal.job_type_id
                 let cost_per_job = customisedVal.cost_per_job
+                let service_id = customisedVal.service_id
 
-                const checkQuery4 = `SELECT id FROM customer_engagement_customised_pricing WHERE customer_engagement_model_id = ? AND minimum_number_of_jobs = ? AND job_type_id = ? AND cost_per_job = ?`;
-                const [exist4] = await pool.execute(checkQuery4, [customer_engagement_model_id, minimum_number_of_jobs, job_type_id, cost_per_job]);
+
+                const checkQuery4 = `SELECT id FROM customer_engagement_customised_pricing WHERE customer_engagement_model_id = ? AND minimum_number_of_jobs = ? AND job_type_id = ? AND cost_per_job = ? AND service_id = ?`;
+                const [exist4] = await pool.execute(checkQuery4, [customer_engagement_model_id, minimum_number_of_jobs, job_type_id, cost_per_job,service_id]);
                 let customer_engagement_customised_pricing_id;
 
                 if (exist4.length === 0) {
@@ -1079,14 +1084,16 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
                 customer_engagement_model_id,
                 minimum_number_of_jobs,
                 job_type_id,
-                cost_per_job
-            ) VALUES (?, ?, ?, ?)
+                cost_per_job,
+                service_id
+            ) VALUES (?, ?, ?, ?,?)
         `;
                     const [result] = await pool.execute(insertQuery, [
                         customer_engagement_model_id,
                         minimum_number_of_jobs,
                         job_type_id,
-                        cost_per_job
+                        cost_per_job,
+                        service_id
                     ]);
                     customer_engagement_customised_pricing_id = result.insertId;
 
@@ -1604,6 +1611,12 @@ const getSingleCustomer = async (customer) => {
             customers.website AS website,
             customers.form_process AS form_process,
             customers.status AS status,
+
+            customers.customerJoiningDate AS customerJoiningDate,
+            customers.customerSource AS customerSource,
+            customers.customerSubSource AS customerSubSource,
+
+
             customer_engagement_model.*, 
             customer_engagement_fte.*, 
             customer_engagement_percentage.*, 
@@ -1611,7 +1624,9 @@ const getSingleCustomer = async (customer) => {
             customer_engagement_customised_pricing.id AS customised_pricing_id,
             customer_engagement_customised_pricing.minimum_number_of_jobs AS minimum_number_of_jobs,
             customer_engagement_customised_pricing.job_type_id AS job_type_id,
-            customer_engagement_customised_pricing.cost_per_job AS cost_per_job
+            customer_engagement_customised_pricing.cost_per_job AS cost_per_job,
+            customer_engagement_customised_pricing.service_id AS service_id
+
         FROM 
             customers
         JOIN 
@@ -1643,6 +1658,9 @@ const getSingleCustomer = async (customer) => {
                 website: rows[0].website,
                 form_process: rows[0].form_process,
                 status: rows[0].status,
+                customerJoiningDate: rows[0].customerJoiningDate,
+                customerSource: rows[0].customerSource,
+                customerSubSource: rows[0].customerSubSource,
             };
 
             const customer_engagement_model_status = {
@@ -1696,11 +1714,16 @@ const getSingleCustomer = async (customer) => {
 
             let customised_pricing = {}
             if (rows[0].customised_pricing == "1") {
+
+console.log(rows)
+
                 customised_pricing = rows.map(row => ({
                     customised_pricing_id: row.customised_pricing_id,
                     minimum_number_of_jobs: row.minimum_number_of_jobs,
                     job_type_id: row.job_type_id,
-                    cost_per_job: row.cost_per_job
+                    cost_per_job: row.cost_per_job,
+                    service_id: row.service_id
+
                 }));
             }
 
@@ -2370,7 +2393,7 @@ const customerUpdate = async (customer) => {
     //  Page Status 3 Customer engagement model Part
     else if (pageStatus === "3") {
 
-        const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing } = customer;
+        const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing,customerJoiningDate,customerSource,customerSubSource } = customer;
 
         const checkQuery = `SELECT id FROM customer_engagement_model WHERE customer_id = ? `;
         const [existCustomer] = await pool.execute(checkQuery, [customer_id]);
@@ -2382,6 +2405,10 @@ const customerUpdate = async (customer) => {
         } else {
             customer_engagement_model_id = existCustomer[0].id;
         }
+
+         const customerUpdateQuery = `UPDATE customers SET customerJoiningDate = ?, customerSource = ?, customerSubSource = ? WHERE id = ?`;   
+         const [updateQuery]= await pool.execute(customerUpdateQuery, [customerJoiningDate, customerSource, customerSubSource, customer_id]);
+
 
 
 
@@ -2702,6 +2729,8 @@ const customerUpdate = async (customer) => {
                     let minimum_number_of_jobs = customisedVal.minimum_number_of_jobs;
                     let job_type_id = customisedVal.job_type_id;
                     let cost_per_job = customisedVal.cost_per_job;
+                    let service_id = customisedVal.service_id;
+
 
                     if (customised_pricing_id == "" || customised_pricing_id == undefined || customised_pricing_id == null) {
                         const insertQuery = `
@@ -2709,14 +2738,16 @@ const customerUpdate = async (customer) => {
                                 customer_engagement_model_id,
                                 minimum_number_of_jobs,
                                 job_type_id,
-                                cost_per_job
-                            ) VALUES (?, ?, ?, ?)
+                                cost_per_job,
+                                service_id
+                            ) VALUES (?, ?, ?, ?,?)
                         `;
                         const [result] = await pool.execute(insertQuery, [
                             customer_engagement_model_id,
                             minimum_number_of_jobs,
                             job_type_id,
-                            cost_per_job
+                            cost_per_job,
+                            service_id
                         ]);
                         customer_engagement_customised_pricing_id = result.insertId;
                         logUpdateRequired = true;
@@ -2725,13 +2756,14 @@ const customerUpdate = async (customer) => {
 
                         const updateQuery = `
                             UPDATE customer_engagement_customised_pricing SET
-                                minimum_number_of_jobs = ?, job_type_id = ?, cost_per_job = ?
+                                minimum_number_of_jobs = ?, job_type_id = ?, cost_per_job = ?, service_id = ?
                             WHERE id = ?
                         `;
                         const [result] = await pool.execute(updateQuery, [
                             minimum_number_of_jobs,
                             job_type_id,
                             cost_per_job,
+                            service_id,
                             customised_pricing_id
                         ]);
                         if (result.affectedRows > 0) {

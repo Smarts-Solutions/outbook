@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useDispatch  } from "react-redux";
+import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -19,22 +19,21 @@ const ClientList = () => {
   const [getJobDetails, setGetJobDetails] = useState([]);
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
-  const [hararchyData, setHararchyData] = useState({customer : location.state});
-  
+  const [hararchyData, setHararchyData] = useState({ customer: location.state });
+   const [searchQuery, setSearchQuery] = useState("");
+
 
   const [activeTab, setActiveTab] = useState(
     location.state &&
-    location.state.route &&
-    location.state.route == "Checklist"
-    ? "checklist"
-    : location.state.route == "job"
-    ? "job"
-    : "client"
+      location.state.route &&
+      location.state.route == "Checklist"
+      ? "checklist"
+      : location.state.route == "job"
+        ? "job"
+        : "client"
   );
- 
 
-  const [searchQuery, setSearchQuery] = useState("");
-  
+
   const SetTab = (e) => {
     setActiveTab(e);
   };
@@ -463,7 +462,7 @@ const ClientList = () => {
         ...prevState,
         client: row
       };
-      navigate("/admin/client/profile", { state: { Client_id: row.id, data: updatedData } }); 
+      navigate("/admin/client/profile", { state: { Client_id: row.id, data: updatedData } });
       return updatedData;
     });
   };
@@ -474,18 +473,12 @@ const ClientList = () => {
         ...prevState,
         job: row
       };
-      navigate("/admin/job/logs", { state: { job_id: row.job_id, goto: "Customer" ,  data: updatedData } }); 
+      navigate("/admin/job/logs", { state: { job_id: row.job_id, goto: "Customer", data: updatedData } });
       return updatedData;
     });
   };
 
-
-  // const HandleJobView = (row) => {  
-  //   navigate("/admin/job/logs", {
-  //     state: { job_id: row.job_id, goto: "Customer" },
-  //   });
-  // };
-
+  
   const handleAddClient = () => {
     navigate("/admin/addclient", { state: { id: location.state.id } });
   };
@@ -503,7 +496,7 @@ const ClientList = () => {
     });
   }
   const handleClick = () => {
-    navigate("/admin/create/checklist", { state: { id: location.state.id ,  } });
+    navigate("/admin/create/checklist", { state: { id: location.state.id, } });
   };
   const EditChecklist = (row) => {
     navigate("/admin/edit/checklist", {
@@ -578,8 +571,9 @@ const ClientList = () => {
             </div>
           </div>
         </div>
-      </div>  
-      <Hierarchy show={["Customer" , activeTab  ]} active={1} data={hararchyData}/>
+      </div>
+
+      <Hierarchy show={["Customer", activeTab]} active={1} data={hararchyData} NumberOfActive={ClientData.length} />
 
       <div className="tab-content" id="pills-tabContent">
         {tabs1.map((tab) => (

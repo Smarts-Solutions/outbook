@@ -48,6 +48,8 @@ import Documents from "../layouts/Admin/Jobs/Documents";
 
 import CreateJob from "../layouts/Admin/Jobs/JobAction/CreateJob";
 import JobEdit from "../layouts/Admin/Jobs/JobAction/EditJob";
+import Timesheet from "../layouts/Admin/Timesheet/Timesheet";
+
 
 
 const Admin_Route = () => {
@@ -89,8 +91,8 @@ const Admin_Route = () => {
       ).unwrap();
 
       if (response.data) {
-        localStorage.setItem("accessData", JSON.stringify(response.data));
-
+        localStorage.setItem("accessData", JSON.stringify(response.data)); 
+        
         response.data.forEach((item) => {
           if (!role == "ADMIN" || !role == "SUPERADMIN") {
             if (item.permission_name === "setting") {
@@ -218,6 +220,7 @@ const Admin_Route = () => {
             <Route path="/add/subSource" element={<Subsource />} />
             <Route path="/setting/checklist" element={<SettingCheckList />} />
             <Route path="/edit/setting/checklist" element={<EditSettingCheckList />} />
+            <Route path="/timesheet" element={<Timesheet />} />
           </Routes>
         </div>
       </div>

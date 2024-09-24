@@ -152,7 +152,7 @@ const Drafts = () => {
     const req = {
       id: AllDraftInputdata.id,
       draft_sent_on: AllDraftInputdata.draft_sent_on,
-      // final_draft_sent_on: AllDraftInputdata.final_draft_sent_on,
+      final_draft_sent_on: AllDraftInputdata.final_draft_sent_on,
       feedback_received: AllDraftInputdata.feedback_received,
       updated_amendment: AllDraftInputdata.updated_amendments,
       feedback: AllDraftInputdata.enter_feedback,
@@ -451,27 +451,7 @@ const Drafts = () => {
                 )}
               </div>
             </div>
-            {/* <div className="col-lg-6">
-              <div className="mb-3">
-                <label htmlFor="firstNameinput" className="form-label">
-                  Final Draft Sent On
-                </label>
-                <input
-                  type="date"
-                  className="form-control"
-                  placeholder=""
-                  name="final_draft_sent_on"
-                  id="final_draft_sent_on"
-                  onChange={(e) => handleInputChange(e)}
-                  value={AllDraftInputdata.final_draft_sent_on}
-                />
-                {errors["final_draft_sent_on"] && (
-                  <div className="error-text">
-                    {errors["final_draft_sent_on"]}
-                  </div>
-                )}
-              </div>
-            </div> */}
+           
             <div className="col-lg-6">
               <div className="mb-3">
                 <label htmlFor="firstNameinput" className="form-label">
@@ -529,7 +509,7 @@ const Drafts = () => {
             <div className="col-lg-6">
               <div className="mb-3">
                 <label htmlFor="firstNameinput" className="form-label">
-                  Was It Complete
+                  Was Draft Completed
                 </label>
                 <select
 
@@ -552,6 +532,29 @@ const Drafts = () => {
                 )}
               </div>
             </div>
+
+             <div className="col-lg-6">
+              <div className="mb-3">
+                <label htmlFor="firstNameinput" className="form-label">
+                  Final Draft Sent On
+                </label>
+                <input
+                  type="date"
+                  className="form-control"
+                  placeholder=""
+                  name="final_draft_sent_on"
+                  id="final_draft_sent_on"
+                  onChange={(e) => handleInputChange(e)}
+                  value={AllDraftInputdata.final_draft_sent_on}
+                />
+                {errors["final_draft_sent_on"] && (
+                  <div className="error-text">
+                    {errors["final_draft_sent_on"]}
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="col-lg-6">
               <div className="mb-3">
                 <label htmlFor="firstNameinput" className="form-label">
@@ -575,6 +578,8 @@ const Drafts = () => {
                 )}
               </div>
             </div>
+
+        
 
 
           </div>

@@ -20,8 +20,7 @@ const ClientList = () => {
   const [companyDetails, setCompanyDetails] = useState([]);
   const [hararchyData, setHararchyData] = useState(location.state.data);
 
-
- 
+  
 
   useEffect(() => {
     GetAllJobList();
@@ -163,9 +162,7 @@ const ClientList = () => {
         ...prevState,
         job: row
       };
-       
-      navigate("/admin/job/logs", { state: { job_id: row.job_id, data: updatedData , goto: "client" } });
-       
+      navigate("/admin/job/logs", { state: { job_id: row.job_id, data: updatedData , goto: "client" } }); 
       return updatedData;
     });
   };
@@ -227,7 +224,7 @@ const ClientList = () => {
   const handleAddClient = (row) => {
     if (getClientDetails?.data?.client?.customer_id) {
       navigate("/admin/createjob", {
-        state: { customer_id: getClientDetails?.data?.client?.customer_id, goto: "client" },
+        state: { customer_id: getClientDetails?.data?.client?.customer_id,clientName: location?.state?.data?.client, goto: "client" },
       });
     }
   };
@@ -304,7 +301,7 @@ const ClientList = () => {
           </div>
         </div>
 
-        <Hierarchy show={["Customer" , "Client" , activeTab  ]} active={2} data={hararchyData}/>
+        <Hierarchy show={["Customer" , "Client" , activeTab  ]} active={2} data={hararchyData} NumberOfActive={customerData.length}/>
         
       </div>
 
