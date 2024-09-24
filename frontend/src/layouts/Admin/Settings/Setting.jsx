@@ -100,9 +100,7 @@ const Setting = () => {
   const [getCheckList1, setCheckList1] = useState([]);
 
 
-
-   console.log("getCheckList",getCheckList)
-
+ 
 
 
 
