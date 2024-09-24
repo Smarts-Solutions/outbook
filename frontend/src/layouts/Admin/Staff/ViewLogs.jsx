@@ -4,8 +4,8 @@ import Datatable from '../../../Components/ExtraComponents/Datatable';
 
 
 const data = [
-  { ModuleName: 'job',LogMessage: 'Account Manager Vikas Patel added a new client on 24/09/2024 at 14:09. Client Code: cli_THE_Win_00007',  SysytemIp: 'The Black T',  }, 
-  { ModuleName: 'job',LogMessage: 'Account Manager Vikas Patel edited the client information on 24/09/2024 at 14:09. Client Code: cli_THE_Win_00007.',  SysytemIp: 'The Black T',  }, 
+  { ModuleName: 'job',LogMessage: 'Account Manager Vikas Patel added a new client on 24/09/2024 at 14:09. Client Code: cli_THE_Win_00007',  SysytemIp: 'The Black T', PermissionType: 'Insert' }, 
+  { ModuleName: 'job',LogMessage: 'Account Manager Vikas Patel edited the client information on 24/09/2024 at 14:09. Client Code: cli_THE_Win_00007.',  SysytemIp: 'The Black T', PermissionType: 'Update' }, 
   
   
 ];
@@ -15,23 +15,7 @@ const columns = [
   { name: 'Module Name', selector: row => row.ModuleName , sortable: true,width:'150px' },
   { name: 'Log Message', selector: row => row.LogMessage, sortable: true },
   { name: 'System Ip', selector: row => row.SysytemIp, sortable: true,width:'250px' },
-  { name: 'Permission Type', selector: row => row.PermissionType, sortable: true,
-    cell: (row) => (
-      <div
-        style={{
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-          maxWidth: "200px",
-        }}
-      >
-      <select className='form-select'>
-        <option value="">Insert</option>
-        <option value="">Update</option>
-      </select>
-      </div>
-    ),
-   },
+  { name: 'Permission Type', selector: row => row.PermissionType, sortable: true},
  
 ]
 

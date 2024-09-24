@@ -186,8 +186,8 @@ const StaffPage = () => {
       cell: (row) => (
         <div>
           <span
-            className={`badge ${
-              row.status === "1" ? "bg-success" : "bg-danger"
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
             }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
@@ -201,7 +201,7 @@ const StaffPage = () => {
       cell: (row) => (
         <div>
           {/* <button className='edit-icon' onClick={() => setIsModalOpen(true)}> <i className="ti-user" /></button> */}
-          <button className="delete-icon" onClick={() => setPortfolio(true)}>
+          <button className="secondary-icon" onClick={() => setPortfolio(true)}>
             {" "}
             <i className="ti-briefcase" />
           </button>
@@ -219,7 +219,7 @@ const StaffPage = () => {
           )}
           {showStaffInsertTab && (
             <button
-              className="delete-icon"
+              className="add-icon"
               onClick={(e) => {
                 ServiceData(row);
                 SetCompetancy(true);
@@ -229,7 +229,7 @@ const StaffPage = () => {
             </button>
           )}
 
-          <button className="delete-icon">View Logs</button>
+          <button className="view-icon">View Logs</button>
 
           {row.role === "ADMIN" || row.role === "SUPERADMIN"
             ? showStaffDeleteTab && (
