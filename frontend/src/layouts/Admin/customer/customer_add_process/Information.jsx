@@ -8,15 +8,8 @@ import { EDIT_CUSTOMER } from "../../../../Utils/Common_Message";
 import { Email_regex } from "../../../../Utils/Common_regex";
 import axios from "axios";
 import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
-import {
-  PersonRole,
-  Country,
-  IncorporationApi,
-} from "../../../../ReduxStore/Slice/Settings/settingSlice";
-import {
-  AddCustomer,
-  GetAllCompany,
-} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { PersonRole, Country, IncorporationApi } from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import { AddCustomer, GetAllCompany, } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 
 const Information = ({ id, pageStatus }) => {
@@ -29,23 +22,21 @@ const Information = ({ id, pageStatus }) => {
   const customer_id = localStorage.getItem("coustomerId");
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [staffDataAll, setStaffDataAll] = useState([]);
+  const [location, setLocation] = useState("");
   const [countryDataAll, setCountryDataAll] = useState([]);
   const [customerType, setCustomerType] = useState("1");
   const [ManagerType, setManagerType] = useState("");
   const [searchItem, setSearchItem] = useState("");
-
   const [getAllSearchCompany, setGetAllSearchCompany] = useState([]);
   const [getSearchDetails, setSearchDetails] = useState("");
   const [showDropdown, setShowDropdown] = useState(true);
-
-
   const [errors1, setErrors1] = useState({});
   const [errors2, setErrors2] = useState({});
   const [errors3, setErrors3] = useState({});
   const [getAccountMangerIdErr, setAccountMangerIdErr] = useState("");
   const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);
-
+  
   // state for sole trader
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     tradingName: "",
@@ -899,7 +890,7 @@ const Information = ({ id, pageStatus }) => {
       });
   };
 
-  const [location, setLocation] = useState("");
+
 
   useEffect(() => {
     const initializeAutocomplete = () => {

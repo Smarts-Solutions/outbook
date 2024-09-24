@@ -100,11 +100,6 @@ const Setting = () => {
   const [getCheckList1, setCheckList1] = useState([]);
 
 
- 
-
-
-
-
   const getCheckListData = async () => {
     const req = { action: "get", customer_id: 0 };
     const data = { req: req, authToken: token };
