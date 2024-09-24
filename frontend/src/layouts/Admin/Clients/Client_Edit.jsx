@@ -654,7 +654,6 @@ const ClientEdit = () => {
                 ? ""
                 : "Valid Email is required",
         };
-
         if (
           error.first_name ||
           error.last_name ||
@@ -692,8 +691,6 @@ const ClientEdit = () => {
       else {
         ScrollToViewFirstErrorContactForm(companyContactsErrors);
       }
-
-
     }
     if (selectClientType == 3 && validateAllFields(3)) {
       let formIsValid = true;
@@ -763,9 +760,7 @@ const ClientEdit = () => {
         client_type: "4",
         client_id: location.state.row.id,
         customer_id: location.state.id,
-
         trading_name: getIndivisualDetails.TradingName,
-
         first_name: getIndivisualDetails.first_name,
         last_name: getIndivisualDetails.last_name,
         phone: getIndivisualDetails.phone,
