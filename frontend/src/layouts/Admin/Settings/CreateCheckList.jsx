@@ -202,8 +202,7 @@ const CreateCheckList = () => {
 
     const req = { service_id, action: "get" };
     const data = { req, authToken: token };
-
-    console.log("data", data);
+ 
     await dispatch(JobType(data))
       .unwrap()
       .then((response) => {
@@ -284,8 +283,7 @@ const CreateCheckList = () => {
       })),
     };
 
-     
-    // console.log("req", req);
+      
     
     const data = { req, authToken: token };
     await dispatch(addChecklists(data))

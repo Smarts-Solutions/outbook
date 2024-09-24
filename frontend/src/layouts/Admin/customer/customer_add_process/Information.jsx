@@ -582,8 +582,8 @@ const Information = ({ id, pageStatus }) => {
           value === ""
             ? ""
             : /^\d{9,12}$/.test(value)
-            ? ""
-            : EDIT_CUSTOMER.PHONE_VALIDATION;
+              ? ""
+              : EDIT_CUSTOMER.PHONE_VALIDATION;
         break;
 
       default:
@@ -629,8 +629,8 @@ const Information = ({ id, pageStatus }) => {
           value === ""
             ? ""
             : /^\d{9,12}$/.test(value)
-            ? ""
-            : EDIT_CUSTOMER.PHONE_VALIDATION;
+              ? ""
+              : EDIT_CUSTOMER.PHONE_VALIDATION;
         break;
 
       default:
@@ -715,8 +715,8 @@ const Information = ({ id, pageStatus }) => {
                 contact.email === ""
                   ? EDIT_CUSTOMER.REQUIRE_EMAIL
                   : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-                  ? ""
-                  : EDIT_CUSTOMER.VALID_EMAIL,
+                    ? ""
+                    : EDIT_CUSTOMER.VALID_EMAIL,
             };
 
             if (
@@ -779,8 +779,8 @@ const Information = ({ id, pageStatus }) => {
                 contact.email === ""
                   ? EDIT_CUSTOMER.REQUIRE_EMAIL
                   : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-                  ? ""
-                  : EDIT_CUSTOMER.VALID_EMAIL,
+                    ? ""
+                    : EDIT_CUSTOMER.VALID_EMAIL,
             };
 
             if (
@@ -918,7 +918,7 @@ const Information = ({ id, pageStatus }) => {
     };
 
     initializeAutocomplete();
-  }, []); 
+  }, []);
 
   const sendPlaceDetailsToApi = (place) => {
     const apiUrl = "https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=AIzaSyAwLuK1P6GQk2WpYZCm0fnp9HmVhNTEeq4";
@@ -932,7 +932,6 @@ const Information = ({ id, pageStatus }) => {
     axios
       .post(apiUrl, placeDetails)
       .then((response) => {
-        console.log("API Response:", response.data);
       })
       .catch((error) => {
         console.error("Error sending data to API:", error);
@@ -1284,16 +1283,16 @@ const Information = ({ id, pageStatus }) => {
                           </div>
 
                           <div>
-      <label htmlFor="location">Enter Location:</label>
-      <input
-        type="text"
-        id="location"
-        className="form-control"
-        placeholder="Type a location"
-        value={location} // Use value prop to bind state
-        onChange={(e) => setLocation(e.target.value)}
-      />
-    </div>
+                            <label htmlFor="location">Enter Location:</label>
+                            <input
+                              type="text"
+                              id="location"
+                              className="form-control"
+                              placeholder="Type a location"
+                              value={location} // Use value prop to bind state
+                              onChange={(e) => setLocation(e.target.value)}
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1331,7 +1330,7 @@ const Information = ({ id, pageStatus }) => {
                                     style={{ cursor: "pointer" }}
                                   />
                                   {getAllSearchCompany.length > 0 &&
-                                  showDropdown ? (
+                                    showDropdown ? (
                                     <div className="dropdown-list">
                                       {getAllSearchCompany &&
                                         getAllSearchCompany.map(
@@ -2281,16 +2280,16 @@ const Information = ({ id, pageStatus }) => {
                                               />
                                               {contactsErrors[index]
                                                 ?.phoneNumber && (
-                                                <div
-                                                  className="error-text"
-                                                  style={{ color: "red" }}
-                                                >
-                                                  {
-                                                    contactsErrors[index]
-                                                      .phoneNumber
-                                                  }
-                                                </div>
-                                              )}
+                                                  <div
+                                                    className="error-text"
+                                                    style={{ color: "red" }}
+                                                  >
+                                                    {
+                                                      contactsErrors[index]
+                                                        .phoneNumber
+                                                    }
+                                                  </div>
+                                                )}
                                             </div>
                                           </div>
                                         </div>

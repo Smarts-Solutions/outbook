@@ -35,9 +35,7 @@ const CreateJob = () => {
     const [BudgetedHoureError, setBudgetedHourError] = useState('')
     const [BudgetedMinuteError, setBudgetedMinuteError] = useState('')
     const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" })
-
-
-    console.log("location.state", location.state.clientName)
+ 
     const [jobData, setJobData] = useState({
         AccountManager: "",
         Customer: "",
@@ -510,9 +508,7 @@ const CreateJob = () => {
     }
 
 
-
-
-    console.log("jobData", jobData)
+ 
 
     return (
         <div>

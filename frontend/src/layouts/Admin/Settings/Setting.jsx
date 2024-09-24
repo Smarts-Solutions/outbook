@@ -107,8 +107,7 @@ const Setting = () => {
     const data = { req: req, authToken: token };
     await dispatch(getList(data))
       .unwrap()
-      .then(async (response) => {
-        console.log("response getCheckListData",response)
+      .then(async (response) => { 
         if (response.status) {
 
           if (response.data.length > 0) {

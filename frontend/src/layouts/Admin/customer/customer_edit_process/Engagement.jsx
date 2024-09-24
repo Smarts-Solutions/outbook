@@ -100,11 +100,11 @@ const Engagement = () => {
             loading: false,
             data: response.data,
           });
-          console.log({
-            customerSource: response.data.customer?.customerSource,
-            customerSubSource: response.data.customer?.customerSubSource,
-            customerJoiningDate: response.data.customer?.customerJoiningDate,
-          });
+          // console.log({
+          //   customerSource: response.data.customer?.customerSource,
+          //   customerSubSource: response.data.customer?.customerSubSource,
+          //   customerJoiningDate: response.data.customer?.customerJoiningDate,
+          // });
 
           setFormState1({
             customerSource: response.data.customer?.customerSource,
@@ -254,8 +254,7 @@ const Engagement = () => {
     if (checkboxStates[3] === 0) setErrors4({});
   }, [checkboxStates]);
 
-  useEffect(() => {
-    console.log("formState1", formState1.customerSource);
+  useEffect(() => { 
     if (formState1.customerSource) {
       customerSubSourceData();
     }
