@@ -122,7 +122,9 @@ const query = `SELECT
       staffs.last_name, ' ', 
       staff_logs.log_message, ' ',
       CASE 
+      
         WHEN staff_logs.module_name = 'customer' THEN CONCAT('cust_', SUBSTRING(customers.trading_name, 1, 3), '_', customers.customer_code)
+
          WHEN staff_logs.module_name = 'client' THEN (
           SELECT CONCAT('cli_', SUBSTRING(c.trading_name, 1, 3),'_', SUBSTRING(clients.trading_name, 1, 3),'_',clients.client_code)
           FROM customers c
