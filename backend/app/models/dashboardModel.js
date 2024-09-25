@@ -123,6 +123,12 @@ const query = `SELECT
       staff_logs.log_message, ' ',
       CASE 
         WHEN staff_logs.module_name = 'customer' THEN CONCAT('cust_', SUBSTRING(customers.trading_name, 1, 3), '_', customers.customer_code)
+         WHEN staff_logs.module_name = 'client' THEN (
+          SELECT CONCAT('cli_', SUBSTRING(c.trading_name, 1, 3),'_', SUBSTRING(clients.trading_name, 1, 3),'_',clients.client_code)
+          FROM customers c
+          JOIN clients cl ON c.id = cl.customer_id
+          WHERE cl.id = staff_logs.module_id
+        )
         ELSE ''
       END
     ) AS log_message_other
@@ -133,13 +139,15 @@ JOIN
 JOIN 
     roles ON roles.id = staffs.role_id
 LEFT JOIN 
-    customers ON staff_logs.module_name = 'customer' AND staff_logs.module_id = customers.id         
+    customers ON staff_logs.module_name = 'customer' AND staff_logs.module_id = customers.id
+LEFT JOIN 
+    clients ON staff_logs.module_name = 'client' AND staff_logs.module_id = clients.id     
 WHERE
     staff_logs.staff_id = ${staff_id}
 ORDER BY
     staff_logs.id DESC
 
-    
+
   
 `;
 
