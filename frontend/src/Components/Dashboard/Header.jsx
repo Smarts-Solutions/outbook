@@ -432,12 +432,7 @@ const Header = () => {
           </ul>
           {/*end topbar-nav*/}
           <ul className="list-unstyled topbar-nav mb-0">
-            <li>
-              <p className="mb-0 page-subtitle">{formatTime(currentTime)}</p>
-              <h2 className="header-page-title mt-1 mb-0">
-                {formatDate(currentTime)}
-              </h2>
-            </li>
+            
             <li>
               <button
                 className="nav-link button-menu-mobile"
@@ -461,6 +456,12 @@ const Header = () => {
                   <line x1={3} y1={18} x2={21} y2={18} />
                 </svg>
               </button>
+            </li>
+            <li>
+              <p className="mb-0 page-subtitle">{formatTime(currentTime)}</p>
+              <h2 className="header-page-title mt-1 mb-0">
+                {formatDate(currentTime)}
+              </h2>
             </li>
           </ul>
         </nav>

@@ -159,9 +159,9 @@ const Customer = () => {
       cell: (row) => (
         <div>
           {row.form_process === "4" ? (
-            <span className="badge bg-success">Complete</span>
+            <span className="text-success">Complete</span>
           ) : (
-            <span className="badge bg-danger">In Progress</span>
+            <span className="text-danger">Pending</span>
           )}
         </div>
       ),
@@ -178,21 +178,21 @@ const Customer = () => {
           <div style={{ textAlign: "center" }}>
             {role === "ADMIN" || role === "SUPERADMIN" ? (
               <>
-                <button className="edit-icon" onClick={() => handleEdit(row)}>
-                  <i className="ti-pencil" />
+                <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
+                  <i className="ti-pencil text-primary" />
                 </button>
                 <button
-                  className="delete-icon"
+                  className="delete-icon "
                   onClick={() => handleDelete(row)}
                 >
-                  <i className="ti-trash text-danger" />
+                  <i className="ti-trash text-danger " />
                 </button>
               </>
             ) : (
               <>
                 {hasUpdateAccess && (
-                  <button className="edit-icon" onClick={() => handleEdit(row)}>
-                    <i className="ti-pencil" />
+                  <button className="edit-icon " onClick={() => handleEdit(row)}>
+                    <i className="ti-pencil text-primary" />
                   </button>
                 )}
                 {hasDeleteAccess && (
@@ -291,7 +291,7 @@ const Customer = () => {
             <div className="col-md-4">
               <Link
                 to="/admin/addcustomer"
-                className="btn btn-info text-white float-end blue-btn"
+                className="btn btn-outline-info  fw-bold float-end border-3"
               >
                 <i className="fa fa-plus" /> Add Customer
               </Link>
@@ -301,7 +301,7 @@ const Customer = () => {
               <div className="col-md-4">
                 <Link
                   to="/admin/addcustomer"
-                  className="btn btn-info text-white float-end blue-btn"
+                  className="btn btn-outline-info fw-bold float-end border-3"
                 >
                   <i className="fa fa-plus" /> Add Customer
                 </Link>
