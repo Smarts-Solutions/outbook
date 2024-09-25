@@ -60,7 +60,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ip: client.ip,
             date: currentDate.toISOString().split('T')[0],
             module_name: 'client',
-            log_message: `created client profile. client code : `,
+            log_message: `created client profile. client code :`,
             permission_type: 'created',
             module_id: client_id,
         }
