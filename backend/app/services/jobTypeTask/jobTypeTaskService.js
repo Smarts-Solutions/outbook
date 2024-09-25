@@ -27,6 +27,8 @@ const getTask = async (task) => {
   return jobTypeTaskModel.getTask(task);
 };
 
+ 
+
 const addChecklist = async (checklist) => {
   return jobTypeTaskModel.addChecklist(checklist);
 };
@@ -78,5 +80,6 @@ module.exports = {
     addChecklist,
     checklistAction,
     updateChecklist,
-    customerGetService
+    customerGetService,
+     
 };

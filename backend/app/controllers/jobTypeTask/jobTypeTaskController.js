@@ -74,6 +74,8 @@ const getTask = async (req, res) => {
   }
 };
 
+ 
+
 const addChecklist = async (req, res) => {
   try {
     const { ...checklist } = req.body;
@@ -149,5 +151,5 @@ module.exports = {
   addChecklist,
   checklistAction,
   updateChecklist,
-  customerGetService,
+  customerGetService, 
 };

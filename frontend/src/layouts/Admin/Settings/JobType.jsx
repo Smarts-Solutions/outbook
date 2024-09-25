@@ -16,18 +16,18 @@ const Setting = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const location = useLocation();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-
+  const dispatch = useDispatch(); 
   const [jobTypeData, setJobTypeData] = useState({ loading: true, data: [] });
   const [modalData, setModalData] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showAddTask, setShowAddTask] = useState(false);
   const [viewtask, setViewtask] = useState(false);
-  const [getJobTypeId, setJobTypeId] = useState("");
-
+  const [getJobTypeId, setJobTypeId] = useState(""); 
   const [isEdit, setIsEdit] = useState(false);
   const [taskInput, setTaskInput] = useState("");
   const [tasks, setTasks] = useState([]);
+  const [ViewTaskData, setViewTaskData] = useState([]);
+ 
 
   const JobTypeData = async (req) => {
     if (location.state.Id) {
@@ -74,6 +74,11 @@ const Setting = () => {
     fetchApiData();
   }, []);
 
+  const handleViewTask = (data) => {
+    // const req = {service_id: location.state.Id, job_type_id: data.id};
+    // const data = { req: req, authToken: token }
+  };
+
   const fetchApiData = () => {
     const req = {
       action: "get",
@@ -103,6 +108,7 @@ const Setting = () => {
           <button
             className="btn border-0"
             onClick={(e) => {
+              handleViewTask(row);
               setViewtask(true);
             }}
           >
@@ -244,7 +250,6 @@ const Setting = () => {
       id: data.id,
     });
 
-    //setModalData(data);
     setIsEdit(true);
     setIsModalOpen(true);
   };
@@ -310,11 +315,10 @@ const Setting = () => {
     setTaskInput(e.target.value);
   };
 
-  // Function to handle adding a task
   const handleAddTask = () => {
     if (taskInput.trim() !== "") {
-      setTasks([...tasks, taskInput]); // Add the new task to the tasks array
-      setTaskInput(""); // Clear the input field after adding
+      setTasks([...tasks, taskInput]);
+      setTaskInput(""); 
     }
   };
 
@@ -331,8 +335,8 @@ const Setting = () => {
 
       const extractedTasks = jsonData.map(
         (row) => row.Task || row.task || row["Task Name"]
-      ); // Adjust this line based on the column name in your Excel file
-      setTasks([...tasks, ...extractedTasks]); // Add the tasks from the file to the existing tasks
+      ); 
+      setTasks([...tasks, ...extractedTasks]); 
     };
 
     reader.readAsBinaryString(file);
@@ -390,7 +394,6 @@ const Setting = () => {
                   className="btn btn-info text-white float-end"
                   onClick={(e) => handleAdd(e, "1")}
                 >
-                  {" "}
                   <i className="fa fa-plus" /> Add Job Type
                 </button>
               </div>
@@ -410,9 +413,6 @@ const Setting = () => {
         <Modal
           modalId="exampleModal3"
           title={isEdit ? "Edit " + modalData.title : "Add " + modalData.title}
-          // fields={[
-          //     { type: modalData.type, name: modalData.name, label: modalData.label, placeholder: modalData.placeholder, value: modalData.value }
-          // ]}
           fields={modalData.fields}
           onClose={() => {
             setIsModalOpen(false);

@@ -120,6 +120,8 @@ const getTask = async (task) => {
   }
 };
 
+ 
+
 const addChecklist = async (checklist) => {
 
 
@@ -555,5 +557,5 @@ module.exports = {
   updateChecklist,
   customerGetService,
   getClientTypeChecklist,
-  getByServiceWithJobType,
+  getByServiceWithJobType, 
 };
