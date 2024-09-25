@@ -33,6 +33,19 @@ const createCustomer = async (customer) => {
             try {
                 const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, customer_code, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus]);
                 const customer_id = result.insertId;
+                const currentDate = new Date();
+                await SatffLogUpdateOperation(
+                    {
+                        staff_id: customer.StaffUserId,
+                        ip: customer.ip,
+                        date: currentDate.toISOString().split('T')[0],
+                        module_name: 'customer',
+                        log_message: `created customer profile on`,
+                        permission_type: 'created',
+                        module_id: customer_id,
+                    }
+                );
+
 
                 const query2 = `
         INSERT INTO customer_contact_details (customer_id,first_name,last_name,phone_code,phone,email,residential_address)
