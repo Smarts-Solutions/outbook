@@ -173,7 +173,7 @@ const addTask = async (task) => {
 const getTask = async (task) => {
   const { service_id, job_type_id } = task;
   const query = `
-    SELECT id,name,service_id,job_type_id FROM task WHERE service_id = ? AND job_type_id = ?
+    SELECT id,name,service_id,job_type_id,status FROM task WHERE service_id = ? AND job_type_id = ?
     ORDER BY id DESC
     `;
   try {
