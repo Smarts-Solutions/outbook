@@ -14,6 +14,7 @@ import {
   EMPTY_EMAIL_ERROR,
 } from "../../Utils/Common_Message";
 import { RoleAccess } from "../../ReduxStore/Slice/Access/AccessSlice";
+import sweatalert from "sweetalert2";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -44,8 +45,6 @@ const Login = () => {
       .then(async (response) => {
         if (response.status) {
           accessDataFetch(response.data.staffDetails, response.data.token);
-
-
           localStorage.setItem(
             "staffDetails",
             JSON.stringify(response.data.staffDetails)
@@ -56,6 +55,15 @@ const Login = () => {
             JSON.stringify(response.data.staffDetails.role)
           );
 
+          // sweet alert
+          sweatalert.fire({
+            title: "Login Successfully",
+            icon: "success",
+            timer: 1000,
+            showConfirmButton: false,
+            timerProgressBar: true,
+          });
+
 
           const req_auth_token = {
             id: response.data.staffDetails.id,
@@ -63,12 +71,14 @@ const Login = () => {
           };
           await dispatch(LoginAuthToken(req_auth_token))
             .unwrap()
-            .then(async (response) => {})
+            .then(async (response) => { })
             .catch((error) => {
               return;
             });
+          setTimeout(() => {
+            navigate("/admin/dashboard");
+          }, 1000);
 
-          navigate("/admin/dashboard");
         } else {
           localStorage.removeItem("staffDetails");
           localStorage.removeItem("token");
@@ -109,7 +119,7 @@ const Login = () => {
             };
             await dispatch(LoginAuthToken(req_auth_token))
               .unwrap()
-              .then(async (response) => {})
+              .then(async (response) => { })
               .catch((error) => {
                 return;
               });
@@ -131,8 +141,6 @@ const Login = () => {
 
   const accessDataFetch = async (data, token) => {
     try {
-     
-
       const response = await dispatch(
         RoleAccess({
           req: { role_id: data.role_id, StaffUserId: data.id, action: "get" },
@@ -141,6 +149,9 @@ const Login = () => {
       ).unwrap();
 
       if (response.data) {
+
+        localStorage.setItem("accessData", JSON.stringify(response.data));
+
         response.data.forEach((item) => {
           const updatedShowTab = {
             setting: false,
@@ -171,6 +182,12 @@ const Login = () => {
               );
               updatedShowTab.status =
                 statusView && statusView.is_assigned === 1;
+            }else if (item.permission_name === "timesheet") {
+              const timesheetView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.timesheet =
+                timesheetView && timesheetView.is_assigned === 1;
             }
           });
 

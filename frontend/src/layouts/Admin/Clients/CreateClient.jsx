@@ -1388,7 +1388,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.CompanyName
                                               }
-                                              disabled
+                                              // disabled
                                             />
                                             {errors2["CompanyName"] && (
                                               <div className="error-text">
@@ -1415,7 +1415,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.EntityType
                                               }
-                                              disabled
+                                              // disabled
                                             />
                                             {errors2["EntityType"] && (
                                               <div className="error-text">
@@ -1443,7 +1443,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.CompanyStatus
                                               }
-                                              disabled
+                                              // disabled
                                             />
                                             {errors2["CompanyStatus"] && (
                                               <div className="error-text">
@@ -1470,7 +1470,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.CompanyNumber
                                               }
-                                              disabled
+                                              // disabled
                                             />
                                             {errors2["CompanyNumber"] && (
                                               <div className="error-text">
@@ -1494,7 +1494,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.IncorporationDate
                                               }
-                                              disabled
+                                              // disabled
                                             />
                                             {errors2["IncorporationDate"] && (
                                               <div className="error-text">
@@ -1521,7 +1521,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.RegisteredOfficeAddress
                                               }
-                                              disabled
+                                              // disabled
                                             />
                                             {errors2[
                                               "RegisteredOfficeAddress"
@@ -1556,7 +1556,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.IncorporationIn
                                               }
-                                              disabled
+                                              // disabled
                                             />
 
                                             {errors2["IncorporationIn"] && (
@@ -2200,10 +2200,10 @@ const CreateClient = () => {
                                               <div className="row">
                                                 <div className="col-lg-12">
                                                   <div
-                                                    className="form-check form-switch form-switch-md mb-3 d-flex justify-content-between"
+                                                    className="form-check form-switch form-switch-md mb-3 d-flex justify-content-end"
                                                     dir="ltr"
                                                   >
-                                                    <div>
+                                                    {/* <div>
                                                       <input
                                                         type="checkbox"
                                                         className="form-check-input"
@@ -2232,7 +2232,7 @@ const CreateClient = () => {
                                                       <label className="form-check-label">
                                                         Authorised Signatory
                                                       </label>
-                                                    </div>
+                                                    </div> */}
                                                     {index !== 0 &&
                                                       index !== 1 && (
                                                         <div>

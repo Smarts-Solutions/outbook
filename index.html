@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=AIzaSyAEBq9LoWxzZDdfz_-r8k6bsfB7gZWA4aY"></script>
+</head>
+<body>
+    <h1>Hello World</h1>
+    <input type="text" id="location" placeholder="Type a location">
+
+    <script>
+        $(document).ready(function () {
+            var autocomplete = new google.maps.places.Autocomplete(
+                document.getElementById('location'),
+                { types: ['geocode'] }
+            );
+
+            google.maps.event.addListener(autocomplete, 'place_changed', function () {
+                var place = autocomplete.getPlace();
+                if (place && place.geometry) {
+                 
+                } else {
+                   
+                }
+            });
+        });
+    </script>
+</body>
+</html>

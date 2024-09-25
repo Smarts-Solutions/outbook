@@ -202,8 +202,7 @@ const CreateCheckList = () => {
 
     const req = { service_id, action: "get" };
     const data = { req, authToken: token };
-
-    console.log("data", data);
+ 
     await dispatch(JobType(data))
       .unwrap()
       .then((response) => {
@@ -284,10 +283,8 @@ const CreateCheckList = () => {
       })),
     };
 
-     
-    console.log("req", req);
-    return 
-
+      
+    
     const data = { req, authToken: token };
     await dispatch(addChecklists(data))
       .unwrap()
@@ -298,6 +295,8 @@ const CreateCheckList = () => {
             text: response.message,
             icon: "success",
             confirmButtonText: "Ok",
+            timer: 1000,
+            timerProgressBar:true
           });
 
           // Reset form and tasks after successful submission
@@ -312,9 +311,10 @@ const CreateCheckList = () => {
           setTasks([{ task_id: "", task_name: "", budgeted_hour: "" }]);
 
           // Redirect to Clientlist
-          navigate("/admin/Clientlist", {
-            state: { id: location.state.id, route: "Checklist" },
-          });
+          // navigate("/admin/Clientlist", {
+          //   state: { id: location.state.id, route: "Checklist" },
+          // });
+          window.history.back();
         }
       })
       .catch((error) => {
@@ -537,9 +537,10 @@ const CreateCheckList = () => {
             <button
               className="btn btn-secondary "
               onClick={(e) =>
-                navigate("/admin/Clientlist", {
-                  state: { id: location.state.id, route: "Checklist" },
-                })
+                // navigate("/admin/Clientlist", {
+                //   state: { id: location.state.id, route: "Checklist" },
+                // })
+                window.history.back()
               }
             >
               Cancel

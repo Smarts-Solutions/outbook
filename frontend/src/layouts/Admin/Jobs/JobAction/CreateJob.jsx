@@ -35,7 +35,7 @@ const CreateJob = () => {
     const [BudgetedHoureError, setBudgetedHourError] = useState('')
     const [BudgetedMinuteError, setBudgetedMinuteError] = useState('')
     const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" })
-
+ 
     const [jobData, setJobData] = useState({
         AccountManager: "",
         Customer: "",
@@ -87,7 +87,7 @@ const CreateJob = () => {
             ...prevState,
             AccountManager: AllJobData?.data?.Manager?.[0]?.manager_name || "",
             Customer: AllJobData?.data?.customer?.customer_trading_name || "",
-            Client: location.state.goto == "Customer" ? "" : AllJobData?.data?.client?.[0]?.client_trading_name || "",
+            Client: location.state.goto == "Customer" ? "" : location.state.clientName.client_name || "",
         }));
     }, [AllJobData]);
 
@@ -312,7 +312,7 @@ const CreateJob = () => {
             staffCreatedId: staffCreatedId,
             account_manager_id: AllJobData?.data?.Manager[0]?.manager_id,
             customer_id: AllJobData?.data?.customer?.customer_id,
-            client_id: AllJobData?.data?.client[0]?.client_id,
+            client_id: location?.state?.clientName?.id,
             client_job_code: jobData.ClientJobCode,
             customer_contact_details_id: Number(jobData.CustomerAccountManager),
             service_id: Number(jobData.Service),
@@ -508,8 +508,7 @@ const CreateJob = () => {
     }
 
 
-
-
+ 
 
     return (
         <div>

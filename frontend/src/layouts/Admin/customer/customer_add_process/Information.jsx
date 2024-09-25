@@ -6,13 +6,12 @@ import { useNavigate } from "react-router-dom";
 import MultiStepFormContext from "./MultiStepFormContext";
 import { EDIT_CUSTOMER } from "../../../../Utils/Common_Message";
 import { Email_regex } from "../../../../Utils/Common_regex";
+import axios from "axios";
 import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
 import { PersonRole, Country, IncorporationApi } from "../../../../ReduxStore/Slice/Settings/settingSlice";
-import {
-  AddCustomer,
-  GetAllCompany,
-} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { AddCustomer, GetAllCompany, } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
+import { ScrollToViewFirstError, ScrollToViewFirstErrorContactForm } from '../../../../Utils/Comman_function'
 
 const Information = ({ id, pageStatus }) => {
   const { address, setAddress, next } = useContext(MultiStepFormContext);
@@ -24,24 +23,20 @@ const Information = ({ id, pageStatus }) => {
   const customer_id = localStorage.getItem("coustomerId");
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [staffDataAll, setStaffDataAll] = useState([]);
+  const [location, setLocation] = useState("");
   const [countryDataAll, setCountryDataAll] = useState([]);
   const [customerType, setCustomerType] = useState("1");
   const [ManagerType, setManagerType] = useState("");
   const [searchItem, setSearchItem] = useState("");
-  const [SearchResidentialAddress, setSearchResidentialAddress] = useState("");
-
   const [getAllSearchCompany, setGetAllSearchCompany] = useState([]);
   const [getSearchDetails, setSearchDetails] = useState("");
   const [showDropdown, setShowDropdown] = useState(true);
-  const [ShowResidentialAddressDropdown, setShowResidentialAddressDropdown] = useState(true);
-
   const [errors1, setErrors1] = useState({});
   const [errors2, setErrors2] = useState({});
   const [errors3, setErrors3] = useState({});
   const [getAccountMangerIdErr, setAccountMangerIdErr] = useState("");
   const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);
-
 
   // state for sole trader
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
@@ -122,11 +117,11 @@ const Information = ({ id, pageStatus }) => {
   // state for company contact errors
   const [errors, setErrors] = useState([
     {
-      firstName: '',
-      lastName: '',
-      role: '',
-      phoneNumber: '',
-      email: '',
+      firstName: "",
+      lastName: "",
+      role: "",
+      phoneNumber: "",
+      email: "",
     },
   ]);
 
@@ -165,8 +160,6 @@ const Information = ({ id, pageStatus }) => {
     FilterSearchDetails();
   }, [searchItem]);
 
-
-
   useEffect(() => {
     if (getSearchDetails && getSearchDetails.length > 0) {
       // Update company details
@@ -174,16 +167,19 @@ const Information = ({ id, pageStatus }) => {
         ...prevState,
         CompanyName: getSearchDetails[0].title || prevState.CompanyName,
         EntityType: getSearchDetails[0].company_type || prevState.EntityType,
-        CompanyStatus: getSearchDetails[0].company_status || prevState.CompanyStatus,
-        CompanyNumber: getSearchDetails[0].company_number || prevState.CompanyNumber,
-        RegisteredOfficeAddress: getSearchDetails[0].address_snippet || prevState.RegisteredOfficeAddress,
+        CompanyStatus:
+          getSearchDetails[0].company_status || prevState.CompanyStatus,
+        CompanyNumber:
+          getSearchDetails[0].company_number || prevState.CompanyNumber,
+        RegisteredOfficeAddress:
+          getSearchDetails[0].address_snippet ||
+          prevState.RegisteredOfficeAddress,
         IncorporationDate: getSearchDetails[0].date_of_creation
           ? getSearchDetails[0].date_of_creation
           : "",
         // IncorporationIn: getSearchDetails[0].description,
         TradingName: getSearchDetails[0].title,
         TradingAddress: getSearchDetails[0].address_snippet,
-
       }));
 
       const newErrors = { ...errors2 };
@@ -191,16 +187,18 @@ const Information = ({ id, pageStatus }) => {
       if (getSearchDetails[0].company_type) delete newErrors["EntityType"];
       if (getSearchDetails[0].company_status) delete newErrors["CompanyStatus"];
       if (getSearchDetails[0].company_number) delete newErrors["CompanyNumber"];
-      if (getSearchDetails[0].address_snippet) delete newErrors["RegisteredOfficeAddress"];
-      if (getSearchDetails[0].date_of_creation) delete newErrors["IncorporationDate"];
+      if (getSearchDetails[0].address_snippet)
+        delete newErrors["RegisteredOfficeAddress"];
+      if (getSearchDetails[0].date_of_creation)
+        delete newErrors["IncorporationDate"];
       if (getSearchDetails[0].description) delete newErrors["IncorporationIn"];
       if (getSearchDetails[0].title) delete newErrors["TradingName"];
-      if (getSearchDetails[0].address_snippet) delete newErrors["TradingAddress"];
+      if (getSearchDetails[0].address_snippet)
+        delete newErrors["TradingAddress"];
 
       setErrors2(newErrors);
     }
   }, [getSearchDetails]);
-
 
   //  Add company contact
   const handleAddContact = () => {
@@ -219,11 +217,11 @@ const Information = ({ id, pageStatus }) => {
     setErrors([
       ...errors,
       {
-        firstName: '',
-        lastName: '',
-        role: '',
-        phoneNumber: '',
-        email: '',
+        firstName: "",
+        lastName: "",
+        role: "",
+        phoneNumber: "",
+        email: "",
       },
     ]);
   };
@@ -249,16 +247,15 @@ const Information = ({ id, pageStatus }) => {
         email: "",
         phone_code: "+44",
       },
-
     ]);
     setContactsErrors([
       ...contactsErrors,
       {
-        firstName: '',
-        lastName: '',
-        role: '',
-        phoneNumber: '',
-        email: '',
+        firstName: "",
+        lastName: "",
+        role: "",
+        phoneNumber: "",
+        email: "",
       },
     ]);
   };
@@ -361,7 +358,7 @@ const Information = ({ id, pageStatus }) => {
     setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
   };
 
-  // handle change COMPANY contact 
+  // handle change COMPANY contact
   const handleChange4 = (index, field, value) => {
     let newValue = value;
     if (field == EDIT_CUSTOMER.AUTHORISED) {
@@ -431,6 +428,7 @@ const Information = ({ id, pageStatus }) => {
     }
 
 
+    ScrollToViewFirstError(newErrors);
     // Update state only if there are errors
     if (Object.keys(newErrors).length !== 0) {
       setErrors1((prevErrors) => ({
@@ -444,7 +442,6 @@ const Information = ({ id, pageStatus }) => {
 
   // validate function company
   const validate2 = (name, value) => {
-
     const newErrors = { ...errors2 };
     if (!value) {
       switch (name) {
@@ -475,8 +472,7 @@ const Information = ({ id, pageStatus }) => {
         default:
           break;
       }
-    }
-    else {
+    } else {
       delete newErrors[name];
       setErrors2((prevErrors) => {
         const updatedErrors = { ...prevErrors };
@@ -485,6 +481,7 @@ const Information = ({ id, pageStatus }) => {
       });
     }
 
+    ScrollToViewFirstError(newErrors);
     if (Object.keys(newErrors).length !== 0) {
       setErrors2((prevErrors) => ({
         ...prevErrors,
@@ -517,6 +514,9 @@ const Information = ({ id, pageStatus }) => {
         return updatedErrors;
       });
     }
+
+    ScrollToViewFirstError(newErrors);
+
     if (Object.keys(newErrors).length !== 0) {
       setErrors3((prevErrors) => ({
         ...prevErrors,
@@ -528,7 +528,11 @@ const Information = ({ id, pageStatus }) => {
 
   // validate all fields when submit
   const validateAllFields = (type) => {
-    const customer_type = [getSoleTraderDetails, getCompanyDetails, getPartnershipDetails];
+    const customer_type = [
+      getSoleTraderDetails,
+      getCompanyDetails,
+      getPartnershipDetails,
+    ];
     const validate = [validate1, validate2, validate3];
     let isValid = true;
     for (const key in customer_type[type - 1]) {
@@ -660,10 +664,15 @@ const Information = ({ id, pageStatus }) => {
   // submit function
   const handleSubmit = async () => {
     if (ManagerType == "") {
-      setAccountMangerIdErr("Please Select Manager");
+      setAccountMangerIdErr("Please Select Manager"); 
       const errorElement = document.getElementById("accountManager");
       if (errorElement) {
-        errorElement.scrollIntoView({ behavior: 'smooth' });
+          const elementPosition = errorElement.getBoundingClientRect().top;  
+          const offsetPosition = elementPosition + window.pageYOffset - 50;
+          window.scrollTo({
+              top: offsetPosition,
+              behavior: "smooth"
+          });
       }
       return;
     }
@@ -686,12 +695,9 @@ const Information = ({ id, pageStatus }) => {
           account_manager_id: ManagerType,
           CustomerType: customerType,
           staff_id: staffDetails.id,
-        }
+        };
         await AddCustomerFun(req);
-      }
-      else {
-        scrollToFirstError(errors1);
-      }
+      }  
     }
     if (customerType == 2 && ManagerType != "") {
       if (validateAllFields(2)) {
@@ -748,14 +754,11 @@ const Information = ({ id, pageStatus }) => {
             Incorporation_in: getCompanyDetails.IncorporationIn,
           };
 
-
           await AddCustomerFun(req);
-        }
-        else {
+        } else {
           scrollToFirstError1(errors);
         }
-      }
-      else {
+      } else {
         scrollToFirstError(errors2);
       }
     }
@@ -806,16 +809,13 @@ const Information = ({ id, pageStatus }) => {
             VAT_Number: getPartnershipDetails.VATNumber,
             Website: getPartnershipDetails.Website,
             contactDetails: contacts1,
-
           };
 
           await AddCustomerFun(req);
-        }
-        else {
+        } else {
           scrollToFirstError1(contactsErrors);
         }
-      }
-      else {
+      } else {
         scrollToFirstError(errors3);
       }
     }
@@ -823,11 +823,10 @@ const Information = ({ id, pageStatus }) => {
 
   // scorll to first error
   const scrollToFirstError = (errors) => {
-
     const errorField = Object.keys(errors)[0];
     const errorElement = document.getElementById(errorField);
     if (errorElement) {
-      errorElement.scrollIntoView({ behavior: 'smooth' });
+      errorElement.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -839,9 +838,8 @@ const Information = ({ id, pageStatus }) => {
           const fieldId = `${field}-${index}`;
           const errorElement = document.getElementById(fieldId);
 
-
           if (errorElement) {
-            errorElement.scrollIntoView({ behavior: 'smooth' });
+            errorElement.scrollIntoView({ behavior: "smooth" });
           }
           return;
         }
@@ -886,13 +884,11 @@ const Information = ({ id, pageStatus }) => {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   };
 
-
   const incorporationData = async (req) => {
     const data = { req: { action: "getAll" }, authToken: token };
     await dispatch(IncorporationApi(data))
       .unwrap()
       .then(async (response) => {
-
         if (response.status) {
           setIncorporationDataAll(response.data);
         } else {
@@ -901,6 +897,45 @@ const Information = ({ id, pageStatus }) => {
       })
       .catch((error) => {
         return;
+      });
+  };
+
+
+
+  useEffect(() => {
+    const initializeAutocomplete = () => {
+      const input = document.getElementById("location");
+      const autocomplete = new window.google.maps.places.Autocomplete(input, {
+        types: ["geocode"],
+      });
+
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+        if (place && place.geometry) {
+          setLocation(place.formatted_address);
+          sendPlaceDetailsToApi(place);
+        }
+      });
+    };
+
+    initializeAutocomplete();
+  }, []);
+
+  const sendPlaceDetailsToApi = (place) => {
+    const apiUrl = "https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=AIzaSyAwLuK1P6GQk2WpYZCm0fnp9HmVhNTEeq4";
+
+    const placeDetails = {
+      address: place.formatted_address,
+      latitude: place.geometry.location.lat(),
+      longitude: place.geometry.location.lng(),
+    };
+
+    axios
+      .post(apiUrl, placeDetails)
+      .then((response) => {
+      })
+      .catch((error) => {
+        console.error("Error sending data to API:", error);
       });
   };
 
@@ -1189,7 +1224,6 @@ const Information = ({ id, pageStatus }) => {
                                     placeholder="Phone Number"
                                     name="phone"
                                     id="phone"
-
                                     value={getSoleTraderDetails.phone}
                                     onChange={(e) => handleChange1(e)}
                                     maxLength={12}
@@ -1226,7 +1260,7 @@ const Information = ({ id, pageStatus }) => {
                             </div>
                           </div>
 
-                          {/* <div className="col-lg-4">
+                          <div className="col-lg-4">
                             <div className="mb-3">
                               <label className="form-label">
                                 Residential Address
@@ -1247,56 +1281,19 @@ const Information = ({ id, pageStatus }) => {
                                 </div>
                               )}
                             </div>
-                          </div> */}
-
-                          <div className="col-lg-4">
-                            <div className="mb-3">
-                              <div className="position-relative">
-                                <label className="form-label">
-                                  Residential Address
-                                  <span style={{ color: "red" }}>*</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  placeholder=" Search Residential Address"
-                                  name="residentialAddress"
-                                  id="residentialAddress"
-                                  onChange={(e) => setSearchResidentialAddress(e.target.value)}
-                                  value={SearchResidentialAddress}
-                                  onClick={() => setShowResidentialAddressDropdown(true)}
-                                  style={{ cursor: "pointer" }}
-                                />
-                                {getAllSearchCompany.length > 0 &&
-                                  ShowResidentialAddressDropdown ? (
-                                  <div className="dropdown-list">
-                                    {getAllSearchCompany &&
-                                      getAllSearchCompany.map(
-                                        (company, index) => (
-                                          <div
-                                            key={index}
-                                            onClick={() => {
-                                              setSearchResidentialAddress(company.title);
-                                              setShowResidentialAddressDropdown(false);
-                                            }}
-                                            style={{
-                                              cursor: "pointer",
-                                              padding: "8px 0",
-                                            }}
-                                          >
-                                            {company.title}
-                                          </div>
-                                        )
-                                      )}
-                                  </div>
-                                ) : (
-                                  ""
-                                )}
-                              </div>
-                            </div>
                           </div>
 
-
+                          <div>
+                            <label htmlFor="location">Enter Location:</label>
+                            <input
+                              type="text"
+                              id="location"
+                              className="form-control"
+                              placeholder="Type a location"
+                              value={location} // Use value prop to bind state
+                              onChange={(e) => setLocation(e.target.value)}
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1307,7 +1304,9 @@ const Information = ({ id, pageStatus }) => {
                   <div className="col-lg-12">
                     <div className="card card_shadow ">
                       <div className="card-header card-header-light-blue  step-card-header align-items-center d-flex">
-                        <h4 className="card-title mb-0 flex-grow-1">Company Information</h4>
+                        <h4 className="card-title mb-0 flex-grow-1">
+                          Company Information
+                        </h4>
                       </div>
                       {/* end card header */}
                       <div className="card-body">
@@ -1322,7 +1321,6 @@ const Information = ({ id, pageStatus }) => {
                                   <input
                                     type="text"
                                     className="form-control"
-
                                     placeholder=" Search Company"
                                     name="SearchCompany"
                                     onChange={(e) =>
@@ -1781,9 +1779,7 @@ const Information = ({ id, pageStatus }) => {
                                             <select
                                               className="form-select"
                                               id={`role-${index}`}
-                                              value={
-                                                contact.role
-                                              }
+                                              value={contact.role}
                                               onChange={(e) =>
                                                 handleChange(
                                                   index,
@@ -1808,16 +1804,12 @@ const Information = ({ id, pageStatus }) => {
                                                 )}
                                             </select>
                                             {errors[index] &&
-                                              errors[index]
-                                                .role && (
+                                              errors[index].role && (
                                                 <div
                                                   className="error-text"
                                                   style={{ color: "red" }}
                                                 >
-                                                  {
-                                                    errors[index]
-                                                      .role
-                                                  }
+                                                  {errors[index].role}
                                                 </div>
                                               )}
                                           </div>
@@ -1875,10 +1867,11 @@ const Information = ({ id, pageStatus }) => {
                                                 />
                                                 {errors[index] &&
                                                   errors[index].phoneNumber && (
-                                                    <div
-                                                      className="error-text"
-                                                    >
-                                                      {errors[index].phoneNumber}
+                                                    <div className="error-text">
+                                                      {
+                                                        errors[index]
+                                                          .phoneNumber
+                                                      }
                                                     </div>
                                                   )}
                                               </div>
@@ -1931,7 +1924,8 @@ const Information = ({ id, pageStatus }) => {
                                   className="btn btn-info text-white blue-btn"
                                   onClick={handleAddContact}
                                 >
-                                  <i className="fa fa-plus pe-1"></i> Add Contact
+                                  <i className="fa fa-plus pe-1"></i> Add
+                                  Contact
                                 </button>
                               </div>
                             </div>
@@ -2147,15 +2141,14 @@ const Information = ({ id, pageStatus }) => {
                                               )
                                             }
                                           />
-                                          {contactsErrors[index]
-                                            ?.firstName && (
-                                              <div
-                                                className="error-text"
-                                                style={{ color: "red" }}
-                                              >
-                                                {contactsErrors[index].firstName}
-                                              </div>
-                                            )}
+                                          {contactsErrors[index]?.firstName && (
+                                            <div
+                                              className="error-text"
+                                              style={{ color: "red" }}
+                                            >
+                                              {contactsErrors[index].firstName}
+                                            </div>
+                                          )}
                                         </div>
                                       </div>
                                       <div className="col-lg-4">
@@ -2202,9 +2195,7 @@ const Information = ({ id, pageStatus }) => {
                                           <select
                                             className="form-select"
                                             id={`role-${index}`}
-                                            value={
-                                              contact.role
-                                            }
+                                            value={contact.role}
                                             onChange={(e) =>
                                               handleChange4(
                                                 index,
@@ -2228,18 +2219,14 @@ const Information = ({ id, pageStatus }) => {
                                                 )
                                               )}
                                           </select>
-                                          {contactsErrors[index]
-                                            ?.role && (
-                                              <div
-                                                className="error-text"
-                                                style={{ color: "red" }}
-                                              >
-                                                {
-                                                  contactsErrors[index]
-                                                    .role
-                                                }
-                                              </div>
-                                            )}
+                                          {contactsErrors[index]?.role && (
+                                            <div
+                                              className="error-text"
+                                              style={{ color: "red" }}
+                                            >
+                                              {contactsErrors[index].role}
+                                            </div>
+                                          )}
                                         </div>
                                       </div>
 
@@ -2292,14 +2279,18 @@ const Information = ({ id, pageStatus }) => {
                                                 maxLength={12}
                                                 minLength={9}
                                               />
-                                              {contactsErrors[index]?.phoneNumber && (
-                                                <div
-                                                  className="error-text"
-                                                  style={{ color: "red" }}
-                                                >
-                                                  {contactsErrors[index].phoneNumber}
-                                                </div>
-                                              )}
+                                              {contactsErrors[index]
+                                                ?.phoneNumber && (
+                                                  <div
+                                                    className="error-text"
+                                                    style={{ color: "red" }}
+                                                  >
+                                                    {
+                                                      contactsErrors[index]
+                                                        .phoneNumber
+                                                    }
+                                                  </div>
+                                                )}
                                             </div>
                                           </div>
                                         </div>

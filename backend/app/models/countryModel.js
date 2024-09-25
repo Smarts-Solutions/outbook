@@ -65,18 +65,23 @@ const deleteCountry = async (CountryId) => {
 
 const updateCountry = async (Country) => {
     const { id, ...fields } = Country;
+
+
     const name  = Country.name;
-    // Create an array to hold the set clauses
+
     const setClauses = [];
     const values = [];
-    // Iterate over the fields and construct the set clauses dynamically
+    
+
     for (const [key, value] of Object.entries(fields)) {
+     if(key !== "ip" && key !=="StaffUserId"){
         setClauses.push(`${key} = ?`);
         values.push(value);
+     }
     }
-    // Add the id to the values array for the WHERE clause
+  
     values.push(id);
-    // Construct the final SQL query
+
     const query = `
     UPDATE countries
     SET ${setClauses.join(', ')}

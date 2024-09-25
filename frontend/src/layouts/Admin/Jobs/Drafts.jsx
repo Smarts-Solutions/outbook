@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import Datatable from '../../../Components/ExtraComponents/Datatable';
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { DraftAction , AddDraft , EditDraft } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
+import { DraftAction, AddDraft, EditDraft } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
 import { useLocation } from "react-router-dom";
 import sweatalert from 'sweetalert2';
 import { all } from "axios";
@@ -22,11 +22,13 @@ const Drafts = () => {
     draft_sent_on: new Date().toISOString().substr(0, 10),
     feedback_received: '0',
     updated_amendments: '1',
-    final_draft_sent_on: null,
+    final_draft_sent_on: new Date().toISOString().substr(0, 10),
     was_it_complete: '0',
     enter_feedback: null,
     id: null
   });
+
+
 
   const resetForm = () => {
     setAllDraftInputdata({
@@ -34,14 +36,14 @@ const Drafts = () => {
       draft_sent_on: new Date().toISOString().substr(0, 10),
       feedback_received: '0',
       updated_amendments: '1',
-      final_draft_sent_on: null,
+      final_draft_sent_on: new Date().toISOString().substr(0, 10),
       was_it_complete: '0',
       enter_feedback: null,
       id: null
 
     });
   };
-  
+
   useEffect(() => {
     if (EditData && showEditModal) {
       setAllDraftInputdata({
@@ -49,13 +51,13 @@ const Drafts = () => {
         draft_sent_on: EditData.draft_sent_on,
         feedback_received: EditData.feedback_received,
         updated_amendments: EditData.updated_amendment,
-        final_draft_sent_on: EditData.final_draft_sent_on,
+        final_draft_sent_on: EditData.final_draft_sent_on == null ? new Date().toISOString().substr(0, 10) : EditData.final_draft_sent_on,
         was_it_complete: EditData.was_it_complete,
         enter_feedback: EditData.feedback,
-        id: EditData.id   
+        id: EditData.id
       });
     }
-  }, [EditData , showEditModal]);
+  }, [EditData, showEditModal]);
 
   useEffect(() => {
     GetAllDraftList();
@@ -93,23 +95,21 @@ const Drafts = () => {
         }
       })
       .catch((err) => {
-        return ;
+        return;
       })
   }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setAllDraftInputdata({ ...AllDraftInputdata, [name]: value });
-    
-  };
 
-  
+  };
 
   const HandleSubmitDraft = async () => {
     const req = {
       job_id: location.state.job_id,
       draft_sent_on: AllDraftInputdata.draft_sent_on,
-      // final_draft_sent_on: AllDraftInputdata.final_draft_sent_on,
+      final_draft_sent_on: AllDraftInputdata.was_it_complete == 0 ? null : AllDraftInputdata.final_draft_sent_on,
       feedback_received: AllDraftInputdata.feedback_received,
       updated_amendment: AllDraftInputdata.updated_amendments,
       feedback: AllDraftInputdata.enter_feedback,
@@ -143,7 +143,7 @@ const Drafts = () => {
         }
       })
       .catch((error) => {
-        return ;
+        return;
       })
 
   }
@@ -152,7 +152,7 @@ const Drafts = () => {
     const req = {
       id: AllDraftInputdata.id,
       draft_sent_on: AllDraftInputdata.draft_sent_on,
-      // final_draft_sent_on: AllDraftInputdata.final_draft_sent_on,
+      final_draft_sent_on: AllDraftInputdata.was_it_complete == 0 ? null : AllDraftInputdata.final_draft_sent_on,
       feedback_received: AllDraftInputdata.feedback_received,
       updated_amendment: AllDraftInputdata.updated_amendments,
       feedback: AllDraftInputdata.enter_feedback,
@@ -186,24 +186,27 @@ const Drafts = () => {
         }
       })
       .catch((error) => {
-        return ;
+        return;
       })
 
   }
 
   const columns = [
+    { name: 'Draft Title', selector: row => row.title, sortable: true },
     { name: 'Draft Sent On', selector: row => row.draft_sent_on, sortable: true },
+    { name: 'Final Draft Sent On', selector: row => row.final_draft_sent_on, sortable: true },
+
     { name: 'Feedback Received', selector: row => row.feedback_received == 1 ? "Yes" : "No", sortable: true },
     { name: 'Updated/Amendments', selector: row => row.updated_amendment == 1 ? "Amendment" : row.updated_amendment == 2 ? "Update" : row.updated_amendment == 3 ? "Both" : "None", sortable: true },
-    { name: 'Was It Complete', selector: row => row.was_it_complete == 1 ? "Yes" : "No", sortable: true },
+    { name: 'Was Draft Completed', selector: row => row.was_it_complete == 1 ? "Yes" : "No", sortable: true },
     {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="edit-icon" onClick={() => {HandleDraftView(row) ; setViewdraft(true)}}>
+          <button className="edit-icon" onClick={() => { HandleDraftView(row); setViewdraft(true) }}>
             <i className="fa fa-eye fs-6 text-secondary" />
           </button>
-          <button className="edit-icon" onClick={() =>{setShowEditModal(true);setEditData(row)}}>
+          <button className="edit-icon" onClick={() => { setShowEditModal(true); setEditData(row) }}>
             <i className="ti-pencil" />
           </button>
 
@@ -251,7 +254,7 @@ const Drafts = () => {
           setAdddraft(false);
           resetForm();
           setErrors({});
-          
+
         }}
         Submit_Function={() => HandleSubmitDraft()}
         Submit_Cancel_Function={() => { setAdddraft(false); resetForm(); setErrors({}); }}
@@ -279,27 +282,7 @@ const Drafts = () => {
                 )}
               </div>
             </div>
-            {/* <div className="col-lg-6">
-              <div className="mb-3">
-                <label htmlFor="firstNameinput" className="form-label">
-                  Final Draft Sent On
-                </label>
-                <input
-                  type="date"
-                  className="form-control"
-                  placeholder=""
-                  name="final_draft_sent_on"
-                  id="final_draft_sent_on"
-                  onChange={(e) => handleInputChange(e)}
-                  value={AllDraftInputdata.final_draft_sent_on}
-                />
-                {errors["final_draft_sent_on"] && (
-                  <div className="error-text">
-                    {errors["final_draft_sent_on"]}
-                  </div>
-                )}
-              </div>
-            </div> */}
+
             <div className="col-lg-6">
               <div className="mb-3">
                 <label htmlFor="firstNameinput" className="form-label">
@@ -357,7 +340,7 @@ const Drafts = () => {
             <div className="col-lg-6">
               <div className="mb-3">
                 <label htmlFor="firstNameinput" className="form-label">
-                  Was It Complete
+                Was Draft Completed
                 </label>
                 <select
 
@@ -369,9 +352,8 @@ const Drafts = () => {
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.was_it_complete}
                 >
-                  <option value="">Select</option>
                   <option value="1">Yes</option>
-                  <option value="0">No</option>
+                  <option value="0" selected>No</option>
                 </select>
                 {errors["was_it_complete"] && (
                   <div className="error-text">
@@ -380,6 +362,30 @@ const Drafts = () => {
                 )}
               </div>
             </div>
+
+            {AllDraftInputdata?.was_it_complete == 1 ? <div className="col-lg-6">
+              <div className="mb-3">
+                <label htmlFor="firstNameinput" className="form-label">
+                  Final Draft Sent On
+                </label>
+                <input
+                  type="date"
+                  className="form-control"
+                  placeholder=""
+                  name="final_draft_sent_on"
+                  id="final_draft_sent_on"
+                  onChange={(e) => handleInputChange(e)}
+                  value={AllDraftInputdata.final_draft_sent_on}
+                />
+                {errors["final_draft_sent_on"] && (
+                  <div className="error-text">
+                    {errors["final_draft_sent_on"]}
+                  </div>
+                )}
+              </div>
+            </div> : ""}
+
+
             <div className="col-lg-6">
               <div className="mb-3">
                 <label htmlFor="firstNameinput" className="form-label">
@@ -407,7 +413,7 @@ const Drafts = () => {
 
           </div>
         </>
- 
+
       </CommonModal>
 
       <CommonModal
@@ -422,10 +428,10 @@ const Drafts = () => {
         handleClose={() => {
           setShowEditModal(false);
           resetForm();
-          
+
         }}
         Submit_Function={() => HandleSubmitEditDraft()}
-        Submit_Cancel_Function={() => { setShowEditModal(false); resetForm();  }}
+        Submit_Cancel_Function={() => { setShowEditModal(false); resetForm(); }}
       >
         <>
           <div className="row">
@@ -450,27 +456,7 @@ const Drafts = () => {
                 )}
               </div>
             </div>
-            {/* <div className="col-lg-6">
-              <div className="mb-3">
-                <label htmlFor="firstNameinput" className="form-label">
-                  Final Draft Sent On
-                </label>
-                <input
-                  type="date"
-                  className="form-control"
-                  placeholder=""
-                  name="final_draft_sent_on"
-                  id="final_draft_sent_on"
-                  onChange={(e) => handleInputChange(e)}
-                  value={AllDraftInputdata.final_draft_sent_on}
-                />
-                {errors["final_draft_sent_on"] && (
-                  <div className="error-text">
-                    {errors["final_draft_sent_on"]}
-                  </div>
-                )}
-              </div>
-            </div> */}
+
             <div className="col-lg-6">
               <div className="mb-3">
                 <label htmlFor="firstNameinput" className="form-label">
@@ -512,7 +498,7 @@ const Drafts = () => {
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.updated_amendments}
                 >
-                  <option value="" selected>Select</option>
+
                   <option value="1">Amendment</option>
                   <option value="2">Update</option>
                   <option value="3">Both</option>
@@ -528,10 +514,9 @@ const Drafts = () => {
             <div className="col-lg-6">
               <div className="mb-3">
                 <label htmlFor="firstNameinput" className="form-label">
-                  Was It Complete
+                  Was Draft Completed
                 </label>
                 <select
-
                   className="form-select DraftWasItComplete"
                   aria-label="Default select example"
                   style={{ color: "#8a8c8e !important" }}
@@ -540,7 +525,7 @@ const Drafts = () => {
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.was_it_complete}
                 >
-                  <option value="">Select</option>
+
                   <option value="1">Yes</option>
                   <option value="0">No</option>
                 </select>
@@ -551,6 +536,29 @@ const Drafts = () => {
                 )}
               </div>
             </div>
+
+            {AllDraftInputdata?.was_it_complete == 1 ? <div className="col-lg-6">
+              <div className="mb-3">
+                <label htmlFor="firstNameinput" className="form-label">
+                  Final Draft Sent On
+                </label>
+                <input
+                  type="date"
+                  className="form-control"
+                  placeholder=""
+                  name="final_draft_sent_on"
+                  id="final_draft_sent_on"
+                  onChange={(e) => handleInputChange(e)}
+                  value={AllDraftInputdata.final_draft_sent_on}
+                />
+                {errors["final_draft_sent_on"] && (
+                  <div className="error-text">
+                    {errors["final_draft_sent_on"]}
+                  </div>
+                )}
+              </div>
+            </div> : ""}
+
             <div className="col-lg-6">
               <div className="mb-3">
                 <label htmlFor="firstNameinput" className="form-label">
@@ -574,11 +582,9 @@ const Drafts = () => {
                 )}
               </div>
             </div>
-
-
           </div>
         </>
- 
+
       </CommonModal>
 
       <CommonModal
@@ -588,14 +594,14 @@ const Drafts = () => {
         title="Draft"
         // btn_name="Save"
         cancel_btn="true"
-        hideBtn={true} 
+        hideBtn={true}
         handleClose={() => {
-          setViewdraft(false); 
+          setViewdraft(false);
         }}
-        Submit_Cancel_Function={() => { setViewdraft(false);}}
-        Submit_Function={() =>  setViewdraft(false)}
+        Submit_Cancel_Function={() => { setViewdraft(false); }}
+        Submit_Function={() => setViewdraft(false)}
 
-        >
+      >
         <div className="av ">
           <div className="row">
             <div className="col-md-6">
@@ -624,7 +630,7 @@ const Drafts = () => {
               </label>
             </div>
             <div className="col-md-6">
-              <span className="text-muted">{SingleDraftData && SingleDraftData.feedback_received==1 ? "Yes" : "No"}</span>
+              <span className="text-muted">{SingleDraftData && SingleDraftData.feedback_received == 1 ? "Yes" : "No"}</span>
             </div>
           </div>
           <div className="row">

@@ -319,8 +319,8 @@ const Service = () => {
           rows.forEach((row, i) => {
             let idValue = i + 1;
             let taskName = row[headers.indexOf("Task Name")] || "";
-            let budgetHours = row[headers.indexOf("Budget Hours")] || "00";
-            let budgetMinutes = row[headers.indexOf("Budget Minutes")] || "00";
+            let budgetHours = row[headers.indexOf("Budgeted Hours")] || "00";
+            let budgetMinutes = row[headers.indexOf("Budgeted Minutes")] || "00";
 
             if (budgetMinutes > 59) {
               let hours = Math.floor(budgetMinutes / 60);
@@ -382,11 +382,11 @@ const Service = () => {
   };
 
   const handleDownload = () => {
-    const fileUrl = "/Task.xlsx";
+    const fileUrl = "/Checklist.xlsx";
 
     const link = document.createElement("a");
     link.href = fileUrl;
-    link.setAttribute("download", "Task.xlsx");
+    link.setAttribute("download", "Checklist.xlsx");
     document.body.appendChild(link);
     link.click();
     link.remove();

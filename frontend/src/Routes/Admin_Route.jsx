@@ -51,6 +51,7 @@ import JobEdit from "../layouts/Admin/Jobs/JobAction/EditJob";
 import Timesheet from "../layouts/Admin/Timesheet/Timesheet";
 
 
+
 const Admin_Route = () => {
   const dispatch = useDispatch();
   const { pathname } = useLocation();
@@ -90,8 +91,8 @@ const Admin_Route = () => {
       ).unwrap();
 
       if (response.data) {
-        localStorage.setItem("accessData", JSON.stringify(response.data));
-
+        localStorage.setItem("accessData", JSON.stringify(response.data)); 
+        
         response.data.forEach((item) => {
           if (!role == "ADMIN" || !role == "SUPERADMIN") {
             if (item.permission_name === "setting") {
@@ -165,6 +166,12 @@ const Admin_Route = () => {
               );
               updatedShowTab.report =
                 reportView && reportView.is_assigned === 1;
+            }else if (item.permission_name === "timesheet") {
+              const timesheetView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.timesheet =
+                timesheetView && timesheetView.is_assigned === 1;
             }
           });
 

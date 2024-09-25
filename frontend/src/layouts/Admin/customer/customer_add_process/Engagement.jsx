@@ -12,7 +12,7 @@ import {
   PercentageModelErrorMessages,
   AdhocPAYGHourlyErrorMessages,
 } from "../../../../Utils/Common_Message";
-import { ADD_SERVICES_CUSTOMERS } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { ADD_SERVICES_CUSTOMERS,Get_Service } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 
 const Engagement = () => {
@@ -24,6 +24,8 @@ const Engagement = () => {
   const [errors3, setErrors3] = useState({});
   const [errors4, setErrors4] = useState([]);
   const [jobType, setJobType] = useState([]);
+  const [getAllServices, setAllServices] = useState([]);
+
 
   const [formValues1, setFormValues1] = useState({
     accountants: "",
@@ -54,7 +56,7 @@ const Engagement = () => {
     adhoc_admin_staff: "",
   });
   const [jobEntries, setJobEntries] = useState([
-    { minimum_number_of_jobs: "", job_type_id: "", cost_per_job: "" },
+    { minimum_number_of_jobs: "", job_type_id: "", service_id: "", cost_per_job: "" },
   ]);
 
   const checkboxOptions = [
@@ -66,7 +68,6 @@ const Engagement = () => {
 
 
   const [formState1, setFormState1] = useState({});
-
   const [formErrors, setFormErrors] = useState({
     customerJoiningDate: "",
     customerSource: "",
@@ -78,6 +79,15 @@ const Engagement = () => {
   const [checkboxStates, setCheckboxStates] = useState(
     Array(checkboxOptions.length).fill(0)
   );
+
+
+  useEffect(() => {
+    customerSourceData();
+    GetJobTypeApi();
+    GetAllServicesApi();
+  }, []);
+
+
 
   const handleCheckboxChange = (index) => {
     setCheckboxStates((prevStates) => {
@@ -208,7 +218,7 @@ const Engagement = () => {
   const handleAddJob = () => {
     setJobEntries([
       ...jobEntries,
-      { minimum_number_of_jobs: "", job_type_id: "", cost_per_job: "" },
+      { minimum_number_of_jobs: "", job_type_id: "", service_id: "", cost_per_job: "" },
     ]);
   };
 
@@ -250,8 +260,12 @@ const Engagement = () => {
           "Minimum number of Jobs must be between 1 and 100";
       }
 
-      if (!entry.job_type_id) {
-        entryErrors.job_type_id = "Please select a job type";
+      // if (!entry.job_type_id) {
+      //   entryErrors.job_type_id = "Please select a job type";
+      // }
+
+      if (!entry.service_id) {
+        entryErrors.service_id = "Please select a Services";
       }
 
       if (!entry.cost_per_job) {
@@ -389,6 +403,19 @@ const Engagement = () => {
       });
   };
 
+  const GetAllServicesApi = async () => {
+    dispatch(Get_Service({ req: { action: "get" }, authToken: token }))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setAllServices(response.data);
+        }
+      })
+      .catch((error) => {
+     return;
+      });
+  };
+
   useEffect(() => {
     if (checkboxStates[0] === 0) setErrors1({});
     if (checkboxStates[1] === 0) setErrors2({});
@@ -396,10 +423,6 @@ const Engagement = () => {
     if (checkboxStates[3] === 0) setErrors4({});
   }, [checkboxStates]);
 
-  useEffect(() => {
-    customerSourceData();
-    GetJobTypeApi();
-  }, []);
 
 
   const customerSourceData = async () => {
@@ -816,7 +839,7 @@ const Engagement = () => {
                                       )}
                                     </div>
                                   </div>
-                                  <div className="col-lg-4">
+                                  {/* <div className="col-lg-4">
                                     <label
                                       htmlFor={`jobType_${index}`}
                                       className="form-label"
@@ -847,7 +870,48 @@ const Engagement = () => {
                                         {errors4[index].job_type_id}
                                       </div>
                                     )}
+                                  </div> */}
+
+
+<div className="col-lg-4">
+                                    <label
+                                      htmlFor={`services_${index}`}
+                                      className="form-label"
+                                    >
+                                      Types Of Services
+                                    </label>
+                                    <select
+                                      id={`services_${index}`}
+                                      className="form-select "
+                                      name="service_id"
+                                      value={job.service_id}
+                                      onChange={(e) => handleChange4(index, e)}
+                                    >
+                                      <option value="">Select Services</option>
+                                  
+                                      {getAllServices &&
+                                        getAllServices.map((data) => (
+                                          <option
+                                            key={data.name}
+                                            value={data.id}
+                                          >
+                                            {data.name}
+                                          </option>
+                                        ))}
+                                    </select>
+                                    {errors4[index] && (
+                                      <div className="error-text">
+                                        {errors4[index].service_id}
+                                      </div>
+                                    )}
                                   </div>
+
+
+
+
+
+
+
 
                                   <div className="col-lg-3">
                                     <div className="mb-3">

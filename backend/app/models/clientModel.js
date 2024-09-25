@@ -1,27 +1,15 @@
 const pool = require("../config/database");
 const deleteUploadFile = require("../middlewares/deleteUploadFile");
-
-async function generateNextUniqueCode() {
-  const [rows] = await pool.execute(
-    "SELECT client_code FROM clients ORDER BY id DESC LIMIT 1"
-  );
-  let newCode = "00001";
-  if (rows.length > 0) {
-    const inputString = rows[0].client_code;
-    const parts = inputString.split("_");
-    const lastPart = parts[parts.length - 1];
-    const lastCode = lastPart;
-    const nextCode = parseInt(lastCode, 10) + 1;
-
-    newCode = "0000" + nextCode;
-  }
-
-  return newCode;
-}
+const { SatffLogUpdateOperation, generateNextUniqueCode } = require('../../app/utils/helper');
 
 const createClient = async (client) => {
-  // Customer Code(cust+CustName+UniqueNo)
-  let UniqueNo = await generateNextUniqueCode();
+  // client Code(cli_CUS_CLI_00001)
+  let data = {
+    table: "clients",
+    field: "client_code"
+  }
+  let client_code = await generateNextUniqueCode(data);
+
   let client_id;
   const {
     client_type,
@@ -33,20 +21,6 @@ const createClient = async (client) => {
     website,
   } = client;
 
-  const [ExistCustomer] = await pool.execute(
-    "SELECT trading_name FROM customers WHERE id =" + customer_id
-  );
-
-  const existCustomerName = ExistCustomer[0].trading_name;
-  const firstThreeLettersexistCustomerName = existCustomerName.substring(0, 3);
-  const firstThreeLettersClientName = trading_name.substring(0, 3);
-  const client_code =
-    "cli_" +
-    firstThreeLettersexistCustomerName +
-    "_" +
-    firstThreeLettersClientName +
-    "_" +
-    UniqueNo;
 
   const checkQuery = `SELECT 1 FROM clients WHERE trading_name = ?`;
 
@@ -280,14 +254,21 @@ const getClient = async (client) => {
     SELECT  
         clients.id AS id,
         clients.trading_name AS client_name,
-        clients.client_code AS client_code,
         clients.status AS status,
         client_types.type AS client_type_name,
         client_contact_details.email AS email,
         client_contact_details.phone_code AS phone_code,
-        client_contact_details.phone AS phone
+        client_contact_details.phone AS phone,
+        CONCAT(
+            'cli_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(clients.client_code, 1, 15)
+            ) AS client_code
     FROM 
         clients
+    JOIN 
+       customers ON customers.id = clients.customer_id    
     JOIN 
         client_types ON client_types.id = clients.client_type
     LEFT JOIN 
@@ -340,9 +321,17 @@ const getByidClient = async (client) => {
     client_contact_details.phone AS phone,
     client_contact_details.residential_address AS residential_address,
     customer_contact_person_role.name AS customer_role_contact_name,
-    customer_contact_person_role.id AS customer_role_contact_id
+    customer_contact_person_role.id AS customer_role_contact_id,
+    CONCAT(
+            'cli_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(clients.client_code, 1, 15)
+            ) AS client_code
 FROM 
     clients
+JOIN 
+    customers ON customers.id = clients.customer_id    
 JOIN 
     client_contact_details ON clients.id = client_contact_details.client_id
 LEFT JOIN 
@@ -398,7 +387,6 @@ WHERE
     clients.customer_id AS customer_id, 
     clients.client_industry_id AS client_industry_id, 
     clients.trading_name AS trading_name, 
-    clients.client_code AS client_code, 
     clients.trading_address AS trading_address, 
     clients.vat_registered AS vat_registered, 
     clients.vat_number AS vat_number, 
@@ -413,9 +401,17 @@ WHERE
     client_contact_details.residential_address AS residential_address,
     customer_contact_person_role.name AS customer_role_contact_name,
     customer_contact_person_role.id AS customer_role_contact_id,
-    client_company_information.*
+    client_company_information.*,
+    CONCAT(
+            'cli_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(clients.client_code, 1, 15)
+            ) AS client_code
 FROM 
     clients
+JOIN 
+    customers ON clients.customer_id = customers.id
 JOIN 
     client_contact_details ON clients.id = client_contact_details.client_id
 LEFT JOIN 
@@ -483,8 +479,7 @@ WHERE
     clients.client_type AS client_type, 
     clients.customer_id AS customer_id, 
     clients.client_industry_id AS client_industry_id, 
-    clients.trading_name AS trading_name, 
-    clients.client_code AS client_code, 
+    clients.trading_name AS trading_name,  
     clients.trading_address AS trading_address, 
     clients.vat_registered AS vat_registered, 
     clients.vat_number AS vat_number, 
@@ -501,9 +496,17 @@ WHERE
     client_contact_details.alternate_phone AS alternate_phone,
     client_contact_details.authorised_signatory_status AS authorised_signatory_status,
     customer_contact_person_role.name AS customer_role_contact_name,
-    customer_contact_person_role.id AS customer_role_contact_id
+    customer_contact_person_role.id AS customer_role_contact_id,
+    CONCAT(
+            'cli_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(clients.client_code, 1, 15)
+            ) AS client_code
 FROM 
     clients
+JOIN
+    customers ON clients.customer_id = customers.id
 JOIN 
     client_contact_details ON clients.id = client_contact_details.client_id
 LEFT JOIN 
@@ -561,9 +564,7 @@ WHERE
     clients.id AS client_id, 
     clients.client_type AS client_type, 
     clients.customer_id AS customer_id,  
-    clients.trading_name AS trading_name, 
-    clients.client_code AS client_code, 
- 
+    clients.trading_name AS trading_name,
     clients.status AS status, 
     client_contact_details.id AS contact_id,
     client_contact_details.first_name AS first_name,
@@ -573,9 +574,17 @@ WHERE
     client_contact_details.phone AS phone,
     client_contact_details.residential_address AS residential_address,
     customer_contact_person_role.name AS customer_role_contact_name,
-    customer_contact_person_role.id AS customer_role_contact_id
+    customer_contact_person_role.id AS customer_role_contact_id,
+    CONCAT(
+            'cli_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(clients.client_code, 1, 15)
+            ) AS client_code
 FROM 
     clients
+JOIN
+    customers ON clients.customer_id = customers.id    
 JOIN 
     client_contact_details ON clients.id = client_contact_details.client_id
 LEFT JOIN 
@@ -763,30 +772,7 @@ const clientUpdate = async (client) => {
     website,
   } = client;
 
-  const [ExistCustomer] = await pool.execute(
-    "SELECT trading_name FROM customers WHERE id = ?",
-    [customer_id]
-  );
-
-  const [ExistClient] = await pool.execute(
-    "SELECT trading_name , client_code FROM clients WHERE id = ?",
-    [client_id]
-  );
-
-  const existCustomerName = ExistCustomer[0].trading_name;
-  const lastCode = ExistClient[0].client_code.slice(
-    ExistClient[0].client_code.lastIndexOf("_") + 1
-  );
-  const firstThreeLettersexistCustomerName = existCustomerName.substring(0, 3);
-  const firstThreeLettersClientName = trading_name.substring(0, 3);
-  const client_code =
-    "cli_" +
-    firstThreeLettersexistCustomerName +
-    "_" +
-    firstThreeLettersClientName +
-    "_" +
-    lastCode;
-
+ 
   const checkQuery = `SELECT 1 FROM clients WHERE trading_name = ? AND id != ?`;
 
   const [check] = await pool.execute(checkQuery, [trading_name, client_id]);
@@ -802,7 +788,6 @@ const clientUpdate = async (client) => {
              client_type = ?,
              client_industry_id = ?,
              trading_name = ?,
-             client_code = ?,
              trading_address = ?,
              vat_registered = ?,
              vat_number = ?,
@@ -814,7 +799,6 @@ const clientUpdate = async (client) => {
         client_type,
         client_industry_id,
         trading_name,
-        client_code,
         trading_address,
         vat_registered,
         vat_number,
@@ -830,8 +814,7 @@ const clientUpdate = async (client) => {
          UPDATE clients
          SET 
              client_type = ?,
-             trading_name = ?,
-             client_code = ?
+             trading_name = ?
          
          WHERE
              id = ?
@@ -839,11 +822,10 @@ const clientUpdate = async (client) => {
       const [result] = await pool.execute(query, [
         client_type,
         trading_name,
-        client_code,
-        client_id,
+        client_id
       ]);
     } catch (err) {
-      console.log("err", err);
+    
       return { status: false, message: "client update Err" };
     }
   }

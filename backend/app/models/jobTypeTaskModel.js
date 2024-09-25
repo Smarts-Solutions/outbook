@@ -125,7 +125,6 @@ const addChecklist = async (checklist) => {
 
 
   const {
-    customer_id,
     service_id,
     job_type_id,
     client_type_id,
@@ -134,15 +133,13 @@ const addChecklist = async (checklist) => {
     task,
   } = checklist;
 
-  // console.log("customer_id",customer_id);
-  // console.log("service_id",service_id);
-  // console.log("job_type_id",job_type_id);
-  // console.log("client_type_id",client_type_id);
-  // console.log("check_list_name",check_list_name);
-  // console.log("status",status);
-  // console.log("task",task);
-
+ 
+  let customer_id = checklist.customer_id
+  if(customer_id == null || customer_id == '' || customer_id == undefined){
+    customer_id = 0
+  }
   
+
 
   try {
     const query = `
@@ -213,7 +210,8 @@ const addChecklist = async (checklist) => {
 
 const getChecklist = async (checklist) => {
   const { customer_id } = checklist;
-  const query = `
+ 
+ let query = `
     SELECT
     checklists.id AS checklists_id,
     checklists.check_list_name AS check_list_name,
@@ -235,9 +233,33 @@ const getChecklist = async (checklist) => {
          job_types ON job_types.id = checklists.job_type_id
     JOIN
          client_types ON client_types.id = checklists.client_type_id          
-    WHERE customer_id = ?
+    WHERE checklists.customer_id = ?
     ORDER BY checklists.id DESC
     `;
+  if(parseInt(customer_id) === 0){
+    query = `
+    SELECT
+    checklists.id AS checklists_id,
+    checklists.check_list_name AS check_list_name,
+    checklists.status AS status,
+    services.id AS service_id,
+    services.name AS service_name,
+    job_types.id AS job_type_id,
+    job_types.type AS job_type_type,
+    client_types.id AS client_type_id,
+    client_types.type AS client_type_type,
+    checklists.client_type_id  AS checklists_client_type_id
+    FROM checklists 
+    JOIN 
+         services ON services.id = checklists.service_id
+    JOIN
+         job_types ON job_types.id = checklists.job_type_id
+    JOIN
+         client_types ON client_types.id = checklists.client_type_id          
+    WHERE checklists.customer_id = ?
+    ORDER BY checklists.id DESC
+    `;
+  }  
   try {
     const [result] = await pool.execute(query, [customer_id]);
     return {
@@ -446,8 +468,8 @@ const getClientTypeChecklist = async (checklist) => {
 
 const getByServiceWithJobType = async (checklist) => {
   const { customer_id, service_id, job_type_id, clientId } = checklist;
-
-
+  
+   
   //   const query = `
   //     SELECT
   //     checklists.id AS checklists_id,
@@ -499,20 +521,22 @@ const getByServiceWithJobType = async (checklist) => {
     ORDER BY checklists.id DESC
 `;
   try {
+
+
     const [result] = await pool.execute(query, [
       service_id,
       job_type_id,
       customer_id,
     ]);
 
-    // console.log("result", result);
+  
     return {
       status: true,
       message: "checklist get successfully.",
       data: result,
     };
   } catch (err) {
-    console.log("Error", err);
+   
     return { status: false, message: "Error get checklist." };
   }
 };

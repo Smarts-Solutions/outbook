@@ -9,21 +9,25 @@ import {
   Country,
   IncorporationApi,
   customerSourceApi,
+  getList
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
+
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import Modal from "../../../Components/ExtraComponents/Modals/Modal";
 import { useDispatch, useSelector } from "react-redux";
 import sweatalert from "sweetalert2";
 
 const Setting = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const tabStatus = useRef("1");
   const role = JSON.parse(localStorage.getItem("role"));
-  const accessData = useSelector(
-    (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data
-  );
-
   const [showSettingInsertTab, setShowSettingInsertTab] = useState(true);
   const [showSettingUpdateTab, setShowSettingUpdateTab] = useState(true);
   const [showSettingDeleteTab, setSettingDeleteTab] = useState(true);
+  const accessData = useSelector(
+    (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data
+  );
 
   useEffect(() => {
     if (
@@ -41,14 +45,12 @@ const Setting = () => {
             setShowSettingInsertTab(
               settingInsert && settingInsert.is_assigned == 1
             );
-
             const settingUpdate = item.items.find(
               (item) => item.type === "update"
             );
             setShowSettingUpdateTab(
               settingUpdate && settingUpdate.is_assigned == 1
             );
-
             const settingDelete = item.items.find(
               (item) => item.type === "delete"
             );
@@ -61,9 +63,6 @@ const Setting = () => {
   }, [accessData]);
 
   const token = JSON.parse(localStorage.getItem("token"));
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const tabStatus = useRef("1");
   const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
   const [personRoleDataAll, setPersonRoleDataAll] = useState({
     loading: true,
@@ -96,6 +95,56 @@ const Setting = () => {
   const [getShowTabId, setShowTabId] = useState("1");
 
   const [isEdit, setIsEdit] = useState(false);
+
+  const [getCheckList, setCheckList] = useState([]);
+  const [getCheckList1, setCheckList1] = useState([]);
+
+
+  const getCheckListData = async () => {
+    const req = { action: "get", customer_id: 0 };
+    const data = { req: req, authToken: token };
+    await dispatch(getList(data))
+      .unwrap()
+      .then(async (response) => { 
+        if (response.status) {
+
+          if (response.data.length > 0) {
+            let Array = [
+              { id: 1, name: "SoleTrader" },
+              { id: 2, name: "Company" },
+              { id: 3, name: "Partnership" },
+              { id: 4, name: "Individual" },
+            ];
+            let data = response.data.map((item) => {
+              return {
+                ...item,
+                check_list_name: item.check_list_name,
+                service_name: item.service_name,
+                job_type_type: item.job_type_type,
+                // client_type_type: item.client_type_type,
+                status: item.status,
+                checklists_id: item.checklists_id,
+                client_type_type: item.checklists_client_type_id.split(",").map(id => {
+                  let matchedItem = Array.find(item => item.id === Number(id));
+                  return matchedItem ? matchedItem.name : null;
+                }).filter(name => name !== null).join(", ")
+              };
+            });
+
+
+            setCheckList(data);
+            setCheckList1(data);
+          } else {
+            setCheckList([]);
+          }
+        } else {
+          setCheckList([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
 
   const roleData = async (req) => {
     const data = { req: req, authToken: token };
@@ -414,6 +463,8 @@ const Setting = () => {
         break;
       case "8":
         customerSourceData(req);
+      case "9":
+        getCheckListData();  
         break;
       default:
         break;
@@ -905,7 +956,6 @@ const Setting = () => {
       selector: (row) => (row.status == "1" ? "Active" : "Deactive"),
       sortable: true,
       width: "100px",
-
     },
     // {
     //   name: "Actions",
@@ -1239,8 +1289,25 @@ const Setting = () => {
             label: "Country Code",
             placeholder: "Enter Country Code",
             value: data.code,
+          }, 
+          {
+            type: "text",
+            name: "currency",
+            label: "Currency",
+            placeholder: "Enter Currency",
+            value: data.currency,
           },
-
+          {
+            type: "select",
+            name: "status",
+            label: "Currency Status",
+            placeholder: "Enter Currency Status",
+            options: [
+              { label: "Active", value: "1" },
+              { label: "Deactive", value: "0" },
+            ],
+            value: data.status === "1" ? "1" : "0",
+          }, 
           {
             type: "select",
             name: "status",
@@ -1251,6 +1318,7 @@ const Setting = () => {
               { label: "Active", value: "1" },
               { label: "Deactive", value: "0" },
             ],
+            
           },
         ],
         title: "Service",
@@ -1799,7 +1867,7 @@ const Setting = () => {
                   <Datatable
                     filter={true}
                     columns={CheckListColumns}
-                    data={[]}
+                    data={getCheckList}
                   />
                 </div>
               </div>
