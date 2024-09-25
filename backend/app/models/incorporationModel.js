@@ -1,4 +1,5 @@
 const pool = require("../config/database");
+const { SatffLogUpdateOperation } = require('../utils/helper'); 
 
 const createIncorporation = async (Incorporation) => {
 
@@ -15,6 +16,18 @@ const createIncorporation = async (Incorporation) => {
       return { status: false, message: "Incorporation In already exists." };
     }
     const [result] = await pool.query(query, [Incorporation.Incorporation]);
+    const currentDate = new Date();
+    await SatffLogUpdateOperation(
+      {
+        staff_id: Incorporation.StaffUserId,
+        ip: Incorporation.ip,
+        date: currentDate.toISOString().split("T")[0],
+        module_name: "incorporation in",
+        log_message: `created incorporation in ${name}`,
+        permission_type: "created",
+        module_id: result.insertId,
+      }
+    );
     return {
       status: true,
       message: "Incorporation In created successfully.",
@@ -60,9 +73,21 @@ const deleteIncorporation = async (IncorporationId) => {
   const query = `
     DELETE FROM incorporation_in WHERE id = ?
     `;
-
+    const [[existName]] = await pool.execute(`SELECT name FROM incorporation_in WHERE id = ?`, [IncorporationId.id]);
   try {
-    await pool.execute(query, [IncorporationId]);
+    await pool.execute(query, [IncorporationId.id]);
+    const currentDate = new Date();
+    await SatffLogUpdateOperation(
+      {
+        staff_id: IncorporationId.StaffUserId,
+        ip: IncorporationId.ip,
+        date: currentDate.toISOString().split("T")[0],
+        module_name: "incorporation in",
+        log_message: `deleted incorporation in ${existName.name}`,
+        permission_type: "deleted",
+        module_id: IncorporationId.id,
+      }
+    );
   } catch (err) {
     console.error("Error deleting data:", err);
     throw err;
@@ -78,7 +103,6 @@ const updateIncorporation = async (Incorporation) => {
 
   for (const [key, value] of Object.entries(fields)) {
     if (key != "ip" && key != "StaffUserId") {
-  
       setClauses.push(`${key} = ?`);
       values.push(value);
     }
@@ -98,7 +122,31 @@ const updateIncorporation = async (Incorporation) => {
     if (check.length > 0) {
       return { status: false, message: "Incorporation In already exists." };
     }
+
+    const [[existStatus]] = await pool.execute(`SELECT status FROM incorporation_in WHERE id = ?`, [id]);
+    let status_change = "Deactivate"
+    if(Incorporation.status == "1"){
+      status_change = "Activate"
+    }
+    let log_message = existStatus.status === Incorporation.status ?
+        `edited incorporation in ${name}`:
+        `changes the incorporation in status ${status_change} ${name}`
+
     const [result] = await pool.execute(query, values);
+    if(result.changedRows > 0){
+      const currentDate = new Date();
+      await SatffLogUpdateOperation(
+        {
+          staff_id: Incorporation.StaffUserId,
+          ip: Incorporation.ip,
+          date: currentDate.toISOString().split("T")[0],
+          module_name: "incorporation in",
+          log_message: log_message,
+          permission_type: "updated",
+          module_id: Incorporation.id,
+          }
+      );
+    }
     return {
       status: true,
       message: "Incorporation In updated successfully.",

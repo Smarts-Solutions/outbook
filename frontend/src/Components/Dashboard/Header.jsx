@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { isLoginAuthCheckToken } from "../../ReduxStore/Slice/Auth/authSlice";
+import { isLoginAuthCheckToken ,isLogOut} from "../../ReduxStore/Slice/Auth/authSlice";
 import { Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
@@ -62,6 +62,17 @@ const Header = () => {
     localStorage.removeItem("currentStep");
     localStorage.removeItem("coustomerId");
     sessionStorage.clear();
+    
+    const req = { id: staffDetails.id};
+    await dispatch(isLogOut(req))
+      .unwrap()
+      .then(async (response) => {
+        navigate("/login");
+      })
+      .catch((error) => {
+        navigate("/login");
+      });
+
     navigate("/login");
   };
 
