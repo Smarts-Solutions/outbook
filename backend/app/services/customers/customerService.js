@@ -58,6 +58,10 @@ const customerUpdate = async (customer) => {
   return customerModel.customerUpdate(customer);
 };
 
+const customerStatusUpdate = async (customer) => {
+  return customerModel.customerStatusUpdate(customer);
+}
+
 
 
 module.exports = {
@@ -67,5 +71,6 @@ module.exports = {
   updateProcessCustomer,
   updateProcessCustomerFile,
   updateProcessCustomerFileAction,
-  customerUpdate
+  customerUpdate,
+  customerStatusUpdate,
 };

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { GET_ALL_CUSTOMERS } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { Update_Customer_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getDateRange } from "../../../Utils/Comman_function";
 import Swal from "sweetalert2";
 
@@ -34,9 +35,7 @@ const Customer = () => {
       (item) => item.permission_name === "client"
     )?.items || [];
 
-  useEffect(() => {
-    GetAllCustomerData();
-  }, []);
+ 
 
   useEffect(() => {
     GetAllCustomerData();
@@ -49,8 +48,7 @@ const Customer = () => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
       if (item.type === "delete") updatedAccess.delete = item.is_assigned;
-    });
-
+    }); 
     accessData1.forEach((item) => {
       if (item.type === "view") updatedAccess.client = item.is_assigned;
     });
@@ -158,10 +156,30 @@ const Customer = () => {
       name: "Status",
       cell: (row) => (
         <div>
+          <div>
+            <select
+              className="form-select form-control"
+              value={row.status}
+              onChange={(e) => handleChangeStatus(e, row)}
+            >
+              <option value="0">Deactive</option>
+              <option value="1">Active</option>
+            </select>
+          </div>
+        </div>
+      ),
+      sortable: true,
+      width: "120px",
+    },
+    
+    {
+      name: "Progress",
+      cell: (row) => (
+        <div>
           {row.form_process === "4" ? (
-            <span className="badge bg-success">Complete</span>
+            <span className="text-success">Complete</span>
           ) : (
-            <span className="badge bg-danger">In Progress</span>
+            <span className="text-danger">Pending</span>
           )}
         </div>
       ),
@@ -178,21 +196,21 @@ const Customer = () => {
           <div style={{ textAlign: "center" }}>
             {role === "ADMIN" || role === "SUPERADMIN" ? (
               <>
-                <button className="edit-icon" onClick={() => handleEdit(row)}>
-                  <i className="ti-pencil" />
+                <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
+                  <i className="ti-pencil text-primary" />
                 </button>
                 <button
-                  className="delete-icon"
+                  className="delete-icon "
                   onClick={() => handleDelete(row)}
                 >
-                  <i className="ti-trash text-danger" />
+                  <i className="ti-trash text-danger " />
                 </button>
               </>
             ) : (
               <>
                 {hasUpdateAccess && (
-                  <button className="edit-icon" onClick={() => handleEdit(row)}>
-                    <i className="ti-pencil" />
+                  <button className="edit-icon " onClick={() => handleEdit(row)}>
+                    <i className="ti-pencil text-primary" />
                   </button>
                 )}
                 {hasDeleteAccess && (
@@ -215,6 +233,59 @@ const Customer = () => {
     },
   ];
 
+  const handleChangeStatus = async (e, row) => {
+    const newStatus = e.target.value;
+  
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to change the status?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, change it!",
+      cancelButtonText: "No, cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const req = { customer_id: row.id, status: newStatus };
+          const res = await dispatch(Update_Customer_Status({ req, authToken: token })).unwrap();
+  
+          if (res.status) {
+            Swal.fire({
+              title: "Success",
+              text: res.message,
+              icon: "success",
+              timer: 1000,
+              showConfirmButton: false,
+            });
+            GetAllCustomerData(); // Fetch updated customer data after success
+          } else {
+            Swal.fire({
+              title: "Error",
+              text: res.message,
+              icon: "error",
+              confirmButtonText: "Ok",
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            title: "Error",
+            text: "An error occurred while updating the status.",
+            icon: "error",
+            confirmButtonText: "Ok",
+          });
+        }
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire({
+          title: "Cancelled",
+          text: "Status change was not performed",
+          icon: "error",
+          confirmButtonText: "Ok",
+        });
+      }
+    });
+  };
+  
+  
   const GetAllCustomerData = async () => {
     const req = { action: "get", staff_id: staffDetails.id };
     const data = { req, authToken: token };
@@ -228,7 +299,7 @@ const Customer = () => {
           return itemDate >= startDate && itemDate <= endDate;
         });
         setCustomerData(filteredData);
-        setFilteredData(filteredData); // Initialize filtered data
+        setFilteredData(filteredData);  
       } else {
         setCustomerData([]);
         setFilteredData([]);
@@ -252,8 +323,7 @@ const Customer = () => {
           ?.toLowerCase()
           .includes(searchValue)
       );
-    });
-
+    }); 
     setFilteredData(filtered);
   };
 
@@ -291,7 +361,7 @@ const Customer = () => {
             <div className="col-md-4">
               <Link
                 to="/admin/addcustomer"
-                className="btn btn-info text-white float-end blue-btn"
+                className="btn btn-outline-info  fw-bold float-end border-3"
               >
                 <i className="fa fa-plus" /> Add Customer
               </Link>
@@ -301,7 +371,7 @@ const Customer = () => {
               <div className="col-md-4">
                 <Link
                   to="/admin/addcustomer"
-                  className="btn btn-info text-white float-end blue-btn"
+                  className="btn btn-outline-info fw-bold float-end border-3"
                 >
                   <i className="fa fa-plus" /> Add Customer
                 </Link>

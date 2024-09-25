@@ -484,8 +484,8 @@ const Setting = () => {
       cell: (row) => (
         <div>
           <span
-            className={`badge ${
-              row.status === "1" ? "bg-success" : "bg-danger"
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
             }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
@@ -538,8 +538,8 @@ const Setting = () => {
       cell: (row) => (
         <div>
           <span
-            className={`badge ${
-              row.status === "1" ? "bg-success" : "bg-danger"
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
             }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
@@ -594,8 +594,8 @@ const Setting = () => {
       cell: (row) => (
         <div>
           <span
-            className={`badge ${
-              row.status === "1" ? "bg-success" : "bg-danger"
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
             }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
@@ -654,8 +654,8 @@ const Setting = () => {
       cell: (row) => (
         <div>
           <span
-            className={`badge ${
-              row.status === "1" ? "bg-success" : "bg-danger"
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
             }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
@@ -709,8 +709,8 @@ const Setting = () => {
       cell: (row) => (
         <div>
           <span
-            className={`badge ${
-              row.status === "1" ? "bg-success" : "bg-danger"
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
             }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
@@ -767,8 +767,8 @@ const Setting = () => {
       cell: (row) => (
         <div>
           <span
-            className={`badge ${
-              row.status === "1" ? "bg-success" : "bg-danger"
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
             }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
@@ -818,8 +818,8 @@ const Setting = () => {
       cell: (row) => (
         <div>
           <span
-            className={`badge ${
-              row.status === "1" ? "bg-success" : "bg-danger"
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
             }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
@@ -864,8 +864,8 @@ const Setting = () => {
       cell: (row) => (
         <div>
           <span
-            className={`badge ${
-              row.status === "1" ? "bg-success" : "bg-danger"
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
             }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
