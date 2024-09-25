@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { DashboardData } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
+import { DashboardData , ActivityLog } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
 
 const Dashboard = () => {
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const token = JSON.parse(localStorage.getItem("token"));
   const dispatch = useDispatch();
   const [dashboard, setDashboard] = useState([]);
+  const [getActiviyLog, setActivityLog] = useState([]);
 
   const currentDate = new Date();
   const options = {
@@ -17,6 +18,8 @@ const Dashboard = () => {
   const currentTime = currentDate.toLocaleTimeString("en-US", options);
   const hours = currentDate.getHours();
 
+
+  console.log("getActiviyLog", getActiviyLog);
   let greeting;
   if (hours < 12) {
     greeting = "Good Morning!";
@@ -28,6 +31,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     GetDashboardData();
+    ActivityLogData();
   }, []);
 
   const GetDashboardData = async () => {
@@ -48,6 +52,23 @@ const Dashboard = () => {
       });
   };
 
+  const ActivityLogData = async () => {
+    const req = { staff_id: staffDetails.id }
+    const data = { req: req, authToken: token }
+    await dispatch(ActivityLog(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status) {
+          setActivityLog(res.data)
+        }
+        else {
+          setActivityLog([])
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
   // Array of month names
   const monthNames = [
     "January",

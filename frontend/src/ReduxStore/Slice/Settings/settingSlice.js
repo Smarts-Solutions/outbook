@@ -18,6 +18,7 @@ import {
   incorporationApi,
   customerSource,
   customerSubSource,
+  
 } from "../../../Services/Settings/settingService";
 import axios from "axios";
 
@@ -348,6 +349,8 @@ export const customerSubSourceApi = createAsyncThunk(
   }
 );
 
+ 
+
 //Setting Slice
 const SettingSlice = createSlice({
   name: "SettingSlice",
@@ -371,6 +374,7 @@ const SettingSlice = createSlice({
     incorporationData: [],
     customerSource: [],
     customerSubSource: [],
+     
   },
 
   reducers: {},
@@ -562,7 +566,8 @@ const SettingSlice = createSlice({
       .addCase(customerSubSourceApi.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-      });
+      })
+       
   },
 });
 

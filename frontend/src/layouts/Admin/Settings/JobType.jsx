@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   JobType,
   AddTask,
+  GETTASKDATA
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import Modal from "../../../Components/ExtraComponents/Modals/Modal";
@@ -28,6 +29,7 @@ const Setting = () => {
   const [tasks, setTasks] = useState([]);
   const [ViewTaskData, setViewTaskData] = useState([]);
  
+  console.log("ViewTaskData", ViewTaskData);
 
   const JobTypeData = async (req) => {
     if (location.state.Id) {
@@ -74,9 +76,23 @@ const Setting = () => {
     fetchApiData();
   }, []);
 
-  const handleViewTask = (data) => {
-    // const req = {service_id: location.state.Id, job_type_id: data.id};
-    // const data = { req: req, authToken: token }
+  const handleViewTask = async(row) => {
+    // const req = {service_id: location.state.Id, job_type_id: row.id};
+    const req = {service_id: 5, job_type_id: 3};
+
+    const data = { req: req, authToken: token }
+    await dispatch(GETTASKDATA(data))
+    .unwrap()
+    .then(async (response) => {
+      if (response.status) {
+        setViewTaskData(response.data);
+      } else {
+        setViewTaskData([]);
+      }
+    })
+    .catch((error) => {
+      return;
+    });
   };
 
   const fetchApiData = () => {
