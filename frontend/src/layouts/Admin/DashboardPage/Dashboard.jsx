@@ -1,22 +1,21 @@
-import React , {useState , useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-// import { DashboardData } from "../../../redux/actions/dashboardActions";
+import { DashboardData } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
 
 const Dashboard = () => {
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+  const token = JSON.parse(localStorage.getItem("token"));
   const dispatch = useDispatch();
-  const [dashboard , setDashboard] = useState([]);  
+  const [dashboard, setDashboard] = useState([]);
 
   const currentDate = new Date();
-
   const options = {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
   };
   const currentTime = currentDate.toLocaleTimeString("en-US", options);
-
-  const hours = currentDate.getHours(); 
+  const hours = currentDate.getHours();
 
   let greeting;
   if (hours < 12) {
@@ -27,29 +26,27 @@ const Dashboard = () => {
     greeting = "Good Evening!";
   }
 
-  // useEffect(() => {
-  //   GetDashboardData();
-  // }, []);
+  useEffect(() => {
+    GetDashboardData();
+  }, []);
 
-  // const GetDashboardData = async () => {
-  //   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
-  //   const staffId = staffDetails.staff_id;
-  //   const token = localStorage.getItem("token");
-  //   const req = { staff_id: staffId };
-  //   await dispatch(DashboardData(req, token))
-  //     .unwrap()
-  //     .then((res) => {
-  //       if(res.status){
-  //         setDashboard(res.data)
-  //       }
-  //       else{
-  //         setDashboard([])
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //     });
-  // };
+  const GetDashboardData = async () => {
+    const req = { staff_id: staffDetails.id }
+    const data = { req: req, authToken: token }
+    await dispatch(DashboardData(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status) {
+          setDashboard(res.data)
+        }
+        else {
+          setDashboard([])
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   // Array of month names
   const monthNames = [
@@ -261,7 +258,7 @@ const Dashboard = () => {
                               </p>
                             </div>
                             <div className="col-12 d-flex align-items-center justify-content-between">
-                              <h3 className="my-4">183</h3>
+                              <h3 className="my-4">{dashboard.customer}</h3>
                               <div className="report-main-icon bg-light-alt">
                                 <i className="ti-user"></i>
                               </div>
@@ -289,7 +286,7 @@ const Dashboard = () => {
                               {/* <h3 className="mt-5">45</h3> */}
                             </div>
                             <div className="col-12 d-flex align-items-center justify-content-between">
-                              <h3 className="my-4">45</h3>
+                              <h3 className="my-4">{dashboard.job}</h3>
                               <div className="report-main-icon bg-light-alt">
                                 <i className="ti-user"></i>
                               </div>
@@ -309,7 +306,7 @@ const Dashboard = () => {
                               {/* <h3 className="mt-5">543</h3> */}
                             </div>
                             <div className="col-12 d-flex align-items-center justify-content-between">
-                              <h3 className="my-4">183</h3>
+                              <h3 className="my-4">{dashboard.client}</h3>
                               <div className="report-main-icon bg-light-alt">
                                 <i className="ti-user"></i>
                               </div>
@@ -326,11 +323,11 @@ const Dashboard = () => {
                             <div className="col">
                               <p className="text-dark mb-1 font-weight-semibold">
                                 NO OF STAFF
-                              </p>
-                              {/* <h3 className="mt-5">78</h3> */}
+                              </p> 
                             </div>
                             <div className="col-12 d-flex align-items-center justify-content-between">
-                              <h3 className="my-4">78</h3>
+                              <h3 className="my-4">{dashboard.staff
+                              }</h3>
                               <div className="report-main-icon bg-light-alt">
                                 <i className="ti-user"></i>
                               </div>

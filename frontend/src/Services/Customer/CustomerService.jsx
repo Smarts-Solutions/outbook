@@ -470,3 +470,15 @@ export async function JOBDOCUMENT_ACTION(data, token) {
     return await err;
   }
 }
+
+export async function UPDATE_CUSTOMER_STATUS(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerStatusUpdate`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}

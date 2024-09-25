@@ -499,7 +499,7 @@ const getCustomer = async (customer) => {
         ORDER BY 
         customers.id DESC;
             `;
-                const [resultAllocated] = await pool.execute(query, [staff_id,staff_id]);
+                const [resultAllocated] = await pool.execute(query, [staff_id, staff_id]);
                 result = resultAllocated;
             }
 
@@ -829,7 +829,7 @@ const updateProcessCustomerServices = async (customerProcessData) => {
 
 const updateProcessCustomerEngagementModel = async (customerProcessData) => {
 
-    const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing,customerJoiningDate,customerSource,customerSubSource } = customerProcessData;
+    const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing, customerJoiningDate, customerSource, customerSubSource } = customerProcessData;
 
 
     const checkQuery = `SELECT id FROM customer_engagement_model WHERE customer_id = ? `;
@@ -846,8 +846,8 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
     //SNEH
 
 
-    const customerUpdateQuery = `UPDATE customers SET customerJoiningDate = ?, customerSource = ?, customerSubSource = ? WHERE id = ?`;   
-    const [updateQuery]= await pool.execute(customerUpdateQuery, [customerJoiningDate, customerSource, customerSubSource, customer_id]);
+    const customerUpdateQuery = `UPDATE customers SET customerJoiningDate = ?, customerSource = ?, customerSubSource = ? WHERE id = ?`;
+    const [updateQuery] = await pool.execute(customerUpdateQuery, [customerJoiningDate, customerSource, customerSubSource, customer_id]);
 
     if (fte_dedicated_staffing === "1") {
 
@@ -1069,7 +1069,7 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
 
 
                 const checkQuery4 = `SELECT id FROM customer_engagement_customised_pricing WHERE customer_engagement_model_id = ? AND minimum_number_of_jobs = ?  AND cost_per_job = ? AND service_id = ?`;
-                const [exist4] = await pool.execute(checkQuery4, [customer_engagement_model_id, minimum_number_of_jobs, cost_per_job,service_id]);
+                const [exist4] = await pool.execute(checkQuery4, [customer_engagement_model_id, minimum_number_of_jobs, cost_per_job, service_id]);
                 let customer_engagement_customised_pricing_id;
 
                 if (exist4.length === 0) {
@@ -1845,8 +1845,8 @@ const customerUpdate = async (customer) => {
         } else if (customer_type === '3') {
             cust_type = 'partnership'
         }
-         
-         console.log("result ",result)
+
+        console.log("result ", result)
 
 
         if (result.changedRows > 0) {
@@ -2043,7 +2043,7 @@ const customerUpdate = async (customer) => {
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
-               
+
                 return { status: false, message: 'Update Error Customer Type 2' };
             }
 
@@ -2083,14 +2083,14 @@ const customerUpdate = async (customer) => {
                     // let residential_address = detail.residential_address;
                     let authorised_signatory_status = detail.authorised_signatory_status;
                     if (contact_id == "" || contact_id == undefined || contact_id == null) {
-                         const query4 = `
+                        const query4 = `
                         INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email,authorised_signatory_status)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                         `;
                         const [result3, err3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, authorised_signatory_status]);
                         logUpdateRequired = true;
 
-               
+
                     } else {
 
                         arrayInterId.push(contact_id)
@@ -2153,7 +2153,7 @@ const customerUpdate = async (customer) => {
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
-              
+
                 return { status: false, message: 'Update Error Customer Type 3' };
             }
 
@@ -2299,7 +2299,7 @@ const customerUpdate = async (customer) => {
 
             const outputArray = Object.values(resultTsk);
 
-      
+
 
             if (outputArray.length > 0) {
                 for (const tsk of outputArray) {
@@ -2381,7 +2381,7 @@ const customerUpdate = async (customer) => {
     //  Page Status 3 Customer engagement model Part
     else if (pageStatus === "3") {
 
-        const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing,customerJoiningDate,customerSource,customerSubSource } = customer;
+        const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing, customerJoiningDate, customerSource, customerSubSource } = customer;
 
         const checkQuery = `SELECT id FROM customer_engagement_model WHERE customer_id = ? `;
         const [existCustomer] = await pool.execute(checkQuery, [customer_id]);
@@ -2394,8 +2394,8 @@ const customerUpdate = async (customer) => {
             customer_engagement_model_id = existCustomer[0].id;
         }
 
-         const customerUpdateQuery = `UPDATE customers SET customerJoiningDate = ?, customerSource = ?, customerSubSource = ? WHERE id = ?`;   
-         const [updateQuery]= await pool.execute(customerUpdateQuery, [customerJoiningDate, customerSource, customerSubSource, customer_id]);
+        const customerUpdateQuery = `UPDATE customers SET customerJoiningDate = ?, customerSource = ?, customerSubSource = ? WHERE id = ?`;
+        const [updateQuery] = await pool.execute(customerUpdateQuery, [customerJoiningDate, customerSource, customerSubSource, customer_id]);
 
 
 
@@ -2875,6 +2875,18 @@ const customerUpdate = async (customer) => {
     return { status: true, message: 'customers updated successfully.', data: customer_id };
 }
 
+const customerStatusUpdate = async (customer) => {
+    const { customer_id, status } = customer; 
+
+    const query = `UPDATE customers SET status = ? WHERE id = ?`;
+    const [result] = await pool.execute(query, [status, customer_id]);
+
+    if (result.affectedRows > 0) {
+        return { status: true, message: 'Customer status updated successfully.' };
+    }
+    return { status: false, message: 'Error updating customer status.' };
+}
+
 
 module.exports = {
     createCustomer,
@@ -2886,6 +2898,7 @@ module.exports = {
     updateProcessCustomerFileGet,
     updateProcessCustomerFileDelete,
     getSingleCustomer,
-    customerUpdate
+    customerUpdate,
+    customerStatusUpdate
 
 };

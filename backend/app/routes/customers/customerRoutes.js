@@ -14,6 +14,9 @@ router.post('/updateProcessCustomer',verifyToken, customerController.updateProce
 router.post('/updateProcessCustomerFile',verifyToken, uploadMultiple, customerController.updateProcessCustomerFile);
 router.post('/updateProcessCustomerFileAction',verifyToken, customerController.updateProcessCustomerFileAction);
 router.post('/customerUpdate',verifyToken, customerController.customerUpdate);
+router.post('/customerStatusUpdate',verifyToken, customerController.customerStatusUpdate);
+
+
 
 
 

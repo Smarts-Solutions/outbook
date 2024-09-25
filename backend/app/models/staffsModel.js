@@ -18,7 +18,7 @@ const createStaff = async (staff) => {
 };
 
 const getStaff = async () => {
-    const [rows] = await pool.query('SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email , staffs.phone , staffs.status , roles.role_name , roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id ORDER BY staffs.id DESC');
+    const [rows] = await pool.query('SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email , staffs.phone , staffs.status , staffs.created_at , roles.role_name , roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id ORDER BY staffs.id DESC');
     return rows;
 };
 

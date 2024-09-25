@@ -9,6 +9,7 @@ import sweatalert from "sweetalert2";
 import Formicform from "../../../Components/ExtraComponents/Forms/Comman.form";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { getDateRange } from "../../../Utils/Comman_function";
 import Validation_Message from "../../../Utils/Validation_Message";
 import { Link } from "react-router-dom";
 
@@ -67,13 +68,12 @@ const StaffPage = () => {
     staff_id: "",
   });
   const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
-
-
+ 
 
   useEffect(() => {
     staffData();
     roleData();
-  }, [refresh]);
+  }, [refresh , activeTab]);
 
   useEffect(() => {
     if (editStaffData && editStaffData) {
@@ -86,13 +86,23 @@ const StaffPage = () => {
     }
   }, [editStaffData]);
 
+ 
 
   const staffData = async () => {
     await dispatch(Staff({ req: { action: "get" }, authToken: token }))
       .unwrap()
       .then(async (response) => {
-        if (response.status) {
-          setStaffDataAll({ loading: false, data: response.data });
+        if (response.status) { 
+          const filteredData = response.data.filter((item) => {
+            const itemDate = new Date(item.created_at);
+            const { startDate, endDate } = getDateRange(activeTab);
+
+            console.log("startDate", startDate)
+            console.log("endDate", endDate)
+            return itemDate >= startDate && itemDate <= endDate;
+          });
+
+          setStaffDataAll({ loading: false, data: filteredData });
         } else {
           setStaffDataAll({ loading: false, data: [] });
         }
@@ -150,6 +160,7 @@ const StaffPage = () => {
     { id: "last-year", label: "Last year" },
   ];
 
+ 
   const columns = [
     {
       name: "First Name",
