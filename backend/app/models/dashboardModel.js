@@ -2,7 +2,6 @@ const pool = require("../config/database");
 const deleteUploadFile = require("../middlewares/deleteUploadFile");
 const { SatffLogUpdateOperation, generateNextUniqueCode } = require('../utils/helper');
 
-
 const getDashboardData = async (dashboard) => {
   const { staff_id } = dashboard;
 
