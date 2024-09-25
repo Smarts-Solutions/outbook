@@ -116,18 +116,20 @@ const query = `SELECT
     DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
     staff_logs.created_at AS created_at,
     staff_logs.log_message AS log_message,
-    CONCAT(staffs.first_name, ' ',staffs.first_name,' ', staff_logs.log_message) AS log_message_other
+    CONCAT(roles.role_name,' ',staffs.first_name, ' ',staffs.first_name,' ', staff_logs.log_message) AS log_message_other
 FROM 
     staff_logs
 JOIN 
-    staffs ON staffs.id = staff_logs.staff_id 
+    staffs ON staffs.id = staff_logs.staff_id
+JOIN 
+    roles ON roles.id = staffs.role_id     
 WHERE
     staff_logs.staff_id = ${staff_id}
 ORDER BY
     staff_logs.id DESC
   
 `;
-  
+
   const [result] = await pool.execute(query);
   return { status: true, message: "success.", data: result };
 
