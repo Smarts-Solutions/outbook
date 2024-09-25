@@ -1846,24 +1846,6 @@ const customerUpdate = async (customer) => {
             cust_type = 'partnership'
         }
          
-         console.log("result ",result)
-
-
-        if (result.changedRows > 0) {
-            // Add Query Satff Logs
-            const currentDate = new Date();
-            await SatffLogUpdateOperation(
-                {
-                    staff_id: customer.StaffUserId,
-                    date: currentDate.toISOString().split('T')[0],
-                    module_name: "customer",
-                    log_message: `updated customer information ${cust_type} for with customer code ${customer_code}`,
-                    permission_type: "update",
-                    ip: customer.ip,
-                }
-            );
-        }
-
         //Solo Traders Details
         if (customer_type == "1") {
 
