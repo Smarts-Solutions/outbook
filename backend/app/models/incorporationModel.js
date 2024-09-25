@@ -3,7 +3,6 @@ const { SatffLogUpdateOperation } = require('../utils/helper');
 
 const createIncorporation = async (Incorporation) => {
 
-  const { name } = Incorporation;
   const checkQuery = `SELECT 1 FROM incorporation_in WHERE name = ?`;
   const query = `
     INSERT INTO incorporation_in (name)
@@ -16,6 +15,7 @@ const createIncorporation = async (Incorporation) => {
       return { status: false, message: "Incorporation In already exists." };
     }
     const [result] = await pool.query(query, [Incorporation.Incorporation]);
+  
     const currentDate = new Date();
     await SatffLogUpdateOperation(
       {
@@ -23,7 +23,7 @@ const createIncorporation = async (Incorporation) => {
         ip: Incorporation.ip,
         date: currentDate.toISOString().split("T")[0],
         module_name: "incorporation in",
-        log_message: `created incorporation in ${name}`,
+        log_message: `created incorporation in ${Incorporation.Incorporation}`,
         permission_type: "created",
         module_id: result.insertId,
       }
