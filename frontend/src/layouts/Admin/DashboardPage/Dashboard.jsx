@@ -1,11 +1,14 @@
-import React from "react";
+import React , {useState , useEffect} from "react";
+import { useDispatch } from "react-redux";
+// import { DashboardData } from "../../../redux/actions/dashboardActions";
 
 const Dashboard = () => {
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+  const dispatch = useDispatch();
+  const [dashboard , setDashboard] = useState([]);  
 
   const currentDate = new Date();
 
-  // Get the current time in "10:35 AM" format
   const options = {
     hour: "2-digit",
     minute: "2-digit",
@@ -13,10 +16,7 @@ const Dashboard = () => {
   };
   const currentTime = currentDate.toLocaleTimeString("en-US", options);
 
-  // Extract the time part
-  const hours = currentDate.getHours();
-  const minutes = String(currentDate.getMinutes()).padStart(2, "0");
-  const seconds = String(currentDate.getSeconds()).padStart(2, "0");
+  const hours = currentDate.getHours(); 
 
   let greeting;
   if (hours < 12) {
@@ -26,6 +26,30 @@ const Dashboard = () => {
   } else {
     greeting = "Good Evening!";
   }
+
+  // useEffect(() => {
+  //   GetDashboardData();
+  // }, []);
+
+  // const GetDashboardData = async () => {
+  //   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+  //   const staffId = staffDetails.staff_id;
+  //   const token = localStorage.getItem("token");
+  //   const req = { staff_id: staffId };
+  //   await dispatch(DashboardData(req, token))
+  //     .unwrap()
+  //     .then((res) => {
+  //       if(res.status){
+  //         setDashboard(res.data)
+  //       }
+  //       else{
+  //         setDashboard([])
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //     });
+  // };
 
   // Array of month names
   const monthNames = [
