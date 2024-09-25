@@ -5,8 +5,13 @@ const getDashboardData = async (dashboard) => {
   return dashboardModel.getDashboardData(dashboard);
 };
 
+const getDashboardActivityLog = async (dashboard) => {
+  return dashboardModel.getDashboardActivityLog(dashboard);
+}
+
 
 
 module.exports = {
-  getDashboardData
+  getDashboardData,
+  getDashboardActivityLog
 };

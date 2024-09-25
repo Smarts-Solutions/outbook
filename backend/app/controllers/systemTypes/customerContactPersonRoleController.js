@@ -25,7 +25,7 @@ const handleCustomerContactPersonRole = async (req, res) => {
                 res.status(200).json({ status: true, data: result });
                 break;
             case 'delete':
-                await customerContactPersonRoleService.removeCustomerContactPersonRole(CustomerContactPersonRole.id);
+                await customerContactPersonRoleService.removeCustomerContactPersonRole(CustomerContactPersonRole);
                 res.status(200).json({ status: true, message: 'CustomerContactPersonRole deleted successfully' });
                 break;
             case 'update':

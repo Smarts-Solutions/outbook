@@ -21,7 +21,7 @@ const handleJobType = async (req, res) => {
         res.status(200).json({ status: true, data: result });
         break;
       case "delete":
-        await jobTypeTaskService.removeJobType(JobType.id);
+        await jobTypeTaskService.removeJobType(JobType);
         res
           .status(200)
           .json({ status: true, message: "JobType deleted successfully" });

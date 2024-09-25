@@ -107,8 +107,34 @@ LEFT JOIN
 
 };
 
+const getDashboardActivityLog = async (dashboard) => {
+  const { staff_id } = dashboard;
+
+const query = `SELECT
+    staff_logs.id AS log_id,
+    staff_logs.staff_id AS staff_id,
+    DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
+    staff_logs.created_at AS created_at,
+    staff_logs.log_message AS log_message
+FROM 
+    staff_logs
+JOIN 
+    staffs ON staffs.id = staff_logs.staff_id 
+WHERE
+    staff_logs.staff_id = ${staff_id}
+ORDER BY
+    staff_logs.id DESC
+  
+`;
+  
+  const [result] = await pool.execute(query);
+  return { status: true, message: "success.", data: result };
+
+}
+
 
 
 module.exports = {
-  getDashboardData
+  getDashboardData,
+  getDashboardActivityLog
 };

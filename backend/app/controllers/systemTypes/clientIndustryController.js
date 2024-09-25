@@ -24,7 +24,7 @@ const handleClientIndustry = async (req, res) => {
                 res.status(200).json({ status: true, data: result });
                 break;
             case 'delete':
-                await clientIndustryService.removeClientIndustry(ClientIndustry.id);
+                await clientIndustryService.removeClientIndustry(ClientIndustry);
                 res.status(200).json({ status: true, message: 'ClientIndustry deleted successfully' });
                 break;
             case 'update':

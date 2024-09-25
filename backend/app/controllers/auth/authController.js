@@ -121,6 +121,17 @@ const login = async (req, res) => {
   };
 
 
+  const isLogOut = async (req , res) =>{
+    try {
+      const { ...staff } = req.body;
+      const data = await authService.isLogOut(staff);
+      return res.send({ status:true, message: "Success.."});
+    } catch (error) {
+      return res.send({ status:false, message: error.message});
+    }
+  }
+
+
 module.exports = {
     handleStaff,
     staffCompetency,
@@ -128,5 +139,6 @@ module.exports = {
     loginWithAzure,
     loginAuthToken,
     isLoginAuthTokenCheck,
-    profile
+    profile,
+    isLogOut
 };

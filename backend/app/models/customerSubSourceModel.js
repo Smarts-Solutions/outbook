@@ -1,4 +1,5 @@
 const pool = require("../config/database");
+const { SatffLogUpdateOperation } = require('../utils/helper');
 
 const createCustomerSubSource = async (CustomerSubSource) => {
   const { name ,customer_source_id} = CustomerSubSource;
@@ -14,6 +15,18 @@ const createCustomerSubSource = async (CustomerSubSource) => {
       return { status: false, message: "CustomerSubSource In already exists." };
     }
     const [result] = await pool.query(query, [name,customer_source_id]);
+    const currentDate = new Date();
+    await SatffLogUpdateOperation(
+      {
+        staff_id: CustomerSubSource.StaffUserId,
+        ip: CustomerSubSource.ip,
+        date: currentDate.toISOString().split("T")[0],
+        module_name: "customer sub source",
+        log_message: `created customer sub source ${name}`,
+        permission_type: "created",
+        module_id: result.insertId,
+      }
+    );
     return {
       status: true,
       message: "CustomerSubSource In created successfully.",
@@ -62,9 +75,21 @@ const deleteCustomerSubSource = async (CustomerSubSourceId) => {
   const query = `
     DELETE FROM customer_sub_source WHERE id = ?
     `;
-
+    const [[existName]] = await pool.execute(`SELECT name FROM customer_sub_source WHERE id = ?`, [CustomerSubSourceId.id]);
   try {
-    await pool.execute(query, [CustomerSubSourceId]);
+    await pool.execute(query, [CustomerSubSourceId.id]);
+    const currentDate = new Date();
+    await SatffLogUpdateOperation(
+      {
+        staff_id: CustomerSubSourceId.StaffUserId,
+        ip: CustomerSubSourceId.ip,
+        date: currentDate.toISOString().split("T")[0],
+        module_name: "customer sub source",
+        log_message: `deleted customer sub source ${existName.name}`,
+        permission_type: "deleted",
+        module_id: CustomerSubSourceId.id,
+      }
+    );
   } catch (err) {
     console.error("Error deleting data:", err);
     throw err;
@@ -80,7 +105,6 @@ const updateCustomerSubSource = async (CustomerSubSource) => {
 
   for (const [key, value] of Object.entries(fields)) {
     if (key != "ip" && key != "StaffUserId") {
-  
       setClauses.push(`${key} = ?`);
       values.push(value);
     }
@@ -100,7 +124,32 @@ const updateCustomerSubSource = async (CustomerSubSource) => {
     if (check.length > 0) {
       return { status: false, message: "CustomerSubSource In already exists." };
     }
+
+
+    const [[existStatus]] = await pool.execute(`SELECT status FROM customer_sub_source WHERE id = ?`, [id]);
+    let status_change = "Deactivate"
+    if(CustomerSubSource.status == "1"){
+      status_change = "Activate"
+    }
+    let log_message = existStatus.status === CustomerSubSource.status ?
+    `edited customer sub source ${name}`:
+    `changes the customer sub source status ${status_change} ${name}`
+
     const [result] = await pool.execute(query, values);
+    if(result.changedRows > 0){
+      const currentDate = new Date();
+      await SatffLogUpdateOperation(
+        {
+          staff_id: CustomerSubSource.StaffUserId,
+          ip: CustomerSubSource.ip,
+          date: currentDate.toISOString().split("T")[0],
+          module_name: "customer sub source",
+          log_message: log_message,
+          permission_type: "updated",
+          module_id: id,
+        }
+      );
+    }
     return {
       status: true,
       message: "CustomerSubSource In updated successfully.",

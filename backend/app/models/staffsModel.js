@@ -1,7 +1,8 @@
 const pool = require('../../app/config/database');
+const { SatffLogUpdateOperation } = require('../../app/utils/helper');
 
 const createStaff = async (staff) => {
-    const { role_id, first_name, last_name, email, phone, password, status ,created_by } = staff;
+    const { role_id, first_name, last_name, email, phone, password, status ,created_by ,StaffUserId,ip } = staff;
 
     const query = `
     INSERT INTO staffs (role_id, first_name, last_name, email, phone, password, status ,created_by)
@@ -10,7 +11,21 @@ const createStaff = async (staff) => {
 
     try {
         const [result] = await pool.execute(query, [role_id, first_name, last_name, email, phone, password, status,created_by]);
+        
+        const currentDate = new Date();
+        await SatffLogUpdateOperation(
+            {
+                staff_id: StaffUserId,
+                ip: ip,
+                date: currentDate.toISOString().split('T')[0],
+                module_name: "staff",
+                log_message: `created staff ${first_name} ${last_name}`,
+                permission_type: "created",
+                module_id:result.insertId
+            }
+        );
         return result.insertId;
+
     } catch (err) {
         console.error('Error inserting data:', err);
         throw err;
@@ -47,8 +62,10 @@ const updateStaff = async (staff) => {
     const values = [];
     // Iterate over the fields and construct the set clauses dynamically
     for (const [key, value] of Object.entries(fields)) {
-        setClauses.push(`${key} = ?`);
-        values.push(value);
+        if (key != "ip" && key != "StaffUserId") {
+            setClauses.push(`${key} = ?`);
+            values.push(value);
+          }
     }
     // Add the id to the values array for the WHERE clause
     values.push(id);
@@ -59,7 +76,32 @@ const updateStaff = async (staff) => {
     WHERE id = ?
     `;
     try {
-        await pool.execute(query, values);
+    const [[existStatus]] = await pool.execute(`SELECT status FROM staffs WHERE id = ?`, [id]);
+   
+       let status_change = "Deactivate"
+        if(staff.status == "1"){
+         status_change = "Activate"
+        }
+        let log_message = existStatus.status === status ?
+        `edited staff ${staff.first_name} ${staff.last_name}`:
+        `changes the staff status ${status_change} ${staff.first_name} ${staff.last_name}`
+
+     const [rows] = await pool.execute(query, values);
+     if(rows.changedRows){
+        const currentDate = new Date();
+        await SatffLogUpdateOperation(
+            {
+                staff_id: staff.StaffUserId,
+                ip: staff.ip,
+                date: currentDate.toISOString().split('T')[0],
+                module_name: "staff",
+                log_message: log_message,
+                permission_type: "updated",
+                module_id:staff.id
+            }
+        );
+
+     }
     } catch (err) {
         console.error('Error updating data:', err);
         throw err;

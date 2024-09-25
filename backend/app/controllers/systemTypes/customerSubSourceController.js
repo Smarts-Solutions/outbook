@@ -24,7 +24,7 @@ const handleCustomerSubSource = async (req, res) => {
                 res.status(200).json({ status: true, data: result });
                 break;
             case 'delete':
-                await CustomerSubSourceService.removeCustomerSubSource(CustomerSubSource.id);
+                await CustomerSubSourceService.removeCustomerSubSource(CustomerSubSource);
                 res.status(200).json({ status: true, message: 'CustomerSubSource deleted successfully' });
                 break;
             case 'update':
