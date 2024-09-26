@@ -26,6 +26,7 @@ import {
   EDIT_MISSION_LOG,
   EDIT_QUERY,
   EDIT_DRAFT,
+  UPDATE_CUSTOMER_STATUS,
    
 } from "../../../Services/Customer/CustomerService";
 
@@ -492,6 +493,23 @@ export const JobDocumentAction = createAsyncThunk("jobDocumentAction", async (da
     throw err;
   }
 });
+
+export const Update_Customer_Status = createAsyncThunk("customerStatusUpdate", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await UPDATE_CUSTOMER_STATUS(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
 
  
 

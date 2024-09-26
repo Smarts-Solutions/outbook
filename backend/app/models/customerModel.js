@@ -33,6 +33,19 @@ const createCustomer = async (customer) => {
             try {
                 const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, customer_code, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus]);
                 const customer_id = result.insertId;
+                const currentDate = new Date();
+                await SatffLogUpdateOperation(
+                    {
+                        staff_id: customer.StaffUserId,
+                        ip: customer.ip,
+                        date: currentDate.toISOString().split('T')[0],
+                        module_name: 'customer',
+                        log_message: `created customer profile on`,
+                        permission_type: 'created',
+                        module_id: customer_id,
+                    }
+                );
+
 
                 const query2 = `
         INSERT INTO customer_contact_details (customer_id,first_name,last_name,phone_code,phone,email,residential_address)
@@ -166,7 +179,7 @@ const createCustomer = async (customer) => {
             return { status: false, message: 'Customers Trading Name Already Exists.' };
         }
 
-        const query = `
+    const query = `
     UPDATE customers
     SET customer_type = ?, staff_id = ?, account_manager_id = ?, trading_name = ?, trading_address = ?, vat_registered = ?, vat_number = ?, website = ?
     WHERE id = ?
@@ -499,7 +512,7 @@ const getCustomer = async (customer) => {
         ORDER BY 
         customers.id DESC;
             `;
-                const [resultAllocated] = await pool.execute(query, [staff_id,staff_id]);
+                const [resultAllocated] = await pool.execute(query, [staff_id, staff_id]);
                 result = resultAllocated;
             }
 
@@ -829,7 +842,7 @@ const updateProcessCustomerServices = async (customerProcessData) => {
 
 const updateProcessCustomerEngagementModel = async (customerProcessData) => {
 
-    const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing,customerJoiningDate,customerSource,customerSubSource } = customerProcessData;
+    const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing, customerJoiningDate, customerSource, customerSubSource } = customerProcessData;
 
 
     const checkQuery = `SELECT id FROM customer_engagement_model WHERE customer_id = ? `;
@@ -846,8 +859,8 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
     //SNEH
 
 
-    const customerUpdateQuery = `UPDATE customers SET customerJoiningDate = ?, customerSource = ?, customerSubSource = ? WHERE id = ?`;   
-    const [updateQuery]= await pool.execute(customerUpdateQuery, [customerJoiningDate, customerSource, customerSubSource, customer_id]);
+    const customerUpdateQuery = `UPDATE customers SET customerJoiningDate = ?, customerSource = ?, customerSubSource = ? WHERE id = ?`;
+    const [updateQuery] = await pool.execute(customerUpdateQuery, [customerJoiningDate, customerSource, customerSubSource, customer_id]);
 
     if (fte_dedicated_staffing === "1") {
 
@@ -1069,7 +1082,7 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
 
 
                 const checkQuery4 = `SELECT id FROM customer_engagement_customised_pricing WHERE customer_engagement_model_id = ? AND minimum_number_of_jobs = ?  AND cost_per_job = ? AND service_id = ?`;
-                const [exist4] = await pool.execute(checkQuery4, [customer_engagement_model_id, minimum_number_of_jobs, cost_per_job,service_id]);
+                const [exist4] = await pool.execute(checkQuery4, [customer_engagement_model_id, minimum_number_of_jobs, cost_per_job, service_id]);
                 let customer_engagement_customised_pricing_id;
 
                 if (exist4.length === 0) {
@@ -1846,24 +1859,6 @@ const customerUpdate = async (customer) => {
             cust_type = 'partnership'
         }
          
-         console.log("result ",result)
-
-
-        if (result.changedRows > 0) {
-            // Add Query Satff Logs
-            const currentDate = new Date();
-            await SatffLogUpdateOperation(
-                {
-                    staff_id: customer.StaffUserId,
-                    date: currentDate.toISOString().split('T')[0],
-                    module_name: "customer",
-                    log_message: `updated customer information ${cust_type} for with customer code ${customer_code}`,
-                    permission_type: "update",
-                    ip: customer.ip,
-                }
-            );
-        }
-
         //Solo Traders Details
         if (customer_type == "1") {
 
@@ -1883,21 +1878,6 @@ const customerUpdate = async (customer) => {
 
             try {
                 const [result2] = await pool.execute(query2, [first_name, last_name, phone_code, phone, email, residential_address, customer_id, contact_id]);
-
-                if (result2.changedRows > 0) {
-                    // Add Query Satff Logs
-                    const currentDate = new Date();
-                    await SatffLogUpdateOperation(
-                        {
-                            staff_id: customer.StaffUserId,
-                            date: currentDate.toISOString().split('T')[0],
-                            module_name: "customer",
-                            log_message: `updated customer ${cust_type} contact details for with customer code ${customer_code}`,
-                            permission_type: "update",
-                            ip: customer.ip
-                        }
-                    );
-                }
 
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
             } catch (err) {
@@ -1923,23 +1903,6 @@ const customerUpdate = async (customer) => {
                     WHERE customer_id = ?
                 `;
                 const [result2] = await pool.execute(query2, [company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date_s, incorporation_in, customer_id]);
-
-
-                // if(result2.changedRows > 0){
-                //     // Add Query Satff Logs
-                //     const currentDate = new Date();
-                //     await SatffLogUpdateOperation(
-                //         {
-                //             staff_id:customer.StaffUserId,
-                //             date:currentDate.toISOString().split('T')[0],
-                //             module_name:"customer",
-                //             log_message:`updated customer ${cust_type} details for with customer code ${customer_code}`,
-                //             permission_type:"update" ,
-                //             ip:customer.ip
-                //         }
-                //     );
-                // }
-
 
 
                 const [existIdResult] = await pool.execute('SELECT id FROM customer_contact_details WHERE customer_id = ?', [customer_id]);
@@ -1990,44 +1953,6 @@ const customerUpdate = async (customer) => {
                 }
 
 
-                if (logUpdateRequired) {
-
-                    if (result4 != undefined) {
-                        if (result4[0].insertId > 0) {
-                            // Add Query Satff Logs
-                            const currentDate = new Date();
-                            await SatffLogUpdateOperation(
-                                {
-                                    staff_id: customer.StaffUserId,
-                                    date: currentDate.toISOString().split('T')[0],
-                                    module_name: "customer",
-                                    log_message: `updated customer ${cust_type} contact details for with customer code ${customer_code}`,
-                                    permission_type: "update",
-                                    ip: customer.ip
-                                }
-                            );
-                        }
-                    }
-                    else if (result3 != undefined) {
-                        if (result3[0].changedRows > 0) {
-                            // Add Query Satff Logs
-                            const currentDate = new Date();
-                            await SatffLogUpdateOperation(
-                                {
-                                    staff_id: customer.StaffUserId,
-                                    date: currentDate.toISOString().split('T')[0],
-                                    module_name: "customer",
-                                    log_message: `updated customer ${cust_type} contact details for with customer code ${customer_code}`,
-                                    permission_type: "update",
-                                    ip: customer.ip
-                                }
-                            );
-                        }
-                    }
-
-
-                }
-
                 let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
                 if (deleteIdArray.length > 0) {
                     for (const id of deleteIdArray) {
@@ -2043,7 +1968,7 @@ const customerUpdate = async (customer) => {
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
-               
+
                 return { status: false, message: 'Update Error Customer Type 2' };
             }
 
@@ -2083,14 +2008,14 @@ const customerUpdate = async (customer) => {
                     // let residential_address = detail.residential_address;
                     let authorised_signatory_status = detail.authorised_signatory_status;
                     if (contact_id == "" || contact_id == undefined || contact_id == null) {
-                         const query4 = `
+                        const query4 = `
                         INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email,authorised_signatory_status)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                         `;
                         const [result3, err3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, authorised_signatory_status]);
                         logUpdateRequired = true;
 
-               
+
                     } else {
 
                         arrayInterId.push(contact_id)
@@ -2104,42 +2029,7 @@ const customerUpdate = async (customer) => {
 
                 }
 
-                if (logUpdateRequired) {
-                    if (result4 != undefined) {
-                        if (result4[0].insertId > 0) {
-                            // Add Query Satff Logs
-                            const currentDate = new Date();
-                            await SatffLogUpdateOperation(
-                                {
-                                    staff_id: customer.StaffUserId,
-                                    date: currentDate.toISOString().split('T')[0],
-                                    module_name: "customer",
-                                    log_message: `updated customer ${cust_type} contact details for with customer code ${customer_code}`,
-                                    permission_type: "update",
-                                    ip: customer.ip
-                                }
-                            );
-                        }
-                    }
-                    else if (result3 != undefined) {
-                        if (result3[0].changedRows > 0) {
-                            // Add Query Satff Logs
-                            const currentDate = new Date();
-                            await SatffLogUpdateOperation(
-                                {
-                                    staff_id: customer.StaffUserId,
-                                    date: currentDate.toISOString().split('T')[0],
-                                    module_name: "customer",
-                                    log_message: `updated customer ${cust_type} contact details for with customer code ${customer_code}`,
-                                    permission_type: "update",
-                                    ip: customer.ip
-                                }
-                            );
-                        }
-                    }
-                }
-
-
+            
                 let deleteIdArray = idArray.filter(id => !arrayInterId.includes(id));
                 if (deleteIdArray.length > 0) {
                     for (const id of deleteIdArray) {
@@ -2153,7 +2043,7 @@ const customerUpdate = async (customer) => {
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
-              
+
                 return { status: false, message: 'Update Error Customer Type 3' };
             }
 
@@ -2299,7 +2189,7 @@ const customerUpdate = async (customer) => {
 
             const outputArray = Object.values(resultTsk);
 
-      
+
 
             if (outputArray.length > 0) {
                 for (const tsk of outputArray) {
@@ -2358,21 +2248,6 @@ const customerUpdate = async (customer) => {
         }
 
 
-        if (logUpdateRequired) {
-            // Add Query Satff Logs
-            const currentDate = new Date();
-            await SatffLogUpdateOperation(
-                {
-                    staff_id: customer.StaffUserId,
-                    date: currentDate.toISOString().split('T')[0],
-                    module_name: "customer",
-                    log_message: `updated customer services for with customer code ${ExistCustomer[0].customer_code}`,
-                    permission_type: "update",
-                    ip: customer.ip
-                }
-            );
-        }
-
         return { status: true, message: 'customer services update successfully.', data: customer_id };
 
 
@@ -2381,7 +2256,7 @@ const customerUpdate = async (customer) => {
     //  Page Status 3 Customer engagement model Part
     else if (pageStatus === "3") {
 
-        const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing,customerJoiningDate,customerSource,customerSubSource } = customer;
+        const { customer_id, fte_dedicated_staffing, percentage_model, adhoc_payg_hourly, customised_pricing, customerJoiningDate, customerSource, customerSubSource } = customer;
 
         const checkQuery = `SELECT id FROM customer_engagement_model WHERE customer_id = ? `;
         const [existCustomer] = await pool.execute(checkQuery, [customer_id]);
@@ -2394,8 +2269,8 @@ const customerUpdate = async (customer) => {
             customer_engagement_model_id = existCustomer[0].id;
         }
 
-         const customerUpdateQuery = `UPDATE customers SET customerJoiningDate = ?, customerSource = ?, customerSubSource = ? WHERE id = ?`;   
-         const [updateQuery]= await pool.execute(customerUpdateQuery, [customerJoiningDate, customerSource, customerSubSource, customer_id]);
+        const customerUpdateQuery = `UPDATE customers SET customerJoiningDate = ?, customerSource = ?, customerSubSource = ? WHERE id = ?`;
+        const [updateQuery] = await pool.execute(customerUpdateQuery, [customerJoiningDate, customerSource, customerSubSource, customer_id]);
 
 
 
@@ -2443,21 +2318,6 @@ const customerUpdate = async (customer) => {
                 ]);
                 fte_dedicated_staffing_id = result.insertId;
 
-                if (result.insertId > 0) {
-                    // Add Query Satff Logs
-                    const currentDate = new Date();
-                    await SatffLogUpdateOperation(
-                        {
-                            staff_id: customer.StaffUserId,
-                            date: currentDate.toISOString().split('T')[0],
-                            module_name: "customer",
-                            log_message: `updated customer engagement model fte dedicated staffing for with customer code ${ExistCustomer[0].customer_code}`,
-                            permission_type: "update",
-                            ip: customer.ip
-                        }
-                    );
-                }
-
                 const updateQueryEngagementModel = `UPDATE customer_engagement_model SET fte_dedicated_staffing = ? WHERE customer_id = ? `;
                 await pool.execute(updateQueryEngagementModel, [fte_dedicated_staffing, customer_id]);
 
@@ -2492,21 +2352,7 @@ const customerUpdate = async (customer) => {
                     fte_dedicated_staffing_id
                 ]);
 
-                if (result.affectedRows > 0) {
-                    // Add Query Satff Logs
-                    const currentDate = new Date();
-                    await SatffLogUpdateOperation(
-                        {
-                            staff_id: customer.StaffUserId,
-                            date: currentDate.toISOString().split('T')[0],
-                            module_name: "customer",
-                            log_message: `updated customer engagement model fte dedicated staffing for with customer code ${ExistCustomer[0].customer_code}`,
-                            permission_type: "update",
-                            ip: customer.ip
-                        }
-                    );
-                }
-
+                
                 const updateQueryEngagementModel = `UPDATE customer_engagement_model SET fte_dedicated_staffing = ? WHERE customer_id = ? `;
                 await pool.execute(updateQueryEngagementModel, [fte_dedicated_staffing, customer_id]);
             }
@@ -2545,22 +2391,7 @@ const customerUpdate = async (customer) => {
                     admin_staff
                 ]);
                 customer_engagement_percentage_id = result.insertId;
-                // Add Query Satff Logs
-                if (result.insertId > 0) {
-                    const currentDate = new Date();
-                    await SatffLogUpdateOperation(
-                        {
-                            staff_id: customer.StaffUserId,
-                            date: currentDate.toISOString().split('T')[0],
-                            module_name: "customer",
-                            log_message: `updated customer engagement model percentage model for with customer code ${ExistCustomer[0].customer_code}`,
-                            permission_type: "update",
-                            ip: customer.ip
-                        }
-                    );
-                }
-
-
+                
                 const updateQueryEngagementModel = `UPDATE customer_engagement_model SET percentage_model = ? WHERE customer_id = ? `;
                 await pool.execute(updateQueryEngagementModel, [percentage_model, customer_id]);
             } else {
@@ -2586,22 +2417,7 @@ const customerUpdate = async (customer) => {
                     customer_engagement_percentage_id
                 ]);
 
-                if (result.affectedRows > 0) {
-                    // Add Query Satff Logs
-                    const currentDate = new Date();
-                    await SatffLogUpdateOperation(
-                        {
-                            staff_id: customer.StaffUserId,
-                            date: currentDate.toISOString().split('T')[0],
-                            module_name: "customer",
-                            log_message: `updated customer engagement model percentage model for with customer code ${ExistCustomer[0].customer_code}`,
-                            permission_type: "update",
-                            ip: customer.ip
-                        }
-                    );
-
-                }
-
+    
                 const updateQueryEngagementModel = `UPDATE customer_engagement_model SET percentage_model = ? WHERE customer_id = ? `;
                 await pool.execute(updateQueryEngagementModel, [percentage_model, customer_id]);
 
@@ -2641,22 +2457,7 @@ const customerUpdate = async (customer) => {
                 ]);
 
                 customer_engagement_adhoc_hourly_id = result.insertId;
-                if (result.insertId > 0) {
-                    // Add Query Satff Logs
-                    const currentDate = new Date();
-                    await SatffLogUpdateOperation(
-                        {
-                            staff_id: customer.StaffUserId,
-                            date: currentDate.toISOString().split('T')[0],
-                            module_name: "customer",
-                            log_message: `updated customer engagement model adhoc payg hourly for with customer code ${ExistCustomer[0].customer_code}`,
-                            permission_type: "update",
-                            ip: customer.ip
-                        }
-                    );
-
-                }
-
+                
                 const updateQueryEngagementModel = `UPDATE customer_engagement_model SET adhoc_payg_hourly = ? WHERE customer_id = ? `;
                 await pool.execute(updateQueryEngagementModel, [adhoc_payg_hourly, customer_id]);
             } else {
@@ -2680,22 +2481,7 @@ const customerUpdate = async (customer) => {
                     customer_engagement_adhoc_hourly_id
                 ]);
 
-                if (result.affectedRows > 0) {
-                    // Add Query Satff Logs
-                    const currentDate = new Date();
-                    await SatffLogUpdateOperation(
-                        {
-                            staff_id: customer.StaffUserId,
-                            date: currentDate.toISOString().split('T')[0],
-                            module_name: "customer",
-                            log_message: `updated customer engagement model adhoc payg hourly for with customer code ${ExistCustomer[0].customer_code}`,
-                            permission_type: "update",
-                            ip: customer.ip
-                        }
-                    );
-
-                }
-
+                
                 const updateQueryEngagementModel = `UPDATE customer_engagement_model SET adhoc_payg_hourly = ? WHERE customer_id = ? `;
                 await pool.execute(updateQueryEngagementModel, [adhoc_payg_hourly, customer_id]);
             }
@@ -2768,22 +2554,7 @@ const customerUpdate = async (customer) => {
                 }
             }
 
-            if (logUpdateRequired) {
-                // Add Query Satff Logs
-                const currentDate = new Date();
-                await SatffLogUpdateOperation(
-                    {
-                        staff_id: customer.StaffUserId,
-                        date: currentDate.toISOString().split('T')[0],
-                        module_name: "customer",
-                        log_message: `updated customer engagement model customised pricing for with customer code ${ExistCustomer[0].customer_code}`,
-                        permission_type: "update",
-                        ip: customer.ip
-                    }
-                );
-
-            }
-
+            
             const updateQueryEngagementModel = `UPDATE customer_engagement_model SET customised_pricing = ? WHERE customer_id = ? `;
             await pool.execute(updateQueryEngagementModel, [customised_pricing, customer_id]);
 
@@ -2875,6 +2646,18 @@ const customerUpdate = async (customer) => {
     return { status: true, message: 'customers updated successfully.', data: customer_id };
 }
 
+const customerStatusUpdate = async (customer) => {
+    const { customer_id, status } = customer; 
+
+    const query = `UPDATE customers SET status = ? WHERE id = ?`;
+    const [result] = await pool.execute(query, [status, customer_id]);
+
+    if (result.affectedRows > 0) {
+        return { status: true, message: 'Customer status updated successfully.' };
+    }
+    return { status: false, message: 'Error updating customer status.' };
+}
+
 
 module.exports = {
     createCustomer,
@@ -2886,6 +2669,7 @@ module.exports = {
     updateProcessCustomerFileGet,
     updateProcessCustomerFileDelete,
     getSingleCustomer,
-    customerUpdate
+    customerUpdate,
+    customerStatusUpdate
 
 };

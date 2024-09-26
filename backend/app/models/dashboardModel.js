@@ -107,8 +107,50 @@ LEFT JOIN
 
 };
 
+const getDashboardActivityLog = async (dashboard) => {
+  const { staff_id } = dashboard;
+
+const query = `SELECT
+    staff_logs.id AS log_id,
+    staff_logs.staff_id AS staff_id,
+    DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
+    staff_logs.created_at AS created_at,
+    staff_logs.log_message AS log_message,
+    CONCAT(
+      roles.role_name, ' ', 
+      staffs.first_name, ' ', 
+      staffs.last_name, ' ', 
+      staff_logs.log_message, ' ',
+      CASE 
+        WHEN staff_logs.module_name = 'customer' THEN CONCAT('cust_', SUBSTRING(customers.trading_name, 1, 3), '_', customers.customer_code)
+        ELSE ''
+      END
+    ) AS log_message_other
+FROM 
+    staff_logs
+JOIN 
+    staffs ON staffs.id = staff_logs.staff_id
+JOIN 
+    roles ON roles.id = staffs.role_id
+LEFT JOIN 
+    customers ON staff_logs.module_name = 'customer' AND staff_logs.module_id = customers.id         
+WHERE
+    staff_logs.staff_id = ${staff_id}
+ORDER BY
+    staff_logs.id DESC
+
+    
+  
+`;
+
+  const [result] = await pool.execute(query);
+  return { status: true, message: "success.", data: result };
+
+}
+
 
 
 module.exports = {
-  getDashboardData
+  getDashboardData,
+  getDashboardActivityLog
 };

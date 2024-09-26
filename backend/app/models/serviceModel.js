@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const { SatffLogUpdateOperation } = require('../utils/helper');
 
 const createServices = async (Services) => {
     const {name} = Services;
@@ -14,6 +15,18 @@ const createServices = async (Services) => {
             return {status: false , message: 'Service already exists.'};
         }
         const [result] = await pool.execute(query, [name]);
+        const currentDate = new Date();
+        await SatffLogUpdateOperation(
+            {
+                staff_id: Services.StaffUserId,
+                ip: Services.ip,
+                date: currentDate.toISOString().split('T')[0],
+                module_name: "services",
+                log_message: `created services ${name}`,
+                permission_type: "created",
+                module_id:result.insertId
+            }
+        );
         return {status: true ,message: 'Service created successfully.' , data : result.insertId};
     } catch (err) {
         console.error('Error inserting data:', err);
@@ -55,9 +68,22 @@ const deleteServices = async (ServicesId) => {
     const query = `
     DELETE FROM services WHERE id = ?
     `;
+    const [[existName]] = await pool.execute(`SELECT name FROM services WHERE id = ?`, [ServicesId.id]);
 
     try {
-        await pool.execute(query, [ServicesId]);
+        await pool.execute(query, [ServicesId.id]);
+        const currentDate = new Date();
+        await SatffLogUpdateOperation(
+            {
+                staff_id: ServicesId.StaffUserId,
+                ip: ServicesId.ip,
+                date: currentDate.toISOString().split('T')[0],
+                module_name: "services",
+                log_message: `deleted services ${existName.name}`,
+                permission_type: "deleted",
+                module_id:ServicesId.id
+            }
+        );
     } catch (err) {
         console.error('Error deleting data:', err);
         throw err;
@@ -73,8 +99,10 @@ const updateServices = async (Services) => {
     const values = [];
     // Iterate over the fields and construct the set clauses dynamically
     for (const [key, value] of Object.entries(fields)) {
-        setClauses.push(`${key} = ?`);
-        values.push(value);
+        if (key != "ip" && key != "StaffUserId") {
+            setClauses.push(`${key} = ?`);
+            values.push(value);
+          }
     }
     // Add the id to the values array for the WHERE clause
     values.push(id);
@@ -92,7 +120,30 @@ const updateServices = async (Services) => {
         if (check.length > 0) {
             return {status: false , message: 'Service already exists.'};
         }
+        const [[existStatus]] = await pool.execute(`SELECT status FROM services WHERE id = ?`, [id]);
+        let status_change = "Deactivate"
+        if(Services.status == "1"){
+          status_change = "Activate"
+        }
+        let log_message = existStatus.status === Services.status ?
+            `edited services ${type}`:
+            `changes the services status ${status_change} ${name}`
+
         const [result] = await pool.execute(query, values);
+        if(result.changedRows){
+            const currentDate = new Date();
+            await SatffLogUpdateOperation(
+                {
+                    staff_id: Services.StaffUserId,
+                    ip: Services.ip,
+                    date: currentDate.toISOString().split('T')[0],
+                    module_name: "services",
+                    log_message: log_message,
+                    permission_type: "updated",
+                    module_id:Services.id
+                }
+            );
+        }
         return {status: true ,message: 'Service updated successfully.' , data : result.affectedRows};
     } catch (err) {
         console.error('Error updating data:', err);

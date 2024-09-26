@@ -1,12 +1,28 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { SIGN_IN_STAFF , SIGN_IN_AZURE_SSO,LOGIN_AUTH_TOKEN , IS_LOGIN_AUTH_TOKEN_CHECK } from "../../../Services/Auth/authService";
+import { SIGN_IN_STAFF , SIGN_IN_AZURE_SSO,LOGIN_AUTH_TOKEN , IS_LOGIN_AUTH_TOKEN_CHECK ,IS_LOGOUT} from "../../../Services/Auth/authService";
+
+import axios from "axios";
+const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+const token = localStorage.getItem("token");
+
+
+export async function GET_IP(data, token) {
+  try {
+    const res = await axios.get(`https://api.ipify.org?format=json`)
+    return await res;
+  }
+  catch (err) {
+  }
+}
 
 
 
 export const SignIn = createAsyncThunk("login", async (data) => {
   try {
-    const res = await SIGN_IN_STAFF(data);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...data, ip: IP_Data.data.ip };
+    const res = await SIGN_IN_STAFF(updatedReq);
     return await res;
   } catch (err) {
     return err;
@@ -15,7 +31,9 @@ export const SignIn = createAsyncThunk("login", async (data) => {
 
 export const SignInWithAzure = createAsyncThunk("loginWithAzure", async (data) => {
   try {
-    const res = await SIGN_IN_AZURE_SSO(data);
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...data, ip: IP_Data.data.ip };
+    const res = await SIGN_IN_AZURE_SSO(updatedReq);
     return await res;
   } catch (err) {
     return err;
@@ -34,7 +52,19 @@ export const LoginAuthToken = createAsyncThunk("loginAuthToken", async (data) =>
 
 export const isLoginAuthCheckToken = createAsyncThunk("isLoginAuthTokenCheck", async (data) => {
   try {
+
     const res = await IS_LOGIN_AUTH_TOKEN_CHECK(data);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
+
+export const isLogOut = createAsyncThunk("isLogOut", async (data) => {
+  try {
+    let IP_Data = await GET_IP();
+    const updatedReq = { ...data, ip: IP_Data.data.ip };
+    const res = await IS_LOGOUT(updatedReq);
     return await res;
   } catch (err) {
     return err;

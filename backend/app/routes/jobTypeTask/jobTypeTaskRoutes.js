@@ -11,5 +11,7 @@ router.post('/addChecklist',verifyToken, jobTypeTaskController.addChecklist);
 router.post('/checklistAction',verifyToken, jobTypeTaskController.checklistAction);
 router.post('/updateChecklist',verifyToken, jobTypeTaskController.updateChecklist);
 router.post('/customerGetService',verifyToken, jobTypeTaskController.customerGetService);
+ 
+
 
 module.exports = router;

@@ -21,7 +21,7 @@ const handleJobType = async (req, res) => {
         res.status(200).json({ status: true, data: result });
         break;
       case "delete":
-        await jobTypeTaskService.removeJobType(JobType.id);
+        await jobTypeTaskService.removeJobType(JobType);
         res
           .status(200)
           .json({ status: true, message: "JobType deleted successfully" });
@@ -73,6 +73,8 @@ const getTask = async (req, res) => {
     res.status(500).json({ status: false, message: error.message });
   }
 };
+
+ 
 
 const addChecklist = async (req, res) => {
   try {
@@ -149,5 +151,5 @@ module.exports = {
   addChecklist,
   checklistAction,
   updateChecklist,
-  customerGetService,
+  customerGetService, 
 };

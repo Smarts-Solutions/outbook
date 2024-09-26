@@ -24,7 +24,7 @@ const handleIncorporation = async (req, res) => {
                 res.status(200).json({ status: true, data: result });
                 break;
             case 'delete':
-                await IncorporationService.removeIncorporation(Incorporation.id);
+                await IncorporationService.removeIncorporation(Incorporation);
                 res.status(200).json({ status: true, message: 'Incorporation deleted successfully' });
                 break;
             case 'update':

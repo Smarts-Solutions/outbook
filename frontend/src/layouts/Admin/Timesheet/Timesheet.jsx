@@ -1,11 +1,51 @@
 import React, { useEffect, useRef, useState } from "react";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
+import { Trash2 } from 'lucide-react';
 
 
 const Timesheet = () => {
+  const [addtask, setAddtask] = useState(false); 
+  const [timeSheetRows, setTimeSheetRows] = useState([
+    {
+      TaskType: "",
+      Customer: "",
+      Client: "",
+      Job: "",
+      Task: "",
+      Mon: "",
+      Tue: "",
+      Wed: "",
+      Thu: "",
+      Fri: "",
+      Sat: "",
+      Sun: "",
+    },
+  ]);
+ 
+  const handleAddNewSheet = () => {
+    const newSheetRow = {
+      TaskType: "",
+      Customer: "",
+      Client: "",
+      Job: "",
+      Task: "",
+      Mon: "",
+      Tue: "",
+      Wed: "",
+      Thu: "",
+      Fri: "",
+      Sat: "",
+      Sun: "",
+    };
+    setTimeSheetRows((prevRows) => [...prevRows, newSheetRow]);
+  };
 
-  const [addtask, setAddtask] = useState(false);
-
+  const handleDeleteRow = (index) => {
+    const newSheetRows = [...timeSheetRows];
+    newSheetRows.splice(index, 1);
+    setTimeSheetRows(newSheetRows);
+  };
+ 
   return (
     <div className="page-content">
       <div className="container-fluid">
@@ -16,13 +56,8 @@ const Timesheet = () => {
                 <h3 className="mt-0">Timesheet</h3>
               </div>
             </div>
-
           </div>
         </div>
-
-
-
-
         <div className='report-data mt-4'>
           <ul
             className="nav nav-pills mb-3 rounded-tabs"
@@ -181,22 +216,9 @@ const Timesheet = () => {
             >
               <div className="row">
                 <div className="col-lg-12">
-
-
-
                   <div className="card-body">
                     <div id="customerList">
                       <div className="row">
-                        {/* <div id="btncls" className="btncls">
-                    <button id="prevButton">
-                      <i className="fa-solid fa-chevron-left" aria-hidden="true" />
-                    </button>
-                    <button id="nextButton">
-                      <i className="fa-solid fa-chevron-right" aria-hidden="true" />
-                    </button>
-                  </div> */}
-
-
 
                         <div className="table-responsive table-card  mb-1">
                           <table className="timesheetTable table align-middle table-nowrap" id="customerTable">
@@ -215,192 +237,111 @@ const Timesheet = () => {
                                 <th className="dropdwnCol5" data-field="phone">Fri 16/02/2024</th>
                                 <th className="dropdwnCol5" data-field="phone">Sat 17/02/2024</th>
                                 <th className="dropdwnCol5" data-field="phone">Sun 18/02/2024</th>
+                                <th className="dropdwnCol5" data-field="phone">Action</th>
+
                               </tr>
                             </thead>
 
                             <tbody className="list form-check-all">
+                              {
+                                timeSheetRows?.map((item, index) => (
+                                  <tr className="tabel_new">
+                                    <td>{index + 1}</td>
+                                    <td>
+                                      <select className="form-select form-control">
+                                        <option>Internal</option>
+                                        <option selected>External</option>
+                                      </select>
+                                    </td>
+                                    <td>
+                                      <select className="form-select">
+                                        <option selected>Customer 1</option>
+                                        <option value={1}>THE BLACK T COMPANY LTD</option>
+                                      </select>
+                                    </td>
+                                    <td>
+                                      <select className="form-select">
+                                        <option selected>Client 1</option>
+                                        <option value={1}>MT LIMITED</option>
+                                      </select>
+                                    </td>
+                                    <td>
+                                      <select className="form-select">
+                                        <option selected>Job 1</option>
+                                        <option value={1}>VAT</option>
+                                      </select>
+                                    </td>
+                                    <td>
+                                      <select className="form-select">
+                                        <option selected>Task 1</option>
+                                        <option value={1}>Task 2</option>
+                                      </select>
+                                    </td>
+                                    <td>
+                                      <input
+                                        className="form-control cursor-pointer"
+                                        disabled
+                                        readOnly
+                                        defaultValue={2}
+                                      />
+                                    </td>
+                                    <td>
+                                      <input
+                                        className="form-control cursor-pointer"
+                                        disabled
+                                        readOnly
+                                        defaultValue={5}
+                                      />
+                                    </td>
+                                    <td>
+                                      <input
+                                        className="form-control cursor-pointer"
+                                        disabled
+                                        readOnly
+                                        defaultValue={7}
+                                      />
+                                    </td>
+                                    <td>
+                                      <input
+                                        className="form-control cursor-pointer"
+                                        disabled
+                                        readOnly
+                                        defaultValue={9}
+                                      />
+                                    </td>
+                                    <td>
+                                      <input
+                                        className="form-control cursor-pointer"
+                                        disabled
+                                        readOnly
+                                        defaultValue={3}
+                                      />
+                                    </td>
+                                    <td>
+                                      <input
+                                        className="form-control cursor-pointer"
+                                        disabled
+                                        readOnly
+                                        defaultValue={2}
+                                      />
+                                    </td>
+                                    <td>
+                                      <input
+                                        className="form-control cursor-pointer"
+                                        disabled
+                                        readOnly
+                                        defaultValue={5}
+                                      />
+                                    </td>
+
+                                    <td>
+                                      <Trash2 onClick={()=>handleDeleteRow(index)}/>
+                                    </td>
+                                  </tr>
+                                ))}
                               <tr className="tabel_new">
-                                <td>1</td>
                                 <td>
-                                  <select className="form-select">
-                                    <option>Internal</option>
-                                    <option selected>External</option>
-                                  </select>
-                                </td>
-                                <td>
-                                  <select className="form-select">
-                                    <option selected>Customer 1</option>
-                                    <option value={1}>THE BLACK T COMPANY LTD</option>
-                                  </select>
-                                </td>
-                                <td>
-                                  <select className="form-select">
-                                    <option selected>Client 1</option>
-                                    <option value={1}>MT LIMITED</option>
-                                  </select>
-                                </td>
-                                <td>
-                                  <select className="form-select">
-                                    <option selected>Job 1</option>
-                                    <option value={1}>VAT</option>
-                                  </select>
-                                </td>
-                                <td>
-                                  <select className="form-select">
-                                    <option selected>Task 1</option>
-                                    <option value={1}>Task 2</option>
-                                  </select>
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control cursor-pointer"
-                                    disabled
-                                    readOnly
-                                    defaultValue={2}
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control cursor-pointer"
-                                    disabled
-                                    readOnly
-                                    defaultValue={5}
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control cursor-pointer"
-                                    disabled
-                                    readOnly
-                                    defaultValue={7}
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control cursor-pointer"
-                                    disabled
-                                    readOnly
-                                    defaultValue={9}
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control cursor-pointer"
-                                    disabled
-                                    readOnly
-                                    defaultValue={3}
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control cursor-pointer"
-                                    disabled
-                                    readOnly
-                                    defaultValue={2}
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control cursor-pointer"
-                                    disabled
-                                    readOnly
-                                    defaultValue={5}
-                                  />
-                                </td>
-                              </tr>
-                              <tr className="tabel_new">
-                                <td>2</td>
-                                <td>
-                                  <select className="form-select">
-                                    <option>Internal</option>
-                                    <option selected>External</option>
-                                  </select>
-                                </td>
-                                <td>
-                                  <select className="form-select">
-                                    <option selected>Customer 1</option>
-                                    <option value={1}>THE BLACK T COMPANY LTD</option>
-                                  </select>
-                                </td>
-                                <td>
-                                  <select className="form-select">
-                                    <option selected>Client 1</option>
-                                    <option value={1}>MT LIMITED</option>
-                                  </select>
-                                </td>
-                                <td>
-                                  <select className="form-select">
-                                    <option selected>Job 1</option>
-                                    <option value={1}>VAT</option>
-                                  </select>
-                                </td>
-                                <td>
-                                  <select className="form-select">
-                                    <option selected>Task 1</option>
-                                    <option value={1}>Task 2</option>
-                                  </select>
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control cursor-pointer"
-                                    readOnly
-                                    defaultValue=""
-                                    onClick={() => setAddtask(true)}
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control cursor-pointer"
-                                    readOnly
-                                    defaultValue=""
-                                    onClick={() => setAddtask(true)}
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control cursor-pointer"
-                                    readOnly
-                                    defaultValue=""
-                                    onClick={() => setAddtask(true)}
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control cursor-pointer"
-                                    readOnly
-                                    defaultValue=""
-                                    onClick={() => setAddtask(true)}
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control cursor-pointer"
-                                    readOnly
-                                    defaultValue=""
-                                    onClick={() => setAddtask(true)}
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control cursor-pointer"
-                                    readOnly
-                                    defaultValue=""
-                                    onClick={() => setAddtask(true)}
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control cursor-pointer"
-                                    readOnly
-                                    defaultValue=""
-                                    onClick={() => setAddtask(true)}
-                                  />
-                                </td>
-                              </tr>
-                              <tr className="tabel_new">
-                                {/* <td className="id" style={{ display: 'none' }}><a href="javascript:void(0);" className="fw-medium link-primary">#VZ2101</a></td> */}
-                                <td>
-                                  <button className="d-flex btn btn-info fw-normal px-2" >
+                                  <button className="d-flex btn btn-info fw-normal px-2" onClick={handleAddNewSheet} >
                                     <i
                                       style={{
                                         display: "block",
