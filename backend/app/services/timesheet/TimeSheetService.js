@@ -1,14 +1,12 @@
 
-const serviceModel = require('../../models/');
+const timeSheetmodal = require('../../models/timeSheet');
 
-
-const addServices = async (Services) => {
-  return serviceModel.createServices(Services);
+const getTimesheet = async (Timesheet) => {
+  
+  return timeSheetmodal.getTimesheet(Timesheet);
 };
 
-
-
 module.exports = {
-    addServices,
+  getTimesheet,
     
 };
