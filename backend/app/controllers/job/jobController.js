@@ -65,7 +65,6 @@ const jobUpdate = async (req, res) => {
     }
 }
 
-
 // task TimeSheet  Work .....
 const getTaskTimeSheet = async (req, res) => {
   try {
@@ -256,6 +255,23 @@ const addJobDocument = async (req,res) => {
  }
 }
 
+// JobTimeLine
+const getJobTimeLine = async (req, res) => {
+
+  try {
+    const { ...job } = req.body;
+
+      const result = await jobService.getJobTimeLine(job);
+      if(!result.status){
+       return  res.status(200).json({ status: false, message: result.message });  
+       }else{
+       return  res.status(200).json({ status: true, message: result.message , data : result.data});
+       }
+   
+   } catch (error) {
+     res.status(500).json({ status:false, message: error.message});
+   }}
+
 
 module.exports = {
   getAddJobData,
@@ -274,5 +290,6 @@ module.exports = {
   addDraft,
   jobDocumentAction,
   addJobDocument,
-  editDraft
+  editDraft,
+  getJobTimeLine
 };

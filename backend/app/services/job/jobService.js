@@ -146,6 +146,11 @@ const addJobDocument = async (jobDocument) => {
   return taskTimeSheetModel.addJobDocument(jobDocument);
 }
 
+// JobTimeLine
+const getJobTimeLine = async (job) => {
+  return jobModel.getJobTimeLine(job);
+};
+
 
 
 
@@ -166,5 +171,6 @@ module.exports = {
   addDraft,
   jobDocumentAction,
   addJobDocument,
-  editDraft
+  editDraft,
+  getJobTimeLine
  };

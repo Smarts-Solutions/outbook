@@ -110,7 +110,7 @@ LEFT JOIN
 const getDashboardActivityLog = async (dashboard) => {
   const { staff_id } = dashboard;
 
-const query = `SELECT
+ const query = `SELECT
     staff_logs.id AS log_id,
     staff_logs.staff_id AS staff_id,
     DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,

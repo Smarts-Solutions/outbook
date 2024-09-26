@@ -2907,11 +2907,29 @@ const customerUpdate = async (customer) => {
 
 const customerStatusUpdate = async (customer) => {
     const { customer_id, status } = customer;
-
+     console.log("status ",typeof status)
     const query = `UPDATE customers SET status = ? WHERE id = ?`;
     const [result] = await pool.execute(query, [status, customer_id]);
 
     if (result.affectedRows > 0) {
+        if(result.changedRows > 0){
+            let status_change = "Deactivate"
+            if(parseInt(status) == 1){
+            status_change = "Activate"
+            }
+            const currentDate = new Date();
+            await SatffLogUpdateOperation(
+                {
+                    staff_id: customer.StaffUserId,
+                    ip: customer.ip,
+                    date: currentDate.toISOString().split('T')[0],
+                    module_name: 'customer',
+                    log_message: `changes the status ${status_change} customer code :`,
+                    permission_type: 'updated',
+                    module_id: customer_id,
+                }
+            );
+        }
         return { status: true, message: 'Customer status updated successfully.' };
     }
     return { status: false, message: 'Error updating customer status.' };
