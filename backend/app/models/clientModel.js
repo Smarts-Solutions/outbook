@@ -53,6 +53,20 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         website,
       ]);
       client_id = result.insertId;
+      const currentDate = new Date();
+      await SatffLogUpdateOperation(
+        {
+            staff_id: client.StaffUserId,
+            ip: client.ip,
+            date: currentDate.toISOString().split('T')[0],
+            module_name: 'client',
+            log_message: `created client profile. client code :`,
+            permission_type: 'created',
+            module_id: client_id,
+        }
+    );
+      
+
     } catch (err) {
       console.error("Error inserting data:", err);
       throw err;
@@ -72,6 +86,18 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         client_code,
       ]);
       client_id = result.insertId;
+      const currentDate = new Date();
+      await SatffLogUpdateOperation(
+        {
+            staff_id: client.StaffUserId,
+            ip: client.ip,
+            date: currentDate.toISOString().split('T')[0],
+            module_name: 'client',
+            log_message: `created client profile. client code :`,
+            permission_type: 'created',
+            module_id: client_id,
+        }
+    );
     } catch (err) {
       console.error("Error inserting data:", err);
       throw err;

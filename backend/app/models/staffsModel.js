@@ -82,7 +82,7 @@ const updateStaff = async (staff) => {
         if(staff.status == "1"){
          status_change = "Activate"
         }
-        let log_message = existStatus.status === status ?
+        let log_message = existStatus.status === staff.status ?
         `edited staff ${staff.first_name} ${staff.last_name}`:
         `changes the staff status ${status_change} ${staff.first_name} ${staff.last_name}`
 
