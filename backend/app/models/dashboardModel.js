@@ -131,6 +131,14 @@ const query = `SELECT
           JOIN clients cl ON c.id = cl.customer_id
           WHERE cl.id = staff_logs.module_id
         )
+
+         WHEN staff_logs.module_name = 'job' THEN (
+          SELECT CONCAT(SUBSTRING(customers.trading_name, 1, 3),'_', SUBSTRING(clients.trading_name, 1, 3),'_',jobs.job_id)
+          FROM jobs
+          JOIN clients ON jobs.client_id = clients.id
+          JOIN customers ON clients.customer_id = customers.id
+          WHERE jobs.id = staff_logs.module_id
+        )
         ELSE ''
       END
     ) AS log_message_other
@@ -143,7 +151,9 @@ JOIN
 LEFT JOIN 
     customers ON staff_logs.module_name = 'customer' AND staff_logs.module_id = customers.id
 LEFT JOIN 
-    clients ON staff_logs.module_name = 'client' AND staff_logs.module_id = clients.id     
+    clients ON staff_logs.module_name = 'client' AND staff_logs.module_id = clients.id
+LEFT JOIN 
+    jobs  ON staff_logs.module_name = 'job' AND staff_logs.module_id = jobs.id         
 WHERE
     staff_logs.staff_id = ${staff_id}
 ORDER BY
