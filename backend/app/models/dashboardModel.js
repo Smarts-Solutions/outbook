@@ -158,9 +158,6 @@ WHERE
     staff_logs.staff_id = ${staff_id}
 ORDER BY
     staff_logs.id DESC
-
-
-  
 `;
 
   const [result] = await pool.execute(query);
