@@ -17,8 +17,7 @@ const Dashboard = () => {
   }; 
   const hours = currentDate.getHours();
 
-
-  console.log("getActiviyLog", getActiviyLog);
+ 
   let greeting;
   if (hours < 12) {
     greeting = "Good Morning!";
