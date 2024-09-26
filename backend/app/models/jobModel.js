@@ -1585,6 +1585,71 @@ const deleteJobById = async (job) => {
   }
 }
 
+const getJobTimeLine = async(job) => {
+ const {job_id , staff_id} = job
+ const query = `SELECT
+    staff_logs.id AS log_id,
+    staff_logs.staff_id AS staff_id,
+    DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
+    staff_logs.created_at AS created_at,
+    CONCAT(
+      roles.role_name, ' ', 
+      staffs.first_name, ' ', 
+      staffs.last_name, ' ', 
+      staff_logs.log_message, ' ',
+      CASE 
+         WHEN staff_logs.module_name = 'job' THEN (
+          SELECT CONCAT(SUBSTRING(customers.trading_name, 1, 3),'_', SUBSTRING(clients.trading_name, 1, 3),'_',jobs.job_id)
+          FROM jobs
+          JOIN clients ON jobs.client_id = clients.id
+          JOIN customers ON clients.customer_id = customers.id
+          WHERE jobs.id = staff_logs.module_id
+        )
+        ELSE ''
+      END
+    ) AS log_message
+FROM 
+    staff_logs
+JOIN 
+    staffs ON staffs.id = staff_logs.staff_id
+JOIN 
+    roles ON roles.id = staffs.role_id
+LEFT JOIN 
+    jobs  ON staff_logs.module_name = 'job' AND staff_logs.module_id = jobs.id         
+WHERE
+    staff_logs.staff_id = ${staff_id} AND  staff_logs.module_name = "job" AND staff_logs.module_id = ${job_id}
+ORDER BY
+    staff_logs.id DESC
+`;
+  
+const [result] = await pool.execute(query);
+
+const groupedResult = result.reduce((acc, log) => {
+  const existingDate = acc.find(item => item.date === log.date);
+  if (existingDate) {
+    existingDate.allContain.push({
+      created_at: log.created_at,
+      log_message: log.log_message
+    });
+  } else {
+    acc.push({
+      date: log.date,
+      allContain: [{
+        created_at: log.created_at,
+        log_message: log.log_message
+      }]
+    });
+  }
+  
+  return acc;
+}, []);
+
+// Output the grouped result
+// console.log(JSON.stringify(groupedResult, null, 2));
+  return { status: true, message: "success.", data: groupedResult };
+
+}
+
 
 
 
@@ -1597,5 +1662,6 @@ module.exports = {
   getJobById,
   jobUpdate,
   deleteJobById,
+  getJobTimeLine
 
 };

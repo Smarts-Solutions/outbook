@@ -12,6 +12,9 @@ router.post('/jobAdd',verifyToken, jobController.jobAdd);
 router.post('/jobAction',verifyToken, jobController.jobAction);
 router.post('/jobUpdate',verifyToken, jobController.jobUpdate);
 
+// JobTimeLine
+router.post('/getJobTimeLine',verifyToken, jobController.getJobTimeLine);
+
 // TaskTime Sheet
 router.post('/getTaskTimeSheet',verifyToken, jobController.getTaskTimeSheet);
 router.post('/jobTimeSheet',verifyToken, jobController.jobTimeSheet);
