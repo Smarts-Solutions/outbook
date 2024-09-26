@@ -115,7 +115,6 @@ const query = `SELECT
     staff_logs.staff_id AS staff_id,
     DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
     staff_logs.created_at AS created_at,
-    staff_logs.log_message AS log_message,
     CONCAT(
       roles.role_name, ' ', 
       staffs.first_name, ' ', 
@@ -141,7 +140,7 @@ const query = `SELECT
         )
         ELSE ''
       END
-    ) AS log_message_other
+    ) AS log_message
 FROM 
     staff_logs
 JOIN 
