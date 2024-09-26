@@ -2868,8 +2868,7 @@ const customerUpdate = async (customer) => {
             const msgLog = model_name.length > 1 
             ? model_name.slice(0, -1).join(', ') + ' and ' + model_name.slice(-1)
             : model_name[0];
-        
-           console.log("msgLog",msgLog)
+    
            const currentDate = new Date();
             await SatffLogUpdateOperation(
                 {
