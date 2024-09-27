@@ -568,7 +568,7 @@ const Dashboard = () => {
                                   </div>
                                   <div className="activity-info-text">
                                     <div className="">
-                                      <small className="">{item?.created_at?.slice(0, 10)}</small>
+                                      <small className="">{formatDate(item?.created_at)}</small>
                                       <p className="">{item?.log_message}</p>
                                     </div>
                                   </div>
