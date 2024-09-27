@@ -1,5 +1,6 @@
-import React from "react";
-import Datatable from "../../../Components/ExtraComponents/Datatable";
+import React , {useState , useEffect} from "react"; 
+import { useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 const data = [
   {
@@ -78,6 +79,27 @@ const columns = [
 ];
 
 const JobTimeline = () => {
+  const location = useLocation();
+  const dispatch = useDispatch();
+  console.log("ccc" , location.state.job_id);
+  const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+  const [getJobTimeline, setJobTimeline] = useState([]);
+  
+useEffect(() => {
+  GetJobTimeline();
+}, []);
+
+  const GetJobTimeline = async() => {
+    const req = {job_id : location.state.job_id , staff_id : StaffUserId.id}
+    await dispatch(getJobTimeline(req))
+    .unwarp()
+    .then((res) => {
+      setJobTimeline(res.data);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  }
   return (
     <div className="">
       <div className="row">
@@ -110,9 +132,7 @@ const JobTimeline = () => {
                 <li><b >3:29:00 PM</b>
                 <p>Harsh Mehta Created New Job with Job Code the_out_00001</p></li>
                 <li><b >3:29:00 PM</b>
-                <p>Harsh Mehta Created New Job with Job Code the_out_00001</p></li>
-               
-                
+                <p>Harsh Mehta Created New Job with Job Code the_out_00001</p></li> 
                </ul>
               </div>
             </div>
