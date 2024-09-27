@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { DashboardData , ActivityLog } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
+import { DashboardData, ActivityLog } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
 
 const Dashboard = () => {
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
@@ -15,18 +15,18 @@ const Dashboard = () => {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
-  }; 
+  };
 
   const hours = currentDate.getHours();
- 
+
   let greeting;
   if (hours < 12) {
     greeting = "Good Morning!";
-  } 
+  }
   else if (hours < 18) {
     greeting = "Good Afternoon!";
   }
-   else {
+  else {
     greeting = "Good Evening!";
   }
 
@@ -70,13 +70,13 @@ const Dashboard = () => {
         console.log(error);
       });
   };
-  
+
   const formatDate = (isoString) => {
     const date = new Date(isoString);
     const options = { month: 'short', day: 'numeric' };
-    const monthDay = date.toLocaleDateString('en-US', options); 
+    const monthDay = date.toLocaleDateString('en-US', options);
     const timeOptions = { hour: 'numeric', minute: 'numeric', hour12: true };
-    const time = date.toLocaleTimeString('en-US', timeOptions); 
+    const time = date.toLocaleTimeString('en-US', timeOptions);
     return `${monthDay} (${time.toLowerCase()})`;
   };
 
@@ -92,7 +92,7 @@ const Dashboard = () => {
                 <div className="col">
                   <p className="mb-0 page-subtitle">{greeting}</p>
                   <h2 className="page-title mt-1">{staffDetails.role_name}</h2>
-                </div> 
+                </div>
               </div>
             </div>
           </div>
@@ -266,12 +266,14 @@ const Dashboard = () => {
                             </div>
                             <div className="col-12 d-flex align-items-center justify-content-between">
                               <h3 className="my-4">{dashboard.customer}</h3>
-                              <div className="report-main-icon bg-light-alt">
+                              <img className="dashboad-img" src="/assets/images/dashboards/users.png" />
+
+                              {/* <div className="report-main-icon bg-light-alt">
                                 <i className="ti-user"></i>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
- 
+
                         </div>
                       </div>
                     </div>
@@ -285,9 +287,10 @@ const Dashboard = () => {
                             </div>
                             <div className="col-12 d-flex align-items-center justify-content-between">
                               <h3 className="my-4">{dashboard.job}</h3>
-                              <div className="report-main-icon bg-light-alt">
+                              <img className="dashboad-img" src="/assets/images/dashboards/suitcase.png" />
+                              {/* <div className="report-main-icon bg-light-alt">
                                 <i className="ti-user"></i>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
                         </div>
@@ -305,9 +308,10 @@ const Dashboard = () => {
                             </div>
                             <div className="col-12 d-flex align-items-center justify-content-between">
                               <h3 className="my-4">{dashboard.client}</h3>
-                              <div className="report-main-icon bg-light-alt">
+                              <img className="dashboad-img" src="/assets/images/dashboards/teamwork.png" />
+                              {/* <div className="report-main-icon bg-light-alt">
                                 <i className="ti-user"></i>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
                         </div>
@@ -321,14 +325,15 @@ const Dashboard = () => {
                             <div className="col">
                               <p className="text-dark mb-1 font-weight-semibold">
                                 NO OF STAFF
-                              </p> 
+                              </p>
                             </div>
                             <div className="col-12 d-flex align-items-center justify-content-between">
                               <h3 className="my-4">{dashboard.staff
                               }</h3>
-                              <div className="report-main-icon bg-light-alt">
+                              <img className="dashboad-img" src="/assets/images/dashboards/handshake.png" />
+                              {/* <div className="report-main-icon bg-light-alt">
                                 <i className="ti-user"></i>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
                         </div>
@@ -346,9 +351,11 @@ const Dashboard = () => {
                             </div>
                             <div className="col-12 d-flex align-items-center justify-content-between">
                               <h3 className="my-4">0</h3>
-                              <div className="report-main-icon bg-light-alt">
+                              <img className="dashboad-img" src="/assets/images/dashboards/pending.png" />
+                              {/* <div className="report-main-icon bg-light-alt">
+                             
                                 <i className="ti-user"></i>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
                         </div>
@@ -366,9 +373,10 @@ const Dashboard = () => {
                             </div>
                             <div className="col-12 d-flex align-items-center justify-content-between">
                               <h3 className="my-4">0</h3>
-                              <div className="report-main-icon bg-light-alt">
+                              <img className="dashboad-img" src="/assets/images/dashboards/time-management.png" />
+                              {/* <div className="report-main-icon bg-light-alt">
                                 <i className="ti-user"></i>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
                         </div>
@@ -535,7 +543,7 @@ const Dashboard = () => {
               </div>
             </>
           </div>
-          <div className="col-lg-4 col-md-4 mt-2 activitylog">
+          <div className="col-lg-4 col-md-4 mt-2">
             <div className="card activity-card">
               <div className="card-header border-bottom-0">
                 <div className="row align-items-center">
@@ -550,7 +558,8 @@ const Dashboard = () => {
                     <div className="">
                       <div className="simplebar-content" style={{ padding: 0 }}>
                         <div className="activity">
-                          {
+                          {/* Conditional Rendering */}
+                          {getActiviyLog && getActiviyLog.length > 0 ? (
                             getActiviyLog.map((item, index) => {
                               return (
                                 <div className="activity-info" key={index}>
@@ -559,15 +568,24 @@ const Dashboard = () => {
                                   </div>
                                   <div className="activity-info-text">
                                     <div className="">
-                                    <small className="">{formatDate(item?.created_at)}</small>
+                                      <small className="">{formatDate(item?.created_at)}</small>
                                       <p className="">{item?.log_message}</p>
                                     </div>
                                   </div>
                                 </div>
-                              )
+                              );
                             })
-                          }
-                          
+                          ) : (
+                            <div className="no-data-found">
+                              {/* Image for "No Data Found" */}
+                              <img
+                                src="/assets/images/No-data-amico.png" // Replace with your image path
+                                alt="No data found"
+                                style={{ maxWidth: "100%", height: "auto" }}
+                              />
+                              <p className="text-center">No Activity Logs Found</p>
+                            </div>
+                          )}
                         </div>
                         {/*end activity*/}
                       </div>
@@ -577,6 +595,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
+
         </div>
       </div>
       {/* container */}
