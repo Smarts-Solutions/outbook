@@ -2,17 +2,10 @@ import React, { useContext, useState, useEffect } from "react";
 import { Formik } from "formik";
 import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
-import { JobType,
-  customerSourceApi,
-  customerSubSourceApi,
- } from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import { JobType, customerSourceApi, customerSubSourceApi, } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import { useDispatch } from "react-redux";
-import {
-  FTEDedicatedErrorMessages,
-  PercentageModelErrorMessages,
-  AdhocPAYGHourlyErrorMessages,
-} from "../../../../Utils/Common_Message";
-import { ADD_SERVICES_CUSTOMERS,Get_Service } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { FTEDedicatedErrorMessages, PercentageModelErrorMessages, AdhocPAYGHourlyErrorMessages, } from "../../../../Utils/Common_Message";
+import { ADD_SERVICES_CUSTOMERS, Get_Service } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 
 const Engagement = () => {
@@ -25,6 +18,9 @@ const Engagement = () => {
   const [errors4, setErrors4] = useState([]);
   const [jobType, setJobType] = useState([]);
   const [getAllServices, setAllServices] = useState([]);
+  const [coustomerSource, setCoustomerSource] = useState([]);
+  const [coustomerSubSource, setCoustomerSubSource] = useState([]);
+  const [formState1, setFormState1] = useState({});
 
 
   const [formValues1, setFormValues1] = useState({
@@ -66,28 +62,21 @@ const Engagement = () => {
     { id: "formCheck4", label: "Customised Pricing" },
   ];
 
-
-  const [formState1, setFormState1] = useState({});
   const [formErrors, setFormErrors] = useState({
     customerJoiningDate: "",
     customerSource: "",
     customerSubSource: "",
   });
-  const [coustomerSource, setCoustomerSource] = useState([]);
-  const [coustomerSubSource, setCoustomerSubSource] = useState([]);
-
+ 
   const [checkboxStates, setCheckboxStates] = useState(
     Array(checkboxOptions.length).fill(0)
   );
-
 
   useEffect(() => {
     customerSourceData();
     GetJobTypeApi();
     GetAllServicesApi();
   }, []);
-
-
 
   const handleCheckboxChange = (index) => {
     setCheckboxStates((prevStates) => {
@@ -260,10 +249,6 @@ const Engagement = () => {
           "Minimum number of Jobs must be between 1 and 100";
       }
 
-      // if (!entry.job_type_id) {
-      //   entryErrors.job_type_id = "Please select a job type";
-      // }
-
       if (!entry.service_id) {
         entryErrors.service_id = "Please select a Services";
       }
@@ -300,9 +285,7 @@ const Engagement = () => {
 
   const scrollToFirstError = (i) => {
     const errors = [errors1, errors2, errors3, errors4];
-
     const errorField = Object.keys(errors[i])[0];
-
     const errorElement = document.getElementById(errorField);
     if (errorElement) {
       errorElement.scrollIntoView({ behavior: "smooth" });
@@ -412,7 +395,7 @@ const Engagement = () => {
         }
       })
       .catch((error) => {
-     return;
+        return;
       });
   };
 
@@ -423,15 +406,13 @@ const Engagement = () => {
     if (checkboxStates[3] === 0) setErrors4({});
   }, [checkboxStates]);
 
-
-
   const customerSourceData = async () => {
     const req = { action: "getAll" };
     const data = { req: req, authToken: token };
     await dispatch(customerSourceApi(data))
       .unwrap()
       .then(async (response) => {
-        if (response.status) { 
+        if (response.status) {
           setCoustomerSource(response.data);
         }
       })
@@ -439,6 +420,7 @@ const Engagement = () => {
         return;
       });
   };
+
   useEffect(() => {
     if (formState1.customerSource) {
       customerSubSourceData();
@@ -467,28 +449,22 @@ const Engagement = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
- 
-   
     setFormState1(({
-        ...formState1,
-        [name]: value, 
-      }));
-    
-      setFormErrors((prevErrors) => ({
-        ...prevErrors,
-        [name]: "", 
-      }));
-  
-  
- 
-  };
-  
+      ...formState1,
+      [name]: value,
+    }));
 
+    setFormErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "",
+    }));
+
+
+
+  };
 
   const validateForm = () => {
     let errors = {};
-
-
     if (!formState1.customerJoiningDate) {
       errors.customerJoiningDate = "Joining Date is required.";
     }
@@ -873,7 +849,7 @@ const Engagement = () => {
                                   </div> */}
 
 
-<div className="col-lg-4">
+                                  <div className="col-lg-4">
                                     <label
                                       htmlFor={`services_${index}`}
                                       className="form-label"
@@ -888,7 +864,7 @@ const Engagement = () => {
                                       onChange={(e) => handleChange4(index, e)}
                                     >
                                       <option value="">Select Services</option>
-                                  
+
                                       {getAllServices &&
                                         getAllServices.map((data) => (
                                           <option
@@ -989,7 +965,7 @@ const Engagement = () => {
                 </h4>
               </div>
               <div className="card-body">
-              <div className="row">
+                <div className="row">
                   <div className="col-lg-4">
                     <label className="form-label">Customer Joining Date</label>
                     <input
@@ -1039,11 +1015,11 @@ const Engagement = () => {
                     >
                       <option value="">Select Customer Sub-Source</option>
                       {coustomerSubSource &&
-                        coustomerSubSource.map((data) => ( 
+                        coustomerSubSource.map((data) => (
                           data.customer_source_id == formState1.customerSource && (
-                          <option key={data.id} value={data.id}>
-                            {data.name}
-                          </option>
+                            <option key={data.id} value={data.id}>
+                              {data.name}
+                            </option>
                           )
                         ))}
                     </select>
