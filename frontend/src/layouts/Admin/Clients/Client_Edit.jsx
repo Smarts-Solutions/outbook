@@ -467,6 +467,7 @@ const ClientEdit = () => {
   const errorsArr = [errors1, errors2, errors3, errors4];
   const setErrorsArr = [setErrors1, setErrors2, setErrors3, setErrors4];
 
+ 
 
   const handleInputsChange = (e, type) => {
     const { name, value } = e.target;
@@ -597,10 +598,7 @@ const ClientEdit = () => {
             timer: 1500,
           });
           setTimeout(() => {
-            window.history.back();
-            // navigate("/admin/Clientlist", {
-            //   state: { id: location.state.id },
-            // });
+            window.history.back(); 
           }, 1500);
         } else {
           Swal.fire({

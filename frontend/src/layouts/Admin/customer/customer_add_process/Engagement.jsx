@@ -4,7 +4,8 @@ import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
 import { JobType, customerSourceApi, customerSubSourceApi, } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import { useDispatch } from "react-redux";
-import { FTEDedicatedErrorMessages, PercentageModelErrorMessages, AdhocPAYGHourlyErrorMessages, } from "../../../../Utils/Common_Message";
+import { EngagementErrorMsg } from "../../../../Utils/Common_Message";
+import { ScrollToViewFirstError  } from "../../../../Utils/Comman_function";
 import { ADD_SERVICES_CUSTOMERS, Get_Service } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 
@@ -72,6 +73,11 @@ const Engagement = () => {
     Array(checkboxOptions.length).fill(0)
   );
 
+  const ErrorArr = [errors1, errors2, errors3, errors4];
+  const setErrorsArr = [setErrors1, setErrors2, setErrors3, setErrors4];
+  const InputsArr = [formValues1, formValues2, formValues3, jobEntries];
+  const setInputArr = [setFormValues1, setFormValues2, setFormValues3, setJobEntries]; 
+
   useEffect(() => {
     customerSourceData();
     GetJobTypeApi();
@@ -85,73 +91,42 @@ const Engagement = () => {
       return newStates;
     });
   };
+ 
+  const RemoveErrorFromErrors = (name, setErrors) => {
+    setErrors((prevErrors) => {
+      const updatedErrors = { ...prevErrors };
+      delete updatedErrors[name];
+      return updatedErrors;
+    });
+  }
 
-
-
-  const validate1 = (name, value, isSubmitting = false) => {
-    const newErrors = { ...errors1 };
-    if (isSubmitting) {
-      for (const key in FTEDedicatedErrorMessages) {
-        if (!formValues1[key]) {
-          newErrors[key] = FTEDedicatedErrorMessages[key];
-        }
-      }
-    } else {
-      if (!value) {
-        if (FTEDedicatedErrorMessages[name]) {
-          newErrors[name] = FTEDedicatedErrorMessages[name];
-        }
-      } else {
-        delete newErrors[name];
+  const validate = (name, value, errors, setErrors) => {
+    const newErrors = { ...errors };
+    if (!value && EngagementErrorMsg[name]) {
+      newErrors[name] = EngagementErrorMsg[name];
+    }
+   else if ((!value || value < 7 || value > 25) && (name === "adhoc_accountants" || name === "adhoc_bookkeepers" || name === "adhoc_payroll_experts" || name === "adhoc_tax_experts" || name === "adhoc_admin_staff")) {
+      if (EngagementErrorMsg[name]) {
+        newErrors[name] = EngagementErrorMsg[name];
       }
     }
-
-    setErrors1(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const validate2 = (name, value, isSubmitting = false) => {
-    const newErrors = { ...errors2 };
-    if (isSubmitting) {
-      for (const key in PercentageModelErrorMessages) {
-        if (!formValues2[key]) {
-          newErrors[key] = PercentageModelErrorMessages[key];
-        }
-      }
-    } else {
-      if (!value) {
-        if (PercentageModelErrorMessages[name]) {
-          newErrors[name] = PercentageModelErrorMessages[name];
-        }
-      } else {
-        delete newErrors[name];
-      }
+    else {
+      delete newErrors[name];
+      RemoveErrorFromErrors(name, setErrors);
     }
-    setErrors2(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
-  const validate3 = (name, value, isSubmitting = false) => {
-    const newErrors = { ...errors3 };
-    if (isSubmitting) {
-      for (const key in AdhocPAYGHourlyErrorMessages) {
-        if (!formValues3[key]) {
-          newErrors[key] = AdhocPAYGHourlyErrorMessages[key];
-        }
-      }
-    } else {
-      if (!value || value < 7 || value > 25) {
-        if (AdhocPAYGHourlyErrorMessages[name]) {
-          newErrors[name] = AdhocPAYGHourlyErrorMessages[name];
-        }
-      } else {
-        delete newErrors[name];
-      }
+    ScrollToViewFirstError(newErrors);
+
+    if (Object.keys(newErrors).length !== 0) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        ...newErrors,
+      }));
     }
-    setErrors3(newErrors);
+  
     return Object.keys(newErrors).length === 0;
-  };
-
+  }
+    
   const validate4 = () => {
     const newErrors = [];
 
@@ -188,51 +163,26 @@ const Engagement = () => {
     return newErrors.length > 0 ? false : true;
   };
 
-  const ErrorArr = [errors1, errors2, errors3, errors4];
-  const InputsArr = [formValues1, formValues2, formValues3, jobEntries];
-  const setInputArr = [setFormValues1, setFormValues2, setFormValues3, setJobEntries];
-  const validateArr = [validate1, validate2, validate3, validate4];
-
   const handleChange = (e, type) => {
     const { name, value } = e.target;
     if (type === 1) {
       if (value === "" || /^\d*\.?\d*$/.test(value)) {
-        validateArr[type - 1](name, value)
+        validate(name, value, ErrorArr[type - 1], setErrorsArr[type - 1]);
         setInputArr[type - 1]({ ...InputsArr[type - 1], [name]: value });
       }
     }
     else {
       if (value === "" || (/^\d*\.?\d*$/.test(value) && value <= 100)) {
-        validateArr[type - 1](name, value)
+        validate(name, value, ErrorArr[type - 1], setErrorsArr[type - 1]);
         setInputArr[type - 1]({ ...InputsArr[type - 1], [name]: value });
       }
     }
   };
 
-  const validateAllFields1 = () => {
+  const validateAllFields = (type) => {
     let isValid = true;
-    for (const key in formValues1) {
-      if (!validate1(key, formValues1[key], true)) {
-        isValid = false;
-      }
-    }
-    return isValid;
-  };
-
-  const validateAllFields2 = () => {
-    let isValid = true;
-    for (const key in formValues2) {
-      if (!validate2(key, formValues2[key], true)) {
-        isValid = false;
-      }
-    }
-    return isValid;
-  };
-
-  const validateAllFields3 = () => {
-    let isValid = true;
-    for (const key in formValues3) {
-      if (!validate3(key, formValues3[key], true)) {
+    for (const key in InputsArr[type - 1]) {
+      if (!validate(key, InputsArr[type - 1][key], ErrorArr[type - 1], setErrorsArr[type - 1])) {
         isValid = false;
       }
     }
@@ -265,8 +215,6 @@ const Engagement = () => {
     setJobEntries(newJobEntries);
   };
 
-
-
   const GetJobTypeApi = async () => {
     const req = { action: "get" };
     const data = { req: req, authToken: token };
@@ -282,15 +230,6 @@ const Engagement = () => {
       });
   };
 
-  const scrollToFirstError = (i) => {
-    const errors = [errors1, errors2, errors3, errors4];
-    const errorField = Object.keys(errors[i])[0];
-    const errorElement = document.getElementById(errorField);
-    if (errorElement) {
-      errorElement.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   const handleSubmit = async () => {
     if (!checkboxStates.some((state) => state === 1)) {
       Swal.fire({
@@ -299,16 +238,14 @@ const Engagement = () => {
       });
       return;
     }
-    const validations = [
-      validateAllFields1,
-      validateAllFields2,
-      validateAllFields3,
-      validate4,
-    ];
-
+    
     for (let i = 0; i < checkboxStates.length; i++) {
-      if (checkboxStates[i] == 1 && !validations[i]()) {
-        scrollToFirstError(i);
+      if(checkboxStates[i] === 1 && i==3 && !validate4()) {
+        ScrollToViewFirstError(ErrorArr[i]);
+        return;
+      }
+      else if (checkboxStates[i] == 1 && !validateAllFields(i+1)) {
+        ScrollToViewFirstError(ErrorArr[i]);
         return;
       }
     }
