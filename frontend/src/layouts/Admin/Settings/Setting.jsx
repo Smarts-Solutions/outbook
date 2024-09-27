@@ -609,7 +609,7 @@ const Setting = () => {
           {
             name: "Actions",
             cell: (row) => (
-              <div>
+              <div className="d-flex">
                 {showSettingUpdateTab && (
                   <button
                     className="edit-icon"
@@ -630,7 +630,7 @@ const Setting = () => {
                 )}
                 {showSettingInsertTab && (
                   <button
-                    className="btn btn-sml btn-info text-white ms-2"
+                    className="btn btn-sm btn-info text-white ms-2"
                     onClick={(e) => handleJobType(row)}
                   >
                     Add Job Type

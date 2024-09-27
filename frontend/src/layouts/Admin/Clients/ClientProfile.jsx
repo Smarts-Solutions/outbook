@@ -55,10 +55,11 @@ const ClientList = () => {
 
 
   const tabs = [
-    { id: "NoOfJobs", label: "No.Of Jobs" },
-    { id: "viewclient", label: "View Client" },
-    { id: "documents", label: "Documents" },
+    { id: "NoOfJobs", label: "No. Of Jobs", icon: "fa-solid fa-briefcase" },
+    { id: "viewclient", label: "View Client", icon: "fa-solid fa-user" },
+    { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
   ];
+  
 
   const columns = [
     {
@@ -260,6 +261,7 @@ const ClientList = () => {
                       aria-selected={activeTab === tab.id}
                       onClick={() => setActiveTab(tab.id)}
                     >
+                      <i className={tab.icon}></i>
                       {tab.label}
                     </button>
                   </li>
@@ -291,7 +293,7 @@ const ClientList = () => {
               <div className="col-md-4 col-auto">
                 <button
                   type="button"
-                  className="btn btn-info text-white float-end blue-btn"
+                  className="btn btn-info text-white float-end blue-btn me-2"
                   onClick={() => window.history.back()}
                 >
                   <i className="fa fa-arrow-left pe-1" /> Back
