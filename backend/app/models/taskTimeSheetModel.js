@@ -157,17 +157,17 @@ const addMissingLog = async (missingLog) => {
  
     if(rows.insertId > 0){
          const currentDate = new Date();
-          // await SatffLogUpdateOperation(
-          //   {
-          //     staff_id: job.StaffUserId,
-          //     ip: job.ip,
-          //     date: currentDate.toISOString().split('T')[0],
-          //     module_name: 'job',
-          //     log_message: `${msgLog} job code:`,
-          //     permission_type: 'updated',
-          //     module_id: job_id,
-          //   }
-          // );
+          await SatffLogUpdateOperation(
+            {
+              staff_id: job.StaffUserId,
+              ip: job.ip,
+              date: currentDate.toISOString().split('T')[0],
+              module_name: 'job',
+              log_message: `sent the missing logs for job code:`,
+              permission_type: 'created',
+              module_id: job_id,
+            }
+          );
 
       let update_status = 2;
       const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status,job_id]);
@@ -260,6 +260,8 @@ const editMissingLog = async (missingLog) => {
 
   const missing_log_document = missingLog.files;
 
+  // const [[existMissingLog]] = await pool.execute('SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ', [allocated_to]);
+
   try {
     const query = `
      UPDATE 
@@ -277,6 +279,13 @@ const editMissingLog = async (missingLog) => {
     const [rows] = await pool.execute(query, [missing_log, missing_log_sent_on, missing_log_prepared_date, missing_log_reviewed_by, missing_log_reviewed_date, status, id]);
 
     if(rows.changedRows > 0){
+
+
+     
+
+
+
+
       const [job_id] = await pool.execute('SELECT job_id FROM  `missing_logs` WHERE id = ?', [id]);
       let update_status = 2;
       const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status,job_id[0].job_id]);
