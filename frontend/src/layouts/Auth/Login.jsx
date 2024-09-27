@@ -158,6 +158,8 @@ const Login = () => {
             customer: false,
             staff: false,
             status: false,
+            report: false,
+            timesheet: false
           };
 
           response.data.forEach((item) => {

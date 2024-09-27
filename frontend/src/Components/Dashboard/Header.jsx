@@ -17,11 +17,12 @@ const Header = () => {
   };
 
   useEffect(() => {
+    isLoginAuthCheck();
     ClearSession();
   }, []);
 
   useEffect(() => {
-    isLoginAuthCheck();
+
     if (isMenuEnlarged) {
       document.body.classList.add("enlarge-menu");
     } else {

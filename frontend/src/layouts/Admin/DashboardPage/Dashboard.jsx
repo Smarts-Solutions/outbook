@@ -28,13 +28,16 @@ const Dashboard = () => {
   }
 
   useEffect(() => {
+    console.log("staffDetails");
     GetDashboardData();
     ActivityLogData();
   }, []);
 
   const GetDashboardData = async () => {
+    
     const req = { staff_id: staffDetails.id }
     const data = { req: req, authToken: token }
+
     await dispatch(DashboardData(data))
       .unwrap()
       .then((res) => {
