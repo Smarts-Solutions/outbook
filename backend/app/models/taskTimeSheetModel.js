@@ -156,6 +156,19 @@ const addMissingLog = async (missingLog) => {
     ]);
  
     if(rows.insertId > 0){
+         const currentDate = new Date();
+          // await SatffLogUpdateOperation(
+          //   {
+          //     staff_id: job.StaffUserId,
+          //     ip: job.ip,
+          //     date: currentDate.toISOString().split('T')[0],
+          //     module_name: 'job',
+          //     log_message: `${msgLog} job code:`,
+          //     permission_type: 'updated',
+          //     module_id: job_id,
+          //   }
+          // );
+
       let update_status = 2;
       const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status,job_id]);
     } 

@@ -85,26 +85,8 @@ const Engagement = () => {
       return newStates;
     });
   };
-  const ErrorArr = [errors1, errors2, errors3, errors4];
-  const InputsArr = [formValues1, formValues2, formValues3, jobEntries];
-  const setInputArr = [setFormValues1, setFormValues2, setFormValues3, setJobEntries];
-  const validateArr = [validate1, validate2, validate3, validate4];
 
-  const handleChange = (e, type) => {
-    const { name, value } = e.target;
-    if (type === 1) {
-      if (value === "" || /^\d*\.?\d*$/.test(value)) {
-        validateArr[type - 1](name, value)
-        setInputArr[type - 1]({ ...InputsArr[type - 1], [name]: value });
-      }
-    }
-    else {
-      if (value === "" || (/^\d*\.?\d*$/.test(value) && value <= 100)) {
-        validateArr[type - 1](name, value)
-        setInputArr[type - 1]({ ...InputsArr[type - 1], [name]: value });
-      }
-    }
-  };
+
 
   const validate1 = (name, value, isSubmitting = false) => {
     const newErrors = { ...errors1 };
@@ -170,6 +152,63 @@ const Engagement = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const validate4 = () => {
+    const newErrors = [];
+
+    jobEntries.forEach((entry, index) => {
+      const entryErrors = {};
+
+      if (!entry.minimum_number_of_jobs) {
+        entryErrors.minimum_number_of_jobs =
+          "Please Enter Minimum number of Jobs";
+      } else if (
+        entry.minimum_number_of_jobs < 1 ||
+        entry.minimum_number_of_jobs > 100
+      ) {
+        entryErrors.minimum_number_of_jobs =
+          "Minimum number of Jobs must be between 1 and 100";
+      }
+
+      if (!entry.service_id) {
+        entryErrors.service_id = "Please select a Services";
+      }
+
+      if (!entry.cost_per_job) {
+        entryErrors.cost_per_job = "Please Enter Cost Per Job";
+      } else if (entry.cost_per_job < 20 || entry.cost_per_job > 500) {
+        entryErrors.cost_per_job = "Cost Per Job must be between 20 and 500";
+      }
+
+      if (Object.keys(entryErrors).length !== 0) {
+        newErrors[index] = entryErrors;
+      }
+    });
+
+    setErrors4(newErrors);
+    return newErrors.length > 0 ? false : true;
+  };
+
+  const ErrorArr = [errors1, errors2, errors3, errors4];
+  const InputsArr = [formValues1, formValues2, formValues3, jobEntries];
+  const setInputArr = [setFormValues1, setFormValues2, setFormValues3, setJobEntries];
+  const validateArr = [validate1, validate2, validate3, validate4];
+
+  const handleChange = (e, type) => {
+    const { name, value } = e.target;
+    if (type === 1) {
+      if (value === "" || /^\d*\.?\d*$/.test(value)) {
+        validateArr[type - 1](name, value)
+        setInputArr[type - 1]({ ...InputsArr[type - 1], [name]: value });
+      }
+    }
+    else {
+      if (value === "" || (/^\d*\.?\d*$/.test(value) && value <= 100)) {
+        validateArr[type - 1](name, value)
+        setInputArr[type - 1]({ ...InputsArr[type - 1], [name]: value });
+      }
+    }
+  };
+
   const validateAllFields1 = () => {
     let isValid = true;
     for (const key in formValues1) {
@@ -226,41 +265,7 @@ const Engagement = () => {
     setJobEntries(newJobEntries);
   };
 
-  const validate4 = () => {
-    const newErrors = [];
 
-    jobEntries.forEach((entry, index) => {
-      const entryErrors = {};
-
-      if (!entry.minimum_number_of_jobs) {
-        entryErrors.minimum_number_of_jobs =
-          "Please Enter Minimum number of Jobs";
-      } else if (
-        entry.minimum_number_of_jobs < 1 ||
-        entry.minimum_number_of_jobs > 100
-      ) {
-        entryErrors.minimum_number_of_jobs =
-          "Minimum number of Jobs must be between 1 and 100";
-      }
-
-      if (!entry.service_id) {
-        entryErrors.service_id = "Please select a Services";
-      }
-
-      if (!entry.cost_per_job) {
-        entryErrors.cost_per_job = "Please Enter Cost Per Job";
-      } else if (entry.cost_per_job < 20 || entry.cost_per_job > 500) {
-        entryErrors.cost_per_job = "Cost Per Job must be between 20 and 500";
-      }
-
-      if (Object.keys(entryErrors).length !== 0) {
-        newErrors[index] = entryErrors;
-      }
-    });
-
-    setErrors4(newErrors);
-    return newErrors.length > 0 ? false : true;
-  };
 
   const GetJobTypeApi = async () => {
     const req = { action: "get" };
