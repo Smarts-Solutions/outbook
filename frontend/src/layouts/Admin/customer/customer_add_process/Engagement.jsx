@@ -221,11 +221,9 @@ const Engagement = () => {
 
   const handleChange4 = (index, e) => {
     const { name, value } = e.target;
-
     if (!/^[0-9+]*$/.test(value)) {
       return;
     }
-
     const newJobEntries = [...jobEntries];
     newJobEntries[index][name] = value;
     validate4();

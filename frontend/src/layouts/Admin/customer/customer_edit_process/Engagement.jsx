@@ -17,7 +17,6 @@ const checkboxOptions = [
   { id: "formCheck4", label: "Customised Pricing" },
 ];
 
-
 const Engagement = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
   const dispatch = useDispatch();
@@ -118,7 +117,6 @@ const Engagement = () => {
         return;
       });
   };
-
 
   useEffect(() => {
     GetJobTypeApi();
@@ -307,7 +305,6 @@ const Engagement = () => {
     if (!/^[0-9+]*$/.test(value)) {
       return;
     }
-
     const newJobEntries = [...jobEntries];
     newJobEntries[index][name] = value;
     validate4();
@@ -466,10 +463,6 @@ const Engagement = () => {
     return isValid;
   };
  
-
-
-
-
   const GetJobTypeApi = async () => {
     const req = { action: "get" };
     const data = { req: req, authToken: token };
