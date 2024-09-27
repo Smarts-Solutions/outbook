@@ -455,7 +455,7 @@ const CreateCheckList = () => {
             </div>
           </div>
 
-          <button className="btn btn-secondary mt-3" onClick={addTask}>
+          <button className="btn btn-info mt-3" onClick={addTask}>
             <i className="fa fa-plus"></i>Add Task
           </button>
 

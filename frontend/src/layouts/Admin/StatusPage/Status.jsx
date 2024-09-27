@@ -305,7 +305,7 @@ const Status = () => {
             setShowModal(false);
           }}
         >
-          <div className="modal-body">
+          <div className="">
             <form className="tablelist-form">
               <div className="mb-3">
                 <label htmlFor="customername-field" className="form-label">

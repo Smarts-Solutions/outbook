@@ -587,7 +587,7 @@ const Setting = () => {
       name: "Service Name",
       selector: (row) => row.name,
       sortable: true,
-      width: "70%",
+      width: "50%",
     },
     {
       name: "Status",
@@ -630,7 +630,7 @@ const Setting = () => {
                 )}
                 {showSettingInsertTab && (
                   <button
-                    className="btn btn-info text-white ms-2"
+                    className="btn btn-sml btn-info text-white ms-2"
                     onClick={(e) => handleJobType(row)}
                   >
                     Add Job Type
@@ -641,7 +641,7 @@ const Setting = () => {
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
-            width: "20%",
+            width: "30%",
           },
         ]
       : []),

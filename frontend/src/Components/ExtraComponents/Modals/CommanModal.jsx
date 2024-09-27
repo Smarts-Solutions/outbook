@@ -8,28 +8,28 @@ const Modal_Component = ({ isOpen, handleClose, Submit_Function, Submit_Function
     return (
         <div>
             <Modal show={isOpen} centered size={size} backdrop={backdrop} onHide={handleClose}>
-                <Modal.Header closeButton className={`${title === "Verify OTP" ? 'border-0 ' : "bg-info"}`}  >
-                    <Modal.Title className='mb-0 text-white' >{title}</Modal.Title >
+                <Modal.Header closeButton className={`${title === "Verify OTP" ? 'border-0 ' : ""}`}  >
+                    <Modal.Title className='mb-0 ' >{title}</Modal.Title >
                 </Modal.Header>
                 <Modal.Body>{rest.children}</Modal.Body>
                 <Modal.Footer className={`${title === "Verify OTP" ? 'border-0' : ""}`}>
 
                     {cancel_btn ?
                         <button type="submit" className="btn btn-secondary " onClick={() => Submit_Cancel_Function()}>
-                            Cancel
+                            Cancel <i className='fa fa-xmark'></i>
                         </button> : ""}
 
 
                     {hideBtn === true ? "" :
                         <Button type="submit" className="btn btn-info " disabled={disabled_submit} onClick={()=> Submit_Function()}>
-                            {btn_name}
+                            {btn_name} <i className='fa fa-check'></i>
                         </Button>}
 
 
 
                     {btn_2 === true ?
                         <Button type="submit" className="btn btn-primary " disabled={disabled_submit} onClick={() => Submit_Function_2()}>
-                            {btn_name_2}
+                            {btn_name_2} <i className='fa fa-check'></i>
                         </Button> : ""
                     }
 

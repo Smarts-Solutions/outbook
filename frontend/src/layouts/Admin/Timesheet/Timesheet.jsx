@@ -335,7 +335,10 @@ const Timesheet = () => {
                                     </td>
 
                                     <td>
-                                      <Trash2 onClick={()=>handleDeleteRow(index)}/>
+                                      <button className="delete-icon" onClick={()=>handleDeleteRow(index)}>
+                                        <i className="ti-trash text-danger  "></i>
+                                      </button>
+                                      {/* <Trash2 className="delete-icon" /> */}
                                     </td>
                                   </tr>
                                 ))}

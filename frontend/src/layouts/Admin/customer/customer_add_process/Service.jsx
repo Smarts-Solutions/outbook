@@ -908,7 +908,7 @@ const Service = () => {
   </div>
 )}
 
->>>>>>>>> Temporary merge branch 2
+
                                 </div>
                               </div>
                             </div>
