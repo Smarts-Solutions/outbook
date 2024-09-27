@@ -58,13 +58,13 @@ const ClientList = () => {
   }, [searchQuery]);
 
   let tabs = [
-    { id: "client", label: "Client" },
+    { id: "client", label: "Client", icon: "fa-solid fa-user" },
     ...(ClientData && ClientData.length > 0
-      ? [{ id: "job", label: "Job" }]
+      ? [{ id: "job", label: "Job", icon: "fa-solid fa-briefcase" }]
       : []),
-    { id: "documents", label: "Documents" },
-    { id: "status", label: "Status" },
-    { id: "checklist", label: "Checklist" },
+    { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
+    { id: "status", label: "Status", icon: "fa-solid fa-info-circle" },
+    { id: "checklist", label: "Checklist", icon: "fa-solid fa-check-square" },
   ];
 
   const ClientListColumns = [
@@ -530,6 +530,7 @@ const ClientList = () => {
                         aria-selected={activeTab === tab.id}
                         onClick={() => SetTab(tab.id)}
                       >
+                        <i className={tab.icon}></i>
                         {tab.label}
                       </button>
                     </li>
@@ -560,7 +561,7 @@ const ClientList = () => {
                           : "Create Job"}
                     </div>
                     <div
-                      className="btn btn-info text-white float-end blue-btn"
+                      className="btn btn-info text-white float-end blue-btn me-2"
                       onClick={() => window.history.back()}
                     >
                       <i className="fa fa-arrow-left pe-1" /> Back

@@ -489,138 +489,265 @@ const Service = () => {
                                   aria-labelledby={`heading-${index}`}
                                   data-bs-parent={`#accordionExample${index}`}
                                 >
+
                                   {services.includes(item.id) && (
                                     <div className="accordion-body">
-                                      <div className="accordion" id="sub-accordionExample">
+                                      <div
+                                        className="accordion"
+                                        id="sub-accordionExample"
+                                      >
                                         {services.includes(item.id) &&
                                           jobTypeData &&
                                           jobTypeData
-                                            .filter((data) => data.service_id === item.id)
+                                            .filter(
+                                              (data) =>
+                                                data.service_id === item.id
+                                            )
                                             .flatMap((data, subIndex) =>
-                                              data.data.map((data1, jobIndex) => (
-                                                <div className="accordion-item" key={`${item.id}_${data1.id}_${jobIndex}`}>
-                                                  <h2 className="accordion-header" id={`sub-headingOne${item.id}_${data1.id}_${jobIndex}`}>
-                                                    <button
-                                                      className="accordion-button collapsed"
-                                                      type="button"
-                                                      data-bs-toggle="collapse"
-                                                      data-bs-target={`#sub-collapseOne${item.id}_${data1.id}_${jobIndex}`}
-                                                      aria-expanded="false"
-                                                      aria-controls={`sub-collapseOne${item.id}_${data1.id}_${jobIndex}`}
-                                                    >
-                                                      {data1.type}
-                                                    </button>
-                                                  </h2>
+                                              data.data.map(
+                                                (data1, jobIndex) => (
                                                   <div
-                                                    id={`sub-collapseOne${item.id}_${data1.id}_${jobIndex}`}
-                                                    className="accordion-collapse collapse"
-                                                    aria-labelledby={`sub-headingOne${item.id}_${data1.id}_${jobIndex}`}
-                                                    data-bs-parent="#sub-accordionExample"
+                                                    className="accordion-item"
+                                                    key={jobIndex}
                                                   >
-                                                    <div className="accordion-body">
-                                                      <div className="pb-3">
-                                                        <div className="row align-items-center">
-                                                          {/* Upload File Button */}
-                                                          <div className="col-auto">
-                                                            <input
-                                                              type="file"
-                                                              id="uploadButton"
-                                                              className="form-control"
-                                                              style={{ cursor: "pointer" }}
-                                                              onChange={(e) => {
-                                                                TaskUpdate(e, data1.id, item.id);
-                                                              }}
-                                                            />
+                                                    <h2
+                                                      className="accordion-header"
+                                                      id={`sub-headingOne${jobIndex}`}
+                                                    >
+                                                      <button
+                                                        className="accordion-button collapsed"
+                                                        type="button"
+                                                        data-bs-toggle="collapse"
+                                                        data-bs-target={`#sub-collapseOne${jobIndex}`}
+                                                        aria-expanded="true"
+                                                        aria-controls="collapseOne"
+                                                      >
+                                                        {data1.type}
+                                                      </button>
+                                                    </h2>
+                                                    <div
+                                                      id={`sub-collapseOne${jobIndex}`}
+                                                      className="accordion-collapse collapse "
+                                                      aria-labelledby={`sub-headingOne${jobIndex}`}
+                                                      data-bs-parent="#sub-accordionExample"
+                                                    >
+                                                      <div className="accordion-body">
+                                                        <div className="pb-3">
+                                                          <div className="row align-items-center">
+                                                            {/* Upload File Button */}
+                                                            <div className="col-auto">
+                                                              {/* <i className="fas fa-upload me-2"></i>
+                                                                Upload File */}
+                                                              <input
+                                                                type="file"
+                                                                id="uploadButton"
+                                                                className="form-control "
+                                                                style={{
+                                                                  cursor:
+                                                                    "pointer",
+                                                                }}
+                                                                onChange={(
+                                                                  e
+                                                                ) => {
+                                                                  TaskUpdate(
+                                                                    e,
+                                                                    data1.id,
+                                                                    item.id
+                                                                  );
+                                                                }}
+                                                              />
+                                                            </div>
+
+                                                            {/* File Name Display and Clear Icon */}
+                                                            {/* <div className="col-auto d-flex align-items-center">
+                                                              <span className="form-text me-2">
+                                                                {fileName}
+                                                              </span>
+                                                              {fileName !==
+                                                                "No file selected" && (
+                                                                  <i
+                                                                    className="fas fa-trash text-danger"
+                                                                    style={{
+                                                                      cursor:
+                                                                        "pointer",
+                                                                    }}
+                                                                    onClick={
+                                                                      handleClearFile
+                                                                    }
+                                                                    title="Clear file"
+                                                                  ></i>
+                                                                )}
+                                                            </div> */}
+
+                                                            {/* Download Button */}
+                                                            <div className="col-auto ms-auto">
+                                                              <button
+                                                                onClick={
+                                                                  handleDownload
+                                                                }
+                                                                className="btn btn-outline-info"
+                                                              >
+                                                                <i className="fas fa-download me-2"></i>
+                                                                Download Sample
+                                                                File
+                                                              </button>
+                                                            </div>
                                                           </div>
-                                                          <div className="col-auto ms-auto">
-                                                            <button onClick={handleDownload} className="btn btn-outline-info">
-                                                              <i className="fas fa-download me-2"></i>
-                                                              Download Sample File
-                                                            </button>
-                                                          </div>
+                                                          {/* <span
+                                                            className="form-text"
+                                                            style={{
+                                                              color: "green",
+                                                            }}
+                                                          >
+                                                            {uploadMessage}
+                                                          </span> */}
                                                         </div>
                                                         <div className="table-responsive">
                                                           {tasksGet &&
-                                                            tasksGet
-                                                              .filter(
-                                                                (TaskShow) =>
-                                                                  data1.id === TaskShow.JobTypeId && item.id === TaskShow.serviceId
-                                                              )
-                                                              .length > 0 && (
+                                                            tasksGet.filter(
+                                                              (TaskShow) =>
+                                                                data1.id ===
+                                                                  TaskShow.JobTypeId &&
+                                                                item.id ===
+                                                                  TaskShow.serviceId
+                                                            ).length > 0 && (
                                                               <table className="table table-bordered">
                                                                 <thead className="table-head-blue">
                                                                   <tr>
-                                                                    <th colSpan="3" className="fs-6 text-center card-header step-header-blue">
-                                                                      Checklist Name:{" "}
+                                                                    <th
+                                                                      colSpan="3"
+                                                                      className="fs-6 text-center card-header step-header-blue"
+                                                                    >
+                                                                      Checklist
+                                                                      Name:{" "}
                                                                       {
                                                                         tasksGet.find(
-                                                                          (TaskShow) =>
-                                                                            data1.id === TaskShow.JobTypeId && item.id === TaskShow.serviceId
-                                                                        ).checklistName
+                                                                          (
+                                                                            TaskShow
+                                                                          ) =>
+                                                                            data1.id ===
+                                                                              TaskShow.JobTypeId &&
+                                                                            item.id ===
+                                                                              TaskShow.serviceId
+                                                                        )
+                                                                          .checklistName
                                                                       }
                                                                     </th>
                                                                   </tr>
                                                                   <tr>
-                                                                    <th className="text-center">Tasks</th>
-                                                                    <th className="text-center">Budgeted Hour</th>
-                                                                    <th className="text-center">Action</th>
+                                                                    <th className="text-center">
+                                                                      Tasks
+                                                                    </th>
+                                                                    <th className="text-center">
+                                                                      Budgeted
+                                                                      Hour
+                                                                    </th>
+                                                                    <th className="text-center">
+                                                                      Action
+                                                                    </th>
                                                                   </tr>
                                                                 </thead>
                                                                 <tbody>
-                                                                  {tasksGet.map((TaskShow) => {
-                                                                    if (
-                                                                      data1.id === TaskShow.JobTypeId &&
-                                                                      item.id === TaskShow.serviceId
-                                                                    ) {
-                                                                      return (
-                                                                        <tr key={TaskShow.id}>
-                                                                          <td>
-                                                                            {TaskShow.Task.map((TaskData) => (
-                                                                              <div key={TaskData.id} className="mb-2">
-                                                                                <input
-                                                                                  type="text"
-                                                                                  className="form-control"
-                                                                                  value={TaskData.TaskName}
-                                                                                  disabled
-                                                                                />
-                                                                              </div>
-                                                                            ))}
-                                                                          </td>
-                                                                          <td>
-                                                                            {TaskShow.Task.map((TaskData) => (
-                                                                              <div key={TaskData.id} className="mb-2">
-                                                                                <div className="input-group">
-                                                                                  <input
-                                                                                    type="text"
-                                                                                    className="form-control"
-                                                                                    value={TaskData.BudgetHour.split(":")[0]}
-                                                                                    disabled
-                                                                                  />
-                                                                                  <span className="input-group-text">Hours</span>
-                                                                                  <input
-                                                                                    type="text"
-                                                                                    className="form-control"
-                                                                                    value={TaskData.BudgetHour.split(":")[1]}
-                                                                                    disabled
-                                                                                  />
-                                                                                  <span className="input-group-text">Minutes</span>
-                                                                                </div>
-                                                                              </div>
-                                                                            ))}
-                                                                          </td>
-                                                                          <td>
-                                                                            <button
-                                                                              className="btn btn-sm btn-outline-danger rounded-circle"
-                                                                              onClick={() => handleDelete(TaskShow.id)}
-                                                                            >
-                                                                              <i className="ti-trash"></i>
-                                                                            </button>
-                                                                          </td>
-                                                                        </tr>
-                                                                      );
+                                                                  {tasksGet.map(
+                                                                    (
+                                                                      TaskShow
+                                                                    ) => {
+                                                                      if (
+                                                                        data1.id ===
+                                                                          TaskShow.JobTypeId &&
+                                                                        item.id ===
+                                                                          TaskShow.serviceId
+                                                                      ) {
+                                                                        return (
+                                                                          <tr
+                                                                            key={
+                                                                              TaskShow.id
+                                                                            }
+                                                                          >
+                                                                            <td>
+                                                                              {TaskShow.Task.map(
+                                                                                (
+                                                                                  TaskData
+                                                                                ) => (
+                                                                                  <div
+                                                                                    key={
+                                                                                      TaskData.id
+                                                                                    }
+                                                                                    className="mb-2"
+                                                                                  >
+                                                                                    <input
+                                                                                      type="text"
+                                                                                      className="form-control"
+                                                                                      value={
+                                                                                        TaskData.TaskName
+                                                                                      }
+                                                                                      disabled
+                                                                                    />
+                                                                                  </div>
+                                                                                )
+                                                                              )}
+                                                                            </td>
+                                                                            <td>
+                                                                              {TaskShow.Task.map(
+                                                                                (
+                                                                                  TaskData
+                                                                                ) => (
+                                                                                  <div
+                                                                                    key={
+                                                                                      TaskData.id
+                                                                                    }
+                                                                                    className="mb-2"
+                                                                                  >
+                                                                                    <div className="input-group">
+                                                                                      <input
+                                                                                        type="text"
+                                                                                        className="form-control"
+                                                                                        value={
+                                                                                          TaskData.BudgetHour.split(
+                                                                                            ":"
+                                                                                          )[0]
+                                                                                        }
+                                                                                        disabled
+                                                                                      />
+                                                                                      <span className="input-group-text">
+                                                                                        Hours
+                                                                                      </span>
+                                                                                      <input
+                                                                                        type="text"
+                                                                                        className="form-control"
+                                                                                        value={
+                                                                                          TaskData.BudgetHour.split(
+                                                                                            ":"
+                                                                                          )[1]
+                                                                                        }
+                                                                                        disabled
+                                                                                      />
+                                                                                      <span className="input-group-text">
+                                                                                        Minutes
+                                                                                      </span>
+                                                                                    </div>
+                                                                                  </div>
+                                                                                )
+                                                                              )}
+                                                                            </td>
+                                                                            <td>
+                                                                              <button
+                                                                                className="btn btn-sm btn-outline-danger rounded-circle"
+                                                                                onClick={() =>
+                                                                                  handleDelete(
+                                                                                    TaskShow.id
+                                                                                  )
+                                                                                }
+                                                                              >
+                                                                                <i className=" ti-trash"></i>
+                                                                              </button>
+                                                                            </td>
+                                                                          </tr>
+                                                                        );
+                                                                      }
+                                                                      return null;
                                                                     }
-                                                                    return null;
-                                                                  })}
+                                                                  )}
                                                                 </tbody>
                                                               </table>
                                                             )}
@@ -628,12 +755,159 @@ const Service = () => {
                                                       </div>
                                                     </div>
                                                   </div>
-                                                </div>
-                                              ))
+                                                )
+                                              )
                                             )}
                                       </div>
                                     </div>
                                   )}
+=========
+                               {services.includes(item.id) && (
+  <div className="accordion-body">
+    <div className="accordion" id="sub-accordionExample">
+      {services.includes(item.id) &&
+        jobTypeData &&
+        jobTypeData
+          .filter((data) => data.service_id === item.id)
+          .flatMap((data, subIndex) =>
+            data.data.map((data1, jobIndex) => (
+              <div className="accordion-item" key={`${item.id}_${data1.id}_${jobIndex}`}>
+                <h2 className="accordion-header" id={`sub-headingOne${item.id}_${data1.id}_${jobIndex}`}>
+                  <button
+                    className="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target={`#sub-collapseOne${item.id}_${data1.id}_${jobIndex}`}
+                    aria-expanded="false"
+                    aria-controls={`sub-collapseOne${item.id}_${data1.id}_${jobIndex}`}
+                  >
+                    {data1.type}
+                  </button>
+                </h2>
+                <div
+                  id={`sub-collapseOne${item.id}_${data1.id}_${jobIndex}`}
+                  className="accordion-collapse collapse"
+                  aria-labelledby={`sub-headingOne${item.id}_${data1.id}_${jobIndex}`}
+                  data-bs-parent="#sub-accordionExample"
+                >
+                  <div className="accordion-body">
+                    <div className="pb-3">
+                      <div className="row align-items-center">
+                        {/* Upload File Button */}
+                        <div className="col-auto">
+                          <input
+                            type="file"
+                            id="uploadButton"
+                            className="form-control"
+                            style={{ cursor: "pointer" }}
+                            onChange={(e) => {
+                              TaskUpdate(e, data1.id, item.id);
+                            }}
+                          />
+                        </div>
+                        <div className="col-auto ms-auto">
+                          <button onClick={handleDownload} className="btn btn-outline-info">
+                            <i className="fas fa-download me-2"></i>
+                            Download Sample File
+                          </button>
+                        </div>
+                      </div>
+                      <div className="table-responsive">
+                        {tasksGet &&
+                          tasksGet
+                            .filter(
+                              (TaskShow) =>
+                                data1.id === TaskShow.JobTypeId && item.id === TaskShow.serviceId
+                            )
+                            .length > 0 && (
+                              <table className="table table-bordered">
+                                <thead className="table-head-blue">
+                                  <tr>
+                                    <th colSpan="3" className="fs-6 text-center card-header step-header-blue">
+                                      Checklist Name:{" "}
+                                      {
+                                        tasksGet.find(
+                                          (TaskShow) =>
+                                            data1.id === TaskShow.JobTypeId && item.id === TaskShow.serviceId
+                                        ).checklistName
+                                      }
+                                    </th>
+                                  </tr>
+                                  <tr>
+                                    <th className="text-center">Tasks</th>
+                                    <th className="text-center">Budgeted Hour</th>
+                                    <th className="text-center">Action</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {tasksGet.map((TaskShow) => {
+                                    if (
+                                      data1.id === TaskShow.JobTypeId &&
+                                      item.id === TaskShow.serviceId
+                                    ) {
+                                      return (
+                                        <tr key={TaskShow.id}>
+                                          <td>
+                                            {TaskShow.Task.map((TaskData) => (
+                                              <div key={TaskData.id} className="mb-2">
+                                                <input
+                                                  type="text"
+                                                  className="form-control"
+                                                  value={TaskData.TaskName}
+                                                  disabled
+                                                />
+                                              </div>
+                                            ))}
+                                          </td>
+                                          <td>
+                                            {TaskShow.Task.map((TaskData) => (
+                                              <div key={TaskData.id} className="mb-2">
+                                                <div className="input-group">
+                                                  <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    value={TaskData.BudgetHour.split(":")[0]}
+                                                    disabled
+                                                  />
+                                                  <span className="input-group-text">Hours</span>
+                                                  <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    value={TaskData.BudgetHour.split(":")[1]}
+                                                    disabled
+                                                  />
+                                                  <span className="input-group-text">Minutes</span>
+                                                </div>
+                                              </div>
+                                            ))}
+                                          </td>
+                                          <td>
+                                            <button
+                                              className="btn btn-sm btn-outline-danger rounded-circle"
+                                              onClick={() => handleDelete(TaskShow.id)}
+                                            >
+                                              <i className="ti-trash"></i>
+                                            </button>
+                                          </td>
+                                        </tr>
+                                      );
+                                    }
+                                    return null;
+                                  })}
+                                </tbody>
+                              </table>
+                            )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+    </div>
+  </div>
+)}
+
 
                                 </div>
                               </div>
