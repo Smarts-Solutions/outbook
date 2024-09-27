@@ -27,6 +27,7 @@ import {
   EDIT_QUERY,
   EDIT_DRAFT,
   UPDATE_CUSTOMER_STATUS,
+  GET_JOB_TIMELINE,
    
 } from "../../../Services/Customer/CustomerService";
 
@@ -397,9 +398,6 @@ export const EditMissingLog = createAsyncThunk("editMissingLog", async (data) =>
   }
 });
 
-
-
-
 export const QueryAction = createAsyncThunk("getQuerie", async (data) => {
   try {
     const { req, authToken } = data;
@@ -536,11 +534,24 @@ export const Update_Customer_Status = createAsyncThunk("customerStatusUpdate", a
   }
 });
 
+export const getJobTimeline = createAsyncThunk("getJobTimeLine", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await GET_JOB_TIMELINE(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
 
- 
 
-
- 
 
 const CustomerSlice = createSlice({
   name: "CustomerSlice",
@@ -571,6 +582,7 @@ const CustomerSlice = createSlice({
     jobdocumentaction: [],
     editmissinglog: [],
     editquery: [],
+    getjobtimeline: [],
     
   },
   reducers: {},
@@ -851,7 +863,19 @@ const CustomerSlice = createSlice({
       .addCase(EditQuery.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
-      });
+      })
+      .addCase(getJobTimeline.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getJobTimeline.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.getjobtimeline = action.payload;
+      })
+      .addCase(getJobTimeline.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      
 
       
   },

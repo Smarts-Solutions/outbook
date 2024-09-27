@@ -1,105 +1,49 @@
-import React , {useState , useEffect} from "react"; 
+import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-
-const data = [
-  {
-    TradingName: "W120",
-    Code: "012_BlaK_T_1772",
-    CustomerName: "The Black T",
-    AccountManager: "Ajeet Aggarwal",
-    ServiceType: "Admin/Support Tasks",
-    JobType: "Year End",
-  },
-  {
-    TradingName: "W121",
-    Code: "025_NesTea_1663",
-    CustomerName: "Nestea",
-    AccountManager: "Ajeet Aggarwal",
-    ServiceType: "Onboarding/Setup",
-    JobType: "Year End",
-  },
-  {
-    TradingName: "W121",
-    Code: "025_NesTea_1663",
-    CustomerName: "Nestea",
-    AccountManager: "Ajeet Aggarwal",
-    ServiceType: "Onboarding/Setup",
-    JobType: "Year End",
-  },
-  {
-    TradingName: "W121",
-    Code: "025_NesTea_1663",
-    CustomerName: "Nestea",
-    AccountManager: "Ajeet Aggarwal",
-    ServiceType: "Onboarding/Setup",
-    JobType: "Year End",
-  },
-  {
-    TradingName: "W121",
-    Code: "025_NesTea_1663",
-    CustomerName: "Nestea",
-    AccountManager: "Ajeet Aggarwal",
-    ServiceType: "Onboarding/Setup",
-    JobType: "Year End",
-  },
-  {
-    TradingName: "W121",
-    Code: "025_NesTea_1663",
-    CustomerName: "Nestea",
-    AccountManager: "Ajeet Aggarwal",
-    ServiceType: "Onboarding/Setup",
-    JobType: "Year End",
-  },
-  {
-    TradingName: "W121",
-    Code: "025_NesTea_1663",
-    CustomerName: "Nestea",
-    AccountManager: "Ajeet Aggarwal",
-    ServiceType: "Onboarding/Setup",
-    JobType: "Year End",
-  },
-];
-
-const columns = [
-  { name: "Trading Name", selector: (row) => row.TradingName, sortable: true },
-  { name: "Customer Code", selector: (row) => row.Code, sortable: true },
-  {
-    name: "Customer Name",
-    selector: (row) => row.CustomerName,
-    sortable: true,
-  },
-  {
-    name: "Company Number",
-    selector: (row) => row.AccountManager,
-    sortable: true,
-  },
-  { name: "Service Type", selector: (row) => row.ServiceType, sortable: true },
-  { name: "Account Manager", selector: (row) => row.JobType, sortable: true },
-];
+import { getJobTimeline } from "../../../ReduxStore/Slice/Customer/CustomerSlice"
 
 const JobTimeline = () => {
   const location = useLocation();
   const dispatch = useDispatch();
-  console.log("ccc" , location.state.job_id);
+  const token = JSON.parse(localStorage.getItem("token"));
   const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-  const [getJobTimeline, setJobTimeline] = useState([]);
-  
-useEffect(() => {
-  GetJobTimeline();
-}, []);
+  const [JobTimelineData, setJobTimelineData] = useState([]);
 
-  const GetJobTimeline = async() => {
-    const req = {job_id : location.state.job_id , staff_id : StaffUserId.id}
-    await dispatch(getJobTimeline(req))
-    .unwarp()
-    .then((res) => {
-      setJobTimeline(res.data);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+  useEffect(() => {
+    GetJobTimeline();
+  }, []);
+
+  const GetJobTimeline = async () => {
+    const req = { job_id: location.state.job_id, staff_id: StaffUserId.id }
+    const data = { req: req, authToken: token }
+    await dispatch(getJobTimeline(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status) {
+          setJobTimelineData(res.data);
+        }
+        else {
+          setJobTimelineData([]);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
+
+
+  const chunkArray = (arr, size) => {
+    const chunkedArr = [];
+    for (let i = 0; i < arr.length; i += size) {
+      chunkedArr.push(arr.slice(i, i + size));
+    }
+    return chunkedArr;
+  };
+
+  const chunkedSpouseArray = chunkArray(JobTimelineData, 3);
+
+
   return (
     <div className="">
       <div className="row">
@@ -118,246 +62,41 @@ useEffect(() => {
         </div>
       </div>
       <div className="mapWrapper">
-        <div className="row">
-          <div className="itemBar">
-            <div class="box">
-              <div class="tooltip--multiline report-data">
-              <ul>
-                <li><b >3:29:00 PM</b>
-                <p>Harsh Mehta Created New Job with Job Code the_out_00001</p></li>
-                <li><b >3:29:00 PM</b>
-                <p>Harsh Mehta Created New Job with Job Code the_out_00001</p></li>
-                <li><b >3:29:00 PM</b>
-                <p>Harsh Mehta Created New Job with Job Code the_out_00001</p></li>
-                <li><b >3:29:00 PM</b>
-                <p>Harsh Mehta Created New Job with Job Code the_out_00001</p></li>
-                <li><b >3:29:00 PM</b>
-                <p>Harsh Mehta Created New Job with Job Code the_out_00001</p></li> 
-               </ul>
-              </div>
-            </div>
+        <div>
+          {chunkedSpouseArray.map((row, rowIndex) => (
+            <div className="row" key={rowIndex} style={{ justifyContent: rowIndex % 2 === 0 ? 'flex-start' : 'flex-end' }}>
+              {row.map((item, index) => (
+                <div className="itemBar" key={index} style={{ textAlign: rowIndex % 2 === 0 ? 'left' : 'right' }}>
+                  <div className="box">
+                    <div className="tooltip--multiline report-data">
+                      {console.log()}
+                      {item?.allContain?.map((item, index) => (
+                        <div key={index}>
+                          <ul>
+                            <li>
+                            <li><b>{new Date(item.created_at).toLocaleTimeString()}</b></li> 
+                              <p>{item.log_message}</p>
+                            </li>
+                          </ul>
+                        </div>
+                      ))}
 
-            <div className="itemInfo">
-              <span>
-                <i class="fa-solid fa-circle-info pe-1"></i>
-              </span>
-              Spawned in Washington
+                    </div>
+                  </div> 
+                  <div className="itemInfo">
+                    <span>
+                      <i className="fa-solid fa-circle-info pe-1"></i>
+                    </span>
+                    {item.info}
+                  </div> 
+                  <div className="itemDate">{item.date}</div>
+                </div>
+              ))}
             </div>
-
-            <div className="itemDate">4/15/1997</div>
-          </div>
-          {/*
-           */}
-          <div className="itemBar">
-            <div class="box">
-              <div class="tooltip--multiline">
-                <h3>Title for the tooltip</h3>
-                <p>This is a multiline tooltip.</p>
-              </div>
-            </div>
-
-            <div className="itemInfo">
-              <span>
-                <i class="fa-solid fa-circle-info pe-1"></i>
-              </span>
-              Spawned in Washington
-            </div>
-
-            <div className="itemDate">4/15/1997</div>
-          </div>
-          {/*
-           */}
-          <div className="itemBar">
-            <div class="box">
-              <div class="tooltip--multiline">
-                <h3>Title for the tooltip</h3>
-                <p>This is a multiline tooltip.</p>
-              </div>
-            </div>
-
-            <div className="itemInfo">
-              <span>
-                <i class="fa-solid fa-circle-info pe-1"></i>
-              </span>
-              Spawned in Washington
-            </div>
-
-            <div className="itemDate">4/15/1997</div>
-          </div>
-        </div>
-        <div className="row">
-          {/*
-           */}
-          <div className="itemBar">
-            <div class="box">
-              <div class="tooltip--multiline">
-                <h3>Title for the tooltip</h3>
-                <p>This is a multiline tooltip.</p>
-              </div>
-            </div>
-
-            <div className="itemInfo">
-              <span>
-                <i class="fa-solid fa-circle-info pe-1"></i>
-              </span>
-              Spawned in Washington
-            </div>
-
-            <div className="itemDate">4/15/1997</div>
-          </div>
-          {/*
-           */}
-          <div className="itemBar">
-            <div class="box">
-              <div class="tooltip--multiline">
-                <h3>Title for the tooltip</h3>
-                <p>This is a multiline tooltip.</p>
-              </div>
-            </div>
-
-            <div className="itemInfo">
-              <span>
-                <i class="fa-solid fa-circle-info pe-1"></i>
-              </span>
-              Spawned in Washington
-            </div>
-
-            <div className="itemDate">4/15/1997</div>
-          </div>
-          {/*
-           */}
-          <div className="itemBar">
-            <div class="box">
-              <div class="tooltip--multiline">
-                <h3>Title for the tooltip</h3>
-                <p>This is a multiline tooltip.</p>
-              </div>
-            </div>
-
-            <div className="itemInfo">
-              <span>
-                <i class="fa-solid fa-circle-info pe-1"></i>
-              </span>
-              Spawned in Washington
-            </div>
-
-            <div className="itemDate">4/15/1997</div>
-          </div>
-        </div>
-        <div className="row">
-          {/*
-           */}
-          <div className="itemBar">
-            <div class="box">
-              <div class="tooltip--multiline">
-                <h3>Title for the tooltip</h3>
-                <p>This is a multiline tooltip.</p>
-              </div>
-            </div>
-
-            <div className="itemInfo">
-              <span>
-                <i class="fa-solid fa-circle-info pe-1"></i>
-              </span>
-              Spawned in Washington
-            </div>
-
-            <div className="itemDate">4/15/1997</div>
-          </div>
-          {/*
-           */}
-          <div className="itemBar">
-            <div class="box">
-              <div class="tooltip--multiline">
-              <ul>
-                <li>Harsh Mehta Created New Job with Job Code the_out_00001</li>
-                <li>Harsh Mehta Created New Job with Job Code the_out_00001</li>
-                <li>Harsh Mehta Created New Job with Job Code the_out_00001</li>
-                <li>Harsh Mehta Created New Job with Job Code the_out_00001</li>
-               </ul>
-              </div>
-            </div>
-
-            <div className="itemInfo">
-              <span>
-                <i class="fa-solid fa-circle-info pe-1"></i>
-              </span>
-              Spawned in Washington
-            </div>
-
-            <div className="itemDate">4/15/1997</div>
-          </div>
-          {/*
-           */}
-          <div className="itemBar">
-            <div class="box">
-              <div class="tooltip--multiline">
-                <h3>Title for the tooltip</h3>
-                <p>This is a multiline tooltip.</p>
-              </div>
-            </div>
-
-            <div className="itemInfo">
-              <span>
-                <i class="fa-solid fa-circle-info pe-1"></i>
-              </span>
-              Spawned in Washington
-            </div>
-
-            <div className="itemDate">4/15/1997</div>
-          </div>
-        </div>
-        <div className="row">
-          <div className="itemBar">
-            <div class="box">
-              <div class="tooltip--multiline">
-                <h3>Title for the tooltip</h3>
-                <p>This is a multiline tooltip.</p>
-              </div>
-            </div>
-
-            <div className="itemInfo">
-              <span>
-                <i class="fa-solid fa-circle-info pe-1"></i>
-              </span>
-              Spawned in Washington
-            </div>
-
-            <div className="itemDate">4/15/1997</div>
-          </div>
-          {/*
-           */}
-          <div className="itemBar">
-            <div class="box">
-              <div class="tooltip--multiline">
-               <ul>
-                <li>Harsh Mehta Created New Job with Job Code the_out_00001</li>
-                <li>Harsh Mehta Created New Job with Job Code the_out_00001</li>
-                <li>Harsh Mehta Created New Job with Job Code the_out_00001</li>
-                <li>Harsh Mehta Created New Job with Job Code the_out_00001</li>
-               </ul>
-                {/* <p>This is a multiline tooltip.</p> */}
-              </div>
-            </div>
-
-            <div className="itemInfo">
-              <span>
-                <i class="fa-solid fa-circle-info pe-1"></i>
-              </span>
-              Spawned in Washington
-            </div>
-
-            <div className="itemDate">4/15/1997</div>
-          </div>
-          {/*
-           */}
-          <div className="itemBar">
-            <div className="itemInfo">🎮Cybertruck Lead Designer</div>
-            <div className="itemDate">Jan 2022</div>
-          </div>
+          ))}
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

@@ -85,12 +85,18 @@ const Dashboard = () => {
     "November",
     "December",
   ];
+  
 
-  const day = String(currentDate.getDate()).padStart(2, "0");
-  const month = monthNames[currentDate.getMonth()]; // Get month name
-  const year = currentDate.getFullYear();
-  const formattedDate = `${day} ${month} ${year}`;
-
+  const formatDate = (isoString) => {
+    const date = new Date(isoString);
+  
+    const options = { month: 'short', day: 'numeric' };
+    const monthDay = date.toLocaleDateString('en-US', options); 
+    const timeOptions = { hour: 'numeric', minute: 'numeric', hour12: true };
+    const time = date.toLocaleTimeString('en-US', timeOptions); 
+  
+    return `${monthDay} (${time.toLowerCase()})`;
+  };
   return (
     <div>
       <div className="container-fluid">
@@ -569,7 +575,7 @@ const Dashboard = () => {
                                   </div>
                                   <div className="activity-info-text">
                                     <div className="">
-                                      <small className="">{item?.created_at?.slice(0,10)}</small>
+                                    <small className="">{formatDate(item?.created_at)}</small>
                                       <p className="">{item?.log_message}</p>
                                     </div>
                                   </div>
