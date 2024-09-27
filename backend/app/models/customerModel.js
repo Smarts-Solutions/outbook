@@ -40,7 +40,7 @@ const createCustomer = async (customer) => {
                         ip: customer.ip,
                         date: currentDate.toISOString().split('T')[0],
                         module_name: 'customer',
-                        log_message: `created customer profile on`,
+                        log_message: `created customer profile. customer code :`,
                         permission_type: 'created',
                         module_id: customer_id,
                     }

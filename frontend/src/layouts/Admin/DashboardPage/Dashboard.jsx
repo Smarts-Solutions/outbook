@@ -14,12 +14,10 @@ const Dashboard = () => {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
-  };
-  const currentTime = currentDate.toLocaleTimeString("en-US", options);
+  }; 
   const hours = currentDate.getHours();
 
-
-  console.log("getActiviyLog", getActiviyLog);
+ 
   let greeting;
   if (hours < 12) {
     greeting = "Good Morning!";
@@ -101,12 +99,7 @@ const Dashboard = () => {
                 <div className="col">
                   <p className="mb-0 page-subtitle">{greeting}</p>
                   <h2 className="page-title mt-1">{staffDetails.role_name}</h2>
-                </div>
-
-                {/* <div className="col-auto align-self-center">
-                  <p className="mb-0 page-subtitle text-end">{currentTime}</p>
-                  <h2 className="page-title mt-1">{formattedDate}</h2>
-                </div> */}
+                </div> 
               </div>
             </div>
           </div>
@@ -285,16 +278,7 @@ const Dashboard = () => {
                               </div>
                             </div>
                           </div>
-
-                          {/* <div className="row d-flex justify-content-center">
-                            <div className="col">
-                              <p className="text-dark mb-1 font-weight-semibold">NO OF CUSTOMERS</p>
-                            
-                              <h3 className="mt-5">183</h3>
-                              <i className='ti-user'></i>
-                            </div>
-
-                          </div> */}
+ 
                         </div>
                       </div>
                     </div>
@@ -368,7 +352,7 @@ const Dashboard = () => {
                               {/* <h3 className="mt-5">233</h3> */}
                             </div>
                             <div className="col-12 d-flex align-items-center justify-content-between">
-                              <h3 className="my-4">183</h3>
+                              <h3 className="my-4">0</h3>
                               <div className="report-main-icon bg-light-alt">
                                 <i className="ti-user"></i>
                               </div>
@@ -388,7 +372,7 @@ const Dashboard = () => {
                               {/* <h3 className="mt-5">870</h3> */}
                             </div>
                             <div className="col-12 d-flex align-items-center justify-content-between">
-                              <h3 className="my-4">183</h3>
+                              <h3 className="my-4">0</h3>
                               <div className="report-main-icon bg-light-alt">
                                 <i className="ti-user"></i>
                               </div>
@@ -414,7 +398,7 @@ const Dashboard = () => {
                               <p className="text-dark mb-1 font-weight-semibold">
                                 NO OF CUSTOMERS
                               </p>
-                              <h3 className="mt-5">183</h3>
+                              <h3 className="mt-5">0</h3>
                             </div>
                           </div>
                         </div>
@@ -567,78 +551,30 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
-
               <div className="card-body">
                 <div className="analytic-dash-activity" data-simplebar="init">
                   <div className="simplebar-mask1">
                     <div className="">
                       <div className="simplebar-content" style={{ padding: 0 }}>
                         <div className="activity">
-                          <div className="activity-info">
-                            <div className="icon-info-activity">
-                              <i className="fa-solid fa-circle"></i>
-                            </div>
-                            <div className="activity-info-text">
-                              <div className="">
-                                <small className="">Aug 17(12:07 AM)</small>
-                                <p className="">
-                                  Sabby created new package Testing AA
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="activity-info">
-                            <div className="icon-info-activity">
-                              <i className="fa-solid fa-circle"></i>
-                            </div>
-                            <div className="activity-info-text">
-                              <div className="">
-                                <small className="">Aug 17(12:07 AM)</small>
-                                <p className="">
-                                  Sabby created new package Testing AA
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="activity-info">
-                            <div className="icon-info-activity">
-                              <i className="fa-solid fa-circle"></i>
-                            </div>
-                            <div className="activity-info-text">
-                              <div className="">
-                                <small className="">Aug 17(12:07 AM)</small>
-                                <p className="">
-                                  Sabby created new package Testing AA
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="activity-info">
-                            <div className="icon-info-activity">
-                              <i className="fa-solid fa-circle"></i>
-                            </div>
-                            <div className="activity-info-text">
-                              <div className="">
-                                <small className="">Aug 17(12:07 AM)</small>
-                                <p className="">
-                                  Sabby created new package Testing AA
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="activity-info">
-                            <div className="icon-info-activity">
-                              <i className="fa-solid fa-circle"></i>
-                            </div>
-                            <div className="activity-info-text">
-                              <div className="">
-                                <small className="">Aug 17(12:07 AM)</small>
-                                <p className="">
-                                  Sabby created new package Testing AA
-                                </p>
-                              </div>
-                            </div>
-                          </div>
+                          {
+                            getActiviyLog.map((item, index) => {
+                              return (
+                                <div className="activity-info" key={index}>
+                                  <div className="icon-info-activity">
+                                    <i className="fa-solid fa-circle"></i>
+                                  </div>
+                                  <div className="activity-info-text">
+                                    <div className="">
+                                      <small className="">{item?.created_at?.slice(0,10)}</small>
+                                      <p className="">{item?.log_message}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            })
+                          }
+                          
                         </div>
                         {/*end activity*/}
                       </div>
