@@ -67,7 +67,7 @@ const Engagement = () => {
     customerSource: "",
     customerSubSource: "",
   });
- 
+
   const [checkboxStates, setCheckboxStates] = useState(
     Array(checkboxOptions.length).fill(0)
   );
@@ -85,28 +85,24 @@ const Engagement = () => {
       return newStates;
     });
   };
+  const ErrorArr = [errors1, errors2, errors3, errors4];
+  const InputsArr = [formValues1, formValues2, formValues3, jobEntries];
+  const setInputArr = [setFormValues1, setFormValues2, setFormValues3, setJobEntries];
+  const validateArr = [validate1, validate2, validate3, validate4];
 
-  const handleChange1 = (e) => {
+  const handleChange = (e, type) => {
     const { name, value } = e.target;
-    if (value === "" || /^\d*\.?\d*$/.test(value)) {
-      validate1(name, value);
-      setFormValues1({ ...formValues1, [name]: value });
+    if (type === 1) {
+      if (value === "" || /^\d*\.?\d*$/.test(value)) {
+        validateArr[type - 1](name, value)
+        setInputArr[type - 1]({ ...InputsArr[type - 1], [name]: value });
+      }
     }
-  };
-
-  const handleChange2 = (e) => {
-    const { name, value } = e.target;
-    if (value === "" || (/^\d*\.?\d*$/.test(value) && value <= 100)) {
-      validate2(name, value);
-      setFormValues2({ ...formValues2, [name]: value });
-    }
-  };
-
-  const handleChange3 = (e) => {
-    const { name, value } = e.target;
-    if (value === "" || (/^\d*\.?\d*$/.test(value) && value <= 100)) {
-      validate3(name, value);
-      setFormValues3({ ...formValues3, [name]: value });
+    else {
+      if (value === "" || (/^\d*\.?\d*$/.test(value) && value <= 100)) {
+        validateArr[type - 1](name, value)
+        setInputArr[type - 1]({ ...InputsArr[type - 1], [name]: value });
+      }
     }
   };
 
@@ -589,7 +585,6 @@ const Engagement = () => {
                                     <label className="form-label label-height">
                                       {field.label}
                                     </label>
-                                    {/* <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label> */}
                                     <input
                                       type="text"
                                       className="form-control"
@@ -597,7 +592,7 @@ const Engagement = () => {
                                       id={field.name}
                                       placeholder={field.feeName}
                                       value={formValues1[field.name]}
-                                      onChange={(e) => handleChange1(e)}
+                                      onChange={(e) => handleChange(e , 1)}
                                     />
                                     {errors1[field.name] && (
                                       <div className="error-text">
@@ -675,7 +670,7 @@ const Engagement = () => {
                                       id={field.name}
                                       value={formValues2[field.name]}
                                       placeholder={field.feeName}
-                                      onChange={handleChange2}
+                                      onChange={(e)=>handleChange(e , 2)}
                                     />
                                     {errors2[field.name] && (
                                       <div className="error-text">
@@ -750,7 +745,7 @@ const Engagement = () => {
                                       id={field.name}
                                       value={formValues3[field.name]}
                                       placeholder={field.feeName}
-                                      onChange={handleChange3}
+                                      onChange={(e)=>handleChange(e , 3)}
                                     />
                                     {errors3[field.name] && (
                                       <div className="error-text">
@@ -813,40 +808,7 @@ const Engagement = () => {
                                       )}
                                     </div>
                                   </div>
-                                  {/* <div className="col-lg-4">
-                                    <label
-                                      htmlFor={`jobType_${index}`}
-                                      className="form-label"
-                                    >
-                                      Types Of Job
-                                    </label>
-                                    <select
-                                      id={`jobType_${index}`}
-                                      className="form-select "
-                                      name="job_type_id"
-                                      value={job.job_type_id}
-                                      onChange={(e) => handleChange4(index, e)}
-                                    >
-                                      <option value="">Select Job Type</option>
-                                      <option value="1">demo</option>
-                                      {jobType &&
-                                        jobType.map((data) => (
-                                          <option
-                                            key={data.type}
-                                            value={data.id}
-                                          >
-                                            {data.type}
-                                          </option>
-                                        ))}
-                                    </select>
-                                    {errors4[index] && (
-                                      <div className="error-text">
-                                        {errors4[index].job_type_id}
-                                      </div>
-                                    )}
-                                  </div> */}
-
-
+                                  
                                   <div className="col-lg-4">
                                     <label
                                       htmlFor={`services_${index}`}
@@ -879,14 +841,6 @@ const Engagement = () => {
                                       </div>
                                     )}
                                   </div>
-
-
-
-
-
-
-
-
                                   <div className="col-lg-3">
                                     <div className="mb-3">
                                       <label
