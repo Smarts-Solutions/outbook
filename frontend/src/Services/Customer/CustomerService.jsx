@@ -253,7 +253,7 @@ export async function GET_MISSING_LOG(data, token) {
 }
 
 export async function ADD_MISSION_LOG(data, token) {
- 
+  
   try { 
     const formData = new FormData();
     formData.append('job_id', data.job_id);
@@ -264,6 +264,8 @@ export async function ADD_MISSION_LOG(data, token) {
     formData.append('missing_log_reviewed_date', data.missionDetails.missing_log_reviewed_date);
     // formData.append('missing_paperwork_received_on', data.missionDetails.missing_paperwork_received_on);
     formData.append('status', data.missionDetails.status);
+    formData.append('StaffUserId', data.StaffUserId);
+    formData.append('ip', data.ip);
 
     if (Array.isArray(data.missionDetails.missing_log_document)) {
       data.missionDetails.missing_log_document.forEach((file) => {
@@ -293,7 +295,7 @@ export async function ADD_MISSION_LOG(data, token) {
 }
 
 export async function EDIT_MISSION_LOG(data, token) {
- 
+
   try { 
     const formData = new FormData();
     formData.append('id', data.id);
@@ -311,6 +313,9 @@ export async function EDIT_MISSION_LOG(data, token) {
     } else if (data.missionDetails.missing_log_document) {
       formData.append('files[]', data.missionDetails.missing_log_document);
     }
+
+    formData.append('StaffUserId', data.StaffUserId);
+    formData.append('ip', data.ip);
 
     let config = {
       method: "post",
@@ -365,6 +370,9 @@ export async function ADD_QUERY(data, token) {
       formData.append('files[]', data.data.QueryDocument);
     }
 
+    formData.append('StaffUserId', data.StaffUserId);
+    formData.append('ip', data.ip);
+
     let config = {
       method: "post",
       maxBodyLength: Infinity,
@@ -405,6 +413,9 @@ export async function EDIT_QUERY(data, token) {
     } else if (data.data.QueryDocument) {
       formData.append('files[]', data.data.QueryDocument);
     }
+
+    formData.append('StaffUserId', data.StaffUserId);
+    formData.append('ip', data.ip);
 
     let config = {
       method: "post",
