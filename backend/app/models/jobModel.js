@@ -1611,43 +1611,62 @@ const jobUpdate = async (job) => {
         let job_heading_name = []
 
         if (ExistJob.client_job_code !== client_job_code || ExistJob.customer_contact_details_id !== customer_contact_details_id || ExistJob.service_id !== service_id || ExistJob.job_type_id !== job_type_id || ExistJob.budgeted_hours.split(':').slice(0, 2).join(':') !== budgeted_hours || ExistJob.reviewer !== reviewer || ExistJob.allocated_to !== allocated_to || ExistJob.allocated_on !== allocated_on || ExistJob.date_received_on !== date_received_on || ExistJob.year_end !== year_end || ExistJob.total_preparation_time.split(':').slice(0, 2).join(':') !== total_preparation_time || ExistJob.review_time.split(':').slice(0, 2).join(':') !== review_time || ExistJob.feedback_incorporation_time.split(':').slice(0, 2).join(':') !== feedback_incorporation_time || ExistJob.total_time.split(':').slice(0, 2).join(':') !== total_time || ExistJob.engagement_model !== engagement_model) {
-          job_heading_name.push('edited the job information.')
+          job_heading_name.push('edited the job information')
         }
         
 
         if (ExistJob.expected_delivery_date !== expected_delivery_date || ExistJob.due_on !== due_on || ExistJob.submission_deadline !== submission_deadline || ExistJob.customer_deadline_date !== customer_deadline_date || ExistJob.sla_deadline_date !== sla_deadline_date || ExistJob.internal_deadline_date !== internal_deadline_date) {
-          job_heading_name.push('edited the job deadline.')
+          job_heading_name.push('edited the job deadline')
         }
 
 
         if (ExistJob.filing_Companies_required !== filing_Companies_required || ExistJob.filing_Companies_date !== filing_Companies_date || ExistJob.filing_hmrc_required !== filing_hmrc_required || ExistJob.filing_hmrc_date !== filing_hmrc_date || ExistJob.opening_balance_required !== opening_balance_required || ExistJob.opening_balance_date !== opening_balance_date) {
-          job_heading_name.push('edited the job other tasks.')
+          job_heading_name.push('edited the job other tasks')
         }
 
         
         if (Number(ExistJob.number_of_transaction) !== number_of_transaction || ExistJob.number_of_balance_items !== number_of_balance_items || Number(ExistJob.turnover) !== turnover || ExistJob.number_of_employees !== number_of_employees || ExistJob.vat_reconciliation !== vat_reconciliation || ExistJob.bookkeeping !== bookkeeping || ExistJob.processing_type !== processing_type) {
-          job_heading_name.push('edited the job other data.')
+          job_heading_name.push('edited the job other data')
         }
 
 
         if (ExistJob.invoiced !== invoiced || ExistJob.currency !== currency || ExistJob.invoice_value !== invoice_value || ExistJob.invoice_date !== invoice_date || ExistJob.invoice_hours.split(':').slice(0, 2).join(':') !== invoice_hours || ExistJob.invoice_remark !== invoice_remark) {
-          job_heading_name.push('edited the job invoice data.')
+          job_heading_name.push('edited the job invoice data')
         }
           
         // reviewer,
-        // allocated_to,
-        // if(parseInt(ExistJob.reviewer) == 0){
-        //   if(reviewer > 0){
-        //    const [getStaff] = await pool.execute('SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ', [reviewer]);
-        //   } 
-        // }
-        //console.log("job_heading_name ", job_heading_name)
+        if(parseInt(ExistJob.reviewer) == 0){
+          if(reviewer > 0){
+           const [[getStaff]] = await pool.execute('SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ', [reviewer]);
+            job_heading_name.push('has assigned the job to the reviewer, ' + getStaff.name)
+          } 
+        }else{
+          if(reviewer != ExistJob.reviewer){
+            const [[getStaff]] = await pool.execute('SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ', [reviewer]);
+            job_heading_name.push('changed the job to the reviewer, ' + getStaff.name)
+          }
+        }
 
+        // allocated_to,
+        if(parseInt(ExistJob.allocated_to) == 0){
+          if(allocated_to > 0){
+            const [[getStaff]] = await pool.execute('SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ', [allocated_to]);
+            job_heading_name.push('has assigned the job to the processor, ' + getStaff.name)
+          }
+        }else{
+          if(allocated_to != ExistJob.allocated_to){
+            const [[getStaff]] = await pool.execute('SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ', [allocated_to]);
+            job_heading_name.push('changed the job to the processor, ' + getStaff.name)
+          }
+        }
+
+        //console.log("job_heading_name ", job_heading_name)
+      
+          
         if (job_heading_name.length > 0) {
           const msgLog = job_heading_name.length > 1
             ? job_heading_name.slice(0, -1).join(', ') + ' and ' + job_heading_name.slice(-1)
             : job_heading_name[0];
-
           const currentDate = new Date();
           await SatffLogUpdateOperation(
             {
@@ -1663,10 +1682,6 @@ const jobUpdate = async (job) => {
 
         }
       }
-
-
-
-
 
       return { status: true, message: 'Job updated successfully.', data: job_id };
     } else {
