@@ -2,19 +2,13 @@ import React, { useContext, useState, useEffect } from "react";
 import { Formik } from "formik";
 import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
-import {
-  JobType,
-  customerSourceApi,
-  customerSubSourceApi,
-} from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import { JobType, customerSourceApi, customerSubSourceApi } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import { useDispatch } from "react-redux";
 import { Edit_Customer } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useLocation } from "react-router-dom";
-import {
-  GET_CUSTOMER_DATA,
-  Get_Service,
-} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { GET_CUSTOMER_DATA, Get_Service } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
+import { FTEDedicatedErrorMessages, PercentageModelErrorMessages, AdhocPAYGHourlyErrorMessages, } from "../../../../Utils/Common_Message";
 
 const checkboxOptions = [
   { id: "formCheck1", label: "FTE/Dedicated Staffing" },
@@ -33,6 +27,10 @@ const Engagement = () => {
   const [errors3, setErrors3] = useState({});
   const [errors4, setErrors4] = useState([]);
   const [getAllServices, setAllServices] = useState([]);
+  const [jobType, setJobType] = useState([]);
+  const [coustomerSource, setCoustomerSource] = useState([]);
+  const [coustomerSubSource, setCoustomerSubSource] = useState([]);
+  const [formState1, setFormState1] = useState({});
 
   const [customerDetails, setCustomerDetails] = useState({
     loading: true,
@@ -61,6 +59,7 @@ const Engagement = () => {
     tax_experts: "",
     admin_staff: "",
   });
+
   const [formValues3, setFormValues3] = useState({
     adhoc_accountants: "",
     adhoc_bookkeepers: "",
@@ -68,20 +67,17 @@ const Engagement = () => {
     adhoc_tax_experts: "",
     adhoc_admin_staff: "",
   });
+
   const [jobEntries, setJobEntries] = useState([
     {
       minimum_number_of_jobs: "",
       job_type_id: "",
-      service_id:"",
+      service_id: "",
       cost_per_job: "",
       customised_pricing_id: "",
     },
   ]);
 
-  const [jobType, setJobType] = useState([]);
-  const [coustomerSource, setCoustomerSource] = useState([]);
-  const [coustomerSubSource, setCoustomerSubSource] = useState([]);
-  const [formState1, setFormState1] = useState({});
   const [formErrors, setFormErrors] = useState({
     customerJoiningDate: "",
     customerSource: "",
@@ -103,7 +99,7 @@ const Engagement = () => {
             loading: false,
             data: response.data,
           });
-         
+
 
           setFormState1({
             customerSource: response.data.customer?.customerSource,
@@ -124,9 +120,6 @@ const Engagement = () => {
 
   useEffect(() => {
     GetJobTypeApi();
-  }, []);
-
-  useEffect(() => {
     GetAllServices();
     customerSourceData();
     GetCustomerData();
@@ -255,7 +248,7 @@ const Engagement = () => {
   }, [checkboxStates]);
 
   useEffect(() => {
-   
+
     if (formState1.customerSource) {
       customerSubSourceData();
     }
@@ -284,48 +277,37 @@ const Engagement = () => {
 
   const handleChange1 = (e) => {
     const { name, value } = e.target;
-
-    if (!/^\d*\.?\d*$/.test(value)) {
-      return;
+    if (value === "" || /^\d*\.?\d*$/.test(value)) {
+      validate1(name, value);
+      setFormValues1({ ...formValues1, [name]: value });
     }
-
-    validate1(name, value);
-    setFormValues1({ ...formValues1, [name]: value });
   };
-
+ 
   const handleChange2 = (e) => {
     const { name, value } = e.target;
-    if (!/^\d*\.?\d*$/.test(value)) {
-      return;
+    if (value === "" || (/^\d*\.?\d*$/.test(value) && value <= 100)) {
+      validate2(name, value);
+      setFormValues2({ ...formValues2, [name]: value });
     }
-    if (value >= 100) {
-      return;
-    }
-    validate2(name, value);
-    setFormValues2({ ...formValues2, [name]: value });
   };
 
   const handleChange3 = (e) => {
     const { name, value } = e.target;
-
-    if (!/^\d*\.?\d*$/.test(value)) {
-      return;
+    if (value === "" || (/^\d*\.?\d*$/.test(value) && value <= 100)) {
+      validate3(name, value);
+      setFormValues3({ ...formValues3, [name]: value });
     }
-
-    validate3(name, value);
-    setFormValues3({ ...formValues3, [name]: value });
   };
 
   const handleChange4 = (index, e) => {
     const { name, value } = e.target;
-    if (!/^\d*\.?\d*$/.test(value)) {
+
+    if (!/^[0-9+]*$/.test(value)) {
       return;
     }
-
     const newJobEntries = [...jobEntries];
-    newJobEntries[index] = { ...newJobEntries[index], [name]: value };
-
-    validate4(name, value);
+    newJobEntries[index][name] = value;
+    validate4();
     setJobEntries(newJobEntries);
   };
 
@@ -351,76 +333,68 @@ const Engagement = () => {
     setJobEntries(newJobEntries);
   };
 
-  const validate1 = (name, value) => {
+  const validate1 = (name, value, isSubmitting = false) => {
     const newErrors = { ...errors1 };
-    if (!value) {
-      if (name == "accountants")
-        newErrors[name] = "Please Enter Number of Accountants";
-      else if (name == "feePerAccountant")
-        newErrors[name] = "Please Enter Fee Per Accountant";
-      else if (name == "bookkeepers")
-        newErrors[name] = "Please Enter Number of Bookkeepers";
-      else if (name == "feePerBookkeeper")
-        newErrors[name] = "Please Enter Fee Per Bookkeeper";
-      else if (name == "payrollExperts")
-        newErrors[name] = "Please Enter Number of Payroll Experts";
-      else if (name == "feePerPayrollExpert")
-        newErrors[name] = "Please Enter Fee Per Payroll Expert";
-      else if (name == "taxExperts")
-        newErrors[name] = "Please Enter Number of Tax Experts";
-      else if (name == "feePerTaxExpert")
-        newErrors[name] = "Please Enter Fee Per Tax Expert";
-      else if (name == "numberOfAdmin")
-        newErrors[name] = "Please Enter Number of Admin/Other Staff";
-      else if (name == "feePerAdmin")
-        newErrors[name] = "Please Enter Fee Per Admin/Other Staff";
+    if (isSubmitting) {
+      for (const key in FTEDedicatedErrorMessages) {
+        if (!formValues1[key]) {
+          newErrors[key] = FTEDedicatedErrorMessages[key];
+        }
+      }
     } else {
-      delete newErrors[name];
+      if (!value) {
+        if (FTEDedicatedErrorMessages[name]) {
+          newErrors[name] = FTEDedicatedErrorMessages[name];
+        }
+      } else {
+        delete newErrors[name];
+      }
     }
+
     setErrors1(newErrors);
-    return Object.keys(newErrors).length === 0 ? true : false;
+    return Object.keys(newErrors).length === 0;
   };
 
-  const validate2 = (name, value) => {
+  const validate2 = (name, value, isSubmitting = false) => {
     const newErrors = { ...errors2 };
-    if (!value) {
-      if (name == "total_outsourcing")
-        newErrors[name] = "Please Enter Total Outsourcing";
-      else if (name == "accountants")
-        newErrors[name] = "Please Enter Accountants";
-      else if (name == "bookkeepers")
-        newErrors[name] = "Please Enter Bookkeepers";
-      else if (name == "payroll_experts")
-        newErrors[name] = "Please Enter Payroll Experts";
-      else if (name == "tax_experts")
-        newErrors[name] = "Please Enter Tax Experts";
-      else if (name == "admin_staff")
-        newErrors[name] = "Please Enter Admin/Other Staff";
+    if (isSubmitting) {
+      for (const key in PercentageModelErrorMessages) {
+        if (!formValues2[key]) {
+          newErrors[key] = PercentageModelErrorMessages[key];
+        }
+      }
     } else {
-      delete newErrors[name];
+      if (!value) {
+        if (PercentageModelErrorMessages[name]) {
+          newErrors[name] = PercentageModelErrorMessages[name];
+        }
+      } else {
+        delete newErrors[name];
+      }
     }
     setErrors2(newErrors);
-    return Object.keys(newErrors).length === 0 ? true : false;
+    return Object.keys(newErrors).length === 0;
   };
 
-  const validate3 = (name, value) => {
+  const validate3 = (name, value, isSubmitting = false) => {
     const newErrors = { ...errors3 };
-    if (!value) {
-      if (name == "adhoc_accountants")
-        newErrors[name] = "Please Enter Accountants Fee Per Hour";
-      else if (name == "adhoc_bookkeepers")
-        newErrors[name] = "Please Enter Bookkeepers Fee Per Hour";
-      else if (name == "adhoc_payroll_experts")
-        newErrors[name] = "Please Enter Payroll Experts Fee Per Hour";
-      else if (name == "adhoc_tax_experts")
-        newErrors[name] = "Please Enter Tax Experts Fee Per Hour";
-      else if (name == "adhoc_admin_staff")
-        newErrors[name] = "Please Enter Admin/Other Staff Fee Per Hour";
+    if (isSubmitting) {
+      for (const key in AdhocPAYGHourlyErrorMessages) {
+        if (!formValues3[key]) {
+          newErrors[key] = AdhocPAYGHourlyErrorMessages[key];
+        }
+      }
     } else {
-      delete newErrors[name];
+      if (!value || value < 7 || value > 25) {
+        if (AdhocPAYGHourlyErrorMessages[name]) {
+          newErrors[name] = AdhocPAYGHourlyErrorMessages[name];
+        }
+      } else {
+        delete newErrors[name];
+      }
     }
     setErrors3(newErrors);
-    return Object.keys(newErrors).length === 0 ? true : false;
+    return Object.keys(newErrors).length === 0;
   };
 
   const validate4 = () => {
@@ -440,12 +414,8 @@ const Engagement = () => {
           "Minimum number of Jobs must be between 1 and 100";
       }
 
-      // if (!entry.job_type_id) {
-      //   entryErrors.job_type_id = "Please select a job type";
-      // }
-
       if (!entry.service_id) {
-        entryErrors.service_id = "Please select a Service";
+        entryErrors.service_id = "Please select a Services";
       }
 
       if (!entry.cost_per_job) {
@@ -454,13 +424,45 @@ const Engagement = () => {
         entryErrors.cost_per_job = "Cost Per Job must be between 20 and 500";
       }
 
-      if (Object.keys(entryErrors).length !== 0) newErrors[index] = entryErrors;
+      if (Object.keys(entryErrors).length !== 0) {
+        newErrors[index] = entryErrors;
+      }
     });
 
     setErrors4(newErrors);
     return newErrors.length > 0 ? false : true;
   };
 
+  const validateAllFields1 = () => {
+    let isValid = true;
+    for (const key in formValues1) {
+      if (!validate1(key, formValues1[key], true)) {
+        isValid = false;
+      }
+    }
+    return isValid;
+  };
+
+  const validateAllFields2 = () => {
+    let isValid = true;
+    for (const key in formValues2) {
+      if (!validate2(key, formValues2[key], true)) {
+        isValid = false;
+      }
+    }
+    return isValid;
+  };
+
+  const validateAllFields3 = () => {
+    let isValid = true;
+    for (const key in formValues3) {
+      if (!validate3(key, formValues3[key], true)) {
+        isValid = false;
+      }
+    }
+    return isValid;
+  };
+ 
   const GetJobTypeApi = async () => {
     const req = { action: "get" };
     const data = { req: req, authToken: token };
@@ -513,9 +515,7 @@ const Engagement = () => {
 
   const scrollToFirstError = (i) => {
     const errors = [errors1, errors2, errors3, errors4];
-
     const errorField = Object.keys(errors[i])[0];
-
     const errorElement = document.getElementById(errorField);
     if (errorElement) {
       errorElement.scrollIntoView({ behavior: "smooth" });
@@ -523,23 +523,28 @@ const Engagement = () => {
   };
 
   const handleSubmit = async () => {
+
     if (!checkboxStates.some((state) => state === 1)) {
       Swal.fire({
         icon: "error",
-        title: "Oops...",
-        text: "Please select at least one option.",
+        title: "Please select at least one option.",
       });
-
       return;
     }
-    const validations = [validate1, validate2, validate3, validate4];
+    const validations = [
+      validateAllFields1,
+      validateAllFields2,
+      validateAllFields3,
+      validate4,
+    ];
 
     for (let i = 0; i < checkboxStates.length; i++) {
-      if (checkboxStates[i] === 1 && !validations[i]()) {
+      if (checkboxStates[i] == 1 && !validations[i]()) {
         scrollToFirstError(i);
         return;
       }
     }
+  
 
     let req = {
       customer_id: address,
@@ -1051,11 +1056,11 @@ const Engagement = () => {
                                           handleChange4(index, e)
                                         }
                                       >
-                                       
+
                                         <option value="">
                                           Select Services
                                         </option>
-                                  
+
                                         {getAllServices &&
                                           getAllServices.map((data) => (
                                             <option

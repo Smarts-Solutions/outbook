@@ -482,3 +482,15 @@ export async function UPDATE_CUSTOMER_STATUS(data, token) {
     return await err;
   }
 }
+
+export async function GET_JOB_TIMELINE(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getJobTimeline`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}

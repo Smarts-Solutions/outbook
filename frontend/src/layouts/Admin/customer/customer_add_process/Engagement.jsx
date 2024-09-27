@@ -2,17 +2,10 @@ import React, { useContext, useState, useEffect } from "react";
 import { Formik } from "formik";
 import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
-import { JobType,
-  customerSourceApi,
-  customerSubSourceApi,
- } from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import { JobType, customerSourceApi, customerSubSourceApi, } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import { useDispatch } from "react-redux";
-import {
-  FTEDedicatedErrorMessages,
-  PercentageModelErrorMessages,
-  AdhocPAYGHourlyErrorMessages,
-} from "../../../../Utils/Common_Message";
-import { ADD_SERVICES_CUSTOMERS,Get_Service } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { FTEDedicatedErrorMessages, PercentageModelErrorMessages, AdhocPAYGHourlyErrorMessages, } from "../../../../Utils/Common_Message";
+import { ADD_SERVICES_CUSTOMERS, Get_Service } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 
 const Engagement = () => {
@@ -25,6 +18,9 @@ const Engagement = () => {
   const [errors4, setErrors4] = useState([]);
   const [jobType, setJobType] = useState([]);
   const [getAllServices, setAllServices] = useState([]);
+  const [coustomerSource, setCoustomerSource] = useState([]);
+  const [coustomerSubSource, setCoustomerSubSource] = useState([]);
+  const [formState1, setFormState1] = useState({});
 
 
   const [formValues1, setFormValues1] = useState({
@@ -66,28 +62,21 @@ const Engagement = () => {
     { id: "formCheck4", label: "Customised Pricing" },
   ];
 
-
-  const [formState1, setFormState1] = useState({});
   const [formErrors, setFormErrors] = useState({
     customerJoiningDate: "",
     customerSource: "",
     customerSubSource: "",
   });
-  const [coustomerSource, setCoustomerSource] = useState([]);
-  const [coustomerSubSource, setCoustomerSubSource] = useState([]);
 
   const [checkboxStates, setCheckboxStates] = useState(
     Array(checkboxOptions.length).fill(0)
   );
-
 
   useEffect(() => {
     customerSourceData();
     GetJobTypeApi();
     GetAllServicesApi();
   }, []);
-
-
 
   const handleCheckboxChange = (index) => {
     setCheckboxStates((prevStates) => {
@@ -96,28 +85,24 @@ const Engagement = () => {
       return newStates;
     });
   };
+  const ErrorArr = [errors1, errors2, errors3, errors4];
+  const InputsArr = [formValues1, formValues2, formValues3, jobEntries];
+  const setInputArr = [setFormValues1, setFormValues2, setFormValues3, setJobEntries];
+  const validateArr = [validate1, validate2, validate3, validate4];
 
-  const handleChange1 = (e) => {
+  const handleChange = (e, type) => {
     const { name, value } = e.target;
-    if (value === "" || /^\d*\.?\d*$/.test(value)) {
-      validate1(name, value);
-      setFormValues1({ ...formValues1, [name]: value });
+    if (type === 1) {
+      if (value === "" || /^\d*\.?\d*$/.test(value)) {
+        validateArr[type - 1](name, value)
+        setInputArr[type - 1]({ ...InputsArr[type - 1], [name]: value });
+      }
     }
-  };
-
-  const handleChange2 = (e) => {
-    const { name, value } = e.target;
-    if (value === "" || (/^\d*\.?\d*$/.test(value) && value <= 100)) {
-      validate2(name, value);
-      setFormValues2({ ...formValues2, [name]: value });
-    }
-  };
-
-  const handleChange3 = (e) => {
-    const { name, value } = e.target;
-    if (value === "" || (/^\d*\.?\d*$/.test(value) && value <= 100)) {
-      validate3(name, value);
-      setFormValues3({ ...formValues3, [name]: value });
+    else {
+      if (value === "" || (/^\d*\.?\d*$/.test(value) && value <= 100)) {
+        validateArr[type - 1](name, value)
+        setInputArr[type - 1]({ ...InputsArr[type - 1], [name]: value });
+      }
     }
   };
 
@@ -232,11 +217,9 @@ const Engagement = () => {
 
   const handleChange4 = (index, e) => {
     const { name, value } = e.target;
-
     if (!/^[0-9+]*$/.test(value)) {
       return;
     }
-
     const newJobEntries = [...jobEntries];
     newJobEntries[index][name] = value;
     validate4();
@@ -259,10 +242,6 @@ const Engagement = () => {
         entryErrors.minimum_number_of_jobs =
           "Minimum number of Jobs must be between 1 and 100";
       }
-
-      // if (!entry.job_type_id) {
-      //   entryErrors.job_type_id = "Please select a job type";
-      // }
 
       if (!entry.service_id) {
         entryErrors.service_id = "Please select a Services";
@@ -300,9 +279,7 @@ const Engagement = () => {
 
   const scrollToFirstError = (i) => {
     const errors = [errors1, errors2, errors3, errors4];
-
     const errorField = Object.keys(errors[i])[0];
-
     const errorElement = document.getElementById(errorField);
     if (errorElement) {
       errorElement.scrollIntoView({ behavior: "smooth" });
@@ -412,7 +389,7 @@ const Engagement = () => {
         }
       })
       .catch((error) => {
-     return;
+        return;
       });
   };
 
@@ -423,15 +400,13 @@ const Engagement = () => {
     if (checkboxStates[3] === 0) setErrors4({});
   }, [checkboxStates]);
 
-
-
   const customerSourceData = async () => {
     const req = { action: "getAll" };
     const data = { req: req, authToken: token };
     await dispatch(customerSourceApi(data))
       .unwrap()
       .then(async (response) => {
-        if (response.status) { 
+        if (response.status) {
           setCoustomerSource(response.data);
         }
       })
@@ -439,6 +414,7 @@ const Engagement = () => {
         return;
       });
   };
+
   useEffect(() => {
     if (formState1.customerSource) {
       customerSubSourceData();
@@ -467,28 +443,22 @@ const Engagement = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
- 
-   
     setFormState1(({
-        ...formState1,
-        [name]: value, 
-      }));
-    
-      setFormErrors((prevErrors) => ({
-        ...prevErrors,
-        [name]: "", 
-      }));
-  
-  
- 
-  };
-  
+      ...formState1,
+      [name]: value,
+    }));
 
+    setFormErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "",
+    }));
+
+
+
+  };
 
   const validateForm = () => {
     let errors = {};
-
-
     if (!formState1.customerJoiningDate) {
       errors.customerJoiningDate = "Joining Date is required.";
     }
@@ -615,7 +585,6 @@ const Engagement = () => {
                                     <label className="form-label label-height">
                                       {field.label}
                                     </label>
-                                    {/* <label className="form-label label_bottom" style={{ color: "#A2A0A0 !important" }}>{field.feeName}</label> */}
                                     <input
                                       type="text"
                                       className="form-control"
@@ -623,7 +592,7 @@ const Engagement = () => {
                                       id={field.name}
                                       placeholder={field.feeName}
                                       value={formValues1[field.name]}
-                                      onChange={(e) => handleChange1(e)}
+                                      onChange={(e) => handleChange(e , 1)}
                                     />
                                     {errors1[field.name] && (
                                       <div className="error-text">
@@ -701,7 +670,7 @@ const Engagement = () => {
                                       id={field.name}
                                       value={formValues2[field.name]}
                                       placeholder={field.feeName}
-                                      onChange={handleChange2}
+                                      onChange={(e)=>handleChange(e , 2)}
                                     />
                                     {errors2[field.name] && (
                                       <div className="error-text">
@@ -776,7 +745,7 @@ const Engagement = () => {
                                       id={field.name}
                                       value={formValues3[field.name]}
                                       placeholder={field.feeName}
-                                      onChange={handleChange3}
+                                      onChange={(e)=>handleChange(e , 3)}
                                     />
                                     {errors3[field.name] && (
                                       <div className="error-text">
@@ -839,41 +808,8 @@ const Engagement = () => {
                                       )}
                                     </div>
                                   </div>
-                                  {/* <div className="col-lg-4">
-                                    <label
-                                      htmlFor={`jobType_${index}`}
-                                      className="form-label"
-                                    >
-                                      Types Of Job
-                                    </label>
-                                    <select
-                                      id={`jobType_${index}`}
-                                      className="form-select "
-                                      name="job_type_id"
-                                      value={job.job_type_id}
-                                      onChange={(e) => handleChange4(index, e)}
-                                    >
-                                      <option value="">Select Job Type</option>
-                                      <option value="1">demo</option>
-                                      {jobType &&
-                                        jobType.map((data) => (
-                                          <option
-                                            key={data.type}
-                                            value={data.id}
-                                          >
-                                            {data.type}
-                                          </option>
-                                        ))}
-                                    </select>
-                                    {errors4[index] && (
-                                      <div className="error-text">
-                                        {errors4[index].job_type_id}
-                                      </div>
-                                    )}
-                                  </div> */}
-
-
-<div className="col-lg-4">
+                                  
+                                  <div className="col-lg-4">
                                     <label
                                       htmlFor={`services_${index}`}
                                       className="form-label"
@@ -888,7 +824,7 @@ const Engagement = () => {
                                       onChange={(e) => handleChange4(index, e)}
                                     >
                                       <option value="">Select Services</option>
-                                  
+
                                       {getAllServices &&
                                         getAllServices.map((data) => (
                                           <option
@@ -905,14 +841,6 @@ const Engagement = () => {
                                       </div>
                                     )}
                                   </div>
-
-
-
-
-
-
-
-
                                   <div className="col-lg-3">
                                     <div className="mb-3">
                                       <label
@@ -989,7 +917,7 @@ const Engagement = () => {
                 </h4>
               </div>
               <div className="card-body">
-              <div className="row">
+                <div className="row">
                   <div className="col-lg-4">
                     <label className="form-label">Customer Joining Date</label>
                     <input
@@ -1039,11 +967,11 @@ const Engagement = () => {
                     >
                       <option value="">Select Customer Sub-Source</option>
                       {coustomerSubSource &&
-                        coustomerSubSource.map((data) => ( 
+                        coustomerSubSource.map((data) => (
                           data.customer_source_id == formState1.customerSource && (
-                          <option key={data.id} value={data.id}>
-                            {data.name}
-                          </option>
+                            <option key={data.id} value={data.id}>
+                              {data.name}
+                            </option>
                           )
                         ))}
                     </select>

@@ -1,16 +1,17 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { GETACCESS, ROLEACCESS } from "../../../Services/Access/Accessservices";
 import axios from "axios";
-const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 
+const StaffUserId = JSON.parse(localStorage.getItem("staffDetails")) || {};
 
-export async function GET_IP(data, token) {
-  try {
-    const res = await axios.get(`https://api.ipify.org?format=json`)
-    return await res;
-  }
-  catch (err) {
-  }
+export async function GET_IP() {
+    try {
+        const res = await axios.get(`https://api.ipify.org?format=json`);
+        return res.data;  // Return only the IP data
+    } catch (err) {
+        console.error('Error fetching IP:', err);
+        throw err;
+    }
 }
 
 export const GetAccess = createAsyncThunk("accessRolePermissions/getAccess", async (data) => {
