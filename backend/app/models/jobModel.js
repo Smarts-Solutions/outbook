@@ -1276,7 +1276,7 @@ const getJobById = async (job) => {
 
 
     const [rows] = await pool.execute(query, [job_id]);
-   
+
     let result = {}
     if (rows.length > 0) {
       let tasks = []
@@ -1359,7 +1359,7 @@ const getJobById = async (job) => {
 
 
     }
- 
+
     return { status: true, message: 'Success.', data: result };
   } catch (error) {
     console.log("error ", error)
@@ -1370,8 +1370,6 @@ const getJobById = async (job) => {
 }
 
 const jobUpdate = async (job) => {
-
-
   const {
     job_id, // Assuming job_id is provided for the update
     account_manager_id,
@@ -1422,34 +1420,82 @@ const jobUpdate = async (job) => {
   } = job;
 
 
+  const ExistJobQuery = `
+ SELECT 
+ account_manager_id,
+ customer_id,
+ client_id,
+ client_job_code,
+ customer_contact_details_id,
+ service_id,
+ job_type_id,
+ budgeted_hours,
+ reviewer,
+ allocated_to,
+ DATE_FORMAT(allocated_on, '%Y-%m-%d') AS allocated_on,
+ DATE_FORMAT(date_received_on, '%Y-%m-%d') AS date_received_on,
+ year_end,
+ total_preparation_time,
+ review_time,
+ feedback_incorporation_time,
+ total_time, engagement_model,
+ 
+ DATE_FORMAT(expected_delivery_date, '%Y-%m-%d') AS expected_delivery_date,
+ DATE_FORMAT(due_on, '%Y-%m-%d') AS due_on,
+ DATE_FORMAT(submission_deadline, '%Y-%m-%d') AS submission_deadline,
+ DATE_FORMAT(customer_deadline_date, '%Y-%m-%d') AS customer_deadline_date,
+ DATE_FORMAT(sla_deadline_date, '%Y-%m-%d') AS sla_deadline_date,
+ DATE_FORMAT(internal_deadline_date, '%Y-%m-%d') AS internal_deadline_date,
 
+ filing_Companies_required,
+ DATE_FORMAT(filing_Companies_date, '%Y-%m-%d') AS filing_Companies_date,
+ filing_hmrc_required,
+ DATE_FORMAT(filing_hmrc_date, '%Y-%m-%d') AS filing_hmrc_date,
+ opening_balance_required,
+ DATE_FORMAT(opening_balance_date, '%Y-%m-%d') AS opening_balance_date,
+ 
+ number_of_transaction,
+ number_of_balance_items,
+ turnover,
+ number_of_employees,
+ vat_reconciliation,
+ bookkeeping,
+ processing_type,
 
-  const [ExistJob] = await pool.execute('SELECT job_id ,status_type ,allocated_to ,reviewer FROM jobs WHERE id = ?', [job_id]);
+ invoiced,
+ currency,
+ invoice_value,
+ DATE_FORMAT(invoice_date, '%Y-%m-%d') AS invoice_date,
+ invoice_hours,
+ invoice_remark
+ FROM jobs WHERE id = ?
+ `
+  try {
+    const [[ExistJob]] = await pool.execute(ExistJobQuery, [job_id]);
 
-
-  let status_type_update = status_type;
-  if (status_type == null || status_type == 0 || status_type == 1) {
-    if (allocated_to > 0) {
-      status_type_update = 3
-    }
-
-    if (reviewer > 0) {
-      status_type_update = 5
-    }
-  } else {
-    if (status_type == 3) {
-      if (reviewer > 0 && ExistJob[0].reviewer != 0) {
-        status_type_update = 5
-      }
-    } else if (status_type == 5) {
-      if (allocated_to > 0 && ExistJob[0].allocated_to != 0) {
+    let status_type_update = status_type;
+    if (status_type == null || status_type == 0 || status_type == 1) {
+      if (allocated_to > 0) {
         status_type_update = 3
       }
+
+      if (reviewer > 0) {
+        status_type_update = 5
+      }
+    } else {
+      if (status_type == 3) {
+        if (reviewer > 0 && ExistJob.reviewer != 0) {
+          status_type_update = 5
+        }
+      } else if (status_type == 5) {
+        if (allocated_to > 0 && ExistJob.allocated_to != 0) {
+          status_type_update = 3
+        }
+      }
     }
-  }
 
-
-  try {
+   
+   
     const query = `
          UPDATE jobs 
          SET account_manager_id = ?, customer_id = ?, client_id = ?, client_job_code = ?, customer_contact_details_id = ?, 
@@ -1476,7 +1522,6 @@ const jobUpdate = async (job) => {
     ]);
 
     if (result.affectedRows > 0) {
-
       if (tasks.task.length > 0) {
         const checklist_id = tasks.checklist_id;
         const providedTaskIds = tasks.task
@@ -1499,7 +1544,7 @@ const jobUpdate = async (job) => {
         // Find task IDs that need to be deleted
         const tasksToDelete = existingTaskIds.filter(id => !providedTaskIds.includes(id));
 
-    
+
 
         if (tasksToDelete.length > 0) {
           // const deleteQuery = `
@@ -1559,6 +1604,70 @@ const jobUpdate = async (job) => {
           }
         }
       }
+
+      //Add log
+      if (result.changedRows > 0) {
+
+        let job_heading_name = []
+
+        if (ExistJob.client_job_code !== client_job_code || ExistJob.customer_contact_details_id !== customer_contact_details_id || ExistJob.service_id !== service_id || ExistJob.job_type_id !== job_type_id || ExistJob.budgeted_hours.split(':').slice(0, 2).join(':') !== budgeted_hours || ExistJob.reviewer !== reviewer || ExistJob.allocated_to !== allocated_to || ExistJob.allocated_on !== allocated_on || ExistJob.date_received_on !== date_received_on || ExistJob.year_end !== year_end || ExistJob.total_preparation_time.split(':').slice(0, 2).join(':') !== total_preparation_time || ExistJob.review_time.split(':').slice(0, 2).join(':') !== review_time || ExistJob.feedback_incorporation_time.split(':').slice(0, 2).join(':') !== feedback_incorporation_time || ExistJob.total_time.split(':').slice(0, 2).join(':') !== total_time || ExistJob.engagement_model !== engagement_model) {
+          job_heading_name.push('edited the job information.')
+        }
+        
+
+        if (ExistJob.expected_delivery_date !== expected_delivery_date || ExistJob.due_on !== due_on || ExistJob.submission_deadline !== submission_deadline || ExistJob.customer_deadline_date !== customer_deadline_date || ExistJob.sla_deadline_date !== sla_deadline_date || ExistJob.internal_deadline_date !== internal_deadline_date) {
+          job_heading_name.push('edited the job deadline.')
+        }
+
+
+        if (ExistJob.filing_Companies_required !== filing_Companies_required || ExistJob.filing_Companies_date !== filing_Companies_date || ExistJob.filing_hmrc_required !== filing_hmrc_required || ExistJob.filing_hmrc_date !== filing_hmrc_date || ExistJob.opening_balance_required !== opening_balance_required || ExistJob.opening_balance_date !== opening_balance_date) {
+          job_heading_name.push('edited the job other tasks.')
+        }
+
+        
+        if (Number(ExistJob.number_of_transaction) !== number_of_transaction || ExistJob.number_of_balance_items !== number_of_balance_items || Number(ExistJob.turnover) !== turnover || ExistJob.number_of_employees !== number_of_employees || ExistJob.vat_reconciliation !== vat_reconciliation || ExistJob.bookkeeping !== bookkeeping || ExistJob.processing_type !== processing_type) {
+          job_heading_name.push('edited the job other data.')
+        }
+
+
+        if (ExistJob.invoiced !== invoiced || ExistJob.currency !== currency || ExistJob.invoice_value !== invoice_value || ExistJob.invoice_date !== invoice_date || ExistJob.invoice_hours.split(':').slice(0, 2).join(':') !== invoice_hours || ExistJob.invoice_remark !== invoice_remark) {
+          job_heading_name.push('edited the job invoice data.')
+        }
+          
+        // reviewer,
+        // allocated_to,
+        // if(parseInt(ExistJob.reviewer) == 0){
+        //   if(reviewer > 0){
+        //    const [getStaff] = await pool.execute('SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ', [reviewer]);
+        //   } 
+        // }
+        //console.log("job_heading_name ", job_heading_name)
+
+        if (job_heading_name.length > 0) {
+          const msgLog = job_heading_name.length > 1
+            ? job_heading_name.slice(0, -1).join(', ') + ' and ' + job_heading_name.slice(-1)
+            : job_heading_name[0];
+
+          const currentDate = new Date();
+          await SatffLogUpdateOperation(
+            {
+              staff_id: job.StaffUserId,
+              ip: job.ip,
+              date: currentDate.toISOString().split('T')[0],
+              module_name: 'job',
+              log_message: `${msgLog} job code:`,
+              permission_type: 'updated',
+              module_id: job_id,
+            }
+          );
+
+        }
+      }
+
+
+
+
+
       return { status: true, message: 'Job updated successfully.', data: job_id };
     } else {
       return { status: false, message: 'No job found with the given job_id.' };
@@ -1585,9 +1694,9 @@ const deleteJobById = async (job) => {
   }
 }
 
-const getJobTimeLine = async(job) => {
- const {job_id , staff_id} = job
- const query = `SELECT
+const getJobTimeLine = async (job) => {
+  const { job_id, staff_id } = job
+  const query = `SELECT
     staff_logs.id AS log_id,
     staff_logs.staff_id AS staff_id,
     DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
@@ -1621,31 +1730,31 @@ WHERE
 ORDER BY
     staff_logs.id DESC
 `;
-  
-const [result] = await pool.execute(query);
 
-const groupedResult = result.reduce((acc, log) => {
-  const existingDate = acc.find(item => item.date === log.date);
-  if (existingDate) {
-    existingDate.allContain.push({
-      created_at: log.created_at,
-      log_message: log.log_message
-    });
-  } else {
-    acc.push({
-      date: log.date,
-      allContain: [{
+  const [result] = await pool.execute(query);
+
+  const groupedResult = result.reduce((acc, log) => {
+    const existingDate = acc.find(item => item.date === log.date);
+    if (existingDate) {
+      existingDate.allContain.push({
         created_at: log.created_at,
         log_message: log.log_message
-      }]
-    });
-  }
-  
-  return acc;
-}, []);
+      });
+    } else {
+      acc.push({
+        date: log.date,
+        allContain: [{
+          created_at: log.created_at,
+          log_message: log.log_message
+        }]
+      });
+    }
 
-// Output the grouped result
-// console.log(JSON.stringify(groupedResult, null, 2));
+    return acc;
+  }, []);
+
+  // Output the grouped result
+  // console.log(JSON.stringify(groupedResult, null, 2));
   return { status: true, message: "success.", data: groupedResult };
 
 }
