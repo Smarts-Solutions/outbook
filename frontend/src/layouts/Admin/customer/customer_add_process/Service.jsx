@@ -489,7 +489,7 @@ const Service = () => {
                                   aria-labelledby={`heading-${index}`}
                                   data-bs-parent={`#accordionExample${index}`}
                                 >
-<<<<<<<<< Temporary merge branch 1
+
                                   {services.includes(item.id) && (
                                     <div className="accordion-body">
                                       <div
