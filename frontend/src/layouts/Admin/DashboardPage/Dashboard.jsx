@@ -10,34 +10,34 @@ const Dashboard = () => {
   const [getActiviyLog, setActivityLog] = useState([]);
 
   const currentDate = new Date();
+
   const options = {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
   }; 
-  const hours = currentDate.getHours();
 
+  const hours = currentDate.getHours();
  
   let greeting;
   if (hours < 12) {
     greeting = "Good Morning!";
-  } else if (hours < 18) {
+  } 
+  else if (hours < 18) {
     greeting = "Good Afternoon!";
-  } else {
+  }
+   else {
     greeting = "Good Evening!";
   }
 
   useEffect(() => {
-    console.log("staffDetails");
     GetDashboardData();
     ActivityLogData();
   }, []);
 
   const GetDashboardData = async () => {
-    
     const req = { staff_id: staffDetails.id }
     const data = { req: req, authToken: token }
-
     await dispatch(DashboardData(data))
       .unwrap()
       .then((res) => {
@@ -70,33 +70,17 @@ const Dashboard = () => {
         console.log(error);
       });
   };
-  // Array of month names
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
   
-
   const formatDate = (isoString) => {
     const date = new Date(isoString);
-  
     const options = { month: 'short', day: 'numeric' };
     const monthDay = date.toLocaleDateString('en-US', options); 
     const timeOptions = { hour: 'numeric', minute: 'numeric', hour12: true };
     const time = date.toLocaleTimeString('en-US', timeOptions); 
-  
     return `${monthDay} (${time.toLowerCase()})`;
   };
+
+
   return (
     <div>
       <div className="container-fluid">
@@ -551,7 +535,7 @@ const Dashboard = () => {
               </div>
             </>
           </div>
-          <div className="col-lg-4 col-md-4 mt-2">
+          <div className="col-lg-4 col-md-4 mt-2 activitylog">
             <div className="card activity-card">
               <div className="card-header border-bottom-0">
                 <div className="row align-items-center">

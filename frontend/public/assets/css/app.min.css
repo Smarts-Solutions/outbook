@@ -10440,3 +10440,9 @@ span.breadcrumb__desc {
 {
   color: #008306 !important;
 }
+
+.activitylog{
+  height: 80vh;
+  overflow: scroll;
+
+}
