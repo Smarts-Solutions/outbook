@@ -203,7 +203,7 @@ const addDraft = async (req,res) => {
     const { ...draft } = req.body;
     const result = await jobService.addDraft(draft);
     if(!result.status){
-     return  res.status(200).json({ status: false, message: result.message });  
+     return  res.status(200).json({ status: false, message: result.message , data: result.data});  
      }else{
      return  res.status(200).json({ status: true, message: result.message , data : result.data});
      }
