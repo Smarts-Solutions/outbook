@@ -199,8 +199,8 @@ const Queries = () => {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="edit-icon" onClick={() => { HandleQueryView(row); setViewquery(true) }}>
-            <i className="fa fa-eye fs-6 text-secondary" />
+          <button className="view-icon" onClick={() => { HandleQueryView(row); setViewquery(true) }}>
+            <i className="fa fa-eye fs-6 text-warning" />
           </button>
           <button className="edit-icon" onClick={() =>{setEditViewquery(true);setEditData(row)}}>
             <i className="ti-pencil" />

@@ -236,11 +236,12 @@ const StaffPage = () => {
                 SetCompetancy(true);
               }}
             >
-              Add Competency
+              <i className="fa fa-plus" /> Competency
             </button>
           )}
 
-          <button className="view-icon">View Logs</button>
+          <button className="view-icon"> 
+               <i className="fa fa-eye" />  Logs</button>
 
           {row.role === "ADMIN" || row.role === "SUPERADMIN"
             ? showStaffDeleteTab && (

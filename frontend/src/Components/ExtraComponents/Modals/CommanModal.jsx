@@ -16,20 +16,20 @@ const Modal_Component = ({ isOpen, handleClose, Submit_Function, Submit_Function
 
                     {cancel_btn ?
                         <button type="submit" className="btn btn-secondary " onClick={() => Submit_Cancel_Function()}>
-                            Cancel <i className='fa fa-xmark'></i>
+                          <i className='fa fa-xmark'></i>  Cancel 
                         </button> : ""}
 
 
                     {hideBtn === true ? "" :
-                        <Button type="submit" className="btn btn-info " disabled={disabled_submit} onClick={()=> Submit_Function()}>
-                            {btn_name} <i className='fa fa-check'></i>
+                        <Button type="submit" className="btn btn-outline-success " disabled={disabled_submit} onClick={()=> Submit_Function()}>
+                          <i className='far fa-save pe-1'></i>  {btn_name} 
                         </Button>}
 
 
 
                     {btn_2 === true ?
-                        <Button type="submit" className="btn btn-primary " disabled={disabled_submit} onClick={() => Submit_Function_2()}>
-                            {btn_name_2} <i className='fa fa-check'></i>
+                        <Button type="submit" className="btn btn-outline-success " disabled={disabled_submit} onClick={() => Submit_Function_2()}>
+                           <i className='far fa-save pe-1'></i>  {btn_name_2} 
                         </Button> : ""
                     }
 

@@ -516,8 +516,8 @@ const CreateCheckList = () => {
                   )}
                 </div>
                 <div className="col-lg-2">
-                  <button className="btn p-0" onClick={() => removeTask(index)}>
-                    <i className="ti-trash text-danger fs-4"></i>
+                  <button className="delete-icon" onClick={() => removeTask(index)}>
+                    <i className="ti-trash text-danger "></i>
                   </button>
                 </div>
               </div>

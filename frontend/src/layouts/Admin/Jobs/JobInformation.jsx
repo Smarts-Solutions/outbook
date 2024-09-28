@@ -245,15 +245,16 @@ const JobInformationPage = ({ job_id }) => {
     return (
         <div>
             <div className='row mb-3'>
-                <div className='col-md-8'>
+                <div className='col-md-9'>
                     <div className='tab-title'>
                         <h3>Job Information </h3>
                     </div>
                 </div>
-                <div className='col-md-4'>
-                    <div>
-                        <button className='btn btn-info text-white float-end blue-btn' onClick={handleDelete}>Delete</button>
-                        <button className='btn btn-info text-white float-end blue-btn' onClick={handleJobEdit}>Edit</button>
+                <div className='col-md-3 '>
+                    <div className='d-flex text-end'>
+                    <button className='edit-icon' onClick={handleJobEdit}>  <i className="ti-pencil text-primary" /></button>
+
+                        <button className='delete-icon' onClick={handleDelete}><i className="ti-trash text-danger"></i></button>
                     </div>
 
                 </div>

@@ -39,6 +39,7 @@ const JobLogs = () => {
                         aria-selected="true"
                         onClick={() => setSelectedTab('job information')}
                       >
+                        <i className='fa-solid fa-info-circle'/>
                         Job Information
                       </button>
                     </li>
@@ -54,6 +55,7 @@ const JobLogs = () => {
                         aria-selected="false"
                         onClick={() => setSelectedTab('task timesheet')}
                       >
+                         <i className='fa-solid fa-clock'/>
                         Task Timesheet
                       </button>
                     </li>
@@ -69,6 +71,7 @@ const JobLogs = () => {
                         aria-selected="false"
                         onClick={() => setSelectedTab('job timeline')}
                       >
+                        <i className='fa-solid fa-table'/>
                         Job Timeline
                       </button>
                     </li>
@@ -84,6 +87,7 @@ const JobLogs = () => {
                         aria-selected="false"
                         onClick={() => setSelectedTab('missing logs')}
                       >
+                        <i className='fa-solid fa-exclamation-triangle'/>
                         Missing Logs
                       </button>
                     </li>
@@ -99,6 +103,7 @@ const JobLogs = () => {
                         aria-selected="false"
                         onClick={() => setSelectedTab('queries')}
                       >
+                         <i className='fa-solid fa-question-circle'/>
                         Queries
                       </button>
                     </li>
@@ -114,6 +119,7 @@ const JobLogs = () => {
                         aria-selected="false"
                         onClick={() => setSelectedTab('drafts')}
                       >
+                         <i className='fa-solid fa-file-alt'/>
                         Drafts
                       </button>
                     </li>
@@ -129,6 +135,7 @@ const JobLogs = () => {
                         aria-selected="false"
                         onClick={() => setSelectedTab('documents')}
                       >
+                         <i className='fa-solid fa-folder'/>
                         Documents
                       </button>
                     </li> 

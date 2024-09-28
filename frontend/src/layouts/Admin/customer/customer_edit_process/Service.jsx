@@ -423,7 +423,7 @@ const Service = () => {
                       </th>
                       <th style={{ width: "70%" }}>Service Name</th>
                       {/* <th width="100"></th> */}
-                      <th className="">Action</th>
+                      <th className="text-center">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -569,7 +569,7 @@ const Service = () => {
                                                                 onClick={
                                                                   handleDownload
                                                                 }
-                                                                className="btn btn-outline-info"
+                                                                className="btn  btn-sm btn-outline-info"
                                                               >
                                                                 <i className="fas fa-download me-2"></i>
                                                                 Download Sample
@@ -622,11 +622,11 @@ const Service = () => {
                                                                     <th className="text-center">
                                                                       Tasks
                                                                     </th>
-                                                                    <th className="text-center">
+                                                                    <th width="250" className="text-center">
                                                                       Budgeted
                                                                       Hour
                                                                     </th>
-                                                                    <th className="text-center">
+                                                                    <th className="text-center ">
                                                                       Action
                                                                     </th>
                                                                   </tr>
@@ -683,6 +683,7 @@ const Service = () => {
                                                                                     className="mb-2"
                                                                                   >
                                                                                     <div className="input-group">
+                                                                                      <div className="hours-div">
                                                                                       <input
                                                                                         type="text"
                                                                                         className="form-control"
@@ -694,8 +695,10 @@ const Service = () => {
                                                                                         disabled
                                                                                       />
                                                                                       <span className="input-group-text">
-                                                                                        Hours
+                                                                                        H
                                                                                       </span>
+                                                                                      </div>
+                                                                                      <div className="hours-div">
                                                                                       <input
                                                                                         type="text"
                                                                                         className="form-control"
@@ -707,23 +710,24 @@ const Service = () => {
                                                                                         disabled
                                                                                       />
                                                                                       <span className="input-group-text">
-                                                                                        Minutes
+                                                                                        M
                                                                                       </span>
+                                                                                      </div>
                                                                                     </div>
                                                                                   </div>
                                                                                 )
                                                                               )}
                                                                             </td>
-                                                                            <td>
+                                                                            <td className="text-center">
                                                                               <button
-                                                                                className="btn btn-sm btn-outline-danger rounded-circle"
+                                                                                className="delete-icon"
                                                                                 onClick={() =>
                                                                                   handleDelete(
                                                                                     TaskShow.id
                                                                                   )
                                                                                 }
                                                                               >
-                                                                                <i className=" ti-trash"></i>
+                                                                                <i className=" ti-trash text-danger"></i>
                                                                               </button>
                                                                             </td>
                                                                           </tr>
@@ -750,9 +754,9 @@ const Service = () => {
                             </div>
                           </td>
 
-                          <td className="align-top">
+                          <td className="align-top text-end">
                             <button
-                              className="btn btn-sm btn-outline-info remove-item-btn"
+                              className="btn  btn-outline-info remove-item-btn"
                               onClick={() => {
                                 setModal(true);
                                 setTempServices(item.id);
@@ -839,7 +843,7 @@ const Service = () => {
                   <thead className="table-light">
                     <tr>
                       <th>Account Name</th>
-                      <th className="text-align-right">Action</th>
+                      <th className="text-end">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -886,7 +890,7 @@ const Service = () => {
           </CommanModal>
 
           <div className="form__item button__items d-flex justify-content-between">
-            <Button className="btn btn-secondary" type="default" onClick={prev}>
+            <Button className="btn btn-info" type="default" onClick={prev}>
               <i className="pe-2 fa-regular fa-arrow-left-long"></i> Previous
             </Button>
             <Button

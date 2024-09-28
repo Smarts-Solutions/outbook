@@ -1629,13 +1629,13 @@ const Information = ({ id, pageStatus }) => {
                                           <div className="col-lg-12">
                                             <div className="form-check mb-3 d-flex justify-content-end">
                                               <button
-                                                className="btn btn-danger"
+                                                className="delete-icon"
                                                 onClick={() =>
                                                   handleDeleteContact(index)
                                                 }
                                                 disabled={contacts.length === 1}
                                               >
-                                                Delete
+                                                <i className="ti-trash text-danger"></i>
                                               </button>
                                             </div>
                                           </div>
@@ -2041,18 +2041,18 @@ const Information = ({ id, pageStatus }) => {
                                     <div className="row">
                                       <div className="col-lg-12">
                                         <div
-                                          className="form-check form-switch form-switch-md mb-3 d-flex justify-content-between"
+                                          className=" mb-2 d-flex justify-content-between"
                                           dir="ltr"
                                         >
                                           <div>
-                                            <label className="form-check-label">
+                                            <label className="fw-bold form-check-label">
                                               Partner {index + 1}
                                             </label>
                                           </div>
                                           {index !== 0 && index !== 1 && (
                                             <div>
                                               <button
-                                                className="btn btn-danger"
+                                                className="delete-icon"
                                                 type="button"
                                                 onClick={() =>
                                                   handleDeleteContact1(index)
@@ -2061,7 +2061,7 @@ const Information = ({ id, pageStatus }) => {
                                                   contacts1.length === 1
                                                 }
                                               >
-                                                Delete
+                                                <i className="ti-trash text-danger"></i>
                                               </button>
                                             </div>
                                           )}
@@ -2292,6 +2292,7 @@ const Information = ({ id, pageStatus }) => {
                                   className="btn btn-info text-white blue-btn"
                                   onClick={handleAddContact1}
                                 >
+                                  <i className="fa fa-plus"></i>
                                   Add Partner
                                 </button>
                               </div>
@@ -2308,7 +2309,7 @@ const Information = ({ id, pageStatus }) => {
             </section>
             <div className="form__item button__items d-flex justify-content-between">
               <Button
-                className="btn btn-secondary"
+                className="btn btn-info"
                 type="default"
                 onClick={(e) => navigate("/admin/customer")}
               >

@@ -205,7 +205,7 @@ const Paper = () => {
                               <div className="d-flex align-items-start justify-content-between gap-3 mt-4">
                                 <button
                                   type="button"
-                                  className="btn btn-secondary text-decoration-none previestab"
+                                  className="btn btn-info text-decoration-none previestab"
                                   onClick={prev}
                                 >
                                   <i className="pe-2 fa-regular fa-arrow-left-long"></i>{" "}

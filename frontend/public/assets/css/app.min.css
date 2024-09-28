@@ -457,7 +457,7 @@
   height: 35px;
   border: none;
   font-size: 12px;
-  border-radius: 3px;
+  border-radius: 20px;
   padding-left: 27px;
   font-weight: 400;
   color: #C0C0C0 !important;
@@ -9471,11 +9471,12 @@ button.edit-icon,
 .datatable-container button.view-icon,
 button.view-icon,
 button.add-icon,
+button.secondary-icon,
 .datatable-container button.add-icon,
 .secondary-icon {
   border-radius: 20px;
-  padding: 7px 8px;
-  font-size: 13px;
+  padding: 5px 5px;
+  font-size: 14px;
   margin: 0px 4px;
   background: none;
   border-width: 3px;
@@ -9500,10 +9501,10 @@ button.delete-icon,.datatable-container button.delete-icon{
   border: 3px solid #ff0000;
   
 }
-.datatable-container button.edit-icon i, button.delete-icon i, button.edit-icon i, button.delete-icon i {
-  font-size: 18px;
+button.secondary-icon i,button.view-icon i, .datatable-container button.view-icon i ,.datatable-container button.edit-icon i, button.delete-icon i, button.edit-icon i, button.delete-icon i {
+  font-size: 16px;
   line-height: 20px;
-  padding: 10px 2px;
+  padding: 1px 2px;
 }
 
 .datatable-container .data-table-extensions {
@@ -10405,7 +10406,6 @@ span.breadcrumb__desc {
 .tooltip--multiline {
   box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
   background: #fff;
- 
   display: none;
   padding: 10px;
   position: absolute;
@@ -10419,6 +10419,8 @@ span.breadcrumb__desc {
   -ms-transform: translate(-50%, 0%);
   -o-transform: translate(-50%, 0%);
   transform: translate(-50%, 0%);
+  height: 280px;
+  overflow-y: auto;
 }
 .tooltip--multiline ul li b,li::marker{
   color:  #00afef;
@@ -10479,4 +10481,51 @@ img.dashboad-img {
 button.btn.btn-sm {
   font-size: 12px !important;
   padding: 6px 11px !important;
+}
+a.nav-link.dropdown-toggle.arrow-none.waves-light.waves-effect img {
+  width: 31px;
+  height: 31px;
+}
+.btn-outline-success
+{
+  border: 3px solid #43c752 !important;
+  color: #43c752;
+  background-color: transparent;
+  border-radius: 20px !important;
+  font-weight: 600;
+}
+
+.btn-outline-success:hover
+{
+ 
+  color: #fff;
+  background-color: #43c752;
+
+}
+.hours-div {
+  position: relative;
+}
+
+.hours-div {
+  position: relative;
+  margin: 0px 5px;
+}
+.hours-div .input-group-text
+{
+position: absolute;
+right: 0;
+
+}
+.input-group {
+  flex-wrap: nowrap;
+ 
+}
+.hours-div .input-group-text {
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  border-radius: 0 20px 20px 0px;
+}
+.swal2-popup .swal2-styled:focus {
+  box-shadow: none !important;
 }

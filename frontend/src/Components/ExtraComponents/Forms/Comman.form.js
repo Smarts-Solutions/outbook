@@ -557,10 +557,11 @@ const ReusableForm = ({
             </button>
 
             <button
-              className={`btn btn-info text-white blue-btn`}
+              className={`btn btn-outline-success`}
               type="submit"
               disabled={formik.isSubmitting}
             >
+              <i className="far fa-save pe-1"></i>
               {btn_name}
             </button>
           </div>

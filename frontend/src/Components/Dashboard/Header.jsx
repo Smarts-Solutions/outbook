@@ -138,7 +138,8 @@ const Header = () => {
                 aria-haspopup="false"
                 aria-expanded="false"
               >
-                <i className="fa-solid fa-bell"></i>
+                <img src="/assets/images/bell.png"/>
+                {/* <i className="fa-solid fa-bell"></i> */}
                 {/* <span className="badge  text-white text-bg-info badge-pill noti-icon-badge">
                                     2
                                 </span> */}
