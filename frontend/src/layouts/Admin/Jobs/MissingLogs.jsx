@@ -72,8 +72,6 @@ const MissingLogs = () => {
     Profile()
     GetMissingLogDetails();
   }, []);
-
-
   const Profile = async (e) => {
     const req = { id: staffDetails.id }
     await dispatch(getProfile(req))
@@ -86,7 +84,6 @@ const MissingLogs = () => {
         else {
           setGetProfileDetails([])
         }
-
       })
       .catch((error) => {
         return;

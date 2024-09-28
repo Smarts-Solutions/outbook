@@ -680,7 +680,6 @@ const getDraftSingleView = async (req, res) => {
 const addDraft = async (draft) => {
   const { job_id, draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete ,final_draft_sent_on } = draft;
 
-
   if(parseInt(was_it_complete)===1){
     const [[rowsCheckMissingLog]] = await pool.execute(`SELECT 
     CASE
@@ -740,8 +739,8 @@ const addDraft = async (draft) => {
       const currentDate = new Date();
       await SatffLogUpdateOperation(
         {
-          staff_id: draft.body.StaffUserId,
-          ip: draft.body.ip,
+          staff_id: draft.StaffUserId,
+          ip: draft.ip,
           date: currentDate.toISOString().split('T')[0],
           module_name: 'job',
           log_message: `sent the draft for job code:`,
@@ -804,7 +803,7 @@ const editDraft = async (draft) => {
         return { status: false, message: 'Please complete the missing logs first.',data : "W" };
       }
       else if(rowsCheckQuery.status_check === 0){
-        return { status: false, message: 'Please complete the queries first.',data : "W" };
+        return { status: false, message: 'Please complete the queries first.', data : "W" };
       }
     }
    

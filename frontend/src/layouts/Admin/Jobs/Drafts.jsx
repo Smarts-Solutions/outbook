@@ -114,13 +114,12 @@ const Drafts = () => {
       updated_amendment: AllDraftInputdata.updated_amendments,
       feedback: AllDraftInputdata.enter_feedback,
       was_it_complete: AllDraftInputdata.was_it_complete,
-
     }
     const data = { req: req, authToken: token }
     await dispatch(AddDraft(data))
       .unwrap()
       .then((response) => {
-        if (response.status) {
+        if (response.status) {  
           setAdddraft(false)
           GetAllDraftList()
           resetForm()
@@ -133,13 +132,21 @@ const Drafts = () => {
           });
         }
         else {
-          sweatalert.fire({
-            icon: 'error',
-            title: response.message,
-            timerProgressBar: true,
-            showConfirmButton: true,
-            timer: 1500
-          });
+          response.data == "W" ?
+            sweatalert.fire({
+              icon: 'warning',
+              title: response.message,
+              timerProgressBar: true,
+              showConfirmButton: true,
+              timer: 1500
+            }) :
+            sweatalert.fire({
+              icon: 'error',
+              title: response.message,
+              timerProgressBar: true,
+              showConfirmButton: true,
+              timer: 1500
+            });
         }
       })
       .catch((error) => {
@@ -176,13 +183,22 @@ const Drafts = () => {
           });
         }
         else {
-          sweatalert.fire({
-            icon: 'error',
-            title: response.message,
-            timerProgressBar: true,
-            showConfirmButton: true,
-            timer: 1500
-          });
+          console.log(response)
+          response.data == "W" ?
+            sweatalert.fire({
+              icon: 'warning',
+              title: response.message,
+              timerProgressBar: true,
+              showConfirmButton: true,
+              timer: 1500
+            }) :
+            sweatalert.fire({
+              icon: 'error',
+              title: response.message,
+              timerProgressBar: true,
+              showConfirmButton: true,
+              timer: 1500
+            });
         }
       })
       .catch((error) => {
@@ -340,7 +356,7 @@ const Drafts = () => {
             <div className="col-lg-6">
               <div className="mb-3">
                 <label htmlFor="firstNameinput" className="form-label">
-                Was Draft Completed
+                  Was Draft Completed
                 </label>
                 <select
 
