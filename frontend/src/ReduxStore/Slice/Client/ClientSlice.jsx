@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { GET_CLIENT_INDUSTRY, ADD_CLIENT, CLIENT_ACTION, EDIT_CLIENT } from "../../../Services/Client/ClientService";
 
 import axios from "axios";
-const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 const token = localStorage.getItem("token");
 
 
@@ -20,6 +20,7 @@ export const GetClientIndustry = createAsyncThunk("clientIndustry", async (data)
   const { req, authToken } = data
   try {
     let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
     const res = await GET_CLIENT_INDUSTRY(updatedReq, authToken);
 
@@ -33,6 +34,7 @@ export const ClientAction = createAsyncThunk("clientAction", async (data) => {
   const { req, authToken } = data
   try {
     let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
     const res = await CLIENT_ACTION(updatedReq, authToken);
 
@@ -47,6 +49,7 @@ export const Add_Client = createAsyncThunk("addClient", async (req) => {
 
   try {
     let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
     const res = await ADD_CLIENT(updatedReq, authToken);
 
@@ -60,6 +63,7 @@ export const Edit_Client = createAsyncThunk("clientUpdate", async (req) => {
   const authToken = token;
   try {
     let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
     const res = await EDIT_CLIENT(updatedReq, authToken);
 

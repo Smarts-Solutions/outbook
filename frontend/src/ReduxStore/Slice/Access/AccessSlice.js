@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { GETACCESS, ROLEACCESS } from "../../../Services/Access/Accessservices";
 import axios from "axios";
 
-const StaffUserId = JSON.parse(localStorage.getItem("staffDetails")) || {};
+var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 
 export async function GET_IP() {
     try {
@@ -18,6 +18,7 @@ export const GetAccess = createAsyncThunk("accessRolePermissions/getAccess", asy
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
     const res = await GETACCESS(updatedReq, authToken);
     return await res;
@@ -31,6 +32,7 @@ export const RoleAccess = createAsyncThunk("accessRolePermissions/roleAccess", a
     const { req, authToken } = data;
   
     let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: req.StaffUserId ?req.StaffUserId :StaffUserId.id };
     const res = await ROLEACCESS(updatedReq, authToken);
      

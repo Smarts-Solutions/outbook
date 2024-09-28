@@ -4,8 +4,7 @@ import { STAFF ,SERVICE,COMPETENCY , GETPROFILE} from "../../../Services/Staff/s
 
 import axios from "axios";
 
-
-const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 export async function GET_IP(data, token) {
   try {
     const res = await axios.get(`https://api.ipify.org?format=json`)
@@ -21,6 +20,7 @@ export const Staff = createAsyncThunk("staff", async (data) => {
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
     const res = await STAFF(updatedReq, authToken);
      
@@ -34,6 +34,7 @@ export const Service = createAsyncThunk("service", async (data) => {
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
     const res = await SERVICE(updatedReq, authToken);
   
@@ -47,6 +48,7 @@ export const Competency = createAsyncThunk("staffCompetency", async (data) => {
   try {
     const { req , authToken } = data
     let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
     const res = await COMPETENCY(updatedReq, authToken);
    
@@ -60,6 +62,7 @@ export const getProfile = createAsyncThunk("profile", async (data) => {
   try {
 
     let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = { ...data, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
     const res = await GETPROFILE(updatedReq);
      
