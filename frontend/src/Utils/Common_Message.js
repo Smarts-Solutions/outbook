@@ -57,6 +57,31 @@ export const EDIT_CUSTOMER = {
 };
 
 
+export const EngagementErrorMsg = {
+  accountants : "Please Enter Number of Accountants",
+  feePerAccountant : "Please Enter Fee Per Accountant",
+  bookkeepers : "Please Enter Number of Bookkeepers",
+  feePerBookkeeper : "Please Enter Fee Per Bookkeeper",
+  payrollExperts : "Please Enter Number of Payroll Experts",
+  feePerPayrollExpert : "Please Enter Fee Per Payroll Expert",
+  taxExperts : "Please Enter Number of Tax Experts",
+  feePerTaxExpert : "Please Enter Fee Per Tax Expert",
+  numberOfAdmin : "Please Enter Number of Admin/Other Staff",
+  feePerAdmin : "Please Enter Fee Per Admin/Other Staff",
+  total_outsourcing : "Please Enter Total Outsourcing Fee Percentage between 0 and 100",
+  accountants : "Please Enter Accountants Fee Percentage between 0 and 100",
+  bookkeepers : "Please Enter Bookkeepers Fee Percentage between 0 and 100",
+  payroll_experts : "Please Enter Payroll Experts Fee Percentage between 0 and 100",
+  tax_experts : "Please Enter Tax Experts Fee Percentage between 0 and 100",
+  admin_staff : "Please Enter Admin/Other Staff Fee Percentage between 0 and 100",
+  adhoc_accountants : "Please Enter Accountants Fee Per Hour between 7 and 25",
+  adhoc_bookkeepers : "Please Enter Bookkeepers Fee Per Hour between 7 and 25",
+  adhoc_payroll_experts : "Please Enter Payroll Experts Fee Per Hour between 7 and 25",
+  adhoc_tax_experts : "Please Enter Tax Experts Fee Per Hour between 7 and 25",
+  adhoc_admin_staff : "Please Enter Admin/Other Staff Fee Per Hour between 7 and 25",
+}
+
+
 
 export const FTEDedicatedErrorMessages = {
   'accountants': "Please Enter Number of Accountants",

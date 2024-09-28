@@ -84,7 +84,6 @@ const Dashboard = () => {
   return (
     <div>
       <div className="container-fluid">
-        {/* Page-Title */}
         <div className="row">
           <div className="col-sm-12">
             <div className="page-title-box">
