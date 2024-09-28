@@ -1745,7 +1745,6 @@ WHERE
 ORDER BY
     staff_logs.id DESC
 `;
-
   const [result] = await pool.execute(query);
 
   const groupedResult = result.reduce((acc, log) => {
