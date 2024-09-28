@@ -27,7 +27,6 @@ const MissingLogs = () => {
 
   const [missionLogAllInputData, setMissionAllInputLogData] = useState({
     missing_log: "0",
-  
     missing_log_sent_on: new Date().toISOString().substr(0, 10),
     missing_log_prepared_date: null,
     missing_log_reviewed_by: null,
@@ -41,7 +40,6 @@ const MissingLogs = () => {
     setMissionAllInputLogData({
       ...missionLogAllInputData,
       missing_log: "0",
-    
       missing_log_sent_on: new Date().toISOString().substr(0, 10),
       missing_log_prepared_date: null,
       missing_log_reviewed_date: null,
