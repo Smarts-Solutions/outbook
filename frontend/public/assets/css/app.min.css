@@ -9464,22 +9464,16 @@ white-space: break-spaces;
   border-radius: 5px;
 }
 
-.datatable-container button.edit-icon,
-.datatable-container button.delete-icon,
-button.delete-icon,
-button.edit-icon,
-.datatable-container button.view-icon,
-button.view-icon,
-button.add-icon,
-button.secondary-icon,
-.datatable-container button.add-icon,
-.secondary-icon {
+.datatable-container button.edit-icon, .datatable-container button.delete-icon, button.delete-icon, button.edit-icon, .datatable-container button.view-icon, button.view-icon, button.add-icon, button.secondary-icon, .datatable-container button.add-icon, .secondary-icon {
   border-radius: 20px;
-  padding: 5px 5px;
-  font-size: 14px;
+  padding: 7px 8px;
+  font-size: 20px;
   margin: 0px 4px;
   background: none;
   border-width: 3px;
+  line-height: 19px;
+  /* padding-top: 7px; */
+  /* line-height: 19px; */
 }
 button.add-icon, .datatable-container button.add-icon {
   color: #008306;
@@ -9501,10 +9495,10 @@ button.delete-icon,.datatable-container button.delete-icon{
   border: 3px solid #ff0000;
   
 }
-button.secondary-icon i,button.view-icon i, .datatable-container button.view-icon i ,.datatable-container button.edit-icon i, button.delete-icon i, button.edit-icon i, button.delete-icon i {
-  font-size: 16px;
-  line-height: 20px;
-  padding: 1px 2px;
+button.secondary-icon i, button.view-icon i, .datatable-container button.view-icon i, .datatable-container button.edit-icon i, button.delete-icon i, button.edit-icon i, button.delete-icon i {
+  font-size: 18px;
+  /* line-height: 20px; */
+  /* padding: 1px 2px; */
 }
 
 .datatable-container .data-table-extensions {
@@ -9938,13 +9932,13 @@ body .accordion-button:not(.collapsed)::after {
   border-radius: 0px !important;
 }
 .error-text {
-  background: #f8d7da;
-  color: #721c24 !important;
-  font-size: 11px;
+  /* background: #f8d7da; */
+  color: #f30017 !important;
+  font-size: 13px;
   padding: 0px 3px;
-  margin-top: 4px;
-  border-radius: 4px;
-  border: 0.5px solid #721c242e;
+  margin-top: 1px;
+  /* border-radius: 4px; */
+  /* border: 0.5px solid #721c242e; */
 }
 .error-text-login {
   background: #cb0000;
@@ -10486,13 +10480,14 @@ a.nav-link.dropdown-toggle.arrow-none.waves-light.waves-effect img {
   width: 31px;
   height: 31px;
 }
-.btn-outline-success
-{
+.btn-outline-success {
   border: 3px solid #43c752 !important;
   color: #43c752;
   background-color: transparent;
   border-radius: 20px !important;
   font-weight: 600;
+  font-size: 14px;
+  padding: 8px 20px;
 }
 
 .btn-outline-success:hover
@@ -10528,4 +10523,8 @@ right: 0;
 }
 .swal2-popup .swal2-styled:focus {
   box-shadow: none !important;
+}
+select.error-field.form-select, input.error-field.form-control {
+  background: #fff3f3;
+  border: 1px solid #ef7e7e;
 }

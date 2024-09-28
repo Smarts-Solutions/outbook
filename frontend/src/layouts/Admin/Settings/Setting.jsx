@@ -956,11 +956,19 @@ const Setting = () => {
       name: "Client Type",
       selector: (row) => row.client_type_type,
       sortable: true,
-      width: "400px",
+      width: "300px",
     },
     {
       name: "Status",
-      selector: (row) => (row.status == "1" ? "Active" : "Deactive"),
+      selector: (row) => (<div>
+        <span
+          className={` ${
+            row.status === "1" ? "text-success" : "text-danger"
+          }`}
+        >
+          {row.status === "1" ? "Active" : "Deactive"}
+        </span>
+      </div>),
       sortable: true,
       width: "100px",
     },

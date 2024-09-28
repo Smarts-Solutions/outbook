@@ -96,11 +96,11 @@ const ClientList = () => {
       selector: (row) => row.client_trading_name,
       sortable: true,
     },
-    {
-      name: "Client Job Code",
-      selector: (row) => row.client_job_code,
-      sortable: true,
-    },
+    // {
+    //   name: "Client Job Code",
+    //   selector: (row) => row.client_job_code,
+    //   sortable: true,
+    // },
     {
       name: "Outbooks Acount Manager",
       selector: (row) =>
@@ -134,6 +134,7 @@ const ClientList = () => {
     {
       name: "Status",
       selector: (row) =>
+        
         row.status == null || row.status == 0 ? "To Be Started - Not Yet Allocated Internally" : row.status,
       sortable: true,
       width: "325px"
@@ -272,7 +273,7 @@ const ClientList = () => {
               <>
                 <div className="col-md-4 col-auto">
                   <div
-                    className="btn btn-info text-white float-end blue-btn"
+                    className="btn btn-info text-white float-end blue-btn ms-2"
                     onClick={handleAddClient}
                   >
                     <i className="fa fa-plus pe-1" /> Create Job

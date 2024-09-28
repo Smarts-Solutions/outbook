@@ -734,7 +734,7 @@ const Service = () => {
                                                                                 )
                                                                               )}
                                                                             </td>
-                                                                            <td>
+                                                                            <td className="text-center">
                                                                               <button
                                                                                 className=" delete-icon"
                                                                                 onClick={() =>

@@ -534,9 +534,11 @@ const CreateCheckList = () => {
                 window.history.back()
               }
             >
+               <i className="fa fa-times pe-1"></i>
               Cancel
             </button>
-            <button className="btn btn-info ms-2" onClick={handleSubmit}>
+            <button className="btn btn-outline-success ms-2" onClick={handleSubmit}>
+            <i className="far fa-save pe-1"></i>
               Submit
             </button>
           </div>

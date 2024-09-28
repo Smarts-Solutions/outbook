@@ -300,7 +300,8 @@ const MissingLogs = () => {
               <select
                 name="missing_log"
                 id="missing_log"
-                className="form-select mb-3 ismissinglog"
+                className={errors1["missing_log"] ? "error-field form-select mb-3 ismissinglog" : "form-select mb-3 ismissinglog"}
+                
                 aria-label="Default select example"
                 style={{ color: "#8a8c8e !important" }}
                 onChange={(e) => handleChange(e)}
@@ -323,7 +324,8 @@ const MissingLogs = () => {
               </label>
               <input
                 type="date"
-                className="form-control"
+                className={errors1["missing_log_sent_on"] ? "error-field form-control" : "form-control"}
+                
                 placeholder=""
                 id="missing_log_sent_on"
                 name="missing_log_sent_on"
@@ -344,7 +346,8 @@ const MissingLogs = () => {
               </label>
               <input
                 type="date"
-                className="form-control"
+                
+                className={errors1["missing_log_prepared_date"] ? "error-field form-control" : "form-control"}
                 placeholder=""
                 id="missing_log_prepared_date"
                 name="missing_log_prepared_date"
@@ -369,7 +372,7 @@ const MissingLogs = () => {
               <input
                 type="text"
                 defaultValue=""
-                className="form-control"
+                className={errors1["missing_log_reviewed_by"] ? "error-field form-control" : "form-control"}
                 placeholder="Missing Log Reviewed By"
                 id="missing_log_reviewed_by"
                 name="missing_log_reviewed_by"
@@ -392,7 +395,7 @@ const MissingLogs = () => {
               </label>
               <input
                 type="date"
-                className="form-control"
+                className={errors1["missing_log_reviewed_date"] ? "error-field form-control" : "form-control"}
                 placeholder=""
                 id="missing_log_reviewed_date"
                 name="missing_log_reviewed_date"
@@ -418,7 +421,8 @@ const MissingLogs = () => {
                 id="missing_log_document"
                 name="missing_log_document"
                 onChange={(event) => { handleChange(event) }}
-                className="custom-file-input form-control"
+                // className="custom-file-input form-control"
+                className={errors1["missing_log_document"] ? "error-field custom-file-input form-control" : "custom-file-input form-control"}
               />
               {errors1["missing_log_document"] && (
                 <div className="error-text">
@@ -499,7 +503,8 @@ const MissingLogs = () => {
               <select
                 name="missing_log"
                 id="missing_log"
-                className="form-select mb-3 ismissinglog"
+                className={errors1["missing_log"] ? "error-field form-select mb-3 ismissinglog" : "form-select mb-3 ismissinglog"}
+               
                 aria-label="Default select example"
                 style={{ color: "#8a8c8e !important" }}
                 onChange={(e) => handleChange(e)}
@@ -523,7 +528,8 @@ const MissingLogs = () => {
               </label>
               <input
                 type="date"
-                className="form-control"
+                className={errors1["missing_log_sent_on"] ? "error-field form-control" : "form-control"}
+              
                 placeholder=""
                 id="missing_log_sent_on"
                 name="missing_log_sent_on"
@@ -544,7 +550,7 @@ const MissingLogs = () => {
               </label>
               <input
                 type="date"
-                className="form-control"
+                className={errors1["missing_log_prepared_date"] ? "error-field form-control" : "form-control"}
                 placeholder=""
                 id="missing_log_prepared_date"
                 name="missing_log_prepared_date"
@@ -568,7 +574,7 @@ const MissingLogs = () => {
               <input
                 type="text"
                 defaultValue=""
-                className="form-control"
+                className={errors1["missing_log_reviewed_by"] ? "error-field form-control" : "form-control"}
                 placeholder="Missing Log Reviewed By"
                 id="missing_log_reviewed_by"
                 name="missing_log_reviewed_by"
@@ -591,7 +597,7 @@ const MissingLogs = () => {
               </label>
               <input
                 type="date"
-                className="form-control"
+                className={errors1["missing_log_reviewed_date"] ? "error-field form-control" : "form-control"}
                 placeholder=""
                 id="missing_log_reviewed_date"
                 name="missing_log_reviewed_date"
@@ -617,7 +623,8 @@ const MissingLogs = () => {
                 id="missing_log_document"
                 name="missing_log_document"
                 onChange={(event) => { handleChange(event) }}
-                className="custom-file-input form-control"
+                className={errors1["missing_log_document"] ? "error-field custom-file-input form-control" : "custom-file-input form-control"}
+                
               />
               {errors1["missing_log_document"] && (
                 <div className="error-text">

@@ -245,13 +245,21 @@ const JobInformationPage = ({ job_id }) => {
     return (
         <div>
             <div className='row mb-3'>
-                <div className='col-md-9'>
+                <div className='col-md-8'>
                     <div className='tab-title'>
                         <h3>Job Information </h3>
                     </div>
                 </div>
-                <div className='col-md-3 '>
-                    <div className='d-flex text-end'>
+                <div className='col-md-4 '>
+                    <div className='d-flex w-100'>
+                    <div className='w-75'>
+            <select
+              className="form-select form-control"
+            >
+              <option value="0">Deactive</option>
+              <option value="1">Active</option>
+            </select>
+          </div>
                     <button className='edit-icon' onClick={handleJobEdit}>  <i className="ti-pencil text-primary" /></button>
 
                         <button className='delete-icon' onClick={handleDelete}><i className="ti-trash text-danger"></i></button>
@@ -383,8 +391,9 @@ const JobInformationPage = ({ job_id }) => {
 
                                     <div className="col-lg-4">
                                         <div className="mb-3">
-                                            <label className="form-label">Budgeted Hours</label>
+                                            <label className="form-label">Budgeted Time</label>
                                             <div className="input-group">
+                                            <div className='hours-div'>
                                                 <input
                                                     type="text"
                                                     defaultValue=""
@@ -397,8 +406,10 @@ const JobInformationPage = ({ job_id }) => {
 
                                                 />
                                                 <span className="input-group-text" id="basic-addon2">
-                                                    Hours
+                                                    H
                                                 </span>
+                                                </div>
+                                                <div className='hours-div'>
                                                 <input
                                                     type="text"
                                                     className="form-control"
@@ -411,8 +422,9 @@ const JobInformationPage = ({ job_id }) => {
 
                                                 />
                                                 <span className="input-group-text" id="basic-addon2">
-                                                    Minutes
+                                                    M
                                                 </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -511,6 +523,7 @@ const JobInformationPage = ({ job_id }) => {
                                         <div className="mb-3">
                                             <label className="form-label" >Total Preparation Time</label>
                                             <div className="input-group">
+                                            <div className='hours-div'>
                                                 <input
                                                     type="text"
                                                     className="form-control"
@@ -521,8 +534,10 @@ const JobInformationPage = ({ job_id }) => {
                                                     value={PreparationTimne.hours}
                                                 />
                                                 <span className="input-group-text" id="basic-addon2">
-                                                    Hours
+                                                    H
                                                 </span>
+                                                </div>
+                                                <div className='hours-div'>
                                                 <input
                                                     type="text"
                                                     className="form-control"
@@ -533,8 +548,9 @@ const JobInformationPage = ({ job_id }) => {
                                                     value={PreparationTimne.minutes}
                                                 />
                                                 <span className="input-group-text" id="basic-addon2">
-                                                    Minutes
+                                                    M
                                                 </span>
+                                                </div>
                                             </div>
 
                                         </div>
@@ -544,6 +560,7 @@ const JobInformationPage = ({ job_id }) => {
                                         <div className="mb-3">
                                             <label className="form-label">Review Time</label>
                                             <div className="input-group">
+                                            <div className='hours-div'>
                                                 <input
                                                     type="text"
                                                     className="form-control"
@@ -554,8 +571,10 @@ const JobInformationPage = ({ job_id }) => {
                                                     value={ReviewTime.hours}
                                                 />
                                                 <span className="input-group-text" id="basic-addon2">
-                                                    Hours
+                                                    H
                                                 </span>
+                                                </div>
+                                                <div className='hours-div'>
                                                 <input
                                                     type="text"
                                                     className="form-control"
@@ -566,8 +585,9 @@ const JobInformationPage = ({ job_id }) => {
                                                     value={ReviewTime.minutes}
                                                 />
                                                 <span className="input-group-text" id="basic-addon2">
-                                                    Minutes
+                                                    M
                                                 </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -576,6 +596,7 @@ const JobInformationPage = ({ job_id }) => {
                                         <div className="mb-3">
                                             <label className="form-label" >Feedback Incorporation Time</label>
                                             <div className="input-group">
+                                            <div className='hours-div'>
                                                 <input
                                                     type="text"
                                                     className="form-control"
@@ -586,8 +607,10 @@ const JobInformationPage = ({ job_id }) => {
                                                     value={FeedbackIncorporationTime.hours}
                                                 />
                                                 <span className="input-group-text" id="basic-addon2">
-                                                    Hours
+                                                    H
                                                 </span>
+                                                </div>
+                                                <div className='hours-div'>
                                                 <input
                                                     type="text"
                                                     className="form-control"
@@ -598,8 +621,9 @@ const JobInformationPage = ({ job_id }) => {
                                                     value={FeedbackIncorporationTime.minutes}
                                                 />
                                                 <span className="input-group-text" id="basic-addon2">
-                                                    Minutes
+                                                    M
                                                 </span>
+                                                </div>
                                             </div>
 
                                         </div>
@@ -611,6 +635,7 @@ const JobInformationPage = ({ job_id }) => {
                                             <div className="row">
                                                 <div className="col-md-6 pe-0">
                                                     <div className="input-group">
+                                                    <div className='hours-div'>
                                                         <input
                                                             type="text"
                                                             className="form-control"
@@ -624,12 +649,14 @@ const JobInformationPage = ({ job_id }) => {
 
                                                         />
                                                         <span className="input-group-text" id="basic-addon2">
-                                                            Hours
+                                                            H
                                                         </span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div className="col-md-6 ps-0">
                                                     <div className="input-group">
+                                                    <div className='hours-div'>
                                                         <input
                                                             type="text"
                                                             className="form-control"
@@ -642,8 +669,9 @@ const JobInformationPage = ({ job_id }) => {
                                                             value={Totaltime.minutes}
                                                         />
                                                         <span className="input-group-text" id="basic-addon2">
-                                                            Minutes
+                                                            M
                                                         </span>
+                                                        </div>
                                                     </div>
                                                 </div>
 

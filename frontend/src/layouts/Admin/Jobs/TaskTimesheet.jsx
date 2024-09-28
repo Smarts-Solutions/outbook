@@ -202,8 +202,8 @@ const TaskTimesheet = () => {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="edit-icon" onClick={() => { handleTimeSheetView(location.state.job_id); setRowData(row); setViewtimesheet(true) }}>
-            <i className="fa fa-eye fs-6 text-secondary" />
+          <button className="view-icon" onClick={() => { handleTimeSheetView(location.state.job_id); setRowData(row); setViewtimesheet(true) }}>
+            <i className="fa fa-eye fs-6 text-warning" />
           </button>
         </div>
       ),
@@ -454,7 +454,7 @@ const TaskTimesheet = () => {
               <div className="input-group">
                 <input
                   type="number"
-                  className="form-control"
+                  className={error['totalHours'] ? "error-field form-control" : "form-control"}
                   placeholder="Hours"
                   defaultValue=""
                   id="totalHours"
@@ -464,7 +464,7 @@ const TaskTimesheet = () => {
                 />
                 <input
                   type=""
-                  className="form-control"
+                  className={error['totalMinutes'] ? "error-field form-control" : "form-control"}
                   placeholder="Minutes"
                   defaultValue=""
                   id="totalMinutes"
@@ -482,7 +482,9 @@ const TaskTimesheet = () => {
           <div className="col-lg-12">
             <div className="mb-3">
               <label className="form-label">Status</label>
-              <select className="form-select"
+              <select 
+               className={error['status'] ? "error-field form-select" : "form-select"}
+              // className="form-select"
                 id="status"
                 name="status"
                 onChange={(e) => handleChange(e)}

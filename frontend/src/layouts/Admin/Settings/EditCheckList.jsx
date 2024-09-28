@@ -442,7 +442,7 @@ const CreateCheckList = () => {
               <div className="col-lg-12 mt-4">
                 <button
                   type="button"
-                  className="btn btn-secondary ms-2"
+                  className="btn btn-info ms-2"
                   onClick={addTask}
                 >
                   <i className="fa fa-plus"></i> Add Task
@@ -502,10 +502,10 @@ const CreateCheckList = () => {
                   {tasks.length > 1 && (
                     <button
                       type="button"
-                      className="btn p-0"
+                      className="delete-icon"
                       onClick={() => removeTask(index)}
                     >
-                      <i className="ti-trash text-danger fs-4"></i>
+                      <i className="ti-trash text-danger "></i>
                     </button>
                   )}
                 </div>
@@ -515,9 +515,10 @@ const CreateCheckList = () => {
               <div className="col-lg-12">
                 <button
                   type="button"
-                  className="btn btn-info"
+                  className="btn btn-ouline-success"
                   onClick={handleSubmit}
                 >
+                  <i className="far fa-save pe-1"></i>
                   Submit
                 </button>
               </div>

@@ -1649,7 +1649,7 @@ const ClientEdit = () => {
                                                       <div className="col-lg-12">
                                                         <div className="form-check mb-3 d-flex justify-content-end">
                                                           <button
-                                                            className="btn btn-danger"
+                                                            className="delete-icon"
                                                             onClick={() =>
                                                               handleDeleteCompanyContact(
                                                                 index
@@ -1660,8 +1660,8 @@ const ClientEdit = () => {
                                                               1
                                                             }
                                                           >
-                                                            <i className="ti-trash  pe-1"></i>{" "}
-                                                            Delete
+                                                            <i className="ti-trash text-danger"></i>{" "}
+                                                           
                                                           </button>
                                                         </div>
                                                       </div>
@@ -2207,7 +2207,7 @@ const ClientEdit = () => {
                                                         index !== 1 && (
                                                           <div>
                                                             <button
-                                                              className="btn btn-danger"
+                                                              className="delete-icon"
                                                               type="button"
                                                               onClick={() =>
                                                                 handleDeletePartnershipContact(
@@ -2219,8 +2219,8 @@ const ClientEdit = () => {
                                                                 1
                                                               }
                                                             >
-                                                              <i className="ti-trash  pe-1"></i>{" "}
-                                                              Delete
+                                                              <i className="ti-trash text-danger"></i>{" "}
+                                                            
                                                             </button>
                                                           </div>
                                                         )}
@@ -2624,6 +2624,7 @@ const ClientEdit = () => {
                                               className="btn btn-info text-white blue-btn"
                                               onClick={handleAddPartnershipContact}
                                             >
+                                              <i className="fa fa-plus pe-1"></i>
                                               Add Partner
                                             </button>
                                           </div>
@@ -2847,12 +2848,14 @@ const ClientEdit = () => {
                           className="btn btn-secondary"
                           onClick={HandleCancel}
                         >
+                          <i className="fa fa-times pe-1"></i>
                           Cancel
                         </button>
                         <button
-                          className="btn btn-info text-white blue-btn"
+                          className="btn btn-outline-success"
                           onClick={handleUpdate}
                         >
+                          <i className="fa fa-edit pe-1"></i>
                           Update Client
                         </button>
                       </div>
