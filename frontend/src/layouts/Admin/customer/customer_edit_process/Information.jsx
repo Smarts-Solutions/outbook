@@ -1004,7 +1004,7 @@ const Information = ({ id, pageStatus }) => {
                                 type="text"
                                 name="tradingName"
                                 id="tradingName"
-                                className="form-control"
+                                className={errors1["tradingName"] ? "error-field form-control" : "form-control"}
                                 placeholder="Trading Name"
                                 onChange={(e) => handleChange1(e)}
                                 value={getSoleTraderDetails.tradingName}
