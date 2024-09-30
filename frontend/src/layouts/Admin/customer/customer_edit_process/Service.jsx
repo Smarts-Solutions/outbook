@@ -569,7 +569,7 @@ const Service = () => {
                                                                 onClick={
                                                                   handleDownload
                                                                 }
-                                                                className="btn  btn-sm btn-outline-info"
+                                                                className="btn  btn-sm btn-info"
                                                               >
                                                                 <i className="fas fa-download me-2"></i>
                                                                 Download Sample
@@ -624,7 +624,7 @@ const Service = () => {
                                                                     </th>
                                                                     <th width="250" className="text-center">
                                                                       Budgeted
-                                                                      Hour
+                                                                      Time
                                                                     </th>
                                                                     <th className="text-center ">
                                                                       Action
@@ -756,7 +756,7 @@ const Service = () => {
 
                           <td className="align-top text-end">
                             <button
-                              className="btn  btn-outline-info remove-item-btn"
+                              className="btn btn-info remove-item-btn"
                               onClick={() => {
                                 setModal(true);
                                 setTempServices(item.id);
@@ -830,11 +830,11 @@ const Service = () => {
               <div className="col-3">
                 <button
                   type="button"
-                  className="btn btn-outline-info add-btn"
+                  className="btn btn-info add-btn"
                   onClick={AddManager}
-                >
+                > <i className="pe-1 fa fa-plus"></i>
                   Add
-                  <i className="ps-2 ti-plus"></i>
+                 
                 </button>
               </div>
 
@@ -859,7 +859,7 @@ const Service = () => {
                                 key={`${managerIndex}-${accountManagerIndex}`} // Ensure unique key for each row
                               >
                                 <td>{accountManager.first_name}</td>
-                                <td className="text-align-right">
+                                <td className="text-end">
                                   <button
                                     onClick={() =>
                                       removeManager(
@@ -867,9 +867,9 @@ const Service = () => {
                                         manager.service_id
                                       )
                                     }
-                                    className="btn btn-sm remove-item-btn"
+                                    className="delete-icon"
                                   >
-                                    <i className="ti-trash text-danger fs-5"></i>
+                                    <i className="ti-trash text-danger "></i>
                                   </button>
                                 </td>
                               </tr>

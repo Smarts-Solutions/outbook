@@ -2238,13 +2238,14 @@ const CreateJob = () => {
                         <Modal.Body>
                           <div className="row">
                             <div className="col-lg-12">
-                              <label className="form-label">Task Name</label>
+                              <label className="form-label ">Task Name</label>
                               <div>
                                 <input
                                   type="text"
                                   placeholder="Enter Task name"
                                   name="taskname"
-                                  className="p-1 w-100 mb-2 rounded"
+                                  className={taskNameError ? "error-field form-control" : "form-control"}
+                
                                   onChange={handleChange1}
                                   value={taskName}
                                 />
@@ -2264,6 +2265,7 @@ const CreateJob = () => {
                                   <input
                                     type="text"
                                     className="form-control"
+                                    
                                     placeholder="Hours"
                                     name="budgeted_hour"
                                     onChange={(e) => {
@@ -2306,12 +2308,14 @@ const CreateJob = () => {
                               HandleReset();
                             }}
                           >
+                            <i className="fa fa-times pe-1"></i>
                             Close
                           </Button>
                           <Button
                             variant="btn btn-info text-white float-end blue-btn"
                             onClick={handleAddTask}
                           >
+                            <i className="fa fa-plus pe-1"></i>
                             Add
                           </Button>
                         </Modal.Footer>

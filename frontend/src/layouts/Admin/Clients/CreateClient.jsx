@@ -1164,7 +1164,8 @@ const CreateClient = () => {
                                         </label>
                                         <input
                                           type="text"
-                                          className="form-control"
+                                         
+                                          className={errors1["first_name"] ? "error-field form-control" : "form-control"}
                                           placeholder="First Name"
                                           name="first_name"
                                           id="first_name"
@@ -1190,7 +1191,7 @@ const CreateClient = () => {
                                         </label>
                                         <input
                                           type="text"
-                                          className="form-control"
+                                          className={errors1["last_name"] ? "error-field form-control" : "form-control"}
                                           placeholder="Last Name"
                                           name="last_name"
                                           id="last_name"
@@ -1263,7 +1264,7 @@ const CreateClient = () => {
                                         </label>
                                         <input
                                           type="text"
-                                          className="form-control"
+                                          className={errors1["email"] ? "error-field form-control" : "form-control"}
                                           placeholder="Enter Email ID"
                                           name="email"
                                           id="email"
@@ -1329,8 +1330,8 @@ const CreateClient = () => {
                                               </label>
                                               <input
                                                 type="text"
-                                                className="form-control"
                                                 placeholder="Search Company"
+                                                className="form-select"
                                                 name="SearchCompany"
                                                 id="SearchCompany"
                                                 onChange={(e) =>
@@ -1384,7 +1385,8 @@ const CreateClient = () => {
                                             </label>
                                             <input
                                               type="text"
-                                              className="form-control input_bg"
+                                              className={errors2["CompanyName"] ? "error-field form-control" : "form-control"}
+
                                               placeholder="Enter Company Name"
                                               name="CompanyName"
                                               id="CompanyName"
@@ -1411,7 +1413,8 @@ const CreateClient = () => {
                                             </label>
                                             <input
                                               type="text"
-                                              className="form-control input_bg"
+                                              className={errors2["EntityType"] ? "error-field form-control" : "form-control"}
+
                                               placeholder="Enter Entity Type"
                                               name="EntityType"
                                               id="EntityType"
@@ -1439,7 +1442,8 @@ const CreateClient = () => {
                                             </label>
                                             <input
                                               type="text"
-                                              className="form-control input_bg"
+                                              className={errors2["CompanyStatus"] ? "error-field form-control" : "form-control"}
+
                                               placeholder="Company Status"
                                               name="CompanyStatus"
                                               id="CompanyStatus"
@@ -1466,7 +1470,9 @@ const CreateClient = () => {
                                             </label>
                                             <input
                                               type="text"
-                                              className="form-control input_bg"
+                                              
+                                              className={errors2["CompanyNumber"] ? "error-field form-control" : "form-control"}
+
                                               placeholder="Enter Company Number"
                                               name="CompanyNumber"
                                               id="CompanyNumber"
@@ -1490,7 +1496,8 @@ const CreateClient = () => {
                                             </label>
                                             <input
                                               type="text"
-                                              className="form-control input_bg"
+                                              className={errors2["IncorporationDate"] ? "error-field form-control" : "form-control"}
+
                                               placeholder="Incorporation Date"
                                               name="IncorporationDate"
                                               id="IncorporationDate"
@@ -1517,7 +1524,8 @@ const CreateClient = () => {
                                             </label>
                                             <input
                                               type="text"
-                                              className="form-control input_bg"
+                                              className={errors2["RegisteredOfficeAddress"] ? "error-field form-control" : "form-control"}
+
                                               placeholder="Registered Office Address"
                                               name="RegisteredOfficeAddress"
                                               id="RegisteredOfficeAddress"
@@ -1552,7 +1560,7 @@ const CreateClient = () => {
                                             </label>
                                             <input
                                               type="text"
-                                              className="form-control input_bg"
+                                              className={errors2["IncorporationIn"] ? "error-field form-control" : "form-control"}
                                               placeholder="Please Enter Incorporation In"
                                               name="IncorporationIn"
                                               id="IncorporationIn"
@@ -1656,7 +1664,8 @@ const CreateClient = () => {
                                             Client Industry
                                           </label>
                                           <select
-                                            className="form-select "
+                                            
+                                            className={errors2["ClientIndustry"] ? "error-field form-select" : "form-select"}
                                             name="ClientIndustry"
                                             id="ClientIndustry"
                                             onChange={(e) => handleChange2(e)}
@@ -1697,7 +1706,8 @@ const CreateClient = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className="form-control"
+                                            className={errors2["TradingName"] ? "error-field form-control" : "form-control"}
+
                                             placeholder="Trading Name"
                                             name="TradingName"
                                             id="TradingName"
@@ -1723,7 +1733,8 @@ const CreateClient = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className="form-control"
+                                            className={errors2["TradingAddress"] ? "error-field form-control" : "form-control"}
+
                                             placeholder="Trading Address"
                                             name="TradingAddress"
                                             id="TradingAddress"
@@ -1784,7 +1795,8 @@ const CreateClient = () => {
                                                       </label>
                                                       <input
                                                         type="text"
-                                                        className="form-control"
+                                                        className={errors[index].first_name  ? "error-field form-control" : "form-control"}
+
                                                         placeholder="First Name"
                                                         id={`first_name-${index}`}
                                                         value={contact.first_name}
@@ -1824,7 +1836,7 @@ const CreateClient = () => {
                                                       </label>
                                                       <input
                                                         type="text"
-                                                        className="form-control"
+                                                        className={errors[index].last_name  ? "error-field form-control" : "form-control"}
                                                         placeholder="Last Name"
                                                         id={`last_name-${index}`}
                                                         value={
@@ -2024,8 +2036,8 @@ const CreateClient = () => {
                                             Client Industry
                                           </label>
                                           <select
-                                            className="form-select "
                                             name="ClientIndustry"
+                                            className="form-select"
                                             id="ClientIndustry"
                                             value={
                                               getPartnershipDetails.ClientIndustry
@@ -2065,7 +2077,8 @@ const CreateClient = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className="form-control"
+                                            className={errors3["TradingName"]  ? "error-field form-control" : "form-control"}
+
                                             placeholder="Trading Name"
                                             name="TradingName"
                                             id="TradingName"
@@ -2092,7 +2105,8 @@ const CreateClient = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className="form-control"
+                                            className={errors3["TradingAddress"]  ? "error-field form-control" : "form-control"}
+
                                             placeholder="Trading Address"
                                             name="TradingAddress"
                                             id="TradingAddress"
@@ -2272,7 +2286,9 @@ const CreateClient = () => {
                                                     </label>
                                                     <input
                                                       type="text"
-                                                      className="form-control"
+                                                 
+                                                      className={contactsErrors[index].first_name ? "error-field form-control" : "form-control"}
+
                                                       placeholder="First Name"
                                                       name="first_name"
                                                       id={`first_name-${index}`}
@@ -2312,7 +2328,8 @@ const CreateClient = () => {
                                                     </label>
                                                     <input
                                                       type="text"
-                                                      className="form-control"
+                                                      className={contactsErrors[index].last_name ? "error-field form-control" : "form-control"}
+
                                                       placeholder=" Last Name"
                                                       name="last_name"
                                                       id={`last_name-${index}`}
@@ -2647,7 +2664,8 @@ const CreateClient = () => {
                                           type="text"
                                           name="tradingName"
                                           id="tradingName"
-                                          className="form-control"
+                                          className={errors4["tradingName"] ? "error-field form-control" : "form-control"}
+
                                           placeholder="Trading Name"
                                           onChange={(e) => handleChangeIndivisul(e)}
                                           value={
@@ -2672,7 +2690,8 @@ const CreateClient = () => {
                                         </label>
                                         <input
                                           type="text"
-                                          className="form-control"
+                                          className={errors4["first_name"] ? "error-field form-control" : "form-control"}
+
                                           placeholder="First Name"
                                           name="first_name"
                                           id="first_name"
@@ -2699,7 +2718,8 @@ const CreateClient = () => {
                                         </label>
                                         <input
                                           type="text"
-                                          className="form-control"
+                                          className={errors4["last_name"] ? "error-field form-control" : "form-control"}
+
                                           placeholder="Last Name"
                                           name="last_name"
                                           id="last_name"

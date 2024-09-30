@@ -77,44 +77,30 @@ const Sidebar = () => {
                 style={{ padding: "0px 0px 70px" }}
               >
                 <ul className="metismenu left-sidenav-menu mm-show">
-                  <li
-                    className={
-                      activeLink === "/admin/dashboard" ? "active" : ""
-                    }
-                  >
+                  <li className={activeLink === "/admin/dashboard" ? "active" : ""}>
                     <Link
                       to="/admin/dashboard"
                       aria-expanded="false"
                       onClick={(e) => handleLinkClick(e, "/admin/dashboard")}
                     >
                       <span className="sidebar-icons">
-                        <img
-                          src="/assets/images/sidebar-icons/dashboard.png"
-                          alt="Dashboard"
-                        />
+                        <i className="fas fa-tachometer-alt"></i> {/* Dashboard icon */}
                       </span>
                       <span>Dashboard</span>
                     </Link>
                   </li>
 
                   {((updatedShowTab && updatedShowTab.customer) ||
-                    role == "ADMIN" ||
-                    role == "SUPERADMIN") && (
-                      <li
-                        className={
-                          activeLink === "/admin/customer" ? "active" : ""
-                        }
-                      >
+                    role === "ADMIN" ||
+                    role === "SUPERADMIN") && (
+                      <li className={activeLink === "/admin/customer" ? "active" : ""}>
                         <Link
                           to="/admin/customer"
                           aria-expanded="false"
                           onClick={(e) => handleLinkClick(e, "/admin/customer")}
                         >
                           <span className="sidebar-icons">
-                            <img
-                              src="/assets/images/sidebar-icons/customers.png"
-                              alt="Customer"
-                            />
+                            <i className="fas fa-users"></i> {/* Customer icon */}
                           </span>
                           <span>Customer</span>
                         </Link>
@@ -122,21 +108,16 @@ const Sidebar = () => {
                     )}
 
                   {((updatedShowTab && updatedShowTab.status) ||
-                    role == "ADMIN" ||
-                    role == "SUPERADMIN") && (
-                      <li
-                        className={activeLink === "/admin/status" ? "active" : ""}
-                      >
+                    role === "ADMIN" ||
+                    role === "SUPERADMIN") && (
+                      <li className={activeLink === "/admin/status" ? "active" : ""}>
                         <Link
                           to="/admin/status"
                           aria-expanded="false"
                           onClick={(e) => handleLinkClick(e, "/admin/status")}
                         >
                           <span className="sidebar-icons">
-                            <img
-                              src="/assets/images/sidebar-icons/status.png"
-                              alt="Status"
-                            />
+                            <i className="fas fa-clipboard-check"></i> {/* Status icon */}
                           </span>
                           <span>Status</span>
                         </Link>
@@ -144,87 +125,63 @@ const Sidebar = () => {
                     )}
 
                   {((updatedShowTab && updatedShowTab.staff) ||
-                    role == "ADMIN" ||
-                    role == "SUPERADMIN") && (
-                      <li
-                        className={activeLink === "/admin/staff" ? "active" : ""}
-                      >
+                    role === "ADMIN" ||
+                    role === "SUPERADMIN") && (
+                      <li className={activeLink === "/admin/staff" ? "active" : ""}>
                         <Link
                           to="/admin/staff"
                           aria-expanded="false"
                           onClick={(e) => handleLinkClick(e, "/admin/staff")}
                         >
                           <span className="sidebar-icons">
-                            <img
-                              src="/assets/images/sidebar-icons/staff.png"
-                              alt="Staff"
-                            />
+                            <i className="fas fa-user-friends"></i> {/* Staff icon */}
                           </span>
                           <span>Staff</span>
                         </Link>
                       </li>
                     )}
 
-                  {(role == "ADMIN" || role == "SUPERADMIN") && (
-                    <li
-                      className={activeLink === "/admin/access" ? "active" : ""}
-                    >
+                  {(role === "ADMIN" || role === "SUPERADMIN") && (
+                    <li className={activeLink === "/admin/access" ? "active" : ""}>
                       <Link
                         to="/admin/access"
                         aria-expanded="false"
                         onClick={(e) => handleLinkClick(e, "/admin/access")}
                       >
                         <span className="sidebar-icons">
-                          <img
-                            src="/assets/images/sidebar-icons/access.png"
-                            alt="Access"
-                          />
+                          <i className="fas fa-lock"></i> {/* Access icon */}
                         </span>
                         <span>Access</span>
                       </Link>
                     </li>
                   )}
                   {((updatedShowTab && updatedShowTab.report) ||
-                    role == "ADMIN" ||
-                    role == "SUPERADMIN") && (
-                      <li
-                        className={
-                          activeLink === "/admin/reports" ? "active" : ""
-                        }
-                      >
+                    role === "ADMIN" ||
+                    role === "SUPERADMIN") && (
+                      <li className={activeLink === "/admin/reports" ? "active" : ""}>
                         <Link
                           to="/admin/reports"
                           aria-expanded="false"
                           onClick={(e) => handleLinkClick(e, "/admin/reports")}
                         >
                           <span className="sidebar-icons">
-                            <img
-                              src="/assets/images/sidebar-icons/reports.png"
-                              alt="Report"
-                            />
+                            <i className="fas fa-file-alt"></i> {/* Report icon */}
                           </span>
                           <span>Report</span>
                         </Link>
                       </li>
                     )}
                   {((updatedShowTab && updatedShowTab.setting) ||
-                    role == "ADMIN" ||
-                    role == "SUPERADMIN") && (
-                      <li
-                        className={
-                          activeLink === "/admin/setting" ? "active" : ""
-                        }
-                      >
+                    role === "ADMIN" ||
+                    role === "SUPERADMIN") && (
+                      <li className={activeLink === "/admin/setting" ? "active" : ""}>
                         <Link
                           to="/admin/setting"
                           aria-expanded="false"
                           onClick={(e) => handleLinkClick(e, "/admin/setting")}
                         >
                           <span className="sidebar-icons">
-                            <img
-                              src="/assets/images/sidebar-icons/setting.png"
-                              alt="Setting"
-                            />
+                            <i className="fas fa-cog"></i> {/* Setting icon */}
                           </span>
                           <span>Setting</span>
                         </Link>
@@ -232,23 +189,16 @@ const Sidebar = () => {
                     )}
 
                   {((updatedShowTab && updatedShowTab.timesheet) ||
-                    role == "ADMIN" ||
-                    role == "SUPERADMIN") && (
-                      <li
-                        className={
-                          activeLink === "/admin/timesheet" ? "active" : ""
-                        }
-                      >
+                    role === "ADMIN" ||
+                    role === "SUPERADMIN") && (
+                      <li className={activeLink === "/admin/timesheet" ? "active" : ""}>
                         <Link
                           to="/admin/timesheet"
                           aria-expanded="false"
                           onClick={(e) => handleLinkClick(e, "/admin/timesheet")}
                         >
                           <span className="sidebar-icons">
-                            <img
-                              src="/assets/images/sidebar-icons/setting.png"
-                              alt="time sheet"
-                            />
+                            <i className="fas fa-clock"></i> {/* Time Sheet icon */}
                           </span>
                           <span>Time Sheet</span>
                         </Link>

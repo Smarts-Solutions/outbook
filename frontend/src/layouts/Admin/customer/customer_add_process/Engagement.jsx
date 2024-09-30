@@ -529,7 +529,8 @@ const Engagement = () => {
                                     </label>
                                     <input
                                       type="text"
-                                      className="form-control"
+                                      
+                                      className={errors1[field.name]? "error-field form-control" : "form-control"}
                                       name={field.name}
                                       id={field.name}
                                       placeholder={field.feeName}
@@ -607,7 +608,8 @@ const Engagement = () => {
                                     <br />
                                     <input
                                       type="text"
-                                      className="form-control"
+                                      
+                                      className={errors2[field.name] ? "error-field form-control" : "form-control"}
                                       name={field.name}
                                       id={field.name}
                                       value={formValues2[field.name]}
@@ -682,7 +684,7 @@ const Engagement = () => {
 
                                     <input
                                       type="text"
-                                      className="form-control"
+                                      className={errors3[field.name] ? "error-field form-control" : "form-control"}
                                       name={field.name}
                                       id={field.name}
                                       value={formValues3[field.name]}
@@ -718,7 +720,7 @@ const Engagement = () => {
                           <div className="card-body">
                             <div id="custprize">
                               {jobEntries.map((job, index) => (
-                                <div className="row " key={index}>
+                                <div className="row align-items-center" key={index}>
                                   <div className="col-lg-4">
                                     <div className="mb-3">
                                       <label
@@ -729,7 +731,7 @@ const Engagement = () => {
                                       </label>
                                       <input
                                         type="text"
-                                        className="form-control"
+                                        className={errors4[index] ? "error-field form-control" : "form-control"}
                                         placeholder={
                                           "Please Enter Minimum number of Jobs"
                                         }
@@ -760,7 +762,8 @@ const Engagement = () => {
                                     </label>
                                     <select
                                       id={`services_${index}`}
-                                      className="form-select "
+                                      
+                                      className={errors4[index] ? "error-field form-select" : "form-select"}
                                       name="service_id"
                                       value={job.service_id}
                                       onChange={(e) => handleChange4(index, e)}
@@ -793,7 +796,7 @@ const Engagement = () => {
                                       </label>
                                       <input
                                         type="text"
-                                        className="form-control"
+                                        className={errors4[index] ? "error-field form-control" : "form-control"}
                                         placeholder={
                                           "Please Enter Cost Per Job"
                                         }
@@ -815,6 +818,7 @@ const Engagement = () => {
                                   {jobEntries.length > 1 && (
                                     <div className="col-lg-1 text-center d-flex">
                                       <button
+                                      style={{height:'37px'}}
                                         className="delete-icon"
                                         onClick={(e) => handleRemoveJob(index)}
                                       >
@@ -864,7 +868,8 @@ const Engagement = () => {
                     <label className="form-label">Customer Joining Date</label>
                     <input
                       type="date"
-                      className="form-control"
+                  
+                      className={formErrors.customerJoiningDate ? "error-field form-control" : "form-control"}
                       name="customerJoiningDate"
                       value={formState1.customerJoiningDate}
                       onChange={handleInputChange}
@@ -878,7 +883,8 @@ const Engagement = () => {
                   <div className="col-lg-4">
                     <label className="form-label">Select Customer Source</label>
                     <select
-                      className="form-select"
+                     
+                      className={formErrors.customerSource ? "error-field form-select" : "form-select"}
                       name="customerSource"
                       value={formState1.customerSource}
                       onChange={handleInputChange}
@@ -902,8 +908,9 @@ const Engagement = () => {
                       Select Customer Sub-Source
                     </label>
                     <select
-                      className="form-select"
+                    
                       name="customerSubSource"
+                      className={formErrors.customerSubSource ? "error-field form-select" : "form-select"}
                       value={formState1.customerSubSource}
                       onChange={(e) => handleInputChange(e)}
                     >

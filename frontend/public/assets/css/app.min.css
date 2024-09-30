@@ -803,9 +803,15 @@ body.dark-sidenav .left-sidenav-menu li>a {
   padding-left: 38px;
   text-decoration: none;
 }
-
-body.dark-sidenav .left-sidenav-menu li>a.active {
-  color: #333547;
+body.dark-sidenav .left-sidenav-menu li>a {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 400;
+  padding-left: 38px;
+  text-decoration: none;
+}
+body.dark-sidenav .left-sidenav-menu li {
+  transition: 0.3s linear;
 }
 
 body.dark-sidenav .left-sidenav-menu li>a:hover {
@@ -821,7 +827,7 @@ body.dark-sidenav .left-sidenav-menu li>a:hover span i {
 }
 
 body.dark-sidenav .left-sidenav-menu li>a i {
-  color: #2d53bd;
+  color: #fff;
 }
 
 body.dark-sidenav .left-sidenav-menu li ul li>a {
@@ -832,8 +838,8 @@ body.dark-sidenav .left-sidenav-menu li ul li>a:hover {
   color: #e6e6e6;
 }
 
-body.dark-sidenav .left-sidenav-menu li ul li>a:hover i {
-  color: #1761fd;
+body.dark-sidenav .left-sidenav-menu  li:hover a i {
+  color: #060609 !important;
 }
 
 body.dark-sidenav .left-sidenav-menu li.mm-active .mm-active>a {
@@ -2335,7 +2341,7 @@ a.ui-button:active,
 .form-label,label {
   font-weight: 500;
   color: #333547;
-  font-size: 13px;
+  font-size: 14px;
   margin-bottom: 5px;
 }
 
@@ -9993,11 +9999,11 @@ body .accordion-button:not(.collapsed)::after {
   display: flex;
   align-items: center;
 }
-.search-icon
-{
+.search-icon {
   position: absolute;
   left: 20px;
   z-index: 1;
+  text-indent: 8px;
 }
  .data-table-header {
      background-color: #f0f0f0;
