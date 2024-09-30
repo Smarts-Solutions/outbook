@@ -751,6 +751,15 @@ CREATE TABLE jobs (
     FOREIGN KEY (customer_source_id) REFERENCES customer_source(id)
 );
 
+
+-- TABLE FOR INTERNAL
+CREATE TABLE internal (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+);
     
 
 

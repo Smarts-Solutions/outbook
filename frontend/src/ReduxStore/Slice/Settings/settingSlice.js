@@ -18,6 +18,8 @@ import {
   incorporationApi,
   customerSource,
   customerSubSource,
+  INTERNALAPI,
+  
   
 } from "../../../Services/Settings/settingService";
 import axios from "axios";
@@ -161,6 +163,25 @@ export const JobType = createAsyncThunk("jobType", async (data) => {
       StaffUserId: StaffUserId.id,
     };
     const res = await JOBTYPE(updatedReq, authToken);
+
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
+
+//Get Country Data
+export const InternalApi = createAsyncThunk("internal", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await INTERNALAPI(updatedReq, authToken);
 
     return await res;
   } catch (err) {

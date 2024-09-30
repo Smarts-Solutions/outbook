@@ -248,4 +248,18 @@ export async function customerSubSource(data, token) {
         return await err;
     }
 }
+
+export async function INTERNALAPI(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}internal`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+ 
  

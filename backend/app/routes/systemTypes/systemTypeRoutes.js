@@ -28,5 +28,6 @@ router.post('/customerSource',verifyToken, controllers.customerSourceController.
 //customerSubSource
 router.post('/customerSubSource',verifyToken, controllers.customerSubSourceController.handleCustomerSubSource);
 
+router.post('/internal',verifyToken, controllers.customerInternal.handleInternal);
 
 module.exports = router;

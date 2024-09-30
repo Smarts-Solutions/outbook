@@ -5,6 +5,8 @@ const customerContactPersonRoleController = require('./customerContactPersonRole
 const IncorporationController = require('./IncorporationController');
 const customerSourceController = require('./customerSourceController');
 const customerSubSourceController = require('./customerSubSourceController');
+const customerInternal = require('./Internal');
+
 
 
 module.exports = {
@@ -14,5 +16,6 @@ module.exports = {
     customerContactPersonRoleController,
     IncorporationController,
     customerSourceController,
-    customerSubSourceController
+    customerSubSourceController,
+    customerInternal,
     };
