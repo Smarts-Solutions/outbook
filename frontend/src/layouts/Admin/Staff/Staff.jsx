@@ -230,17 +230,18 @@ const StaffPage = () => {
           )}
           {showStaffInsertTab && (
             <button
-              className="add-icon"
+              className="add-icon fs-6"
               onClick={(e) => {
                 ServiceData(row);
                 SetCompetancy(true);
               }}
             >
-              Add Competency
+              <i className="fa fa-plus" /> Competency
             </button>
           )}
 
-          <button className="view-icon">View Logs</button>
+          <button className="view-icon fs-6"> 
+               <i className="fa fa-eye" />  Logs</button>
 
           {row.role === "ADMIN" || row.role === "SUPERADMIN"
             ? showStaffDeleteTab && (

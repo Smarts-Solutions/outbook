@@ -94,14 +94,23 @@ const ClientList = () => {
       selector: (row) =>
         row.client_type_name == null ? "-" : row.client_type_name,
       sortable: true,
-      width: "200px",
+      width: "150px",
     },
     { name: "Email Address", selector: (row) => row.email || "-", sortable: true, width: '250px' },
-    { name: "Phone", selector: (row) => row.phone || "-", sortable: true },
+    { name: "Phone", selector: (row) => row.phone || "-", sortable: true,width:'130px' },
     {
       name: "Status",
-      selector: (row) => (row.status == "1" ? "Active" : "Deactive"),
+      selector: (row) => (<div>
+        <span
+          className={` ${
+            row.status === "1" ? "text-success" : "text-danger"
+          }`}
+        >
+          {row.status === "1" ? "Active" : "Deactive"}
+        </span>
+      </div>),
       sortable: true,
+      width:'130px'
     },
     {
       name: "Actions",

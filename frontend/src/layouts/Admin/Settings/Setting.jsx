@@ -500,7 +500,7 @@ const Setting = () => {
           {
             name: "Actions",
             cell: (row) => (
-              <div>
+              <div className="d-flex">
                 {showSettingUpdateTab && (
                   <button
                     className="edit-icon"
@@ -526,6 +526,7 @@ const Setting = () => {
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
+            width:"10%"
           },
         ]
       : []),
@@ -577,6 +578,7 @@ const Setting = () => {
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
+            width:"20%",
           },
         ]
       : []),
@@ -587,7 +589,7 @@ const Setting = () => {
       name: "Service Name",
       selector: (row) => row.name,
       sortable: true,
-      width: "50%",
+      width: "60%",
     },
     {
       name: "Status",
@@ -609,7 +611,7 @@ const Setting = () => {
           {
             name: "Actions",
             cell: (row) => (
-              <div>
+              <div className="d-flex">
                 {showSettingUpdateTab && (
                   <button
                     className="edit-icon"
@@ -630,7 +632,7 @@ const Setting = () => {
                 )}
                 {showSettingInsertTab && (
                   <button
-                    className="btn btn-sml btn-info text-white ms-2"
+                    className="btn btn-sm btn-info text-white ms-2"
                     onClick={(e) => handleJobType(row)}
                   >
                     Add Job Type
@@ -641,7 +643,7 @@ const Setting = () => {
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
-            width: "30%",
+            width: "20%",
           },
         ]
       : []),
@@ -693,6 +695,7 @@ const Setting = () => {
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
+            width:'20%'
           },
         ]
       : []),
@@ -748,13 +751,14 @@ const Setting = () => {
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
+            width:'20%'
           },
         ]
       : []),
   ];
 
   const columnCountry = [
-    { name: "Country Code", selector: (row) => row.code, sortable: true },
+    { name: "Country Code", selector: (row) => row.code, sortable: true, },
     { name: "Country Name", selector: (row) => row.name, sortable: true },
     { name: "Currency", selector: (row) => row.currency, sortable: true },
     {
@@ -806,13 +810,14 @@ const Setting = () => {
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
+            width:'20%'
           },
         ]
       : []),
   ];
 
    const columnincorporation = [
-    { name: "Incorporation Name", selector: (row) => row.name, sortable: true ,width:'80%'},
+    { name: "Incorporation Name", selector: (row) => row.name, sortable: true ,width:'70%'},
     {
       name: "Status",
       cell: (row) => (
@@ -849,6 +854,7 @@ const Setting = () => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
+      width:"20%"
     },
   ];
 
@@ -857,7 +863,7 @@ const Setting = () => {
       name: "Source Name",
       selector: (row) => row.name,
       sortable: true,
-      width: "65%",
+      width: "60%",
     },
     {
       name: "Status",
@@ -879,7 +885,7 @@ const Setting = () => {
           {
             name: "Actions",
             cell: (row) => (
-              <div>
+              <div className="d-flex">
                 {showSettingUpdateTab && (
                   <button
                     className="edit-icon"
@@ -900,9 +906,10 @@ const Setting = () => {
                 )}
                 {showSettingInsertTab && (
                   <button
-                    className="btn btn-info text-white"
+                    className="btn btn-info btn-sm text-white ms-1"
                     onClick={(e) => handleSubSource(row)}
                   >
+                     <i className="fa fa-plus pe-1" />
                     Add Sub Source Type
                   </button>
                 )}
@@ -911,7 +918,7 @@ const Setting = () => {
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
-            width: "25%",
+            width: "30%",
           },
         ]
       : []),
@@ -949,11 +956,19 @@ const Setting = () => {
       name: "Client Type",
       selector: (row) => row.client_type_type,
       sortable: true,
-      width: "400px",
+      width: "300px",
     },
     {
       name: "Status",
-      selector: (row) => (row.status == "1" ? "Active" : "Deactive"),
+      selector: (row) => (<div>
+        <span
+          className={` ${
+            row.status === "1" ? "text-success" : "text-danger"
+          }`}
+        >
+          {row.status === "1" ? "Active" : "Deactive"}
+        </span>
+      </div>),
       sortable: true,
       width: "100px",
     },
@@ -1891,7 +1906,18 @@ const Setting = () => {
               }}
               onSave={handleSave}
               onChange={handleModalChange}
-              buttonName={isEdit ? "Update" : "Save"}
+              buttonClass={isEdit ? "" : "btn btn-outline-success"}
+              buttonName={
+    isEdit ? (
+      <>
+        <i className="fa fa-edit"></i> Update
+      </>
+    ) : (
+      <>
+        <i className="far fa-save pe-1"></i> Save
+      </>
+    )
+  }
             />
           )}
         </>

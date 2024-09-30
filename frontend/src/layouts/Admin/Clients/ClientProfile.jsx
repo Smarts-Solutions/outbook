@@ -55,10 +55,11 @@ const ClientList = () => {
 
 
   const tabs = [
-    { id: "NoOfJobs", label: "No.Of Jobs" },
-    { id: "viewclient", label: "View Client" },
-    { id: "documents", label: "Documents" },
+    { id: "NoOfJobs", label: "No. Of Jobs", icon: "fa-solid fa-briefcase" },
+    { id: "viewclient", label: "View Client", icon: "fa-solid fa-user" },
+    { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
   ];
+  
 
   const columns = [
     {
@@ -95,11 +96,11 @@ const ClientList = () => {
       selector: (row) => row.client_trading_name,
       sortable: true,
     },
-    {
-      name: "Client Job Code",
-      selector: (row) => row.client_job_code,
-      sortable: true,
-    },
+    // {
+    //   name: "Client Job Code",
+    //   selector: (row) => row.client_job_code,
+    //   sortable: true,
+    // },
     {
       name: "Outbooks Acount Manager",
       selector: (row) =>
@@ -133,6 +134,7 @@ const ClientList = () => {
     {
       name: "Status",
       selector: (row) =>
+        
         row.status == null || row.status == 0 ? "To Be Started - Not Yet Allocated Internally" : row.status,
       sortable: true,
       width: "325px"
@@ -260,6 +262,7 @@ const ClientList = () => {
                       aria-selected={activeTab === tab.id}
                       onClick={() => setActiveTab(tab.id)}
                     >
+                      <i className={tab.icon}></i>
                       {tab.label}
                     </button>
                   </li>
@@ -270,7 +273,7 @@ const ClientList = () => {
               <>
                 <div className="col-md-4 col-auto">
                   <div
-                    className="btn btn-info text-white float-end blue-btn"
+                    className="btn btn-info text-white float-end blue-btn ms-2"
                     onClick={handleAddClient}
                   >
                     <i className="fa fa-plus pe-1" /> Create Job
@@ -291,7 +294,7 @@ const ClientList = () => {
               <div className="col-md-4 col-auto">
                 <button
                   type="button"
-                  className="btn btn-info text-white float-end blue-btn"
+                  className="btn btn-info text-white float-end blue-btn me-2"
                   onClick={() => window.history.back()}
                 >
                   <i className="fa fa-arrow-left pe-1" /> Back

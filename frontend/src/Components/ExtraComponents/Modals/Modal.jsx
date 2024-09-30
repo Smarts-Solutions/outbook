@@ -76,14 +76,16 @@ const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange, button
               className="btn btn-secondary"
               onClick={onClose}
             >
+              <i className='fa fa-times pe-1 '></i>
               Cancel
             </button>
             <button
               type="button"
-              className="btn btn-info text-white"
-              style={{ borderRadius: '4px' }}
+              className="btn btn-outline-success"
+              
               onClick={onSave}
             >
+              {/* <i className='far fa-save pe-1'></i> */}
               {buttonName}
             </button>
           </div>

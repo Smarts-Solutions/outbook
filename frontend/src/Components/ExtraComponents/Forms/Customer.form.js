@@ -665,7 +665,7 @@ const ReusableForm = ({
           <div className="modal-footer d-flex justify-content-between">
             <button
               type="button"
-              className="btn btn-secondary m-2"
+              className="btn btn-info m-2"
               onClick={closeBtn}
             >
               <i className="pe-2 fa-regular fa-arrow-left-long"></i> Previous
@@ -683,7 +683,7 @@ const ReusableForm = ({
           <div className="modal-footer">
             <button
               type="button"
-              className="btn btn-secondary m-2"
+              className="btn btn-info m-2"
               onClick={closeBtn}
             >
               <i className="pe-2 fa-regular fa-arrow-left-long"></i> Cancel

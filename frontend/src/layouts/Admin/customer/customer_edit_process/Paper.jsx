@@ -293,7 +293,8 @@ const Paper = () => {
                                               <td className="action">
                                                 <div className="">
                                                   <div className="remove">
-                                                    <a
+                                                    <button
+                                                    className="delete-icon"
                                                       onClick={() => {
                                                         const updatedFiles =
                                                           newFiles.filter(
@@ -315,8 +316,8 @@ const Paper = () => {
                                                         );
                                                       }}
                                                     >
-                                                      <i className="fs-5 ti-trash text-danger" />
-                                                    </a>
+                                                      <i className="ti-trash text-danger" />
+                                                    </button>
                                                   </div>
                                                 </div>
                                               </td>
@@ -406,13 +407,14 @@ const Paper = () => {
                                             <td className="action">
                                               <div className="d-flex gap-2">
                                                 <div className="remove">
-                                                  <a
+                                                  <button
+                                                  className="delete-icon"
                                                     onClick={(e) =>
                                                       removeItem(file)
                                                     }
                                                   >
-                                                    <i className="ti-trash text-danger fs-5" />
-                                                  </a>
+                                                    <i className="ti-trash text-danger" />
+                                                  </button>
                                                 </div>
                                               </div>
                                             </td>
@@ -435,7 +437,7 @@ const Paper = () => {
                         <div className="d-flex align-items-start gap-3 mt-4 justify-content-between">
                           <button
                             type="button"
-                            className="btn btn-secondary text-decoration-none previestab"
+                            className="btn btn-info text-decoration-none previestab"
                             onClick={prev}
                           >
                           <i className="pe-2 fa-regular fa-arrow-left-long"></i>  Previous

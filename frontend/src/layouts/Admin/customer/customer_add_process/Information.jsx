@@ -1217,7 +1217,7 @@ const Information = ({ id, pageStatus }) => {
                                       ))}
                                   </select>
                                 </div>
-                                <div className="mb-3 col-md-8 ps-1">
+                                <div className=" col-md-8 ps-1">
                                   <input
                                     type="text"
                                     className="form-control"
@@ -1684,13 +1684,13 @@ const Information = ({ id, pageStatus }) => {
                                           <div className="col-lg-12">
                                             <div className="form-check mb-3 d-flex justify-content-end">
                                               <button
-                                                className="btn "
+                                                className="delete-icon "
                                                 onClick={() =>
                                                   handleDeleteContact(index)
                                                 }
                                                 disabled={contacts.length === 1}
                                               >
-                                                <i className="ti-trash text-danger fs-4"></i>
+                                                <i className="ti-trash text-danger "></i>
                                               </button>
                                             </div>
                                           </div>
@@ -2103,7 +2103,7 @@ const Information = ({ id, pageStatus }) => {
                                           {index !== 0 && index !== 1 && (
                                             <div>
                                               <button
-                                                className="btn "
+                                                className="delete-icon "
                                                 type="button"
                                                 onClick={() =>
                                                   handleDeleteContact1(index)
@@ -2356,7 +2356,7 @@ const Information = ({ id, pageStatus }) => {
             </section>
             <div className="form__item button__items d-flex justify-content-between">
               <Button
-                className="btn btn-secondary"
+                className="btn btn-info"
                 type="default"
                 onClick={(e) => navigate("/admin/customer")}
               >

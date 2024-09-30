@@ -989,7 +989,8 @@ const CreateClient = () => {
                                             Client Industry
                                           </label>
                                           <select
-                                            className="form-select "
+                                            
+                                            className={errors1["IndustryType"] ? "error-field form-select" : "form-select"}
                                             aria-label="Default select example"
                                             name="IndustryType"
                                             id="IndustryType"
@@ -1033,7 +1034,8 @@ const CreateClient = () => {
                                             type="text"
                                             name="tradingName"
                                             id="tradingName"
-                                            className="form-control"
+                                            
+                                            className={errors1["tradingName"] ? "error-field form-control" : "form-control"}
                                             placeholder="Trading Name"
                                             onChange={(e) => handleChange1(e)}
                                             value={
@@ -1057,7 +1059,8 @@ const CreateClient = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className="form-control"
+                                            
+                                            className={errors1["tradingAddress"] ? "error-field form-control" : "form-control"}
                                             placeholder="Trading Address"
                                             name="tradingAddress"
                                             id="tradingAddress"
@@ -1079,7 +1082,8 @@ const CreateClient = () => {
                                             VAT Registered
                                           </label>
                                           <select
-                                            className="form-select "
+                                           
+                                            className={errors1["vatRegistered"] ? "error-field form-select" : "form-select"}
                                             aria-label="Default select example"
                                             name="vatRegistered"
                                             id="vatRegistered"
@@ -1761,11 +1765,11 @@ const CreateClient = () => {
                                                     <div className="col-lg-12">
                                                       <div className="form-check mb-3 d-flex justify-content-end">
                                                         <button
-                                                          className="btn btn-danger"
+                                                          className="delete-icon"
                                                           onClick={() => handleDeleteContact(index)}
                                                           disabled={contacts.length === 1}
                                                         >
-                                                          <i className="ti-trash  pe-1"></i>{" "}Delete</button>
+                                                          <i className="ti-trash text-danger"></i>{" "}</button>
                                                       </div>
                                                     </div>
                                                   )}
@@ -2237,7 +2241,7 @@ const CreateClient = () => {
                                                       index !== 1 && (
                                                         <div>
                                                           <button
-                                                            className="btn btn-danger"
+                                                            className="delete-icon"
                                                             type="button"
                                                             onClick={() =>
                                                               handleDeleteContact1(
@@ -2249,8 +2253,8 @@ const CreateClient = () => {
                                                               1
                                                             }
                                                           >
-                                                            <i className="ti-trash  pe-1"></i>{" "}
-                                                            Delete
+                                                            <i className="ti-trash  text-danger"></i>{" "}
+                                                         
                                                           </button>
                                                         </div>
                                                       )}
@@ -2826,6 +2830,7 @@ const CreateClient = () => {
                           className="btn btn-secondary"
                           data-bs-dismiss="modal"
                         >
+                          <i className=" fa fa-times pe-1"></i>
                           Cancel
                         </button>
                         <button

@@ -1110,8 +1110,8 @@ const Engagement = () => {
 
                                   {jobEntries.length > 1 && (
                                     <div className="col-lg-1 text-center mt-4">
-                                      <a
-                                        className="add_icon text-decoration-none"
+                                      <button
+                                        className="delete-icon"
                                         onClick={(e) => handleRemoveJob(index)}
                                       >
                                         <i
@@ -1121,7 +1121,7 @@ const Engagement = () => {
                                           }}
                                           className="ti-trash text-danger"
                                         />
-                                      </a>
+                                      </button>
                                     </div>
                                   )}
                                 </div>
@@ -1239,7 +1239,7 @@ const Engagement = () => {
             </div>
             <div className="form__item button__items d-flex justify-content-between">
               <Button
-                className="btn btn-secondary"
+                className="btn btn-info"
                 type="default"
                 onClick={prev}
               >

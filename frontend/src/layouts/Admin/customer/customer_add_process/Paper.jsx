@@ -171,7 +171,8 @@ const Paper = () => {
                                             <td className="action">
                                               <div className="d-flex gap-2">
                                                 <div className="remove">
-                                                  <a
+                                                  <button
+                                                  className="delete-icon"
                                                     onClick={() => {
                                                       const updatedFiles =
                                                         newFiles.filter(
@@ -191,8 +192,8 @@ const Paper = () => {
                                                       );
                                                     }}
                                                   >
-                                                    <i className="ti-trash text-danger fs-5" />
-                                                  </a>
+                                                    <i className="ti-trash text-danger " />
+                                                  </button>
                                                 </div>
                                               </div>
                                             </td>
@@ -205,7 +206,7 @@ const Paper = () => {
                               <div className="d-flex align-items-start justify-content-between gap-3 mt-4">
                                 <button
                                   type="button"
-                                  className="btn btn-secondary text-decoration-none previestab"
+                                  className="btn btn-info text-decoration-none previestab"
                                   onClick={prev}
                                 >
                                   <i className="pe-2 fa-regular fa-arrow-left-long"></i>{" "}

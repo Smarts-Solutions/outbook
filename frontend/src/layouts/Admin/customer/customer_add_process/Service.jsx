@@ -443,7 +443,7 @@ const Service = () => {
                       </th>
                       <th style={{ width: "70%" }}>Service Name</th>
                       {/* <th width="100"></th> */}
-                      <th className="">Action</th>
+                      <th className="text-center">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -585,7 +585,7 @@ const Service = () => {
                                                                 onClick={
                                                                   handleDownload
                                                                 }
-                                                                className="btn btn-outline-info"
+                                                                className="btn btn-sm btn-outline-info"
                                                               >
                                                                 <i className="fas fa-download me-2"></i>
                                                                 Download Sample
@@ -638,7 +638,7 @@ const Service = () => {
                                                                     <th className="text-center">
                                                                       Tasks
                                                                     </th>
-                                                                    <th className="text-center">
+                                                                    <th width="250" className="text-center">
                                                                       Budgeted
                                                                       Hour
                                                                     </th>
@@ -699,6 +699,7 @@ const Service = () => {
                                                                                     className="mb-2"
                                                                                   >
                                                                                     <div className="input-group">
+                                                                                    <div className="hours-div">
                                                                                       <input
                                                                                         type="text"
                                                                                         className="form-control"
@@ -710,8 +711,10 @@ const Service = () => {
                                                                                         disabled
                                                                                       />
                                                                                       <span className="input-group-text">
-                                                                                        Hours
+                                                                                        H
                                                                                       </span>
+                                                                                      </div>
+                                                                                      <div className="hours-div">
                                                                                       <input
                                                                                         type="text"
                                                                                         className="form-control"
@@ -723,23 +726,24 @@ const Service = () => {
                                                                                         disabled
                                                                                       />
                                                                                       <span className="input-group-text">
-                                                                                        Minutes
+                                                                                        M
                                                                                       </span>
+                                                                                      </div>
                                                                                     </div>
                                                                                   </div>
                                                                                 )
                                                                               )}
                                                                             </td>
-                                                                            <td>
+                                                                            <td className="text-center">
                                                                               <button
-                                                                                className="btn btn-sm btn-outline-danger rounded-circle"
+                                                                                className=" delete-icon"
                                                                                 onClick={() =>
                                                                                   handleDelete(
                                                                                     TaskShow.id
                                                                                   )
                                                                                 }
                                                                               >
-                                                                                <i className=" ti-trash"></i>
+                                                                                <i className=" ti-trash text-danger"></i>
                                                                               </button>
                                                                             </td>
                                                                           </tr>
@@ -761,7 +765,7 @@ const Service = () => {
                                       </div>
                                     </div>
                                   )}
-=========
+
                                {services.includes(item.id) && (
   <div className="accordion-body">
     <div className="accordion" id="sub-accordionExample">
@@ -862,31 +866,36 @@ const Service = () => {
                                           <td>
                                             {TaskShow.Task.map((TaskData) => (
                                               <div key={TaskData.id} className="mb-2">
+
                                                 <div className="input-group">
+                                                  <div className="hours-div">
                                                   <input
                                                     type="text"
                                                     className="form-control"
                                                     value={TaskData.BudgetHour.split(":")[0]}
                                                     disabled
                                                   />
-                                                  <span className="input-group-text">Hours</span>
+                                                  <span className="input-group-text">H</span>
+                                                  </div>
+                                                  <div className="hours-div">
                                                   <input
                                                     type="text"
                                                     className="form-control"
                                                     value={TaskData.BudgetHour.split(":")[1]}
                                                     disabled
                                                   />
-                                                  <span className="input-group-text">Minutes</span>
+                                                  <span className="input-group-text">M</span>
+                                                </div>
                                                 </div>
                                               </div>
                                             ))}
                                           </td>
                                           <td>
                                             <button
-                                              className="btn btn-sm btn-outline-danger rounded-circle"
+                                              className=" delete-icon"
                                               onClick={() => handleDelete(TaskShow.id)}
                                             >
-                                              <i className="ti-trash"></i>
+                                              <i className="ti-trash text-danger"></i>
                                             </button>
                                           </td>
                                         </tr>
@@ -914,9 +923,9 @@ const Service = () => {
                             </div>
                           </td>
 
-                          <td className="align-top">
+                          <td className="align-top text-end">
                             <button
-                              className="btn btn-sm btn-outline-info remove-item-btn"
+                              className="btn  btn-outline-info remove-item-btn"
                               onClick={() => {
                                 setModal(true);
                                 setTempServices(item.id);
@@ -990,20 +999,21 @@ const Service = () => {
               <div className="col-3">
                 <button
                   type="button"
-                  className="btn btn-outline-info add-btn"
+                  className="btn btn-info "
                   onClick={AddManager}
                 >
+                   <i className="pe-1 fa fa-plus"></i>
                   Add
-                  <i className="ps-2 ti-plus"></i>
+                 
                 </button>
               </div>
 
               <div className="table-responsive mt-3 mb-1">
                 <table className="table align-middle table-nowrap">
-                  <thead className="table-light">
+                  <thead className="table-light table-head-blue">
                     <tr>
                       <th>Account Name</th>
-                      <th className="text-align-right">Action</th>
+                      <th className="text-end">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1027,9 +1037,9 @@ const Service = () => {
                                         manager.service_id
                                       )
                                     }
-                                    className="btn btn-sm remove-item-btn"
+                                    className=" delete-icon"
                                   >
-                                    <i className="ti-trash text-danger fs-5"></i>
+                                    <i className="ti-trash text-danger "></i>
                                   </button>
                                 </td>
                               </tr>
@@ -1050,7 +1060,7 @@ const Service = () => {
           </CommanModal>
 
           <div className="form__item button__items d-flex justify-content-between">
-            <Button className="btn btn-secondary" type="default" onClick={prev}>
+            <Button className="btn btn-info" type="default" onClick={prev}>
               <i className="pe-2 fa-regular fa-arrow-left-long"></i> Previous
             </Button>
             <Button

@@ -219,8 +219,8 @@ const Drafts = () => {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="edit-icon" onClick={() => { HandleDraftView(row); setViewdraft(true) }}>
-            <i className="fa fa-eye fs-6 text-secondary" />
+          <button className="view-icon" onClick={() => { HandleDraftView(row); setViewdraft(true) }}>
+            <i className="fa fa-eye fs-6 text-warning" />
           </button>
           <button className="edit-icon" onClick={() => { setShowEditModal(true); setEditData(row) }}>
             <i className="ti-pencil" />

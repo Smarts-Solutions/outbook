@@ -212,7 +212,7 @@ const Access = () => {
                         ]} data={roleDataAll.data} /> */}
                     </div>
                     <div className="modal-footer"> 
-                       <button type="button" className="btn btn-info mt-3" onClick={handleSaveChanges}>Save changes</button>
+                       <button type="button" className="btn btn-info mt-3" onClick={handleSaveChanges}>    <i className="far fa-save pe-1" /> Save changes</button>
                     </div>
                 </div>
 

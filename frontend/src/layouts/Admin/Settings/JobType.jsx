@@ -122,14 +122,14 @@ const Setting = () => {
             <i className="ti-trash text-danger" />
           </button>
           <button
-            className="btn border-0"
+            className="view-icon"
             onClick={(e) => {
               handleViewTask(row);
               setViewtask(true);
             }}
           >
             {" "}
-            <i className="fa-regular fa-eye me-2" />
+            <i className="fa-regular fa-eye " />
           </button>
           <button
             className="btn btn-info text-white"
@@ -451,7 +451,7 @@ const Setting = () => {
           formik.resetForm();
         }}
       >
-        <div className="modal-body">
+        <div className="">
           <div className="mb-3" id="modal-id" style={{ display: "none" }}>
             <label htmlFor="id-field" className="form-label">
               ID
@@ -479,15 +479,15 @@ const Setting = () => {
                   />
                 </div>
               </div>
-              <div className="col-lg-3 ">
+              <div className="col-lg-3 ps-0">
                 <div className="remove">
-                  <a
-                    className="btn btn-secondary btn-sm add-btn-job_type add-btn-new"
+                  <button
+                    className="btn  btn-info"
                     onClick={handleAddTask} // Call handleAddTask when clicked
                   >
                     <i className="fa fa-plus pe-2"> </i>
                     Add
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>
@@ -547,6 +547,7 @@ const Setting = () => {
                             }}
                             className="btn btn-sm "
                           >
+                          
                             Enable
                           </a>
                         </div>
@@ -560,9 +561,10 @@ const Setting = () => {
           <div className="col-lg-12">
             <div className="remove" style={{ float: "right" }}>
               <button
-                className="btn btn-info text-white "
+                className="btn btn-outline-success"
                 onClick={(e) => handleSaveTask()}
               >
+                <i className="far fa-save pe-1"></i>
                 Submit
               </button>
             </div>
