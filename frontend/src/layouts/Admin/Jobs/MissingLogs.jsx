@@ -47,7 +47,7 @@ const MissingLogs = () => {
       status: "0",
       id: null
     });
-  }; 
+  };
 
   useEffect(() => {
     if (getEditData && showEditmissinglogsModal) {
@@ -60,7 +60,7 @@ const MissingLogs = () => {
         missing_log_reviewed_date: getEditData.missing_log_reviewed_date,
         missing_log_document: getEditData.missing_log_document,
         status: getEditData.status,
-      
+
         id: getEditData.id
       });
     }
@@ -222,9 +222,9 @@ const MissingLogs = () => {
   }
 
   const columns = [
-    { name: 'Missing Log Title', selector: row => row.title, sortable: true }, 
-    { name: 'Missing Log Sent On', selector: row => row.missing_log_sent_on, sortable: true }, 
-    { name: 'Missing Log Prepared Date', selector: row => row.missing_log_prepared_date, sortable: true }, 
+    { name: 'Missing Log Title', selector: row => row.title, sortable: true },
+    { name: 'Missing Log Sent On', selector: row => row.missing_log_sent_on, sortable: true },
+    { name: 'Missing Log Prepared Date', selector: row => row.missing_log_prepared_date, sortable: true },
     { name: 'Missing Log Reviewed Date', selector: row => row.missing_log_reviewed_date, sortable: true },
 
 
@@ -236,9 +236,16 @@ const MissingLogs = () => {
           <button className="edit-icon" onClick={() => { HandleMissionView(row); setViewmissinglogs(true) }}>
             <i className="fa fa-eye fs-6 text-secondary" />
           </button>
-          <button className="edit-icon" onClick={() => { setShowEditMissinglogsModal(true); setEditData(row) }}>
-            <i className="ti-pencil" />
-          </button>
+          {
+            row.status == 1 ? "" :
+              <button className="edit-icon" onClick={() => {
+                setShowEditMissinglogsModal(true);
+                setEditData(row)
+              }}>
+                <i className="ti-pencil" />
+              </button>
+          }
+
 
         </div>
       ),
@@ -477,7 +484,7 @@ const MissingLogs = () => {
         btn_2="true"
         btn_name="Save"
         title="Edit Missing Log"
-        hideBtn={false} 
+        hideBtn={false}
         handleClose={() => {
           setShowEditMissinglogsModal(false);
           resetForm();
@@ -510,7 +517,7 @@ const MissingLogs = () => {
               )}
             </div>
           </div>
- 
+
           <div className="col-lg-6">
             <div className="mb-3">
               <label htmlFor="firstNameinput" className="form-label">
@@ -551,7 +558,7 @@ const MissingLogs = () => {
                   {errors1["missing_log_prepared_date"]}
                 </div>
               )}
- 
+
             </div>
           </div>
 

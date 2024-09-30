@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Datatable from '../../../Components/ExtraComponents/Datatable';
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { QueryAction, AddQuery , EditQuery } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
+import { QueryAction, AddQuery, EditQuery } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
 import sweatalert from 'sweetalert2';
 
 const Queries = () => {
@@ -19,13 +19,13 @@ const Queries = () => {
   const [singleQueryData, setSingleQueryData] = useState([]);
 
   const [AllQueryInputdata, setAllQueryInputdata] = useState({
-    QueriesRemaining: "0", 
+    QueriesRemaining: "0",
     ReviewedBy: '0',
     MissingQueriesPreparedDate: null,
-    QuerySentDate:new Date().toISOString().substr(0, 10),
+    QuerySentDate: new Date().toISOString().substr(0, 10),
     ResponseReceived: '0',
     status: "0",
-    id:null,
+    id: null,
     FinalQueryResponseReceivedDate: null,
     QueryDocument: null,
   });
@@ -33,23 +33,23 @@ const Queries = () => {
   const resetForm = () => {
     setAllQueryInputdata({
       ...AllQueryInputdata,
-      QueriesRemaining: "0", 
+      QueriesRemaining: "0",
       ReviewedBy: '0',
       MissingQueriesPreparedDate: null,
       QuerySentDate: new Date().toISOString().substr(0, 10),
       ResponseReceived: '0',
       status: "0",
-      id:null,
+      id: null,
       FinalQueryResponseReceivedDate: null,
       QueryDocument: null,
     });
   };
-  
+
 
   useEffect(() => {
     if (EditData && editViewquery) {
       setAllQueryInputdata({
-        QueriesRemaining: EditData.queries_remaining, 
+        QueriesRemaining: EditData.queries_remaining,
         ReviewedBy: EditData.reviewed_by,
         MissingQueriesPreparedDate: EditData.missing_queries_prepared_date,
         QuerySentDate: EditData.query_sent_date,
@@ -57,10 +57,10 @@ const Queries = () => {
         status: EditData.status,
         FinalQueryResponseReceivedDate: EditData.final_query_response_received_date,
         QueryDocument: EditData.query_document,
-        id:EditData.id
+        id: EditData.id
       });
     }
-  }, [EditData , editViewquery]);
+  }, [EditData, editViewquery]);
 
   useEffect(() => {
     GetQueryAllList();
@@ -80,7 +80,7 @@ const Queries = () => {
         }
       })
       .catch((error) => {
-        return ;
+        return;
       })
 
 
@@ -100,13 +100,13 @@ const Queries = () => {
         }
       })
       .catch((err) => {
-        return ;
+        return;
       })
   }
 
-  const HandleAddQuery = async () => { 
+  const HandleAddQuery = async () => {
     const req = { action: "add", job_id: location.state.job_id, data: AllQueryInputdata }
-    const data = { req: req, authToken: token } 
+    const data = { req: req, authToken: token }
     await dispatch(AddQuery(data))
       .unwrap()
       .then((response) => {
@@ -133,14 +133,14 @@ const Queries = () => {
         }
       })
       .catch((error) => {
-        return ;
+        return;
       })
 
   }
 
-  const HandleEditQuery = async () => { 
+  const HandleEditQuery = async () => {
     const req = { action: "add", data: AllQueryInputdata }
-    const data = { req: req, authToken: token } 
+    const data = { req: req, authToken: token }
     await dispatch(EditQuery(data))
       .unwrap()
       .then((response) => {
@@ -167,7 +167,7 @@ const Queries = () => {
         }
       })
       .catch((error) => {
-        return ;
+        return;
       })
 
   }
@@ -186,12 +186,12 @@ const Queries = () => {
     }
     else {
       setAllQueryInputdata({ ...AllQueryInputdata, [name]: value });
-    } 
+    }
   };
 
   const columns = [
-    { name: 'Query Title', selector: row => row.title, sortable: true }, 
-    { name: 'Query Sent Date', selector: row => row.query_sent_date, sortable: true }, 
+    { name: 'Query Title', selector: row => row.title, sortable: true },
+    { name: 'Query Sent Date', selector: row => row.query_sent_date, sortable: true },
     { name: 'Missing Queries Prepared Date', selector: row => row.missing_queries_prepared_date, sortable: true },
     { name: 'Final Query Response Received Date', selector: row => row.final_query_response_received_date, sortable: true },
     { name: 'Status', selector: row => row.status == 1 ? "Complete" : "Incomplete", sortable: true },
@@ -202,9 +202,12 @@ const Queries = () => {
           <button className="edit-icon" onClick={() => { HandleQueryView(row); setViewquery(true) }}>
             <i className="fa fa-eye fs-6 text-secondary" />
           </button>
-          <button className="edit-icon" onClick={() =>{setEditViewquery(true);setEditData(row)}}>
-            <i className="ti-pencil" />
-          </button>
+          {
+            row.status == 1 ? "" :
+              <button className="edit-icon" onClick={() => { setEditViewquery(true); setEditData(row) }}>
+                <i className="ti-pencil" />
+              </button>
+          }
 
         </div>
       ),
@@ -272,7 +275,7 @@ const Queries = () => {
               value={AllQueryInputdata.QueriesRemaining}
             >
               <option value="">Select</option>
-              <option value="1">Yes</option>                                                                                                                                        m                                                                                                      
+              <option value="1">Yes</option>                                                                                                                                        m
               <option value="0" selected>No</option>
             </select>
             {errors1["QueriesRemaining"] && (
@@ -280,7 +283,7 @@ const Queries = () => {
                 {errors1["QueriesRemaining"]}
               </div>
             )}
-          </div> 
+          </div>
           <div className="col-lg-6">
             <label htmlFor="firstNameinput" className="form-label">Reviewed By</label>
             <select
@@ -292,7 +295,7 @@ const Queries = () => {
               onChange={(e) => handleChange(e)}
               value={AllQueryInputdata.ReviewedBy}
             >
-              
+
               <option value="1">Yes</option>
               <option value="0">No</option>
             </select>
@@ -359,7 +362,7 @@ const Queries = () => {
                 onChange={(e) => handleChange(e)}
                 value={AllQueryInputdata.ResponseReceived}
               >
-                 
+
                 <option value="1">Yes</option>
                 <option value="0">No</option>
               </select>
@@ -370,7 +373,7 @@ const Queries = () => {
               )}
             </div>
           </div>
-           
+
           <div className="col-lg-6">
             <div className="mb-3">
               <label htmlFor="firstNameinput" className="form-label">
@@ -470,10 +473,10 @@ const Queries = () => {
         handleClose={() => {
           setEditViewquery(false);
           resetForm();
-          
+
         }}
         Submit_Function={() => HandleEditQuery()}
-        Submit_Cancel_Function={() => { setEditViewquery(false);   resetForm(); }}
+        Submit_Cancel_Function={() => { setEditViewquery(false); resetForm(); }}
       >
         <div className="row">
           <div className="col-lg-6">
@@ -489,7 +492,7 @@ const Queries = () => {
               onChange={(e) => handleChange(e)}
               value={AllQueryInputdata.QueriesRemaining}
             >
-              
+
               <option value="1">Yes</option>
               <option value="0" selected>No</option>
             </select>
@@ -498,7 +501,7 @@ const Queries = () => {
                 {errors1["QueriesRemaining"]}
               </div>
             )}
-          </div> 
+          </div>
           <div className="col-lg-6">
             <label htmlFor="firstNameinput" className="form-label">Reviewed By</label>
             <select
@@ -510,7 +513,7 @@ const Queries = () => {
               onChange={(e) => handleChange(e)}
               value={AllQueryInputdata.ReviewedBy}
             >
-              
+
               <option value="1">Yes</option>
               <option value="0">No</option>
             </select>
@@ -577,7 +580,7 @@ const Queries = () => {
                 onChange={(e) => handleChange(e)}
                 value={AllQueryInputdata.ResponseReceived}
               >
-               
+
                 <option value="1">Yes</option>
                 <option value="0">No</option>
               </select>
@@ -588,7 +591,7 @@ const Queries = () => {
               )}
             </div>
           </div>
-           
+
           <div className="col-lg-6">
             <div className="mb-3">
               <label htmlFor="firstNameinput" className="form-label">
@@ -682,15 +685,15 @@ const Queries = () => {
         size="md"
         title="Query"
         // btn_name="Close"
-        hideBtn={true} 
+        hideBtn={true}
         cancel_btn="true"
-        btn_2="true" 
+        btn_2="true"
         handleClose={() => {
-          setViewquery(false); 
+          setViewquery(false);
         }}
-        Submit_Cancel_Function={() => {  setViewquery(false); }}
-        Submit_Function={() =>  setViewquery(false)}
-        >
+        Submit_Cancel_Function={() => { setViewquery(false); }}
+        Submit_Function={() => setViewquery(false)}
+      >
         <div className="row">
           <div className="card col-md-12">
             <div className="card-body">
