@@ -1519,7 +1519,7 @@ const Setting = () => {
     { id: "7", label: "Incorporation" },
     { id: "8", label: "Source" },
     { id: "9", label: "Checklist" },
-
+    { id: "10", label: "Internal" }
   ];
 
   return (
