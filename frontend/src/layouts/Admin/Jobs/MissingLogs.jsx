@@ -22,6 +22,7 @@ const MissingLogs = () => {
   const [singleMissionData, setSingleMissionData] = useState([]);
   const [getEditData, setEditData] = useState([]);
   const [errors1, setErrors1] = useState({});
+  const [draftStatus, setDraftStatus] = useState(0);
 
 
 
@@ -118,7 +119,8 @@ const MissingLogs = () => {
       .unwrap()
       .then((response) => {
         if (response.status) {
-          setGetMissingLogListData(response.data);
+          setDraftStatus(response.data.draft_process)
+          setGetMissingLogListData(response.data.rows);
         }
         else {
           setGetMissingLogListData([]);
@@ -265,9 +267,11 @@ const MissingLogs = () => {
         </div>
         <div className='col-md-4'>
           <div>
-            <button type="button" className="btn btn-info text-white float-end" onClick={() => setAddmissinglogs(true)}>
-              <i className="fa-regular fa-plus pe-1"></i> Add Missing Logs
-            </button>
+            {
+              draftStatus == 0 ? <button type="button" className="btn btn-info text-white float-end" onClick={() => setAddmissinglogs(true)}>
+                <i className="fa-regular fa-plus pe-1"></i> Add Missing Logs
+              </button> : ""
+            }
           </div>
         </div>
       </div>

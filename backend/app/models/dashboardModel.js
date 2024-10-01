@@ -109,58 +109,29 @@ LEFT JOIN
 
 const getDashboardActivityLog = async (dashboard) => {
   const { staff_id } = dashboard;
-
- const query = `SELECT
+try {
+  const query = `
+  SELECT
     staff_logs.id AS log_id,
     staff_logs.staff_id AS staff_id,
     DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
     staff_logs.created_at AS created_at,
-    CONCAT(
-      roles.role_name, ' ', 
-      staffs.first_name, ' ', 
-      staffs.last_name, ' ', 
-      staff_logs.log_message, ' ',
-      CASE 
-      
-        WHEN staff_logs.module_name = 'customer' THEN CONCAT('cust_', SUBSTRING(customers.trading_name, 1, 3), '_', customers.customer_code)
-
-         WHEN staff_logs.module_name = 'client' THEN (
-          SELECT CONCAT('cli_', SUBSTRING(c.trading_name, 1, 3),'_', SUBSTRING(clients.trading_name, 1, 3),'_',clients.client_code)
-          FROM customers c
-          JOIN clients cl ON c.id = cl.customer_id
-          WHERE cl.id = staff_logs.module_id
-        )
-
-         WHEN staff_logs.module_name = 'job' THEN (
-          SELECT CONCAT(SUBSTRING(customers.trading_name, 1, 3),'_', SUBSTRING(clients.trading_name, 1, 3),'_',jobs.job_id)
-          FROM jobs
-          JOIN clients ON jobs.client_id = clients.id
-          JOIN customers ON clients.customer_id = customers.id
-          WHERE jobs.id = staff_logs.module_id
-        )
-        ELSE ''
-      END
-    ) AS log_message
-FROM 
+    staff_logs.log_message_all AS log_message
+  FROM
     staff_logs
-JOIN 
-    staffs ON staffs.id = staff_logs.staff_id
-JOIN 
-    roles ON roles.id = staffs.role_id
-LEFT JOIN 
-    customers ON staff_logs.module_name = 'customer' AND staff_logs.module_id = customers.id
-LEFT JOIN 
-    clients ON staff_logs.module_name = 'client' AND staff_logs.module_id = clients.id
-LEFT JOIN 
-    jobs  ON staff_logs.module_name = 'job' AND staff_logs.module_id = jobs.id         
-WHERE
+  WHERE
     staff_logs.staff_id = ${staff_id}
-ORDER BY
+  ORDER BY
     staff_logs.id DESC
 `;
 
   const [result] = await pool.execute(query);
   return { status: true, message: "success.", data: result };
+} catch (error) {
+  console.log("error - ",error)
+  return { status: false, message: "Err Dashboard Activity Log Get", error: error.message };
+}
+ 
 
 }
 

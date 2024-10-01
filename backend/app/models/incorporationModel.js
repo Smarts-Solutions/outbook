@@ -70,12 +70,7 @@ const getIncorporationAll = async () => {
 };
 
 const deleteIncorporation = async (IncorporationId) => {
-  const query = `
-    DELETE FROM incorporation_in WHERE id = ?
-    `;
-    const [[existName]] = await pool.execute(`SELECT name FROM incorporation_in WHERE id = ?`, [IncorporationId.id]);
-  try {
-    await pool.execute(query, [IncorporationId.id]);
+  if(parseInt(IncorporationId.id) > 0){
     const currentDate = new Date();
     await SatffLogUpdateOperation(
       {
@@ -88,6 +83,14 @@ const deleteIncorporation = async (IncorporationId) => {
         module_id: IncorporationId.id,
       }
     );
+  }
+  const query = `
+    DELETE FROM incorporation_in WHERE id = ?
+    `;
+    const [[existName]] = await pool.execute(`SELECT name FROM incorporation_in WHERE id = ?`, [IncorporationId.id]);
+  try {
+    await pool.execute(query, [IncorporationId.id]);
+  
   } catch (err) {
     console.error("Error deleting data:", err);
     throw err;
