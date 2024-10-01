@@ -65,8 +65,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             module_id: client_id,
         }
     );
-      
-
+    
     } catch (err) {
       console.error("Error inserting data:", err);
       throw err;
@@ -405,7 +404,8 @@ WHERE
     } else {
       return { status: false, message: "No customer found with the given ID." };
     }
-  } else if (client_type == "2") {
+  } 
+  else if (client_type == "2") {
     const query = `
  SELECT 
     clients.id AS client_id, 
@@ -765,6 +765,20 @@ WHERE
 
 const deleteClient = async (client) => {
   const { client_id } = client;
+  if(parseInt(client_id) > 0){
+    const currentDate = new Date();
+    await SatffLogUpdateOperation(
+        {
+            staff_id: client.StaffUserId,
+            ip: client.ip,
+            date: currentDate.toISOString().split('T')[0],
+            module_name: 'client',
+            log_message: `deleted client profile. client code :`,
+            permission_type: 'deleted',
+            module_id: client_id,
+            }
+        );
+    }
 
   try {
     await pool.execute("DELETE FROM clients WHERE id = ?", [client_id]);
@@ -805,6 +819,18 @@ const clientUpdate = async (client) => {
   if (check.length > 0) {
     return { status: false, message: "Client Trading Name Already Exists." };
   }
+ 
+  let information_client = false
+
+
+  let cli_type = 'sole trader'
+  if (client_type === '2') {
+    cli_type = 'company'
+  } else if (client_type === '3') {
+    cli_type = 'partnership'
+  }else if (client_type === '4') {
+    cli_type = 'individual'
+  }
 
   if (client_type != "4") {
     try {
@@ -831,6 +857,9 @@ const clientUpdate = async (client) => {
         website,
         client_id,
       ]);
+      if(result.changedRows > 0){
+        information_client = true
+      }
     } catch (err) {
       return { status: false, message: "client update Err" };
     }
@@ -850,6 +879,9 @@ const clientUpdate = async (client) => {
         trading_name,
         client_id
       ]);
+      if(result.changedRows > 0){
+        information_client = true
+      }
     } catch (err) {
     
       return { status: false, message: "client update Err" };
@@ -874,11 +906,64 @@ const clientUpdate = async (client) => {
         residential_address,
         client_id,
       ]);
+
+      if(result2.changedRows > 0 && information_client == true){
+        const currentDate = new Date();
+        await SatffLogUpdateOperation(
+            {
+                staff_id: client.StaffUserId,
+                ip: client.ip,
+                date: currentDate.toISOString().split('T')[0],
+                module_name: 'client',
+                log_message: `edited ${cli_type} information and Officer information. client code :`,
+                permission_type: 'updated',
+                module_id: client_id,
+            }
+        );
+      }
+      else if(information_client == true){
+        const currentDate = new Date();
+        await SatffLogUpdateOperation(
+            {
+                staff_id: client.StaffUserId,
+                ip: client.ip,
+                date: currentDate.toISOString().split('T')[0],
+                module_name: 'client',
+                log_message: `edited ${cli_type} information. client code :`,
+                permission_type: 'updated',
+                module_id: client_id,
+            }
+        );
+      }
+      else if(result2.changedRows > 0){
+        const currentDate = new Date();
+        await SatffLogUpdateOperation(
+            {
+                staff_id: client.StaffUserId,
+                ip: client.ip,
+                date: currentDate.toISOString().split('T')[0],
+                module_name: 'client',
+                log_message: `edited ${cli_type} Officer information. client code :`,
+                permission_type: 'updated',
+                module_id: client_id,
+            }
+        );
+      
+      }
+
     } catch (err) {
       console.log("err", err);
       return { status: false, message: "client update Err Client Type 1" };
     }
-  } else if (client_type == "2") {
+  } 
+  
+  else if (client_type == "2") {
+
+    let addedOfficer = false;
+    let removeOfficer = false;
+    let editOfficer = false;
+   
+
     const {
       company_name,
       entity_type,
@@ -889,6 +974,8 @@ const clientUpdate = async (client) => {
       incorporation_in,
       contactDetails,
     } = client;
+
+    const [incorporation_date_s] = incorporation_date.split('T');
 
     try {
       const query1 = `
@@ -902,12 +989,17 @@ const clientUpdate = async (client) => {
         company_status,
         company_number,
         registered_office_address,
-        incorporation_date,
+        incorporation_date_s,
         incorporation_in,
         client_id,
       ]);
+      if (result1.changedRows > 0) {
+         information_client = true
+      }
+
     } catch (err) {
-      return { status: false, message: "client update Err Client Type 1" };
+      console.log("err", err);
+      return { status: false, message: "client update Err Client Type 2" };
     }
 
     try {
@@ -925,8 +1017,8 @@ const clientUpdate = async (client) => {
     `;
       if (contactDetails.length > 0) {
         for (const detail of contactDetails) {
+          console.log("detail",detail.customer_contact_person_role_id)
           let {
-            customer_contact_person_role_id,
             first_name,
             last_name,
             phone,
@@ -937,6 +1029,8 @@ const clientUpdate = async (client) => {
             detail.phone_code == undefined || detail.phone_code == ""
               ? ""
               : detail.phone_code;
+
+          let customer_contact_person_role_id = detail.customer_contact_person_role_id == null || detail.customer_contact_person_role_id == '' || detail.customer_contact_person_role_id == undefined? 0 : detail.customer_contact_person_role_id   
 
           if (
             contact_id == "" ||
@@ -955,6 +1049,9 @@ const clientUpdate = async (client) => {
                 email,
               ]
             );
+            if(result2.changedRows > 0){
+              addedOfficer = true
+            }
           } else {
             arrayInterId.push(contact_id);
             const [result2] = await pool.execute(query2, [
@@ -967,11 +1064,15 @@ const clientUpdate = async (client) => {
               client_id,
               contact_id,
             ]);
+            if(result2.changedRows > 0){
+              editOfficer = true
+            }
           }
         }
 
         let deleteIdArray = idArray.filter((id) => !arrayInterId.includes(id));
         if (deleteIdArray.length > 0) {
+          removeOfficer =true
           for (const id of deleteIdArray) {
             const query3 = `
                     DELETE FROM client_contact_details WHERE id = ?
@@ -980,12 +1081,53 @@ const clientUpdate = async (client) => {
           }
         }
       }
+
+      let model_name = [];
+      if(information_client == true){
+        model_name.push(`edited information`)
+      }
+      if(addedOfficer == true){
+        model_name.push('added additional Officer information')
+      }
+      if(editOfficer == true){
+        model_name.push('edited Officer information')
+      }
+      if(removeOfficer == true){
+        model_name.push('removed Officer information')
+      }
+      
+
+      if(model_name.length > 0){
+        const msgLog = model_name.length > 1 
+        ? model_name.slice(0, -1).join(', ') + ' and ' + model_name.slice(-1)
+        : model_name[0];
+
+       const currentDate = new Date();
+        await SatffLogUpdateOperation(
+            {
+                staff_id: client.StaffUserId,
+                ip: client.ip,
+                date: currentDate.toISOString().split('T')[0],
+                module_name: 'client',
+                log_message: `${cli_type} ${msgLog}. client code :`,
+                permission_type: 'updated',
+                module_id: client_id,
+            }
+        );
+
+    }
+
+
     } catch (err) {
+      console.log("err", err);
       return { status: false, message: "client update Err Client Type 2" };
     }
-  } else if (client_type == "3") {
+  }
+  else if (client_type == "3") {
     const { contactDetails } = client;
-
+    let addedOfficer = false;
+    let removeOfficer = false;
+    let editOfficer = false;
     try {
       const [existIdResult] = await pool.execute(
         "SELECT id FROM client_contact_details WHERE client_id = ?",
@@ -996,13 +1138,13 @@ const clientUpdate = async (client) => {
 
       const query2 = `
     UPDATE client_contact_details
-    SET role = ?, first_name = ?, last_name = ?, email = ?, alternate_email = ?, phone_code = ?,phone = ?, alternate_phone_code = ? ,alternate_phone = ?, authorised_signatory_status = ?
+    SET role = ?, first_name = ?, last_name = ?, email = ?, alternate_email = ?, phone_code = ?,phone = ?, alternate_phone_code = ? ,alternate_phone = ?
     WHERE client_id = ? AND id = ?
     `;
 
       for (const detail of contactDetails) {
-        let customer_contact_person_role_id =
-          detail.customer_contact_person_role_id;
+        let customer_contact_person_role_id = detail.customer_contact_person_role_id == null || detail.customer_contact_person_role_id == '' || detail.customer_contact_person_role_id == undefined? 0 : detail.customer_contact_person_role_id
+
         let first_name = detail.first_name;
         let last_name = detail.last_name;
         let email = detail.email;
@@ -1018,11 +1160,11 @@ const clientUpdate = async (client) => {
             ? ""
             : detail.alternate_phone_code;
         let alternate_phone = detail.alternate_phone;
-        let authorised_signatory_status = detail.authorised_signatory_status;
+      
         let contact_id = detail.contact_id; // Assuming each contactDetail has an id
         if (contact_id == "" || contact_id == undefined || contact_id == null) {
           const [result2] = await pool.execute(
-            "INSERT INTO client_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone_code,phone,alternate_phone_code,alternate_phone,authorised_signatory_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO client_contact_details (client_id,role,first_name,last_name,email,alternate_email,phone_code,phone,alternate_phone_code,alternate_phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [
               client_id,
               customer_contact_person_role_id,
@@ -1034,9 +1176,12 @@ const clientUpdate = async (client) => {
               phone,
               alternate_phone_code,
               alternate_phone,
-              authorised_signatory_status,
+              
             ]
           );
+          if(result2.changedRows > 0){
+            addedOfficer = true
+          }
         } else {
           arrayInterId.push(contact_id);
           const [result2] = await pool.execute(query2, [
@@ -1049,27 +1194,65 @@ const clientUpdate = async (client) => {
             phone,
             alternate_phone_code,
             alternate_phone,
-            authorised_signatory_status,
             client_id,
             contact_id,
           ]);
+          if(result2.changedRows > 0){
+            editOfficer = true
+          }
         }
       }
 
       let deleteIdArray = idArray.filter((id) => !arrayInterId.includes(id));
       if (deleteIdArray.length > 0) {
         for (const id of deleteIdArray) {
+          removeOfficer = true
           const query3 = `
                         DELETE FROM client_contact_details WHERE id = ?
                         `;
           const [result3] = await pool.execute(query3, [id]);
         }
       }
+      let model_name = [];
+      if(information_client == true){
+        model_name.push(`edited information`)
+      }
+      if(addedOfficer == true){
+        model_name.push('added additional Officer information')
+      }
+      if(editOfficer == true){
+        model_name.push('edited Officer information')
+      }
+      if(removeOfficer == true){
+        model_name.push('removed Officer information')
+      }
+
+      if(model_name.length > 0){
+        const msgLog = model_name.length > 1 
+        ? model_name.slice(0, -1).join(', ') + ' and ' + model_name.slice(-1)
+        : model_name[0];
+
+       const currentDate = new Date();
+        await SatffLogUpdateOperation(
+            {
+                staff_id: client.StaffUserId,
+                ip: client.ip,
+                date: currentDate.toISOString().split('T')[0],
+                module_name: 'client',
+                log_message: `${cli_type} ${msgLog}. client code :`,
+                permission_type: 'updated',
+                module_id: client_id,
+            }
+        );
+
+      }
+
     } catch (err) {
       console.log("err", err);
       return { status: false, message: "client update Err Client Type 3" };
     }
-  } else if (client_type == "4") {
+  } 
+  else if (client_type == "4") {
     const { first_name, last_name, phone, email, residential_address } = client;
     let phone_code = client.phone_code == undefined ? "" : client.phone_code;
     try {
@@ -1087,6 +1270,49 @@ const clientUpdate = async (client) => {
         residential_address,
         client_id,
       ]);
+      if(result2.changedRows  > 0 && information_client == true){
+        const currentDate = new Date();
+        await SatffLogUpdateOperation(
+            {
+                staff_id: client.StaffUserId,
+                ip: client.ip,
+                date: currentDate.toISOString().split('T')[0],
+                module_name: 'client',
+                log_message: `edited ${cli_type} information and Officer information. client code :`,
+                permission_type: 'updated',
+                module_id: client_id,
+            }
+        );
+
+      }
+      else if(information_client == true){
+        const currentDate = new Date();
+        await SatffLogUpdateOperation(
+            {
+                staff_id: client.StaffUserId,
+                ip: client.ip,
+                date: currentDate.toISOString().split('T')[0],
+                module_name: 'client',
+                log_message: `edited ${cli_type} information. client code :`,
+                permission_type: 'updated',
+                module_id: client_id,
+            }
+        );
+      }
+      else if(result2.changedRows  > 0){
+        const currentDate = new Date();
+        await SatffLogUpdateOperation(
+            {
+                staff_id: client.StaffUserId,
+                ip: client.ip,
+                date: currentDate.toISOString().split('T')[0],
+                module_name: 'client',
+                log_message: `edited ${cli_type} Officer information. client code :`,
+                permission_type: 'updated',
+                module_id: client_id,
+            }
+        );
+      }
     } catch (err) {
       console.log("err", err);
       return { status: false, message: "client update Err Client Type 1" };
