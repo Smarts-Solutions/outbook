@@ -15,6 +15,8 @@ const Status = () => {
   const [statusTypeDataAll, setStatusTypeDataAll] = useState([]);
   const [statusDataAll, setStatusDataAll] = useState([]);
 
+
+  console.log("statusDataAll", statusDataAll);
   const [getStatsAdd, setStatsAdd] = useState({
     statusname: "",
     statustype: "",
@@ -95,7 +97,6 @@ const Status = () => {
       });
       return;
     }
-
     try {
       const data = {
         req: {
