@@ -84,6 +84,7 @@ const Sidebar = () => {
                       onClick={(e) => handleLinkClick(e, "/admin/dashboard")}
                     >
                       <span className="sidebar-icons">
+                        
                         <i className="fas fa-tachometer-alt"></i> {/* Dashboard icon */}
                       </span>
                       <span>Dashboard</span>
