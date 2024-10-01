@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { GetAllJabData, AddAllJobType, GET_ALL_CHECKLIST } from '../../../ReduxStore/Slice/Customer/CustomerSlice';
 import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from 'sweetalert2';
+import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 
 
 const JobInformationPage = ({ job_id }) => {
@@ -19,7 +20,8 @@ const JobInformationPage = ({ job_id }) => {
     const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" })
     const [FeedbackIncorporationTime, setFeedbackIncorporationTime] = useState({ hours: "", minutes: "" })
     const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" })
-
+    const [statusDataAll, setStatusDataAll] = useState([])
+    const [selectStatusIs , setStatusId] = useState('')
 
     const [JobInformationData, setJobInformationData] = useState({
         AccountManager: "",
@@ -69,6 +71,14 @@ const JobInformationPage = ({ job_id }) => {
 
     });
 
+    useEffect(() => {
+        JobDetails()
+        GetStatus()
+    }, []);
+
+    useEffect(() => {
+        GetJobData()
+    }, [JobInformationData]);
 
     const JobDetails = async () => {
         const req = { action: "getByJobId", job_id: location.state.job_id }
@@ -157,6 +167,22 @@ const JobInformationPage = ({ job_id }) => {
             });
     }
 
+    const GetStatus = async () => {
+        const data = { req: { action: "get" }, authToken: token };
+        await dispatch(MasterStatusData(data))
+            .unwrap()
+            .then((response) => {
+                if (response.status) {
+                    setStatusDataAll(response.data);
+                } else {
+                    setStatusDataAll([]);
+                }
+            })
+            .catch((error) => {
+                return;
+            });
+    };
+
     const GetJobData = async () => {
         const req = { customer_id: JobInformationData?.Customer_id }
         const data = { req: req, authToken: token }
@@ -182,16 +208,7 @@ const JobInformationPage = ({ job_id }) => {
 
     }
 
-    useEffect(() => {
-        JobDetails()
-    }, []);
-
-    useEffect(() => {
-        GetJobData()
-    }, [JobInformationData]);
-
-
-
+ 
     const filteredData = AllJobData.data?.engagement_model?.[0]
         ? Object.keys(AllJobData.data.engagement_model[0])
             .filter(key => AllJobData.data.engagement_model[0][key] === "1")
@@ -206,7 +223,6 @@ const JobInformationPage = ({ job_id }) => {
     const handleJobEdit = () => {
         navigate('/admin/job/edit', { state: { job_id: location.state.job_id } })
     }
-
 
     const handleDelete = async (row, type) => {
         const req = { action: "delete", job_id: location.state.job_id };
@@ -241,7 +257,7 @@ const JobInformationPage = ({ job_id }) => {
                 return;
             });
     };
-    
+
     return (
         <div>
             <div className='row mb-3'>
@@ -252,15 +268,16 @@ const JobInformationPage = ({ job_id }) => {
                 </div>
                 <div className='col-md-4 '>
                     <div className='d-flex w-100'>
-                    <div className='w-75'>
-            <select
-              className="form-select form-control"
-            >
-              <option value="0">Deactive</option>
-              <option value="1">Active</option>
-            </select>
-          </div>
-                    <button className='edit-icon' onClick={handleJobEdit}>  <i className="ti-pencil text-primary" /></button>
+                        <div className='w-75'>
+                            <select  className="form-select form-control" onChange={(e)=> setStatusId(e.target.value)} >
+                                {
+                                    statusDataAll.map((status) => (
+                                        <option value={status.id} key={status.id}>{status.name}</option>
+                                    ))
+                                } 
+                            </select>
+                        </div>
+                        <button className='edit-icon' onClick={handleJobEdit}>  <i className="ti-pencil text-primary" /></button>
 
                         <button className='delete-icon' onClick={handleDelete}><i className="ti-trash text-danger"></i></button>
                     </div>
@@ -393,37 +410,37 @@ const JobInformationPage = ({ job_id }) => {
                                         <div className="mb-3">
                                             <label className="form-label">Budgeted Time</label>
                                             <div className="input-group">
-                                            <div className='hours-div'>
-                                                <input
-                                                    type="text"
-                                                    defaultValue=""
-                                                    className="form-control"
-                                                    placeholder="Hours"
-                                                    name="BudgetedHours"
-                                                    disabled
-                                                    onChange={(e) => setBudgetedHours({ ...budgetedhours, hours: e.target.value })}
-                                                    value={budgetedhours.hours}
+                                                <div className='hours-div'>
+                                                    <input
+                                                        type="text"
+                                                        defaultValue=""
+                                                        className="form-control"
+                                                        placeholder="Hours"
+                                                        name="BudgetedHours"
+                                                        disabled
+                                                        onChange={(e) => setBudgetedHours({ ...budgetedhours, hours: e.target.value })}
+                                                        value={budgetedhours.hours}
 
-                                                />
-                                                <span className="input-group-text" id="basic-addon2">
-                                                    H
-                                                </span>
+                                                    />
+                                                    <span className="input-group-text" id="basic-addon2">
+                                                        H
+                                                    </span>
                                                 </div>
                                                 <div className='hours-div'>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="Minutes"
-                                                    name="BudgetedHours"
-                                                    defaultValue=""
-                                                    disabled
-                                                    onChange={(e) => setBudgetedHours({ ...budgetedhours, minutes: e.target.value })}
-                                                    value={budgetedhours.minutes}
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="Minutes"
+                                                        name="BudgetedHours"
+                                                        defaultValue=""
+                                                        disabled
+                                                        onChange={(e) => setBudgetedHours({ ...budgetedhours, minutes: e.target.value })}
+                                                        value={budgetedhours.minutes}
 
-                                                />
-                                                <span className="input-group-text" id="basic-addon2">
-                                                    M
-                                                </span>
+                                                    />
+                                                    <span className="input-group-text" id="basic-addon2">
+                                                        M
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -523,33 +540,33 @@ const JobInformationPage = ({ job_id }) => {
                                         <div className="mb-3">
                                             <label className="form-label" >Total Preparation Time</label>
                                             <div className="input-group">
-                                            <div className='hours-div'>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="Hours"
-                                                    defaultValue=""
-                                                    disabled
-                                                    onChange={(e) => setPreparationTimne({ ...PreparationTimne, hours: e.target.value })}
-                                                    value={PreparationTimne.hours}
-                                                />
-                                                <span className="input-group-text" id="basic-addon2">
-                                                    H
-                                                </span>
+                                                <div className='hours-div'>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="Hours"
+                                                        defaultValue=""
+                                                        disabled
+                                                        onChange={(e) => setPreparationTimne({ ...PreparationTimne, hours: e.target.value })}
+                                                        value={PreparationTimne.hours}
+                                                    />
+                                                    <span className="input-group-text" id="basic-addon2">
+                                                        H
+                                                    </span>
                                                 </div>
                                                 <div className='hours-div'>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="Minutes"
-                                                    defaultValue=""
-                                                    disabled
-                                                    onChange={(e) => setPreparationTimne({ ...PreparationTimne, minutes: e.target.value })}
-                                                    value={PreparationTimne.minutes}
-                                                />
-                                                <span className="input-group-text" id="basic-addon2">
-                                                    M
-                                                </span>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="Minutes"
+                                                        defaultValue=""
+                                                        disabled
+                                                        onChange={(e) => setPreparationTimne({ ...PreparationTimne, minutes: e.target.value })}
+                                                        value={PreparationTimne.minutes}
+                                                    />
+                                                    <span className="input-group-text" id="basic-addon2">
+                                                        M
+                                                    </span>
                                                 </div>
                                             </div>
 
@@ -560,33 +577,33 @@ const JobInformationPage = ({ job_id }) => {
                                         <div className="mb-3">
                                             <label className="form-label">Review Time</label>
                                             <div className="input-group">
-                                            <div className='hours-div'>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="Hours"
-                                                    defaultValue=""
-                                                    disabled
-                                                    onChange={(e) => setReviewTime({ ...ReviewTime, hours: e.target.value })}
-                                                    value={ReviewTime.hours}
-                                                />
-                                                <span className="input-group-text" id="basic-addon2">
-                                                    H
-                                                </span>
+                                                <div className='hours-div'>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="Hours"
+                                                        defaultValue=""
+                                                        disabled
+                                                        onChange={(e) => setReviewTime({ ...ReviewTime, hours: e.target.value })}
+                                                        value={ReviewTime.hours}
+                                                    />
+                                                    <span className="input-group-text" id="basic-addon2">
+                                                        H
+                                                    </span>
                                                 </div>
                                                 <div className='hours-div'>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="Minutes"
-                                                    defaultValue=""
-                                                    disabled
-                                                    onChange={(e) => setReviewTime({ ...ReviewTime, minutes: e.target.value })}
-                                                    value={ReviewTime.minutes}
-                                                />
-                                                <span className="input-group-text" id="basic-addon2">
-                                                    M
-                                                </span>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="Minutes"
+                                                        defaultValue=""
+                                                        disabled
+                                                        onChange={(e) => setReviewTime({ ...ReviewTime, minutes: e.target.value })}
+                                                        value={ReviewTime.minutes}
+                                                    />
+                                                    <span className="input-group-text" id="basic-addon2">
+                                                        M
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -596,33 +613,33 @@ const JobInformationPage = ({ job_id }) => {
                                         <div className="mb-3">
                                             <label className="form-label" >Feedback Incorporation Time</label>
                                             <div className="input-group">
-                                            <div className='hours-div'>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    defaultValue=""
-                                                    placeholder="Hours"
-                                                    disabled
-                                                    onChange={(e) => setFeedbackIncorporationTime({ ...FeedbackIncorporationTime, hours: e.target.value })}
-                                                    value={FeedbackIncorporationTime.hours}
-                                                />
-                                                <span className="input-group-text" id="basic-addon2">
-                                                    H
-                                                </span>
+                                                <div className='hours-div'>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        defaultValue=""
+                                                        placeholder="Hours"
+                                                        disabled
+                                                        onChange={(e) => setFeedbackIncorporationTime({ ...FeedbackIncorporationTime, hours: e.target.value })}
+                                                        value={FeedbackIncorporationTime.hours}
+                                                    />
+                                                    <span className="input-group-text" id="basic-addon2">
+                                                        H
+                                                    </span>
                                                 </div>
                                                 <div className='hours-div'>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="Minutes"
-                                                    defaultValue=""
-                                                    disabled
-                                                    onChange={(e) => setFeedbackIncorporationTime({ ...FeedbackIncorporationTime, minutes: e.target.value })}
-                                                    value={FeedbackIncorporationTime.minutes}
-                                                />
-                                                <span className="input-group-text" id="basic-addon2">
-                                                    M
-                                                </span>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="Minutes"
+                                                        defaultValue=""
+                                                        disabled
+                                                        onChange={(e) => setFeedbackIncorporationTime({ ...FeedbackIncorporationTime, minutes: e.target.value })}
+                                                        value={FeedbackIncorporationTime.minutes}
+                                                    />
+                                                    <span className="input-group-text" id="basic-addon2">
+                                                        M
+                                                    </span>
                                                 </div>
                                             </div>
 
@@ -635,42 +652,42 @@ const JobInformationPage = ({ job_id }) => {
                                             <div className="row">
                                                 <div className="col-md-6 pe-0">
                                                     <div className="input-group">
-                                                    <div className='hours-div'>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder={10}
-                                                            aria-label="Recipient's username"
-                                                            aria-describedby="basic-addon2"
-                                                            disabled
-                                                            defaultValue=""
-                                                            onChange={(e) => setTotalTime({ ...Totaltime, hours: e.target.value })}
-                                                            value={Totaltime.hours}
+                                                        <div className='hours-div'>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control"
+                                                                placeholder={10}
+                                                                aria-label="Recipient's username"
+                                                                aria-describedby="basic-addon2"
+                                                                disabled
+                                                                defaultValue=""
+                                                                onChange={(e) => setTotalTime({ ...Totaltime, hours: e.target.value })}
+                                                                value={Totaltime.hours}
 
-                                                        />
-                                                        <span className="input-group-text" id="basic-addon2">
-                                                            H
-                                                        </span>
+                                                            />
+                                                            <span className="input-group-text" id="basic-addon2">
+                                                                H
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div className="col-md-6 ps-0">
                                                     <div className="input-group">
-                                                    <div className='hours-div'>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder={10}
-                                                            aria-label="Recipient's username"
-                                                            aria-describedby="basic-addon2"
-                                                            defaultValue=""
-                                                            disabled
-                                                            onChange={(e) => setTotalTime({ ...Totaltime, minutes: e.target.value })}
-                                                            value={Totaltime.minutes}
-                                                        />
-                                                        <span className="input-group-text" id="basic-addon2">
-                                                            M
-                                                        </span>
+                                                        <div className='hours-div'>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control"
+                                                                placeholder={10}
+                                                                aria-label="Recipient's username"
+                                                                aria-describedby="basic-addon2"
+                                                                defaultValue=""
+                                                                disabled
+                                                                onChange={(e) => setTotalTime({ ...Totaltime, minutes: e.target.value })}
+                                                                value={Totaltime.minutes}
+                                                            />
+                                                            <span className="input-group-text" id="basic-addon2">
+                                                                M
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 </div>
