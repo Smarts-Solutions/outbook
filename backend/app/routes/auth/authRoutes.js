@@ -11,6 +11,7 @@ router.post('/isLoginAuthTokenCheck', authController.isLoginAuthTokenCheck);
 router.post('/staff',verifyToken, authController.handleStaff);
 router.post('/staffCompetency',verifyToken, authController.staffCompetency);
 router.post('/profile',verifyToken, authController.profile);
+router.post('/isLogOut', authController.isLogOut);
 
 
 module.exports = router;

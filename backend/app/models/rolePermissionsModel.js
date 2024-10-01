@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const { SatffLogUpdateOperation } = require('../utils/helper');
 
 const createRole = async (Role) => {
     const { role_name } = Role;
@@ -15,7 +16,38 @@ const createRole = async (Role) => {
           return  {status:false , message : "Role already exists"}
           }
         const [result] = await pool.execute(query, [role_name, role]);
-        return {status:true , message : "Role created successfully" , data : result.insertId}
+
+
+
+        const addQuery = `
+        INSERT INTO role_permissions (role_id, permission_id)
+        VALUES (?, ?), (?, ?), (?, ?), (?, ?)
+        ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP
+      `;
+      
+      const values = [
+        result.insertId, 29,  
+        result.insertId, 30,  
+        result.insertId, 31, 
+        result.insertId, 32   
+      ];
+      
+      await pool.execute(addQuery, values);
+       
+      const currentDate = new Date();
+      await SatffLogUpdateOperation(
+          {
+              staff_id: Role.StaffUserId,
+              ip: Role.ip,
+              date: currentDate.toISOString().split('T')[0],
+              module_name: "role",
+              log_message: `created role ${role_name}`,
+              permission_type: "created",
+              module_id:result.insertId
+          }
+      );
+           
+     return {status:true , message : "Role created successfully" , data : result.insertId}
     } catch (err) {
         console.error('Error inserting data:', err);
         throw err;
@@ -61,16 +93,16 @@ const staffRole = async () => {
 };
 
 const deleteRole = async (roleId) => {
-    const query = `
-    DELETE FROM roles WHERE id = ?
-    `;
+    // const query = `
+    // DELETE FROM roles WHERE id = ?
+    // `;
 
-    try {
-        await pool.execute(query, [roleId]);
-    } catch (err) {
-        console.error('Error deleting data:', err);
-        throw err;
-    }
+    // try {
+    //     await pool.execute(query, [roleId]);
+    // } catch (err) {
+    //     console.error('Error deleting data:', err);
+    //     throw err;
+    // }
 };
 
 const getRoleById = async (roleId) => {
@@ -103,8 +135,32 @@ const updateRole = async (Role) => {
         const [check] = await pool.execute(checkQuery, [role, id]);
         if (check.length > 0) {
             return {status : false , message : 'Role already exists'}
-         }
+        }
+
+        const [[existStatus]] = await pool.execute(`SELECT status FROM roles WHERE id = ?`, [id]);
         const [result] = await pool.execute(query, [role_name, role,status, id]);
+  
+        let status_change = "Deactivate"
+        if(status == "1"){
+         status_change = "Activate"
+        }
+        let log_message = existStatus.status === status ?
+        `edited role ${role_name}`:
+        `changes the role status ${status_change} ${role_name}`
+        if(result.changedRows){
+        const currentDate = new Date();
+        await SatffLogUpdateOperation(
+            {
+                staff_id: Role.StaffUserId,
+                ip: Role.ip,
+                date: currentDate.toISOString().split('T')[0],
+                module_name: "role",
+                log_message: log_message,
+                permission_type: "updated",
+                module_id:id
+            }
+        );
+      }
         return {status : true , message : 'Role updated successfully' , data : result.affectedRows}
         // Return affectedRows
     } catch (err) {

@@ -1,7 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isSelected, fieldtype, formik, btn_name, forlogin, title, label_size, col_size, disable, check_box_true, row_size, additional_field, showImagePreview, placeholderdata, disabled, closeBtn, }) => {
+const ReusableForm = ({
+  initialValues,
+  validationSchema,
+  onSubmit,
+  fromDate,
+  isSelected,
+  fieldtype,
+  formik,
+  btn_name,
+  forlogin,
+  title,
+  label_size,
+  col_size,
+  disable,
+  check_box_true,
+  row_size,
+  additional_field,
+  showImagePreview,
+  placeholderdata,
+  disabled,
+  closeBtn,
+}) => {
   const location = useLocation();
   const [passwordVisible, setPasswordVisible] = useState({});
   const [selectSearchItem, setSelectSearchItem] = useState("");
@@ -16,9 +37,9 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
     );
   }, [formik.values.search_company_name]);
 
+
   return (
     <form className="w-100" onSubmit={formik.handleSubmit}>
-
       <div
         className="w-100"
         style={{
@@ -32,8 +53,9 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
               {field.type === "select3" ? (
                 <>
                   <div
-                    className={`col-lg-${title === "update_theme" ? 12 : field.col_size
-                      }`}
+                    className={`col-lg-${
+                      title === "update_theme" ? 12 : field.col_size
+                    }`}
                   >
                     <div className=" row">
                       <label
@@ -41,7 +63,6 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         htmlFor={field.name}
                       >
                         {field.label}
-
                       </label>
                       <div
                         className={`col-lg-${title === "addgroup" ? 12 : 12}`}
@@ -52,9 +73,8 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                           style={{ background: field.disable ? "#eeeeee" : "" }}
                           {...formik.getFieldProps(field.name)}
                           disabled={field.disable}
-                          defaultValue={'0'}
+                          defaultValue={"0"}
                         >
-
                           {field.options.map((option) => (
                             <option key={option.value} value={option.value}>
                               {option.label}
@@ -74,8 +94,9 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
               ) : field.type === "select" ? (
                 <>
                   <div
-                    className={`col-lg-${title === "update_theme" ? 12 : field.col_size
-                      }`}
+                    className={`col-lg-${
+                      title === "update_theme" ? 12 : field.col_size
+                    }`}
                   >
                     <div className=" row">
                       <label
@@ -106,7 +127,10 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         </select>
                         {formik.touched[field.name] &&
                           formik.errors[field.name] && (
-                            <div className="error-text" style={{ color: "red" }}>
+                            <div
+                              className="error-text"
+                              style={{ color: "red" }}
+                            >
                               {formik.errors[field.name]}
                             </div>
                           )}
@@ -258,10 +282,11 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                           autoComplete="off"
                         />
                         <i
-                          className={`fa-solid ${passwordVisible[field.name]
-                            ? "fa-eye-slash"
-                            : "fa-eye"
-                            }`}
+                          className={`fa-solid ${
+                            passwordVisible[field.name]
+                              ? "fa-eye-slash"
+                              : "fa-eye"
+                          }`}
                           style={{
                             position: "absolute",
                             top: "1.5px",
@@ -372,7 +397,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                           defaultValue=""
                           readOnly={field.disable}
                           autoComplete="new-email"
-                          required={field.name == "Trading_Name" ? true : false}
+                          // required={field.name == "Trading_Name" ? true : false}
                           // ref={(input) => {
                           //   if (formik.touched[field.name] && formik.errors[field.name] && input) {
                           //     input.focus();
@@ -384,7 +409,10 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         </div>
                         {formik.touched[field.name] &&
                           formik.errors[field.name] && (
-                            <div className="error-text" style={{ color: "red" }}>
+                            <div
+                              className="error-text"
+                              style={{ color: "red" }}
+                            >
                               {formik.errors[field.name]}
                             </div>
                           )}
@@ -431,57 +459,53 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
               ) : field.type === "number1" ? (
                 <>
                   <div className={`col-lg-${field.col_size}`}>
-
-
                     <label
                       className={`col-lg-${field.label_size}`}
                       htmlFor={field.name}
-                      
                     >
                       {field.label}
                       <span className="text-danger">*</span>
                     </label>
                     <div className="mb-3 row align-items-center">
-
-
-                      <div className="d-flex align-items-center" >
-
+                      <div className="d-flex align-items-center">
                         <select
                           className="form-select me-2"
                           style={{ width: "30%" }}
                           {...formik.getFieldProps("countryCode")}
                         >
-                          {formik.values && formik.values.CountryData && formik.values.CountryData.map((item, i) => (
-                            <option value={item.code} key={i}>
-                              {item.code}
-                            </option>
-                          ))}
+                          {formik.values &&
+                            formik.values.CountryData &&
+                            formik.values.CountryData.map((item, i) => (
+                              <option value={item.code} key={i}>
+                                {item.code}
+                              </option>
+                            ))}
                         </select>
 
                         <input
                           type="number"
                           className="form-control"
-                          style={{ background: field.disable ? "#eeeeee" : "", width: "70%" }}
+                          style={{
+                            background: field.disable ? "#eeeeee" : "",
+                            width: "70%",
+                          }}
                           id={field.name}
                           placeholder={`Enter ${field.label}`}
                           {...formik.getFieldProps(field.name)}
                           defaultValue=""
                           readOnly={field.disable}
                           autoComplete="new-email"
-
                         />
-                        
                       </div>
 
                       <div className="error-text">
-                        {formik.touched[field.name] && formik.errors[field.name] && (
-                          <div>{formik.errors[field.name]}</div>
-                        )}
+                        {formik.touched[field.name] &&
+                          formik.errors[field.name] && (
+                            <div>{formik.errors[field.name]}</div>
+                          )}
                       </div>
                     </div>
                   </div>
-
-
                 </>
               ) : field.type === "text1" ? (
                 <>
@@ -509,7 +533,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         />
 
                         {field.filteredCompanies.length > 0 &&
-                          !selectSearchItem ? (
+                        !selectSearchItem ? (
                           <div className="dropdown-list">
                             {field.filteredCompanies &&
                               field.filteredCompanies.map((company, index) => (
@@ -519,8 +543,6 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                     setSelectSearchItem(company.title)
                                   }
                                 >
-                            
-
                                   {company.title}
                                 </div>
                               ))}
@@ -557,20 +579,21 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                         <input
                           type="text"
                           className="form-control"
-                          style={{ background: field.disable ? "#eeeeee" : "", cursor: "pointer" }}
+                          style={{
+                            background: field.disable ? "#eeeeee" : "",
+                            cursor: "pointer",
+                          }}
                           id={field.name}
                           value={selectSearchItem}
                           placeholder={`Enter ${field.label}`}
                           {...formik.getFieldProps(field.name)}
                           defaultValue=""
-
-
                           readOnly={field.disable}
                           autoComplete="new-email"
                         />
 
                         {field.filteredCompanies.length > 0 &&
-                          !selectSearchItem ? (
+                        !selectSearchItem ? (
                           <div className="dropdown-list">
                             {field.filteredCompanies &&
                               field.filteredCompanies.map((company, index) => (
@@ -579,9 +602,11 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                                   onClick={() =>
                                     setSelectSearchItem(company.title)
                                   }
-                                  style={{ cursor: "pointer", padding: "8px 0" }}
+                                  style={{
+                                    cursor: "pointer",
+                                    padding: "8px 0",
+                                  }}
                                 >
-
                                   {company.title}
                                 </div>
                               ))}
@@ -607,7 +632,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                 <>
                   <>
                     <div className={`col-lg-${field.col_size} px-2`}>
-                      <div className="mb-3  mt-4 row flex-column">
+                      <div className="  mt-4 row flex-column">
                         <div className="card-header card-header-light-blue step-card-header mb-4 card-header-light-blue" ><h6 className="my-0 fw-bold">Trading Details </h6></div>
                         {/* <label
                         className={`col-lg-${field.label_size}`}
@@ -620,17 +645,17 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
                     </div>
                   </>
                 </>
-              ) :
-                (
-                  <>
-                    <div className={`col-lg-${field.col_size} px-2`}>
-                      <div className="mb-3  mt-4 row flex-column">
-                        <div className="card-header card-header-light-blue step-card-header" ><h6 className="my-0 fw-bold">Sole Trading </h6></div>
-                       
+              ) : (
+                <>
+                  <div className={`col-lg-${field.col_size} px-2`}>
+                    <div className="mb-3  mt-4 row flex-column">
+                      <div className="card-header card-header-light-blue step-card-header">
+                        <h6 className="my-0 fw-bold">Sole Trading </h6>
                       </div>
                     </div>
-                  </>
-                )}
+                  </div>
+                </>
+              )}
             </>
           ))}
         </div>
@@ -640,7 +665,7 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
           <div className="modal-footer d-flex justify-content-between">
             <button
               type="button"
-              className="btn btn-secondary m-2"
+              className="btn btn-info m-2"
               onClick={closeBtn}
             >
               <i className="pe-2 fa-regular fa-arrow-left-long"></i> Previous
@@ -658,15 +683,16 @@ const ReusableForm = ({ initialValues, validationSchema, onSubmit, fromDate, isS
           <div className="modal-footer">
             <button
               type="button"
-              className="btn btn-secondary m-2"
+              className="btn btn-info m-2"
               onClick={closeBtn}
             >
               <i className="pe-2 fa-regular fa-arrow-left-long"></i> Cancel
             </button>
 
             <button
-              className={`btn btn-primary ${location.pathname === "resetpassword" ? "col-md-11" : ""
-                }`}
+              className={`btn btn-primary ${
+                location.pathname === "resetpassword" ? "col-md-11" : ""
+              }`}
               type="submit"
               disabled={formik.isSubmitting}
             >

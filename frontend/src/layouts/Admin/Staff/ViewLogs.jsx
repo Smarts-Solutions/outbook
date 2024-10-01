@@ -4,24 +4,19 @@ import Datatable from '../../../Components/ExtraComponents/Datatable';
 
 
 const data = [
-  { TradingName: 'W120', Code: '012_BlaK_T_1772', CustomerName: 'The Black T', AccountManager: 'Ajeet Aggarwal',  ServiceType: 'Admin/Support Tasks', JobType: 'Year End' },
-  { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal',  ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-  { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal',  ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-  { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal',  ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-  { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal',  ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-  { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal',  ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-  { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal',  ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
+  { ModuleName: 'job',LogMessage: 'Account Manager Vikas Patel added a new client on 24/09/2024 at 14:09. Client Code: cli_THE_Win_00007',  SysytemIp: 'The Black T', PermissionType: 'Insert' }, 
+  { ModuleName: 'job',LogMessage: 'Account Manager Vikas Patel edited the client information on 24/09/2024 at 14:09. Client Code: cli_THE_Win_00007.',  SysytemIp: 'The Black T', PermissionType: 'Update' }, 
+  
   
 ];
 
 
 const columns = [
-  { name: 'Trading Name', selector: row => row.TradingName , sortable: true },
-  { name: 'Customer Code', selector: row => row.Code, sortable: true },
-  { name: 'Customer Name', selector: row => row.CustomerName, sortable: true },
-  { name: 'Company Number', selector: row => row.AccountManager, sortable: true },
-  { name: 'Service Type', selector: row => row.ServiceType, sortable: true },
-  { name: 'Account Manager', selector: row => row.JobType, sortable: true },
+  { name: 'Module Name', selector: row => row.ModuleName , sortable: true,width:'150px' },
+  { name: 'Log Message', selector: row => row.LogMessage, sortable: true },
+  { name: 'System Ip', selector: row => row.SysytemIp, sortable: true,width:'250px' },
+  { name: 'Permission Type', selector: row => row.PermissionType, sortable: true},
+ 
 ]
 
 
@@ -181,7 +176,7 @@ const ViewLogs = () => {
   </>
 
       </div>
-
+{/* 
       <div className='col-md-4 '>
                 <ul className="list-unstyled personal-detail mb-0 report-data">
                 <li className="">
@@ -196,7 +191,7 @@ const ViewLogs = () => {
  
 </ul>
 
-                </div>
+                </div> */}
 
     </div>
 
@@ -213,14 +208,35 @@ const ViewLogs = () => {
         aria-labelledby="this-week-tab"
       >
         <div className='report-data'>
-            
-                <div className='tab-title'>
+            <div className='row'>
+              <div className='col-md-8'>
+              <div className='tab-title'>
           <h3>Activity Log</h3>
           </div>
-          <div className='job-filter-btn'>
+          <div className='job-filter-btn' style={{marginTop:'30px'}}>
           <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
           <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
           </div>
+              </div>
+              <div className='col-md-4'>
+              
+                <ul className="list-unstyled personal-detail mb-0 report-data">
+                <li className="">
+    <b>Staff Name </b>: mannat
+  </li>
+  <li className="">
+    <b>phone </b>: +91 23456 78910
+  </li>
+  <li className="">
+    <b>Email </b>: mannat.theme@gmail.com
+  </li>
+ 
+</ul>
+
+               
+              </div>
+            </div>
+            
                 
        
           <div className='datatable-wrapper mt-minus'>

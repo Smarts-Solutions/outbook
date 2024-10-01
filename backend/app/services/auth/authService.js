@@ -2,15 +2,21 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const staffModel = require('../../models/staffsModel');
 const { jwtSecret } = require('../../config/config');
+const { SatffLogUpdateOperation } = require('../../utils/helper');
 
 
 const addStaff = async (staff) => {
-  const { role_id, first_name, last_name, email, phone, password, status } = staff;
+  const { role_id, first_name, last_name, email, phone, password, status ,created_by ,StaffUserId,ip} = staff;
   const hashedPassword = await bcrypt.hash(password, 10);
-  return staffModel.createStaff({ role_id, first_name, last_name, email, phone, status, password: hashedPassword });
+  return staffModel.createStaff({ role_id, first_name, last_name, email, phone, status, password: hashedPassword ,created_by,StaffUserId,ip});
 };
+
 const getStaff = async () => {
   return staffModel.getStaff();
+}
+
+const managePortfolio = async (staff_id) => {
+  return staffModel.managePortfolio(staff_id);
 }
 
 const getManagerStaff = async () => {
@@ -48,12 +54,12 @@ const login = async (credentials) => {
     const user = await staffModel.getStaffByEmail(email);
 
     if (!user) {
-      return {status:false,message:"Invalid Email."}
+      return {status:false,message:"Please enter a valid Email"}
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return {status:false,message:"Password Incorrect."}
+      return {status:false,message:"Please enter a valid password"}
     }
 
     if (user.status == '0') {
@@ -64,10 +70,23 @@ const login = async (credentials) => {
     const fieldsToUpdate = { login_auth_token: token };
     const id = user.id;
     staffModel.updateStaff({ id, ...fieldsToUpdate });
+    
+    const currentDate = new Date();
+    await SatffLogUpdateOperation(
+      {
+          staff_id: id,
+          date: currentDate.toISOString().split('T')[0],
+          module_name: "-",
+          log_message: ` Logged In`,
+          permission_type: "-",
+          ip: credentials.ip
+      }
+  );
+
     return {status:true,token:token , staffDetails:user};
   };
 
-  const loginWithAzure = async (credentials) => {
+const loginWithAzure = async (credentials) => {
     const { email } = credentials;
     const user = await staffModel.getStaffByEmail(email);
    
@@ -83,8 +102,36 @@ const login = async (credentials) => {
     const fieldsToUpdate = { login_auth_token: token };
     const id = user.id;
     staffModel.updateStaff({ id, ...fieldsToUpdate });
+
+    const currentDate = new Date();
+    await SatffLogUpdateOperation(
+      {
+          staff_id: id,
+          date: currentDate.toISOString().split('T')[0],
+          module_name: "-",
+          log_message: ` Logged In With Microsoft`,
+          permission_type: "-",
+          ip: credentials.ip
+      }
+  );
     return {status:true, token:token , staffDetails:user};
-  };
+};
+
+const isLogOut = async(credentials) => {
+  const { id } = credentials;
+  const currentDate = new Date();
+    await SatffLogUpdateOperation(
+      {
+          staff_id: id,
+          date: currentDate.toISOString().split('T')[0],
+          module_name: "-",
+          log_message: ` Logged Out`,
+          permission_type: "-",
+          ip: credentials.ip
+      }
+  );
+  return {status:true,message:"Success.."}
+}
 
 
 
@@ -106,5 +153,7 @@ module.exports = {
     isLoginAuthTokenCheck,
     profile,
     loginWithAzure,
-    isLoginAuthTokenCheck
+    isLoginAuthTokenCheck,
+    isLogOut,
+    managePortfolio
 };

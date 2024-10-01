@@ -24,7 +24,7 @@ const handleServices = async (req, res) => {
             res.status(200).json({ status:true, data: result });
             break;       
           case 'delete':
-              await serviceService.removeServices(Services.id);
+              await serviceService.removeServices(Services);
               res.status(200).json({ status:true,message: 'Services deleted successfully' });
               break;
           case 'update':

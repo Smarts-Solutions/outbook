@@ -7,7 +7,9 @@ import {
   useNavigate,
 } from "react-router-dom";
 import Login from "../layouts/Auth/Login";
+
 import Admin_Route from "./Admin_Route";
+import ForgetPassword from "../layouts/Auth/ForgetPassword";
 
 const Main_Route = () => {
   const location = useLocation();
@@ -45,7 +47,7 @@ const Main_Route = () => {
           location.pathname === "/login" ||
           location.pathname === "/" ||
           !location.pathname.startsWith("/admin")
-        ) {
+        ) {  
           navigate("/admin/dashboard");
         }
         break;
@@ -67,6 +69,7 @@ const Main_Route = () => {
       <Routes>
         <Route path="/admin/*" element={role ? <Admin_Route /> : <Login />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgetpassword" element={<ForgetPassword />} />
       </Routes>
     </div>
   );

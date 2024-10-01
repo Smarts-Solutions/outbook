@@ -28,17 +28,12 @@ const AddCustomer = () => {
     const [address, setAddress] = useState(addressInitialState);
     const [currentStep, setCurrentStep] = useState(0);
     const [coustomerId, setCoustomerId] = useState("");
-
     const location = useLocation();
-
-
-
     const { Step } = Steps;
-
     const renderStep = (step) => {
         switch (step) {
             case 0:
-                return <Information id={location.state} pageStatus={"1"}/>;
+                return <Information id={location.state} pageStatus={"1"} />;
             case 1:
                 return <Service />;
             case 2:
@@ -50,7 +45,6 @@ const AddCustomer = () => {
         }
     };
     const next = (data) => {
-
         setCoustomerId(data)
         if (currentStep < 3) {
             setCurrentStep(currentStep + 1);
@@ -67,7 +61,7 @@ const AddCustomer = () => {
         }
     };
 
-    
+
     useEffect(() => {
         addressInitialState.coustomerId = location.state.id;
         setAddress(location.state.id)
@@ -75,34 +69,37 @@ const AddCustomer = () => {
 
     return (
         <>
-        <div className="content-title">
-        <div className="tab-title">
-          <h3 className="mt-0">Update Customer</h3>
-        </div>
-      </div>
+            <div className="content-title">
+                <div className="tab-title d-flex">
+                    <button type="button" className="btn p-0">
+                        <i className="pe-3 fa-regular fa-arrow-left-long  fs-4" onClick={() => window.history.back()}></i>
+                    </button>
+                    <h3 className="mt-0">Update Customer</h3>
+                </div>
+            </div>
 
-        <div className='report-data mt-4'>
-            {/* <div className='d-flex justify-content-between align-items-center'>
+            <div className='report-data mt-4'>
+                {/* <div className='d-flex justify-content-between align-items-center'>
                 <div className='tab-title'>
                     <h3 className='mt-0'>Update Customer</h3>
                 </div>
             </div> */}
-            <div className="col-sm-12">
-                <div className="page-title-box ">
-                    <Provider value={{ details, setDetails, next, prev, address, setAddress }}>
-                        <Steps current={currentStep}>
-                            <Step title="Customer Information" />
-                            <Step title="Services" />
-                            <Step title="Engagement Model" />
-                            <Step title="Paper Work" />
-                        </Steps>
-                       
-                        <main>{renderStep(currentStep)}</main>
-                       
-                    </Provider>
+                <div className="col-sm-12">
+                    <div className="page-title-box ">
+                        <Provider value={{ details, setDetails, next, prev, address, setAddress }}>
+                            <Steps current={currentStep}>
+                                <Step title="Customer Information" />
+                                <Step title="Services" />
+                                <Step title="Engagement Model" />
+                                <Step title="Paper Work" />
+                            </Steps>
+
+                            <main>{renderStep(currentStep)}</main>
+
+                        </Provider>
+                    </div>
                 </div>
             </div>
-        </div>
         </>
     );
 };

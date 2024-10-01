@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
-import { Get_All_Client } from "../../../ReduxStore/Slice/Client/ClientSlice";
+import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Get_All_Job_List } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import Statuses from "./Statuses";
+import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -15,61 +16,58 @@ const ClientList = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const [ClientData, setClientData] = useState([]);
-  const [getJobDetails, setGetJobDetails] = useState({
-    loading: false,
-    data: [],
-  });
+  const [getJobDetails, setGetJobDetails] = useState([]);
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
+  const [hararchyData, setHararchyData] = useState({ customer: location.state });
+   const [searchQuery, setSearchQuery] = useState("");
+
+
   const [activeTab, setActiveTab] = useState(
     location.state &&
       location.state.route &&
       location.state.route == "Checklist"
       ? "checklist"
       : location.state.route == "job"
-      ? "job"
-      : "client"
+        ? "job"
+        : "client"
   );
-  const [searchQuery, setSearchQuery] = useState("");
+
 
   const SetTab = (e) => {
     setActiveTab(e);
   };
 
+  useEffect(() => {
+    getCheckListData();
+    GetAllClientData();
+    JobDetails();
+  }, []);
+
+  useEffect(() => {
+    if (getCheckList) {
+      const filteredData = getCheckList.filter((item) =>
+        Object.values(item).some((val) =>
+          val.toString().toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
+      setCheckList1(filteredData);
+    } else {
+      setCheckList1([]);
+    }
+  }, [searchQuery]);
+
   let tabs = [
-    { id: "client", label: "Client" },
+    { id: "client", label: "Client", icon: "fa-solid fa-user" },
     ...(ClientData && ClientData.length > 0
-      ? [{ id: "job", label: "Job" }]
+      ? [{ id: "job", label: "Job", icon: "fa-solid fa-briefcase" }]
       : []),
-    { id: "documents", label: "Documents" },
-    { id: "status", label: "Status" },
-    { id: "checklist", label: "Checklist" },
+    { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
+    { id: "status", label: "Status", icon: "fa-solid fa-info-circle" },
+    { id: "checklist", label: "Checklist", icon: "fa-solid fa-check-square" },
   ];
 
-  const JobDetails = async () => {
-    const req = { action: "getByCustomer", customer_id: location.state.id };
-    const data = { req: req, authToken: token };
-    await dispatch(Get_All_Job_List(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          setGetJobDetails({
-            loading: true,
-            data: response.data,
-          });
-        } else {
-          setGetJobDetails({
-            loading: true,
-            data: [],
-          });
-        }
-      })
-      .catch((error) => {
-        console.log("Error", error);
-      });
-  };
-
-  const columns = [
+  const ClientListColumns = [
     {
       name: "Client Name",
       cell: (row) => (
@@ -88,21 +86,31 @@ const ClientList = () => {
 
     {
       name: "Client Code (cli+CustName+ClientName+UniqueNo)",
-      selector: (row) => row.client_code,
+      selector: (row) => row.client_code || "-",
       sortable: true,
     },
     {
       name: "Client Type",
       selector: (row) =>
-        row.client_type_name == null ? "" : row.client_type_name,
+        row.client_type_name == null ? "-" : row.client_type_name,
       sortable: true,
+      width: "150px",
     },
-    { name: "Email Address", selector: (row) => row.email, sortable: true },
-    { name: "Phone", selector: (row) => row.phone, sortable: true },
+    { name: "Email Address", selector: (row) => row.email || "-", sortable: true, width: '250px' },
+    { name: "Phone", selector: (row) => row.phone || "-", sortable: true,width:'130px' },
     {
       name: "Status",
-      selector: (row) => (row.status == "1" ? "Active" : "Deactive"),
+      selector: (row) => (<div>
+        <span
+          className={` ${
+            row.status === "1" ? "text-success" : "text-danger"
+          }`}
+        >
+          {row.status === "1" ? "Active" : "Deactive"}
+        </span>
+      </div>),
       sortable: true,
+      width:'130px'
     },
     {
       name: "Actions",
@@ -112,9 +120,12 @@ const ClientList = () => {
             {" "}
             <i className="ti-pencil" />
           </button>
-          <button className="delete-icon" onClick={() => handleDelete(row)}>
+          <button
+            className="delete-icon"
+            onClick={() => handleDelete(row, "client")}
+          >
             {" "}
-            <i className="ti-trash" />
+            <i className="ti-trash text-danger" />
           </button>
         </div>
       ),
@@ -130,7 +141,7 @@ const ClientList = () => {
       cell: (row) => (
         <div>
           <a
-            onClick={() => HandleClientView(row)}
+            onClick={() => HandleJobView(row)}
             style={{ cursor: "pointer", color: "#26bdf0" }}
           >
             {row.job_code_id}
@@ -143,7 +154,7 @@ const ClientList = () => {
 
     {
       name: "Job Type",
-      selector: (row) => row.job_type_name,
+      selector: (row) => row.job_type_name || "-",
       sortable: true,
     },
     {
@@ -151,12 +162,12 @@ const ClientList = () => {
       selector: (row) =>
         row.account_manager_officer_first_name +
         " " +
-        row.account_manager_officer_last_name,
+        row.account_manager_officer_last_name || "-",
       sortable: true,
     },
     {
       name: "Client Job Code",
-      selector: (row) => row.client_job_code,
+      selector: (row) => row.client_job_code || "-",
       sortable: true,
     },
     {
@@ -164,14 +175,35 @@ const ClientList = () => {
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
         " " +
-        row.outbooks_acount_manager_last_name,
+        row.outbooks_acount_manager_last_name || "-",
       sortable: true,
     },
     {
       name: "Allocated To",
       selector: (row) =>
-        row.allocated_first_name + " " + row.allocated_last_name,
+        row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name,
       sortable: true,
+    },
+    {
+      name: "Timesheet",
+      selector: (row) =>
+        row.total_hours_status == "1" && row.total_hours != null ?
+          row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
+          : "-",
+      sortable: true,
+    },
+    {
+      name: "Invoicing",
+      selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
+      sortable: true,
+    },
+
+    {
+      name: "Status",
+      selector: (row) =>
+        row.status == null || row.status == 0 ? "To Be Started - Not Yet Allocated Internally" : row.status,
+      sortable: true,
+      width: "325px"
     },
 
     {
@@ -181,8 +213,8 @@ const ClientList = () => {
           <button className="edit-icon" onClick={() => handleJobEdit(row)}>
             <i className="ti-pencil" />
           </button>
-          <button className="delete-icon" onClick={() => handleDelete(row)}>
-            <i className="ti-trash" />
+          <button className="delete-icon" onClick={() => handleDelete(row, "job")}>
+            <i className="ti-trash text-danger" />
           </button>
         </div>
       ),
@@ -214,16 +246,24 @@ const ClientList = () => {
       selector: (row) => row.service_name,
       sortable: true,
     },
-    { name: "Job Type", selector: (row) => row.job_type_type, sortable: true },
+    {
+      name: "Job Type",
+      selector: (row) => row.job_type_type, sortable: true,
+      width: "120px"
+    }
+    ,
     {
       name: "Client Type",
       selector: (row) => row.client_type_type,
       sortable: true,
+      width: "400px",
     },
     {
       name: "Status",
       selector: (row) => (row.status == "1" ? "Active" : "Deactive"),
       sortable: true,
+      width: "100px",
+
     },
     {
       name: "Actions",
@@ -235,7 +275,7 @@ const ClientList = () => {
           </button>
           <button className="delete-icon" onClick={() => ChecklistDelete(row)}>
             {" "}
-            <i className="ti-trash" />
+            <i className="ti-trash text-danger" />
           </button>
         </div>
       ),
@@ -245,10 +285,64 @@ const ClientList = () => {
     },
   ];
 
+  const tabs1 = [
+    {
+      key: "client",
+      title: "Clients",
+      placeholder: "Search clients...",
+      data: ClientData,
+      columns: ClientListColumns,
+    },
+    {
+      key: "job",
+      title: "Jobs",
+      placeholder: "Search jobs...",
+      data: getJobDetails,
+      columns: JobColumns,
+    },
+    {
+      key: "documents",
+      title: "Documents",
+      placeholder: null,
+      data: [],
+      columns: ClientListColumns,
+    },
+    {
+      key: "status",
+      title: "Status",
+      placeholder: "Search Status...",
+      data: [],
+      columns: JobColumns,
+    },
+    {
+      key: "checklist",
+      title: "Checklist",
+      placeholder: "Search...",
+      data: getCheckList1,
+      columns: CheckListColumns,
+    },
+  ];
+
+  const JobDetails = async () => {
+    const req = { action: "getByCustomer", customer_id: location.state.id };
+    const data = { req: req, authToken: token };
+    await dispatch(JobAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setGetJobDetails(response.data);
+        } else {
+          setGetJobDetails([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
   const GetAllClientData = async () => {
     const req = { action: "get", customer_id: location.state.id };
     const data = { req: req, authToken: token };
-    await dispatch(Get_All_Client(data))
+    await dispatch(ClientAction(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
@@ -258,16 +352,9 @@ const ClientList = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
-
-  useEffect(() => {
-    getCheckListData();
-    GetAllClientData();
-    JobDetails();
-  }, []);
-
   const getCheckListData = async () => {
     const req = { action: "get", customer_id: location.state.id };
     const data = { req: req, authToken: token };
@@ -275,17 +362,46 @@ const ClientList = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setCheckList(response.data);
-          setCheckList1(response.data);
+          if (response.data.length > 0) {
+            let Array = [
+              { id: 1, name: "SoleTrader" },
+              { id: 2, name: "Company" },
+              { id: 3, name: "Partnership" },
+              { id: 4, name: "Individual" },
+            ];
+            let data = response.data.map((item) => {
+              return {
+                ...item,
+                check_list_name: item.check_list_name,
+                service_name: item.service_name,
+                job_type_type: item.job_type_type,
+                // client_type_type: item.client_type_type,
+                status: item.status,
+                checklists_id: item.checklists_id,
+                client_type_type: item.checklists_client_type_id.split(",").map(id => {
+                  let matchedItem = Array.find(item => item.id === Number(id));
+                  return matchedItem ? matchedItem.name : null;
+                }).filter(name => name !== null).join(", ")
+              };
+            });
+
+
+            setCheckList(data);
+            setCheckList1(data);
+          } else {
+            setCheckList([]);
+          }
+
+          // setCheckList(response.data);
+          // setCheckList1(response.data);
         } else {
           setCheckList([]);
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
-
   const ChecklistDelete = async (row) => {
     const req = { action: "delete", checklist_id: row.checklists_id };
     const data = { req: req, authToken: token };
@@ -312,21 +428,72 @@ const ClientList = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
+      });
+  };
+  const handleDelete = async (row, type) => {
+    const req = {
+      action: "delete",
+      ...(type === "job" ? { job_id: row.job_id } : { client_id: row.id }),
+    };
+    const data = { req: req, authToken: token };
+    await dispatch(type == "job" ? JobAction(data) : ClientAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          sweatalert.fire({
+            title: "Deleted",
+            icon: "success",
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+
+          type === "job" ? JobDetails() : GetAllClientData();
+        } else {
+          sweatalert.fire({
+            title: "Failed",
+            icon: "error",
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        }
+      })
+      .catch((error) => {
+        return;
       });
   };
 
   const HandleClientView = (row) => {
-    navigate("/admin/client/profile", {
-      state: { row, customer_id: location.state },
+    setHararchyData(prevState => {
+      const updatedData = {
+        ...prevState,
+        client: row
+      };
+      navigate("/admin/client/profile", { state: { Client_id: row.id, data: updatedData } });
+      return updatedData;
     });
   };
+
+  const HandleJobView = (row) => {
+    setHararchyData(prevState => {
+      const updatedData = {
+        ...prevState,
+        job: row
+      };
+      navigate("/admin/job/logs", { state: { job_id: row.job_id, goto: "Customer", data: updatedData } });
+      return updatedData;
+    });
+  };
+
+  
   const handleAddClient = () => {
     navigate("/admin/addclient", { state: { id: location.state.id } });
   };
   const handleAddJob = () => {
     navigate("/admin/createjob", {
-      state: { details: location.state, goto: "Customer" },
+      state: { customer_id: location.state.id, goto: "Customer" },
     });
   };
   function handleEdit(row) {
@@ -334,33 +501,17 @@ const ClientList = () => {
   }
   function handleJobEdit(row) {
     navigate("/admin/job/edit", {
-      state: { details: location.state, row: row, goto: "Customer" },
+      state: { job_id: row.job_id, goto: "Customer" },
     });
   }
-  function handleDelete(row) {
-    console.log("Deleting row:", row);
-  }
   const handleClick = () => {
-    navigate("/admin/create/checklist", { state: { id: location.state.id } });
+    navigate("/admin/create/checklist", { state: { id: location.state.id, } });
   };
   const EditChecklist = (row) => {
     navigate("/admin/edit/checklist", {
       state: { id: location.state.id, checklist_id: row.checklists_id },
     });
   };
-
-  useEffect(() => {
-    if (getCheckList) {
-      const filteredData = getCheckList.filter((item) =>
-        Object.values(item).some((val) =>
-          val.toString().toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      );
-      setCheckList1(filteredData);
-    } else {
-      setCheckList1([]);
-    }
-  }, [searchQuery]);
 
   return (
     <div className="container-fluid">
@@ -377,9 +528,8 @@ const ClientList = () => {
                   {tabs.map((tab) => (
                     <li className="nav-item" role="presentation" key={tab.id}>
                       <button
-                        className={`nav-link ${
-                          activeTab === tab.id ? "active" : ""
-                        }`}
+                        className={`nav-link ${activeTab === tab.id ? "active" : ""
+                          }`}
                         id={`${tab.id}-tab`}
                         data-bs-toggle="pill"
                         data-bs-target={`#${tab.id}`}
@@ -389,6 +539,7 @@ const ClientList = () => {
                         aria-selected={activeTab === tab.id}
                         onClick={() => SetTab(tab.id)}
                       >
+                        <i className={tab.icon}></i>
                         {tab.label}
                       </button>
                     </li>
@@ -397,9 +548,9 @@ const ClientList = () => {
               </div>
               <div className="col-md-4 col-auto">
                 {activeTab === "client" ||
-                activeTab === "checklist" ||
-                activeTab === "" ||
-                activeTab === "job" ? (
+                  activeTab === "checklist" ||
+                  activeTab === "" ||
+                  activeTab === "job" ? (
                   <>
                     <div
                       className="btn btn-info text-white float-end blue-btn"
@@ -407,19 +558,19 @@ const ClientList = () => {
                         activeTab === "client"
                           ? handleAddClient
                           : activeTab === "checklist"
-                          ? handleClick
-                          : handleAddJob
+                            ? handleClick
+                            : handleAddJob
                       }
                     >
                       <i className="fa fa-plus pe-1" />
                       {activeTab === "client"
                         ? "Add Client"
                         : activeTab === "checklist"
-                        ? "Add Checklist"
-                        : "Create Job"}
+                          ? "Add Checklist"
+                          : "Create Job"}
                     </div>
                     <div
-                      className="btn btn-info text-white float-end blue-btn"
+                      className="btn btn-info text-white float-end blue-btn me-2"
                       onClick={() => window.history.back()}
                     >
                       <i className="fa fa-arrow-left pe-1" /> Back
@@ -431,151 +582,65 @@ const ClientList = () => {
           </div>
         </div>
       </div>
-      <div className="tab-content" id="pills-tabContent">
-        {activeTab == "client" && (
-          <div
-            className={`tab-pane fade ${
-              activeTab == "client" ? "show active" : ""
-            }`}
-            id={"client"}
-            role="tabpanel"
-            aria-labelledby={`client-tab`}
-          >
-            <div className="container-fluid">
-              <div className="report-data mt-4 ">
-                <div className="d-flex justify-content-between align-items-center">
-              
-                  <div className="tab-title">
-                    <h3 className="mt-0">Clients</h3>
-                  </div>
 
-            
+      <Hierarchy show={["Customer", activeTab]} active={1} data={hararchyData} NumberOfActive={ClientData.length} />
+
+      <div className="tab-content" id="pills-tabContent">
+        {tabs1.map((tab) => (
+          <div
+            key={tab.key}
+            className={`tab-pane fade ${activeTab == tab.key ? "show active" : ""
+              }`}
+            id={tab.key}
+            role="tabpanel"
+            aria-labelledby={`${tab.key}-tab`}
+          >
+
+            <div className="report-data mt-4">
+              <div className="d-flex justify-content-between align-items-center">
+                <div className="tab-title">
+                  <h3 className="mt-0">{tab.title}</h3>
+                </div>
+
+                {tab.placeholder && (
                   <div className="search-input">
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Search clients..."
+                      placeholder={tab.placeholder}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
-                </div>
-
-                <div className="datatable-wrapper ">
-                  {ClientData && ClientData && (
-                    <Datatable
-                      columns={columns}
-                      data={ClientData}
-                      filter={false}
-                    />
-                  )}
-                </div>
+                )}
               </div>
-            </div>
-          </div>
-        )}
 
-        {activeTab == "job" && (
-          <div
-            className={`tab-pane fade ${
-              activeTab == "job" ? "show active" : ""
-            }`}
-            id={"job"}
-            role="tabpanel"
-            aria-labelledby={`job-tab`}
-          >
-            {getJobDetails && getJobDetails && (
-              <Datatable
-                columns={JobColumns}
-                data={getJobDetails.data}
-                filter={false}
-              />
-            )}
-          </div>
-        )}
-
-        {activeTab == "documents" && (
-          <div
-            className={`tab-pane fade ${
-              activeTab == "documents" ? "show active" : ""
-            }`}
-            id={"documents"}
-            role="tabpanel"
-            aria-labelledby={`documents-tab`}
-          >
-            <div className="container-fluid">
-              <div className="report-data mt-4 ">
-                <div className="d-flex justify-content-between align-items-center">
-                  <div className="tab-title">
-                    <h3 className="mt-0">Documents</h3>
-                  </div>
-                </div>
-                <div className="datatable-wrapper ">
-                  {ClientData && ClientData && (
-                    <Datatable columns={columns} data={[]} filter={false} />
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab == "status" && (
-          <div
-            className={`tab-pane fade ${
-              activeTab == "status" ? "show active" : ""
-            }`}
-            id={"statuses"}
-            role="tabpanel"
-          >
-            <Statuses />
-            {getJobDetails && getJobDetails && (
-              <Datatable
-                columns={JobColumns}
-                data={getJobDetails.data}
-                filter={false}
-              />
-            )}
-          </div>
-        )}
-
-        {activeTab == "checklist" && (
-          <div
-            className={`tab-pane fade ${
-              activeTab == "checklist" ? "show active" : ""
-            }`}
-            id={"checklist"}
-            role="tabpanel"
-          >
-            <div className="container-fluid">
-              <div className="report-data mt-4">
-                <div className="d-flex justify-content-between align-items-center">
-                  <div className="tab-title">
-                    <h3 className="mt-0">Checklist</h3>
-                  </div>
-                </div>
-
-                <div className="d-flex justify-content-end mb-3">
-                  <input
-                    type="text"
-                    className="form-control w-25 me-2"
-                    placeholder="Search..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+              <div className="datatable-wrapper">
+                {tab.data && tab.data.length > 0 ? (
+                  <Datatable
+                    columns={tab.columns}
+                    data={tab.data}
+                    filter={false}
                   />
-                </div>
-
-                <div className="datatable-wrapper">
-                  {ClientData && ClientData && (
-                    <Datatable
-                      columns={CheckListColumns}
-                      data={getCheckList1}
-                      filter={false}
+                ) : (
+                  <div className="text-center">
+                    <img
+                      src="/assets/images/No-data-amico.png"
+                      alt="No records available"
+                      style={{
+                        width: "250px",
+                        height: "auto",
+                        objectFit: "contain",
+                      }}
                     />
-                  )}
-                </div>
+                    <p>No data available.</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        )}
+
+        ))}
       </div>
     </div>
   );

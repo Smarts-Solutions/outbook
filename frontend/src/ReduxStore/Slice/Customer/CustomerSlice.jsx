@@ -11,13 +11,29 @@ import {
   Delete_Customer_File,
   GET_ALL_JOB_DATA,
   Add_Job_Type,
-  GET_ALL_JOB_LIST,
+  JOB_ACTION,
   UPDATE_JOB,
   GETALLCHECKLIST,
+  GET_ALL_TASK_TIME_SHEET,
+  GET_JOB_TIME_SHEET,
+  GET_MISSING_LOG, 
+  ADD_MISSION_LOG,
+  QUERY_ACTION,
+  ADD_QUERY,
+  DRAFT_ACTION,
+  ADD_DRAFT,
+  JOBDOCUMENT_ACTION,
+  EDIT_MISSION_LOG,
+  EDIT_QUERY,
+  EDIT_DRAFT,
+  UPDATE_CUSTOMER_STATUS,
+  GET_JOB_TIMELINE,
+   
 } from "../../../Services/Customer/CustomerService";
 
 import axios from "axios";
-const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+import { add } from "date-fns";
+var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 
 export async function GET_IP(data, token) {
   try {
@@ -45,6 +61,7 @@ export const AddCustomer = createAsyncThunk("addCustomer", async (data) => {
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = {
       ...req,
       ip: IP_Data.data.ip,
@@ -62,6 +79,7 @@ export const Get_Service = createAsyncThunk("service", async (data) => {
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = {
       ...req,
       ip: IP_Data.data.ip,
@@ -80,6 +98,7 @@ export const ADD_SERVICES_CUSTOMERS = createAsyncThunk(
     try {
       const { req, authToken } = data;
       let IP_Data = await GET_IP();
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
       const updatedReq = {
         ...req,
         ip: IP_Data.data.ip,
@@ -102,6 +121,7 @@ export const ADD_PEPPER_WORKS = createAsyncThunk(
     
 
       let IP_Data = await GET_IP();
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
       const updatedReq = {
         ...req,
         ip: IP_Data.data.ip,
@@ -124,6 +144,7 @@ export const GET_ALL_CUSTOMERS = createAsyncThunk(
       const { req, authToken } = data;
 
       let IP_Data = await GET_IP();
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
       const updatedReq = {
         ...req,
         ip: IP_Data.data.ip,
@@ -144,6 +165,7 @@ export const GET_CUSTOMER_DATA = createAsyncThunk(
     try {
       const { req, authToken } = data;
       let IP_Data = await GET_IP();
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
       const updatedReq = {
         ...req,
         ip: IP_Data.data.ip,
@@ -164,6 +186,7 @@ export const Edit_Customer = createAsyncThunk(
     try {
       const { req, authToken } = data;
       let IP_Data = await GET_IP();
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
       const updatedReq = {
         ...req,
         ip: IP_Data.data.ip,
@@ -184,6 +207,7 @@ export const DELETE_CUSTOMER_FILE = createAsyncThunk(
     try {
       const { req, authToken } = data;
       let IP_Data = await GET_IP();
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
       const updatedReq = {
         ...req,
         ip: IP_Data.data.ip,
@@ -202,6 +226,7 @@ export const GetAllJabData = createAsyncThunk("getAddJobData", async (data) => {
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = {
       ...req,
       ip: IP_Data.data.ip,
@@ -219,6 +244,7 @@ export const AddAllJobType = createAsyncThunk("jobAdd", async (data) => {
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = {
       ...req,
       ip: IP_Data.data.ip,
@@ -232,16 +258,17 @@ export const AddAllJobType = createAsyncThunk("jobAdd", async (data) => {
   }
 });
 
-export const Get_All_Job_List = createAsyncThunk("jobAction", async (data) => {
+export const JobAction= createAsyncThunk("jobAction", async (data) => {
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = {
       ...req,
       ip: IP_Data.data.ip,
       StaffUserId: StaffUserId.id,
     };
-    const res = await GET_ALL_JOB_LIST(updatedReq, authToken);
+    const res = await JOB_ACTION(updatedReq, authToken);
     return await res;
   } catch (err) {
     throw err;
@@ -252,6 +279,7 @@ export const UpdateJob = createAsyncThunk("jobUpdate", async (data) => {
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = {
       ...req,
       ip: IP_Data.data.ip,
@@ -270,6 +298,7 @@ export const GET_ALL_CHECKLIST = createAsyncThunk(
     try {
       const { req, authToken } = data;
       let IP_Data = await GET_IP();
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
       const updatedReq = {
         ...req,
         ip: IP_Data.data.ip,
@@ -282,6 +311,247 @@ export const GET_ALL_CHECKLIST = createAsyncThunk(
     }
   }
 );
+
+export const getAllTaskTimeSheet = createAsyncThunk("getTaskTimeSheet", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await GET_ALL_TASK_TIME_SHEET(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const JobTimeSheetAction = createAsyncThunk("jobTimeSheet", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await GET_JOB_TIME_SHEET(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+
+export const GetMissingLog = createAsyncThunk("getMissingLog", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await GET_MISSING_LOG(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const AddMissionLog = createAsyncThunk("addMissingLog", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await ADD_MISSION_LOG(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const EditMissingLog = createAsyncThunk("editMissingLog", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await EDIT_MISSION_LOG(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const QueryAction = createAsyncThunk("getQuerie", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await QUERY_ACTION(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const AddQuery = createAsyncThunk("addQuerie", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await ADD_QUERY(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const EditQuery = createAsyncThunk("editQuerie", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await EDIT_QUERY(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const DraftAction = createAsyncThunk("getDraft", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await DRAFT_ACTION(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const AddDraft = createAsyncThunk("addDraft", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await ADD_DRAFT(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const EditDraft = createAsyncThunk("editDraft", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await EDIT_DRAFT(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const JobDocumentAction = createAsyncThunk("jobDocumentAction", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await JOBDOCUMENT_ACTION(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const Update_Customer_Status = createAsyncThunk("customerStatusUpdate", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await UPDATE_CUSTOMER_STATUS(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const getJobTimeline = createAsyncThunk("getJobTimeLine", async (data) => {
+  try {
+    const { req, authToken } = data;
+    let IP_Data = await GET_IP();
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data.data.ip,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await GET_JOB_TIMELINE(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+
 
 const CustomerSlice = createSlice({
   name: "CustomerSlice",
@@ -299,9 +569,21 @@ const CustomerSlice = createSlice({
     deletecustomerfile: [],
     getalljobdata: [],
     addjobtype: [],
-    getalljoblist: [],
+    jobaction: [],
     updatejob: [],
     getallchecklist: [],
+    getalltasktimesheet: [],
+    jobtimesheetaction: [],
+    getmissinglog: [],
+    queryaction: [],
+    addquery: [],
+    getdraftlist: [],
+    adddraft: [],
+    jobdocumentaction: [],
+    editmissinglog: [],
+    editquery: [],
+    getjobtimeline: [],
+    
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -427,14 +709,14 @@ const CustomerSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
       })
-      .addCase(Get_All_Job_List.pending, (state) => {
+      .addCase(JobAction.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(Get_All_Job_List.fulfilled, (state, action) => {
+      .addCase(JobAction.fulfilled, (state, action) => {
         state.isLoading = false;
         state.getalljoblist = action.payload;
       })
-      .addCase(Get_All_Job_List.rejected, (state) => {
+      .addCase(JobAction.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       })
@@ -459,7 +741,143 @@ const CustomerSlice = createSlice({
       .addCase(GET_ALL_CHECKLIST.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
-      });
+      })
+      .addCase(getAllTaskTimeSheet.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getAllTaskTimeSheet.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.getalltasktimesheet = action.payload;
+      })
+      .addCase(getAllTaskTimeSheet.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(JobTimeSheetAction.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(JobTimeSheetAction.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.jobtimesheetaction = action.payload;
+      })
+      .addCase(JobTimeSheetAction.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(GetMissingLog.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(GetMissingLog.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.getmissinglog = action.payload;
+      })
+      .addCase(GetMissingLog.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(AddMissionLog.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(AddMissionLog.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.addmissinglog = action.payload;
+      })
+      .addCase(AddMissionLog.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(QueryAction.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(QueryAction.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.queryaction = action.payload;
+      })
+      .addCase(QueryAction.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(AddQuery.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(AddQuery.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.addquery = action.payload;
+      })
+      .addCase(AddQuery.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true
+      })
+      .addCase(DraftAction.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(DraftAction.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.getdraftlist = action.payload;
+      })
+      .addCase(DraftAction.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(AddDraft.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(AddDraft.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.adddraft = action.payload;
+      })
+      .addCase(AddDraft.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(JobDocumentAction.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(JobDocumentAction.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.jobdocumentaction = action.payload;
+      })
+      .addCase(JobDocumentAction.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(EditMissingLog.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(EditMissingLog.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.editmissinglog = action.payload;
+      })
+      .addCase(EditMissingLog.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+
+      .addCase(EditQuery.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(EditQuery.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.editquery = action.payload;
+      })
+      .addCase(EditQuery.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(getJobTimeline.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getJobTimeline.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.getjobtimeline = action.payload;
+      })
+      .addCase(getJobTimeline.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      
+
+      
   },
 });
 

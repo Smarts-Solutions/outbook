@@ -4,7 +4,6 @@ import axios from "axios";
 import * as Config from "../../Utils/Config";
 import { header } from "../../Utils/ApiHeader";
 
-
 // Role Action API Add, Edit, Delete
 export async function ROLE(data, token) {
     try {
@@ -19,7 +18,6 @@ export async function ROLE(data, token) {
     }
 }
 
-
 // Status Type Action API Add, Edit, Delete
 export async function STATUS_TYPE(data, token) {
     try {
@@ -33,7 +31,6 @@ export async function STATUS_TYPE(data, token) {
         return await err;
     }
 }
-
 
 // Service Action API Add, Edit, Delete
 export async function SERVICE(data, token) {
@@ -105,8 +102,6 @@ export async function JOBTYPE(data, token) {
     }
 }
 
-
-
 // Service Action API Add, Edit, Delete
 export async function ADDTASK(data, token) {
     try {
@@ -120,7 +115,6 @@ export async function ADDTASK(data, token) {
         return await err;
     }
 }
-
 
 // Service Action API Add, Edit, Delete
 export async function GetServicesByCustomer(data, token) {
@@ -136,7 +130,6 @@ export async function GetServicesByCustomer(data, token) {
     }
 }
 
-
 export async function GETTASK(data, token) {
     try {
         const res = await axios.post(`${Config.base_url}getTask`, data, {
@@ -149,8 +142,6 @@ export async function GETTASK(data, token) {
         return await err;
     }
 }
-
-
 
 export async function getListAction(data, token) {
     try {
@@ -165,8 +156,6 @@ export async function getListAction(data, token) {
     }
 }
 
-
-
 export async function addChecklist(data, token) {
     try {
         const res = await axios.post(`${Config.base_url}addChecklist`, data, {
@@ -179,8 +168,6 @@ export async function addChecklist(data, token) {
         return await err;
     }
 }
-
-
 
 export async function UpdateChecklist(data, token) {
     try {
@@ -195,7 +182,6 @@ export async function UpdateChecklist(data, token) {
     }
 }
 
-
 export async function MasterStatus(data, token) {
     try {
         const res = await axios.post(`${Config.base_url}masterStatus`, data, {
@@ -208,3 +194,70 @@ export async function MasterStatus(data, token) {
         return await err;
     }
 }
+
+export async function incorporationApi(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}incorporation`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+export async function customerSource(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}customerSource`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+export async function customerSubSource(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}customerSubSource`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+export async function INTERNALAPI(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}internal`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+export async function SUBINTERNALAPI(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}subinternal`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+ 
+ 

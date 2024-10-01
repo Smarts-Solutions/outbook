@@ -15,6 +15,8 @@ const Status = () => {
   const [statusTypeDataAll, setStatusTypeDataAll] = useState([]);
   const [statusDataAll, setStatusDataAll] = useState([]);
 
+
+  console.log("statusDataAll", statusDataAll);
   const [getStatsAdd, setStatsAdd] = useState({
     statusname: "",
     statustype: "",
@@ -51,22 +53,22 @@ const Status = () => {
       selector: (row) => row.status_type,
       sortable: true,
     },
-    {
-      name: "Actions",
-      cell: (row) => (
-        <div>
-          <button className="edit-icon" onClick={() => handleEdit(row)}>
-            <i className="ti-pencil" />
-          </button>
-          <button className="delete-icon" onClick={() => handleDelete(row)}>
-            <i className="ti-trash" />
-          </button>
-        </div>
-      ),
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-    },
+    // {
+    //   name: "Actions",
+    //   cell: (row) => (
+    //     <div>
+    //       <button className="edit-icon" onClick={() => handleEdit(row)}>
+    //         <i className="ti-pencil" />
+    //       </button>
+    //       {/* <button className="delete-icon" onClick={() => handleDelete(row)}>
+    //         <i className="ti-trash text-danger" />
+    //       </button> */}
+    //     </div>
+    //   ),
+    //   ignoreRowClick: true,
+    //   allowOverflow: true,
+    //   button: true,
+    // },
   ];
 
   const formatDate = (date) => {
@@ -95,7 +97,6 @@ const Status = () => {
       });
       return;
     }
-
     try {
       const data = {
         req: {
@@ -108,7 +109,7 @@ const Status = () => {
       };
 
       const response = await dispatch(MasterStatusData(data)).unwrap();
-      console.log(response);
+ 
       if (response.status) {
         Swal.fire({
           title: "Updated!",
@@ -162,7 +163,7 @@ const Status = () => {
             }
           })
           .catch((error) => {
-            console.log("Error", error);
+            return;
           });
       }
     });
@@ -180,7 +181,7 @@ const Status = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -196,7 +197,7 @@ const Status = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -242,7 +243,7 @@ const Status = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
@@ -276,12 +277,12 @@ const Status = () => {
               >
                 <i className="fa fa-plus pe-1" /> Add Status
               </button>
-              <button
+              {/* <button
                 type="button"
                 className="btn btn-info text-white float-end "
               >
                 <i className="fa-regular fa-eye pe-1"></i> View Log
-              </button>
+              </button> */}
             </div>
           </div>
           <div className="datatable-wrapper mt-minus">
@@ -305,7 +306,7 @@ const Status = () => {
             setShowModal(false);
           }}
         >
-          <div className="modal-body">
+          <div className="">
             <form className="tablelist-form">
               <div className="mb-3">
                 <label htmlFor="customername-field" className="form-label">

@@ -13,6 +13,9 @@ const clientAction = async (client) => {
   else if(action === "getByid"){
     return clientModel.getByidClient(client);
   }
+  else if(action === "getCustomerId"){
+    return clientModel.getCustomerId(client);
+  }
   else if(action === "delete"){
     return clientModel.deleteClient(client);
   }

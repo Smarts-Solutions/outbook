@@ -25,7 +25,7 @@ const Access = () => {
                 setRoleDataAll({ loading: false, data: [] });
             }
         } catch (error) {
-            console.error("Error fetching role data:", error);
+          
             setRoleDataAll({ loading: false, data: [] });
         }
     };
@@ -77,7 +77,7 @@ const Access = () => {
                 setAccessData({ loading: false, data: [] });
             }
         } catch (error) {
-            console.log("Error fetching role data:", error);
+           
             setAccessData({ loading: false, data: [] });
         }
     }
@@ -147,7 +147,7 @@ const Access = () => {
                 });
             }
         } catch (error) {
-            console.error("Error updating permissions:", error);
+          
             Swal.fire({
                 title: 'Error!',
                 text: 'An error occurred while updating permissions. Please try again later.',
@@ -161,8 +161,8 @@ const Access = () => {
     useEffect(() => {
         roleData()
     }, []);
-
-
+    
+  
 
     return (
 
@@ -171,12 +171,9 @@ const Access = () => {
                 <div className='tab-title'>
                             <h3 className='mt-0'>Access</h3>
                         </div>
-                </div>
-           
-                
+                </div> 
                 <div className='report-data mt-4'>
-                <div className="tab-title"><h3>Set Default Access</h3></div>
-                  
+                <div className="tab-title"><h3>Set Default Access</h3></div> 
                     <div className='mt-3'>
                     <div className="accordion" id="default-accordion-example">
                                     {roleDataAll.data && roleDataAll.data.map((val, index) => (
@@ -214,9 +211,8 @@ const Access = () => {
                             { name: 'Role Name', selector: row => row.role_name, sortable: true },
                         ]} data={roleDataAll.data} /> */}
                     </div>
-                    <div className="modal-footer">
-                              
-                       <button type="button" className="btn btn-info mt-3" onClick={handleSaveChanges}>Save changes</button>
+                    <div className="modal-footer"> 
+                       <button type="button" className="btn btn-info mt-3" onClick={handleSaveChanges}>    <i className="far fa-save pe-1" /> Save changes</button>
                     </div>
                 </div>
 

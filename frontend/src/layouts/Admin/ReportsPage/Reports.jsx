@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Datatable from '../../../Components/ExtraComponents/Datatable';
+import ExpandableTable from '../../../Components/ExtraComponents/ExpandableTable';
+import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
 
 
 const data = [
@@ -24,155 +26,132 @@ const columns = [
 ]
 
 function Reports() {
+
+  const [filter, setFilter] = useState(false);
+
   return (
     <div className='container-fluid'>
               <div className="row ">
                <div className="col-sm-12">
             <div className="page-title-box">
               <div className="row align-items-start">
-                <div className="col-md-8">
+                <div className="col-md-9">
                 <>
-              <ul className="nav nav-tabs border-0"  role="tablist">
+              <ul className="nav nav-pills rounded-tabs"  role="tablist">
                 <li className="nav-item" role="presentation">
                   <button
                     className="nav-link active"
-                    id="this-week-tab"
+                    id="job-status-tab"
                     data-bs-toggle="pill"
-                    data-bs-target="#this-week"
+                    data-bs-target="#job-status"
                     type="button"
                     role="tab"
-                    aria-controls="this-week"
+                    aria-controls="job-status"
                     aria-selected="true"
                   >
-                    This week
+                    Job Status Report
                   </button>
                 </li>
                 <li className="nav-item" role="presentation">
                   <button
                     className="nav-link"
-                    id="last-week-tab"
+                    id="job-received-tab"
                     data-bs-toggle="pill"
-                    data-bs-target="#last-week"
+                    data-bs-target="#job-received"
                     type="button"
                     role="tab"
-                    aria-controls="last-week"
+                    aria-controls="job-received"
                     aria-selected="false"
                   >
-                    Last week
+                   Jobs Received Sent Reports
                   </button>
                 </li>
                 <li className="nav-item" role="presentation">
                   <button
                     className="nav-link"
-                    id="this-month-tab"
+                    id="job-summary-tab"
                     data-bs-toggle="pill"
-                    data-bs-target="#this-month"
+                    data-bs-target="#job-summary"
                     type="button"
                     role="tab"
-                    aria-controls="this-month"
+                    aria-controls="job-summary"
                     aria-selected="false"
                   >
-                    This month
+                    Job Summary Report
                   </button>
                 </li>
                 <li className="nav-item" role="presentation">
                   <button
                     className="nav-link"
-                    id="last-month-tab"
+                    id="job-pending-tab"
                     data-bs-toggle="pill"
-                    data-bs-target="#last-month"
+                    data-bs-target="#job-pending"
                     type="button"
                     role="tab"
-                    aria-controls="last-month"
+                    aria-controls="job-pending"
                     aria-selected="false"
                   >
-                    Last month
+                    Jobs Pending Report
                   </button>
                 </li>
                 <li className="nav-item" role="presentation">
                   <button
                     className="nav-link"
-                    id="last-quarter-tab"
+                    id="due-by-tab"
                     data-bs-toggle="pill"
-                    data-bs-target="#last-quarter"
+                    data-bs-target="#due-by"
                     type="button"
                     role="tab"
-                    aria-controls="last-quarter"
+                    aria-controls="due-by"
                     aria-selected="false"
                   >
-                    Last quarter
+                   Due By Report
+
                   </button>
                 </li>
                 <li className="nav-item" role="presentation">
                   <button
                     className="nav-link"
-                    id="this-6-months-tab"
+                    id="team-performance-tab"
                     data-bs-toggle="pill"
-                    data-bs-target="#this-6-months"
+                    data-bs-target="#team-performance"
                     type="button"
                     role="tab"
-                    aria-controls="this-6-months"
+                    aria-controls="team-performance"
                     aria-selected="false"
                   >
-                    This 6 months
+                    Team Performance Report by Month
                   </button>
                 </li>
                 <li className="nav-item" role="presentation">
                   <button
                     className="nav-link"
-                    id="last-6-months-tab"
+                    id="average-TAT-tab"
                     data-bs-toggle="pill"
-                    data-bs-target="#last-6-months"
+                    data-bs-target="#average-TAT"
                     type="button"
                     role="tab"
-                    aria-controls="last-6-months"
+                    aria-controls="average-TAT"
                     aria-selected="false"
                   >
-                    Last 6 months
+                   Average TAT Report
                   </button>
                 </li>
                 <li className="nav-item" role="presentation">
                   <button
                     className="nav-link"
-                    id="this-year-tab"
+                    id="timesheet-tab"
                     data-bs-toggle="pill"
-                    data-bs-target="#this-year"
+                    data-bs-target="#timesheet"
                     type="button"
                     role="tab"
-                    aria-controls="this-year"
+                    aria-controls="timesheet"
                     aria-selected="false"
                   >
-                    This year
+                   Timesheet Report
                   </button>
                 </li>
-                <li className="nav-item" role="presentation">
-                  <button
-                    className="nav-link"
-                    id="last-year-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#last-year"
-                    type="button"
-                    role="tab"
-                    aria-controls="last-year"
-                    aria-selected="false"
-                  >
-                    Last year
-                  </button>
-                </li>
-                <li className="nav-item" role="presentation">
-                  <button
-                    className="nav-link"
-                    id="custom-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#custom"
-                    type="button"
-                    role="tab"
-                    aria-controls="custom"
-                    aria-selected="false"
-                  >
-                    Custom
-                  </button>
-                </li>
+                
               </ul>
              
             </>
@@ -193,20 +172,20 @@ function Reports() {
         <div className="tab-content" id="pills-tabContent">
                 <div
                   className="tab-pane fade show active"
-                  id="this-week"
+                  id="job-status"
                   role="tabpanel"
-                  aria-labelledby="this-week-tab"
+                  aria-labelledby="job-status-tab"
                 >
                   <div className='report-data'>
                   <div className='tab-title'>
                     <h3>Job Status Report</h3>
                     </div>
                     <div className='job-filter-btn'>
-                    <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
+                    <button className='filter btn btn-info text-white fw-normal' onClick={() => setFilter(true)}><i className="fas fa-filter pe-2"></i>Filters</button>
                     <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
                     </div>
                     <div className='datatable-wrapper mt-minus'>
-                     
+                   
                  <Datatable 
                  filter={true}
                  columns={columns} data={data} />
@@ -215,70 +194,610 @@ function Reports() {
                 </div>
                 <div
                   className="tab-pane fade"
-                  id="last-week"
+                  id="job-received"
                   role="tabpanel"
-                  aria-labelledby="last-week-tab"
-                >
-                  <Datatable columns={columns} data={data} />
+                  aria-labelledby="job-received-tab"
+                ><div className='report-data'>
+                  <div className='tab-title'>
+                    <h3>Jobs Received Sent Reports</h3>
+                    </div>
+                   <div className='job-filter-btn'>
+                    <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
+                    <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
+                    </div>
+                   <div className='datatable-wrapper mt-minus'>
+                    <ExpandableTable 
+                     columns={columns}
+                     data={data}
+                     filter={true}
+                     />
+                 </div>
+                 </div>
                 </div>
                 <div
                   className="tab-pane fade"
-                  id="last-month"
+                  id="job-summary"
                   role="tabpanel"
-                  aria-labelledby="last-month-tab"
+                  aria-labelledby="job-summary-tab"
                 >
-                  Last month's content...
+                  <div className='report-data'>
+                  <div className='tab-title'>
+                    <h3>Jobs Summary Report</h3>
+                    </div>
+                   <div className='job-filter-btn'>
+                    <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
+                    <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
+                    </div>
+                   <div className='datatable-wrapper mt-minus'>
+                   <Datatable 
+                 filter={true}
+                 columns={columns} data={data} />
+                 </div>
+                 </div>
                 </div>
                 <div
                   className="tab-pane fade"
-                  id="last-quarter"
+                  id="job-pending"
                   role="tabpanel"
-                  aria-labelledby="last-quarter-tab"
+                  aria-labelledby="job-pending-tab"
                 >
-                  Last quarter's content...
+                  <div className='report-data'>
+                  <div className='tab-title'>
+                    <h3>Jobs Pending Report</h3>
+                    </div>
+                   <div className='job-filter-btn'>
+                    <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
+                    <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
+                    </div>
+                   <div className='datatable-wrapper mt-minus'>
+                   <Datatable 
+                 filter={true}
+                 columns={columns} data={data} />
+                 </div>
+                 </div>
                 </div>
                 <div
                   className="tab-pane fade"
-                  id="this-6-months"
+                  id="due-by"
                   role="tabpanel"
-                  aria-labelledby="this-6-months-tab"
+                  aria-labelledby="due-by-tab"
                 >
-                  This 6 months' content...
+                 <div className='report-data'>
+                  <div className='tab-title'>
+                    <h3>Due By Report</h3>
+                    </div>
+                   <div className='job-filter-btn'>
+                    <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
+                    <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
+                    </div>
+                   <div className='datatable-wrapper mt-minus'>
+                   <Datatable 
+                 filter={true}
+                 columns={columns} data={data} />
+                 </div>
+                 </div>
                 </div>
                 <div
                   className="tab-pane fade"
-                  id="last-6-months"
+                  id="timesheet"
                   role="tabpanel"
-                  aria-labelledby="last-6-months-tab"
+                  aria-labelledby="timesheet-tab"
                 >
-                  Last 6 months' content...
+                 <div className='report-data'>
+                  <div className='row'>
+                  <div className='col-md-7'>
+                  <div className='tab-title'>
+                    <h3>Timesheet Report</h3>
+                    </div>
+                    <div className='job-filter-btn '>
+                    <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
+                    <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
+                    </div>
+                  </div>
+                  <div className='col-md-5'>
+                  <div className='d-block float-end report-data py-2'>
+                                                <div><b>Amatis Training ltd</b></div>
+                                                <div><b>Timesheet: </b><a href="logs.html">Book-keeping Timesheet</a></div>
+                                                <div><b>Subject:</b> Weekly Book-keeping Timesheet</div>
+                                            </div>
+                  </div>
+                  </div>
+                  
+                    
+                   
+                   <div className='datatable-wrapper mt-minus'>
+                   <Datatable 
+                 filter={true}
+                 columns={columns} data={data} />
+                 </div>
+                 </div>
                 </div>
                 <div
                   className="tab-pane fade"
-                  id="this-year"
+                  id="team-performance"
                   role="tabpanel"
-                  aria-labelledby="this-year-tab"
+                  aria-labelledby="team-performance-tab"
                 >
-                  This year's content...
+                  <div className='report-data'>
+                  <div className='tab-title'>
+                    <h3>Team Performance Report by Month</h3>
+                    </div>
+                   <div className='job-filter-btn'>
+                    <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
+                    <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
+                    </div>
+                   <div className='datatable-wrapper mt-minus'>
+                   <Datatable 
+                 filter={true}
+                 columns={columns} data={data} />
+                 </div>
+                 </div>
                 </div>
                 <div
                   className="tab-pane fade"
-                  id="last-year"
+                  id="average-TAT"
                   role="tabpanel"
-                  aria-labelledby="last-year-tab"
+                  aria-labelledby="average-TAT-tab"
                 >
-                  Last year's content...
+                  <div className='report-data'>
+                  <div className='tab-title'>
+                    <h3>Average TAT Report</h3>
+                    </div>
+                   <div className='job-filter-btn'>
+                    <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
+                    <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
+                    </div>
+                   <div className='datatable-wrapper mt-minus'>
+                    <ExpandableTable 
+                     columns={columns}
+                     data={data}
+                     filter={true}
+                     />
+                 </div>
+                 </div>
                 </div>
-                <div
-                  className="tab-pane fade"
-                  id="custom"
-                  role="tabpanel"
-                  aria-labelledby="custom-tab"
-                >
-                  Custom content...
+              
+              </div>
+              <CommanModal
+                isOpen={filter}
+                backdrop="static"
+                size="ms-5"
+                title="Task"
+                cancel_btn="cancel"
+                hideBtn={false}
+                btn_name="Save"
+                handleClose={() => setFilter(false)}
+            >
+
+<div className="row">
+  {/* <div class="col-lg-6">
+                              <label for="firstNameinput"
+                                          class="form-label">Expected Delivery Date
+                                         </label>
+                                         <input type="date" class="form-control mb-3" placeholder="DD-MM-YYYY" id="cleave-date">
+
+                          </div>*/}
+  <div className="accordion" id="default-accordion-example">
+    <div className="accordion-item mt-2">
+      <h2 className="accordion-header" id="headingOne">
+        <button
+          className="accordion-button "
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseOne"
+          aria-expanded="true"
+          aria-controls="collapseOne"
+        >
+          Date Range
+        </button>
+      </h2>
+      <div
+        id="collapseOne"
+        className="accordion-collapse collapsed"
+        aria-labelledby="headingOne"
+        data-bs-parent="#default-accordion-example"
+        style={{}}
+      >
+        <div className="accordion-body">
+          <div className="row">
+            <div className="col-md-6">
+              {/* <h4 class="card-title mb-0 flex-grow-1"
+                                                      style="margin-bottom: 20px !important;">General
+                                                  </h4> */}
+              <div className="row">
+                <div className="col-md-10">
+                  <div className="row">
+                    <div className="mb-3">
+                      <div className="form-check form-check-outline form-check-dark">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="formCheck"
+                        />
+                        <label
+                          className="form-check-label new_checkbox"
+                          htmlFor="formCheck"
+                        >
+                          This Week
+                        </label>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="form-check form-check-outline form-check-dark">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="formCheck"
+                        />
+                        <label
+                          className="form-check-label new_checkbox"
+                          htmlFor="formCheck"
+                        >
+                          Last Week
+                        </label>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="form-check form-check-outline form-check-dark">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="formCheck"
+                        />
+                        <label
+                          className="form-check-label new_checkbox"
+                          htmlFor="formCheck"
+                        >
+                          This Month
+                        </label>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="form-check form-check-outline form-check-dark">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="formCheck"
+                        />
+                        <label
+                          className="form-check-label new_checkbox"
+                          htmlFor="formCheck"
+                        >
+                          Last Month
+                        </label>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="form-check form-check-outline form-check-dark">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="formCheck"
+                        />
+                        <label
+                          className="form-check-label new_checkbox"
+                          htmlFor="formCheck"
+                        >
+                          This Quarter
+                        </label>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="form-check form-check-outline form-check-dark">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="formCheck"
+                        />
+                        <label
+                          className="form-check-label new_checkbox"
+                          htmlFor="formCheck"
+                        >
+                          Last Quarter
+                        </label>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-      
+            </div>
+            <div className="col-md-6">
+              <div className="row">
+                <div className="col-md-10">
+                  <div className="row">
+                    <div className="mb-3">
+                      <div className="form-check form-check-outline form-check-dark">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="formCheck"
+                        />
+                        <label
+                          className="form-check-label new_checkbox"
+                          htmlFor="formCheck"
+                        >
+                          This 6 Months
+                        </label>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="form-check form-check-outline form-check-dark">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="formCheck"
+                        />
+                        <label
+                          className="form-check-label new_checkbox"
+                          htmlFor="formCheck"
+                        >
+                          Last 6 Months
+                        </label>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="form-check form-check-outline form-check-dark">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="formCheck"
+                        />
+                        <label
+                          className="form-check-label new_checkbox"
+                          htmlFor="formCheck"
+                        >
+                          This Year
+                        </label>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="form-check form-check-outline form-check-dark">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="formCheck"
+                        />
+                        <label
+                          className="form-check-label new_checkbox"
+                          htmlFor="formCheck"
+                        >
+                          Last Year
+                        </label>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="form-check form-check-outline form-check-dark">
+                        <input
+                          className="form-check-input "
+                          type="checkbox"
+                          id="customdate"
+                        />
+                        <label
+                          className="form-check-label new_checkbox"
+                          htmlFor="customdate"
+                        >
+                          Custom Date Range
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+           
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div className="accordion-item mt-2">
+      <h2 className="accordion-header" id="headingTwo">
+        <button
+          className="accordion-button collapsed"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseTwo"
+          aria-expanded="true"
+          aria-controls="collapseTwo"
+        >
+          Job Type
+        </button>
+      </h2>
+      <div
+        id="collapseTwo"
+        className="accordion-collapse collapse"
+        aria-labelledby="headingTwo"
+        data-bs-parent="#default-accordion-example"
+        style={{}}
+      >
+        <div className="accordion-body">
+          <div className="row">
+            <div className="col-md-6">
+              {/* <h4 class="card-title mb-0 flex-grow-1"
+                                                      style="margin-bottom: 20px !important;">General
+                                                  </h4> */}
+              <div className="row">
+                <div className="col-md-10">
+                  <div className="row">
+                    <div className="mb-3">
+                      <div className="form-check form-check-outline form-check-dark">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="formCheck"
+                          defaultChecked=""
+                        />
+                        <label
+                          className="form-check-label new_checkbox"
+                          htmlFor="formCheck"
+                        >
+                          All
+                        </label>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="form-check form-check-outline form-check-dark">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="formCheck"
+                          defaultChecked=""
+                        />
+                        <label
+                          className="form-check-label new_checkbox"
+                          htmlFor="formCheck"
+                        >
+                          Year End
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div className="accordion-item mt-2">
+    <h2 className="accordion-header" id="headingFour">
+      <button
+        className="accordion-button collapsed"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseFour"
+        aria-expanded="true"
+        aria-controls="collapseFour"
+      >
+        Service Type
+      </button>
+      </h2>
+      <div
+        id="collapseFour"
+        className="accordion-collapse collapse"
+        aria-labelledby="headingFour"
+        data-bs-parent="#default-accordion-example"
+        style={{}}
+      >
+        <div className="accordion-body">
+          <div className="row">
+            <div className="col-md-6">
+              {/* <h4 class="card-title mb-0 flex-grow-1"
+                                                      style="margin-bottom: 20px !important;">General
+                                                  </h4> */}
+              <div className="row">
+                <div className="col-md-10">
+                  <div className="row">
+                    <div className="mb-3">
+                      <div className="form-check form-check-outline form-check-dark">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="formCheck"
+                          defaultChecked=""
+                        />
+                        <label
+                          className="form-check-label new_checkbox"
+                          htmlFor="formCheck"
+                        >
+                          All
+                        </label>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="form-check form-check-outline form-check-dark">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="formCheck"
+                          defaultChecked=""
+                        />
+                        <label
+                          className="form-check-label new_checkbox"
+                          htmlFor="formCheck"
+                        >
+                          LTD
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div className="col-lg-6">
+    <div className="mb-3 mt-3">
+      <label htmlFor="firstNameinput" className="form-label">
+        Account Manager
+      </label>
+      <div>
+        <datalist id="suggestions">
+          <option>Ajeet Agarwal</option>
+          <option>Hemant D</option>
+        </datalist>
+        <input
+          type="text"
+          placeholder="Search Account Manager"
+          className="form-control"
+          autoComplete="on"
+          list="suggestions"
+        />
+      </div>
+    </div>
+  </div>
+  <div className="col-lg-6">
+    <div className="mb-3 mt-3">
+      <label htmlFor="firstNameinput" className="form-label">
+        Customer
+      </label>
+      <div>
+        <datalist id="suggestions1">
+          <option>Outbooks Outsourcing PVT LTD</option>
+          <option>NSGC LTD</option>
+        </datalist>
+        <input
+          type="text"
+          placeholder="Search Customer"
+          className="form-control"
+          autoComplete="on"
+          list="suggestions1"
+        />
+      </div>
+    </div>
+  </div>
+  <div className="col-lg-6">
+    <div className="mb-3 mt-3">
+      <label htmlFor="firstNameinput" className="form-label">
+        Processor
+      </label>
+      <div>
+        <datalist id="suggestions2">
+          <option>Harsh Mehta </option>
+          <option>Devang Agarwal</option>
+        </datalist>
+        <input
+          type="text"
+          placeholder="Search Processor"
+          className="form-control"
+          autoComplete="on"
+          list="suggestions2"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+            </CommanModal >
     </div>
 
   );

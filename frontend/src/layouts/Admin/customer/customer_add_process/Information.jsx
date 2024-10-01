@@ -1,48 +1,85 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { useDispatch } from "react-redux";
-import { Formik, Field, Form, useFormik } from "formik";
-import AddFrom from "../../../../Components/ExtraComponents/Forms/Customer.form";
-import { Email_regex } from "../../../../Utils/Common_regex";
-import {
-  GetAllCompany,
-  AddCustomer,
-} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { Formik, Field, Form } from "formik";
+import { Button } from "antd";
+import { useNavigate } from "react-router-dom";
 import MultiStepFormContext from "./MultiStepFormContext";
+import { EDIT_CUSTOMER } from "../../../../Utils/Common_Message";
+import { Email_regex } from "../../../../Utils/Common_regex";
+import axios from "axios";
 import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
-import {
-  PersonRole,
-  Country,
-} from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import { PersonRole, Country, IncorporationApi } from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import { AddCustomer, GetAllCompany, } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
-import { GET_CUSTOMER_DATA } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { ScrollToViewFirstError, ScrollToViewFirstErrorContactForm } from '../../../../Utils/Comman_function'
 
-const Information = () => {
+const Information = ({ id, pageStatus }) => {
+  const { address, setAddress, next } = useContext(MultiStepFormContext);
+  const refs = useRef({});
+  const managerSelectRef = useRef(null);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
   const customer_id = localStorage.getItem("coustomerId");
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
-  const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
-  const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
-  const [getAccountMangerId, setAccountMangerId] = useState("");
-  const [getAccountMangerIdErr, setAccountMangerIdErr] = useState("");
-  const [CustomerType, setCustomerType] = useState("1");
-  const [getNextStatus, setNextStatus] = useState("0");
-  const [customerDetails, setCustomerDetails] = useState({
-    loading: true,
-    data: [],
-  });
-  const [personRoleDataAll, setPersonRoleDataAll] = useState({
-    loading: true,
-    data: [],
-  });
-  const [errors, setErrors] = useState([
-    { firstName: "", lastName: "", role: "", phoneNumber: "", email: "" },
-  ]);
+  const [staffDataAll, setStaffDataAll] = useState([]);
+  const [location, setLocation] = useState("");
+  const [countryDataAll, setCountryDataAll] = useState([]);
+  const [customerType, setCustomerType] = useState("1");
+  const [ManagerType, setManagerType] = useState("");
+  const [searchItem, setSearchItem] = useState("");
   const [getAllSearchCompany, setGetAllSearchCompany] = useState([]);
-  const [countryDataAll, setCountryDataAll] = useState({
-    loading: true,
-    data: [],
+  const [getSearchDetails, setSearchDetails] = useState("");
+  const [showDropdown, setShowDropdown] = useState(true);
+  const [errors1, setErrors1] = useState({});
+  const [errors2, setErrors2] = useState({});
+  const [errors3, setErrors3] = useState({});
+  const [getAccountMangerIdErr, setAccountMangerIdErr] = useState("");
+  const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
+  const [incorporationDataAll, setIncorporationDataAll] = useState([]);
+
+  // state for sole trader
+  const [getSoleTraderDetails, setSoleTraderDetails] = useState({
+    tradingName: "",
+    tradingAddress: "",
+    vatRegistered: "0",
+    vatNumber: "",
+    website: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
+    email: "",
+    residentialAddress: "",
+    phone_code: "+44",
   });
+
+  // state for partnership
+  const [getPartnershipDetails, setPartnershipDetails] = useState({
+    TradingName: "",
+    TradingAddress: "",
+    VATRegistered: "0",
+    VATNumber: "",
+    Website: "",
+  });
+
+  // state for company
+  const [getCompanyDetails, setCompanyDetails] = useState({
+    SearchCompany: "",
+    CompanyName: "",
+    EntityType: "",
+    CompanyStatus: "",
+    CompanyNumber: "",
+    RegisteredOfficeAddress: "",
+    IncorporationDate: "",
+    IncorporationIn: "",
+    VATRegistered: "0",
+    VATNumber: "",
+    Website: "",
+    TradingName: "",
+    TradingAddress: "",
+  });
+
+  // state for company contact
   const [contacts, setContacts] = useState([
     {
       authorised_signatory_status: false,
@@ -55,6 +92,115 @@ const Information = () => {
     },
   ]);
 
+  // state for partnership contact
+  const [contacts1, setContacts1] = useState([
+    {
+      authorised_signatory_status: false,
+      firstName: "",
+      lastName: "",
+      role: "",
+      phoneNumber: "",
+      email: "",
+      phone_code: "+44",
+    },
+    {
+      authorised_signatory_status: false,
+      firstName: "",
+      lastName: "",
+      role: "",
+      phoneNumber: "",
+      email: "",
+      phone_code: "+44",
+    },
+  ]);
+
+  // state for company contact errors
+  const [errors, setErrors] = useState([
+    {
+      firstName: "",
+      lastName: "",
+      role: "",
+      phoneNumber: "",
+      email: "",
+    },
+  ]);
+
+  // state for partnership contact errors
+  const [contactsErrors, setContactsErrors] = useState([
+    {
+      authorised_signatory_status: false,
+      firstName: "",
+      lastName: "",
+      role: "",
+      phoneNumber: "",
+      email: "",
+      phone_code: "+44",
+    },
+    {
+      authorised_signatory_status: false,
+      firstName: "",
+      lastName: "",
+      role: "",
+      phoneNumber: "",
+      email: "",
+      phone_code: "+44",
+    },
+  ]);
+
+  // use effect
+  useEffect(() => {
+    incorporationData();
+    CountryData();
+    fetchStaffData();
+    CustomerPersonRoleData();
+  }, []);
+
+  useEffect(() => {
+    Get_Company();
+    FilterSearchDetails();
+  }, [searchItem]);
+
+  useEffect(() => {
+    if (getSearchDetails && getSearchDetails.length > 0) {
+      // Update company details
+      setCompanyDetails((prevState) => ({
+        ...prevState,
+        CompanyName: getSearchDetails[0].title || prevState.CompanyName,
+        EntityType: getSearchDetails[0].company_type || prevState.EntityType,
+        CompanyStatus:
+          getSearchDetails[0].company_status || prevState.CompanyStatus,
+        CompanyNumber:
+          getSearchDetails[0].company_number || prevState.CompanyNumber,
+        RegisteredOfficeAddress:
+          getSearchDetails[0].address_snippet ||
+          prevState.RegisteredOfficeAddress,
+        IncorporationDate: getSearchDetails[0].date_of_creation
+          ? getSearchDetails[0].date_of_creation
+          : "",
+        // IncorporationIn: getSearchDetails[0].description,
+        TradingName: getSearchDetails[0].title,
+        TradingAddress: getSearchDetails[0].address_snippet,
+      }));
+
+      const newErrors = { ...errors2 };
+      if (getSearchDetails[0].title) delete newErrors["CompanyName"];
+      if (getSearchDetails[0].company_type) delete newErrors["EntityType"];
+      if (getSearchDetails[0].company_status) delete newErrors["CompanyStatus"];
+      if (getSearchDetails[0].company_number) delete newErrors["CompanyNumber"];
+      if (getSearchDetails[0].address_snippet)
+        delete newErrors["RegisteredOfficeAddress"];
+      if (getSearchDetails[0].date_of_creation)
+        delete newErrors["IncorporationDate"];
+      if (getSearchDetails[0].description) delete newErrors["IncorporationIn"];
+      if (getSearchDetails[0].title) delete newErrors["TradingName"];
+      if (getSearchDetails[0].address_snippet)
+        delete newErrors["TradingAddress"];
+
+      setErrors2(newErrors);
+    }
+  }, [getSearchDetails]);
+
+  //  Add company contact
   const handleAddContact = () => {
     setContacts([
       ...contacts,
@@ -70,10 +216,75 @@ const Information = () => {
     ]);
     setErrors([
       ...errors,
-      { firstName: "", lastName: "", role: "", phoneNumber: "", email: "" },
+      {
+        firstName: "",
+        lastName: "",
+        role: "",
+        phoneNumber: "",
+        email: "",
+      },
     ]);
   };
 
+  // delete company contact
+  const handleDeleteContact = (index) => {
+    const newContacts = contacts.filter((_, i) => i !== index);
+    const newErrors = errors.filter((_, i) => i !== index);
+    setContacts(newContacts);
+    setErrors(newErrors);
+  };
+
+  // add partnership contact
+  const handleAddContact1 = () => {
+    setContacts1([
+      ...contacts1,
+      {
+        authorised_signatory_status: false,
+        firstName: "",
+        lastName: "",
+        role: "",
+        phoneNumber: "",
+        email: "",
+        phone_code: "+44",
+      },
+    ]);
+    setContactsErrors([
+      ...contactsErrors,
+      {
+        firstName: "",
+        lastName: "",
+        role: "",
+        phoneNumber: "",
+        email: "",
+      },
+    ]);
+  };
+
+  // delete partnership contact
+  const handleDeleteContact1 = (index) => {
+    const newContacts = contacts1.filter((_, i) => i !== index);
+    const newErrors = contactsErrors.filter((_, i) => i !== index);
+    setContacts1(newContacts);
+    setContactsErrors(newErrors);
+  };
+
+  // fetch staff data
+  const fetchStaffData = async () => {
+    try {
+      const response = await dispatch(
+        Staff({ req: { action: "getmanager" }, authToken: token })
+      ).unwrap();
+      if (response.status) {
+        setStaffDataAll(response.data);
+      } else {
+        setStaffDataAll([]);
+      }
+    } catch (error) {
+      setStaffDataAll([]);
+    }
+  };
+
+  // fetch person role data
   const CustomerPersonRoleData = async () => {
     const req = {
       action: "get",
@@ -83,23 +294,351 @@ const Information = () => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setPersonRoleDataAll({ loading: false, data: response.data });
+          setPersonRoleDataAll(response.data);
         } else {
-          setPersonRoleDataAll({ loading: false, data: [] });
+          setPersonRoleDataAll([]);
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
-  const handleDeleteContact = (index) => {
-    const newContacts = contacts.filter((_, i) => i !== index);
-    const newErrors = errors.filter((_, i) => i !== index);
+  // fetch country code data
+  const CountryData = async (req) => {
+    const data = { req: { action: "get" }, authToken: token };
+    await dispatch(Country(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setCountryDataAll(response.data);
+        } else {
+          setCountryDataAll([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+  // handle change solo trader
+  const handleChange1 = (e) => {
+    const { name, value } = e.target;
+    if (name === "vatNumber" || name === "phone") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    validate1(name, value);
+    setSoleTraderDetails({ ...getSoleTraderDetails, [name]: value });
+  };
+
+  // handle change company
+  const handleChange2 = (e) => {
+    const { name, value } = e.target;
+    if (name === "VATNumber") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    validate2(name, value, 1);
+    setCompanyDetails({ ...getCompanyDetails, [name]: value });
+  };
+
+  // handle change partnership
+  const handleChange3 = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "VATNumber") {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    validate3(name, value);
+    setPartnershipDetails({ ...getPartnershipDetails, [name]: value });
+  };
+
+  // handle change COMPANY contact
+  const handleChange4 = (index, field, value) => {
+    let newValue = value;
+    if (field == EDIT_CUSTOMER.AUTHORISED) {
+      newValue = value ? 1 : 0;
+    }
+
+    const newContacts =
+      contacts1 &&
+      contacts1.map((contact, i) =>
+        i === index ? { ...contact, [field]: newValue } : contact
+      );
+
+    setContacts1(newContacts);
+    validateField1(index, field, newValue);
+  };
+
+  // handle change partnership contact
+  const handleChange = (index, field, value) => {
+    const newContacts =
+      contacts &&
+      contacts.map((contact, i) =>
+        i === index ? { ...contact, [field]: value } : contact
+      );
     setContacts(newContacts);
+    validateField(index, field, value);
+  };
+
+  //  validate function sole trader
+  const validate1 = (field, value) => {
+    const newErrors = { ...errors1 };
+    if (!value) {
+      switch (field) {
+        case "IndustryType":
+          newErrors[field] = EDIT_CUSTOMER.SELECT_CLIENT_INDUSTRIES;
+          break;
+        case "tradingName":
+          newErrors[field] = EDIT_CUSTOMER.ENTER_TRADING_NAME;
+          break;
+        case "firstName":
+          newErrors[field] = EDIT_CUSTOMER.ENTER_FIRST_NAME;
+          break;
+        case "lastName":
+          newErrors[field] = EDIT_CUSTOMER.LAST_NAME;
+          break;
+        case "email":
+          newErrors[field] = EDIT_CUSTOMER.EMAIL;
+          break;
+        case "residentialAddress":
+          newErrors[field] = EDIT_CUSTOMER.RESIDENTIOAL_ADDRESS;
+          break;
+        default:
+          break;
+      }
+    } else {
+      if (field === "email" && !Email_regex(value)) {
+        newErrors[field] = EDIT_CUSTOMER.invalidEmail;
+      } else if (field === "phone" && !/^\d{9,12}$/.test(value)) {
+        newErrors[field] = EDIT_CUSTOMER.invalidPhone;
+      } else {
+        delete newErrors[field];
+        setErrors1((prevErrors) => {
+          const updatedErrors = { ...prevErrors };
+          delete updatedErrors[field];
+          return updatedErrors;
+        });
+      }
+    }
+
+
+    ScrollToViewFirstError(newErrors);
+    // Update state only if there are errors
+    if (Object.keys(newErrors).length !== 0) {
+      setErrors1((prevErrors) => ({
+        ...prevErrors,
+        ...newErrors,
+      }));
+    }
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // validate function company
+  const validate2 = (name, value) => {
+    const newErrors = { ...errors2 };
+    if (!value) {
+      switch (name) {
+        case "CompanyName":
+          newErrors[name] = EDIT_CUSTOMER.COMPANY_NAME;
+          break;
+        case "EntityType":
+          newErrors[name] = EDIT_CUSTOMER.ENTITY_TYPE;
+          break;
+        case "CompanyStatus":
+          newErrors[name] = EDIT_CUSTOMER.COMPANY_STATUS;
+          break;
+        case "CompanyNumber":
+          newErrors[name] = EDIT_CUSTOMER.COMPANY_NUMBER;
+          break;
+        case "RegisteredOfficeAddress":
+          newErrors[name] = EDIT_CUSTOMER.REGISTRER_OFFICE_ADDRESS;
+          break;
+        case "IncorporationDate":
+          newErrors[name] = EDIT_CUSTOMER.INCORPORATION_DATE;
+          break;
+        case "IncorporationIn":
+          newErrors[name] = EDIT_CUSTOMER.INCORPORATION_IN;
+          break;
+        case "TradingName":
+          newErrors[name] = EDIT_CUSTOMER.ENTER_TRADING_NAME;
+          break;
+        default:
+          break;
+      }
+    } else {
+      delete newErrors[name];
+      setErrors2((prevErrors) => {
+        const updatedErrors = { ...prevErrors };
+        delete updatedErrors[name];
+        return updatedErrors;
+      });
+    }
+
+    ScrollToViewFirstError(newErrors);
+    if (Object.keys(newErrors).length !== 0) {
+      setErrors2((prevErrors) => ({
+        ...prevErrors,
+        ...newErrors,
+      }));
+    }
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // validate function partnership
+  const validate3 = (name, value) => {
+    const newErrors = { ...errors3 };
+    if (!value) {
+      switch (name) {
+        case "TradingName":
+          newErrors[name] = EDIT_CUSTOMER.ENTER_TRADING_NAME;
+          break;
+        case "ClientIndustry":
+          newErrors[name] = EDIT_CUSTOMER.SELECT_CLIENT_INDUSTRIES;
+          break;
+        default:
+          break;
+      }
+    } else {
+      delete newErrors[name];
+      setErrors3((prevErrors) => {
+        const updatedErrors = { ...prevErrors };
+        delete updatedErrors[name];
+        return updatedErrors;
+      });
+    }
+
+    ScrollToViewFirstError(newErrors);
+
+    if (Object.keys(newErrors).length !== 0) {
+      setErrors3((prevErrors) => ({
+        ...prevErrors,
+        ...newErrors,
+      }));
+    }
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // validate all fields when submit
+  const validateAllFields = (type) => {
+    const customer_type = [
+      getSoleTraderDetails,
+      getCompanyDetails,
+      getPartnershipDetails,
+    ];
+    const validate = [validate1, validate2, validate3];
+    let isValid = true;
+    for (const key in customer_type[type - 1]) {
+      if (!validate[type - 1](key, customer_type[type - 1][key])) {
+        isValid = false;
+      }
+    }
+    return isValid;
+  };
+
+  // validate company contact fields when submit
+  const validateField = (index, field, value) => {
+    const newErrors = [...errors];
+    if (!newErrors[index]) {
+      newErrors[index] = {
+        firstName: "",
+        lastName: "",
+        role: "",
+        phoneNumber: "",
+        email: "",
+      };
+    }
+    switch (field) {
+      case "firstName":
+        newErrors[index].firstName = value
+          ? ""
+          : EDIT_CUSTOMER.REQUIRED_FIRST_NAME;
+        break;
+      case "lastName":
+        newErrors[index].lastName = value
+          ? ""
+          : EDIT_CUSTOMER.REQUIRES_LAST_NAME;
+        break;
+      case "email":
+        if (!value) {
+          newErrors[index].email = EDIT_CUSTOMER.REQUIRE_EMAIL;
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          newErrors[index].email = EDIT_CUSTOMER.VALID_EMAIL;
+        } else {
+          newErrors[index].email = "";
+        }
+        break;
+      case "phoneNumber":
+        errors[index].phoneNumber =
+          value === ""
+            ? ""
+            : /^\d{9,12}$/.test(value)
+              ? ""
+              : EDIT_CUSTOMER.PHONE_VALIDATION;
+        break;
+
+      default:
+        break;
+    }
     setErrors(newErrors);
   };
 
+  // validate partnership contact fields when submit
+  const validateField1 = (index, field, value) => {
+    const errors = [...contactsErrors];
+
+    switch (field) {
+      case "firstName":
+      case "lastName":
+        if (!value.trim()) {
+          errors[index] = {
+            ...errors[index],
+            [field]: EDIT_CUSTOMER.REQUIRED_FEILD,
+          };
+        } else {
+          delete errors[index][field];
+        }
+        break;
+
+      case "email":
+        if (!value.trim()) {
+          errors[index] = {
+            ...errors[index],
+            [field]: EDIT_CUSTOMER.REQUIRED_FEILD,
+          };
+        } else if (!/\S+@\S+\.\S+/.test(value)) {
+          errors[index] = {
+            ...errors[index],
+            [field]: EDIT_CUSTOMER.INVALID_EMAIL_ERROR,
+          };
+        } else {
+          delete errors[index][field];
+        }
+        break;
+      case "phoneNumber":
+        errors[index].phoneNumber =
+          value === ""
+            ? ""
+            : /^\d{9,12}$/.test(value)
+              ? ""
+              : EDIT_CUSTOMER.PHONE_VALIDATION;
+        break;
+
+      default:
+        break;
+    }
+
+    setContactsErrors(errors);
+  };
+
+  // common submit function for all type of customer
   const AddCustomerFun = async (req) => {
     const data = { req: req, authToken: token };
     await dispatch(AddCustomer(data))
@@ -118,1725 +657,1744 @@ const Information = () => {
         }
       })
       .catch((error) => {
-        console.log("Error", error);
+        return;
       });
   };
 
-  const formik = useFormik({
-    initialValues: {
-      company_name: "",
-      search_company_name: "",
-      entity_type: "",
-      company_status: "",
-      company_number: "",
-      Registered_Office_Addres: "",
-      Incorporation_Date: "",
-      Incorporation_in: "",
-      VAT_Registered: "0",
-      VAT_Number: "",
-      Website: "",
-      Trading_Name: "",
-      Trading_Address: "",
-    },
-    validate: (values) => {
-      let errors = {};
-
-      if (formik.touched.Trading_Name == true && getAccountMangerId == "") {
-        setAccountMangerIdErr("Please select an Account Manager");
-        return;
-      } else if (!values.company_name) {
-        errors.company_name = "Please Enter Company Name";
-      } else if (!values.entity_type) {
-        errors.entity_type = "Please Enter Entity Type";
-      } else if (!values.company_status) {
-        errors.company_status = "Please Enter Company Status";
-      } else if (!values.company_number) {
-        errors.company_number = "Please Enter Company Number";
-      } else if (!values.Registered_Office_Addres) {
-        errors.Registered_Office_Addres =
-          "Please Enter Registered Office Address";
-      } else if (!values.Incorporation_Date) {
-        errors.Incorporation_Date = "Please Enter Incorporation Date";
-      } else if (!values.Incorporation_in) {
-        errors.Incorporation_in = "Please Enter Incorporation in";
-      } else 
-      // if (values.VAT_Registered === "1" && !values.VAT_Number) {
-      //   errors.VAT_Number = "Please Enter VAT Number";
-      // } else 
-      
-      if (values.VAT_Number && values.VAT_Number.length > 9) {
-        errors.VAT_Number = "VAT Number cannot exceed 9 Numbers";
-      } else if (values.Website && values.Website.length > 200) {
-        errors.Website = "Website cannot exceed 200 characters";
-      } else if (
-        values.Trading_Name != undefined &&
-        !values.Trading_Name.trim()
-      ) {
-        errors.Trading_Name = "Please Enter Trading Name";
+  // submit function
+  const handleSubmit = async () => {
+    if (ManagerType == "") {
+      setAccountMangerIdErr("Please Select Manager"); 
+      const errorElement = document.getElementById("accountManager");
+      if (errorElement) {
+          const elementPosition = errorElement.getBoundingClientRect().top;  
+          const offsetPosition = elementPosition + window.pageYOffset - 50;
+          window.scrollTo({
+              top: offsetPosition,
+              behavior: "smooth"
+          });
       }
-
-      return errors;
-    },
-    onSubmit: async (values) => {
-      let formIsValid = true;
-      const newErrors = contacts.map((contact, index) => {
-        const error = {
-          firstName: contact.firstName ? "" : "First Name is required",
-          lastName: contact.lastName ? "" : "Last Name is required",
-          // role: contact.role ? "" : "Role is required",
-          // phoneNumber: contact.phoneNumber ? "" : "Phone Number is required",
-          email:
-            contact.email === ""
-              ? "Email Id is required"
-              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-              ? ""
-              : "Valid Email is required",
-        };
-
-        if (
-          error.firstName ||
-          error.lastName ||
-          error.role ||
-          error.phoneNumber ||
-          error.email
-        ) {
-          formIsValid = false;
-        }
-        return error;
-      });
-
-      setErrors(newErrors);
-      if (formIsValid) {
-        if (getAccountMangerId == "") {
-          return;
-        }
-        let req = {
-          customer_id: Number(customer_id),
-          contact_id: customerDetails.data.contact_id,
-          company_name: values.company_name,
-          entity_type: values.entity_type,
-          company_status: values.company_status,
-          company_number: values.company_number,
-          Registered_Office_Addres: values.Registered_Office_Addres,
-          Incorporation_Date: values.Incorporation_Date,
-          Incorporation_in: values.Incorporation_in,
-          VAT_Registered: values.VAT_Registered,
-          VAT_Number: values.VAT_Number,
-          Website: values.Website,
-          Trading_Name: values.Trading_Name,
-          Trading_Address: values.Trading_Address,
-          contactDetails: contacts,
-          CustomerType: CustomerType,
-          PageStatus: "1",
-          account_manager_id: getAccountMangerId,
-          staff_id: staffDetails.id,
-        };
-        await AddCustomerFun(req);
-      }
-    },
-  });
-
-  const formik1 = useFormik({
-    initialValues: {
-      Trading_Name: "",
-      Trading_Address: "",
-      VAT_Registered: "0",
-      VAT_Number: "",
-      Website: "",
-      First_Name: "",
-      Last_Name: "",
-      Phone: "",
-      Email: "",
-      Residential_Address: "",
-      countryCode: "+44",
-    },
-    validate: (values) => {
-      let errors = {};
-
-      if (formik1.touched.Trading_Name == true && getAccountMangerId == "") {
-        setAccountMangerIdErr("Please select an Account Manager");
-        return;
-      } else if (!values.Trading_Name.trim()) {
-        errors.Trading_Name = "Please Enter Trading Name";
-      }
-      if (values.Trading_Name && values.Trading_Name.trim().length > 100) {
-        errors.Trading_Name = "Trading Name cannot exceed 100 characters";
-      } else if (values.Phone && values.Phone.toString().length > 12) {
-        errors.Phone = "Phone Number cannot exceed 12 digits";
-      } else if (values.Phone && values.Phone.toString().length < 9) {
-        errors.Phone = "Phone Number cannot be less than 9 digits";
-      } else if (
-        values.Trading_Address &&
-        values.Trading_Address.length > 200
-      ) {
-        errors.Trading_Address = "Trading Address cannot exceed 200 characters";
-      } else 
-      // if (!values.VAT_Registered) {
-      //   errors.VAT_Registered = "Please Enter VAT Registered";
-      // }
-      //  else
-      //  if (values.VAT_Registered === "1" && !values.VAT_Number) {
-      //   errors.VAT_Number = "Please Enter VAT Number";
-      // } else 
-      if (values.VAT_Number && values.VAT_Number.length > 9) {
-        errors.VAT_Number = "VAT Number cannot exceed 9 Numbers";
-      } else if (values.Website && values.Website.length > 200) {
-        errors.Website = "Website cannot exceed 200 characters";
-      } else if (!values.First_Name) {
-        errors.First_Name = "Please Enter First Name";
-      } else if (values.First_Name && values.First_Name.length > 50) {
-        errors.First_Name = "First Name exceed 50 characters";
-      } else if (!values.Last_Name) {
-        errors.Last_Name = "Please Enter Last Name";
-      } else if (values.Last_Name && values.Last_Name.length > 50) {
-        errors.Last_Name = "Last Name exceed 50 characters";
-      } else if (!values.Email) {
-        errors.Email = "Please Enter Email";
-      } else if (!Email_regex(values.Email)) {
-        errors.Email = "Please Enter Valid Email";
-      } else if (!values.Residential_Address) {
-        errors.Residential_Address = "Please Enter Residential Address";
-      } else if (
-        values.Residential_Address &&
-        values.Residential_Address.length > 200
-      ) {
-        errors.Residential_Address =
-          "Residential Address cannot exceed 200 characters";
-      }
-
-      return errors;
-    },
-
-    onSubmit: async (values) => {
-      if (getAccountMangerId == "") {
-        return;
-      }
-
-      const req = {
-        customer_id: Number(customer_id),
-        Trading_Name: values.Trading_Name,
-        Trading_Address: values.Trading_Address,
-        VAT_Registered: values.VAT_Registered,
-        VAT_Number: values.VAT_Number,
-        Website: values.Website,
-        First_Name: values.First_Name,
-        Last_Name: values.Last_Name,
-        Phone: values.Phone,
-        Email: values.Email,
-        Residential_Address: values.Residential_Address,
-        PageStatus: "1",
-        CustomerType: CustomerType,
-        account_manager_id: getAccountMangerId,
-        staff_id: staffDetails.id,
-        phone_code: values.countryCode,
-      };
-
-      await AddCustomerFun(req);
-    },
-  });
-
-  const formik2 = useFormik({
-    initialValues: {
-      Trading_Name: "",
-      Trading_Address: "",
-      VAT_Registered: "0",
-      VAT_Number: "",
-      Website: "",
-    },
-    validate: (values) => {
-      let errors = {};
-      if (formik2.touched.Trading_Name == true && getAccountMangerId == "") {
-        setAccountMangerIdErr("Please select an Account Manager");
-        return;
-      } else if (!values.Trading_Name.trim()) {
-        errors.Trading_Name = "Please Enter Trading Name";
-      } 
-      // else if (!values.VAT_Registered) {
-      //   errors.VAT_Registered = "Please Enter VAT Registered";
-      // } 
-      // else if (values.VAT_Registered === "1" && !values.VAT_Number) {
-      //   errors.VAT_Number = "Please Enter VAT Number";
-      // }
-
-      return errors;
-    },
-
-    onSubmit: async (values) => {
-      let formIsValid = true;
-      const newErrors = contacts.map((contact, index) => {
-        const error = {
-          firstName: contact.firstName ? "" : "First Name is required",
-          lastName: contact.lastName ? "" : "Last Name is required",
-          email:
-            contact.email === ""
-              ? "Email Id is required"
-              : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
-              ? ""
-              : "Valid Email is required",
-        };
-
-        if (
-          error.firstName ||
-          error.lastName ||
-          error.role ||
-          error.phoneNumber ||
-          error.email
-        ) {
-          formIsValid = false;
-        }
-        return error;
-      });
-
-      setErrors(newErrors);
-
-      if (formIsValid) {
-        if (getAccountMangerId == "") {
-          return;
-        }
+      return;
+    }
+    if (customerType == 1 && ManagerType != "") {
+      if (validateAllFields(1)) {
         const req = {
           customer_id: Number(customer_id),
-          Trading_Name: values.Trading_Name,
-          Trading_Address: values.Trading_Address,
-          VAT_Registered: values.VAT_Registered,
-          VAT_Number: values.VAT_Number,
-          Website: values.Website,
+          Trading_Name: getSoleTraderDetails.tradingName,
+          Trading_Address: getSoleTraderDetails.tradingAddress,
+          VAT_Registered: getSoleTraderDetails.vatRegistered,
+          VAT_Number: getSoleTraderDetails.vatNumber,
+          Website: getSoleTraderDetails.website,
+          First_Name: getSoleTraderDetails.firstName,
+          Last_Name: getSoleTraderDetails.lastName,
+          Email: getSoleTraderDetails.email,
+          Phone: getSoleTraderDetails.phone,
+          Residential_Address: getSoleTraderDetails.residentialAddress,
+          phone_code: getSoleTraderDetails.phone_code,
           PageStatus: "1",
-          contactDetails: contacts,
-          CustomerType: CustomerType,
-          account_manager_id: getAccountMangerId,
+          account_manager_id: ManagerType,
+          CustomerType: customerType,
           staff_id: staffDetails.id,
         };
-
         await AddCustomerFun(req);
-      }
-    },
-  });
-
-  let filteredCompanies = [];
-  if (getAllSearchCompany.items !== undefined) {
-    filteredCompanies =
-      getAllSearchCompany &&
-      getAllSearchCompany.items.filter((company) =>
-        company.title
-          .toLowerCase()
-          .includes(formik.values.search_company_name.toLowerCase())
-      );
-  }
-
-  let getCompanyDetails = [];
-  if (getAllSearchCompany.items !== undefined) {
-    getCompanyDetails =
-      getAllSearchCompany &&
-      getAllSearchCompany.items.filter(
-        (company) => company.title == formik.values.search_company_name
-      );
-  }
-
-  useEffect(() => {
-    formik.setFieldValue("company_name", getCompanyDetails[0]?.title);
-    formik.setFieldValue("entity_type", getCompanyDetails[0]?.company_type);
-    formik.setFieldValue(
-      "company_status",
-      getCompanyDetails[0]?.company_status
-    );
-    formik.setFieldValue(
-      "company_number",
-      getCompanyDetails[0]?.company_number
-    );
-    formik.setFieldValue(
-      "Registered_Office_Addres",
-      getCompanyDetails[0]?.address_snippet
-    );
-    formik.setFieldValue(
-      "Incorporation_Date",
-      getCompanyDetails[0]?.date_of_creation
-    );
-    formik.setFieldValue("Incorporation_in", getCompanyDetails[0]?.description);
-    formik.setFieldValue("Trading_Name", getCompanyDetails[0]?.title);
-    formik.setFieldValue(
-      "Trading_Address",
-      getCompanyDetails[0]?.address_snippet
-    );
-
-    if (formik.values.search_company_name == "") {
-      formik.setFieldValue("company_name", "");
-      formik.setFieldValue("entity_type", "");
-      formik.setFieldValue("company_status", "");
-      formik.setFieldValue("company_number", "");
-      formik.setFieldValue("Registered_Office_Addres", "");
-      formik.setFieldValue("Incorporation_Date", "");
-      formik.setFieldValue("Incorporation_in", "");
+      }  
     }
-  }, [formik.values.search_company_name]);
+    if (customerType == 2 && ManagerType != "") {
+      if (validateAllFields(2)) {
+        let formIsValid = true;
+        const newErrors =
+          contacts &&
+          contacts.map((contact, index) => {
+            const error = {
+              firstName: contact.firstName
+                ? ""
+                : EDIT_CUSTOMER.REQUIRED_FIRST_NAME,
+              lastName: contact.lastName
+                ? ""
+                : EDIT_CUSTOMER.REQUIRES_LAST_NAME,
+              email:
+                contact.email === ""
+                  ? EDIT_CUSTOMER.REQUIRE_EMAIL
+                  : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+                    ? ""
+                    : EDIT_CUSTOMER.VALID_EMAIL,
+            };
 
-  const fields = [
-    {
-      name: "Trading_Name",
-      label: "Trading Name ",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "Trading_Address",
-      label: "Trading Address",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "VAT_Registered",
-      label: "VAT Registered",
-      type: "select3",
-      options: [
-        { value: "1", label: "Yes" },
-        { value: "0", label: "No" },
-      ],
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "VAT_Number",
-      label: "VAT Number",
-      type: "number",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "Website",
-      label: "Website",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "Sole Trader Detalis",
-      label: "Sole Trader Detalis",
-      type: "heading",
-      label_size: 12,
-      col_size: 12,
-      disable: false,
-    },
-    {
-      name: "First_Name",
-      label: "First Name",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "Last_Name",
-      label: "Last Name",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "Phone",
-      label: "Phone",
-      type: "number1",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "Email",
-      label: "Email",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "Residential_Address",
-      label: "Residential Address",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-  ];
+            if (
+              error.firstName ||
+              error.lastName ||
+              error.role ||
+              error.phoneNumber ||
+              error.email
+            ) {
+              formIsValid = false;
+            }
+            return error;
+          });
+        setErrors(newErrors);
+        if (formIsValid) {
+          const req = {
+            PageStatus: "1",
+            CustomerType: "2",
+            staff_id: staffDetails.id,
+            account_manager_id: ManagerType,
+            customer_id: Number(customer_id),
+            Trading_Name: getCompanyDetails.TradingName,
+            Trading_Address: getCompanyDetails.TradingAddress,
+            VAT_Registered: getCompanyDetails.VATRegistered,
+            VAT_Number: getCompanyDetails.VATNumber,
+            Website: getCompanyDetails.Website,
+            contactDetails: contacts,
+            company_name: getCompanyDetails.CompanyName,
+            entity_type: getCompanyDetails.EntityType,
+            company_status: getCompanyDetails.CompanyStatus,
+            company_number: getCompanyDetails.CompanyNumber,
+            Registered_Office_Addres: getCompanyDetails.RegisteredOfficeAddress,
+            Incorporation_Date: getCompanyDetails.IncorporationDate,
+            Incorporation_in: getCompanyDetails.IncorporationIn,
+          };
 
-  const fields1 = [
-    {
-      name: "search_company_name",
-      label: "Search Company",
-      type: "text9",
-      filteredCompanies: filteredCompanies && filteredCompanies,
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
+          await AddCustomerFun(req);
+        } else {
+          scrollToFirstError1(errors);
+        }
+      } else {
+        scrollToFirstError(errors2);
+      }
+    }
+    if (customerType == 3 && ManagerType != "") {
+      if (validateAllFields(3)) {
+        let formIsValid = true;
+        const newErrors =
+          contacts1 &&
+          contacts1.map((contact, index) => {
+            const error = {
+              firstName: contact.firstName
+                ? ""
+                : EDIT_CUSTOMER.REQUIRED_FIRST_NAME,
+              lastName: contact.lastName
+                ? ""
+                : EDIT_CUSTOMER.REQUIRES_LAST_NAME,
 
-    {
-      name: "company_name",
-      label: "Company Name",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "entity_type",
-      label: "Entity Type",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "company_status",
-      label: "Company Status",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "company_number",
-      label: "Company Number",
-      type: "number",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
+              email:
+                contact.email === ""
+                  ? EDIT_CUSTOMER.REQUIRE_EMAIL
+                  : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+                    ? ""
+                    : EDIT_CUSTOMER.VALID_EMAIL,
+            };
 
-    {
-      name: "Incorporation_Date",
-      label: "Incorporation Date",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
+            if (
+              error.firstName ||
+              error.lastName ||
+              error.role ||
+              error.phoneNumber ||
+              error.email
+            ) {
+              formIsValid = false;
+            }
+            return error;
+          });
+        setContactsErrors(newErrors);
+        if (formIsValid) {
+          const req = {
+            customer_id: Number(customer_id),
+            PageStatus: "1",
+            CustomerType: "3",
+            staff_id: staffDetails.id,
+            account_manager_id: ManagerType,
+            Trading_Name: getPartnershipDetails.TradingName,
+            Trading_Address: getPartnershipDetails.TradingAddress,
+            VAT_Registered: getPartnershipDetails.VATRegistered,
+            VAT_Number: getPartnershipDetails.VATNumber,
+            Website: getPartnershipDetails.Website,
+            contactDetails: contacts1,
+          };
 
-    {
-      name: "Incorporation_in",
-      label: "Incorporation in",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "Registered_Office_Addres",
-      label: "Registered Office Address",
-      type: "text",
-      label_size: 12,
-      col_size: 8,
-      disable: false,
-    },
-    {
-      name: "VAT_Registered",
-      label: "VAT Registered",
-      type: "select3",
-      options: [
-        { value: "1", label: "Yes" },
-        { value: "0", label: "No" },
-      ],
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "VAT_Number",
-      label: "VAT Number",
-      type: "number",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "Website",
-      label: "Website",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "Website",
-      label: "Trading Details",
-      type: "TradingDetails",
-      label_size: 12,
-      col_size: 12,
-      disable: false,
-    },
+          await AddCustomerFun(req);
+        } else {
+          scrollToFirstError1(contactsErrors);
+        }
+      } else {
+        scrollToFirstError(errors3);
+      }
+    }
+  };
 
-    {
-      name: "Trading_Name",
-      label: "Trading Name",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "Trading_Address",
-      label: "Trading Address",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-  ];
+  // scorll to first error
+  const scrollToFirstError = (errors) => {
+    const errorField = Object.keys(errors)[0];
+    const errorElement = document.getElementById(errorField);
+    if (errorElement) {
+      errorElement.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
-  const fields3 = [
-    {
-      name: "Trading_Name",
-      label: "Trading Name",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "Trading_Address",
-      label: "Trading Address",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "VAT_Registered",
-      label: "VAT Registered",
-      type: "select3",
-      options: [
-        { value: "1", label: "Yes" },
-        { value: "0", label: "No" },
-      ],
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "VAT_Number",
-      label: "VAT Number",
-      type: "number",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-    {
-      name: "Website",
-      label: "Website",
-      type: "text",
-      label_size: 12,
-      col_size: 4,
-      disable: false,
-    },
-  ];
+  // scroll to first error for contact
+  const scrollToFirstError1 = (errors) => {
+    errors.forEach((errorObj, index) => {
+      for (const field in errorObj) {
+        if (errorObj[field]) {
+          const fieldId = `${field}-${index}`;
+          const errorElement = document.getElementById(fieldId);
+
+          if (errorElement) {
+            errorElement.scrollIntoView({ behavior: "smooth" });
+          }
+          return;
+        }
+      }
+    });
+  };
+
+  const FilterSearchDetails = () => {
+    const filterData = getAllSearchCompany.filter(
+      (data) => data.title === searchItem
+    );
+    setSearchDetails(filterData);
+  };
+
+  const handleChangeManager = (e) => {
+    setManagerType(e.target.value);
+    if (e.target.value == "") {
+      setAccountMangerIdErr("Please Select Manager");
+    } else {
+      setAccountMangerIdErr("");
+    }
+  };
 
   const Get_Company = async () => {
-    const data = { search: formik.values.search_company_name };
+    const data = { search: searchItem };
     await dispatch(GetAllCompany(data))
       .unwrap()
       .then((res) => {
         if (res.status) {
-          setGetAllSearchCompany(res.data);
+          setGetAllSearchCompany(res.data.items);
         } else {
           setGetAllSearchCompany([]);
         }
       })
       .catch((err) => {
-        console.log("Error", err);
+        return;
       });
   };
-
-  useEffect(() => {
-    Get_Company();
-  }, [formik.values.search_company_name]);
-
-  const CountryData = async (req) => {
-    const data = { req: { action: "get" }, authToken: token };
-    await dispatch(Country(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          setCountryDataAll({ loading: false, data: response.data });
-          formik.setFieldValue("CountryData", response.data);
-          formik1.setFieldValue("CountryData", response.data);
-          formik2.setFieldValue("CountryData", response.data);
-        } else {
-          setCountryDataAll({ loading: false, data: [] });
-        }
-      })
-      .catch((error) => {
-        console.log("Error", error);
-      });
-  };
-
-  const fetchStaffData = async () => {
-    try {
-      const response = await dispatch(
-        Staff({ req: { action: "getmanager" }, authToken: token })
-      ).unwrap();
-      if (response.status) {
-        setStaffDataAll({ loading: false, data: response.data });
-      } else {
-        setStaffDataAll({ loading: false, data: [] });
-      }
-    } catch (error) {
-      console.error("Error fetching staff data", error);
-      setStaffDataAll({ loading: false, data: [] });
-    }
-  };
-
-  useEffect(() => {
-    CustomerPersonRoleData();
-    fetchStaffData();
-    CountryData();
-  }, []);
-
-  const handleChangeValue = (e) => {
-    setAccountMangerId(e.target.value);
-    setAccountMangerIdErr("");
-  };
-
-  useEffect(() => {
-    if (CustomerType == 1 || CustomerType == 3) {
-      formik.resetForm();
-    }
-    if (CustomerType == 2 || CustomerType == 3) {
-      formik1.resetForm();
-    }
-    if (CustomerType == 1 || CustomerType == 2) {
-      formik2.resetForm();
-    }
-  }, [CustomerType]);
-
-  const ChangeCustomerType = (value) => {
-    if (value == 3) {
-      setContacts([
-        {
-          authorised_signatory_status: true,
-          firstName: "",
-          lastName: "",
-          role: "",
-          phoneNumber: "",
-          email: "",
-          phone_code: "+44",
-        },
-        {
-          authorised_signatory_status: true,
-          firstName: "",
-          lastName: "",
-          role: "",
-          phoneNumber: "",
-          email: "",
-          phone_code: "+44",
-        },
-      ]);
-      setErrors([
-        { firstName: false, lastName: false, role: false, email: false },
-        { firstName: false, lastName: false, role: false, email: false },
-      ]);
-    }
-  };
-
-  const handleChange = (index, field, value) => {
-    const newContacts = [...contacts];
-    newContacts[index][field] = value;
-    setContacts(newContacts);
-    validateField(index, field, value);
-  };
-
-  const validateField = (index, field, value) => {
-    const newErrors = [...errors];
-    switch (field) {
-      case "firstName":
-        newErrors[index].firstName = value ? "" : "First Name is required";
-        break;
-      case "lastName":
-        newErrors[index].lastName = value ? "" : "Last Name is required";
-        break;
-
-      case "email":
-        if (!value) {
-          newErrors[index].email = "Email Id is required";
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          newErrors[index].email = "Valid Email is required";
-        } else {
-          newErrors[index].email = "";
-        }
-        break;
-
-      case "phoneNumber":
-        newErrors[index].phoneNumber =
-          value === ""
-            ? ""
-            : /^\d{9,12}$/.test(value)
-            ? ""
-            : "Phone Number must be between 9 to 12 digits";
-        break;
-      default:
-        break;
-    }
-    setErrors(newErrors);
-  };
-
-  const GetCustomerData = async () => {
-    const req = { customer_id: customer_id, pageStatus: "1" };
-    const data = { req: req, authToken: token };
-    await dispatch(GET_CUSTOMER_DATA(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          const customerDetailsExist = response.data;
-
-          setCustomerType(
-            customerDetailsExist && customerDetailsExist.customer.customer_type
-          );
-          setAccountMangerId(
-            customerDetailsExist &&
-              customerDetailsExist.customer.account_manager_id
-          );
-
-          if (
-            customerDetailsExist &&
-            customerDetailsExist.customer.customer_type == "1"
-          ) {
-            formik1.setFieldValue(
-              "Trading_Name",
-              customerDetailsExist.customer.trading_name
-            );
-            formik1.setFieldValue(
-              "Trading_Address",
-              customerDetailsExist.customer.trading_address
-            );
-            formik1.setFieldValue(
-              "VAT_Registered",
-              customerDetailsExist.customer.vat_registered
-            );
-            formik1.setFieldValue(
-              "VAT_Number",
-              customerDetailsExist.customer.vat_number
-            );
-            formik1.setFieldValue(
-              "Website",
-              customerDetailsExist.customer.website
-            );
-            formik1.setFieldValue(
-              "First_Name",
-              customerDetailsExist.contact_details[0].first_name
-            );
-            formik1.setFieldValue(
-              "Last_Name",
-              customerDetailsExist.contact_details[0].last_name
-            );
-            formik1.setFieldValue(
-              "Phone",
-              customerDetailsExist.contact_details[0].phone
-            );
-            formik1.setFieldValue(
-              "Email",
-              customerDetailsExist.contact_details[0].email
-            );
-            formik1.setFieldValue(
-              "Residential_Address",
-              customerDetailsExist.contact_details[0].residential_address
-            );
-            formik1.setFieldValue(
-              "countryCode",
-              customerDetailsExist.contact_details[0].phone_code
-            );
-          }
-          if (
-            customerDetailsExist &&
-            customerDetailsExist.customer.customer_type == "2"
-          ) {
-            formik.setFieldValue(
-              "company_name",
-              customerDetailsExist.customer.company_name
-            );
-            formik.setFieldValue(
-              "entity_type",
-              customerDetailsExist.customer.entity_type
-            );
-            formik.setFieldValue(
-              "company_status",
-              customerDetailsExist.customer.company_status
-            );
-            formik.setFieldValue(
-              "company_number",
-              customerDetailsExist.customer.company_number
-            );
-            formik.setFieldValue(
-              "Registered_Office_Addres",
-              customerDetailsExist.customer.registered_office_address
-            );
-            formik.setFieldValue(
-              "Incorporation_Date",
-              customerDetailsExist.customer.incorporation_date
-            );
-            formik.setFieldValue(
-              "Incorporation_in",
-              customerDetailsExist.customer.incorporation_in
-            );
-            formik.setFieldValue(
-              "VAT_Registered",
-              customerDetailsExist.customer.vat_registered
-            );
-            formik.setFieldValue(
-              "VAT_Number",
-              customerDetailsExist.customer.vat_number
-            );
-            formik.setFieldValue(
-              "Website",
-              customerDetailsExist.customer.website
-            );
-            formik.setFieldValue(
-              "Trading_Name",
-              customerDetailsExist.customer.trading_name
-            );
-            formik.setFieldValue(
-              "Trading_Address",
-              customerDetailsExist.customer.trading_address
-            );
-            setContacts(
-              customerDetailsExist && customerDetailsExist.contact_details
-            );
-          }
-
-          if (
-            customerDetailsExist &&
-            customerDetailsExist.customer.customer_type == "3"
-          ) {
-            formik2.setFieldValue(
-              "Trading_Name",
-              customerDetailsExist.customer.trading_name
-            );
-            formik2.setFieldValue(
-              "Trading_Address",
-              customerDetailsExist.customer.trading_address
-            );
-            formik2.setFieldValue(
-              "VAT_Registered",
-              customerDetailsExist.customer.vat_registered
-            );
-            formik2.setFieldValue(
-              "VAT_Number",
-              customerDetailsExist.customer.vat_number
-            );
-            formik2.setFieldValue(
-              "Website",
-              customerDetailsExist.customer.website
-            );
-            setContacts(
-              customerDetailsExist && customerDetailsExist.contact_details
-            );
-          }
-
-          setCustomerDetails({
-            loading: false,
-            data: response.data,
-          });
-        } else {
-          setCustomerDetails({
-            loading: false,
-            data: [],
-          });
-        }
-      })
-      .catch((error) => {
-        console.log("Error ", error);
-      });
-  };
-
-  useEffect(() => {
-    if (customer_id != null) {
-      GetCustomerData();
-    }
-  }, []);
-
-  const inputRefs = useRef([]);
-
-  useEffect(() => {
-    for (let i = 0; i < contacts.length; i++) {
-      if (errors[i]?.firstName) {
-        inputRefs.current[i]?.focus();
-        break;
-      }
-    }
-  }, [errors, contacts]);
 
   const capitalizeFirstLetter = (string) => {
     if (!string) return "";
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   };
 
+  const incorporationData = async (req) => {
+    const data = { req: { action: "getAll" }, authToken: token };
+    await dispatch(IncorporationApi(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setIncorporationDataAll(response.data);
+        } else {
+          setIncorporationDataAll([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+
+
+  useEffect(() => {
+    const initializeAutocomplete = () => {
+      const input = document.getElementById("location");
+      const autocomplete = new window.google.maps.places.Autocomplete(input, {
+        types: ["geocode"],
+      });
+
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+        if (place && place.geometry) {
+          setLocation(place.formatted_address);
+          sendPlaceDetailsToApi(place);
+        }
+      });
+    };
+
+    initializeAutocomplete();
+  }, []);
+
+  const sendPlaceDetailsToApi = (place) => {
+    const apiUrl = "https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=AIzaSyAwLuK1P6GQk2WpYZCm0fnp9HmVhNTEeq4";
+
+    const placeDetails = {
+      address: place.formatted_address,
+      latitude: place.geometry.location.lat(),
+      longitude: place.geometry.location.lng(),
+    };
+
+    axios
+      .post(apiUrl, placeDetails)
+      .then((response) => {
+      })
+      .catch((error) => {
+        console.error("Error sending data to API:", error);
+      });
+  };
+
   return (
-    <Formik
-      initialValues={address}
-      onSubmit={(values) => {
-        setAddress(values);
-        next();
-      }}
-    >
-      {({ handleSubmit }) => (
-        <div className="details__wrapper">
-          <div className="bg-blue-light pt-3 px-3 rounded">
-            <div className="row">
-              <div className="col-lg-6">
-                <div className="card card_shadow">
-                  <div className="card-header step-header-blue align-items-center d-flex">
-                    <h4 className="card-title mb-0 flex-grow-1">
-                      Customer Type
-                    </h4>
-                  </div>
-                  <div className="card-body">
-                    <div className="row">
-                      <div className="col-lg-12">
-                        <Field
-                          as="select"
-                          name="customerType"
-                          className="form-select "
-                          onChange={(e) => {
-                            setCustomerType(e.target.value);
-                            ChangeCustomerType(e.target.value);
-                          }}
-                          value={CustomerType}
-                        >
-                          <option value="1">Sole Trader</option>
-                          <option value="2">Company</option>
-                          <option value="3">Partnership</option>
-                        </Field>
+    <>
+      <Formik
+        initialValues={address}
+        onSubmit={(values) => {
+          setAddress(values);
+          handleSubmit(values);
+        }}
+      >
+        {({ handleSubmit }) => (
+          <Form className="details__wrapper">
+            <div className="bg-blue-light pt-3 px-3 rounded">
+              <div className="row">
+                <div className="col-lg-6">
+                  <div className="card card_shadow">
+                    <div className="card-header step-header-blue align-items-center d-flex">
+                      <h4 className="card-title mb-0 flex-grow-1">
+                        Customer Type <span style={{ color: "red" }}>*</span>
+                      </h4>
+                    </div>
+                    <div className="card-body">
+                      <div className="row">
+                        <div className="col-lg-12">
+                          <Field
+                            as="select"
+                            name="customerType"
+                            id="customerType"
+                            className="form-select "
+                            onChange={(e) => setCustomerType(e.target.value)}
+                            value={customerType}
+                          >
+                            <option value="1">Sole Trader</option>
+                            <option value="2">Company</option>
+                            <option value="3">Partnership</option>
+                          </Field>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="col-lg-6">
-                <div className="card card_shadow">
-                  <div className="card-header step-header-blue align-items-center d-flex">
-                    <h4 className="card-title mb-0 flex-grow-1">
-                      Outbooks Account Manager
-                    </h4>
-                  </div>
-                  <div className="card-body">
-                    <div className="row">
-                      <div className="col-lg-12">
-                        <Field
-                          as="select"
-                          name="accountManager"
-                          className="form-select "
-                          onChange={(e) => handleChangeValue(e)}
-                        >
-                          <option value="" selected>
-                            Please select
-                          </option>
-                          {staffDataAll.data.map((data) => (
-                            <option key={data.id} value={data.id}>
-                              {capitalizeFirstLetter(data.first_name) +
-                                " " +
-                                capitalizeFirstLetter(data.last_name)}
-                            </option>
-                          ))}
-                        </Field>
-
-                        {getAccountMangerIdErr && (
-                          <div className="error-text" style={{ color: "red" }}>
-                            {getAccountMangerIdErr && getAccountMangerIdErr}
-                          </div>
-                        )}
+                <div className="col-lg-6">
+                  <div className="card card_shadow">
+                    <div className="card-header step-header-blue align-items-center d-flex">
+                      <h4 className="card-title mb-0 flex-grow-1">
+                        Outbooks Account Manager{" "}
+                        <span style={{ color: "red" }}>*</span>
+                      </h4>
+                    </div>
+                    <div className="card-body">
+                      <div className="row">
+                        <div className="col-lg-12">
+                          <Field
+                            as="select"
+                            name="accountManager"
+                            
+                            className={getAccountMangerIdErr ? "error-field form-select" : "form-select"}
+                            id="accountManager"
+                            onChange={(e) => handleChangeManager(e)}
+                            value={ManagerType}
+                            innerRef={managerSelectRef}
+                          >
+                            <option value="">Select Manager</option>
+                            {staffDataAll &&
+                              staffDataAll.map((data) => (
+                                <option key={data.id} value={data.id}>
+                                  {capitalizeFirstLetter(data.first_name) +
+                                    " " +
+                                    capitalizeFirstLetter(data.last_name)}
+                                </option>
+                              ))}
+                          </Field>
+                          {getAccountMangerIdErr && (
+                            <div
+                              className="error-text"
+                              style={{ color: "red" }}
+                            >
+                              {getAccountMangerIdErr}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <section className="px-3 mt-3">
-            <div className="row" id="form1">
-              {CustomerType == 1 ? (
-                <>
-                  <div className="card card_shadow p-0 ">
-                    <div className="card-header card-header-light-blue  step-card-header align-items-center d-flex">
-                      <h4 className="card-title mb-0 flex-grow-1">
-                        Sole Trader
-                      </h4>
+            <section>
+              {customerType == 1 ? (
+                <div className="row mt-3">
+                  <div className="col-lg-12">
+                    <div className="card card_shadow ">
+                      <div className="card-header card-header-light-blue step-card-header  align-items-center d-flex">
+                        <h4 className="card-title mb-0 flex-grow-1">
+                          Sole Trader
+                        </h4>
+                      </div>
+                      <div className="card-body">
+                        <div className="row">
+                          <div className="col-lg-4">
+                            <div className="mb-3">
+                              <label className="form-label">
+                                Trading Name
+                                <span style={{ color: "red" }}>*</span>
+                              </label>
+                              <input
+                                type="text"
+                                name="tradingName"
+                                id="tradingName"
+                                
+                                className={errors1["tradingName"] ? "error-field form-control" : "form-control"}
+                                placeholder="Trading Name"
+                                onChange={(e) => handleChange1(e)}
+                                value={getSoleTraderDetails.tradingName}
+                                maxLength={100}
+                              />
+
+                              {errors1["tradingName"] && (
+                                <div className="error-text">
+                                  {errors1["tradingName"]}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="col-lg-6">
+                            <div className="mb-3">
+                              <label className="form-label">
+                                Trading Address
+                              </label>
+                              <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Trading Address"
+                                name="tradingAddress"
+                                id="tradingAddress"
+                                onChange={(e) => handleChange1(e)}
+                                value={getSoleTraderDetails.tradingAddress}
+                                maxLength={200}
+                              />
+                            </div>
+                          </div>
+                          <div className="col-lg-4">
+                            <div className="mb-3">
+                              <label className="form-label">
+                                VAT Registered
+                                <span style={{ color: "red" }}>*</span>
+                              </label>
+                              <select
+                                className="form-select "
+                                aria-label="Default select example"
+                                name="vatRegistered"
+                                id="vatRegistered"
+                                value={getSoleTraderDetails.vatRegistered}
+                                onChange={(e) => handleChange1(e)}
+                              >
+                                <option value="">
+                                  Please Select VAT Registered
+                                </option>
+
+                                <option value={1}>Yes</option>
+                                <option value={0}>No</option>
+                              </select>
+                              {errors1["vatRegistered"] && (
+                                <div className="error-text">
+                                  {errors1["vatRegistered"]}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="col-lg-4">
+                            <div className="mb-3">
+                              <label className="form-label">VAT Number</label>
+                              <input
+                                type="text"
+                                className="form-control"
+                                placeholder="VAT Number"
+                                name="vatNumber"
+                                id="vatNumber"
+                                value={getSoleTraderDetails.vatNumber}
+                                onChange={(e) => handleChange1(e)}
+                                maxLength={9}
+                              />
+                            </div>
+                          </div>
+                          <div className="col-lg-4">
+                            <div className="mb-3">
+                              <label className="form-label">Website</label>
+                              <input
+                                type="text"
+                                className="form-control"
+                                placeholder="URL"
+                                name="website"
+                                id="website"
+                                value={getSoleTraderDetails.website}
+                                onChange={(e) => handleChange1(e)}
+                                maxLength={200}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="card-body">
-                      <AddFrom
-                        fieldtype={fields.filter(
-                          (field) =>
-                            !field.showWhen || field.showWhen(formik1.values)
-                        )}
-                        formik={formik1}
-                        btn_name="Next"
-                      />
+                    <div className="card">
+                      <div className="card-header card-header-light-blue step-card-header mb-3 ">
+                        <h4
+                          className="card-title mb-0 flex-grow-1"
+                          style={{ marginBottom: "15px !important" }}
+                        >
+                          Sole Trader Details
+                        </h4>
+                      </div>
+                      <div className="card-body">
+                        <div className="row">
+                          <div className="col-lg-4">
+                            <div className="mb-3">
+                              <label className="form-label">
+                                First Name
+                                <span style={{ color: "red" }}>*</span>
+                              </label>
+                              <input
+                                type="text"
+                               
+                                className={errors1["firstName"] ? "error-field form-control" : "form-control"}
+                                placeholder="First Name"
+                                name="firstName"
+                                id="firstName"
+                                value={getSoleTraderDetails.firstName}
+                                onChange={(e) => handleChange1(e)}
+                                maxLength={50}
+                              />
+                              {errors1["firstName"] && (
+                                <div className="error-text">
+                                  {errors1["firstName"]}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="col-lg-4">
+                            <div className="mb-3">
+                              <label className="form-label">
+                                Last Name<span style={{ color: "red" }}>*</span>
+                              </label>
+                              <input
+                                type="text"
+                               
+                                className={errors1["lastName"] ? "error-field form-control" : "form-control"}
+                                placeholder="Last Name"
+                                name="lastName"
+                                id="lastName"
+                                value={getSoleTraderDetails.lastName}
+                                onChange={(e) => handleChange1(e)}
+                                maxLength={50}
+                              />
+                              {errors1["lastName"] && (
+                                <div className="error-text">
+                                  {errors1["lastName"]}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="col-lg-4 pe-0">
+                            <div className="mb-3">
+                              <label className="form-label">Phone</label>
+                              <div className="row">
+                                <div className="col-md-4">
+                                  <select
+                                    className="form-select"
+                                    onChange={(e) => handleChange1(e)}
+                                    name="phone_code"
+                                    id="phone_code"
+                                    value={getSoleTraderDetails.phone_code}
+                                  >
+                                    {countryDataAll &&
+                                      countryDataAll.map((data) => (
+                                        <option
+                                          key={data.code}
+                                          value={data.code}
+                                        >
+                                          {data.code}
+                                        </option>
+                                      ))}
+                                  </select>
+                                </div>
+                                <div className=" col-md-8 ps-1">
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Phone Number"
+                                    name="phone"
+                                    id="phone"
+                                    value={getSoleTraderDetails.phone}
+                                    onChange={(e) => handleChange1(e)}
+                                    maxLength={12}
+                                  />
+                                  {errors1["phone"] && (
+                                    <div className="error-text">
+                                      {errors1["phone"]}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="col-lg-4">
+                            <div className="mb-3">
+                              <label className="form-label">
+                                Email<span style={{ color: "red" }}>*</span>
+                              </label>
+                              <input
+                                type="text"
+                                
+                                className={errors1["eamil"] ? "error-field form-control" : "form-control"}
+                                placeholder="Enter Email ID"
+                                name="email"
+                                id="email"
+                                value={getSoleTraderDetails.email}
+                                onChange={(e) => handleChange1(e)}
+                              />
+                              {errors1["email"] && (
+                                <div className="error-text">
+                                  {errors1["email"]}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="col-lg-4">
+                            <div className="mb-3">
+                              <label className="form-label">
+                                Residential Address
+                                <span style={{ color: "red" }}>*</span>
+                              </label>
+                              <input
+                                type="text"
+                                
+                                className={errors1["residentialAddress"] ? "error-field form-control" : "form-control"}
+                                placeholder="Residential Address"
+                                name="residentialAddress"
+                                id="residentialAddress"
+                                value={getSoleTraderDetails.residentialAddress}
+                                onChange={(e) => handleChange1(e)}
+                              />
+                              {errors1["residentialAddress"] && (
+                                <div className="error-text">
+                                  {errors1["residentialAddress"]}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div>
+                            <label htmlFor="location">Enter Location:</label>
+                            <input
+                              type="text"
+                              id="location"
+                              className="form-control"
+                              placeholder="Type a location"
+                              value={location} // Use value prop to bind state
+                              onChange={(e) => setLocation(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </>
-              ) : CustomerType == 2 ? (
-                <>
-                  <div className="card card_shadow px-0">
-                    <div className="card-header card-header-light-blue  mb-3 step-card-header align-items-center d-flex">
-                      <h4 className="card-title mb-0 flex-grow-1">
-                        Company Information
-                      </h4>
-                    </div>
-                    <div className="card-body">
-                      <AddFrom
-                        fieldtype={fields1.filter(
-                          (field) =>
-                            !field.showWhen || field.showWhen(formik.values)
-                        )}
-                        formik={formik}
-                        btn_name="Next"
-                        additional_field={
-                          <section className="w-100">
-                            <div className="" id="form2">
-                              <div className="row">
-                                <div className="col-lg-12 px-0">
-                                  <div className="card-header card-header-light-blue step-card-header align-items-center d-flex">
-                                    <h4 className="card-title mb-0 flex-grow-1">
-                                      Contact Details
-                                    </h4>
-                                  </div>
+                </div>
+              ) : customerType == 2 ? (
+                <div className="row mt-3">
+                  <div className="col-lg-12">
+                    <div className="card card_shadow ">
+                      <div className="card-header card-header-light-blue  step-card-header align-items-center d-flex">
+                        <h4 className="card-title mb-0 flex-grow-1">
+                          Company Information
+                        </h4>
+                      </div>
+                      {/* end card header */}
+                      <div className="card-body">
+                        <div className="row">
+                          <div className="row">
+                            <div className="col-lg-4">
+                              <div className="mb-3">
+                                <div className="position-relative">
+                                  <label className="form-label">
+                                    Search Company
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder=" Search Company"
+                                    name="SearchCompany"
+                                    onChange={(e) =>
+                                      setSearchItem(e.target.value)
+                                    }
+                                    value={searchItem}
+                                    onClick={() => setShowDropdown(true)}
+                                    style={{ cursor: "pointer" }}
+                                  />
+                                  {getAllSearchCompany.length > 0 &&
+                                    showDropdown ? (
+                                    <div className="dropdown-list">
+                                      {getAllSearchCompany &&
+                                        getAllSearchCompany.map(
+                                          (company, index) => (
+                                            <div
+                                              key={index}
+                                              onClick={() => {
+                                                setSearchItem(company.title);
+                                                setShowDropdown(false);
+                                              }}
+                                              style={{
+                                                cursor: "pointer",
+                                                padding: "8px 0",
+                                              }}
+                                            >
+                                              {company.title}
+                                            </div>
+                                          )
+                                        )}
+                                    </div>
+                                  ) : (
+                                    ""
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="col-lg-4">
+                              <div className="mb-3">
+                                <label className="form-label">
+                                  Company Name
+                                  <span style={{ color: "red" }}>*</span>{" "}
+                                </label>
+                                <input
+                                  type="text"
+                                  // className="form-control input_bg"
+                                  className={errors2["CompanyName"] ? "error-field form-control" : "form-control"}
 
-                                  <div className="row card-body">
-                                    {contacts.map((contact, index) => (
-                                      <div
-                                        className="col-xl-12 col-lg-12 mt-3"
-                                        key={index}
-                                      >
-                                        <div className=" pricing-box  m-2 mt-0">
-                                          <div className="row">
-                                            {index !== 0 && (
-                                              <div className="col-lg-12">
-                                                <div className="form-check mb-3 d-flex justify-content-end">
-                                                  <button
-                                                    className="btn btn-danger"
-                                                    onClick={() =>
-                                                      handleDeleteContact(index)
-                                                    }
-                                                    disabled={
-                                                      contacts.length === 1
-                                                    }
-                                                  >
-                                                    Delete
-                                                  </button>
+                                  placeholder="Enter Company Name"
+                                  name="CompanyName"
+                                  id="CompanyName"
+                                  onChange={(e) => handleChange2(e)}
+                                  defaultValue={getCompanyDetails.CompanyName}
+                                />
+                                {errors2["CompanyName"] && (
+                                  <div className="error-text">
+                                    {errors2["CompanyName"]}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="col-lg-4">
+                              <div className="mb-3">
+                                <label className="form-label">
+                                  Entity Type
+                                  <span style={{ color: "red" }}>*</span>{" "}
+                                </label>
+                                <input
+                                  type="text"
+                                  
+                                  className={errors2["EntityType"]  ? "error-field form-control" : "form-control"}
+
+                                  placeholder="Enter Entity Type"
+                                  name="EntityType"
+                                  id="EntityType"
+                                  onChange={(e) => handleChange2(e)}
+                                  value={getCompanyDetails.EntityType}
+                                />
+                                {errors2["EntityType"] && (
+                                  <div className="error-text">
+                                    {errors2["EntityType"]}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="col-lg-4">
+                              <div className="mb-3">
+                                <label className="form-label">
+                                  Company Status
+                                  <span style={{ color: "red" }}>*</span>{" "}
+                                </label>
+                                <input
+                                  type="text"
+                                  className={errors2["CompanyStatus"]  ? "error-field form-control" : "form-control"}
+
+                                  placeholder="Enter Company Status"
+                                  name="CompanyStatus"
+                                  id="CompanyStatus"
+                                  onChange={(e) => handleChange2(e)}
+                                  value={getCompanyDetails.CompanyStatus}
+                                />
+                                {errors2["CompanyStatus"] && (
+                                  <div className="error-text">
+                                    {errors2["CompanyStatus"]}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="col-lg-4">
+                              <div className="mb-3">
+                                <label className="form-label">
+                                  Company Number
+                                  <span style={{ color: "red" }}>*</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  id="CompanyNumber"
+                                  className={errors2["CompanyNumber"] ? "error-field form-control" : "form-control"}
+
+                                  placeholder="Enter Company Number"
+                                  name="CompanyNumber"
+                                  onChange={(e) => handleChange2(e)}
+                                  value={getCompanyDetails.CompanyNumber}
+                                />
+                                {errors2["CompanyNumber"] && (
+                                  <div className="error-text">
+                                    {errors2["CompanyNumber"]}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="col-lg-4">
+                              <div className="mb-3">
+                                <label className="form-label">
+                                  Incorporation Date
+                                </label>
+
+                                <input
+                                  type="text"
+                                  className={errors2["IncorporationDate"] ? "error-field form-control" : "form-control"}
+
+                                  placeholder="Enter Incorporation Date"
+                                  name="IncorporationDate"
+                                  id="IncorporationDate"
+                                  onChange={(e) => handleChange2(e)}
+                                  value={getCompanyDetails.IncorporationDate}
+                                />
+                                {errors2["IncorporationDate"] && (
+                                  <div className="error-text">
+                                    {errors2["IncorporationDate"]}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="col-lg-4">
+                              <div className="mb-3">
+                                <label className="form-label">
+                                  {" "}
+                                  Incorporation in{" "}
+                                  <span style={{ color: "red" }}>*</span>{" "}
+                                </label>
+                                {/* <input
+                                  type="text"
+                                  className="form-control input_bg"
+                                  placeholder={EDIT_CUSTOMER.INCORPORATION_IN}
+                                  name="IncorporationIn"
+                                  id="IncorporationIn"
+                                  onChange={(e) => handleChange2(e)}
+                                  value={getCompanyDetails.IncorporationIn}
+                                /> */}
+
+                                <select
+                                 
+                                  className={errors2["IncorporationIn"] ? "error-field form-select" : "form-select"}
+
+                                  name="IncorporationIn"
+                                  id="IncorporationIn"
+                                  onChange={(e) => handleChange2(e)}
+                                  value={getCompanyDetails.IncorporationIn}
+                                >
+                                  <option value="">
+                                    Please Select Incorporation In
+                                  </option>
+                                  {incorporationDataAll &&
+                                    incorporationDataAll.map((data) => (
+                                      <option key={data.id} value={data.id}>
+                                        {data.name}
+                                      </option>
+                                    ))}
+                                </select>
+
+                                {errors2["IncorporationIn"] && (
+                                  <div className="error-text">
+                                    {errors2["IncorporationIn"]}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="col-lg-8">
+                              <div className="mb-3">
+                                <label className="form-label">
+                                  Registered Office Address
+                                  <span style={{ color: "red" }}>*</span>{" "}
+                                </label>
+                                <input
+                                  type="text"
+                                  className={errors2["RegisteredOfficeAddress"] ? "error-field form-control" : "form-control"}
+                                  placeholder="Suite Winsor & Netwon Building, White Fridrs Avenue, England,HA3 5RN"
+                                  name="RegisteredOfficeAddress"
+                                  id="RegisteredOfficeAddress"
+                                  onChange={(e) => handleChange2(e)}
+                                  value={
+                                    getCompanyDetails.RegisteredOfficeAddress
+                                  }
+                                />
+                                {errors2["RegisteredOfficeAddress"] && (
+                                  <div className="error-text">
+                                    {errors2["RegisteredOfficeAddress"]}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="col-lg-4">
+                              <div className="mb-3">
+                                <label className="form-label">
+                                  VAT Registered
+                                </label>
+                                <select
+                                  className="form-select "
+                                  name="VATRegistered"
+                                  id="VATRegistered"
+                                  onChange={(e) => handleChange2(e)}
+                                  value={getCompanyDetails.VATRegistered}
+                                >
+                                  <option value="">
+                                    Please Select VAT Registered
+                                  </option>
+                                  <option value={1}>Yes</option>
+                                  <option value={0}>No</option>
+                                </select>
+                                {errors2["VATRegistered"] && (
+                                  <div className="error-text">
+                                    {errors2["VATRegistered"]}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="col-lg-4">
+                              <div className="mb-3">
+                                <div className="mb-3">
+                                  <label className="form-label">
+                                    VAT Number
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="form-control "
+                                    placeholder="VAT Number"
+                                    name="VATNumber"
+                                    id="VATNumber"
+                                    onChange={(e) => handleChange2(e)}
+                                    value={getCompanyDetails.VATNumber}
+                                    maxLength={9}
+                                  />
+                                  {errors2["VATNumber"] && (
+                                    <div className="error-text">
+                                      {errors2["VATNumber"]}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="col-lg-4">
+                              <div className="mb-3">
+                                <label className="form-label">Website</label>
+                                <input
+                                  type="text"
+                                  className="form-control "
+                                  placeholder="URL"
+                                  name="Website"
+                                  id="Website"
+                                  onChange={(e) => handleChange2(e)}
+                                  value={getCompanyDetails.Website}
+                                  maxLength={200}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-lg-12">
+                    <div className="card card_shadow ">
+                      <div className="card-header step-card-header card-header-light-blue ">
+                        <h4 className="card-title">Trading Details</h4>
+                      </div>
+                      {/* end card header */}
+                      <div className="card-body">
+                        <div className="row">
+                          <div className="col-lg-5">
+                            <div className="mb-3">
+                              <label className="form-label">
+                                Trading Name
+                                <span style={{ color: "red" }}>*</span>
+                              </label>
+                              <input
+                                type="text"
+                                className={errors2["TradingName"] ? "error-field form-control" : "form-control"}
+                                placeholder="Trading Name"
+                                name="TradingName"
+                                id="TradingName"
+                                onChange={(e) => handleChange2(e)}
+                                value={getCompanyDetails.TradingName}
+                              />
+                              {errors2["TradingName"] && (
+                                <div className="error-text">
+                                  {errors2["TradingName"]}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="col-lg-7">
+                            <div className="mb-3">
+                              <label className="form-label">
+                                Trading Address
+                                <span style={{ color: "red" }}>*</span>{" "}
+                              </label>
+                              <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Trading Address"
+                                name="TradingAddress"
+                                id="TradingAddress"
+                                onChange={(e) => handleChange2(e)}
+                                value={getCompanyDetails.TradingAddress}
+                              />
+                              {errors2["TradingAddress"] && (
+                                <div className="error-text">
+                                  {errors2["TradingAddress"]}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-lg-12">
+                      <div className="card card_shadow">
+                        <div className="card-header step-card-header card-header-light-blue   align-items-center d-flex">
+                          <h4 className="card-title mb-0 flex-grow-1">
+                            Officer Details
+                          </h4>
+                        </div>
+                        <div className="row">
+                          <div className="card-body">
+                            <div className="row">
+                              {contacts &&
+                                contacts.length > 0 &&
+                                contacts.map((contact, index) => (
+                                  <div
+                                    className="col-xl-12 col-lg-12 mt-3"
+                                    key={index}
+                                  >
+                                    <div className=" pricing-box px-2 m-2 mt-0">
+                                      <div className="row">
+                                        {index !== 0 && (
+                                          <div className="col-lg-12">
+                                            <div className="form-check mb-3 d-flex justify-content-end">
+                                              <button
+                                                className="delete-icon "
+                                                onClick={() =>
+                                                  handleDeleteContact(index)
+                                                }
+                                                disabled={contacts.length === 1}
+                                              >
+                                                <i className="ti-trash text-danger "></i>
+                                              </button>
+                                            </div>
+                                          </div>
+                                        )}
+                                        <div className="col-lg-4">
+                                          <div className="mb-3">
+                                            <label
+                                              htmlFor={`firstName-${index}`}
+                                              className="form-label"
+                                            >
+                                              First Name
+                                              <span style={{ color: "red" }}>
+                                                *
+                                              </span>
+                                            </label>
+                                            <input
+                                              type="text"
+                                              className={errors[index].firstName ? "error-field form-control" : "form-control"}
+                                              placeholder="First Name"
+                                              id={`firstName-${index}`}
+                                              value={contact.firstName}
+                                              onChange={(e) =>
+                                                handleChange(
+                                                  index,
+                                                  "firstName",
+                                                  e.target.value
+                                                )
+                                              }
+                                            />
+                                            {errors[index] &&
+                                              errors[index].firstName && (
+                                                <div
+                                                  className="error-text"
+                                                  style={{ color: "red" }}
+                                                >
+                                                  {errors[index].firstName}
                                                 </div>
-                                              </div>
-                                            )}
-                                            <div className="col-lg-4 ps-1">
-                                              <div className="mb-3">
-                                                <label
-                                                  htmlFor={`firstName-${index}`}
-                                                  className="form-label"
+                                              )}
+                                          </div>
+                                        </div>
+                                        <div className="col-lg-4">
+                                          <div className="mb-3">
+                                            <label
+                                              htmlFor={`lastName-${index}`}
+                                              className="form-label"
+                                            >
+                                              Last Name
+                                              <span style={{ color: "red" }}>
+                                                *
+                                              </span>
+                                            </label>
+                                            <input
+                                              type="text"
+                                              className={ errors[index].lastName ? "error-field form-control" : "form-control"}
+                                              placeholder="Last Name"
+                                              id={`lastName-${index}`}
+                                              value={contact.lastName}
+                                              onChange={(e) =>
+                                                handleChange(
+                                                  index,
+                                                  "lastName",
+                                                  e.target.value
+                                                )
+                                              }
+                                            />
+                                            {errors[index] &&
+                                              errors[index].lastName && (
+                                                <div
+                                                  className="error-text"
+                                                  style={{ color: "red" }}
                                                 >
-                                                  First Name
-                                                  <span
-                                                    style={{
-                                                      color: "red",
-                                                    }}
-                                                  >
-                                                    {" "}
-                                                    *{" "}
-                                                  </span>
-                                                </label>
-                                                <input
-                                                  type="text"
-                                                  className="form-control"
-                                                  placeholder="First Name"
-                                                  id={`firstName-${index}`}
-                                                  value={contact.firstName}
-                                                  onChange={(e) =>
-                                                    handleChange(
-                                                      index,
-                                                      "firstName",
-                                                      e.target.value
-                                                    )
-                                                  }
-                                                />
-                                                {errors[index].firstName && (
-                                                  <div className="error-text">
-                                                    {errors[index].firstName}
-                                                  </div>
+                                                  {errors[index].lastName}
+                                                </div>
+                                              )}
+                                          </div>
+                                        </div>
+
+                                        <div className="col-lg-4">
+                                          <div className="mb-3">
+                                            <label className="form-label">
+                                              Role
+                                              <span style={{ color: "red" }}>
+                                                *
+                                              </span>
+                                            </label>
+                                            <select
+                                              className="form-select"
+                                              id={`role-${index}`}
+                                              value={contact.role}
+                                              onChange={(e) =>
+                                                handleChange(
+                                                  index,
+                                                  "role",
+                                                  e.target.value
+                                                )
+                                              }
+                                            >
+                                              <option value="">
+                                                Select Role
+                                              </option>
+                                              {personRoleDataAll &&
+                                                personRoleDataAll.map(
+                                                  (item) => (
+                                                    <option
+                                                      value={item.id}
+                                                      key={item.id}
+                                                    >
+                                                      {item.name}
+                                                    </option>
+                                                  )
                                                 )}
-                                              </div>
-                                            </div>
-                                            <div className="col-lg-4">
-                                              <div className="mb-3">
-                                                <label
-                                                  htmlFor={`lastName-${index}`}
-                                                  className="form-label"
+                                            </select>
+                                            {errors[index] &&
+                                              errors[index].role && (
+                                                <div
+                                                  className="error-text"
+                                                  style={{ color: "red" }}
                                                 >
-                                                  Last Name
-                                                  <span
-                                                    style={{
-                                                      color: "red",
-                                                    }}
-                                                  >
-                                                    *
-                                                  </span>
-                                                </label>
-                                                <input
-                                                  type="text"
-                                                  className="form-control"
-                                                  placeholder="Last Name"
-                                                  id={`lastName-${index}`}
-                                                  value={contact.lastName}
-                                                  onChange={(e) =>
-                                                    handleChange(
-                                                      index,
-                                                      "lastName",
-                                                      e.target.value
-                                                    )
-                                                  }
-                                                />
-                                                {errors[index].lastName && (
-                                                  <div className="error-text">
-                                                    {errors[index].lastName}
-                                                  </div>
-                                                )}
-                                              </div>
-                                            </div>
-                                            <div className="col-lg-4">
-                                              <div className="mb-3">
-                                                <label
-                                                  htmlFor={`role-${index}`}
-                                                  className="form-label"
-                                                >
-                                                  Role
-                                                  <span
-                                                    style={{
-                                                      color: "red",
-                                                    }}
-                                                  >
-                                                    *
-                                                  </span>
-                                                </label>
+                                                  {errors[index].role}
+                                                </div>
+                                              )}
+                                          </div>
+                                        </div>
+
+                                        <div className="col-lg-4 pe-0">
+                                          <div className="mb-3">
+                                            <label className="form-label">
+                                              Phone
+                                            </label>
+                                            <div className="row">
+                                              <div className="col-md-4 pe-0">
                                                 <select
                                                   className="form-select"
-                                                  id={`role-${index}`}
-                                                  value={contact.role}
                                                   onChange={(e) =>
                                                     handleChange(
                                                       index,
-                                                      "role",
+                                                      "phone_code",
                                                       e.target.value
                                                     )
                                                   }
+                                                  name="phone_code"
+                                                  value={contact.phone_code}
                                                 >
-                                                  <option value="">
-                                                    Select Role
-                                                  </option>
-                                                  {personRoleDataAll &&
-                                                    personRoleDataAll.data.map(
-                                                      (item, i) => (
+                                                  {countryDataAll &&
+                                                    countryDataAll.map(
+                                                      (data) => (
                                                         <option
-                                                          value={item.id}
-                                                          key={i}
+                                                          key={data.code}
+                                                          value={data.code}
                                                         >
-                                                          {item.name}
+                                                          {data.code}
                                                         </option>
                                                       )
                                                     )}
                                                 </select>
-                                                {errors[index].role && (
-                                                  <div className="error-text">
-                                                    {errors[index].role}
-                                                  </div>
-                                                )}
                                               </div>
-                                            </div>
-
-                                            <div className="col-lg-4">
-                                              <label className="form-label">
-                                                Phone
-                                              </label>
-                                              <div className="mb-3">
-                                                <div className="row">
-                                                  <div className="col-md-4 pe-0">
-                                                    <select
-                                                      className="form-select"
-                                                      onChange={(e) =>
-                                                        handleChange(
-                                                          index,
-                                                          "phone_code",
-                                                          e.target.value
-                                                        )
-                                                      }
-                                                      name="phone_code"
-                                                      value={contact.phone_code}
-                                                    >
-                                                      {countryDataAll.data.map(
-                                                        (data) => (
-                                                          <option
-                                                            key={data.code}
-                                                            value={data.code}
-                                                          >
-                                                            {data.code}
-                                                          </option>
-                                                        )
-                                                      )}
-                                                    </select>
-                                                  </div>
-                                                  <div className="mb-3 col-md-8 ps-1">
-                                                    <input
-                                                      type="text"
-                                                      className="form-control"
-                                                      placeholder="Phone Number"
-                                                      name="phone"
-                                                      id={`phone-${index}`}
-                                                      value={
-                                                        contact.phoneNumber
-                                                      }
-                                                      onChange={(e) =>
-                                                        handleChange(
-                                                          index,
-                                                          "phoneNumber",
-                                                          e.target.value
-                                                        )
-                                                      }
-                                                      maxLength={12}
-                                                      minLength={9}
-                                                    />
-                                                    {errors[index]
-                                                      .phoneNumber && (
-                                                      <div className="error-text">
-                                                        {
-                                                          errors[index]
-                                                            .phoneNumber
-                                                        }
-                                                      </div>
-                                                    )}
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </div>
-                                            <div className="col-lg-4 ">
-                                              <div className="mb-3">
-                                                <label
-                                                  htmlFor={`email-${index}`}
-                                                  className="form-label"
-                                                >
-                                                  Email
-                                                  <span
-                                                    style={{
-                                                      color: "red",
-                                                    }}
-                                                  >
-                                                    *
-                                                  </span>
-                                                </label>
+                                              <div className="mb-3 col-md-8 ps-1">
                                                 <input
                                                   type="text"
                                                   className="form-control"
-                                                  placeholder="Email"
-                                                  id={`email-${index}`}
-                                                  value={contact.email}
+                                                  placeholder="Phone Number"
+                                                  name="phoneNumber"
+                                                  id={`phoneNumber-${index}`}
+                                                  value={contact.phoneNumber}
                                                   onChange={(e) =>
                                                     handleChange(
                                                       index,
-                                                      "email",
+                                                      "phoneNumber",
                                                       e.target.value
                                                     )
                                                   }
+                                                  maxLength={12}
+                                                  minLength={9}
                                                 />
-                                                {errors[index].email && (
-                                                  <div className="error-text">
-                                                    {errors[index].email}
+                                                {errors[index] &&
+                                                  errors[index].phoneNumber && (
+                                                    <div className="error-text">
+                                                      {
+                                                        errors[index]
+                                                          .phoneNumber
+                                                      }
+                                                    </div>
+                                                  )}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div className="col-lg-4">
+                                          <div className="mb-3">
+                                            <label
+                                              htmlFor={`email-${index}`}
+                                              className="form-label"
+                                            >
+                                              Email
+                                              <span style={{ color: "red" }}>
+                                                *
+                                              </span>
+                                            </label>
+                                            <input
+                                              type="text"
+                                              className={errors[index].email ? "error-field form-control" : "form-control"}
+
+                                              placeholder="Email"
+                                              id={`email-${index}`}
+                                              value={contact.email}
+                                              onChange={(e) =>
+                                                handleChange(
+                                                  index,
+                                                  "email",
+                                                  e.target.value
+                                                )
+                                              }
+                                            />
+                                            {errors[index] &&
+                                              errors[index].email && (
+                                                <div
+                                                  className="error-text"
+                                                  style={{ color: "red" }}
+                                                >
+                                                  {errors[index].email}
+                                                </div>
+                                              )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              <div className="px-4 d-flex align-items-center">
+                                <h5 className="card-title mb-0 flex-grow-1"></h5>
+                                <button
+                                  className="btn btn-info text-white blue-btn"
+                                  onClick={handleAddContact}
+                                >
+                                  <i className="fa fa-plus pe-1"></i> Add
+                                  Contact
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>{" "}
+                    {/* end col */}
+                  </div>
+                </div>
+              ) : customerType == 3 ? (
+                <div className="row mt-3">
+                  <div className="col-lg-12">
+                    <div className="card card_shadow ">
+                      <div className=" card-header card-header-light-blue step-card-header align-items-center d-flex">
+                        <h4 className="card-title mb-0 flex-grow-1">
+                          Partnership
+                        </h4>
+                      </div>
+                      <div className="card-body">
+                        <div className="row">
+                          <div className="col-lg-4">
+                            <div className="mb-3">
+                              <label className="form-label">
+                                Trading Name
+                                <span style={{ color: "red" }}>*</span>
+                              </label>
+                              <input
+                                type="text"
+                                className={errors3["TradingName"] ? "error-field form-control" : "form-control"}
+
+                                placeholder="Trading Name"
+                                name="TradingName"
+                                id="TradingName"
+                                value={getPartnershipDetails.TradingName}
+                                onChange={(e) => handleChange3(e)}
+                                maxLength={100}
+                                ref={(el) => (refs.current["TradingName"] = el)}
+                              />
+                              {errors3["TradingName"] && (
+                                <div className="error-text">
+                                  {errors3["TradingName"]}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="col-lg-4">
+                            <div className="mb-3">
+                              <label className="form-label">
+                                Trading Address
+                                <span style={{ color: "red" }}>*</span>{" "}
+                              </label>
+                              <input
+                                type="text"
+                                className={errors3["TradingAddress"] ? "error-field form-control" : "form-control"}
+
+                                placeholder="Trading Address"
+                                name="TradingAddress"
+                                id="TradingAddress"
+                                value={getPartnershipDetails.TradingAddress}
+                                onChange={(e) => handleChange3(e)}
+                                maxLength={200}
+                              />
+                              {errors3["TradingAddress"] && (
+                                <div className="error-text">
+                                  {errors3["TradingAddress"]}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="col-lg-4">
+                            <div className="mb-3">
+                              <div className="mb-3">
+                                <label className="form-label">
+                                  VAT Registered
+                                  <span style={{ color: "red" }}>*</span>
+                                </label>
+                                <select
+                                  className="form-select "
+                                  name="VATRegistered"
+                                  id="VATRegistered"
+                                  value={getPartnershipDetails.VATRegistered}
+                                  onChange={(e) => handleChange3(e)}
+                                >
+                                  <option value="">
+                                    Select VAT Registered
+                                  </option>
+                                  <option value={1}>Yes</option>
+                                  <option value={0}>No</option>
+                                </select>
+                                {errors3["VATRegistered"] && (
+                                  <div className="error-text">
+                                    {errors3["VATRegistered"]}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-lg-4">
+                            <div className="mb-3">
+                              <div className="mb-3">
+                                <label className="form-label">
+                                  {" "}
+                                  VAT Number
+                                </label>
+                                <input
+                                  type="text"
+                                  className="form-control "
+                                  placeholder="VAT Number"
+                                  name="VATNumber"
+                                  id="VATNumber"
+                                  value={getPartnershipDetails.VATNumber}
+                                  onChange={(e) => handleChange3(e)}
+                                  maxLength={9}
+                                />
+                                {errors3["VATNumber"] && (
+                                  <div className="error-text">
+                                    {errors3["VATNumber"]}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-lg-4">
+                            <div className="mb-3">
+                              <label className="form-label">Website</label>
+                              <input
+                                type="text"
+                                className="form-control "
+                                placeholder="URL"
+                                name="Website"
+                                id="Website"
+                                value={getPartnershipDetails.Website}
+                                onChange={(e) => handleChange3(e)}
+                                maxLength={200}
+                              />
+
+                              {errors3["Website"] && (
+                                <div className="error-text">
+                                  {errors3["Website"]}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-lg-12">
+                      <div className="card card_shadow">
+                        <div className=" card-header card-header-light-blue step-card-header align-items-center d-flex">
+                          <h4 className="card-title mb-0 flex-grow-1">
+                            Contact Details
+                          </h4>
+                        </div>
+                        <div className="card-body">
+                          <div className="row">
+                            {contacts1 &&
+                              contacts1.map((contact, index) => (
+                                <div
+                                  className="col-xxl-12 col-lg-12"
+                                  key={contact.contact_id}
+                                >
+                                  <div className="card pricing-box p-4 m-2 mt-0">
+                                    <div className="row">
+                                      <div className="col-lg-12">
+                                        <div
+                                          className=" form-switch-md mb-3 d-flex justify-content-between"
+                                          dir="ltr"
+                                        >
+                                          <div>
+                                            <label className="form-check-label fw-bold fs-16">
+                                              Partner {index + 1}
+                                            </label>
+                                          </div>
+                                          {index !== 0 && index !== 1 && (
+                                            <div>
+                                              <button
+                                                className="delete-icon "
+                                                type="button"
+                                                onClick={() =>
+                                                  handleDeleteContact1(index)
+                                                }
+                                                disabled={
+                                                  contacts1.length === 1
+                                                }
+                                              >
+                                                <i className="ti-trash text-danger"></i>
+                                              </button>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <label className="form-label">
+                                            First Name
+                                            <span style={{ color: "red" }}>
+                                              *
+                                            </span>
+                                          </label>
+                                          <input
+                                            type="text"
+                                            className={contactsErrors[index].firstName ? "error-field form-control" : "form-control"}
+
+                                            placeholder="First Name"
+                                            name="firstName"
+                                            id={`firstName-${index}`}
+                                            value={contact.firstName}
+                                            onChange={(e) =>
+                                              handleChange4(
+                                                index,
+                                                "firstName",
+                                                e.target.value
+                                              )
+                                            }
+                                          />
+                                          {contactsErrors[index]?.firstName && (
+                                            <div
+                                              className="error-text"
+                                              style={{ color: "red" }}
+                                            >
+                                              {contactsErrors[index].firstName}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <label className="form-label">
+                                            Last Name
+                                            <span style={{ color: "red" }}>
+                                              *
+                                            </span>
+                                          </label>
+                                          <input
+                                            type="text"
+                                            className={contactsErrors[index].lastName ? "error-field form-control" : "form-control"}
+
+                                            placeholder="Last Name"
+                                            name="last_name"
+                                            id={`lastName-${index}`}
+                                            value={contact.lastName}
+                                            onChange={(e) =>
+                                              handleChange4(
+                                                index,
+                                                "lastName",
+                                                e.target.value
+                                              )
+                                            }
+                                          />
+                                          {contactsErrors[index]?.lastName && (
+                                            <div
+                                              className="error-text"
+                                              style={{ color: "red" }}
+                                            >
+                                              {contactsErrors[index].lastName}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <label className="form-label">
+                                            Role
+                                            <span style={{ color: "red" }}>
+                                              *
+                                            </span>
+                                          </label>
+                                          <select
+                                            className="form-select"
+                                            id={`role-${index}`}
+                                            value={contact.role}
+                                            onChange={(e) =>
+                                              handleChange4(
+                                                index,
+                                                "role",
+                                                e.target.value
+                                              )
+                                            }
+                                          >
+                                            <option value="">
+                                              Select Role
+                                            </option>
+                                            {personRoleDataAll &&
+                                              personRoleDataAll.map(
+                                                (item, i) => (
+                                                  <option
+                                                    value={item.id}
+                                                    key={i}
+                                                  >
+                                                    {item.name}
+                                                  </option>
+                                                )
+                                              )}
+                                          </select>
+                                          {contactsErrors[index]?.role && (
+                                            <div
+                                              className="error-text"
+                                              style={{ color: "red" }}
+                                            >
+                                              {contactsErrors[index].role}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+
+                                      <div className="col-lg-4 pe-1">
+                                        <div className="mb-3">
+                                          <label className="form-label">
+                                            Phone
+                                          </label>
+                                          <div className="row">
+                                            <div className="col-md-4">
+                                              <select
+                                                className="form-select"
+                                                onChange={(e) =>
+                                                  handleChange4(
+                                                    index,
+                                                    "phone_code",
+                                                    e.target.value
+                                                  )
+                                                }
+                                                name="phone_code"
+                                                id={`phone_code-${index}`}
+                                                value={contact.phone_code}
+                                              >
+                                                {countryDataAll &&
+                                                  countryDataAll.map((data) => (
+                                                    <option
+                                                      key={data.code}
+                                                      value={data.code}
+                                                    >
+                                                      {data.code}
+                                                    </option>
+                                                  ))}
+                                              </select>
+                                            </div>
+                                            <div className="mb-3 col-md-8 ps-0">
+                                              <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="Phone Number"
+                                                name="phoneNumber"
+                                                id={`phoneNumber-${index}`}
+                                                value={contact.phoneNumber}
+                                                onChange={(e) =>
+                                                  handleChange4(
+                                                    index,
+                                                    "phoneNumber",
+                                                    e.target.value
+                                                  )
+                                                }
+                                                maxLength={12}
+                                                minLength={9}
+                                              />
+                                              {contactsErrors[index]
+                                                ?.phoneNumber && (
+                                                  <div
+                                                    className="error-text"
+                                                    style={{ color: "red" }}
+                                                  >
+                                                    {
+                                                      contactsErrors[index]
+                                                        .phoneNumber
+                                                    }
                                                   </div>
                                                 )}
-                                              </div>
                                             </div>
                                           </div>
                                         </div>
                                       </div>
-                                    ))}
-                                    <div className="card-header d-flex align-items-center">
-                                      <h5 className="card-title mb-0 flex-grow-1"></h5>
-                                      <button
-                                        className="btn btn-info text-white blue-btn"
-                                        onClick={handleAddContact}
-                                      >
-                                        Add Contact
-                                      </button>
+                                      <div className="col-lg-4">
+                                        <div className="mb-3">
+                                          <label className="form-label">
+                                            Email
+                                            <span style={{ color: "red" }}>
+                                              *
+                                            </span>
+                                          </label>
+                                          <input
+                                            type="text"
+                                            className={contactsErrors[index]?.email ? "error-field form-control" : "form-control"}
+
+                                            placeholder="Enter Email"
+                                            name="email"
+                                            id={`email-${index}`}
+                                            value={contact.email}
+                                            onChange={(e) =>
+                                              handleChange4(
+                                                index,
+                                                "email",
+                                                e.target.value
+                                              )
+                                            }
+                                          />
+                                          {contactsErrors[index]?.email && (
+                                            <div
+                                              className="error-text"
+                                              style={{ color: "red" }}
+                                            >
+                                              {contactsErrors[index].email}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
+                              ))}
+
+                            <div className="px-4 d-flex align-items-center">
+                              <h5 className="card-title mb-0 flex-grow-1"></h5>
+                              <div>
+                                <button
+                                  className="btn btn-info text-white blue-btn"
+                                  onClick={handleAddContact1}
+                                >
+                                  <i className="fa fa-plus pe-2"></i>Add Partner
+                                </button>
                               </div>
                             </div>
-                          </section>
-                        }
-                      />
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </>
-              ) : CustomerType == 3 ? (
-                <>
-                  <div className="card card-shadow px-0 ">
-                    <div className="card-header mb-3 card-header-light-blue step-card-header align-items-center d-flex">
-                      <h4 className="card-title mb-0 flex-grow-1">
-                        Partnership Information
-                      </h4>
-                    </div>
-                    <div className="card-body">
-                      <AddFrom
-                        fieldtype={fields3.filter(
-                          (field) =>
-                            !field.showWhen || field.showWhen(formik2.values)
-                        )}
-                        formik={formik2}
-                        btn_name="Next"
-                        additional_field={
-                          <section>
-                            <div className="mt-2" id="form2">
-                              <div className="row">
-                                <div className="col-lg-12 px-0">
-                                  <div className="">
-                                    <div className="card-header card-header-light-blue step-card-header step-card-header align-items-center d-flex">
-                                      <h4 className="card-title mb-0 flex-grow-1">
-                                        Contact Details
-                                      </h4>
-                                    </div>
-                                    <div className="card-body">
-                                      <form onSubmit={handleSubmit}>
-                                        <div className="row">
-                                          {contacts.map((contact, index) => (
-                                            <div
-                                              className="col-xl-12 col-lg-12 mt-3"
-                                              key={index}
-                                            >
-                                              <div className="card pricing-box p-4 m-2 mt-0">
-                                                <div className="row">
-                                                  <div className="col-lg-12">
-                                                    <div
-                                                      className="form-switch-md mb-3 d-flex justify-content-between"
-                                                      dir="ltr"
-                                                    >
-                                                      <div>
-                                                        <label
-                                                          className="form-check-label fs-16"
-                                                          htmlFor={`customSwitchsizemd-${index}`}
-                                                        >
-                                                          {" "}
-                                                          Partner {index + 1}
-                                                        </label>
-                                                      </div>
-                                                      {index !== 0 &&
-                                                        index !== 1 && (
-                                                          <div>
-                                                            <button
-                                                              className="btn btn-danger"
-                                                              type="button"
-                                                              onClick={() =>
-                                                                handleDeleteContact(
-                                                                  index
-                                                                )
-                                                              }
-                                                              disabled={
-                                                                contacts.length ===
-                                                                1
-                                                              }
-                                                            >
-                                                              Delete
-                                                            </button>
-                                                          </div>
-                                                        )}
-                                                    </div>
-                                                  </div>
-
-                                                  <div className="col-lg-4">
-                                                    <div className="mb-3">
-                                                      <label
-                                                        htmlFor={`firstName-${index}`}
-                                                        className="form-label"
-                                                      >
-                                                        First Name
-                                                        <span
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          {" "}
-                                                          *{" "}
-                                                        </span>
-                                                      </label>
-                                                      <input
-                                                        type="text"
-                                                        className="form-control"
-                                                        placeholder="First Name"
-                                                        id={`firstName-${index}`}
-                                                        value={
-                                                          contact.firstName
-                                                        }
-                                                        onChange={(e) =>
-                                                          handleChange(
-                                                            index,
-                                                            "firstName",
-                                                            e.target.value
-                                                          )
-                                                        }
-                                                        ref={(el) =>
-                                                          (inputRefs.current[
-                                                            index
-                                                          ] = el)
-                                                        }
-                                                      />
-                                                      {errors[index]
-                                                        .firstName && (
-                                                        <div className="error-text">
-                                                          {
-                                                            errors[index]
-                                                              .firstName
-                                                          }{" "}
-                                                        </div>
-                                                      )}
-                                                    </div>
-                                                  </div>
-                                                  <div className="col-lg-4">
-                                                    <div className="mb-3">
-                                                      <label
-                                                        htmlFor={`lastName-${index}`}
-                                                        className="form-label"
-                                                      >
-                                                        Last Name
-                                                        <span
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          *
-                                                        </span>
-                                                      </label>
-                                                      <input
-                                                        type="text"
-                                                        className="form-control"
-                                                        placeholder="Last Name"
-                                                        id={`lastName-${index}`}
-                                                        value={contact.lastName}
-                                                        onChange={(e) =>
-                                                          handleChange(
-                                                            index,
-                                                            "lastName",
-                                                            e.target.value
-                                                          )
-                                                        }
-                                                        ref={(el) =>
-                                                          (inputRefs.current[
-                                                            index
-                                                          ] = el)
-                                                        }
-                                                      />
-                                                      {errors[index]
-                                                        .lastName && (
-                                                        <div className="error-text">
-                                                          {
-                                                            errors[index]
-                                                              .lastName
-                                                          }
-                                                        </div>
-                                                      )}
-                                                    </div>
-                                                  </div>
-                                                  <div className="col-lg-4">
-                                                    <div className="mb-3">
-                                                      <label
-                                                        htmlFor={`role-${index}`}
-                                                        className="form-label"
-                                                      >
-                                                        Role
-                                                        <span
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          *
-                                                        </span>
-                                                      </label>
-                                                      <select
-                                                        className="form-select"
-                                                        id={`role-${index}`}
-                                                        value={contact.role}
-                                                        onChange={(e) =>
-                                                          handleChange(
-                                                            index,
-                                                            "role",
-                                                            e.target.value
-                                                          )
-                                                        }
-                                                      >
-                                                        <option value="">
-                                                          Select Role
-                                                        </option>
-                                                        {personRoleDataAll &&
-                                                          personRoleDataAll.data.map(
-                                                            (item, idx) => (
-                                                              <option
-                                                                value={item.id}
-                                                                key={idx}
-                                                              >
-                                                                {item.name}
-                                                              </option>
-                                                            )
-                                                          )}
-                                                      </select>
-                                                      {errors[index].role && (
-                                                        <div className="error-text">
-                                                          {errors[index].role}
-                                                        </div>
-                                                      )}
-                                                    </div>
-                                                  </div>
-
-                                                  <div className="col-lg-4">
-                                                    <div className="mb-3">
-                                                      <label className="form-label">
-                                                        Phone
-                                                      </label>
-                                                      <div className="row">
-                                                        <div className="col-md-4">
-                                                          <select
-                                                            className="form-select"
-                                                            onChange={(e) =>
-                                                              handleChange(
-                                                                index,
-                                                                "phone_code",
-                                                                e.target.value
-                                                              )
-                                                            }
-                                                            name="phone_code"
-                                                            value={
-                                                              contact.phone_code
-                                                            }
-                                                          >
-                                                            {countryDataAll.data.map(
-                                                              (data) => (
-                                                                <option
-                                                                  key={
-                                                                    data.code
-                                                                  }
-                                                                  value={
-                                                                    data.code
-                                                                  }
-                                                                >
-                                                                  {data.code}
-                                                                </option>
-                                                              )
-                                                            )}
-                                                          </select>
-                                                        </div>
-                                                        <div className="mb-3 col-md-8">
-                                                          <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder="Phone Number"
-                                                            name="phone"
-                                                            id={`phone-${index}`}
-                                                            value={
-                                                              contact.phoneNumber
-                                                            }
-                                                            onChange={(e) =>
-                                                              handleChange(
-                                                                index,
-                                                                "phoneNumber",
-                                                                e.target.value
-                                                              )
-                                                            }
-                                                            maxLength={12}
-                                                            minLength={9}
-                                                          />
-                                                          {errors[index]
-                                                            .phoneNumber && (
-                                                            <div className="error-text">
-                                                              {
-                                                                errors[index]
-                                                                  .phoneNumber
-                                                              }
-                                                            </div>
-                                                          )}
-                                                        </div>
-                                                      </div>
-                                                    </div>
-                                                  </div>
-
-                                                  <div className="col-lg-4">
-                                                    <div className="mb-3">
-                                                      <label
-                                                        htmlFor={`email-${index}`}
-                                                        className="form-label"
-                                                      >
-                                                        Email
-                                                        <span
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          *
-                                                        </span>
-                                                      </label>
-                                                      <input
-                                                        type="text"
-                                                        className="form-control"
-                                                        placeholder="Email"
-                                                        id={`email-${index}`}
-                                                        value={contact.email}
-                                                        onChange={(e) =>
-                                                          handleChange(
-                                                            index,
-                                                            "email",
-                                                            e.target.value
-                                                          )
-                                                        }
-                                                      />
-                                                      {errors[index].email && (
-                                                        <div className="error-text">
-                                                          {errors[index].email}
-                                                        </div>
-                                                      )}
-                                                    </div>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </div>
-                                          ))}
-
-                                          <div className="card-header d-flex align-items-center">
-                                            <h5 className="card-title mb-0 flex-grow-1"></h5>
-                                            <button
-                                              className="btn btn-info text-white blue-btn"
-                                              type="button"
-                                              onClick={handleAddContact}
-                                            >
-                                              Add Contact
-                                            </button>
-                                          </div>
-                                        </div>
-                                      </form>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>{" "}
-                              {/* end col */}
-                            </div>
-                          </section>
-                        }
-                      />
-                    </div>
-                  </div>
-                </>
+                </div>
               ) : (
-                <>
-                  <h1>NULL</h1>
-                </>
+                ""
               )}
+            </section>
+            <div className="form__item button__items d-flex justify-content-between">
+              <Button
+                className="btn btn-info"
+                type="default"
+                onClick={(e) => navigate("/admin/customer")}
+              >
+                <i className="pe-2 fa-regular fa-arrow-left-long"></i>Back
+              </Button>
+              <Button
+                className="btn btn-info text-white blue-btn"
+                type="submit"
+                onClick={handleSubmit}
+              >
+                Next<i className="ps-2 fa-regular fa-arrow-right-long"></i>
+              </Button>
             </div>
-          </section>
-        </div>
-      )}
-    </Formik>
+          </Form>
+        )}
+      </Formik>
+    </>
   );
 };
 

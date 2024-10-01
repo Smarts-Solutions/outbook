@@ -1,22 +1,60 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { GET_ALL_CUSTOMERS } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
-import { useNavigate } from "react-router-dom";
+import { Update_Customer_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getDateRange } from "../../../Utils/Comman_function";
+import Swal from "sweetalert2";
 
 const Customer = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
-
   const [customerData, setCustomerData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [activeTab, setActiveTab] = useState("this-week");
+  const [activeTab, setActiveTab] = useState("this-year");
+  const role = JSON.parse(localStorage.getItem("role"));
+
   const [searchTerm, setSearchTerm] = useState("");
+  const [getAccessData, setAccessData] = useState({
+    insert: 0,
+    update: 0,
+    delete: 0,
+    client: 0,
+  });
+
+  const accessData =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "customer"
+    )?.items || [];
+
+  const accessData1 =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "client"
+    )?.items || [];
+
+ 
+
+  useEffect(() => {
+    GetAllCustomerData();
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (accessData.length === 0) return;
+    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0 };
+    accessData.forEach((item) => {
+      if (item.type === "insert") updatedAccess.insert = item.is_assigned;
+      if (item.type === "update") updatedAccess.update = item.is_assigned;
+      if (item.type === "delete") updatedAccess.delete = item.is_assigned;
+    }); 
+    accessData1.forEach((item) => {
+      if (item.type === "view") updatedAccess.client = item.is_assigned;
+    });
+
+    setAccessData(updatedAccess);
+  }, []);
 
   const tabs = [
     { id: "this-week", label: "This week" },
@@ -28,6 +66,7 @@ const Customer = () => {
     { id: "this-year", label: "This year" },
     { id: "last-year", label: "Last year" },
   ];
+
 
   const columns = [
     {
@@ -41,13 +80,23 @@ const Customer = () => {
             maxWidth: "150px",
           }}
         >
-          <a
-            onClick={() => HandleClientView(row)}
-            style={{ cursor: "pointer", color: "#26bdf0" }}
-            title={row.trading_name}
-          >
-            {row.trading_name}
-          </a>
+          {role === "ADMIN" || role === "SUPERADMIN" ? (
+            <a
+              onClick={() => HandleClientView(row)}
+              style={{ cursor: "pointer", color: "#26bdf0" }}
+              title={row.trading_name}
+            >
+              {row.trading_name}
+            </a>
+          ) : (
+            getAccessData.client == 1 ? <a
+              onClick={() => HandleClientView(row)}
+              style={{ cursor: "pointer", color: "#26bdf0" }}
+              title={row.trading_name}
+            >
+              {row.trading_name}
+            </a> :row.trading_name
+          )}
         </div>
       ),
       selector: (row) => row.trading_name,
@@ -55,7 +104,7 @@ const Customer = () => {
       width: "200px",
     },
     {
-      name: "Customer Code(cust+CustName+UniqueNo)",
+      name: "Customer Code",
       selector: (row) => row.customer_code,
       sortable: true,
       width: "250px",
@@ -81,16 +130,16 @@ const Customer = () => {
       name: "Company Number",
       selector: (row) => (row.company_number == null ? "" : row.company_number),
       sortable: true,
-      width: "150px",
+      width: "200px",
     },
     {
       name: "Type",
       selector: (row) =>
-        row.customer_type == 1
+        row.customer_type === 1
           ? "Sole Trader"
-          : row.customer_type == 2
+          : row.customer_type === 2
           ? "Company"
-          : row.customer_type == 3
+          : row.customer_type === 3
           ? "Partnership"
           : "-",
       sortable: true,
@@ -107,10 +156,30 @@ const Customer = () => {
       name: "Status",
       cell: (row) => (
         <div>
+          <div>
+            <select
+              className="form-select form-control"
+              value={row.status}
+              onChange={(e) => handleChangeStatus(e, row)}
+            >
+              <option value="0">Deactive</option>
+              <option value="1">Active</option>
+            </select>
+          </div>
+        </div>
+      ),
+      sortable: true,
+      width: "120px",
+    },
+    
+    {
+      name: "Progress",
+      cell: (row) => (
+        <div>
           {row.form_process === "4" ? (
-            <span className="badge bg-success">Complete</span>
+            <span className="text-success">Complete</span>
           ) : (
-            <span className="badge bg-danger">In Progress</span>
+            <span className="text-danger">Pending</span>
           )}
         </div>
       ),
@@ -119,18 +188,44 @@ const Customer = () => {
     },
     {
       name: "Actions",
-      cell: (row) => (
-        <div style={{ textAlign: "center" }}>
-          <button className="edit-icon" onClick={() => handleEdit(row)}>
-            {" "}
-            <i className="ti-pencil" />
-          </button>
-          <button className="delete-icon" onClick={() => handleDelete(row)}>
-            {" "}
-            <i className="ti-trash" />
-          </button>
-        </div>
-      ),
+      cell: (row) => {
+        const hasUpdateAccess = getAccessData.update === 1;
+        const hasDeleteAccess = getAccessData.delete === 1;
+
+        return (
+          <div style={{ textAlign: "center" }}>
+            {role === "ADMIN" || role === "SUPERADMIN" ? (
+              <>
+                <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
+                  <i className="ti-pencil text-primary" />
+                </button>
+                <button
+                  className="delete-icon "
+                  onClick={() => handleDelete(row)}
+                >
+                  <i className="ti-trash text-danger " />
+                </button>
+              </>
+            ) : (
+              <>
+                {hasUpdateAccess && (
+                  <button className="edit-icon " onClick={() => handleEdit(row)}>
+                    <i className="ti-pencil text-primary" />
+                  </button>
+                )}
+                {hasDeleteAccess && (
+                  <button
+                    className="delete-icon"
+                    onClick={() => handleDelete(row)}
+                  >
+                    <i className="ti-trash text-danger" />
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        );
+      },
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
@@ -138,37 +233,80 @@ const Customer = () => {
     },
   ];
 
-  const HandleClientView = (row) => {
-    navigate("/admin/Clientlist", { state: row });
+  const handleChangeStatus = async (e, row) => {
+    const newStatus = e.target.value;
+  
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to change the status?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, change it!",
+      cancelButtonText: "No, cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const req = { customer_id: row.id, status: newStatus };
+          const res = await dispatch(Update_Customer_Status({ req, authToken: token })).unwrap();
+  
+          if (res.status) {
+            Swal.fire({
+              title: "Success",
+              text: res.message,
+              icon: "success",
+              timer: 1000,
+              showConfirmButton: false,
+            });
+            GetAllCustomerData(); // Fetch updated customer data after success
+          } else {
+            Swal.fire({
+              title: "Error",
+              text: res.message,
+              icon: "error",
+              confirmButtonText: "Ok",
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            title: "Error",
+            text: "An error occurred while updating the status.",
+            icon: "error",
+            confirmButtonText: "Ok",
+          });
+        }
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire({
+          title: "Cancelled",
+          text: "Status change was not performed",
+          icon: "error",
+          confirmButtonText: "Ok",
+        });
+      }
+    });
   };
-
-  function handleEdit(row) {
-    navigate("/admin/editcustomer", { state: row });
-  }
-
+  
+  
   const GetAllCustomerData = async () => {
     const req = { action: "get", staff_id: staffDetails.id };
-    const data = { req: req, authToken: token };
-    await dispatch(GET_ALL_CUSTOMERS(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          const filteredData = response.data.filter((item) => {
-            const itemDate = new Date(item.created_at);
-            const { startDate, endDate } = getDateRange(activeTab);
-            return itemDate >= startDate && itemDate <= endDate;
-          });
+    const data = { req, authToken: token };
 
-          setCustomerData(filteredData);
-          setFilteredData(filteredData); // Initialize filtered data
-        } else {
-          setCustomerData([]);
-          setFilteredData([]);
-        }
-      })
-      .catch((error) => {
-        console.log("Error", error);
-      });
+    try {
+      const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
+      if (response.status) {
+        const filteredData = response.data.filter((item) => {
+          const itemDate = new Date(item.created_at);
+          const { startDate, endDate } = getDateRange(activeTab);
+          return itemDate >= startDate && itemDate <= endDate;
+        });
+        setCustomerData(filteredData);
+        setFilteredData(filteredData);  
+      } else {
+        setCustomerData([]);
+        setFilteredData([]);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleSearch = (event) => {
@@ -177,57 +315,70 @@ const Customer = () => {
 
     const filtered = customerData.filter((item) => {
       return (
-        (item.trading_name &&
-          item.trading_name.toLowerCase().includes(searchValue)) ||
-        (item.customer_code &&
-          item.customer_code.toLowerCase().includes(searchValue)) ||
-        (item.company_name &&
-          item.company_name.toLowerCase().includes(searchValue)) ||
-        (item.company_number &&
-          item.company_number.toLowerCase().includes(searchValue)) ||
-        (
-          item.account_manager_firstname &&
-          item.account_manager_firstname +
-            " " +
-            item.account_manager_lastname &&
-          item.account_manager_lastname
-        )
-          .toLowerCase()
+        item.trading_name?.toLowerCase().includes(searchValue) ||
+        item.customer_code?.toLowerCase().includes(searchValue) ||
+        item.company_name?.toLowerCase().includes(searchValue) ||
+        item.company_number?.toLowerCase().includes(searchValue) ||
+        (item.account_manager_firstname + " " + item.account_manager_lastname)
+          ?.toLowerCase()
           .includes(searchValue)
       );
-    });
-
+    }); 
     setFilteredData(filtered);
   };
 
-  function handleDelete(row) {
-    // Implement delete functionality
-  }
+  const HandleClientView = (row) => {
+    if (row.form_process == "4") {
+      navigate("/admin/Clientlist", { state: row });
+    } else {
+      Swal.fire({
+        title: "Form not completed",
+        text: "Please complete the form",
+        icon: "error",
+        confirmButtonText: "Ok",
+      });
+    }
+  };
 
-  useEffect(() => {
-    GetAllCustomerData();
-  }, [activeTab]);
+  const handleEdit = (row) => {
+    navigate("/admin/editcustomer", { state: row });
+  };
+
+  const handleDelete = (row) => {
+    // Implement delete functionality
+  };
 
   return (
     <div className="container-fluid">
       <div className="content-title">
-     <div className="row">
-      <div className="col-md-8">
-      <div className="tab-title">
-      <h3 className="mt-0">Customers</h3></div>
-      </div>
-      <div className="col-md-4">
-      <Link
-            to="/admin/addcustomer"
-            className="btn btn-info text-white float-end blue-btn"
-          >
-           
-            <i className="fa fa-plus" /> Add Customer
-          </Link>
-      </div>
-     </div>
-
-       
+        <div className="row">
+          <div className="col-md-8">
+            <div className="tab-title">
+              <h3 className="mt-0">Customers</h3>
+            </div>
+          </div>
+          {role === "ADMIN" || role === "SUPERADMIN" ? (
+            <div className="col-md-4">
+              <Link
+                to="/admin/addcustomer"
+                className="btn btn-outline-info  fw-bold float-end border-3"
+              >
+                <i className="fa fa-plus" /> Add Customer
+              </Link>
+            </div>
+          ) : (
+            getAccessData.insert === 1 && (
+              <div className="col-md-4">
+                <Link
+                  to="/admin/addcustomer"
+                  className="btn btn-outline-info fw-bold float-end border-3"
+                >
+                  <i className="fa fa-plus" /> Add Customer
+                </Link>
+              </div>
+            )
+          )}
+        </div>
       </div>
 
       <div className="report-data mt-4">
@@ -262,14 +413,13 @@ const Customer = () => {
                 </ul>
               </div>
               <div className="col-md-4 col-auto">
-           
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={handleSearch}
-                  />
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={handleSearch}
+                />
               </div>
             </div>
           </div>
@@ -286,13 +436,9 @@ const Customer = () => {
               role="tabpanel"
               aria-labelledby={`${tab.id}-tab`}
             >
-              {filteredData && filteredData.length > 0 && (
-                <Datatable
-                  columns={columns}
-                  data={filteredData}
-                  filter={false}
-                />
-              )}
+              <div className="card-datatable">
+                <Datatable columns={columns} data={filteredData} />
+              </div>
             </div>
           ))}
         </div>

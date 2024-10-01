@@ -27,6 +27,8 @@ const getTask = async (task) => {
   return jobTypeTaskModel.getTask(task);
 };
 
+ 
+
 const addChecklist = async (checklist) => {
   return jobTypeTaskModel.addChecklist(checklist);
 };
@@ -47,6 +49,10 @@ const checklistAction = async (checklist) => {
     return jobTypeTaskModel.getClientTypeChecklist(checklist);
   }
   else if(action === "getByServiceWithJobType"){
+    let client_id = checklist.clientId
+    if(client_id == undefined || client_id == ''){
+      return { status: false, message: 'Error getting checklist.' };
+    }
     return jobTypeTaskModel.getByServiceWithJobType(checklist);
   }
   else{
@@ -74,5 +80,6 @@ module.exports = {
     addChecklist,
     checklistAction,
     updateChecklist,
-    customerGetService
+    customerGetService,
+     
 };

@@ -43,6 +43,7 @@ CREATE TABLE staffs (
     phone VARCHAR(20) NOT NULL,
     password VARCHAR(255) NOT NULL,
     status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    created_by  INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     login_auth_token TEXT,
@@ -174,6 +175,9 @@ CREATE TABLE customers (
     vat_registered ENUM('0', '1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: yes',
     vat_number VARCHAR(20) DEFAULT NULL,
     website VARCHAR(255) DEFAULT NULL,
+    customerJoiningDate DATE DEFAULT NULL,
+    customerSource INT DEFAULT NULL,
+    customerSubSource INT DEFAULT NULL,
     form_process ENUM('0', '1' ,'2','3','4') NOT NULL DEFAULT '0' COMMENT '0: Pending All, 1: Customer Information Complete ,2: Services Complete ,3:Engagement Model Complete ,4:Paper Work Complete',
     status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -324,7 +328,8 @@ CREATE TABLE customer_engagement_customised_pricing (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_engagement_model_id INT NOT NULL,
     minimum_number_of_jobs INT NOT NULL,
-    job_type_id INT NOT NULL,
+    job_type_id INT DEFAULT NULL,
+    service_id INT DEFAULT NULL,
     cost_per_job DECIMAL(10, 2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -371,7 +376,7 @@ CREATE TABLE clients (
     client_industry_id INT DEFAULT 0,
     trading_name VARCHAR(100) NOT NULL UNIQUE,
     client_code VARCHAR(100) NOT NULL UNIQUE,
-    trading_address VARCHAR(100) NOT NULL,
+    trading_address VARCHAR(255) DEFAULT NULL,
     vat_registered ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: No, 1: Yes',
     vat_number VARCHAR(20) DEFAULT NULL,
     website VARCHAR(255) DEFAULT NULL,
@@ -452,7 +457,7 @@ CREATE TABLE jobs (
     customer_contact_details_id INT NOT NULL,
     service_id INT NOT NULL,
     job_type_id INT NOT NULL,
-    budgeted_hours DECIMAL(10, 2) DEFAULT NULL,
+    budgeted_hours TIME DEFAULT NULL,
     reviewer INT DEFAULT NULL, 
     allocated_to INT DEFAULT NULL,
     allocated_on  DATE DEFAULT NULL,
@@ -486,8 +491,11 @@ CREATE TABLE jobs (
     currency INT DEFAULT 0,
     invoice_value DECIMAL(15, 2) DEFAULT NULL,
     invoice_date  DATE DEFAULT NULL,
-    invoice_hours DECIMAL(10, 2) DEFAULT NULL,
+    invoice_hours TIME DEFAULT NULL,
     invoice_remark TEXT DEFAULT NULL,
+    status_type  INT DEFAULT NULL,
+    total_hours TIME DEFAULT NULL,
+    total_hours_status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (account_manager_id) REFERENCES staffs(id),
@@ -563,12 +571,15 @@ CREATE TABLE jobs (
         client_id INT NOT NULL,
         checklist_id INT NOT NULL,
         task_id INT NOT NULL,
+        task_status INT NOT NULL,
+        time TIME DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (job_id) REFERENCES jobs(id),
         FOREIGN KEY (client_id) REFERENCES clients(id),
         FOREIGN KEY (checklist_id) REFERENCES checklists(id),
         FOREIGN KEY (task_id) REFERENCES task(id),
+        FOREIGN KEY (task_status) REFERENCES master_status(id),
         UNIQUE (job_id,client_id,checklist_id,task_id)
     );
     
@@ -594,9 +605,7 @@ CREATE TABLE jobs (
         FOREIGN KEY (job_id) REFERENCES jobs(id)
     );
 
-
-
-  /*--TABLE:- JOB TIMELINE PENDING */  
+    /*--TABLE:- JOB TIMELINE PENDING */ 
 
 
     /*--TABLE:- MISSING LOGS  */  
@@ -605,13 +614,12 @@ CREATE TABLE jobs (
         job_id INT NOT NULL,
         missing_log ENUM('0', '1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
         missing_paperwork ENUM('0', '1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
-        missing_log_sent_on DATE NOT NULL,
-        missing_log_prepared_date DATE NOT NULL,
-        missing_log_title VARCHAR(100) NOT NULL,
-        missing_log_reviewed_by INT NOT NULL,
-        missing_log_reviewed_date DATE NOT NULL,
-        missing_paperwork_received_on DATE NOT NULL,
-        missing_log_document VARCHAR(255) DEFAULT NULL,
+        missing_log_sent_on DATE DEFAULT NULL,
+        missing_log_prepared_date DATE DEFAULT NULL,
+        missing_log_title VARCHAR(100) DEFAULT NULL,
+        missing_log_reviewed_by INT DEFAULT NULL,
+        missing_log_reviewed_date DATE DEFAULT NULL,
+        missing_paperwork_received_on DATE DEFAULT NULL,
         status ENUM('0', '1') NOT NULL DEFAULT '0' COMMENT '0: Incomplete, 1: Complete',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -619,24 +627,50 @@ CREATE TABLE jobs (
         FOREIGN KEY (missing_log_reviewed_by) REFERENCES staffs(id)
     );
 
+    /*--TABLE:- MISSING LOGS DOCUMNET */
+    CREATE TABLE missing_logs_documents (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        missing_log_id INT NOT NULL,
+        file_name VARCHAR(255) NOT NULL,
+        original_name VARCHAR(255) NOT NULL,
+        file_type VARCHAR(50) NOT NULL,
+        file_size INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (missing_log_id) REFERENCES missing_logs(id)
+    );
 
+    
      /*--TABLE:- QUERIES   */  
     CREATE TABLE queries (
         id INT AUTO_INCREMENT PRIMARY KEY,
         job_id INT NOT NULL,
         queries_remaining ENUM('0', '1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
-        query_title VARCHAR(100) NOT NULL,
-        reviewed_by INT NOT NULL,
-        missing_queries_prepared_date DATE NOT NULL,
-        query_sent_date DATE NOT NULL,
+        query_title VARCHAR(100) DEFAULT NULL,
+        reviewed_by ENUM('0', '1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
+        missing_queries_prepared_date DATE DEFAULT NULL,
+        query_sent_date DATE DEFAULT NULL,
         response_received ENUM('0', '1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
-        response VARCHAR(255) NOT NULL,
-        final_query_response_received_date DATE NOT NULL,
-        query_document VARCHAR(255) DEFAULT NULL,
+        response VARCHAR(255) DEFAULT NULL,
+        final_query_response_received_date DATE DEFAULT NULL,
+        status ENUM('0', '1') NOT NULL DEFAULT '0' COMMENT '0: Incomplete, 1: Complete',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (job_id) REFERENCES jobs(id),
-        FOREIGN KEY (reviewed_by) REFERENCES staffs(id)
+        FOREIGN KEY (job_id) REFERENCES jobs(id)
+        -- FOREIGN KEY (reviewed_by) REFERENCES staffs(id)
+    );
+
+    /*--TABLE:- QUERIES DOCUMNET */
+    CREATE TABLE queries_documents (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        query_id INT NOT NULL,
+        file_name VARCHAR(255) NOT NULL,
+        original_name VARCHAR(255) NOT NULL,
+        file_type VARCHAR(50) NOT NULL,
+        file_size INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (query_id) REFERENCES queries(id)
     );
 
 
@@ -644,7 +678,9 @@ CREATE TABLE jobs (
     CREATE TABLE drafts (
         id INT AUTO_INCREMENT PRIMARY KEY,
         job_id INT NOT NULL,
-        draft_sent_on DATE NOT NULL,
+        draft_sent_on DATE DEFAULT NULL,
+        draft_title VARCHAR(100) DEFAULT NULL,
+        final_draft_sent_on DATE DEFAULT NULL,
         feedback_received ENUM('0', '1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
         updated_amendment ENUM('1', '2','3','4') NOT NULL DEFAULT '1' COMMENT '1:Amendment, 2: Update ,2: Both ,2: None',
         feedback TEXT,
@@ -661,13 +697,13 @@ CREATE TABLE jobs (
         id INT AUTO_INCREMENT PRIMARY KEY,
         job_id INT NOT NULL,
         file_name VARCHAR(255) NOT NULL,
+        original_name VARCHAR(255) NOT NULL,
         file_type VARCHAR(50) NOT NULL,
         file_size INT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (job_id) REFERENCES jobs(id)
     );
-
 
    /*--TABLE:- STAFF LOGS DOCUMENTS  */
  CREATE TABLE staff_logs (
@@ -682,6 +718,62 @@ CREATE TABLE jobs (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (staff_id) REFERENCES staffs(id)
 );
+
+   
+
+/*--TABLE:- Incorporation in DOCUMENTS  */
+ CREATE TABLE incorporation_in (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+/*--TABLE:- customer source  DOCUMENTS  */
+ CREATE TABLE customer_source (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+/*--TABLE:- customer sub source  DOCUMENTS  */
+ CREATE TABLE customer_sub_source (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_source_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_source_id) REFERENCES customer_source(id)
+);
+
+
+-- TABLE FOR INTERNAL
+CREATE TABLE internal (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+-- TABLE FOR SUB INTERNAL
+CREATE TABLE sub_internal (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    internal_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (internal_id) REFERENCES internal(id)
+);
+
+
 
     
 

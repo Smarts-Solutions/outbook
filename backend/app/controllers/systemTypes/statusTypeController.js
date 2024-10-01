@@ -24,7 +24,7 @@ const handleStatusType = async (req, res) => {
                 res.status(200).json({ status: true, data: result });
                 break;    
             case 'delete':
-                await statusTypeService.removeStatusType(StatusType.id);
+                await statusTypeService.removeStatusType(StatusType);
                 res.status(200).json({ status: true, message: 'StatusType deleted successfully' });
                 break;
             case 'update':
@@ -68,7 +68,7 @@ const handleMasterStatus = async (req, res) => {
                 res.status(200).json({ status: true, data: result });
                 break;    
             case 'delete':
-                await statusTypeService.removeMasterStatus(masterStatus.id);
+                await statusTypeService.removeMasterStatus(masterStatus);
                 res.status(200).json({ status: true, message: 'Master Status deleted successfully' });
                 break;
             case 'update':

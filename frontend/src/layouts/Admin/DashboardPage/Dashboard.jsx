@@ -1,57 +1,89 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { DashboardData, ActivityLog } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
 
 const Dashboard = () => {
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+  const token = JSON.parse(localStorage.getItem("token"));
+  const dispatch = useDispatch();
+  const [dashboard, setDashboard] = useState([]);
+  const [getActiviyLog, setActivityLog] = useState([]);
 
   const currentDate = new Date();
 
-  // Get the current time in "10:35 AM" format
   const options = {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
   };
-  const currentTime = currentDate.toLocaleTimeString("en-US", options);
 
-  // Extract the time part
   const hours = currentDate.getHours();
-  const minutes = String(currentDate.getMinutes()).padStart(2, "0");
-  const seconds = String(currentDate.getSeconds()).padStart(2, "0");
 
   let greeting;
   if (hours < 12) {
     greeting = "Good Morning!";
-  } else if (hours < 18) {
+  }
+  else if (hours < 18) {
     greeting = "Good Afternoon!";
-  } else {
+  }
+  else {
     greeting = "Good Evening!";
   }
 
-  // Array of month names
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+  useEffect(() => {
+    GetDashboardData();
+    ActivityLogData();
+  }, []);
 
-  const day = String(currentDate.getDate()).padStart(2, "0");
-  const month = monthNames[currentDate.getMonth()]; // Get month name
-  const year = currentDate.getFullYear();
-  const formattedDate = `${day} ${month} ${year}`;
+  const GetDashboardData = async () => {
+    const req = { staff_id: staffDetails.id }
+    const data = { req: req, authToken: token }
+    await dispatch(DashboardData(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status) {
+          setDashboard(res.data)
+        }
+        else {
+          setDashboard([])
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const ActivityLogData = async () => {
+    const req = { staff_id: staffDetails.id }
+    const data = { req: req, authToken: token }
+    await dispatch(ActivityLog(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status) {
+          setActivityLog(res.data)
+        }
+        else {
+          setActivityLog([])
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const formatDate = (isoString) => {
+    const date = new Date(isoString);
+    const options = { month: 'short', day: 'numeric' };
+    const monthDay = date.toLocaleDateString('en-US', options);
+    const timeOptions = { hour: 'numeric', minute: 'numeric', hour12: true };
+    const time = date.toLocaleTimeString('en-US', timeOptions);
+    return `${monthDay} (${time.toLowerCase()})`;
+  };
+
 
   return (
     <div>
       <div className="container-fluid">
-        {/* Page-Title */}
         <div className="row">
           <div className="col-sm-12">
             <div className="page-title-box">
@@ -60,11 +92,6 @@ const Dashboard = () => {
                   <p className="mb-0 page-subtitle">{greeting}</p>
                   <h2 className="page-title mt-1">{staffDetails.role_name}</h2>
                 </div>
-
-                {/* <div className="col-auto align-self-center">
-                  <p className="mb-0 page-subtitle text-end">{currentTime}</p>
-                  <h2 className="page-title mt-1">{formattedDate}</h2>
-                </div> */}
               </div>
             </div>
           </div>
@@ -228,7 +255,7 @@ const Dashboard = () => {
                 >
                   <div className="row justify-content-center">
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col-12">
@@ -237,45 +264,20 @@ const Dashboard = () => {
                               </p>
                             </div>
                             <div className="col-12 d-flex align-items-center justify-content-between">
-                              <h3 className="my-4">183</h3>
-                              <div className="report-main-icon bg-light-alt">
+                              <h3 className="my-4">{dashboard.customer}</h3>
+                              <img className="dashboad-img" src="/assets/images/dashboards/users.png" />
+
+                              {/* <div className="report-main-icon bg-light-alt">
                                 <i className="ti-user"></i>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
 
-                          {/* <div className="row d-flex justify-content-center">
-                            <div className="col">
-                              <p className="text-dark mb-1 font-weight-semibold">NO OF CUSTOMERS</p>
-                            
-                              <h3 className="mt-5">183</h3>
-                              <i className='ti-user'></i>
-                            </div>
-
-                          </div> */}
                         </div>
                       </div>
                     </div>
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
-                        <div className="card-body">
-                          <div className="row d-flex justify-content-center">
-                            <div className="col-12">
-                              <p className=" mb-1">NO OF JOBS</p>
-                              {/* <h3 className="mt-5">45</h3> */}
-                            </div>
-                            <div className="col-12 d-flex align-items-center justify-content-between">
-                              <h3 className="my-4">45</h3>
-                              <div className="report-main-icon bg-light-alt">
-                                <i className="ti-user"></i>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col-12">
@@ -285,10 +287,11 @@ const Dashboard = () => {
                               {/* <h3 className="mt-5">543</h3> */}
                             </div>
                             <div className="col-12 d-flex align-items-center justify-content-between">
-                              <h3 className="my-4">183</h3>
-                              <div className="report-main-icon bg-light-alt">
+                              <h3 className="my-4">{dashboard.client}</h3>
+                              <img className="dashboad-img" src="/assets/images/dashboards/teamwork.png" />
+                              {/* <div className="report-main-icon bg-light-alt">
                                 <i className="ti-user"></i>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
                         </div>
@@ -296,27 +299,48 @@ const Dashboard = () => {
                     </div>
 
                     <div className="col-md-6 col-lg-4 ">
-                      <div className="card report-card ">
+                      <div className="card report-card dashboard-card ">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col">
                               <p className="text-dark mb-1 font-weight-semibold">
                                 NO OF STAFF
                               </p>
-                              {/* <h3 className="mt-5">78</h3> */}
                             </div>
                             <div className="col-12 d-flex align-items-center justify-content-between">
-                              <h3 className="my-4">78</h3>
-                              <div className="report-main-icon bg-light-alt">
+                              <h3 className="my-4">{dashboard.staff
+                              }</h3>
+                              <img className="dashboad-img" src="/assets/images/dashboards/handshake.png" />
+                              {/* <div className="report-main-icon bg-light-alt">
                                 <i className="ti-user"></i>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
+                        <div className="card-body">
+                          <div className="row d-flex justify-content-center">
+                            <div className="col-12">
+                              <p className=" mb-1">NO OF JOBS</p>
+                              {/* <h3 className="mt-5">45</h3> */}
+                            </div>
+                            <div className="col-12 d-flex align-items-center justify-content-between">
+                              <h3 className="my-4">{dashboard.job}</h3>
+                              <img className="dashboad-img" src="/assets/images/dashboards/suitcase.png" />
+                              {/* <div className="report-main-icon bg-light-alt">
+                                <i className="ti-user"></i>
+                              </div> */}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                
+                    <div className="col-md-6 col-lg-4">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col-12">
@@ -326,17 +350,19 @@ const Dashboard = () => {
                               {/* <h3 className="mt-5">233</h3> */}
                             </div>
                             <div className="col-12 d-flex align-items-center justify-content-between">
-                              <h3 className="my-4">183</h3>
-                              <div className="report-main-icon bg-light-alt">
+                              <h3 className="my-4">0</h3>
+                              <img className="dashboad-img" src="/assets/images/dashboards/pending.png" />
+                              {/* <div className="report-main-icon bg-light-alt">
+                             
                                 <i className="ti-user"></i>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col-12">
@@ -346,10 +372,11 @@ const Dashboard = () => {
                               {/* <h3 className="mt-5">870</h3> */}
                             </div>
                             <div className="col-12 d-flex align-items-center justify-content-between">
-                              <h3 className="my-4">183</h3>
-                              <div className="report-main-icon bg-light-alt">
+                              <h3 className="my-4">0</h3>
+                              <img className="dashboad-img" src="/assets/images/dashboards/time-management.png" />
+                              {/* <div className="report-main-icon bg-light-alt">
                                 <i className="ti-user"></i>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
                         </div>
@@ -365,21 +392,21 @@ const Dashboard = () => {
                 >
                   <div className="row justify-content-center">
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col">
                               <p className="text-dark mb-1 font-weight-semibold">
                                 NO OF CUSTOMERS
                               </p>
-                              <h3 className="mt-5">183</h3>
+                              <h3 className="mt-5">0</h3>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col">
@@ -391,7 +418,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col">
@@ -406,7 +433,7 @@ const Dashboard = () => {
                     </div>
 
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col">
@@ -420,7 +447,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col">
@@ -434,7 +461,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <div className="col-md-6 col-lg-4">
-                      <div className="card report-card">
+                      <div className="card report-card dashboard-card">
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col">
@@ -525,78 +552,40 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
-
               <div className="card-body">
                 <div className="analytic-dash-activity" data-simplebar="init">
                   <div className="simplebar-mask1">
                     <div className="">
                       <div className="simplebar-content" style={{ padding: 0 }}>
                         <div className="activity">
-                          <div className="activity-info">
-                            <div className="icon-info-activity">
-                              <i className="fa-solid fa-circle"></i>
+                          {/* Conditional Rendering */}
+                          {getActiviyLog && getActiviyLog.length > 0 ? (
+                            getActiviyLog.map((item, index) => {
+                              return (
+                                <div className="activity-info" key={index}>
+                                  <div className="icon-info-activity">
+                                    <i className="fa-solid fa-circle"></i>
+                                  </div>
+                                  <div className="activity-info-text">
+                                    <div className="">
+                                      <small className="">{formatDate(item?.created_at)}</small>
+                                      <p className="">{item?.log_message}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <div className="no-data-found">
+                              {/* Image for "No Data Found" */}
+                              <img
+                                src="/assets/images/No-data-amico.png" // Replace with your image path
+                                alt="No data found"
+                                style={{ maxWidth: "100%", height: "auto" }}
+                              />
+                              <p className="text-center">No Activity Logs Found</p>
                             </div>
-                            <div className="activity-info-text">
-                              <div className="">
-                                <small className="">Aug 17(12:07 AM)</small>
-                                <p className="">
-                                  Sabby created new package Testing AA
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="activity-info">
-                            <div className="icon-info-activity">
-                              <i className="fa-solid fa-circle"></i>
-                            </div>
-                            <div className="activity-info-text">
-                              <div className="">
-                                <small className="">Aug 17(12:07 AM)</small>
-                                <p className="">
-                                  Sabby created new package Testing AA
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="activity-info">
-                            <div className="icon-info-activity">
-                              <i className="fa-solid fa-circle"></i>
-                            </div>
-                            <div className="activity-info-text">
-                              <div className="">
-                                <small className="">Aug 17(12:07 AM)</small>
-                                <p className="">
-                                  Sabby created new package Testing AA
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="activity-info">
-                            <div className="icon-info-activity">
-                              <i className="fa-solid fa-circle"></i>
-                            </div>
-                            <div className="activity-info-text">
-                              <div className="">
-                                <small className="">Aug 17(12:07 AM)</small>
-                                <p className="">
-                                  Sabby created new package Testing AA
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="activity-info">
-                            <div className="icon-info-activity">
-                              <i className="fa-solid fa-circle"></i>
-                            </div>
-                            <div className="activity-info-text">
-                              <div className="">
-                                <small className="">Aug 17(12:07 AM)</small>
-                                <p className="">
-                                  Sabby created new package Testing AA
-                                </p>
-                              </div>
-                            </div>
-                          </div>
+                          )}
                         </div>
                         {/*end activity*/}
                       </div>
@@ -606,6 +595,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
+
         </div>
       </div>
       {/* container */}

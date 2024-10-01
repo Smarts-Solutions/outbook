@@ -24,7 +24,7 @@ const handleCountry = async (req, res) => {
                 res.status(200).json({ status: true, data: result });
                 break;
             case 'delete':
-                await countryService.removeCountry(Country.id);
+                await countryService.removeCountry(Country);
                 res.status(200).json({ status: true, message: 'Country deleted successfully' });
                 break;
             case 'update':

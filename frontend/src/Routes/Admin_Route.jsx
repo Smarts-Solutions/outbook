@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { useDispatch } from "react-redux";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { BrowserRouter as Router,  Route,  Routes,  useLocation,  useNavigate} from "react-router-dom";
 import Sidebar from "../Components/Dashboard/Sidebar";
 import Header from "../Components/Dashboard/Header";
 import Profile from "../Components/Dashboard/Profile";
@@ -26,8 +20,10 @@ import Access from "../layouts/Admin/AccessPage/Access";
 import Setting from "../layouts/Admin/Settings/Setting";
 import Staff from "../layouts/Admin/Staff/Staff";
 import ViewLogs from "../layouts/Admin/Staff/ViewLogs";
+import SubInternal from "../layouts/Admin/Settings/SubInternal";
 
 import JobType from "../layouts/Admin/Settings/JobType";
+import Subsource from "../layouts/Admin/Settings/Subsource";
 import { RoleAccess } from "../ReduxStore/Slice/Access/AccessSlice";
 
 import AddNewClient from "../layouts/Admin/Clients/CreateClient";
@@ -39,7 +35,10 @@ import ClientProfile from "../layouts/Admin/Clients/ClientProfile";
 import CreateCheckList from "../layouts/Admin/Clients/CreateCheckList";
 import EditCheckList from "../layouts/Admin/Clients/Editchecklist";
 import Statuses from "../layouts/Admin/Clients/Statuses";
+import SettingCheckList from '../layouts/Admin/Settings/CreateCheckList'
+import EditSettingCheckList from '../layouts/Admin/Settings/EditCheckList'
 
+import JobLogs from "../layouts/Admin/Jobs/JobLogs";
 import JobInformation from "../layouts/Admin/Jobs/JobInformation";
 import TaskTimesheet from "../layouts/Admin/Jobs/TaskTimesheet";
 import JobTimeline from "../layouts/Admin/Jobs/JobTimeline";
@@ -50,6 +49,9 @@ import Documents from "../layouts/Admin/Jobs/Documents";
 
 import CreateJob from "../layouts/Admin/Jobs/JobAction/CreateJob";
 import JobEdit from "../layouts/Admin/Jobs/JobAction/EditJob";
+import Timesheet from "../layouts/Admin/Timesheet/Timesheet";
+
+
 
 const Admin_Route = () => {
   const dispatch = useDispatch();
@@ -65,6 +67,7 @@ const Admin_Route = () => {
     customer: true,
     staff: true,
     status: true,
+    report: true,
   });
 
   useEffect(() => {
@@ -89,6 +92,8 @@ const Admin_Route = () => {
       ).unwrap();
 
       if (response.data) {
+        localStorage.setItem("accessData", JSON.stringify(response.data)); 
+        
         response.data.forEach((item) => {
           if (!role == "ADMIN" || !role == "SUPERADMIN") {
             if (item.permission_name === "setting") {
@@ -121,8 +126,17 @@ const Admin_Route = () => {
               if (statusView && statusView.is_assigned === 0) {
                 navigate("/admin/dashboard");
               }
+            } else if (item.permission_name === "report") {
+              const reportView = item.items.find(
+                (item) => item.type === "view"
+              );
+
+              if (reportView && reportView.is_assigned === 0) {
+                navigate("/admin/dashboard");
+              }
             }
           }
+
           const updatedShowTab = { ...showTab };
 
           response.data.forEach((item) => {
@@ -147,6 +161,18 @@ const Admin_Route = () => {
               );
               updatedShowTab.status =
                 statusView && statusView.is_assigned === 1;
+            } else if (item.permission_name === "report") {
+              const reportView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.report =
+                reportView && reportView.is_assigned === 1;
+            }else if (item.permission_name === "timesheet") {
+              const timesheetView = item.items.find(
+                (item) => item.type === "view"
+              );
+              updatedShowTab.timesheet =
+                timesheetView && timesheetView.is_assigned === 1;
             }
           });
 
@@ -157,7 +183,7 @@ const Admin_Route = () => {
         });
       }
     } catch (error) {
-      console.log("Error fetching access data:", error);
+      return;
     }
   };
 
@@ -166,7 +192,7 @@ const Admin_Route = () => {
       <Sidebar />
       <div className="page-wrapper">
         <Header />
-        <div className="page-content">
+        <div className="page-content"> 
           <Routes>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
@@ -190,13 +216,19 @@ const Admin_Route = () => {
             <Route path="/create/checklist" element={<CreateCheckList />} />
             <Route path="/create/statuses" element={<Statuses />} />
             <Route path="/edit/checklist" element={<EditCheckList />} />
-            <Route path="/job/jobinformation" element={<JobInformation />} />
+            <Route path="/job/logs" element={<JobLogs />} />
             <Route path="/job/tasktimesheet" element={<TaskTimesheet />} />
             <Route path="/job/missinglogs" element={<MissingLogs />} />
             <Route path="/job/queries" element={<Queries />} />
             <Route path="/job/drafts" element={<Drafts />} />
             <Route path="/job/documents" element={<Documents />} />
             <Route path="/job/jobtimeline" element={<JobTimeline />} />
+            <Route path="/job/jobinformation" element={<JobInformation />} />
+            <Route path="/add/subSource" element={<Subsource />} />
+            <Route path="/setting/checklist" element={<SettingCheckList />} />
+            <Route path="/edit/setting/checklist" element={<EditSettingCheckList />} />
+            <Route path="/timesheet" element={<Timesheet />} />
+            <Route path="/subinternal" element={<SubInternal />} />
           </Routes>
         </div>
       </div>

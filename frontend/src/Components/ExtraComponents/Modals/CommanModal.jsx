@@ -8,28 +8,28 @@ const Modal_Component = ({ isOpen, handleClose, Submit_Function, Submit_Function
     return (
         <div>
             <Modal show={isOpen} centered size={size} backdrop={backdrop} onHide={handleClose}>
-                <Modal.Header closeButton className={`${title === "Verify OTP" ? 'border-0 ' : "bg-info"}`}  >
-                    <Modal.Title className='mb-0 text-white' >{title}</Modal.Title >
+                <Modal.Header closeButton className={`${title === "Verify OTP" ? 'border-0 ' : ""}`}  >
+                    <Modal.Title className='mb-0 ' >{title}</Modal.Title >
                 </Modal.Header>
                 <Modal.Body>{rest.children}</Modal.Body>
                 <Modal.Footer className={`${title === "Verify OTP" ? 'border-0' : ""}`}>
 
                     {cancel_btn ?
                         <button type="submit" className="btn btn-secondary " onClick={() => Submit_Cancel_Function()}>
-                            Cancel
+                          <i className='fa fa-xmark'></i>  Cancel 
                         </button> : ""}
 
 
                     {hideBtn === true ? "" :
-                        <Button type="submit" className="btn btn-info " disabled={disabled_submit} onClick={()=> Submit_Function()}>
-                            {btn_name}
+                        <Button type="submit" className="btn btn-outline-success " disabled={disabled_submit} onClick={()=> Submit_Function()}>
+                          <i className='far fa-save pe-1'></i>  {btn_name} 
                         </Button>}
 
 
 
                     {btn_2 === true ?
-                        <Button type="submit" className="btn btn-primary " disabled={disabled_submit} onClick={() => Submit_Function_2()}>
-                            {btn_name_2}
+                        <Button type="submit" className="btn btn-outline-success " disabled={disabled_submit} onClick={() => Submit_Function_2()}>
+                           <i className='far fa-save pe-1'></i>  {btn_name_2} 
                         </Button> : ""
                     }
 

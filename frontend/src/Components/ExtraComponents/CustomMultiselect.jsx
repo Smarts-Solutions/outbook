@@ -1,139 +1,72 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from 'react';
 
-const CustomMultiselect = () => {
-  const options = [
-    { 
-      id: 1, 
-      label: "Option 1", 
-      subOptions: [
-        { id: 11, label: "Sub Option 1" }, 
-        { id: 12, label: "Sub Option 2" } 
-      ] 
-    },
-    { 
-      id: 2, 
-      label: "Option 2", 
-      subOptions: [
-        { id: 21, label: "Sub Option 3" }
-      ]
-    },
-    { id: 3, label: "Option 3", subOptions: [] },
-    { 
-      id: 4, 
-      label: "Option 4", 
-      subOptions: [
-        { id: 41, label: "Sub Option 4" },
-        { id: 42, label: "Sub Option 5"},
-        { id: 42, label: "Sub Option 5"},
-        { id: 42, label: "Sub Option 5"},
-        { id: 42, label: "Sub Option 5"}
-
-      ]
-    },
-  ];
-
-  const [selectedOptions, setSelectedOptions] = useState([]);
+function CustomMultiSelect({ options, placeholder, onChange }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [openMainOption, setOpenMainOption] = useState(null);
-  const [openSubDropdowns, setOpenSubDropdowns] = useState({});
-  const dropdownRef = useRef(null);
+  const [selectedOptions, setSelectedOptions] = useState([]);
+  const selectRef = useRef(null);
 
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
-    setOpenMainOption(null);  // Close any open subdropdown when main dropdown is closed
-    setOpenSubDropdowns({});
-  };
+  const toggleDropdown = () => setIsOpen(!isOpen);
 
-  const handleCheckboxChange = (optionId, hasSubOptions) => {
-    setSelectedOptions((prevSelectedOptions) =>
-      prevSelectedOptions.includes(optionId)
-        ? prevSelectedOptions.filter((id) => id !== optionId)
-        : [...prevSelectedOptions, optionId]
-    );
 
-    if (hasSubOptions) {
-      setOpenSubDropdowns({ [optionId]: !openSubDropdowns[optionId] });
-    }
-  };
 
-  const handleOptionClick = (optionId, hasSubOptions) => {
-    if (openMainOption === optionId) {
-      // Close the current option if it's already open
-      setOpenMainOption(null);
-      setOpenSubDropdowns({});
+  const handleOptionClick = (e,option) => {
+
+    const isSelected = selectedOptions.includes(option);
+    let updatedOptions;
+    
+    if (isSelected) {
+      updatedOptions = selectedOptions.filter((item) => item !== option);
     } else {
-      // Open the clicked option and close any other open option
-      setOpenMainOption(optionId);
-      setOpenSubDropdowns({});
-      if (hasSubOptions) {
-        setOpenSubDropdowns({ [optionId]: true });
-      }
+      updatedOptions = [...selectedOptions, option];
     }
+    
+    setSelectedOptions(updatedOptions);
+    if (onChange) onChange(updatedOptions);
   };
 
   const handleClickOutside = (event) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    if (selectRef.current && !selectRef.current.contains(event.target)) {
       setIsOpen(false);
-      setOpenMainOption(null);
-      setOpenSubDropdowns({});
     }
   };
 
   useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
-  const renderSubOptions = (subOptions, parentId) => {
-    return (
-      <div className="sub-dropdown-menu">
-        {subOptions.map((subOption) => (
-          <div key={subOption.id} className="dropdown-item-wrapper">
-            <label className="dropdown-item">
+  return (
+    <div className="custom-multi-select-container w-100" ref={selectRef}>
+      <div className="custom-multi-select-header form-control" onClick={toggleDropdown}>
+        {selectedOptions.length > 0
+          ? selectedOptions.map((option) => option.label).join(', ')
+          : placeholder}
+  
+        <span className={`arrow fa ${isOpen ? 'open' : 'fa'}`}>&#xf107;</span>
+      </div>
+      {isOpen && (
+        <ul className="custom-multi-select-options">
+          {options.map((option, index) => (
+            <li
+              key={index}
+              className={`custom-multi-select-option ${
+                selectedOptions.includes(option) ? 'selected' : ''
+              }`}
+            >
               <input
                 type="checkbox"
-                checked={selectedOptions.includes(subOption.id)}
-                onChange={() => handleCheckboxChange(subOption.id, subOption.subOptions && subOption.subOptions.length > 0)}
+                checked={selectedOptions.includes(option)}
+                onChange={(e) => handleOptionClick(e,option)}
               />
-              {subOption.label}
-            </label>
-            {openSubDropdowns[subOption.id] && subOption.subOptions && subOption.subOptions.length > 0 && (
-              renderSubOptions(subOption.subOptions, subOption.id)
-            )}
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  return (
-    <div className="custom-multiselect" ref={dropdownRef}>
-      <button onClick={toggleDropdown} className="multiselect dropdown-toggle">
-        <span className="multiselect-selected-text">Select options</span>
-      </button>
-      {isOpen && (
-        <div className="dropdown-menu">
-          {options.map((option) => (
-            <div key={option.id} className="dropdown-item-wrapper">
-              <label className="dropdown-item" onClick={() => handleOptionClick(option.id, option.subOptions.length > 0)}>
-                <input
-                  type="checkbox"
-                  checked={selectedOptions.includes(option.id)}
-                  onChange={() => handleCheckboxChange(option.id, option.subOptions.length > 0)}
-                />
-                {option.label}
-              </label>
-              {openMainOption === option.id && option.subOptions.length > 0 && (
-                renderSubOptions(option.subOptions, option.id)
-              )}
-            </div>
+              <span className="form-control" onClick={() => handleOptionClick(option)}>{option.label}</span>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   );
-};
+}
 
-export default CustomMultiselect;
+export default CustomMultiSelect;
