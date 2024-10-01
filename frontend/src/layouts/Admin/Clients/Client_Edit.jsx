@@ -862,7 +862,8 @@ const ClientEdit = () => {
                                             Client Industry
                                           </label>
                                           <select
-                                            className="form-select mb-3"
+                                           className={errors1["IndustryType"] ? "error-field form-select mb-3" : "form-select mb-3"}
+
                                             aria-label="Default select example"
                                             name="IndustryType"
                                             id="IndustryType"
@@ -901,7 +902,8 @@ const ClientEdit = () => {
                                             type="text"
                                             name="TradingName"
                                             id="TradingName"
-                                            className="form-control"
+                                            className={errors1["TradingName"] ? "error-field form-control" : "form-control"}
+
                                             placeholder="Trading Name"
                                             onChange={(e) => handleInputsChange(e, 1)}
                                             value={
@@ -926,7 +928,7 @@ const ClientEdit = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className="form-control"
+                                            className={errors1["TradingAddress"] ? "error-field form-control" : "form-control"}
                                             placeholder="Trading Address"
                                             name="TradingAddress"
                                             id="TradingAddress"
@@ -949,7 +951,7 @@ const ClientEdit = () => {
                                             VAT Registered
                                           </label>
                                           <select
-                                            className="form-select mb-3"
+                                            className={errors1["VATRegistered"] ? "error-field form-select " : "form-select "}
                                             aria-label="Default select example"
                                             name="VATRegistered"
                                             id="VATRegistered"
@@ -1033,7 +1035,7 @@ const ClientEdit = () => {
                                         </label>
                                         <input
                                           type="text"
-                                          className="form-control"
+                                          className={errors1["first_name"] ? "error-field form-control" : "form-control"}
                                           placeholder="First Name"
                                           name="first_name"
                                           id="first_name"
@@ -1060,7 +1062,7 @@ const ClientEdit = () => {
                                         </label>
                                         <input
                                           type="text"
-                                          className="form-control"
+                                          className={errors1["last_name"] ? "error-field form-control" : "form-control"}
                                           placeholder="Last Name"
                                           name="last_name"
                                           id="last_name"
@@ -1106,7 +1108,8 @@ const ClientEdit = () => {
                                           <div className="mb-3 col-md-8 ps-1">
                                             <input
                                               type="text"
-                                              className="form-control"
+                                              className={errors1["phone"]   ? "error-field form-control" : "form-control"}
+
                                               placeholder="Phone Number"
                                               name="phone"
                                               id="phone"
@@ -1135,7 +1138,7 @@ const ClientEdit = () => {
                                         </label>
                                         <input
                                           type="text"
-                                          className="form-control"
+                                          className={errors1["email"] ? "error-field form-control" : "form-control"}
                                           placeholder="Enter Email ID"
                                           name="email"
                                           id="email"
@@ -1256,7 +1259,7 @@ const ClientEdit = () => {
                                             </label>
                                             <input
                                               type="text"
-                                              className="form-control input_bg"
+                                              className={errors2["CompanyName"] ? "error-field form-control" : "form-control"}
                                               placeholder="Enter Company Name"
                                               name="CompanyName"
                                               id="CompanyName"
@@ -1283,7 +1286,7 @@ const ClientEdit = () => {
                                             </label>
                                             <input
                                               type="text"
-                                              className="form-control input_bg"
+                                              className={errors2["EntityType"] ? "error-field form-control" : "form-control"}
                                               placeholder="LTD"
                                               name="EntityType"
                                               id="EntityType"
@@ -1310,7 +1313,7 @@ const ClientEdit = () => {
                                             </label>
                                             <input
                                               type="text"
-                                              className="form-control input_bg"
+                                              className={errors2["CompanyStatus"] ? "error-field form-control" : "form-control"}
                                               placeholder="Active"
                                               name="CompanyStatus"
                                               id="CompanyStatus"
@@ -1337,7 +1340,8 @@ const ClientEdit = () => {
                                             </label>
                                             <input
                                               type="text"
-                                              className="form-control input_bg"
+                                              className={errors2["CompanyNumber"] ? "error-field form-control" : "form-control"}
+
                                               placeholder="Company Number"
                                               name="CompanyNumber"
                                               id="CompanyNumber"
@@ -1361,7 +1365,7 @@ const ClientEdit = () => {
                                             </label>
                                             <input
                                               type="text"
-                                              className="form-control input_bg"
+                                              className={errors2["IncorporationDate"] ? "error-field form-control" : "form-control"}
                                               placeholder="07-01-2023"
                                               name="IncorporationDate"
                                               id="IncorporationDate"
@@ -1388,7 +1392,7 @@ const ClientEdit = () => {
                                             </label>
                                             <input
                                               type="text"
-                                              className="form-control input_bg"
+                                              className={errors2["RegisteredOfficeAddress"] ? "error-field form-control" : "form-control"}
                                               placeholder="Suite Winsor & Netwon Building, White Fridrs Avenue, England,HA3 5RN"
                                               name="RegisteredOfficeAddress"
                                               id="RegisteredOfficeAddress"
@@ -1423,7 +1427,7 @@ const ClientEdit = () => {
                                             </label>
                                             <input
                                               type="text"
-                                              className="form-control input_bg"
+                                              className={errors2["IncorporationIn"] ? "error-field form-control" : "form-control"}
                                               placeholder="Please Enter Incorporation In"
                                               name="IncorporationIn"
                                               id="IncorporationIn"
@@ -1447,7 +1451,8 @@ const ClientEdit = () => {
                                               VAT Registered
                                             </label>
                                             <select
-                                              className="form-select mb-3"
+                                              className={errors2["VATRegistered"]  ? "error-field form-select" : "form-select"}
+
                                               name="VATRegistered"
                                               id="VATRegistered"
                                               onChange={(e) => handleInputsChange(e, 2)}
@@ -1537,7 +1542,8 @@ const ClientEdit = () => {
                                             Client Industry
                                           </label>
                                           <select
-                                            className="form-select mb-3"
+                                            className={errors2["ClientIndustry"] ? "error-field form-select mb-3" : "form-select mb-3"}
+
                                             name="ClientIndustry"
                                             id="ClientIndustry"
                                             onChange={(e) => handleInputsChange(e, 2)}
@@ -1578,7 +1584,8 @@ const ClientEdit = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className="form-control"
+                                            className={errors2["TradingName"] ? "error-field form-control" : "form-control"}
+
                                             placeholder="Trading Name"
                                             name="TradingName"
                                             id="TradingName"
@@ -1605,7 +1612,8 @@ const ClientEdit = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className="form-control"
+                                            className={errors2["TradingAddress"] ? "error-field form-control" : "form-control"}
+
                                             placeholder="Trading Address"
                                             name="TradingAddress"
                                             id="TradingAddress"
@@ -1683,7 +1691,8 @@ const ClientEdit = () => {
                                                         </label>
                                                         <input
                                                           type="text"
-                                                          className="form-control"
+                                                          className={companyContactsErrors[index].first_name  ? "error-field form-control" : "form-control"}
+
                                                           placeholder="First Name"
                                                           id={`first_name-${index}`}
                                                           value={
@@ -1728,7 +1737,9 @@ const ClientEdit = () => {
                                                         </label>
                                                         <input
                                                           type="text"
-                                                          className="form-control"
+                                                          className={companyContactsErrors[index]
+                                                            .last_name  ? "error-field form-control" : "form-control"}
+
                                                           placeholder="Last Name"
                                                           id={`last_name-${index}`}
                                                           value={
@@ -1914,7 +1925,8 @@ const ClientEdit = () => {
                                                         </label>
                                                         <input
                                                           type="text"
-                                                          className="form-control"
+                                                          className={companyContactsErrors[index].email  ? "error-field form-control" : "form-control"}
+
                                                           placeholder="Email"
                                                           id={`email-${index}`}
                                                           value={contact.email}
@@ -2019,7 +2031,8 @@ const ClientEdit = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className="form-control"
+                                            className={errors3["TradingName"]   ? "error-field form-control" : "form-control"}
+
                                             placeholder="Trading Name"
                                             name="TradingName"
                                             id="TradingName"
@@ -2046,7 +2059,8 @@ const ClientEdit = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className="form-control"
+                                            className={errors3["TradingAddress"]   ? "error-field form-control" : "form-control"}
+
                                             placeholder="Trading Address"
                                             name="TradingAddress"
                                             id="TradingAddress"
@@ -2070,7 +2084,8 @@ const ClientEdit = () => {
                                               VAT Registered
                                             </label>
                                             <select
-                                              className="form-select mb-3"
+                                             className={errors3["VATRegistered"]   ? "error-field form-select" : "form-select"}
+
                                               name="VATRegistered"
                                               id="VATRegistered"
                                               value={
@@ -2240,7 +2255,8 @@ const ClientEdit = () => {
                                                       </label>
                                                       <input
                                                         type="text"
-                                                        className="form-control"
+                                                        className={PartnershiContactsErrors[index] ?.first_name   ? "error-field form-control" : "form-control"}
+
                                                         placeholder="First Name"
                                                         name="first_name"
                                                         id={`first_name-${index}`}
@@ -2285,7 +2301,8 @@ const ClientEdit = () => {
                                                       </label>
                                                       <input
                                                         type="text"
-                                                        className="form-control"
+                                                        className={PartnershiContactsErrors[index]?.last_name   ? "error-field form-control" : "form-control"}
+
                                                         placeholder="Last Name"
                                                         name="last_name"
                                                         id={`last_name-${index}`}
@@ -2658,7 +2675,8 @@ const ClientEdit = () => {
                                             type="text"
                                             name="TradingName"
                                             id="TradingName"
-                                            className="form-control"
+                                            className={errors4["TradingName"]   ? "error-field form-control" : "form-control"}
+
                                             placeholder="Trading Name"
                                             onChange={(e) => handleInputsChange(e, 4)}
                                             value={
@@ -2684,7 +2702,8 @@ const ClientEdit = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className="form-control"
+                                            className={errors4["first_name"]   ? "error-field form-control" : "form-control"}
+
                                             placeholder="First Name"
                                             name="first_name"
                                             id="first_name"
@@ -2711,7 +2730,8 @@ const ClientEdit = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className="form-control"
+                                            className={errors4["last_name"]   ? "error-field form-control" : "form-control"}
+
                                             placeholder="Last Name"
                                             name="last_name"
                                             id="last_name"
@@ -2760,7 +2780,8 @@ const ClientEdit = () => {
                                             <div className="mb-3 col-md-8 ps-1">
                                               <input
                                                 type="text"
-                                                className="form-control"
+                                                className={errors4["phone"]   ? "error-field form-control" : "form-control"}
+
                                                 placeholder="Phone Number"
                                                 name="phone"
                                                 id="phone"
@@ -2791,7 +2812,8 @@ const ClientEdit = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className="form-control"
+                                            className={errors4["email"]   ? "error-field form-control" : "form-control"}
+
                                             placeholder="Enter Email ID"
                                             name="email"
                                             id="email"

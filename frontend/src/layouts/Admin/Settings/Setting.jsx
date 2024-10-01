@@ -1725,7 +1725,7 @@ const Setting = () => {
                         onClick={(e) => handleAdd(e, "1")}
                       >
                         {" "}
-                        <i className="fa fa-plus" /> Add Staff Role
+                        <i className="fa fa-plus" /> 
                       </button>
                     </div>
                   )}

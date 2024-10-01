@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Trash2 } from 'lucide-react';
-
+import { Trash2 } from "lucide-react";
 
 const Timesheet = () => {
-  const [addtask, setAddtask] = useState(false); 
+  const [addtask, setAddtask] = useState(false);
   const [timeSheetRows, setTimeSheetRows] = useState([
     {
       TaskType: "",
@@ -21,7 +20,7 @@ const Timesheet = () => {
       Sun: "",
     },
   ]);
- 
+
   const handleAddNewSheet = () => {
     const newSheetRow = {
       TaskType: "",
@@ -45,7 +44,17 @@ const Timesheet = () => {
     newSheetRows.splice(index, 1);
     setTimeSheetRows(newSheetRows);
   };
- 
+
+  const [openRows, setOpenRows] = useState([]); // Track which rows are open
+
+  // Function to toggle rows open/close
+  const toggleRow = (index) => {
+    if (openRows.includes(index)) {
+      setOpenRows(openRows.filter((i) => i !== index)); // Close if open
+    } else {
+      setOpenRows([...openRows, index]); // Open if closed
+    }
+  };
   return (
     <div className="page-content">
       <div className="container-fluid">
@@ -58,7 +67,7 @@ const Timesheet = () => {
             </div>
           </div>
         </div>
-        <div className='report-data mt-4'>
+        <div className="report-data mt-4">
           <ul
             className="nav nav-pills mb-3 rounded-tabs"
             id="pills-tab"
@@ -206,8 +215,6 @@ const Timesheet = () => {
             </li>
           </ul>
           <div className="tab-content mt-5" id="pills-tabContent">
-
-
             <div
               className="tab-pane fade show active"
               id="this-week"
@@ -219,132 +226,175 @@ const Timesheet = () => {
                   <div className="card-body">
                     <div id="customerList">
                       <div className="row">
-
+                       
                         <div className="table-responsive table-card  mb-1">
-                          <table className="timesheetTable table align-middle table-nowrap" id="customerTable">
+                          <table
+                            className="timesheetTable table align-middle table-nowrap"
+                            id="customerTable"
+                          >
                             <thead className="table-light table-head-blue">
                               <tr>
-                                <th className="dropdwnCol2" data-field="phone">No</th>
-                                <th className="" data-field="phone" width="8%">Task Type</th>
-                                <th className="dropdwnCol7" data-field="phone">Customer</th>
-                                <th className="dropdwnCol6" data-field="phone">Client</th>
-                                <th className="dropdwnCol5" data-field="phone">Job</th>
-                                <th className="dropdwnCol5" data-field="phone">Task</th>
-                                <th className="dropdwnCol5" data-field="customer_name">Mon 12/02/2024</th>
-                                <th className="dropdwnCol5" data-field="customer_name">Tue 13/02/2024</th>
-                                <th className="dropdwnCol5" data-field="phone">Wed 14/02/2024</th>
-                                <th className="dropdwnCol5" data-field="phone">Thu 15/02/2024</th>
-                                <th className="dropdwnCol5" data-field="phone">Fri 16/02/2024</th>
-                                <th className="dropdwnCol5" data-field="phone">Sat 17/02/2024</th>
-                                <th className="dropdwnCol5" data-field="phone">Sun 18/02/2024</th>
-                                <th className="dropdwnCol5" data-field="phone">Action</th>
-
+                                <th className="dropdwnCol2" data-field="phone">
+                                  No
+                                </th>
+                                <th className="" data-field="phone" width="8%">
+                                  Task Type
+                                </th>
+                                <th className="dropdwnCol7" data-field="phone">
+                                  Customer
+                                </th>
+                                <th className="dropdwnCol6" data-field="phone">
+                                  Client
+                                </th>
+                                <th className="dropdwnCol5" data-field="phone">
+                                  Job
+                                </th>
+                                <th className="dropdwnCol5" data-field="phone">
+                                  Task
+                                </th>
+                                <th
+                                  className="dropdwnCol5"
+                                  data-field="customer_name"
+                                >
+                                  Mon 12/02/2024
+                                </th>
+                                <th
+                                  className="dropdwnCol5"
+                                  data-field="customer_name"
+                                >
+                                  Tue 13/02/2024
+                                </th>
+                                <th className="dropdwnCol5" data-field="phone">
+                                  Wed 14/02/2024
+                                </th>
+                                <th className="dropdwnCol5" data-field="phone">
+                                  Thu 15/02/2024
+                                </th>
+                                <th className="dropdwnCol5" data-field="phone">
+                                  Fri 16/02/2024
+                                </th>
+                                <th className="dropdwnCol5" data-field="phone">
+                                  Sat 17/02/2024
+                                </th>
+                                <th className="dropdwnCol5" data-field="phone">
+                                  Sun 18/02/2024
+                                </th>
+                                <th className="dropdwnCol5" data-field="phone">
+                                  Action
+                                </th>
                               </tr>
                             </thead>
 
                             <tbody className="list form-check-all">
-                              {
-                                timeSheetRows?.map((item, index) => (
-                                  <tr className="tabel_new">
-                                    <td>{index + 1}</td>
-                                    <td>
-                                      <select className="form-select form-control">
-                                        <option>Internal</option>
-                                        <option selected>External</option>
-                                      </select>
-                                    </td>
-                                    <td>
-                                      <select className="form-select">
-                                        <option selected>Customer 1</option>
-                                        <option value={1}>THE BLACK T COMPANY LTD</option>
-                                      </select>
-                                    </td>
-                                    <td>
-                                      <select className="form-select">
-                                        <option selected>Client 1</option>
-                                        <option value={1}>MT LIMITED</option>
-                                      </select>
-                                    </td>
-                                    <td>
-                                      <select className="form-select">
-                                        <option selected>Job 1</option>
-                                        <option value={1}>VAT</option>
-                                      </select>
-                                    </td>
-                                    <td>
-                                      <select className="form-select">
-                                        <option selected>Task 1</option>
-                                        <option value={1}>Task 2</option>
-                                      </select>
-                                    </td>
-                                    <td>
-                                      <input
-                                        className="form-control cursor-pointer"
-                                        disabled
-                                        readOnly
-                                        defaultValue={2}
-                                      />
-                                    </td>
-                                    <td>
-                                      <input
-                                        className="form-control cursor-pointer"
-                                        disabled
-                                        readOnly
-                                        defaultValue={5}
-                                      />
-                                    </td>
-                                    <td>
-                                      <input
-                                        className="form-control cursor-pointer"
-                                        disabled
-                                        readOnly
-                                        defaultValue={7}
-                                      />
-                                    </td>
-                                    <td>
-                                      <input
-                                        className="form-control cursor-pointer"
-                                        disabled
-                                        readOnly
-                                        defaultValue={9}
-                                      />
-                                    </td>
-                                    <td>
-                                      <input
-                                        className="form-control cursor-pointer"
-                                        disabled
-                                        readOnly
-                                        defaultValue={3}
-                                      />
-                                    </td>
-                                    <td>
-                                      <input
-                                        className="form-control cursor-pointer"
-                                        disabled
-                                        readOnly
-                                        defaultValue={2}
-                                      />
-                                    </td>
-                                    <td>
-                                      <input
-                                        className="form-control cursor-pointer"
-                                        disabled
-                                        readOnly
-                                        defaultValue={5}
-                                      />
-                                    </td>
+                              {timeSheetRows?.map((item, index) => (
+                                <tr className="tabel_new">
+                                  <td>{index + 1}</td>
+                                  <td>
+                                    <select className="form-select form-control">
+                                      <option>Internal</option>
+                                      <option selected>External</option>
+                                    </select>
+                                  </td>
+                                  <td>
+                                    <select className="form-select">
+                                      <option selected>Customer 1</option>
+                                      <option value={1}>
+                                        THE BLACK T COMPANY LTD
+                                      </option>
+                                    </select>
+                                  </td>
+                                  <td>
+                                    <select className="form-select">
+                                      <option selected>Client 1</option>
+                                      <option value={1}>MT LIMITED</option>
+                                    </select>
+                                  </td>
+                                  <td>
+                                    <select className="form-select">
+                                      <option selected>Job 1</option>
+                                      <option value={1}>VAT</option>
+                                    </select>
+                                  </td>
+                                  <td>
+                                    <select className="form-select">
+                                      <option selected>Task 1</option>
+                                      <option value={1}>Task 2</option>
+                                    </select>
+                                  </td>
+                                  <td>
+                                    <input
+                                      className="form-control cursor-pointer"
+                                      disabled
+                                      readOnly
+                                      defaultValue={2}
+                                    />
+                                  </td>
+                                  <td>
+                                    <input
+                                      className="form-control cursor-pointer"
+                                      disabled
+                                      readOnly
+                                      defaultValue={5}
+                                    />
+                                  </td>
+                                  <td>
+                                    <input
+                                      className="form-control cursor-pointer"
+                                      disabled
+                                      readOnly
+                                      defaultValue={7}
+                                    />
+                                  </td>
+                                  <td>
+                                    <input
+                                      className="form-control cursor-pointer"
+                                      disabled
+                                      readOnly
+                                      defaultValue={9}
+                                    />
+                                  </td>
+                                  <td>
+                                    <input
+                                      className="form-control cursor-pointer"
+                                      disabled
+                                      readOnly
+                                      defaultValue={3}
+                                    />
+                                  </td>
+                                  <td>
+                                    <input
+                                      className="form-control cursor-pointer"
+                                      disabled
+                                      readOnly
+                                      defaultValue={2}
+                                    />
+                                  </td>
+                                  <td>
+                                    <input
+                                      className="form-control cursor-pointer"
+                                      disabled
+                                      readOnly
+                                      defaultValue={5}
+                                    />
+                                  </td>
 
-                                    <td>
-                                      <button className="delete-icon" onClick={()=>handleDeleteRow(index)}>
-                                        <i className="ti-trash text-danger  "></i>
-                                      </button>
-                                      {/* <Trash2 className="delete-icon" /> */}
-                                    </td>
-                                  </tr>
-                                ))}
+                                  <td>
+                                    <button
+                                      className="delete-icon"
+                                      onClick={() => handleDeleteRow(index)}
+                                    >
+                                      <i className="ti-trash text-danger  "></i>
+                                    </button>
+                                    {/* <Trash2 className="delete-icon" /> */}
+                                  </td>
+                                </tr>
+                              ))}
                               <tr className="tabel_new">
                                 <td>
-                                  <button className="d-flex btn btn-info fw-normal px-2" onClick={handleAddNewSheet} >
+                                  <button
+                                    className="d-flex btn btn-info fw-normal px-2"
+                                    onClick={handleAddNewSheet}
+                                  >
                                     <i
                                       style={{
                                         display: "block",
@@ -363,7 +413,6 @@ const Timesheet = () => {
                       </div>
                     </div>
                   </div>
-
                 </div>
               </div>
             </div>
@@ -533,16 +582,12 @@ const Timesheet = () => {
             btn_name="Save"
             title="Task"
             hideBtn={false}
-
             handleClose={() => {
               setAddtask(false);
-
             }}
-
           >
             <div className="modal-body">
               <div className="row">
-
                 <div className="col-lg-6">
                   <div className="form-group">
                     <label htmlFor="customername-field" className="form-label">
@@ -662,15 +707,10 @@ const Timesheet = () => {
                 />
               </div>
             </div>
-
-
-
           </CommonModal>
         </div>
       </div>
     </div>
-
-
   );
 };
 

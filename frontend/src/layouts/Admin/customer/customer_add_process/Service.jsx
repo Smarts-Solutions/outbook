@@ -585,7 +585,7 @@ const Service = () => {
                                                                 onClick={
                                                                   handleDownload
                                                                 }
-                                                                className="btn btn-sm btn-outline-info"
+                                                                className="btn btn-sm btn-info"
                                                               >
                                                                 <i className="fas fa-download me-2"></i>
                                                                 Download Sample
@@ -640,7 +640,7 @@ const Service = () => {
                                                                     </th>
                                                                     <th width="250" className="text-center">
                                                                       Budgeted
-                                                                      Hour
+                                                                      Time
                                                                     </th>
                                                                     <th className="text-center">
                                                                       Action
@@ -925,7 +925,7 @@ const Service = () => {
 
                           <td className="align-top text-end">
                             <button
-                              className="btn  btn-outline-info remove-item-btn"
+                              className="btn  btn-info remove-item-btn"
                               onClick={() => {
                                 setModal(true);
                                 setTempServices(item.id);

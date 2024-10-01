@@ -281,25 +281,6 @@ const Dashboard = () => {
                         <div className="card-body">
                           <div className="row d-flex justify-content-center">
                             <div className="col-12">
-                              <p className=" mb-1">NO OF JOBS</p>
-                              {/* <h3 className="mt-5">45</h3> */}
-                            </div>
-                            <div className="col-12 d-flex align-items-center justify-content-between">
-                              <h3 className="my-4">{dashboard.job}</h3>
-                              <img className="dashboad-img" src="/assets/images/dashboards/suitcase.png" />
-                              {/* <div className="report-main-icon bg-light-alt">
-                                <i className="ti-user"></i>
-                              </div> */}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-md-6 col-lg-4">
-                      <div className="card report-card dashboard-card">
-                        <div className="card-body">
-                          <div className="row d-flex justify-content-center">
-                            <div className="col-12">
                               <p className="text-dark mb-1 font-weight-semibold">
                                 NO OF CLIENTS
                               </p>
@@ -338,6 +319,26 @@ const Dashboard = () => {
                         </div>
                       </div>
                     </div>
+                    <div className="col-md-6 col-lg-4">
+                      <div className="card report-card dashboard-card">
+                        <div className="card-body">
+                          <div className="row d-flex justify-content-center">
+                            <div className="col-12">
+                              <p className=" mb-1">NO OF JOBS</p>
+                              {/* <h3 className="mt-5">45</h3> */}
+                            </div>
+                            <div className="col-12 d-flex align-items-center justify-content-between">
+                              <h3 className="my-4">{dashboard.job}</h3>
+                              <img className="dashboad-img" src="/assets/images/dashboards/suitcase.png" />
+                              {/* <div className="report-main-icon bg-light-alt">
+                                <i className="ti-user"></i>
+                              </div> */}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                
                     <div className="col-md-6 col-lg-4">
                       <div className="card report-card dashboard-card">
                         <div className="card-body">

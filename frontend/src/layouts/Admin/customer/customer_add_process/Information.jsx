@@ -993,7 +993,8 @@ const Information = ({ id, pageStatus }) => {
                           <Field
                             as="select"
                             name="accountManager"
-                            className="form-select"
+                            
+                            className={getAccountMangerIdErr ? "error-field form-select" : "form-select"}
                             id="accountManager"
                             onChange={(e) => handleChangeManager(e)}
                             value={ManagerType}
@@ -1046,7 +1047,8 @@ const Information = ({ id, pageStatus }) => {
                                 type="text"
                                 name="tradingName"
                                 id="tradingName"
-                                className="form-control"
+                                
+                                className={errors1["tradingName"] ? "error-field form-control" : "form-control"}
                                 placeholder="Trading Name"
                                 onChange={(e) => handleChange1(e)}
                                 value={getSoleTraderDetails.tradingName}
@@ -1157,7 +1159,8 @@ const Information = ({ id, pageStatus }) => {
                               </label>
                               <input
                                 type="text"
-                                className="form-control"
+                               
+                                className={errors1["firstName"] ? "error-field form-control" : "form-control"}
                                 placeholder="First Name"
                                 name="firstName"
                                 id="firstName"
@@ -1179,7 +1182,8 @@ const Information = ({ id, pageStatus }) => {
                               </label>
                               <input
                                 type="text"
-                                className="form-control"
+                               
+                                className={errors1["lastName"] ? "error-field form-control" : "form-control"}
                                 placeholder="Last Name"
                                 name="lastName"
                                 id="lastName"
@@ -1245,7 +1249,8 @@ const Information = ({ id, pageStatus }) => {
                               </label>
                               <input
                                 type="text"
-                                className="form-control"
+                                
+                                className={errors1["eamil"] ? "error-field form-control" : "form-control"}
                                 placeholder="Enter Email ID"
                                 name="email"
                                 id="email"
@@ -1268,7 +1273,8 @@ const Information = ({ id, pageStatus }) => {
                               </label>
                               <input
                                 type="text"
-                                className="form-control"
+                                
+                                className={errors1["residentialAddress"] ? "error-field form-control" : "form-control"}
                                 placeholder="Residential Address"
                                 name="residentialAddress"
                                 id="residentialAddress"
@@ -1366,7 +1372,9 @@ const Information = ({ id, pageStatus }) => {
                                 </label>
                                 <input
                                   type="text"
-                                  className="form-control input_bg"
+                                  // className="form-control input_bg"
+                                  className={errors2["CompanyName"] ? "error-field form-control" : "form-control"}
+
                                   placeholder="Enter Company Name"
                                   name="CompanyName"
                                   id="CompanyName"
@@ -1388,7 +1396,9 @@ const Information = ({ id, pageStatus }) => {
                                 </label>
                                 <input
                                   type="text"
-                                  className="form-control input_bg"
+                                  
+                                  className={errors2["EntityType"]  ? "error-field form-control" : "form-control"}
+
                                   placeholder="Enter Entity Type"
                                   name="EntityType"
                                   id="EntityType"
@@ -1410,7 +1420,8 @@ const Information = ({ id, pageStatus }) => {
                                 </label>
                                 <input
                                   type="text"
-                                  className="form-control input_bg"
+                                  className={errors2["CompanyStatus"]  ? "error-field form-control" : "form-control"}
+
                                   placeholder="Enter Company Status"
                                   name="CompanyStatus"
                                   id="CompanyStatus"
@@ -1433,7 +1444,8 @@ const Information = ({ id, pageStatus }) => {
                                 <input
                                   type="text"
                                   id="CompanyNumber"
-                                  className="form-control input_bg"
+                                  className={errors2["CompanyNumber"] ? "error-field form-control" : "form-control"}
+
                                   placeholder="Enter Company Number"
                                   name="CompanyNumber"
                                   onChange={(e) => handleChange2(e)}
@@ -1455,7 +1467,8 @@ const Information = ({ id, pageStatus }) => {
 
                                 <input
                                   type="text"
-                                  className="form-control input_bg"
+                                  className={errors2["IncorporationDate"] ? "error-field form-control" : "form-control"}
+
                                   placeholder="Enter Incorporation Date"
                                   name="IncorporationDate"
                                   id="IncorporationDate"
@@ -1487,7 +1500,9 @@ const Information = ({ id, pageStatus }) => {
                                 /> */}
 
                                 <select
-                                  className="form-select"
+                                 
+                                  className={errors2["IncorporationIn"] ? "error-field form-select" : "form-select"}
+
                                   name="IncorporationIn"
                                   id="IncorporationIn"
                                   onChange={(e) => handleChange2(e)}
@@ -1519,7 +1534,7 @@ const Information = ({ id, pageStatus }) => {
                                 </label>
                                 <input
                                   type="text"
-                                  className="form-control input_bg"
+                                  className={errors2["RegisteredOfficeAddress"] ? "error-field form-control" : "form-control"}
                                   placeholder="Suite Winsor & Netwon Building, White Fridrs Avenue, England,HA3 5RN"
                                   name="RegisteredOfficeAddress"
                                   id="RegisteredOfficeAddress"
@@ -1620,7 +1635,7 @@ const Information = ({ id, pageStatus }) => {
                               </label>
                               <input
                                 type="text"
-                                className="form-control"
+                                className={errors2["TradingName"] ? "error-field form-control" : "form-control"}
                                 placeholder="Trading Name"
                                 name="TradingName"
                                 id="TradingName"
@@ -1708,7 +1723,7 @@ const Information = ({ id, pageStatus }) => {
                                             </label>
                                             <input
                                               type="text"
-                                              className="form-control"
+                                              className={errors[index].firstName ? "error-field form-control" : "form-control"}
                                               placeholder="First Name"
                                               id={`firstName-${index}`}
                                               value={contact.firstName}
@@ -1744,7 +1759,7 @@ const Information = ({ id, pageStatus }) => {
                                             </label>
                                             <input
                                               type="text"
-                                              className="form-control"
+                                              className={ errors[index].lastName ? "error-field form-control" : "form-control"}
                                               placeholder="Last Name"
                                               id={`lastName-${index}`}
                                               value={contact.lastName}
@@ -1891,7 +1906,8 @@ const Information = ({ id, pageStatus }) => {
                                             </label>
                                             <input
                                               type="text"
-                                              className="form-control"
+                                              className={errors[index].email ? "error-field form-control" : "form-control"}
+
                                               placeholder="Email"
                                               id={`email-${index}`}
                                               value={contact.email}
@@ -1955,7 +1971,8 @@ const Information = ({ id, pageStatus }) => {
                               </label>
                               <input
                                 type="text"
-                                className="form-control"
+                                className={errors3["TradingName"] ? "error-field form-control" : "form-control"}
+
                                 placeholder="Trading Name"
                                 name="TradingName"
                                 id="TradingName"
@@ -1979,7 +1996,8 @@ const Information = ({ id, pageStatus }) => {
                               </label>
                               <input
                                 type="text"
-                                className="form-control"
+                                className={errors3["TradingAddress"] ? "error-field form-control" : "form-control"}
+
                                 placeholder="Trading Address"
                                 name="TradingAddress"
                                 id="TradingAddress"
@@ -2128,7 +2146,8 @@ const Information = ({ id, pageStatus }) => {
                                           </label>
                                           <input
                                             type="text"
-                                            className="form-control"
+                                            className={contactsErrors[index].firstName ? "error-field form-control" : "form-control"}
+
                                             placeholder="First Name"
                                             name="firstName"
                                             id={`firstName-${index}`}
@@ -2161,7 +2180,8 @@ const Information = ({ id, pageStatus }) => {
                                           </label>
                                           <input
                                             type="text"
-                                            className="form-control"
+                                            className={contactsErrors[index].lastName ? "error-field form-control" : "form-control"}
+
                                             placeholder="Last Name"
                                             name="last_name"
                                             id={`lastName-${index}`}
@@ -2305,7 +2325,8 @@ const Information = ({ id, pageStatus }) => {
                                           </label>
                                           <input
                                             type="text"
-                                            className="form-control"
+                                            className={contactsErrors[index]?.email ? "error-field form-control" : "form-control"}
+
                                             placeholder="Enter Email"
                                             name="email"
                                             id={`email-${index}`}

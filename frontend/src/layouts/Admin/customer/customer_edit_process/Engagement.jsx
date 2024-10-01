@@ -764,15 +764,17 @@ const Engagement = () => {
                                     {field.label}
                                   </label>
 
-                                  <label
+                                  {/* <label
                                     className="form-label label_bottom"
                                     style={{ color: "#A2A0A0 !important" }}
                                   >
                                     {field.feeName}
-                                  </label>
+                                  </label> */}
                                   <input
                                     type="text"
-                                    className="form-control"
+                                    className={errors1[field.name] ? "error-field form-control" : "form-control"}
+
+                                   
                                     name={field.name}
                                     id={field.name}
                                     placeholder={field.feeName}
@@ -846,16 +848,18 @@ const Engagement = () => {
                                   <label className="form-label">
                                     {field.label}
                                   </label>{" "}
-                                  <br />
-                                  <label
+                                 
+                                  {/* <label
                                     className="form-label label_bottom"
                                     style={{ color: "#A2A0A0 !important" }}
                                   >
                                     {field.feeName}
-                                  </label>
+                                  </label> */}
                                   <input
                                     type="text"
-                                    className="form-control"
+                                   
+                                    className={errors2[field.name] ? "error-field form-control" : "form-control"}
+
                                     name={field.name}
                                     id={field.name}
                                     value={formValues2[field.name]}
@@ -896,27 +900,27 @@ const Engagement = () => {
                               {
                                 label: "Accountants",
                                 name: "adhoc_accountants",
-                                feeName: "Fee Per Hour",
+                                // feeName: "Fee Per Hour",
                               },
                               {
                                 label: "Bookkeepers",
                                 name: "adhoc_bookkeepers",
-                                feeName: "Fee Per Hour",
+                                // feeName: "Fee Per Hour",
                               },
                               {
                                 label: "Payroll Experts",
                                 name: "adhoc_payroll_experts",
-                                feeName: "Fee Per Hour",
+                                // feeName: "Fee Per Hour",
                               },
                               {
                                 label: "Tax Experts",
                                 name: "adhoc_tax_experts",
-                                feeName: "Fee Per Hour",
+                                // feeName: "Fee Per Hour",
                               },
                               {
                                 label: "Admin/Other Staff",
                                 name: "adhoc_admin_staff",
-                                feeName: "Fee Per Hour",
+                                // feeName: "Fee Per Hour",
                               },
                             ].map((field, index) => (
                               <div className="col-lg-4" key={index}>
@@ -924,7 +928,7 @@ const Engagement = () => {
                                   <label className="form-label">
                                     {field.label}
                                   </label>
-                                  <br />
+                                 
                                   <label
                                     className="form-label label_bottom"
                                     style={{ color: "#A2A0A0 !important" }}
@@ -933,7 +937,9 @@ const Engagement = () => {
                                   </label>
                                   <input
                                     type="text"
-                                    className="form-control"
+                                    
+                                    className={errors3[field.name] ? "error-field form-control" : "form-control"}
+
                                     name={field.name}
                                     id={field.name}
                                     value={formValues3[field.name]}
@@ -979,7 +985,9 @@ const Engagement = () => {
                                       </label>
                                       <input
                                         type="text"
-                                        className="form-control"
+                                        
+                                        className={errors4[index] ? "error-field form-control" : "form-control"}
+
                                         placeholder={
                                           "Please Enter Minimum number of Jobs"
                                         }
@@ -1049,7 +1057,9 @@ const Engagement = () => {
                                       </label>
                                       <select
                                         id={`service${index}`}
-                                        className="form-select"
+                                        className={errors4[index] ? "error-field form-select" : "form-select"}
+
+                                      
                                         name="service_id"
                                         value={job.service_id}
                                         onChange={(e) =>
@@ -1089,7 +1099,7 @@ const Engagement = () => {
                                       </label>
                                       <input
                                         type="text"
-                                        className="form-control"
+                                        className={errors4[index] ? "error-field form-control" : "form-control"}
                                         name="cost_per_job"
                                         placeholder={
                                           "Please Enter Cost Per Job"
@@ -1116,7 +1126,7 @@ const Engagement = () => {
                                       >
                                         <i
                                           style={{
-                                            fontSize: 25,
+                                           
                                             cursor: "pointer",
                                           }}
                                           className="ti-trash text-danger"
@@ -1167,7 +1177,7 @@ const Engagement = () => {
                       </label>
                       <input
                         type="date"
-                        className="form-control"
+                        className={formErrors.customerJoiningDate ? "error-field form-control" : "form-control"}
                         name="customerJoiningDate"
                         defaultValue={
                           customerDetails?.data?.customer
@@ -1188,7 +1198,7 @@ const Engagement = () => {
                         Select Customer Source
                       </label>
                       <select
-                        className="form-select"
+                       className={formErrors.customerSource ? "error-field form-select" : "form-select"}
                         name="customerSource"
                         value={formState1.customerSource}
                         onChange={handleInputChange}
@@ -1214,7 +1224,7 @@ const Engagement = () => {
                         Select Customer Sub-Source
                       </label>
                       <select
-                        className="form-select"
+                        className={formErrors.customerSubSource ? "error-field form-select" : "form-select"}
                         name="customerSubSource"
                         value={formState1.customerSubSource}
                         onChange={(e) => handleInputChange(e)}
