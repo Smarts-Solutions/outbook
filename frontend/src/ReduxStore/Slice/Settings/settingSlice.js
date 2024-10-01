@@ -19,6 +19,7 @@ import {
   customerSource,
   customerSubSource,
   INTERNALAPI,
+  SUBINTERNALAPI,
   
   
 } from "../../../Services/Settings/settingService";
@@ -387,6 +388,27 @@ export const customerSubSourceApi = createAsyncThunk(
   }
 );
 
+export const customerSubInternalApi = createAsyncThunk(
+  "subinternal",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      let IP_Data = await GET_IP();
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+      const updatedReq = {
+        ...req,
+        ip: IP_Data.data.ip,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await SUBINTERNALAPI(updatedReq, authToken);
+
+      return await res;
+    } catch (err) {
+      return err;
+    }
+  }
+);
+
  
 
 //Setting Slice
@@ -412,6 +434,7 @@ const SettingSlice = createSlice({
     incorporationData: [],
     customerSource: [],
     customerSubSource: [],
+    customersubinternal: [],
      
   },
 
@@ -605,6 +628,17 @@ const SettingSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
       })
+      .addCase(customerSubInternalApi.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(customerSubInternalApi.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.customersubinternal = action.payload;
+      })
+      .addCase(customerSubInternalApi.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      });
        
   },
 });

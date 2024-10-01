@@ -24,7 +24,7 @@ const handleSubInternal = async (req, res) => {
                 res.status(200).json({ status: true, data: result });
                 break;
             case 'delete':
-                await subInternalService.removeSubInternal(Internal);
+                await subInternalService.removeSubInternal(subInternal);
                 res.status(200).json({ status: true, message: 'Sub Internal deleted successfully' });
                 break;
             case 'update':

@@ -10,8 +10,8 @@ const getSubInternal = async (subInternal) => {
     return subInternalModel.getSubInternal(subInternal);
 }
 
-const getSubInternalAll = async () => {
-    return subInternalModel.getSubInternalAll();
+const getSubInternalAll = async (subInternal) => {
+    return subInternalModel.getSubInternalAll(subInternal);
 }
 
 const removeSubInternal = async (subInternal) => {

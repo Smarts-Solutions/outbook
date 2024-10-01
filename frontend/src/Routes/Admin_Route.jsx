@@ -20,6 +20,7 @@ import Access from "../layouts/Admin/AccessPage/Access";
 import Setting from "../layouts/Admin/Settings/Setting";
 import Staff from "../layouts/Admin/Staff/Staff";
 import ViewLogs from "../layouts/Admin/Staff/ViewLogs";
+import SubInternal from "../layouts/Admin/Settings/SubInternal";
 
 import JobType from "../layouts/Admin/Settings/JobType";
 import Subsource from "../layouts/Admin/Settings/Subsource";
@@ -227,6 +228,7 @@ const Admin_Route = () => {
             <Route path="/setting/checklist" element={<SettingCheckList />} />
             <Route path="/edit/setting/checklist" element={<EditSettingCheckList />} />
             <Route path="/timesheet" element={<Timesheet />} />
+            <Route path="/subinternal" element={<SubInternal />} />
           </Routes>
         </div>
       </div>
