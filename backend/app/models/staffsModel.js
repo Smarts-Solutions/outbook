@@ -2,7 +2,7 @@ const pool = require('../../app/config/database');
 const { SatffLogUpdateOperation } = require('../../app/utils/helper');
 
 const createStaff = async (staff) => {
-    const { role_id, first_name, last_name, email, phone, password, status ,created_by ,StaffUserId,ip } = staff;
+    const { role_id, first_name, last_name, email, phone, password, status, created_by, StaffUserId, ip } = staff;
 
     const query = `
     INSERT INTO staffs (role_id, first_name, last_name, email, phone, password, status ,created_by)
@@ -10,8 +10,8 @@ const createStaff = async (staff) => {
     `;
 
     try {
-        const [result] = await pool.execute(query, [role_id, first_name, last_name, email, phone, password, status,created_by]);
-        
+        const [result] = await pool.execute(query, [role_id, first_name, last_name, email, phone, password, status, created_by]);
+
         const currentDate = new Date();
         await SatffLogUpdateOperation(
             {
@@ -21,7 +21,7 @@ const createStaff = async (staff) => {
                 module_name: "staff",
                 log_message: `created staff ${first_name} ${last_name}`,
                 permission_type: "created",
-                module_id:result.insertId
+                module_id: result.insertId
             }
         );
         return result.insertId;
@@ -65,7 +65,7 @@ const updateStaff = async (staff) => {
         if (key != "ip" && key != "StaffUserId") {
             setClauses.push(`${key} = ?`);
             values.push(value);
-          }
+        }
     }
     // Add the id to the values array for the WHERE clause
     values.push(id);
@@ -76,32 +76,32 @@ const updateStaff = async (staff) => {
     WHERE id = ?
     `;
     try {
-    const [[existStatus]] = await pool.execute(`SELECT status FROM staffs WHERE id = ?`, [id]);
-   
-       let status_change = "Deactivate"
-        if(staff.status == "1"){
-         status_change = "Activate"
+        const [[existStatus]] = await pool.execute(`SELECT status FROM staffs WHERE id = ?`, [id]);
+
+        let status_change = "Deactivate"
+        if (staff.status == "1") {
+            status_change = "Activate"
         }
         let log_message = existStatus.status === staff.status ?
-        `edited staff ${staff.first_name} ${staff.last_name}`:
-        `changes the staff status ${status_change} ${staff.first_name} ${staff.last_name}`
+            `edited staff ${staff.first_name} ${staff.last_name}` :
+            `changes the staff status ${status_change} ${staff.first_name} ${staff.last_name}`
 
-     const [rows] = await pool.execute(query, values);
-     if(rows.changedRows){
-        const currentDate = new Date();
-        await SatffLogUpdateOperation(
-            {
-                staff_id: staff.StaffUserId,
-                ip: staff.ip,
-                date: currentDate.toISOString().split('T')[0],
-                module_name: "staff",
-                log_message: log_message,
-                permission_type: "updated",
-                module_id:staff.id
-            }
-        );
+        const [rows] = await pool.execute(query, values);
+        if (rows.changedRows) {
+            const currentDate = new Date();
+            await SatffLogUpdateOperation(
+                {
+                    staff_id: staff.StaffUserId,
+                    ip: staff.ip,
+                    date: currentDate.toISOString().split('T')[0],
+                    module_name: "staff",
+                    log_message: log_message,
+                    permission_type: "updated",
+                    module_id: staff.id
+                }
+            );
 
-     }
+        }
     } catch (err) {
         console.error('Error updating data:', err);
         throw err;
@@ -109,36 +109,36 @@ const updateStaff = async (staff) => {
 };
 
 const staffCompetency = async (staffCompetency) => {
- const { staff_id,action, service } = staffCompetency;
- if(action==="update"){
-    const addQuery = `
+    const { staff_id, action, service } = staffCompetency;
+    if (action === "update") {
+        const addQuery = `
     INSERT INTO staff_competencies (staff_id, service_id)
     VALUES (?, ?)
     ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP
    `;
-   
-   const deleteQuery = `
+
+        const deleteQuery = `
     DELETE FROM staff_competencies
     WHERE staff_id = ? AND service_id = ?
    `;
-   
-    try {
-        for (const serv of service) {
-            if (serv.status) {
-                // Insert service
-                await pool.execute(addQuery, [staff_id, serv.service_id]);
-            } else {
-                // Delete service
-                await pool.execute(deleteQuery, [staff_id, serv.service_id]);
+
+        try {
+            for (const serv of service) {
+                if (serv.status) {
+                    // Insert service
+                    await pool.execute(addQuery, [staff_id, serv.service_id]);
+                } else {
+                    // Delete service
+                    await pool.execute(deleteQuery, [staff_id, serv.service_id]);
+                }
             }
+        } catch (err) {
+            console.error('Error updating data:', err);
+            throw err;
         }
-    } catch (err) {
-        console.error('Error updating data:', err);
-        throw err;
-    }
- }else{
-    
-    const query = `
+    } else {
+
+        const query = `
         SELECT 
             services.id as service_id, 
             services.name as service_name, 
@@ -156,9 +156,9 @@ const staffCompetency = async (staffCompetency) => {
             staff_competencies.staff_id = ?
     `;
 
-    const [rows] = await pool.query(query, [staff_id]);
-    return rows;
- }
+        const [rows] = await pool.query(query, [staff_id]);
+        return rows;
+    }
 
 
 }
@@ -175,9 +175,9 @@ const getStaffById = async (id) => {
 };
 
 const isLoginAuthTokenCheckmodel = async (staff) => {
-     const { id, login_auth_token } = staff;
-     const [rows] = await pool.query('SELECT id , login_auth_token FROM staffs WHERE id = ? AND login_auth_token = ?', [id , login_auth_token]);
-     return rows[0];
+    const { id, login_auth_token } = staff;
+    const [rows] = await pool.query('SELECT id , login_auth_token FROM staffs WHERE id = ? AND login_auth_token = ?', [id, login_auth_token]);
+    return rows[0];
 };
 
 const profile = async (staff) => {
@@ -195,6 +195,21 @@ const profile = async (staff) => {
     }
 }
 
+
+const managePortfolio = async (staff_id) => {
+    const id = staff_id.staff_id;
+    const query = ` SELECT id, trading_name as customer_name FROM customers  ORDER BY id DESC `;
+    try {
+        const [result] = await pool.execute(query);
+        
+        return result;
+    } catch (err) {
+        console.error('Error selecting data:', err);
+        throw err;
+    }
+
+};
+
 module.exports = {
     createStaff,
     getStaff,
@@ -205,5 +220,6 @@ module.exports = {
     getStaffByEmail,
     getStaffById,
     isLoginAuthTokenCheckmodel,
-    profile
+    profile,
+    managePortfolio
 };

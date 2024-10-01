@@ -10,8 +10,13 @@ const addStaff = async (staff) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   return staffModel.createStaff({ role_id, first_name, last_name, email, phone, status, password: hashedPassword ,created_by,StaffUserId,ip});
 };
+
 const getStaff = async () => {
   return staffModel.getStaff();
+}
+
+const managePortfolio = async (staff_id) => {
+  return staffModel.managePortfolio(staff_id);
 }
 
 const getManagerStaff = async () => {
@@ -149,5 +154,6 @@ module.exports = {
     profile,
     loginWithAzure,
     isLoginAuthTokenCheck,
-    isLogOut
+    isLogOut,
+    managePortfolio
 };

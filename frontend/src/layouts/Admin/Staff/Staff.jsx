@@ -24,6 +24,7 @@ const StaffPage = () => {
   const [showStaffInsertTab, setShowStaffInsertTab] = useState(true);
   const [showStaffUpdateTab, setShowStaffUpdateTab] = useState(true);
   const [showStaffDeleteTab, setStaffDeleteTab] = useState(true);
+  const [allCustomerData, setAllCustomerData] = useState([]);
 
   useEffect(() => {
     if (
@@ -69,7 +70,6 @@ const StaffPage = () => {
   });
   const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
  
-
   useEffect(() => {
     staffData();
     roleData();
@@ -86,8 +86,6 @@ const StaffPage = () => {
     }
   }, [editStaffData]);
 
- 
-
   const staffData = async () => {
     await dispatch(Staff({ req: { action: "get" }, authToken: token }))
       .unwrap()
@@ -96,9 +94,6 @@ const StaffPage = () => {
           const filteredData = response.data.filter((item) => {
             const itemDate = new Date(item.created_at);
             const { startDate, endDate } = getDateRange(activeTab);
-
-            console.log("startDate", startDate)
-            console.log("endDate", endDate)
             return itemDate >= startDate && itemDate <= endDate;
           });
 
@@ -111,6 +106,22 @@ const StaffPage = () => {
         return;
       });
   };
+ 
+  const GetAllCustomer = async () => {
+    await dispatch(Staff({ req: { action: "portfolio" , staff_id: StaffUserId.id}, authToken: token }))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setAllCustomerData(response.data); 
+        } else {
+          setAllCustomerData([]); 
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
 
   const ServiceData = async (row) => {
     try {
@@ -212,7 +223,7 @@ const StaffPage = () => {
       cell: (row) => (
         <div>
           {/* <button className='edit-icon' onClick={() => setIsModalOpen(true)}> <i className="ti-user" /></button> */}
-          <button className="secondary-icon" onClick={() => setPortfolio(true)}>
+          <button className="secondary-icon" onClick={() =>{ setPortfolio(true) ; GetAllCustomer()}}>
             {" "}
             <i className="ti-briefcase" />
           </button>
@@ -656,7 +667,27 @@ const StaffPage = () => {
                   </tr>
                 </thead>
                 <tbody className="list form-check-all">
-                  <tr className="tabel_new">
+                  {
+                    allCustomerData &&
+                    allCustomerData.map((item, index) => (
+                      <tr className="tabel_new" key={index}>
+                        <td>{item.customer_name}</td>
+                        <td className="tabel_left">
+                          <div className=" gap-2">
+                            <div className="remove">
+                              <a
+                                onclick="deleteRecordModalshow()"
+                                className="text-decoration-none remove-item-btn"
+                              >
+                                <i className="ti-trash text-danger fs-5"></i>
+                              </a>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  }
+                  {/* <tr className="tabel_new">
                     <td>Outbooks Outsourcing Pvt Ltd</td>
 
                     <td className="tabel_left">
@@ -671,7 +702,7 @@ const StaffPage = () => {
                         </div>
                       </div>
                     </td>
-                  </tr>
+                  </tr> */}
                 </tbody>
               </table>
               <div className="noresult" style={{ display: "none" }}>
