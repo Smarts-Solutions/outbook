@@ -1696,9 +1696,25 @@ const jobUpdate = async (job) => {
 const deleteJobById = async (job) => {
   const { job_id } = job;
   try {
-
+    if(parseInt(job_id) > 0){
+      const currentDate = new Date();
+      await SatffLogUpdateOperation(
+        {
+          staff_id: job.StaffUserId,
+          ip: job.ip,
+          date: currentDate.toISOString().split('T')[0],
+          module_name: 'job',
+          log_message: `deletes job code:`,
+          permission_type: 'deleted',
+          module_id: job_id,
+        }
+      );
+    }
     const [result] = await pool.execute('DELETE FROM jobs WHERE id = ?', [job_id]);
     await pool.execute('DELETE FROM client_job_task WHERE job_id = ?', [job_id]);
+    await pool.execute('DELETE FROM drafts WHERE job_id = ?', [job_id]);
+    await pool.execute('DELETE FROM missing_logs WHERE job_id = ?', [job_id]);
+    await pool.execute('DELETE FROM queries WHERE job_id = ?', [job_id]);
     if (result.affectedRows > 0) {
       return { status: true, message: 'Job deleted successfully.', data: job_id };
     } else {

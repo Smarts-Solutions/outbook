@@ -66,12 +66,7 @@ const getCustomerContactPersonRoleAll = async () => {
 }
 
 const deleteCustomerContactPersonRole = async (CustomerContactPersonRole) => {
-    const query = `
-    DELETE FROM customer_contact_person_role WHERE id = ?
-    `;
-    const [[existName]] = await pool.execute(`SELECT name FROM customer_contact_person_role WHERE id = ?`, [CustomerContactPersonRole.id]);
-    try {
-        await pool.execute(query, [CustomerContactPersonRole.id]);
+    if(parseInt(CustomerContactPersonRole.id) > 0){
         const currentDate = new Date();
         await SatffLogUpdateOperation(
             {
@@ -84,7 +79,13 @@ const deleteCustomerContactPersonRole = async (CustomerContactPersonRole) => {
                 module_id:CustomerContactPersonRole.id
             }
         );
-
+    }
+    const query = `
+    DELETE FROM customer_contact_person_role WHERE id = ?
+    `;
+    const [[existName]] = await pool.execute(`SELECT name FROM customer_contact_person_role WHERE id = ?`, [CustomerContactPersonRole.id]);
+    try {
+        await pool.execute(query, [CustomerContactPersonRole.id]);
 
     } catch (err) {
         console.error('Error deleting data:', err);

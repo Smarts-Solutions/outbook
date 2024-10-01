@@ -17,6 +17,7 @@ const Queries = () => {
   const [errors1, setErrors1] = useState({});
   const [EditData, setEditData] = useState({});
   const [singleQueryData, setSingleQueryData] = useState([]);
+  const [draftStatus, setDraftStatus] = useState(0);
 
   const [AllQueryInputdata, setAllQueryInputdata] = useState({
     QueriesRemaining: "0",
@@ -73,7 +74,8 @@ const Queries = () => {
       .unwrap()
       .then((response) => {
         if (response.status) {
-          setAllQueryList(response.data || [])
+          setDraftStatus(response.data.draft_process)
+          setAllQueryList(response.data.rows || [])
         }
         else {
           setAllQueryList([])
@@ -229,8 +231,13 @@ const Queries = () => {
         </div>
         <div className='col-md-4'>
           <div>
-            <button type="button" className="btn btn-info text-white float-end " onClick={() => setAddquery(true)}>
-              <i className="fa-regular fa-plus pe-1"></i> Add Query</button>
+            {
+              draftStatus == 0 ?
+                <button type="button" className="btn btn-info text-white float-end " onClick={() => setAddquery(true)} disabled>
+                  <i className="fa-regular fa-plus pe-1"></i> Add Query</button>
+                :
+                ""
+            }
           </div>
 
         </div>
