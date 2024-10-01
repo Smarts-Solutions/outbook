@@ -20,7 +20,12 @@ const Timesheet = () => {
       Sun: "",
     },
   ]);
+  const [selectedTab, setSelectedTab] = useState("this-week");
 
+  // Function to handle dropdown change
+  const handleTabChange = (event) => {
+    setSelectedTab(event.target.value);
+  };
   const handleAddNewSheet = () => {
     const newSheetRow = {
       TaskType: "",
@@ -68,163 +73,36 @@ const Timesheet = () => {
           </div>
         </div>
         <div className="report-data mt-4">
-          <ul
-            className="nav nav-pills mb-3 rounded-tabs"
-            id="pills-tab"
-            role="tablist"
-          >
-            <li className="nav-item" role="presentation">
-              <button
-                className="nav-link active"
-                id="this-week-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#this-week"
-                type="button"
-                role="tab"
-                aria-controls="this-week"
-                aria-selected="true"
-              >
-                This week
-              </button>
-            </li>
-            <li className="nav-item" role="presentation">
-              <button
-                className="nav-link"
-                id="last-week-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#last-week"
-                type="button"
-                role="tab"
-                aria-controls="last-week"
-                aria-selected="false"
-              >
-                Last week
-              </button>
-            </li>
-            <li className="nav-item" role="presentation">
-              <button
-                className="nav-link"
-                id="this-month-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#this-month"
-                type="button"
-                role="tab"
-                aria-controls="this-month"
-                aria-selected="false"
-              >
-                This Month
-              </button>
-            </li>
-            <li className="nav-item" role="presentation">
-              <button
-                className="nav-link"
-                id="last-month-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#last-month"
-                type="button"
-                role="tab"
-                aria-controls="last-month"
-                aria-selected="false"
-              >
-                Last month
-              </button>
-            </li>
-            <li className="nav-item" role="presentation">
-              <button
-                className="nav-link"
-                id="last-quarter-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#last-quarter"
-                type="button"
-                role="tab"
-                aria-controls="last-quarter"
-                aria-selected="false"
-              >
-                Last quarter
-              </button>
-            </li>
-            <li className="nav-item" role="presentation">
-              <button
-                className="nav-link"
-                id="this-6-months-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#this-6-months"
-                type="button"
-                role="tab"
-                aria-controls="this-6-months"
-                aria-selected="false"
-              >
-                This 6 months
-              </button>
-            </li>
-            <li className="nav-item" role="presentation">
-              <button
-                className="nav-link"
-                id="last-6-months-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#last-6-months"
-                type="button"
-                role="tab"
-                aria-controls="last-6-months"
-                aria-selected="false"
-              >
-                Last 6 months
-              </button>
-            </li>
-            <li className="nav-item" role="presentation">
-              <button
-                className="nav-link"
-                id="this-year-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#this-year"
-                type="button"
-                role="tab"
-                aria-controls="this-year"
-                aria-selected="false"
-              >
-                This year
-              </button>
-            </li>
-            <li className="nav-item" role="presentation">
-              <button
-                className="nav-link"
-                id="last-year-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#last-year"
-                type="button"
-                role="tab"
-                aria-controls="last-year"
-                aria-selected="false"
-              >
-                Last year
-              </button>
-            </li>
-            <li className="nav-item" role="presentation">
-              <button
-                className="nav-link"
-                id="custom-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#custom"
-                type="button"
-                role="tab"
-                aria-controls="custom"
-                aria-selected="false"
-              >
-                Custom
-              </button>
-            </li>
-          </ul>
-          <div className="tab-content mt-5" id="pills-tabContent">
-            <div
-              className="tab-pane fade show active"
-              id="this-week"
-              role="tabpanel"
-              aria-labelledby="this-week-tab"
-            >
-              <div className="row">
-                <div className="col-lg-12">
-                  <div className="card-body">
-                    <div id="customerList">
+          <div className="col-md-4">
+        <div className="form-group">
+                    {/* <label htmlFor="tabSelect">Filter:</label> */}
+                    <select
+                      className="form-control"
+                      id="tabSelect"
+                      value={selectedTab}
+                      onChange={handleTabChange}
+                    >
+                      <option >Select Options</option>
+                      <option value="this-week">This Week</option>
+                      <option value="last-week">Last Week</option>
+                      <option value="this-month">This Month</option>
+                      <option value="last-month">Last Month</option>
+                      <option value="last-quarter">Last Quarter</option>
+                      <option value="this-6-months">This 6 Months</option>
+                      <option value="last-6-months">Last 6 Months</option>
+                      <option value="this-year">This Year</option>
+                      <option value="last-year">Last Year</option>
+                      <option value="custom">Custom</option>
+                    </select>
+                  </div>
+                  </div>
+
+                   {/* Tabs Content */}
+              <div className="tab-content mt-5">
+                {/* Render content based on selected tab */}
+                {selectedTab === "this-week" && (
+                  <div className="tab-pane show active">
+                     <div id="customerList">
                       <div className="row">
                        
                         <div className="table-responsive table-card  mb-1">
@@ -237,7 +115,7 @@ const Timesheet = () => {
                                 <th className="dropdwnCol2" data-field="phone">
                                   No
                                 </th>
-                                <th className="" data-field="phone" width="8%">
+                                <th className="" data-field="phone" >
                                   Task Type
                                 </th>
                                 <th className="dropdwnCol7" data-field="phone">
@@ -289,14 +167,14 @@ const Timesheet = () => {
                               {timeSheetRows?.map((item, index) => (
                                 <tr className="tabel_new">
                                   <td>{index + 1}</td>
-                                  <td>
-                                    <select className="form-select form-control">
+                                  <td >
+                                    <select className="form-select form-control" style={{width:'100px'}}>
                                       <option>Internal</option>
                                       <option selected>External</option>
                                     </select>
                                   </td>
-                                  <td>
-                                    <select className="form-select">
+                                  <td >
+                                    <select className="form-select" style={{width:'150px'}}>
                                       <option selected>Customer 1</option>
                                       <option value={1}>
                                         THE BLACK T COMPANY LTD
@@ -304,19 +182,19 @@ const Timesheet = () => {
                                     </select>
                                   </td>
                                   <td>
-                                    <select className="form-select">
+                                    <select className="form-select" style={{width:'150px'}}>
                                       <option selected>Client 1</option>
                                       <option value={1}>MT LIMITED</option>
                                     </select>
                                   </td>
                                   <td>
-                                    <select className="form-select">
+                                    <select className="form-select" style={{width:'120px'}}>
                                       <option selected>Job 1</option>
                                       <option value={1}>VAT</option>
                                     </select>
                                   </td>
                                   <td>
-                                    <select className="form-select">
+                                    <select className="form-select" style={{width:'120px'}}>
                                       <option selected>Task 1</option>
                                       <option value={1}>Task 2</option>
                                     </select>
@@ -413,166 +291,36 @@ const Timesheet = () => {
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-            <div
-              className="tab-pane fade"
-              id="last-week"
-              role="tabpanel"
-              aria-labelledby="last-week-tab"
-            >
-              <div className="row justify-content-center">
-                <div className="col-md-6 col-lg-4">
-                  <div className="card report-card dashboard-card">
-                    <div className="card-body">
-                      <div className="row d-flex justify-content-center">
-                        <div className="col">
-                          <p className="text-dark mb-1 font-weight-semibold">
-                            NO OF CUSTOMERS
-                          </p>
-                          <h3 className="mt-5">183</h3>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-6 col-lg-4">
-                  <div className="card report-card dashboard-card">
-                    <div className="card-body">
-                      <div className="row d-flex justify-content-center">
-                        <div className="col">
-                          <p className=" mb-1">NO OF JOBS</p>
-                          <h3 className="mt-5">45</h3>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-6 col-lg-4">
-                  <div className="card report-card dashboard-card">
-                    <div className="card-body">
-                      <div className="row d-flex justify-content-center">
-                        <div className="col">
-                          <p className="text-dark mb-1 font-weight-semibold">
-                            NO OF CLIENTS
-                          </p>
-                          <h3 className="mt-5">543</h3>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                )}
 
-                <div className="col-md-6 col-lg-4">
-                  <div className="card report-card dashboard-card">
-                    <div className="card-body">
-                      <div className="row d-flex justify-content-center">
-                        <div className="col">
-                          <p className="text-dark mb-1 font-weight-semibold">
-                            NO OF STAFF
-                          </p>
-                          <h3 className="mt-5">78</h3>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-6 col-lg-4">
-                  <div className="card report-card dashboard-card">
-                    <div className="card-body">
-                      <div className="row d-flex justify-content-center">
-                        <div className="col">
-                          <p className="text-dark mb-1 font-weight-semibold">
-                            PENDING JOBS
-                          </p>
-                          <h3 className="mt-5">233</h3>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-6 col-lg-4">
-                  <div className="card report-card dashboard-card">
-                    <div className="card-body">
-                      <div className="row d-flex justify-content-center">
-                        <div className="col">
-                          <p className="text-dark mb-1 font-weight-semibold">
-                            COMPLETED JOBS
-                          </p>
-                          <h3 className="mt-5">870</h3>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {selectedTab === "last-week" && (
+                   <div>This Last week content...</div>
+                )}
+
+                {selectedTab === "this-month" && (
+                  <div>This month's content...</div>
+                )}
+                {selectedTab === "last-month" && (
+                  <div>Last month's content...</div>
+                )}
+                {selectedTab === "last-quarter" && (
+                  <div>Last quarter's content...</div>
+                )}
+                {selectedTab === "this-6-months" && (
+                  <div>This 6 months' content...</div>
+                )}
+                {selectedTab === "last-6-months" && (
+                  <div>Last 6 months' content...</div>
+                )}
+                {selectedTab === "this-year" && (
+                  <div>This year's content...</div>
+                )}
+                {selectedTab === "last-year" && (
+                  <div>Last year's content...</div>
+                )}
+                {selectedTab === "custom" && <div>Custom content...</div>}
               </div>
-            </div>
-            <div
-              className="tab-pane fade"
-              id="this-month"
-              role="tabpanel"
-              aria-labelledby="this-month-tab"
-            >
-              This month's content...
-            </div>
-            <div
-              className="tab-pane fade"
-              id="last-month"
-              role="tabpanel"
-              aria-labelledby="last-month-tab"
-            >
-              Last month's content...
-            </div>
-            <div
-              className="tab-pane fade"
-              id="last-quarter"
-              role="tabpanel"
-              aria-labelledby="last-quarter-tab"
-            >
-              Last quarter's content...
-            </div>
-            <div
-              className="tab-pane fade"
-              id="this-6-months"
-              role="tabpanel"
-              aria-labelledby="this-6-months-tab"
-            >
-              This 6 months' content...
-            </div>
-            <div
-              className="tab-pane fade"
-              id="last-6-months"
-              role="tabpanel"
-              aria-labelledby="last-6-months-tab"
-            >
-              Last 6 months' content...
-            </div>
-            <div
-              className="tab-pane fade"
-              id="this-year"
-              role="tabpanel"
-              aria-labelledby="this-year-tab"
-            >
-              This year's content...
-            </div>
-            <div
-              className="tab-pane fade"
-              id="last-year"
-              role="tabpanel"
-              aria-labelledby="last-year-tab"
-            >
-              Last year's content...
-            </div>
-            <div
-              className="tab-pane fade"
-              id="custom"
-              role="tabpanel"
-              aria-labelledby="custom-tab"
-            >
-              Custom content...
-            </div>
-          </div>
+            
           <CommonModal
             isOpen={addtask}
             backdrop="static"

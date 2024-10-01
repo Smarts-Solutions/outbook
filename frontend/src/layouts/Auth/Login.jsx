@@ -243,7 +243,9 @@ const Login = () => {
                         <div className="input-group ">
                           <input
                             type="email"
-                            className="form-control"
+                          
+                            className={errorEmail ? "error-field form-control" : "form-control"}
+
                             name="username"
                             id="username"
                             placeholder="Enter Email Id"
@@ -252,7 +254,7 @@ const Login = () => {
                           />
                         </div>
                         {errorEmail ? (
-                          <span className="error-text-login">{errorEmail}</span>
+                          <span className="error-text">{errorEmail}</span>
                         ) : (
                           ""
                         )}
@@ -262,7 +264,8 @@ const Login = () => {
                         <div className="input-group ">
                           <input
                             type="password"
-                            className="form-control"
+                            className={errorPassword ?  "error-field form-control" : "form-control"}
+
                             name="password"
                             id="userpassword"
                             placeholder="Enter password"
@@ -270,7 +273,7 @@ const Login = () => {
                           />
                         </div>
                         {errorPassword ? (
-                          <span className="error-text-login">{errorPassword}</span>
+                          <span className="error-text">{errorPassword}</span>
                         ) : (
                           ""
                         )}
