@@ -11,16 +11,12 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { getDateRange } from "../../../Utils/Comman_function";
 import Validation_Message from "../../../Utils/Validation_Message";
-import { Link } from "react-router-dom";
 
 const StaffPage = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
   const role = JSON.parse(localStorage.getItem("role"));
-  const accessData = useSelector(
-    (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data
-  );
-
+  const accessData = useSelector((state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data);
   const [showStaffInsertTab, setShowStaffInsertTab] = useState(true);
   const [showStaffUpdateTab, setShowStaffUpdateTab] = useState(true);
   const [showStaffDeleteTab, setStaffDeleteTab] = useState(true);
@@ -60,7 +56,7 @@ const StaffPage = () => {
   const [editStaffData, setEditStaffData] = useState(false);
   const [addCompetancy, SetCompetancy] = useState(false);
   const [refresh, SetRefresh] = useState(false);
-  const [activeTab, setActiveTab] = useState("this-week");
+  const [activeTab, setActiveTab] = useState("this-year");
   const [modalData, setModalData] = useState({ fields: [] });
   const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
   const [serviceDataAll, setServiceDataAll] = useState({

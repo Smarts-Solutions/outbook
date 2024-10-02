@@ -279,9 +279,7 @@ const Customer = () => {
       }
     });
   };
-  const [selectedTab, setSelectedTab] = useState('this-week');
-
-
+  const [selectedTab, setSelectedTab] = useState('this-year');
 
   const tabs = [
     { id: 'this-week', label: 'This Week' },
@@ -297,11 +295,11 @@ const Customer = () => {
   ];
 
   useEffect(() => {
-    GetAllCustomerData(); // Fetch data when the component mounts
+    GetAllCustomerData(); 
   }, []);
 
   useEffect(() => {
-    GetAllCustomerData(); // Fetch data whenever the selected tab changes
+    GetAllCustomerData();
   }, [selectedTab]);
 
   const handleTabChange = (event) => {
