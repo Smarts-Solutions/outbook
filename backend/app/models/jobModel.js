@@ -1833,9 +1833,6 @@ const updateJobStatus = async(job)=>{
   }
 }
 
-
-
-
 module.exports = {
   getAddJobData,
   jobAdd,
