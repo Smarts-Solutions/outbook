@@ -1793,16 +1793,12 @@ const updateJobStatus = async(job)=>{
   const { job_id, status_type } = job;
   try {
 
-    let  draft_process = 0
+      if(parseInt(status_type)==6){
       const [ExistDraft] = await pool.execute(`SELECT job_id FROM drafts WHERE job_id = ?`, [job_id]);
-      console.log("ExistDraft",ExistDraft)
-
-      if(ExistDraft.length >  0){
+      if(ExistDraft.length === 0){
         return { status: false, message: 'Please sent first draft.', data: "W" }; 
       }
 
-
-     
        const [[rowsDraftProcess]] = await pool.execute(`SELECT 
           CASE
               WHEN NOT EXISTS (
@@ -1819,11 +1815,8 @@ const updateJobStatus = async(job)=>{
          if(rowsDraftProcess.status_check === 0){
             return { status: false, message: 'Please complete the draft.', data : "W" };
          }
+      }
 
-
-
-
-    return
     const query = `
          UPDATE jobs 
          SET status_type = ?
@@ -1836,7 +1829,6 @@ const updateJobStatus = async(job)=>{
       return { status: false, message: 'No job found with the given job_id.' };
     }
   } catch (err) {
-    console.log("err -", err);
     return { status: false, message: 'Error updating job status.' };
   }
 }
