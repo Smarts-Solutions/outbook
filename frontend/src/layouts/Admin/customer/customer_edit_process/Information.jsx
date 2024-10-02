@@ -130,6 +130,7 @@ const Information = ({ id, pageStatus }) => {
     CustomerPersonRoleData();
     incorporationData();
   }, []);
+  
   useEffect(() => {
     Get_Company();
   }, [searchItem]);
@@ -139,108 +140,108 @@ const Information = ({ id, pageStatus }) => {
   }, [searchItem]);
 
   useEffect(() => {
-    setCustomerType(id.customer_type);
-    setManagerType(id.account_manager_id);
+    setCustomerType(id?.customer_type);
+    setManagerType(id?.account_manager_id);
 
     if (customerDetails && customerDetails) {
       if (id.customer_type == "1") {
         setSoleTraderDetails((prevState) => ({
           ...prevState,
           tradingName:
-            customerDetails.customer && customerDetails.customer.trading_name,
+            customerDetails?.customer && customerDetails?.customer?.trading_name,
           tradingAddress:
-            customerDetails.customer &&
-            customerDetails.customer.trading_address,
+            customerDetails?.customer &&
+            customerDetails?.customer?.trading_address,
           vatRegistered:
-            customerDetails.customer && customerDetails.customer.vat_registered,
+            customerDetails?.customer && customerDetails?.customer?.vat_registered,
           vatNumber:
-            customerDetails.customer && customerDetails.customer.vat_number,
-          website: customerDetails.customer && customerDetails.customer.website,
+            customerDetails?.customer && customerDetails?.customer?.vat_number,
+          website: customerDetails?.customer && customerDetails?.customer?.website,
           first_name:
-            customerDetails.contact_details &&
-            customerDetails.contact_details[0].first_name,
+            customerDetails?.contact_details &&
+            customerDetails?.contact_details[0]?.first_name,
           last_name:
-            customerDetails.contact_details &&
-            customerDetails.contact_details[0].last_name,
+            customerDetails?.contact_details &&
+            customerDetails?.contact_details[0]?.last_name,
           phone:
-            customerDetails.contact_details &&
-            customerDetails.contact_details[0].phone,
+            customerDetails?.contact_details &&
+            customerDetails?.contact_details[0]?.phone,
           email:
-            customerDetails.contact_details &&
-            customerDetails.contact_details[0].email,
+            customerDetails?.contact_details &&
+            customerDetails?.contact_details[0]?.email,
           residentialAddress:
-            customerDetails.contact_details &&
-            customerDetails.contact_details[0].residential_address,
+            customerDetails?.contact_details &&
+            customerDetails?.contact_details[0]?.residential_address,
           phone_code:
-            customerDetails.contact_details &&
-            customerDetails.contact_details[0].phone_code,
+            customerDetails?.contact_details &&
+            customerDetails?.contact_details[0]?.phone_code,
           contact_id:
-            customerDetails.contact_details &&
-            customerDetails.contact_details[0].contact_id,
+            customerDetails?.contact_details &&
+            customerDetails?.contact_details[0]?.contact_id,
         }));
       }
       if (id.customer_type == "2") {
         setCompanyDetails((prevState) => ({
           ...prevState,
           CompanyName:
-            customerDetails.company_details &&
-            customerDetails.company_details.company_name,
+            customerDetails?.company_details &&
+            customerDetails?.company_details?.company_name,
           EntityType:
-            customerDetails.company_details &&
-            customerDetails.company_details.entity_type,
+            customerDetails?.company_details &&
+            customerDetails?.company_details?.entity_type,
           CompanyStatus:
-            customerDetails.company_details &&
-            customerDetails.company_details.company_status,
+            customerDetails?.company_details &&
+            customerDetails?.company_details?.company_status,
           CompanyNumber:
-            customerDetails.company_details &&
-            customerDetails.company_details.company_number,
+            customerDetails?.company_details &&
+            customerDetails?.company_details?.company_number,
           RegisteredOfficeAddress:
-            customerDetails.company_details &&
-            customerDetails.company_details.registered_office_address,
+            customerDetails?.company_details &&
+            customerDetails?.company_details?.registered_office_address,
           IncorporationDate:
-            customerDetails.company_details &&
-            customerDetails.company_details.incorporation_date
-              ? customerDetails.company_details &&
-                customerDetails.company_details.incorporation_date
+            customerDetails?.company_details &&
+            customerDetails?.company_details?.incorporation_date
+              ? customerDetails?.company_details &&
+                customerDetails?.company_details?.incorporation_date
               : "",
           IncorporationIn:
-            customerDetails.company_details &&
-            customerDetails.company_details.incorporation_in,
+            customerDetails?.company_details &&
+            customerDetails?.company_details?.incorporation_in,
 
           VATRegistered:
-            customerDetails.customer && customerDetails.customer.vat_registered,
+            customerDetails?.customer && customerDetails?.customer?.vat_registered,
           VATNumber:
-            customerDetails.customer && customerDetails.customer.vat_number,
-          Website: customerDetails.customer && customerDetails.customer.website,
+            customerDetails?.customer && customerDetails?.customer?.vat_number,
+          Website: customerDetails?.customer && customerDetails?.customer?.website,
 
           TradingName:
-            customerDetails.customer && customerDetails.customer.trading_name,
+            customerDetails?.customer && customerDetails?.customer?.trading_name,
           TradingAddress:
-            customerDetails.customer &&
-            customerDetails.customer.trading_address,
+            customerDetails?.customer &&
+            customerDetails?.customer?.trading_address,
         }));
-        setContacts(customerDetails.contact_details);
+        setContacts(customerDetails?.contact_details);
       }
       if (id.customer_type == "3") {
         setPartnershipDetails((prevState) => ({
           ...prevState,
           TradingName:
-            customerDetails.customer && customerDetails.customer.trading_name,
+            customerDetails?.customer && customerDetails?.customer?.trading_name,
           TradingAddress:
-            customerDetails.customer &&
-            customerDetails.customer.trading_address,
+            customerDetails?.customer &&
+            customerDetails?.customer?.trading_address,
           VATRegistered:
-            customerDetails.customer && customerDetails.customer.vat_registered,
+            customerDetails?.customer && customerDetails?.customer?.vat_registered,
           VATNumber:
-            customerDetails.customer && customerDetails.customer.vat_number,
-          Website: customerDetails.customer && customerDetails.customer.website,
+            customerDetails?.customer && customerDetails?.customer?.vat_number,
+          Website: customerDetails?.customer && customerDetails?.customer?.website,
         }));
-        setContacts1(customerDetails && customerDetails.contact_details);
+        setContacts1(customerDetails && customerDetails?.contact_details);
 
-        if (customerDetails && customerDetails.contact_details?.length > 0) {
+        if (customerDetails && customerDetails?.contact_details?.length > 0) {
           const newErrors =
-            customerDetails.contact_details &&
-            customerDetails.contact_details.map((contact) => ({
+            customerDetails?.contact_details &&
+            customerDetails?.contact_details.map((contact) => ({
               first_name: "",
               last_name: "",
               customer_contact_person_role_id: "",
@@ -257,13 +258,13 @@ const Information = ({ id, pageStatus }) => {
     if (getSearchDetails && getSearchDetails.length > 0) {
       setCompanyDetails((prevState) => ({
         ...prevState,
-        CompanyName: getSearchDetails[0].title,
-        EntityType: getSearchDetails[0].company_type,
-        CompanyStatus: getSearchDetails[0].company_status,
-        CompanyNumber: getSearchDetails[0].company_number,
-        RegisteredOfficeAddress: getSearchDetails[0].address_snippet,
-        IncorporationDate: getSearchDetails[0].date_of_creation
-          ? getSearchDetails[0].date_of_creation
+        CompanyName: getSearchDetails[0]?.title,
+        EntityType: getSearchDetails[0]?.company_type,
+        CompanyStatus: getSearchDetails[0]?.company_status,
+        CompanyNumber: getSearchDetails[0]?.company_number,
+        RegisteredOfficeAddress: getSearchDetails[0]?.address_snippet,
+        IncorporationDate: getSearchDetails[0]?.date_of_creation
+          ? getSearchDetails[0]?.date_of_creation
           : "",
         // IncorporationIn: getSearchDetails[0].description,
       }));
@@ -446,28 +447,28 @@ const Information = ({ id, pageStatus }) => {
     if (customerType == 1 && ManagerType != "") {
       if (validate1()) {
         const req = {
-          customer_id: id.id,
+          customer_id: id?.id,
           pageStatus: "1",
           customer_type: "1",
-          staff_id: id.staff_id,
-          account_manager_id: id.account_manager_id,
-          trading_name: getSoleTraderDetails.tradingName,
-          customer_code: id.customer_code,
-          trading_address: getSoleTraderDetails.tradingAddress,
-          vat_registered: getSoleTraderDetails.vatRegistered,
-          vat_number: getSoleTraderDetails.vatNumber,
-          website: getSoleTraderDetails.website,
+          staff_id: id?.staff_id,
+          account_manager_id: id?.account_manager_id,
+          trading_name: getSoleTraderDetails?.tradingName,
+          customer_code: id?.customer_code,
+          trading_address: getSoleTraderDetails?.tradingAddress,
+          vat_registered: getSoleTraderDetails?.vatRegistered,
+          vat_number: getSoleTraderDetails?.vatNumber,
+          website: getSoleTraderDetails?.website,
           contactDetails: [
             {
-              contact_id: getSoleTraderDetails.contact_id,
+              contact_id: getSoleTraderDetails?.contact_id,
               customer_contact_person_role_id: null,
               customer_contact_person_role_name: null,
-              first_name: getSoleTraderDetails.first_name,
-              last_name: getSoleTraderDetails.last_name,
-              email: getSoleTraderDetails.email,
-              phone: getSoleTraderDetails.phone,
-              residential_address: getSoleTraderDetails.residentialAddress,
-              phone_code: getSoleTraderDetails.phone_code,
+              first_name: getSoleTraderDetails?.first_name,
+              last_name: getSoleTraderDetails?.last_name,
+              email: getSoleTraderDetails?.email,
+              phone: getSoleTraderDetails?.phone,
+              residential_address: getSoleTraderDetails?.residentialAddress,
+              phone_code: getSoleTraderDetails?.phone_code,
             },
           ],
         };
@@ -496,16 +497,16 @@ const Information = ({ id, pageStatus }) => {
           contacts &&
           contacts.map((contact, index) => {
             const error = {
-              first_name: contact.first_name
+              first_name: contact?.first_name
                 ? ""
                 : EDIT_CUSTOMER.REQUIRED_FIRST_NAME,
-              last_name: contact.last_name
+              last_name: contact?.last_name
                 ? ""
                 : EDIT_CUSTOMER.REQUIRES_LAST_NAME,
               email:
-                contact.email === ""
+                contact?.email === ""
                   ? EDIT_CUSTOMER.REQUIRE_EMAIL
-                  : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+                  : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact?.email)
                   ? ""
                   : EDIT_CUSTOMER.VALID_EMAIL,
             };
@@ -526,23 +527,23 @@ const Information = ({ id, pageStatus }) => {
           const req = {
             pageStatus: "1",
             customer_type: "2",
-            staff_id: id.staff_id,
-            account_manager_id: id.account_manager_id,
-            customer_id: id.id,
-            customer_code: id.customer_code,
-            company_name: getCompanyDetails.CompanyName,
-            entity_type: getCompanyDetails.EntityType,
-            company_status: getCompanyDetails.CompanyStatus,
-            company_number: getCompanyDetails.CompanyNumber,
+            staff_id: id?.staff_id,
+            account_manager_id: id?.account_manager_id,
+            customer_id: id?.id,
+            customer_code: id?.customer_code,
+            company_name: getCompanyDetails?.CompanyName,
+            entity_type: getCompanyDetails?.EntityType,
+            company_status: getCompanyDetails?.CompanyStatus,
+            company_number: getCompanyDetails?.CompanyNumber,
             registered_office_address:
-              getCompanyDetails.RegisteredOfficeAddress,
-            incorporation_date: getCompanyDetails.IncorporationDate,
-            incorporation_in: getCompanyDetails.IncorporationIn,
-            vat_registered: getCompanyDetails.VATRegistered,
-            vat_number: getCompanyDetails.VATNumber,
-            website: getCompanyDetails.Website,
-            trading_name: getCompanyDetails.TradingName,
-            trading_address: getCompanyDetails.TradingAddress,
+              getCompanyDetails?.RegisteredOfficeAddress,
+            incorporation_date: getCompanyDetails?.IncorporationDate,
+            incorporation_in: getCompanyDetails?.IncorporationIn,
+            vat_registered: getCompanyDetails?.VATRegistered,
+            vat_number: getCompanyDetails?.VATNumber,
+            website: getCompanyDetails?.Website,
+            trading_name: getCompanyDetails?.TradingName,
+            trading_address: getCompanyDetails?.TradingAddress,
             contactDetails: contacts,
           };
 
@@ -574,17 +575,17 @@ const Information = ({ id, pageStatus }) => {
           contacts1 &&
           contacts1.map((contact, index) => {
             const error = {
-              first_name: contact.first_name
+              first_name: contact?.first_name
                 ? ""
                 : EDIT_CUSTOMER.REQUIRED_FIRST_NAME,
-              last_name: contact.last_name
+              last_name: contact?.last_name
                 ? ""
                 : EDIT_CUSTOMER.REQUIRES_LAST_NAME,
 
               email:
                 contact.email === ""
                   ? EDIT_CUSTOMER.REQUIRE_EMAIL
-                  : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+                  : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact?.email)
                   ? ""
                   : EDIT_CUSTOMER.VALID_EMAIL,
             };
@@ -603,17 +604,17 @@ const Information = ({ id, pageStatus }) => {
         setContactsErrors(newErrors);
         if (formIsValid) {
           const req = {
-            customer_id: id.id,
+            customer_id: id?.id,
             pageStatus: "1",
             customer_type: "3",
-            staff_id: id.staff_id,
-            account_manager_id: id.account_manager_id,
-            trading_name: getPartnershipDetails.TradingName,
-            customer_code: id.customer_code,
-            trading_address: getPartnershipDetails.TradingAddress,
-            vat_registered: getPartnershipDetails.VATRegistered,
-            vat_number: getPartnershipDetails.VATNumber,
-            website: getPartnershipDetails.Website,
+            staff_id: id?.staff_id,
+            account_manager_id: id?.account_manager_id,
+            trading_name: getPartnershipDetails?.TradingName,
+            customer_code: id?.customer_code,
+            trading_address: getPartnershipDetails?.TradingAddress,
+            vat_registered: getPartnershipDetails?.VATRegistered,
+            vat_number: getPartnershipDetails?.VATNumber,
+            website: getPartnershipDetails?.Website,
             contactDetails: contacts1,
           };
 
@@ -703,7 +704,7 @@ const Information = ({ id, pageStatus }) => {
   const handleChange = (index, field, value) => {
     const newContacts =
       contacts &&
-      contacts.map((contact, i) =>
+      contacts?.map((contact, i) =>
         i === index ? { ...contact, [field]: value } : contact
       );
     setContacts(newContacts);
@@ -847,7 +848,7 @@ const Information = ({ id, pageStatus }) => {
 
   const FilterSearchDetails = () => {
     const filterData = getAllSearchCompany.filter(
-      (data) => data.title === searchItem
+      (data) => data?.title === searchItem
     );
     setSearchDetails(filterData);
   };
@@ -960,11 +961,11 @@ const Information = ({ id, pageStatus }) => {
                           >
                             <option value="">Select Manager</option>
                             {staffDataAll &&
-                              staffDataAll.map((data) => (
-                                <option key={data.id} value={data.id}>
-                                  {capitalizeFirstLetter(data.first_name) +
+                              staffDataAll?.map((data) => (
+                                <option key={data?.id} value={data?.id}>
+                                  {capitalizeFirstLetter(data?.first_name) +
                                     " " +
-                                    capitalizeFirstLetter(data.last_name)}
+                                    capitalizeFirstLetter(data?.last_name)}
                                 </option>
                               ))}
                           </Field>
@@ -1008,7 +1009,7 @@ const Information = ({ id, pageStatus }) => {
                                 className={errors1["tradingName"] ? "error-field form-control" : "form-control"}
                                 placeholder="Trading Name"
                                 onChange={(e) => handleChange1(e)}
-                                value={getSoleTraderDetails.tradingName}
+                                value={getSoleTraderDetails?.tradingName}
                                 maxLength={100}
                               />
 
@@ -1031,7 +1032,7 @@ const Information = ({ id, pageStatus }) => {
                                 name="tradingAddress"
                                 id="tradingAddress"
                                 onChange={(e) => handleChange1(e)}
-                                value={getSoleTraderDetails.tradingAddress}
+                                value={getSoleTraderDetails?.tradingAddress}
                                 maxLength={200}
                               />
                             </div>
@@ -1047,7 +1048,7 @@ const Information = ({ id, pageStatus }) => {
                                 aria-label="Default select example"
                                 name="vatRegistered"
                                 id="vatRegistered"
-                                value={getSoleTraderDetails.vatRegistered}
+                                value={getSoleTraderDetails?.vatRegistered}
                                 onChange={(e) => handleChange1(e)}
                               >
                                 <option value="">
@@ -1073,7 +1074,7 @@ const Information = ({ id, pageStatus }) => {
                                 placeholder="VAT Number"
                                 name="vatNumber"
                                 id="vatNumber"
-                                value={getSoleTraderDetails.vatNumber}
+                                value={getSoleTraderDetails?.vatNumber}
                                 onChange={(e) => handleChange1(e)}
                                 maxLength={9}
                               />
@@ -1088,7 +1089,7 @@ const Information = ({ id, pageStatus }) => {
                                 placeholder="URL"
                                 name="website"
                                 id="website"
-                                value={getSoleTraderDetails.website}
+                                value={getSoleTraderDetails?.website}
                                 onChange={(e) => handleChange1(e)}
                                 maxLength={200}
                               />
@@ -1120,7 +1121,7 @@ const Information = ({ id, pageStatus }) => {
                                 className={errors1["firstName"] ? "error-field form-control" : "form-control"}
                                 name="first_name"
                                 id="first_name"
-                                value={getSoleTraderDetails.first_name}
+                                value={getSoleTraderDetails?.first_name}
                                 onChange={(e) => handleChange1(e)}
                                 maxLength={50}
                               />
@@ -1142,7 +1143,7 @@ const Information = ({ id, pageStatus }) => {
                                 placeholder="Last Name"
                                 name="last_name"
                                 id="last_name"
-                                value={getSoleTraderDetails.last_name}
+                                value={getSoleTraderDetails?.last_name}
                                 onChange={(e) => handleChange1(e)}
                                 maxLength={50}
                               />
@@ -1163,15 +1164,15 @@ const Information = ({ id, pageStatus }) => {
                                     onChange={(e) => handleChange1(e)}
                                     name="phone_code"
                                     id="phone_code"
-                                    value={getSoleTraderDetails.phone_code}
+                                    value={getSoleTraderDetails?.phone_code}
                                   >
                                     {countryDataAll &&
-                                      countryDataAll.map((data) => (
+                                      countryDataAll?.map((data) => (
                                         <option
-                                          key={data.code}
-                                          value={data.code}
+                                          key={data?.code}
+                                          value={data?.code}
                                         >
-                                          {data.code}
+                                          {data?.code}
                                         </option>
                                       ))}
                                   </select>
@@ -1183,7 +1184,7 @@ const Information = ({ id, pageStatus }) => {
                                     placeholder="Phone Number"
                                     name="phone"
                                     id="phone"
-                                    value={getSoleTraderDetails.phone}
+                                    value={getSoleTraderDetails?.phone}
                                     onChange={(e) => handleChange1(e)}
                                     maxLength={12}
                                   />
@@ -1209,7 +1210,7 @@ const Information = ({ id, pageStatus }) => {
                                 placeholder="Enter Email ID"
                                 name="email"
                                 id="email"
-                                value={getSoleTraderDetails.email}
+                                value={getSoleTraderDetails?.email}
                                 onChange={(e) => handleChange1(e)}
                               />
                               {errors1["email"] && (
@@ -1232,7 +1233,7 @@ const Information = ({ id, pageStatus }) => {
                                 placeholder="Residential Address"
                                 name="residentialAddress"
                                 id="residentialAddress"
-                                value={getSoleTraderDetails.residentialAddress}
+                                value={getSoleTraderDetails?.residentialAddress}
                                 onChange={(e) => handleChange1(e)}
                               />
                               {errors1["residentialAddress"] && (
@@ -1271,9 +1272,7 @@ const Information = ({ id, pageStatus }) => {
                                     className="form-control"
                                     placeholder=" Search Company"
                                     name="SearchCompany"
-                                    onChange={(e) =>
-                                      setSearchItem(e.target.value)
-                                    }
+                                    onChange={(e) => setSearchItem(e.target.value)}
                                     value={searchItem}
                                     onClick={() => setShowDropdown(true)}
                                     style={{ cursor: "pointer" }}
@@ -1282,12 +1281,12 @@ const Information = ({ id, pageStatus }) => {
                                   showDropdown ? (
                                     <div className="dropdown-list">
                                       {getAllSearchCompany &&
-                                        getAllSearchCompany.map(
+                                        getAllSearchCompany?.map(
                                           (company, index) => (
                                             <div
                                               key={index}
                                               onClick={() => {
-                                                setSearchItem(company.title);
+                                                setSearchItem(company?.title);
                                                 setShowDropdown(false);
                                               }}
                                               style={{
@@ -1295,7 +1294,7 @@ const Information = ({ id, pageStatus }) => {
                                                 padding: "8px 0",
                                               }}
                                             >
-                                              {company.title}
+                                              {company?.title}
                                             </div>
                                           )
                                         )}
@@ -1320,7 +1319,7 @@ const Information = ({ id, pageStatus }) => {
                                   name="CompanyName"
                                   id="CompanyName"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails.CompanyName}
+                                  value={getCompanyDetails?.CompanyName}
                                 />
                                 {errors2["CompanyName"] && (
                                   <div className="error-text">
@@ -1343,7 +1342,7 @@ const Information = ({ id, pageStatus }) => {
                                   name="EntityType"
                                   id="EntityType"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails.EntityType}
+                                  value={getCompanyDetails?.EntityType}
                                 />
                                 {errors2["EntityType"] && (
                                   <div className="error-text">
@@ -1366,7 +1365,7 @@ const Information = ({ id, pageStatus }) => {
                                   name="CompanyStatus"
                                   id="CompanyStatus"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails.CompanyStatus}
+                                  value={getCompanyDetails?.CompanyStatus}
                                 />
                                 {errors2["CompanyStatus"] && (
                                   <div className="error-text">
@@ -1389,7 +1388,7 @@ const Information = ({ id, pageStatus }) => {
                                   placeholder="Enter Company Number"
                                   name="CompanyNumber"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails.CompanyNumber}
+                                  value={getCompanyDetails?.CompanyNumber}
                                 />
                                 {errors2["CompanyNumber"] && (
                                   <div className="error-text">
@@ -1413,7 +1412,7 @@ const Information = ({ id, pageStatus }) => {
                                   name="IncorporationDate"
                                   id="IncorporationDate"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails.IncorporationDate}
+                                  value={getCompanyDetails?.IncorporationDate}
                                 />
                                 {errors2["IncorporationDate"] && (
                                   <div className="error-text">
@@ -1436,7 +1435,7 @@ const Information = ({ id, pageStatus }) => {
                                   name="IncorporationIn"
                                   id="IncorporationIn"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails.IncorporationIn}
+                                  value={getCompanyDetails?.IncorporationIn}
                                 /> */}
                                 <select
                                   className={errors2["IncorporationIn"] ? "error-field form-select" : "form-select"}
@@ -1444,15 +1443,15 @@ const Information = ({ id, pageStatus }) => {
                                   name="IncorporationIn"
                                   id="IncorporationIn"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails.IncorporationIn}
+                                  value={getCompanyDetails?.IncorporationIn}
                                 >
                                   <option value="">
                                     Please Select Incorporation In
                                   </option>
                                   {incorporationDataAll &&
-                                    incorporationDataAll.map((data) => (
-                                      <option key={data.id} value={data.id}>
-                                        {data.name}
+                                    incorporationDataAll?.map((data) => (
+                                      <option key={data?.id} value={data?.id}>
+                                        {data?.name}
                                       </option>
                                     ))}
                                 </select>
@@ -1479,7 +1478,7 @@ const Information = ({ id, pageStatus }) => {
                                   id="RegisteredOfficeAddress"
                                   onChange={(e) => handleChange2(e)}
                                   value={
-                                    getCompanyDetails.RegisteredOfficeAddress
+                                    getCompanyDetails?.RegisteredOfficeAddress
                                   }
                                 />
                                 {errors2["RegisteredOfficeAddress"] && (
@@ -1499,7 +1498,7 @@ const Information = ({ id, pageStatus }) => {
                                   name="VATRegistered"
                                   id="VATRegistered"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails.VATRegistered}
+                                  value={getCompanyDetails?.VATRegistered}
                                 >
                                   <option value="">
                                     Please Select VAT Registered
@@ -1527,7 +1526,7 @@ const Information = ({ id, pageStatus }) => {
                                     name="VATNumber"
                                     id="VATNumber"
                                     onChange={(e) => handleChange2(e)}
-                                    value={getCompanyDetails.VATNumber}
+                                    value={getCompanyDetails?.VATNumber}
                                     maxLength={9}
                                   />
                                   {errors2["VATNumber"] && (
@@ -1548,7 +1547,7 @@ const Information = ({ id, pageStatus }) => {
                                   name="Website"
                                   id="Website"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails.Website}
+                                  value={getCompanyDetails?.Website}
                                   maxLength={200}
                                 />
                               </div>
@@ -1579,7 +1578,7 @@ const Information = ({ id, pageStatus }) => {
                                 name="TradingName"
                                 id="TradingName"
                                 onChange={(e) => handleChange2(e)}
-                                value={getCompanyDetails.TradingName}
+                                value={getCompanyDetails?.TradingName}
                               />
                               {errors2["TradingName"] && (
                                 <div className="error-text">
@@ -1601,7 +1600,7 @@ const Information = ({ id, pageStatus }) => {
                                 name="TradingAddress"
                                 id="TradingAddress"
                                 onChange={(e) => handleChange2(e)}
-                                value={getCompanyDetails.TradingAddress}
+                                value={getCompanyDetails?.TradingAddress}
                               />
                               {errors2["TradingAddress"] && (
                                 <div className="error-text">
@@ -1626,8 +1625,8 @@ const Information = ({ id, pageStatus }) => {
                           <div className="card-body">
                             <div className="row">
                               {contacts &&
-                                contacts.length > 0 &&
-                                contacts.map((contact, index) => (
+                                contacts?.length > 0 &&
+                                contacts?.map((contact, index) => (
                                   <div
                                     className="col-xl-12 col-lg-12 mt-3"
                                     key={index}
@@ -1642,7 +1641,7 @@ const Information = ({ id, pageStatus }) => {
                                                 onClick={() =>
                                                   handleDeleteContact(index)
                                                 }
-                                                disabled={contacts.length === 1}
+                                                disabled={contacts?.length === 1}
                                               >
                                                 <i className="ti-trash text-danger"></i>
                                               </button>
@@ -1662,11 +1661,11 @@ const Information = ({ id, pageStatus }) => {
                                             </label>
                                             <input
                                               type="text"
-                                              className={errors[index].first_name ? "error-field form-control" : "form-control"}
+                                              className={errors[index]?.first_name ? "error-field form-control" : "form-control"}
 
                                               placeholder="First Name"
                                               id={`first_name-${index}`}
-                                              value={contact.first_name}
+                                              value={contact?.first_name}
                                               onChange={(e) =>
                                                 handleChange(
                                                   index,
@@ -1676,12 +1675,12 @@ const Information = ({ id, pageStatus }) => {
                                               }
                                             />
                                             {errors[index] &&
-                                              errors[index].first_name && (
+                                              errors[index]?.first_name && (
                                                 <div
                                                   className="error-text"
                                                   style={{ color: "red" }}
                                                 >
-                                                  {errors[index].first_name}
+                                                  {errors[index]?.first_name}
                                                 </div>
                                               )}
                                           </div>
@@ -1702,7 +1701,7 @@ const Information = ({ id, pageStatus }) => {
                                               className={errors[index]?.last_name ? "error-field form-control" : "form-control"}
                                               placeholder="Last Name"
                                               id={`last_name-${index}`}
-                                              value={contact.last_name}
+                                              value={contact?.last_name}
                                               onChange={(e) =>
                                                 handleChange(
                                                   index,
@@ -1712,12 +1711,12 @@ const Information = ({ id, pageStatus }) => {
                                               }
                                             />
                                             {errors[index] &&
-                                              errors[index].last_name && (
+                                              errors[index]?.last_name && (
                                                 <div
                                                   className="error-text"
                                                   style={{ color: "red" }}
                                                 >
-                                                  {errors[index].last_name}
+                                                  {errors[index]?.last_name}
                                                 </div>
                                               )}
                                           </div>
@@ -1735,7 +1734,7 @@ const Information = ({ id, pageStatus }) => {
                                               className="form-select"
                                               id={`customer_contact_person_role_id-${index}`}
                                               value={
-                                                contact.customer_contact_person_role_id
+                                                contact?.customer_contact_person_role_id
                                               }
                                               onChange={(e) =>
                                                 handleChange(
@@ -1749,11 +1748,11 @@ const Information = ({ id, pageStatus }) => {
                                                 Select Role
                                               </option>
                                               {personRoleDataAll &&
-                                                personRoleDataAll.map(
+                                                personRoleDataAll?.map(
                                                   (item) => (
                                                     <option
-                                                      value={item.id}
-                                                      key={item.id}
+                                                      value={item?.id}
+                                                      key={item?.id}
                                                     >
                                                       {item.name}
                                                     </option>
@@ -1761,15 +1760,13 @@ const Information = ({ id, pageStatus }) => {
                                                 )}
                                             </select>
                                             {errors[index] &&
-                                              errors[index]
-                                                .customer_contact_person_role_id && (
+                                              errors[index]?.customer_contact_person_role_id && (
                                                 <div
                                                   className="error-text"
                                                   style={{ color: "red" }}
                                                 >
                                                   {
-                                                    errors[index]
-                                                      .customer_contact_person_role_id
+                                                    errors[index]?.customer_contact_person_role_id
                                                   }
                                                 </div>
                                               )}
@@ -1793,16 +1790,16 @@ const Information = ({ id, pageStatus }) => {
                                                     )
                                                   }
                                                   name="phone_code"
-                                                  value={contact.phone_code}
+                                                  value={contact?.phone_code}
                                                 >
                                                   {countryDataAll &&
-                                                    countryDataAll.map(
+                                                    countryDataAll?.map(
                                                       (data) => (
                                                         <option
-                                                          key={data.code}
-                                                          value={data.code}
+                                                          key={data?.code}
+                                                          value={data?.code}
                                                         >
-                                                          {data.code}
+                                                          {data?.code}
                                                         </option>
                                                       )
                                                     )}
@@ -1815,7 +1812,7 @@ const Information = ({ id, pageStatus }) => {
                                                   placeholder="Phone Number"
                                                   name="phone"
                                                   id={`phone-${index}`}
-                                                  value={contact.phone}
+                                                  value={contact?.phone}
                                                   onChange={(e) =>
                                                     handleChange(
                                                       index,
@@ -1827,11 +1824,11 @@ const Information = ({ id, pageStatus }) => {
                                                   minLength={9}
                                                 />
                                                 {errors[index] &&
-                                                  errors[index].phone && (
+                                                  errors[index]?.phone && (
                                                     <div
                                                       style={{ color: "red" }}
                                                     >
-                                                      {errors[index].phone}
+                                                      {errors[index]?.phone}
                                                     </div>
                                                   )}
                                               </div>
@@ -1852,11 +1849,11 @@ const Information = ({ id, pageStatus }) => {
                                             <input
                                               type="text"
                                               
-                                              className={errors[index].email ? "error-field form-control" : "form-control"}
+                                              className={errors[index]?.email ? "error-field form-control" : "form-control"}
 
                                               placeholder="Email"
                                               id={`email-${index}`}
-                                              value={contact.email}
+                                              value={contact?.email}
                                               onChange={(e) =>
                                                 handleChange(
                                                   index,
@@ -1866,12 +1863,12 @@ const Information = ({ id, pageStatus }) => {
                                               }
                                             />
                                             {errors[index] &&
-                                              errors[index].email && (
+                                              errors[index]?.email && (
                                                 <div
                                                   className="error-text"
                                                   style={{ color: "red" }}
                                                 >
-                                                  {errors[index].email}
+                                                  {errors[index]?.email}
                                                 </div>
                                               )}
                                           </div>
@@ -1922,7 +1919,7 @@ const Information = ({ id, pageStatus }) => {
                                 placeholder="Trading Name"
                                 name="TradingName"
                                 id="TradingName"
-                                value={getPartnershipDetails.TradingName}
+                                value={getPartnershipDetails?.TradingName}
                                 onChange={(e) => handleChange3(e)}
                                 maxLength={100}
                                 ref={(el) => (refs.current["TradingName"] = el)}
@@ -1946,7 +1943,7 @@ const Information = ({ id, pageStatus }) => {
                                 placeholder="Trading Address"
                                 name="TradingAddress"
                                 id="TradingAddress"
-                                value={getPartnershipDetails.TradingAddress}
+                                value={getPartnershipDetails?.TradingAddress}
                                 onChange={(e) => handleChange3(e)}
                                 maxLength={200}
                               />
@@ -1968,7 +1965,7 @@ const Information = ({ id, pageStatus }) => {
                                   className="form-select "
                                   name="VATRegistered"
                                   id="VATRegistered"
-                                  value={getPartnershipDetails.VATRegistered}
+                                  value={getPartnershipDetails?.VATRegistered}
                                   onChange={(e) => handleChange3(e)}
                                 >
                                   <option value="">
@@ -1998,7 +1995,7 @@ const Information = ({ id, pageStatus }) => {
                                   placeholder="VAT Number"
                                   name="VATNumber"
                                   id="VATNumber"
-                                  value={getPartnershipDetails.VATNumber}
+                                  value={getPartnershipDetails?.VATNumber}
                                   onChange={(e) => handleChange3(e)}
                                   maxLength={9}
                                 />
@@ -2019,7 +2016,7 @@ const Information = ({ id, pageStatus }) => {
                                 placeholder="URL"
                                 name="Website"
                                 id="Website"
-                                value={getPartnershipDetails.Website}
+                                value={getPartnershipDetails?.Website}
                                 onChange={(e) => handleChange3(e)}
                                 maxLength={200}
                               />
@@ -2046,10 +2043,10 @@ const Information = ({ id, pageStatus }) => {
                         <div className="card-body">
                           <div className="row">
                             {contacts1 &&
-                              contacts1.map((contact, index) => (
+                              contacts1?.map((contact, index) => (
                                 <div
                                   className="col-xxl-12 col-lg-12"
-                                  key={contact.contact_id}
+                                  key={contact?.contact_id}
                                 >
                                   <div className="card pricing-box p-4 m-2 mt-0">
                                     <div className="row">
@@ -2072,7 +2069,7 @@ const Information = ({ id, pageStatus }) => {
                                                   handleDeleteContact1(index)
                                                 }
                                                 disabled={
-                                                  contacts1.length === 1
+                                                  contacts1?.length === 1
                                                 }
                                               >
                                                 <i className="ti-trash text-danger"></i>
@@ -2097,7 +2094,7 @@ const Information = ({ id, pageStatus }) => {
                                             placeholder="First Name"
                                             name="first_name"
                                             id={`first_name-${index}`}
-                                            value={contact.first_name}
+                                            value={contact?.first_name}
                                             onChange={(e) =>
                                               handleChange4(
                                                 index,
@@ -2112,7 +2109,7 @@ const Information = ({ id, pageStatus }) => {
                                               className="error-text"
                                               style={{ color: "red" }}
                                             >
-                                              {contactsErrors[index].first_name}
+                                              {contactsErrors[index]?.first_name}
                                             </div>
                                           )}
                                         </div>
@@ -2132,7 +2129,7 @@ const Information = ({ id, pageStatus }) => {
                                             placeholder="Last Name"
                                             name="last_name"
                                             id={`last_name-${index}`}
-                                            value={contact.last_name}
+                                            value={contact?.last_name}
                                             onChange={(e) =>
                                               handleChange4(
                                                 index,
@@ -2146,7 +2143,7 @@ const Information = ({ id, pageStatus }) => {
                                               className="error-text"
                                               style={{ color: "red" }}
                                             >
-                                              {contactsErrors[index].last_name}
+                                              {contactsErrors[index]?.last_name}
                                             </div>
                                           )}
                                         </div>
@@ -2163,7 +2160,7 @@ const Information = ({ id, pageStatus }) => {
                                             className="form-select"
                                             id={`customer_contact_person_role_id-${index}`}
                                             value={
-                                              contact.customer_contact_person_role_id
+                                              contact?.customer_contact_person_role_id
                                             }
                                             onChange={(e) =>
                                               handleChange4(
@@ -2177,13 +2174,13 @@ const Information = ({ id, pageStatus }) => {
                                               Select Role
                                             </option>
                                             {personRoleDataAll &&
-                                              personRoleDataAll.map(
+                                              personRoleDataAll?.map(
                                                 (item, i) => (
                                                   <option
-                                                    value={item.id}
+                                                    value={item?.id}
                                                     key={i}
                                                   >
-                                                    {item.name}
+                                                    {item?.name}
                                                   </option>
                                                 )
                                               )}
@@ -2195,8 +2192,7 @@ const Information = ({ id, pageStatus }) => {
                                               style={{ color: "red" }}
                                             >
                                               {
-                                                contactsErrors[index]
-                                                  .customer_contact_person_role_id
+                                                contactsErrors[index]?.customer_contact_person_role_id
                                               }
                                             </div>
                                           )}
@@ -2221,15 +2217,15 @@ const Information = ({ id, pageStatus }) => {
                                                 }
                                                 name="phone_code"
                                                 id={`phone_code-${index}`}
-                                                value={contact.phone_code}
+                                                value={contact?.phone_code}
                                               >
                                                 {countryDataAll &&
-                                                  countryDataAll.map((data) => (
+                                                  countryDataAll?.map((data) => (
                                                     <option
-                                                      key={data.code}
-                                                      value={data.code}
+                                                      key={data?.code}
+                                                      value={data?.code}
                                                     >
-                                                      {data.code}
+                                                      {data?.code}
                                                     </option>
                                                   ))}
                                               </select>
@@ -2241,7 +2237,7 @@ const Information = ({ id, pageStatus }) => {
                                                 placeholder="Phone Number"
                                                 name="phone"
                                                 id={`phone-${index}`}
-                                                value={contact.phone}
+                                                value={contact?.phone}
                                                 onChange={(e) =>
                                                   handleChange4(
                                                     index,
@@ -2257,7 +2253,7 @@ const Information = ({ id, pageStatus }) => {
                                                   className="error-text"
                                                   style={{ color: "red" }}
                                                 >
-                                                  {contactsErrors[index].phone}
+                                                  {contactsErrors[index]?.phone}
                                                 </div>
                                               )}
                                             </div>
@@ -2279,7 +2275,7 @@ const Information = ({ id, pageStatus }) => {
                                             placeholder="Enter Email"
                                             name="email"
                                             id={`email-${index}`}
-                                            value={contact.email}
+                                            value={contact?.email}
                                             onChange={(e) =>
                                               handleChange4(
                                                 index,
@@ -2293,7 +2289,7 @@ const Information = ({ id, pageStatus }) => {
                                               className="error-text"
                                               style={{ color: "red" }}
                                             >
-                                              {contactsErrors[index].email}
+                                              {contactsErrors[index]?.email}
                                             </div>
                                           )}
                                         </div>
