@@ -4,7 +4,7 @@ const { SatffLogUpdateOperation, generateNextUniqueCodeJobLogTitle } = require('
 
 const getTaskTimeSheet = async (timeSheet) => {
   const { job_id } = timeSheet;
-  
+
   try {
     const query = `
      SELECT 
@@ -43,7 +43,7 @@ const getTaskTimeSheet = async (timeSheet) => {
 
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-  
+
     return { status: false, message: 'Error getTaskTimeSheet .' };
   }
 
@@ -54,7 +54,7 @@ const getTaskTimeSheet = async (timeSheet) => {
 
 const getjobTimeSheet = async (timeSheet) => {
   const { job_id } = timeSheet;
-  
+
   try {
     const query = `
      SELECT 
@@ -73,7 +73,7 @@ const getjobTimeSheet = async (timeSheet) => {
 
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-   
+
     return { status: false, message: 'Error getTaskTimeSheet .' };
   }
 }
@@ -111,10 +111,10 @@ const updateJobTimeTotalHours = async (timeSheet) => {
      id = ?
      `;
     const [rows] = await pool.execute(query, [total_hours, total_hours_status, job_id]);
-   
+
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-    
+
     return { status: false, message: 'Error getTaskTimeSheet .' };
   }
 }
@@ -156,24 +156,24 @@ const addMissingLog = async (missingLog) => {
       missing_log_reviewed_date,
       status
     ]);
- 
-    if(rows.insertId > 0){
-         const currentDate = new Date();
-          await SatffLogUpdateOperation(
-            {
-              staff_id: missingLog.body.StaffUserId,
-              ip: missingLog.body.ip,
-              date: currentDate.toISOString().split('T')[0],
-              module_name: 'job',
-              log_message: `sent the missing logs for job code:`,
-              permission_type: 'created',
-              module_id: job_id,
-            }
-          );
+
+    if (rows.insertId > 0) {
+      const currentDate = new Date();
+      await SatffLogUpdateOperation(
+        {
+          staff_id: missingLog.body.StaffUserId,
+          ip: missingLog.body.ip,
+          date: currentDate.toISOString().split('T')[0],
+          module_name: 'job',
+          log_message: `sent the missing logs for job code:`,
+          permission_type: 'created',
+          module_id: job_id,
+        }
+      );
 
       let update_status = 2;
-      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status,job_id]);
-    } 
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status, job_id]);
+    }
 
 
 
@@ -201,7 +201,7 @@ const addMissingLog = async (missingLog) => {
           ]);
 
         } catch (error) {
-        
+
         }
       }
     }
@@ -246,10 +246,10 @@ const getMissingLog = async (missingLog) => {
 `;
     const [rows] = await pool.execute(query, [job_id]);
 
-      let  draft_process = 0
-      const [ExistDraft] = await pool.execute(`SELECT job_id FROM drafts WHERE job_id = ?`, [job_id]);
-      if(ExistDraft.length >  0){
-       const [[rowsDraftProcess]] = await pool.execute(`SELECT 
+    let draft_process = 0
+    const [ExistDraft] = await pool.execute(`SELECT job_id FROM drafts WHERE job_id = ?`, [job_id]);
+    if (ExistDraft.length > 0) {
+      const [[rowsDraftProcess]] = await pool.execute(`SELECT 
           CASE
               WHEN NOT EXISTS (
                   SELECT 1 
@@ -260,10 +260,10 @@ const getMissingLog = async (missingLog) => {
               THEN 1
               ELSE 0
           END AS status_check;`, [job_id]);
-          draft_process = rowsDraftProcess.status_check
-      }else{
-        draft_process = 0
-      }
+      draft_process = rowsDraftProcess.status_check
+    } else {
+      draft_process = 0
+    }
 
     return { status: true, message: 'Success.', data: { rows, draft_process: draft_process } };
   } catch (error) {
@@ -274,7 +274,7 @@ const getMissingLog = async (missingLog) => {
 
 const editMissingLog = async (missingLog) => {
   const { id, missing_log, missing_log_sent_on, missing_log_reviewed_by, status } = missingLog.body;
- 
+
   let missing_log_prepared_date = missingLog.body.missing_log_prepared_date == 'null' ? null : missingLog.body.missing_log_prepared_date
 
   let missing_log_reviewed_date = missingLog.body.missing_log_reviewed_date == 'null' ? null : missingLog.body.missing_log_reviewed_date
@@ -302,38 +302,38 @@ const editMissingLog = async (missingLog) => {
      `;
     const [rows] = await pool.execute(query, [missing_log, missing_log_sent_on, missing_log_prepared_date, missing_log_reviewed_by, missing_log_reviewed_date, status, id]);
 
-    if(rows.changedRows > 0){
+    if (rows.changedRows > 0) {
 
-    let missing_log_msg = []
-    if(parseInt(status) == 1){
-      missing_log_msg.push('completed the missing logs')
+      let missing_log_msg = []
+      if (parseInt(status) == 1) {
+        missing_log_msg.push('completed the missing logs')
 
-    }else if(existMissingLog.missing_log != missing_log || existMissingLog.missing_log_sent_on != missing_log_sent_on || existMissingLog.missing_log_prepared_date != missing_log_prepared_date || existMissingLog.missing_log_reviewed_by != missing_log_reviewed_by || existMissingLog.missing_log_reviewed_date != missing_log_reviewed_date){
-      missing_log_msg.push('edited the missing logs')
-    }
-    
-    if(missing_log_msg.length > 0){
-      const msgLog = missing_log_msg.length > 1
-            ? missing_log_msg.slice(0, -1).join(', ') + ' and ' + missing_log_msg.slice(-1)
-            : missing_log_msg[0];
-      const currentDate = new Date();
-      await SatffLogUpdateOperation(
-        {
-          staff_id: missingLog.body.StaffUserId,
-          ip: missingLog.body.ip,
-          date: currentDate.toISOString().split('T')[0],
-          module_name: 'job',
-          log_message: `${msgLog} job code:`,
-          permission_type: 'updated',
-          module_id: existMissingLog.job_id,
-        }
-      );
-     }
-  
+      } else if (existMissingLog.missing_log != missing_log || existMissingLog.missing_log_sent_on != missing_log_sent_on || existMissingLog.missing_log_prepared_date != missing_log_prepared_date || existMissingLog.missing_log_reviewed_by != missing_log_reviewed_by || existMissingLog.missing_log_reviewed_date != missing_log_reviewed_date) {
+        missing_log_msg.push('edited the missing logs')
+      }
+
+      if (missing_log_msg.length > 0) {
+        const msgLog = missing_log_msg.length > 1
+          ? missing_log_msg.slice(0, -1).join(', ') + ' and ' + missing_log_msg.slice(-1)
+          : missing_log_msg[0];
+        const currentDate = new Date();
+        await SatffLogUpdateOperation(
+          {
+            staff_id: missingLog.body.StaffUserId,
+            ip: missingLog.body.ip,
+            date: currentDate.toISOString().split('T')[0],
+            module_name: 'job',
+            log_message: `${msgLog} job code:`,
+            permission_type: 'updated',
+            module_id: existMissingLog.job_id,
+          }
+        );
+      }
+
 
       const [job_id] = await pool.execute('SELECT job_id FROM  `missing_logs` WHERE id = ?', [id]);
       let update_status = 2;
-      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status,job_id[0].job_id]);
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status, job_id[0].job_id]);
     }
 
     if (missing_log_document.length > 0) {
@@ -367,7 +367,7 @@ const editMissingLog = async (missingLog) => {
 
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-   
+
     return { status: false, message: 'Error editMissingLog .' };
   }
 }
@@ -406,7 +406,7 @@ const addQuerie = async (querie) => {
     table: 'queries',
     field: 'query_title',
     filter_id: `job_id = ${job_id}`,
-    prefix : 'Q'
+    prefix: 'Q'
   }
 
   const UniqueNoTitle = await generateNextUniqueCodeJobLogTitle(data)
@@ -425,7 +425,7 @@ const addQuerie = async (querie) => {
       `;
     const [rows] = await pool.execute(query, [job_id, queries_remaining, status, UniqueNoTitle, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date]);
 
-    if(rows.insertId > 0){
+    if (rows.insertId > 0) {
       const currentDate = new Date();
       await SatffLogUpdateOperation(
         {
@@ -439,8 +439,8 @@ const addQuerie = async (querie) => {
         }
       );
       let update_status = 4;
-      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status,job_id]);
-    } 
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status, job_id]);
+    }
 
 
     if (query_document.length > 0) {
@@ -512,10 +512,10 @@ const getQuerie = async (querie) => {
      `;
     const [rows] = await pool.execute(query, [job_id]);
 
-    let  draft_process = 0
+    let draft_process = 0
     const [ExistDraft] = await pool.execute(`SELECT job_id FROM drafts WHERE job_id = ?`, [job_id]);
-    if(ExistDraft.length >  0){
-     const [[rowsDraftProcess]] = await pool.execute(`SELECT 
+    if (ExistDraft.length > 0) {
+      const [[rowsDraftProcess]] = await pool.execute(`SELECT 
         CASE
             WHEN NOT EXISTS (
                 SELECT 1 
@@ -526,8 +526,8 @@ const getQuerie = async (querie) => {
             THEN 1
             ELSE 0
         END AS status_check;`, [job_id]);
-        draft_process = rowsDraftProcess.status_check
-    }else{
+      draft_process = rowsDraftProcess.status_check
+    } else {
       draft_process = 0
     }
 
@@ -558,7 +558,7 @@ const getQuerieSingleView = async (querie) => {
       queries.id DESC;
      `;
     const [rows] = await pool.execute(query, [id]);
- 
+
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
     console.log("error ", error)
@@ -597,37 +597,37 @@ const editQuerie = async (query) => {
      `;
     const [rows] = await pool.execute(query_table, [queries_remaining, status, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date, id]);
 
-    if(rows.changedRows > 0){
+    if (rows.changedRows > 0) {
       let querie_log_msg = []
-      if(parseInt(status) == 3){
+      if (parseInt(status) == 3) {
         querie_log_msg.push('completed the queries')
-        }
-      else if(existQuerie.queries_remaining != queries_remaining || existQuerie.reviewed_by != reviewed_by || existQuerie.missing_queries_prepared_date != missing_queries_prepared_date || existQuerie.query_sent_date != query_sent_date || existQuerie.response_received != response_received || existQuerie.final_query_response_received_date != final_query_response_received_date){
+      }
+      else if (existQuerie.queries_remaining != queries_remaining || existQuerie.reviewed_by != reviewed_by || existQuerie.missing_queries_prepared_date != missing_queries_prepared_date || existQuerie.query_sent_date != query_sent_date || existQuerie.response_received != response_received || existQuerie.final_query_response_received_date != final_query_response_received_date) {
         querie_log_msg.push('edited the queries')
       }
 
-     if(querie_log_msg.length > 0){
-      const msgLog = querie_log_msg.length > 1
-            ? querie_log_msg.slice(0, -1).join(', ') + ' and ' + querie_log_msg.slice(-1)
-            : querie_log_msg[0];
-      const currentDate = new Date();
-      await SatffLogUpdateOperation(
-        {
-          staff_id: query.body.StaffUserId,
-          ip: query.body.ip,
-          date: currentDate.toISOString().split('T')[0],
-          module_name: 'job',
-          log_message: `${msgLog} job code:`,
-          permission_type: 'updated',
-          module_id: existQuerie.job_id,
-        }
-       );
-      
-     }
+      if (querie_log_msg.length > 0) {
+        const msgLog = querie_log_msg.length > 1
+          ? querie_log_msg.slice(0, -1).join(', ') + ' and ' + querie_log_msg.slice(-1)
+          : querie_log_msg[0];
+        const currentDate = new Date();
+        await SatffLogUpdateOperation(
+          {
+            staff_id: query.body.StaffUserId,
+            ip: query.body.ip,
+            date: currentDate.toISOString().split('T')[0],
+            module_name: 'job',
+            log_message: `${msgLog} job code:`,
+            permission_type: 'updated',
+            module_id: existQuerie.job_id,
+          }
+        );
+
+      }
 
       const [job_id] = await pool.execute('SELECT job_id FROM  `queries` WHERE id = ?', [id]);
       let update_status = 4;
-      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status,job_id[0].job_id]);
+      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status, job_id[0].job_id]);
     }
 
 
@@ -686,7 +686,7 @@ const getDraft = async (draft) => {
       drafts.id DESC;
      `;
     const [rows] = await pool.execute(query, [job_id]);
-   
+
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
 
@@ -712,7 +712,7 @@ const getDraftSingleView = async (req, res) => {
       drafts.id DESC;
      `;
     const [rows] = await pool.execute(query, [id]);
- 
+
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
 
@@ -721,9 +721,9 @@ const getDraftSingleView = async (req, res) => {
 }
 
 const addDraft = async (draft) => {
-  const { job_id, draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete ,final_draft_sent_on } = draft;
+  const { job_id, draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete, final_draft_sent_on } = draft;
 
-  if(parseInt(was_it_complete)===1){
+  if (parseInt(was_it_complete) === 1) {
     const [[rowsCheckMissingLog]] = await pool.execute(`SELECT 
     CASE
         WHEN NOT EXISTS (
@@ -748,24 +748,24 @@ const addDraft = async (draft) => {
           THEN 1
           ELSE 0
       END AS status_check;`, [job_id]);
-      // console.log("rowsCheckQuery",rowsCheckQuery)
+    // console.log("rowsCheckQuery",rowsCheckQuery)
 
-    if(rowsCheckMissingLog.status_check === 0 && rowsCheckQuery.status_check === 0){
-      return { status: false, message: 'Please complete the missing logs and queries first.' , data : "W" };
+    if (rowsCheckMissingLog.status_check === 0 && rowsCheckQuery.status_check === 0) {
+      return { status: false, message: 'Please complete the missing logs and queries first.', data: "W" };
     }
-    else if(rowsCheckMissingLog.status_check === 0){
-      return { status: false, message: 'Please complete the missing logs first.',data : "W" };
+    else if (rowsCheckMissingLog.status_check === 0) {
+      return { status: false, message: 'Please complete the missing logs first.', data: "W" };
     }
-    else if(rowsCheckQuery.status_check === 0){
-      return { status: false, message: 'Please complete the queries first.', data : "W" };
+    else if (rowsCheckQuery.status_check === 0) {
+      return { status: false, message: 'Please complete the queries first.', data: "W" };
     }
   }
- 
+
   let data = {
     table: 'drafts',
     field: 'draft_title',
     filter_id: `job_id = ${job_id}`,
-    prefix : 'D'
+    prefix: 'D'
   }
   const UniqueNoTitle = await generateNextUniqueCodeJobLogTitle(data)
 
@@ -777,8 +777,8 @@ const addDraft = async (draft) => {
       VALUES
       (?,?,?,?,?,?,?,?)
       `;
-    const [rows] = await pool.execute(query, [job_id, draft_sent_on, UniqueNoTitle, feedback_received, updated_amendment, feedback, was_it_complete,final_draft_sent_on]);
-    if(rows.insertId > 0){
+    const [rows] = await pool.execute(query, [job_id, draft_sent_on, UniqueNoTitle, feedback_received, updated_amendment, feedback, was_it_complete, final_draft_sent_on]);
+    if (rows.insertId > 0) {
       const currentDate = new Date();
       await SatffLogUpdateOperation(
         {
@@ -791,10 +791,27 @@ const addDraft = async (draft) => {
           module_id: job_id,
         }
       );
-      if(parseInt(was_it_complete)===1){
-      let update_status = 6;
-      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status, job_id]);
+      if (parseInt(was_it_complete) === 1) {
+
+        const [[rowsDraftProcess]] = await pool.execute(`SELECT 
+          CASE
+              WHEN NOT EXISTS (
+                  SELECT 1 
+                  FROM drafts 
+                  WHERE job_id = ? 
+                    AND was_it_complete <> '1'
+              )
+              THEN 1
+              ELSE 0
+          END AS status_check;`, [job_id]);
+
+
+        if (rowsDraftProcess.status_check === 1) {
+          let update_status = 6;
+          const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status, job_id]);
+        }
       }
+
     }
 
     return { status: true, message: 'Success.', data: rows };
@@ -805,14 +822,14 @@ const addDraft = async (draft) => {
 }
 
 const editDraft = async (draft) => {
-  
-  const {draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete, final_draft_sent_on, id } = draft.body;
+
+  const { draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete, final_draft_sent_on, id } = draft.body;
 
   try {
 
     const [[rowJob]] = await pool.execute("SELECT job_id,DATE_FORMAT(draft_sent_on, '%Y-%m-%d') AS draft_sent_on,feedback_received,updated_amendment,feedback,was_it_complete,DATE_FORMAT(final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on FROM `drafts` WHERE id = ?", [id]);
-    
-    if(parseInt(was_it_complete)===1){
+
+    if (parseInt(was_it_complete) === 1) {
       const [[rowsCheckMissingLog]] = await pool.execute(`SELECT 
       CASE
           WHEN NOT EXISTS (
@@ -825,7 +842,7 @@ const editDraft = async (draft) => {
           ELSE 0
       END AS status_check;`, [rowJob.job_id]);
       // console.log("rowsCheckMissingLog",rowsCheckMissingLog)
-  
+
       const [[rowsCheckQuery]] = await pool.execute(`SELECT 
         CASE
             WHEN NOT EXISTS (
@@ -837,19 +854,19 @@ const editDraft = async (draft) => {
             THEN 1
             ELSE 0
         END AS status_check;`, [rowJob.job_id]);
-        // console.log("rowsCheckQuery",rowsCheckQuery)
-  
-      if(rowsCheckMissingLog.status_check === 0 && rowsCheckQuery.status_check === 0){
-        return { status: false, message: 'Please complete the missing logs and queries first.' ,data : "W" };
+      // console.log("rowsCheckQuery",rowsCheckQuery)
+
+      if (rowsCheckMissingLog.status_check === 0 && rowsCheckQuery.status_check === 0) {
+        return { status: false, message: 'Please complete the missing logs and queries first.', data: "W" };
       }
-      else if(rowsCheckMissingLog.status_check === 0){
-        return { status: false, message: 'Please complete the missing logs first.',data : "W" };
+      else if (rowsCheckMissingLog.status_check === 0) {
+        return { status: false, message: 'Please complete the missing logs first.', data: "W" };
       }
-      else if(rowsCheckQuery.status_check === 0){
-        return { status: false, message: 'Please complete the queries first.', data : "W" };
+      else if (rowsCheckQuery.status_check === 0) {
+        return { status: false, message: 'Please complete the queries first.', data: "W" };
       }
     }
-   
+
 
     const query_table = `
      UPDATE 
@@ -866,23 +883,40 @@ const editDraft = async (draft) => {
       `;
     const [rows] = await pool.execute(query_table, [draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete, final_draft_sent_on, id]);
 
-    if(rows.changedRows > 0){
+    if (rows.changedRows > 0) {
 
       let draft_log_msg = []
-     
-      if(parseInt(was_it_complete)===1){
-       draft_log_msg.push('completed the draft')
-      let update_status = 6;
-      const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status,rowJob.job_id]);
+
+      if (parseInt(was_it_complete) === 1) {
+
+        const [[rowsDraftProcess]] = await pool.execute(`SELECT 
+          CASE
+              WHEN NOT EXISTS (
+                  SELECT 1 
+                  FROM drafts 
+                  WHERE job_id = ? 
+                    AND was_it_complete <> '1'
+              )
+              THEN 1
+              ELSE 0
+          END AS status_check;`, [rowJob.job_id]);
+
+        draft_log_msg.push('completed the draft')
+        if (rowsDraftProcess.status_check === 1) {
+          let update_status = 6;
+          const [result] = await pool.execute(`UPDATE jobs SET status_type = ?  WHERE id = ?`, [update_status, rowJob.job_id]);
+
+        }
+
       }
-      else if(rowJob.draft_sent_on != draft_sent_on || rowJob.feedback_received != feedback_received || rowJob.updated_amendment != updated_amendment || rowJob.feedback != feedback || rowJob.was_it_complete != was_it_complete || rowJob.final_draft_sent_on != final_draft_sent_on){
+      else if (rowJob.draft_sent_on != draft_sent_on || rowJob.feedback_received != feedback_received || rowJob.updated_amendment != updated_amendment || rowJob.feedback != feedback || rowJob.was_it_complete != was_it_complete || rowJob.final_draft_sent_on != final_draft_sent_on) {
         draft_log_msg.push('edited the draft')
       }
 
-      if(draft_log_msg.length > 0){
+      if (draft_log_msg.length > 0) {
         const msgLog = draft_log_msg.length > 1
-              ? draft_log_msg.slice(0, -1).join(', ') + ' and ' + draft_log_msg.slice(-1)
-              : draft_log_msg[0];
+          ? draft_log_msg.slice(0, -1).join(', ') + ' and ' + draft_log_msg.slice(-1)
+          : draft_log_msg[0];
         const currentDate = new Date();
         await SatffLogUpdateOperation(
           {
@@ -897,7 +931,7 @@ const editDraft = async (draft) => {
         );
       }
     }
-    
+
     return { status: true, message: 'Success.', data: rows };
 
   } catch (error) {

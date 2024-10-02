@@ -352,7 +352,6 @@ CREATE TABLE customer_paper_work (
 );
 
 
-
  /*--TABLE:- CUSTOMERS DOCUMENTS  */
     CREATE TABLE customer_documents (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -365,7 +364,6 @@ CREATE TABLE customer_paper_work (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id)
     );
-
 
 
 /*--TABLE:- CLIENTS   */
@@ -387,8 +385,6 @@ CREATE TABLE clients (
     FOREIGN KEY (client_industry_id) REFERENCES client_industry_types(id)
 );
 
-
-
 /*--TABLE:- CLIENTS COMPANY INFORMATION  */
 CREATE TABLE client_company_information (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -404,8 +400,6 @@ CREATE TABLE client_company_information (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (client_id) REFERENCES clients(id)
 );
-
-
 
 /*--TABLE:- CLIENTS CONTACT DETAILS */
 CREATE TABLE client_contact_details (
@@ -428,7 +422,6 @@ CREATE TABLE client_contact_details (
     FOREIGN KEY (role) REFERENCES customer_contact_person_role(id)
 );
 
-
 /*--TABLE:- CLIENT DOCUMENTS  */
     CREATE TABLE client_documents (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -441,9 +434,6 @@ CREATE TABLE client_contact_details (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (client_id) REFERENCES clients(id)
     );
-
-
-
 
 /*--TABLE:- CREATE JOB   */
 CREATE TABLE jobs (
@@ -719,8 +709,6 @@ CREATE TABLE jobs (
   FOREIGN KEY (staff_id) REFERENCES staffs(id)
 );
 
-   
-
 /*--TABLE:- Incorporation in DOCUMENTS  */
  CREATE TABLE incorporation_in (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -739,7 +727,6 @@ CREATE TABLE jobs (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-
 /*--TABLE:- customer sub source  DOCUMENTS  */
  CREATE TABLE customer_sub_source (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -751,7 +738,6 @@ CREATE TABLE jobs (
     FOREIGN KEY (customer_source_id) REFERENCES customer_source(id)
 );
 
-
 -- TABLE FOR INTERNAL
 CREATE TABLE internal (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -760,7 +746,6 @@ CREATE TABLE internal (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-
 
 -- TABLE FOR SUB INTERNAL
 CREATE TABLE sub_internal (

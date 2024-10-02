@@ -65,6 +65,22 @@ const jobUpdate = async (req, res) => {
     }
 }
 
+const updateJobStatus = async (req,res) =>{
+  try {
+    const { ...job } = req.body;
+ 
+      const result = await jobService.updateJobStatus(job);
+      if(!result.status){
+       return  res.status(200).json({ status: false, message: result.message });  
+       }else{
+       return  res.status(200).json({ status: true, message: result.message , data : result.data});
+       }
+   
+   } catch (error) {
+     res.status(500).json({ status:false, message: error.message});
+   }
+}
+
 // task TimeSheet  Work .....
 const getTaskTimeSheet = async (req, res) => {
   try {
@@ -278,6 +294,7 @@ module.exports = {
   jobAdd,
   jobAction,
   jobUpdate,
+  updateJobStatus,
   getTaskTimeSheet,
   jobTimeSheet,
   addMissingLog,
