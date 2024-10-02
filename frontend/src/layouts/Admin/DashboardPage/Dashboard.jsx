@@ -90,7 +90,7 @@ const Dashboard = () => {
     const monthDay = date.toLocaleDateString("en-US", options);
     const timeOptions = { hour: "numeric", minute: "numeric", hour12: true };
     const time = date.toLocaleTimeString("en-US", timeOptions);
-    return `${monthDay} (${time.toLowerCase()})`;
+    return `${monthDay} (${time.toUpperCase()})`;
   };
 
   return (
