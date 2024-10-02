@@ -6,6 +6,7 @@ const IncorporationController = require('./IncorporationController');
 const customerSourceController = require('./customerSourceController');
 const customerSubSourceController = require('./customerSubSourceController');
 const customerInternal = require('./Internal');
+const customerSubInternal = require('./subInternal');
 
 
 
@@ -18,4 +19,5 @@ module.exports = {
     customerSourceController,
     customerSubSourceController,
     customerInternal,
+    customerSubInternal
     };

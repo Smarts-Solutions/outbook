@@ -65,13 +65,7 @@ const getServicesAll = async () => {
 }
 
 const deleteServices = async (ServicesId) => {
-    const query = `
-    DELETE FROM services WHERE id = ?
-    `;
-    const [[existName]] = await pool.execute(`SELECT name FROM services WHERE id = ?`, [ServicesId.id]);
-
-    try {
-        await pool.execute(query, [ServicesId.id]);
+    if(parseInt(ServicesId.id) > 0){
         const currentDate = new Date();
         await SatffLogUpdateOperation(
             {
@@ -84,6 +78,15 @@ const deleteServices = async (ServicesId) => {
                 module_id:ServicesId.id
             }
         );
+    }
+    const query = `
+    DELETE FROM services WHERE id = ?
+    `;
+    const [[existName]] = await pool.execute(`SELECT name FROM services WHERE id = ?`, [ServicesId.id]);
+
+    try {
+        await pool.execute(query, [ServicesId.id]);
+        
     } catch (err) {
         console.error('Error deleting data:', err);
         throw err;

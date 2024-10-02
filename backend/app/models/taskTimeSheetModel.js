@@ -51,6 +51,7 @@ const getTaskTimeSheet = async (timeSheet) => {
 
 
 }
+
 const getjobTimeSheet = async (timeSheet) => {
   const { job_id } = timeSheet;
   
@@ -76,6 +77,7 @@ const getjobTimeSheet = async (timeSheet) => {
     return { status: false, message: 'Error getTaskTimeSheet .' };
   }
 }
+
 const updateTaskTimeSheetStatus = async (timeSheet) => {
 
   const { id, task_status, time } = timeSheet;
@@ -243,10 +245,29 @@ const getMissingLog = async (missingLog) => {
     missing_logs.id DESC;
 `;
     const [rows] = await pool.execute(query, [job_id]);
-  
-    return { status: true, message: 'Success.', data: rows };
+
+      let  draft_process = 0
+      const [ExistDraft] = await pool.execute(`SELECT job_id FROM drafts WHERE job_id = ?`, [job_id]);
+      if(ExistDraft.length >  0){
+       const [[rowsDraftProcess]] = await pool.execute(`SELECT 
+          CASE
+              WHEN NOT EXISTS (
+                  SELECT 1 
+                  FROM drafts 
+                  WHERE job_id = ? 
+                    AND was_it_complete <> '1'
+              )
+              THEN 1
+              ELSE 0
+          END AS status_check;`, [job_id]);
+          draft_process = rowsDraftProcess.status_check
+      }else{
+        draft_process = 0
+      }
+
+    return { status: true, message: 'Success.', data: { rows, draft_process: draft_process } };
   } catch (error) {
-   
+    console.log("Error getMissingLog ", error)
     return { status: false, message: 'Error getMissingLog .' };
   }
 }
@@ -457,6 +478,7 @@ const addQuerie = async (querie) => {
     return { status: false, message: 'Error querie .' };
   }
 }
+
 const getQuerie = async (querie) => {
   const { job_id } = querie;
   try {
@@ -489,8 +511,29 @@ const getQuerie = async (querie) => {
       queries.id DESC;
      `;
     const [rows] = await pool.execute(query, [job_id]);
- 
-    return { status: true, message: 'Success.', data: rows };
+
+    let  draft_process = 0
+    const [ExistDraft] = await pool.execute(`SELECT job_id FROM drafts WHERE job_id = ?`, [job_id]);
+    if(ExistDraft.length >  0){
+     const [[rowsDraftProcess]] = await pool.execute(`SELECT 
+        CASE
+            WHEN NOT EXISTS (
+                SELECT 1 
+                FROM drafts 
+                WHERE job_id = ? 
+                  AND was_it_complete <> '1'
+            )
+            THEN 1
+            ELSE 0
+        END AS status_check;`, [job_id]);
+        draft_process = rowsDraftProcess.status_check
+    }else{
+      draft_process = 0
+    }
+
+
+    return { status: true, message: 'Success.', data: { rows, draft_process: draft_process } };
+
   } catch (error) {
     console.log("error ", error)
     return { status: false, message: 'Error querie .' };

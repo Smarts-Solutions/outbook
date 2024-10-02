@@ -78,8 +78,7 @@ const Setting = () => {
   const [getShowTabId, setShowTabId] = useState("1");
   const [isEdit, setIsEdit] = useState(false);
   const [getCheckList, setCheckList] = useState([]);
-  const [getCheckList1, setCheckList1] = useState([]);
-  const [showInternalTaskModal, setShowInternalTaskModal] = useState(false);
+  const [getCheckList1, setCheckList1] = useState([]); 
 
 
   const getCheckListData = async () => {
@@ -1077,7 +1076,8 @@ const Setting = () => {
   };
 
   const handleTaskAdd = (row) => {
-    setShowInternalTaskModal(true);
+    navigate("/admin/subinternal", { state: { Id: row.id } });
+    
     
   };
   const handleAdd = (e, tabStatus) => {
@@ -1542,7 +1542,7 @@ const Setting = () => {
     modalData.fields.map((field) => {
       req[field.name] = field.value;
       if (field.name == "status") {
-        req.status = field.value;
+        req.status = field.value || '1';
       }
     });
 
@@ -2008,44 +2008,15 @@ const Setting = () => {
                   <>
                     <i className="fa fa-edit"></i> Update
                   </>
-                ) : (
+                ) : 
                   <>
                     {/* <i className="far fa-save pe-1"></i>  */}
                     Save
                   </>
-                )
               }
             />
           )}
-        </>
-
-        <>
-          {showInternalTaskModal && (
-            <Modal
-              modalId="exampleModal3"
-              title="Add Task"
-              fields={[]}
-              onClose={() => {
-                setShowInternalTaskModal(false);
-                setModalData({});
-              }}
-              onSave={handleSave}
-              onChange={handleModalChange}
-              buttonClass={isEdit ? "" : "btn btn-outline-success"}
-              buttonName={
-                isEdit ? (
-                  <>
-                    <i className="fa fa-edit"></i> Update
-                  </>
-                ) : (
-                  <>
-                    <i className="far fa-save pe-1"></i> Save
-                  </>
-                )
-              }
-            />
-          )}
-        </>
+        </>  
       </div>
     </>
   );

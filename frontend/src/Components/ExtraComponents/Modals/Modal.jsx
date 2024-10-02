@@ -85,7 +85,7 @@ const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange, button
               
               onClick={onSave}
             >
-              <i className='far fa-save pe-1'></i>
+           
               {buttonName}
             </button>
           </div>

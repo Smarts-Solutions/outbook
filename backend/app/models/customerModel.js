@@ -646,6 +646,9 @@ const getCustomer = async (customer) => {
 }
 
 const deleteCustomer = async (customer) => {
+    // if(parseInt(customer_id)  > 0){
+
+    // }
     // const { customer_id } = customer;
 
     // try {
