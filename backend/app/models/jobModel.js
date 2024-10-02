@@ -1795,11 +1795,14 @@ const updateJobStatus = async(job)=>{
 
     let  draft_process = 0
       const [ExistDraft] = await pool.execute(`SELECT job_id FROM drafts WHERE job_id = ?`, [job_id]);
-      
       console.log("ExistDraft",ExistDraft)
 
-
       if(ExistDraft.length >  0){
+        return { status: false, message: 'Please sent first draft.', data: "W" }; 
+      }
+
+
+     
        const [[rowsDraftProcess]] = await pool.execute(`SELECT 
           CASE
               WHEN NOT EXISTS (
@@ -1811,21 +1814,14 @@ const updateJobStatus = async(job)=>{
               THEN 1
               ELSE 0
           END AS status_check;`, [job_id]);
-        draft_process = rowsDraftProcess.status_check
+   
 
-        
-      
-        
-         if(rowsCheckQuery.status_check === 0){
-            return { status: false, message: 'Please complete the queries first.', data : "W" };
-          }
+         if(rowsDraftProcess.status_check === 0){
+            return { status: false, message: 'Please complete the draft.', data : "W" };
+         }
 
 
-      }else{
-        draft_process = 0
-      }
 
-  console.log("draft_process ",draft_process)
 
     return
     const query = `
