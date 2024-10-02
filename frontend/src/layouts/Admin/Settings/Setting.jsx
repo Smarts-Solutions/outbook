@@ -1652,16 +1652,16 @@ const Setting = () => {
 
 
   const tabsArr = [
-    { id: "1", label: "Staff Role" },
-    { id: "2", label: "Customer Contact Person Role" },
-    { id: "3", label: "Status Type" },
-    { id: "4", label: "Services" },
-    { id: "5", label: "Client Industry" },
-    { id: "6", label: "Country" },
-    { id: "7", label: "Incorporation" },
-    { id: "8", label: "Source" },
-    { id: "9", label: "Checklist" },
-    { id: "10", label: "Internal" }
+    { id: "1", label: "Staff Role", icon: "fas fa-user" },
+    { id: "2", label: "Customer Contact Person Role", icon: "fas fa-phone" },
+    { id: "3", label: "Status Type", icon: "fas fa-tasks" },
+    { id: "4", label: "Services", icon: "fas fa-gear" },
+    { id: "5", label: "Client Industry", icon: "fas fa-industry" },
+    { id: "6", label: "Country", icon: "fas fa-globe" },
+    { id: "7", label: "Incorporation", icon: "fas fa-file-alt" },
+    { id: "8", label: "Source", icon: "fas fa-external-link-alt" },
+    { id: "9", label: "Checklist", icon: "fas fa-check-square" },
+    { id: "10", label: "Internal", icon: "fas fa-lock" }
   ];
 
   return (
@@ -1697,6 +1697,7 @@ const Setting = () => {
                               aria-selected={tabStatus.current === tab.id}
                               onClick={() => handleTabChange(tab.id)}
                             >
+                                <i className={`${tab.icon} me-2`}></i>
                               {tab.label}
                             </button>
                           </li>
@@ -2009,7 +2010,8 @@ const Setting = () => {
                   </>
                 ) : 
                   <>
-                    <i className="far fa-save pe-1"></i> Save
+                    {/* <i className="far fa-save pe-1"></i>  */}
+                    Save
                   </>
               }
             />

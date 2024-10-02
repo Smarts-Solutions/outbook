@@ -9514,7 +9514,7 @@ button.secondary-icon i, button.view-icon i, .datatable-container button.view-ic
 .datatable-container .data-table-extensions-filter {
   border: 1px solid #9E9E9E;
   /* height: 35px; */
-  padding: 3px 5px;
+  /* padding: 0px 5px; */
   width: 350px;
   /* line-height: 24px; */
   border-radius: 35px;
@@ -9693,10 +9693,11 @@ body .btn-info:hover {
 .account-body .container input {
   background-color: #eee;
   border: none;
-  margin: 8px 0;
+  /* margin: 8px 0; */
+  margin-top: 10px;
   padding: 10px 15px;
   font-size: 13px;
-  border-radius: 8px;
+  border-radius: 26px;
   width: 100%;
   outline: none;
 }
@@ -9816,6 +9817,10 @@ margin: 0px auto;
 }
 .mt-minus-60 {
   margin-top: -60px;
+}
+
+.mt-minus-90 {
+  margin-top: -90px;
 }
 .job-filter-btn {
   margin-left: 360px;
@@ -10174,12 +10179,13 @@ body .accordion-button:not(.collapsed)::after {
   width: 100%;
   margin-bottom: 15px;
 }
-.custom-multiselect .dropdown .dropdown-toggle{
+.custom-multiselect .dropdown .dropdown-toggle {
   font-size: 14px !important;
   color: #4B4B4B !important;
   background: transparent !important;
   border: 1px solid #dee2e6 !important;
   padding: .375rem 2.25rem .375rem .75rem;
+  border-radius: 20px;
 }
  button.actions-btn.btn.btn-light:hover {
   border: none !important;
@@ -10533,4 +10539,30 @@ right: 0;
 select.error-field.form-select, input.error-field.form-control {
   background: #fff3f3;
   border: 1px solid #ef7e7e;
+}
+select#tabSelect {
+  position: relative;
+  z-index: 9;
+  appearance: auto;
+  padding: 10px;
+  text-indent: 2px;
+}
+.data-table-extensions > .data-table-extensions-filter > .filter-text {
+  border-bottom: 0px !important;
+  margin-top: 2px;
+}
+
+.data-table-extensions > .data-table-extensions-filter > .icon {
+  float: right !important;
+  display: block;
+  width: 20px;
+  height: 20px;
+  margin-top: 0px;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-color: #f1f5fa;
+  /* background-size: contain; */
+  margin-bottom: 0 !important;
+  padding: 16px 17px;
+  border-radius: 0 20px 20px 0px;
 }
