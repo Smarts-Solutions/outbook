@@ -18,9 +18,9 @@ export const GetAccess = createAsyncThunk("accessRolePermissions/getAccess", asy
   try {
     const { req, authToken } = data;
     let IP_Data = await GET_IP();
-    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
-    const res = await GETACCESS(updatedReq, authToken);
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails")); 
+    const updatedReq = { ...req, ip: IP_Data.ip, StaffUserId: StaffUserId.id };
+    const res = await GETACCESS(updatedReq, authToken); 
     return await res;
   } catch (err) {
     throw err;

@@ -92,9 +92,7 @@ export const Get_Service = createAsyncThunk("service", async (data) => {
   }
 });
 
-export const ADD_SERVICES_CUSTOMERS = createAsyncThunk(
-  "updateProcessCustomer",
-  async (data) => {
+export const ADD_SERVICES_CUSTOMERS = createAsyncThunk("updateProcessCustomer",async (data) => {
     try {
       const { req, authToken } = data;
       let IP_Data = await GET_IP();
@@ -113,9 +111,7 @@ export const ADD_SERVICES_CUSTOMERS = createAsyncThunk(
   }
 );
 
-export const ADD_PEPPER_WORKS = createAsyncThunk(
-  "updateProcessCustomerFile",
-  async (data) => {
+export const ADD_PEPPER_WORKS = createAsyncThunk("updateProcessCustomerFile",async (data) => {
     try {
       const { req, authToken } = data;
     
@@ -137,9 +133,7 @@ export const ADD_PEPPER_WORKS = createAsyncThunk(
   }
 );
 
-export const GET_ALL_CUSTOMERS = createAsyncThunk(
-  "customerAction",
-  async (data) => {
+export const GET_ALL_CUSTOMERS = createAsyncThunk("customerAction",async (data) => {
     try {
       const { req, authToken } = data;
 
@@ -159,9 +153,7 @@ export const GET_ALL_CUSTOMERS = createAsyncThunk(
   }
 );
 
-export const GET_CUSTOMER_DATA = createAsyncThunk(
-  "getSingleCustomer",
-  async (data) => {
+export const GET_CUSTOMER_DATA = createAsyncThunk("getSingleCustomer",async (data) => {
     try {
       const { req, authToken } = data;
       let IP_Data = await GET_IP();
@@ -180,9 +172,7 @@ export const GET_CUSTOMER_DATA = createAsyncThunk(
   }
 );
 
-export const Edit_Customer = createAsyncThunk(
-  "customerUpdate",
-  async (data) => {
+export const Edit_Customer = createAsyncThunk("customerUpdate",async (data) => {
     try {
       const { req, authToken } = data;
       let IP_Data = await GET_IP();
@@ -201,9 +191,7 @@ export const Edit_Customer = createAsyncThunk(
   }
 );
 
-export const DELETE_CUSTOMER_FILE = createAsyncThunk(
-  "updateProcessCustomerFileAction",
-  async (data) => {
+export const DELETE_CUSTOMER_FILE = createAsyncThunk("updateProcessCustomerFileAction", async (data) => {
     try {
       const { req, authToken } = data;
       let IP_Data = await GET_IP();
@@ -292,9 +280,7 @@ export const UpdateJob = createAsyncThunk("jobUpdate", async (data) => {
   }
 });
 
-export const GET_ALL_CHECKLIST = createAsyncThunk(
-  "checklistAction",
-  async (data) => {
+export const GET_ALL_CHECKLIST = createAsyncThunk("checklistAction", async (data) => {
     try {
       const { req, authToken } = data;
       let IP_Data = await GET_IP();

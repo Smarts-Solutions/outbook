@@ -59,10 +59,13 @@ const Access = () => {
 
 
     const OpenAccourdian = async (val) => {
-
         try {
-            const response = await dispatch(GetAccess({ req: { "action": "get", "role_id": val.id }, authToken: token })).unwrap();
+            const req = { "action": "get", "role_id": val.id };
+            const data = { req, authToken: token };
+            console.log("data", data);
+            const response = await dispatch(GetAccess(data)).unwrap();
             if (response.status) {
+                console.log("response", response.data);
                 const assignedItems = response.data.filter((item) => {
                     item.items.forEach((data) => {
                         if (data.is_assigned === 1) {
@@ -82,13 +85,14 @@ const Access = () => {
         }
     }
 
-    const AccordionItem = ({ section, TradingName, role_id }) => {
-
+    const AccordionItem = ({ section, TradingName, role_id }) => {  
         return (
             <div>
                 <h4 className="card-title fs-16  mb-3 flex-grow-1" style={{ marginBottom: '20px !important' }}>
                     {section.permission_name}
                 </h4>
+
+               
                 <div className="row ">
                     {section.items.map((item, id) => (
                         <CheckboxItem
@@ -163,6 +167,7 @@ const Access = () => {
     }, []);
     
   
+    console.log("roleDataAll" , accessData.data);
 
     return (
 
