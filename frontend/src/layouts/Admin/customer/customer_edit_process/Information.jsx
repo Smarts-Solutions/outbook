@@ -1699,7 +1699,7 @@ const Information = ({ id, pageStatus }) => {
                                             </label>
                                             <input
                                               type="text"
-                                              className={errors[index].last_name ? "error-field form-control" : "form-control"}
+                                              className={errors[index]?.last_name ? "error-field form-control" : "form-control"}
                                               placeholder="Last Name"
                                               id={`last_name-${index}`}
                                               value={contact.last_name}
