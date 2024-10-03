@@ -28,8 +28,6 @@ const Drafts = () => {
     id: null
   });
 
-
-
   const resetForm = () => {
     setAllDraftInputdata({
       ...AllDraftInputdata,
@@ -119,7 +117,7 @@ const Drafts = () => {
     await dispatch(AddDraft(data))
       .unwrap()
       .then((response) => {
-        if (response.status) {  
+        if (response.status) {
           setAdddraft(false)
           GetAllDraftList()
           resetForm()
@@ -130,6 +128,9 @@ const Drafts = () => {
             showConfirmButton: true,
             timer: 1500
           });
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
         }
         else {
           response.data == "W" ?
@@ -174,6 +175,8 @@ const Drafts = () => {
           setShowEditModal(false)
           GetAllDraftList()
           resetForm()
+
+
           sweatalert.fire({
             icon: 'success',
             title: response.message,
@@ -181,6 +184,9 @@ const Drafts = () => {
             showConfirmButton: true,
             timer: 1500
           });
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
         }
         else {
           console.log(response)
@@ -233,6 +239,9 @@ const Drafts = () => {
       button: true,
     },
   ];
+
+
+
 
   return (
     <div className=''>

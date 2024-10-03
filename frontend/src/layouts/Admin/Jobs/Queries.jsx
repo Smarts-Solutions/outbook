@@ -219,8 +219,6 @@ const Queries = () => {
     },
   ];
 
-
-
   return (
     <div className=''>
       <div className='row'>
@@ -233,7 +231,7 @@ const Queries = () => {
           <div>
             {
               draftStatus == 0 ?
-                <button type="button" className="btn btn-info text-white float-end " onClick={() => setAddquery(true)} disabled>
+                <button type="button" className="btn btn-info text-white float-end " onClick={() => setAddquery(true)} >
                   <i className="fa-regular fa-plus pe-1"></i> Add Query</button>
                 :
                 ""
