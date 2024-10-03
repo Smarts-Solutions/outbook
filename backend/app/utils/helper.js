@@ -37,10 +37,10 @@ const pool = require('../config/database');
           staff_logs.log_message, ' ',
           CASE 
           
-            WHEN staff_logs.module_name = 'customer' THEN CONCAT('cust_', SUBSTRING(customers.trading_name, 1, 3), '_', customers.customer_code)
+            WHEN staff_logs.module_name = 'customer' THEN CONCAT('cust_', SUBSTRING(customers.trading_name, 1, 3), '_', customers.customer_code,'(',customers.trading_name ,')')
     
              WHEN staff_logs.module_name = 'client' THEN (
-              SELECT CONCAT('cli_', SUBSTRING(c.trading_name, 1, 3),'_', SUBSTRING(clients.trading_name, 1, 3),'_',clients.client_code)
+              SELECT CONCAT('cli_', SUBSTRING(c.trading_name, 1, 3),'_', SUBSTRING(clients.trading_name, 1, 3),'_',clients.client_code,'(',clients.trading_name,')')
               FROM customers c
               JOIN clients cl ON c.id = cl.customer_id
               WHERE cl.id = staff_logs.module_id

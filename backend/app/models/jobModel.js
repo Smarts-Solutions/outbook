@@ -1789,8 +1789,49 @@ ORDER BY
 
 }
 
+const updateJobStatus = async(job)=>{
+  const { job_id, status_type } = job;
+  try {
 
+      if(parseInt(status_type)==6){
+      const [ExistDraft] = await pool.execute(`SELECT job_id FROM drafts WHERE job_id = ?`, [job_id]);
+      if(ExistDraft.length === 0){
+        return { status: false, message: 'Please sent first draft.', data: "W" }; 
+      }
 
+       const [[rowsDraftProcess]] = await pool.execute(`SELECT 
+          CASE
+              WHEN NOT EXISTS (
+                  SELECT 1 
+                  FROM drafts 
+                  WHERE job_id = ? 
+                    AND was_it_complete <> '1'
+              )
+              THEN 1
+              ELSE 0
+          END AS status_check;`, [job_id]);
+   
+
+         if(rowsDraftProcess.status_check === 0){
+            return { status: false, message: 'Please complete the draft.', data : "W" };
+         }
+      }
+
+    const query = `
+         UPDATE jobs 
+         SET status_type = ?
+         WHERE id = ?
+       `;
+    const [result] = await pool.execute(query, [status_type, job_id]);
+    if (result.affectedRows > 0) {
+      return { status: true, message: 'Job status updated successfully.', data: job_id };
+    } else {
+      return { status: false, message: 'No job found with the given job_id.' };
+    }
+  } catch (err) {
+    return { status: false, message: 'Error updating job status.' };
+  }
+}
 
 module.exports = {
   getAddJobData,
@@ -1801,6 +1842,7 @@ module.exports = {
   getJobById,
   jobUpdate,
   deleteJobById,
-  getJobTimeLine
+  getJobTimeLine,
+  updateJobStatus
 
 };
