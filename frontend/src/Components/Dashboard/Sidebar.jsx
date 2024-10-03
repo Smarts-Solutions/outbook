@@ -84,7 +84,7 @@ const Sidebar = () => {
                       onClick={(e) => handleLinkClick(e, "/admin/dashboard")}
                     >
                       <span className="sidebar-icons">
-                        <i className="fas fa-tachometer-alt"></i> {/* Dashboard icon */}
+                      <i className="fa-regular fa-grid-2"></i>
                       </span>
                       <span>Dashboard</span>
                     </Link>
@@ -117,7 +117,7 @@ const Sidebar = () => {
                           onClick={(e) => handleLinkClick(e, "/admin/status")}
                         >
                           <span className="sidebar-icons">
-                            <i className="fas fa-clipboard-check"></i> {/* Status icon */}
+                            <i className="fas fa-chart-pie"></i> {/* Status icon */}
                           </span>
                           <span>Status</span>
                         </Link>
@@ -149,7 +149,7 @@ const Sidebar = () => {
                         onClick={(e) => handleLinkClick(e, "/admin/access")}
                       >
                         <span className="sidebar-icons">
-                          <i className="fas fa-lock"></i> {/* Access icon */}
+                          <i className="fas fa-shield-alt"></i> {/* Access icon */}
                         </span>
                         <span>Access</span>
                       </Link>

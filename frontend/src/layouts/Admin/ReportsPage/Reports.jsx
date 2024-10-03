@@ -49,6 +49,7 @@ function Reports() {
                     aria-controls="job-status"
                     aria-selected="true"
                   >
+                  <i className="fas fa-clipboard-list"></i>
                     Job Status Report
                   </button>
                 </li>
@@ -63,6 +64,7 @@ function Reports() {
                     aria-controls="job-received"
                     aria-selected="false"
                   >
+<i className="fas fa-inbox"></i>
                    Jobs Received Sent Reports
                   </button>
                 </li>
@@ -77,6 +79,7 @@ function Reports() {
                     aria-controls="job-summary"
                     aria-selected="false"
                   >
+                <i className="fas fa-chart-pie"></i>
                     Job Summary Report
                   </button>
                 </li>
@@ -91,6 +94,7 @@ function Reports() {
                     aria-controls="job-pending"
                     aria-selected="false"
                   >
+                    <i className="fas fa-tasks"></i>
                     Jobs Pending Report
                   </button>
                 </li>
@@ -105,6 +109,7 @@ function Reports() {
                     aria-controls="due-by"
                     aria-selected="false"
                   >
+                    <i className="fas fa-calendar-alt"></i>
                    Due By Report
 
                   </button>
@@ -120,6 +125,7 @@ function Reports() {
                     aria-controls="team-performance"
                     aria-selected="false"
                   >
+                    <i className="fas fa-users"></i>
                     Team Performance Report by Month
                   </button>
                 </li>
@@ -134,6 +140,7 @@ function Reports() {
                     aria-controls="average-TAT"
                     aria-selected="false"
                   >
+                    <i className="fas fa-stopwatch"></i>
                    Average TAT Report
                   </button>
                 </li>
@@ -148,6 +155,7 @@ function Reports() {
                     aria-controls="timesheet"
                     aria-selected="false"
                   >
+                    <i className="fas fa-clock"></i>
                    Timesheet Report
                   </button>
                 </li>

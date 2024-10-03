@@ -25,6 +25,9 @@ const Customer = () => {
     client: 0,
   });
 
+
+
+
   const accessData =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
       (item) => item.permission_name === "customer"
@@ -56,16 +59,8 @@ const Customer = () => {
     setAccessData(updatedAccess);
   }, []);
 
-  const tabs = [
-    { id: "this-week", label: "This week" },
-    { id: "last-week", label: "Last week" },
-    { id: "this-month", label: "This month" },
-    { id: "last-month", label: "Last month" },
-    { id: "last-quarter", label: "Last quarter" },
-    { id: "this-6-months", label: "This 6 months" },
-    { id: "this-year", label: "This year" },
-    { id: "last-year", label: "Last year" },
-  ];
+
+
 
 
   const columns = [
@@ -284,30 +279,56 @@ const Customer = () => {
       }
     });
   };
-  
+  const [selectedTab, setSelectedTab] = useState('this-year');
+
+  const tabs = [
+    { id: 'this-week', label: 'This Week' },
+    { id: 'last-week', label: 'Last Week' },
+    { id: 'this-month', label: 'This Month' },
+    { id: 'last-month', label: 'Last Month' },
+    { id: 'last-quarter', label: 'Last Quarter' },
+    { id: 'this-6-months', label: 'This 6 Months' },
+    { id: 'last-6-months', label: 'Last 6 Months' },
+    { id: 'this-year', label: 'This Year' },
+    { id: 'last-year', label: 'Last Year' },
+    { id: 'custom', label: 'Custom' }
+  ];
+
+  useEffect(() => {
+    GetAllCustomerData(); 
+  }, []);
+
+  useEffect(() => {
+    GetAllCustomerData();
+  }, [selectedTab]);
+
+  const handleTabChange = (event) => {
+    setSelectedTab(event.target.value);
+  };
   
   const GetAllCustomerData = async () => {
-    const req = { action: "get", staff_id: staffDetails.id };
-    const data = { req, authToken: token };
+    const req = { action: 'get', staff_id: staffDetails.id }; // Replace staffDetails.id with actual staff ID
+    const data = { req, authToken: token }; // Make sure `token` is defined
 
     try {
       const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
+
       if (response.status) {
         const filteredData = response.data.filter((item) => {
           const itemDate = new Date(item.created_at);
-          const { startDate, endDate } = getDateRange(activeTab);
+          const { startDate, endDate } = getDateRange(selectedTab); // Get date range based on selected tab
           return itemDate >= startDate && itemDate <= endDate;
         });
-        setCustomerData(filteredData);
-        setFilteredData(filteredData);  
+
+        setFilteredData(filteredData); // Set the filtered data
       } else {
-        setCustomerData([]);
-        setFilteredData([]);
+        setFilteredData([]); // Set to empty if no valid response
       }
     } catch (error) {
-      console.error(error);
+      console.error('Error fetching customer data:', error);
     }
   };
+
 
   const handleSearch = (event) => {
     const searchValue = event.target.value.toLowerCase();
@@ -384,64 +405,58 @@ const Customer = () => {
       <div className="report-data mt-4">
         <div className="col-sm-12">
           <div className="page-title-box pt-0">
-            <div className="row align-items-start">
-              <div className="col-md-8">
-                <ul
-                  className="nav nav-pills rounded-tabs"
-                  id="pills-tab"
-                  role="tablist"
-                >
-                  {tabs.map((tab) => (
-                    <li className="nav-item" role="presentation" key={tab.id}>
-                      <button
-                        className={`nav-link ${
-                          activeTab === tab.id ? "active" : ""
-                        }`}
-                        id={`${tab.id}-tab`}
-                        data-bs-toggle="pill"
-                        data-bs-target={`#${tab.id}`}
-                        type="button"
-                        role="tab"
-                        aria-controls={tab.id}
-                        aria-selected={activeTab === tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                      >
-                        {tab.label}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+            <div className="row align-items-start justify-content-end">
+              <div className="col-4">
+              <div className="form-group mb-2 mt-1">
+        <select
+          className="form-control"
+          id="tabSelect"
+          value={selectedTab}
+          onChange={handleTabChange}
+        >
+          {tabs.map((tab) => (
+            <option key={tab.id} value={tab.id}>
+              {tab.label}
+            </option>
+          ))}
+        </select>
+      </div>
               </div>
-              <div className="col-md-4 col-auto">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search..."
-                  value={searchTerm}
-                  onChange={handleSearch}
-                />
+             
+              <div className="col-12">
+         
+
+      {/* Tab content */}
+      <div className="tab-content mt-minus-60" id="pills-tabContent">
+        {tabs.map((tab) => (
+          <div
+            key={tab.id}
+            className={`tab-pane fade ${selectedTab === tab.id ? 'show active' : ''}`}
+            id={tab.id}
+            role="tabpanel"
+            aria-labelledby={`${tab.id}-tab`}
+          >
+            <div className="card-datatable">
+            
+              <div className="card-datatable">
+                {/* Render filtered data here, for example: */}
+                <Datatable columns={columns} data={filteredData} />
               </div>
+            </div>
+          </div>
+        ))}
+      </div>
+              </div>
+           
+            
+
+       
+            
             </div>
           </div>
         </div>
 
-        <div className="tab-content" id="pills-tabContent">
-          {tabs.map((tab) => (
-            <div
-              key={tab.id}
-              className={`tab-pane fade ${
-                activeTab === tab.id ? "show active" : ""
-              }`}
-              id={tab.id}
-              role="tabpanel"
-              aria-labelledby={`${tab.id}-tab`}
-            >
-              <div className="card-datatable">
-                <Datatable columns={columns} data={filteredData} />
-              </div>
-            </div>
-          ))}
-        </div>
+     
       </div>
     </div>
   );

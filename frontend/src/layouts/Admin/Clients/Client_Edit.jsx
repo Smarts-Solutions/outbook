@@ -142,6 +142,8 @@ const ClientEdit = () => {
     Get_Company();
   }, [searchItem]);
 
+
+
   useEffect(() => {
     if (location.state.row.client_type_name == "SoleTrader") {
       setSoleTraderDetails((prevState) => ({
@@ -227,6 +229,29 @@ const ClientEdit = () => {
       setCompanyContacts(
         !getClientDetails.loading && getClientDetails.data.contact_details
       );
+
+
+      if (getClientDetails?.data?.contact_details) {
+        const newErrors = [...companyContactsErrors];
+        for (let i = 1; i < getClientDetails.data.contact_details.length; i++) {
+          newErrors.push({
+
+            first_name: "",
+            last_name: "",
+            customer_contact_person_role_id: "",
+            phone: "",
+            alternate_phone: "",
+            email: "",
+            alternate_email: "",
+
+          });
+        }
+
+        setPartnershipContactsErrors(newErrors);
+      }
+
+
+
     }
     if (location.state.row.client_type_name == "Partnership") {
       setPartnershipDetails((prevState) => ({
@@ -251,6 +276,21 @@ const ClientEdit = () => {
       setPartnershipContacts(
         getClientDetails.data && getClientDetails.data.contact_details
       );
+
+      if (getClientDetails?.data?.contact_details) {
+        const newErrors = [...PartnershiContactsErrors];
+        for (let i = 2; i < getClientDetails.data.contact_details.length; i++) {
+          newErrors.push({
+            first_name: "",
+            last_name: "",
+            customer_contact_person_role_id: "",
+            phone: "",
+            email: "",
+          });
+        }
+
+        setPartnershipContactsErrors(newErrors);
+      }
     }
     if (location.state.row.client_type_name == "Individual") {
       setIndivisualDetails((prevState) => ({
@@ -280,6 +320,7 @@ const ClientEdit = () => {
           getClientDetails.data.contact_details[0].phone_code,
       }));
     }
+
   }, [getClientDetails]);
 
   useEffect(() => {
@@ -467,7 +508,7 @@ const ClientEdit = () => {
   const errorsArr = [errors1, errors2, errors3, errors4];
   const setErrorsArr = [setErrors1, setErrors2, setErrors3, setErrors4];
 
- 
+
 
   const handleInputsChange = (e, type) => {
     const { name, value } = e.target;
@@ -527,6 +568,14 @@ const ClientEdit = () => {
   const validateField = (index, field, value, Type) => {
     const errors = ErrorsArr[Type - 1];
     const newErrors = [...errors];
+
+    console.log("index", index)
+    console.log("field", field)
+    console.log("value", value)
+    console.log("Type", Type)
+    console.log("newErrors", newErrors)
+
+
     switch (field) {
       case "first_name":
       case "last_name":
@@ -598,7 +647,7 @@ const ClientEdit = () => {
             timer: 1500,
           });
           setTimeout(() => {
-            window.history.back(); 
+            window.history.back();
           }, 1500);
         } else {
           Swal.fire({
@@ -781,7 +830,7 @@ const ClientEdit = () => {
   };
 
 
-  const HandleCancel = () => { window.history.back()};
+  const HandleCancel = () => { window.history.back() };
 
   return (
     <div>
@@ -862,7 +911,7 @@ const ClientEdit = () => {
                                             Client Industry
                                           </label>
                                           <select
-                                           className={errors1["IndustryType"] ? "error-field form-select mb-3" : "form-select mb-3"}
+                                            className={errors1["IndustryType"] ? "error-field form-select mb-3" : "form-select mb-3"}
 
                                             aria-label="Default select example"
                                             name="IndustryType"
@@ -1108,7 +1157,7 @@ const ClientEdit = () => {
                                           <div className="mb-3 col-md-8 ps-1">
                                             <input
                                               type="text"
-                                              className={errors1["phone"]   ? "error-field form-control" : "form-control"}
+                                              className={errors1["phone"] ? "error-field form-control" : "form-control"}
 
                                               placeholder="Phone Number"
                                               name="phone"
@@ -1267,7 +1316,7 @@ const ClientEdit = () => {
                                               value={
                                                 getCompanyDetails.CompanyName
                                               }
-                                              // disabled
+                                            // disabled
                                             />
                                             {errors2["CompanyName"] && (
                                               <div className="error-text">
@@ -1294,7 +1343,7 @@ const ClientEdit = () => {
                                               value={
                                                 getCompanyDetails.EntityType
                                               }
-                                              // disabled
+                                            // disabled
                                             />
                                             {errors2["EntityType"] && (
                                               <div className="error-text">
@@ -1321,7 +1370,7 @@ const ClientEdit = () => {
                                               value={
                                                 getCompanyDetails.CompanyStatus
                                               }
-                                              // disabled
+                                            // disabled
                                             />
                                             {errors2["CompanyStatus"] && (
                                               <div className="error-text">
@@ -1349,7 +1398,7 @@ const ClientEdit = () => {
                                               value={
                                                 getCompanyDetails.CompanyNumber
                                               }
-                                              // disabled
+                                            // disabled
                                             />
                                             {errors2["CompanyNumber"] && (
                                               <div className="error-text">
@@ -1373,7 +1422,7 @@ const ClientEdit = () => {
                                               value={
                                                 getCompanyDetails.IncorporationDate
                                               }
-                                              // disabled
+                                            // disabled
                                             />
                                             {errors2["IncorporationDate"] && (
                                               <div className="error-text">
@@ -1400,7 +1449,7 @@ const ClientEdit = () => {
                                               value={
                                                 getCompanyDetails.RegisteredOfficeAddress
                                               }
-                                              // disabled
+                                            // disabled
                                             />
                                             {errors2[
                                               "RegisteredOfficeAddress"
@@ -1435,7 +1484,7 @@ const ClientEdit = () => {
                                               value={
                                                 getCompanyDetails.IncorporationIn
                                               }
-                                              // disabled
+                                            // disabled
                                             />
 
                                             {errors2["IncorporationIn"] && (
@@ -1451,7 +1500,7 @@ const ClientEdit = () => {
                                               VAT Registered
                                             </label>
                                             <select
-                                              className={errors2["VATRegistered"]  ? "error-field form-select" : "form-select"}
+                                              className={errors2["VATRegistered"] ? "error-field form-select" : "form-select"}
 
                                               name="VATRegistered"
                                               id="VATRegistered"
@@ -1669,7 +1718,7 @@ const ClientEdit = () => {
                                                             }
                                                           >
                                                             <i className="ti-trash text-danger"></i>{" "}
-                                                           
+
                                                           </button>
                                                         </div>
                                                       </div>
@@ -1691,7 +1740,7 @@ const ClientEdit = () => {
                                                         </label>
                                                         <input
                                                           type="text"
-                                                          className={companyContactsErrors[index].first_name  ? "error-field form-control" : "form-control"}
+                                                          className={companyContactsErrors[index]?.first_name ? "error-field form-control" : "form-control"}
 
                                                           placeholder="First Name"
                                                           id={`first_name-${index}`}
@@ -1713,8 +1762,7 @@ const ClientEdit = () => {
                                                             .first_name && (
                                                             <div className="error-text">
                                                               {
-                                                                companyContactsErrors[index]
-                                                                  .first_name
+                                                                companyContactsErrors[index]?.first_name
                                                               }
                                                             </div>
                                                           )}
@@ -1737,8 +1785,7 @@ const ClientEdit = () => {
                                                         </label>
                                                         <input
                                                           type="text"
-                                                          className={companyContactsErrors[index]
-                                                            .last_name  ? "error-field form-control" : "form-control"}
+                                                          className={companyContactsErrors[index]?.last_name ? "error-field form-control" : "form-control"}
 
                                                           placeholder="Last Name"
                                                           id={`last_name-${index}`}
@@ -1760,8 +1807,7 @@ const ClientEdit = () => {
                                                             .last_name && (
                                                             <div className="error-text">
                                                               {
-                                                                companyContactsErrors[index]
-                                                                  .last_name
+                                                                companyContactsErrors[index]?.last_name
                                                               }
                                                             </div>
                                                           )}
@@ -1785,9 +1831,7 @@ const ClientEdit = () => {
                                                         <select
                                                           className="form-select"
                                                           id={`customer_contact_person_role_id-${index}`}
-                                                          value={
-                                                            contact.customer_contact_person_role_id
-                                                          }
+                                                          value={contact.customer_contact_person_role_id}
                                                           onChange={(e) =>
                                                             handleContactInputChange(
                                                               index,
@@ -1821,8 +1865,7 @@ const ClientEdit = () => {
                                                             .customer_contact_person_role_id && (
                                                             <div className="error-text">
                                                               {
-                                                                companyContactsErrors[index]
-                                                                  .customer_contact_person_role_id
+                                                                companyContactsErrors[index]?.customer_contact_person_role_id
                                                               }
                                                             </div>
                                                           )}
@@ -1874,7 +1917,7 @@ const ClientEdit = () => {
                                                               placeholder="Phone Number"
                                                               id={`phone-${index}`}
                                                               value={
-                                                                contact.phone
+                                                                contact?.phone
                                                               }
                                                               onChange={(e) =>
                                                                 handleContactInputChange(
@@ -1897,9 +1940,7 @@ const ClientEdit = () => {
                                                                   }}
                                                                 >
                                                                   {
-                                                                    companyContactsErrors[
-                                                                      index
-                                                                    ].phone
+                                                                    companyContactsErrors[index]?.phone
                                                                   }
                                                                 </div>
                                                               )}
@@ -1925,7 +1966,7 @@ const ClientEdit = () => {
                                                         </label>
                                                         <input
                                                           type="text"
-                                                          className={companyContactsErrors[index].email  ? "error-field form-control" : "form-control"}
+                                                          className={companyContactsErrors[index]?.email ? "error-field form-control" : "form-control"}
 
                                                           placeholder="Email"
                                                           id={`email-${index}`}
@@ -1944,8 +1985,7 @@ const ClientEdit = () => {
                                                             .email && (
                                                             <div className="error-text">
                                                               {
-                                                                companyContactsErrors[index]
-                                                                  .email
+                                                                companyContactsErrors[index]?.email
                                                               }
                                                             </div>
                                                           )}
@@ -2031,7 +2071,7 @@ const ClientEdit = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className={errors3["TradingName"]   ? "error-field form-control" : "form-control"}
+                                            className={errors3["TradingName"] ? "error-field form-control" : "form-control"}
 
                                             placeholder="Trading Name"
                                             name="TradingName"
@@ -2059,7 +2099,7 @@ const ClientEdit = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className={errors3["TradingAddress"]   ? "error-field form-control" : "form-control"}
+                                            className={errors3["TradingAddress"] ? "error-field form-control" : "form-control"}
 
                                             placeholder="Trading Address"
                                             name="TradingAddress"
@@ -2084,7 +2124,7 @@ const ClientEdit = () => {
                                               VAT Registered
                                             </label>
                                             <select
-                                             className={errors3["VATRegistered"]   ? "error-field form-select" : "form-select"}
+                                              className={errors3["VATRegistered"] ? "error-field form-select" : "form-select"}
 
                                               name="VATRegistered"
                                               id="VATRegistered"
@@ -2235,7 +2275,7 @@ const ClientEdit = () => {
                                                               }
                                                             >
                                                               <i className="ti-trash text-danger"></i>{" "}
-                                                            
+
                                                             </button>
                                                           </div>
                                                         )}
@@ -2255,7 +2295,7 @@ const ClientEdit = () => {
                                                       </label>
                                                       <input
                                                         type="text"
-                                                        className={PartnershiContactsErrors[index] ?.first_name   ? "error-field form-control" : "form-control"}
+                                                        className={PartnershiContactsErrors[index]?.first_name ? "error-field form-control" : "form-control"}
 
                                                         placeholder="First Name"
                                                         name="first_name"
@@ -2301,7 +2341,7 @@ const ClientEdit = () => {
                                                       </label>
                                                       <input
                                                         type="text"
-                                                        className={PartnershiContactsErrors[index]?.last_name   ? "error-field form-control" : "form-control"}
+                                                        className={PartnershiContactsErrors[index]?.last_name ? "error-field form-control" : "form-control"}
 
                                                         placeholder="Last Name"
                                                         name="last_name"
@@ -2675,7 +2715,7 @@ const ClientEdit = () => {
                                             type="text"
                                             name="TradingName"
                                             id="TradingName"
-                                            className={errors4["TradingName"]   ? "error-field form-control" : "form-control"}
+                                            className={errors4["TradingName"] ? "error-field form-control" : "form-control"}
 
                                             placeholder="Trading Name"
                                             onChange={(e) => handleInputsChange(e, 4)}
@@ -2702,7 +2742,7 @@ const ClientEdit = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className={errors4["first_name"]   ? "error-field form-control" : "form-control"}
+                                            className={errors4["first_name"] ? "error-field form-control" : "form-control"}
 
                                             placeholder="First Name"
                                             name="first_name"
@@ -2730,7 +2770,7 @@ const ClientEdit = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className={errors4["last_name"]   ? "error-field form-control" : "form-control"}
+                                            className={errors4["last_name"] ? "error-field form-control" : "form-control"}
 
                                             placeholder="Last Name"
                                             name="last_name"
@@ -2780,7 +2820,7 @@ const ClientEdit = () => {
                                             <div className="mb-3 col-md-8 ps-1">
                                               <input
                                                 type="text"
-                                                className={errors4["phone"]   ? "error-field form-control" : "form-control"}
+                                                className={errors4["phone"] ? "error-field form-control" : "form-control"}
 
                                                 placeholder="Phone Number"
                                                 name="phone"
@@ -2812,7 +2852,7 @@ const ClientEdit = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className={errors4["email"]   ? "error-field form-control" : "form-control"}
+                                            className={errors4["email"] ? "error-field form-control" : "form-control"}
 
                                             placeholder="Enter Email ID"
                                             name="email"

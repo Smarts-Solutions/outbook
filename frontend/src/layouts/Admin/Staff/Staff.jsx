@@ -11,16 +11,12 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { getDateRange } from "../../../Utils/Comman_function";
 import Validation_Message from "../../../Utils/Validation_Message";
-import { Link } from "react-router-dom";
 
 const StaffPage = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
   const role = JSON.parse(localStorage.getItem("role"));
-  const accessData = useSelector(
-    (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data
-  );
-
+  const accessData = useSelector((state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data);
   const [showStaffInsertTab, setShowStaffInsertTab] = useState(true);
   const [showStaffUpdateTab, setShowStaffUpdateTab] = useState(true);
   const [showStaffDeleteTab, setStaffDeleteTab] = useState(true);
@@ -60,7 +56,7 @@ const StaffPage = () => {
   const [editStaffData, setEditStaffData] = useState(false);
   const [addCompetancy, SetCompetancy] = useState(false);
   const [refresh, SetRefresh] = useState(false);
-  const [activeTab, setActiveTab] = useState("this-week");
+  const [activeTab, setActiveTab] = useState("this-year");
   const [modalData, setModalData] = useState({ fields: [] });
   const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
   const [serviceDataAll, setServiceDataAll] = useState({
@@ -532,7 +528,7 @@ const StaffPage = () => {
             <h3 className="mt-0">Manage Staff</h3>
           </div>
         </div>
-        <div className="report-data mt-4">
+        {/* <div className="report-data mt-4">
           <div className="col-sm-12">
             <div className="page-title-box pt-0">
               <div className="row align-items-start">
@@ -590,9 +586,62 @@ const StaffPage = () => {
               filter={true}
             />
           </div>
+        </div> */}
+      </div>
+      <div className="report-data mt-4">
+       <div className="col-sm-12">
+        <div className="page-title-box pt-0">
+        <div className="row align-items-start">
+          <div className="col-md-6">
+            {/* Dropdown for selecting tabs */}
+          
+          </div>
+          <div className="col-md-6">
+            <div className="d-flex">
+          <div className="form-group w-75">
+              <select
+                className="form-control"
+                id="tabSelect"
+                value={activeTab}
+                onChange={(e) => setActiveTab(e.target.value)}
+              >
+                {tabs.map((tab) => (
+                  <option key={tab.id} value={tab.id}>
+                    {tab.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="w-25">
+            {showStaffInsertTab && (
+              <button
+                type="button"
+                className="btn btn-info text-white float-end"
+                onClick={() => setAddStaff(true)}
+              >
+                <i className="fa fa-plus" /> Add Staff
+              </button>
+            )}
+          </div>
+          </div>
+          </div>
         </div>
       </div>
-
+    </div>
+    <div className="tab-content mt-minus-60" id="pills-tabContent">
+      {tabs.map((tab) => (
+        <div
+          key={tab.id}
+          className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""}`}
+          id={tab.id}
+          role="tabpanel"
+        >
+          {/* Your Datatable component */}
+          <Datatable columns={columns} data={staffDataAll.data} filter={true} />
+        </div>
+      ))}
+    </div>
+  </div>
       {/* Add Staff */}
       <CommanModal
         isOpen={addStaff}

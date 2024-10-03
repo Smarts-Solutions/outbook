@@ -294,7 +294,7 @@ const Information = ({ id, pageStatus }) => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setPersonRoleDataAll(response.data);
+          setPersonRoleDataAll(response?.data);
         } else {
           setPersonRoleDataAll([]);
         }
@@ -311,7 +311,7 @@ const Information = ({ id, pageStatus }) => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setCountryDataAll(response.data);
+          setCountryDataAll(response?.data);
         } else {
           setCountryDataAll([]);
         }
@@ -664,15 +664,15 @@ const Information = ({ id, pageStatus }) => {
   // submit function
   const handleSubmit = async () => {
     if (ManagerType == "") {
-      setAccountMangerIdErr("Please Select Manager"); 
+      setAccountMangerIdErr("Please Select Manager");
       const errorElement = document.getElementById("accountManager");
       if (errorElement) {
-          const elementPosition = errorElement.getBoundingClientRect().top;  
-          const offsetPosition = elementPosition + window.pageYOffset - 50;
-          window.scrollTo({
-              top: offsetPosition,
-              behavior: "smooth"
-          });
+        const elementPosition = errorElement.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - 50;
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth"
+        });
       }
       return;
     }
@@ -680,24 +680,24 @@ const Information = ({ id, pageStatus }) => {
       if (validateAllFields(1)) {
         const req = {
           customer_id: Number(customer_id),
-          Trading_Name: getSoleTraderDetails.tradingName,
-          Trading_Address: getSoleTraderDetails.tradingAddress,
-          VAT_Registered: getSoleTraderDetails.vatRegistered,
-          VAT_Number: getSoleTraderDetails.vatNumber,
-          Website: getSoleTraderDetails.website,
-          First_Name: getSoleTraderDetails.firstName,
-          Last_Name: getSoleTraderDetails.lastName,
-          Email: getSoleTraderDetails.email,
-          Phone: getSoleTraderDetails.phone,
-          Residential_Address: getSoleTraderDetails.residentialAddress,
-          phone_code: getSoleTraderDetails.phone_code,
+          Trading_Name: getSoleTraderDetails?.tradingName,
+          Trading_Address: getSoleTraderDetails?.tradingAddress,
+          VAT_Registered: getSoleTraderDetails?.vatRegistered,
+          VAT_Number: getSoleTraderDetails?.vatNumber,
+          Website: getSoleTraderDetails?.website,
+          First_Name: getSoleTraderDetails?.firstName,
+          Last_Name: getSoleTraderDetails?.lastName,
+          Email: getSoleTraderDetails?.email,
+          Phone: getSoleTraderDetails?.phone,
+          Residential_Address: getSoleTraderDetails?.residentialAddress,
+          phone_code: getSoleTraderDetails?.phone_code,
           PageStatus: "1",
           account_manager_id: ManagerType,
           CustomerType: customerType,
           staff_id: staffDetails.id,
         };
         await AddCustomerFun(req);
-      }  
+      }
     }
     if (customerType == 2 && ManagerType != "") {
       if (validateAllFields(2)) {
@@ -739,19 +739,19 @@ const Information = ({ id, pageStatus }) => {
             staff_id: staffDetails.id,
             account_manager_id: ManagerType,
             customer_id: Number(customer_id),
-            Trading_Name: getCompanyDetails.TradingName,
-            Trading_Address: getCompanyDetails.TradingAddress,
-            VAT_Registered: getCompanyDetails.VATRegistered,
-            VAT_Number: getCompanyDetails.VATNumber,
-            Website: getCompanyDetails.Website,
+            Trading_Name: getCompanyDetails?.TradingName,
+            Trading_Address: getCompanyDetails?.TradingAddress,
+            VAT_Registered: getCompanyDetails?.VATRegistered,
+            VAT_Number: getCompanyDetails?.VATNumber,
+            Website: getCompanyDetails?.Website,
             contactDetails: contacts,
-            company_name: getCompanyDetails.CompanyName,
-            entity_type: getCompanyDetails.EntityType,
-            company_status: getCompanyDetails.CompanyStatus,
-            company_number: getCompanyDetails.CompanyNumber,
-            Registered_Office_Addres: getCompanyDetails.RegisteredOfficeAddress,
-            Incorporation_Date: getCompanyDetails.IncorporationDate,
-            Incorporation_in: getCompanyDetails.IncorporationIn,
+            company_name: getCompanyDetails?.CompanyName,
+            entity_type: getCompanyDetails?.EntityType,
+            company_status: getCompanyDetails?.CompanyStatus,
+            company_number: getCompanyDetails?.CompanyNumber,
+            Registered_Office_Addres: getCompanyDetails?.RegisteredOfficeAddress,
+            Incorporation_Date: getCompanyDetails?.IncorporationDate,
+            Incorporation_in: getCompanyDetails?.IncorporationIn,
           };
 
           await AddCustomerFun(req);
@@ -803,11 +803,11 @@ const Information = ({ id, pageStatus }) => {
             CustomerType: "3",
             staff_id: staffDetails.id,
             account_manager_id: ManagerType,
-            Trading_Name: getPartnershipDetails.TradingName,
-            Trading_Address: getPartnershipDetails.TradingAddress,
-            VAT_Registered: getPartnershipDetails.VATRegistered,
-            VAT_Number: getPartnershipDetails.VATNumber,
-            Website: getPartnershipDetails.Website,
+            Trading_Name: getPartnershipDetails?.TradingName,
+            Trading_Address: getPartnershipDetails?.TradingAddress,
+            VAT_Registered: getPartnershipDetails?.VATRegistered,
+            VAT_Number: getPartnershipDetails?.VATNumber,
+            Website: getPartnershipDetails?.Website,
             contactDetails: contacts1,
           };
 
@@ -938,6 +938,8 @@ const Information = ({ id, pageStatus }) => {
         console.error("Error sending data to API:", error);
       });
   };
+  console.log("getCompanyDetails", getCompanyDetails)
+
 
   return (
     <>
@@ -993,7 +995,6 @@ const Information = ({ id, pageStatus }) => {
                           <Field
                             as="select"
                             name="accountManager"
-                            
                             className={getAccountMangerIdErr ? "error-field form-select" : "form-select"}
                             id="accountManager"
                             onChange={(e) => handleChangeManager(e)}
@@ -1002,11 +1003,11 @@ const Information = ({ id, pageStatus }) => {
                           >
                             <option value="">Select Manager</option>
                             {staffDataAll &&
-                              staffDataAll.map((data) => (
-                                <option key={data.id} value={data.id}>
-                                  {capitalizeFirstLetter(data.first_name) +
+                              staffDataAll?.map((data) => (
+                                <option key={data?.id} value={data?.id}>
+                                  {capitalizeFirstLetter(data?.first_name) +
                                     " " +
-                                    capitalizeFirstLetter(data.last_name)}
+                                    capitalizeFirstLetter(data?.last_name)}
                                 </option>
                               ))}
                           </Field>
@@ -1047,11 +1048,11 @@ const Information = ({ id, pageStatus }) => {
                                 type="text"
                                 name="tradingName"
                                 id="tradingName"
-                                
+
                                 className={errors1["tradingName"] ? "error-field form-control" : "form-control"}
                                 placeholder="Trading Name"
                                 onChange={(e) => handleChange1(e)}
-                                value={getSoleTraderDetails.tradingName}
+                                value={getSoleTraderDetails?.tradingName}
                                 maxLength={100}
                               />
 
@@ -1074,7 +1075,7 @@ const Information = ({ id, pageStatus }) => {
                                 name="tradingAddress"
                                 id="tradingAddress"
                                 onChange={(e) => handleChange1(e)}
-                                value={getSoleTraderDetails.tradingAddress}
+                                value={getSoleTraderDetails?.tradingAddress}
                                 maxLength={200}
                               />
                             </div>
@@ -1090,7 +1091,7 @@ const Information = ({ id, pageStatus }) => {
                                 aria-label="Default select example"
                                 name="vatRegistered"
                                 id="vatRegistered"
-                                value={getSoleTraderDetails.vatRegistered}
+                                value={getSoleTraderDetails?.vatRegistered}
                                 onChange={(e) => handleChange1(e)}
                               >
                                 <option value="">
@@ -1116,7 +1117,7 @@ const Information = ({ id, pageStatus }) => {
                                 placeholder="VAT Number"
                                 name="vatNumber"
                                 id="vatNumber"
-                                value={getSoleTraderDetails.vatNumber}
+                                value={getSoleTraderDetails?.vatNumber}
                                 onChange={(e) => handleChange1(e)}
                                 maxLength={9}
                               />
@@ -1131,7 +1132,7 @@ const Information = ({ id, pageStatus }) => {
                                 placeholder="URL"
                                 name="website"
                                 id="website"
-                                value={getSoleTraderDetails.website}
+                                value={getSoleTraderDetails?.website}
                                 onChange={(e) => handleChange1(e)}
                                 maxLength={200}
                               />
@@ -1159,12 +1160,12 @@ const Information = ({ id, pageStatus }) => {
                               </label>
                               <input
                                 type="text"
-                               
+
                                 className={errors1["firstName"] ? "error-field form-control" : "form-control"}
                                 placeholder="First Name"
                                 name="firstName"
                                 id="firstName"
-                                value={getSoleTraderDetails.firstName}
+                                value={getSoleTraderDetails?.firstName}
                                 onChange={(e) => handleChange1(e)}
                                 maxLength={50}
                               />
@@ -1182,12 +1183,12 @@ const Information = ({ id, pageStatus }) => {
                               </label>
                               <input
                                 type="text"
-                               
+
                                 className={errors1["lastName"] ? "error-field form-control" : "form-control"}
                                 placeholder="Last Name"
                                 name="lastName"
                                 id="lastName"
-                                value={getSoleTraderDetails.lastName}
+                                value={getSoleTraderDetails?.lastName}
                                 onChange={(e) => handleChange1(e)}
                                 maxLength={50}
                               />
@@ -1208,10 +1209,10 @@ const Information = ({ id, pageStatus }) => {
                                     onChange={(e) => handleChange1(e)}
                                     name="phone_code"
                                     id="phone_code"
-                                    value={getSoleTraderDetails.phone_code}
+                                    value={getSoleTraderDetails?.phone_code}
                                   >
                                     {countryDataAll &&
-                                      countryDataAll.map((data) => (
+                                      countryDataAll?.map((data) => (
                                         <option
                                           key={data.code}
                                           value={data.code}
@@ -1228,7 +1229,7 @@ const Information = ({ id, pageStatus }) => {
                                     placeholder="Phone Number"
                                     name="phone"
                                     id="phone"
-                                    value={getSoleTraderDetails.phone}
+                                    value={getSoleTraderDetails?.phone}
                                     onChange={(e) => handleChange1(e)}
                                     maxLength={12}
                                   />
@@ -1249,12 +1250,11 @@ const Information = ({ id, pageStatus }) => {
                               </label>
                               <input
                                 type="text"
-                                
                                 className={errors1["eamil"] ? "error-field form-control" : "form-control"}
                                 placeholder="Enter Email ID"
                                 name="email"
                                 id="email"
-                                value={getSoleTraderDetails.email}
+                                value={getSoleTraderDetails?.email}
                                 onChange={(e) => handleChange1(e)}
                               />
                               {errors1["email"] && (
@@ -1273,12 +1273,12 @@ const Information = ({ id, pageStatus }) => {
                               </label>
                               <input
                                 type="text"
-                                
+
                                 className={errors1["residentialAddress"] ? "error-field form-control" : "form-control"}
                                 placeholder="Residential Address"
                                 name="residentialAddress"
                                 id="residentialAddress"
-                                value={getSoleTraderDetails.residentialAddress}
+                                value={getSoleTraderDetails?.residentialAddress}
                                 onChange={(e) => handleChange1(e)}
                               />
                               {errors1["residentialAddress"] && (
@@ -1336,16 +1336,16 @@ const Information = ({ id, pageStatus }) => {
                                     onClick={() => setShowDropdown(true)}
                                     style={{ cursor: "pointer" }}
                                   />
-                                  {getAllSearchCompany.length > 0 &&
+                                  {getAllSearchCompany?.length > 0 &&
                                     showDropdown ? (
                                     <div className="dropdown-list">
                                       {getAllSearchCompany &&
-                                        getAllSearchCompany.map(
+                                        getAllSearchCompany?.map(
                                           (company, index) => (
                                             <div
                                               key={index}
                                               onClick={() => {
-                                                setSearchItem(company.title);
+                                                setSearchItem(company?.title);
                                                 setShowDropdown(false);
                                               }}
                                               style={{
@@ -1353,7 +1353,7 @@ const Information = ({ id, pageStatus }) => {
                                                 padding: "8px 0",
                                               }}
                                             >
-                                              {company.title}
+                                              {company?.title}
                                             </div>
                                           )
                                         )}
@@ -1379,7 +1379,7 @@ const Information = ({ id, pageStatus }) => {
                                   name="CompanyName"
                                   id="CompanyName"
                                   onChange={(e) => handleChange2(e)}
-                                  defaultValue={getCompanyDetails.CompanyName}
+                                  defaultValue={getCompanyDetails?.CompanyName}
                                 />
                                 {errors2["CompanyName"] && (
                                   <div className="error-text">
@@ -1396,14 +1396,14 @@ const Information = ({ id, pageStatus }) => {
                                 </label>
                                 <input
                                   type="text"
-                                  
-                                  className={errors2["EntityType"]  ? "error-field form-control" : "form-control"}
+
+                                  className={errors2["EntityType"] ? "error-field form-control" : "form-control"}
 
                                   placeholder="Enter Entity Type"
                                   name="EntityType"
                                   id="EntityType"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails.EntityType}
+                                  value={getCompanyDetails?.EntityType}
                                 />
                                 {errors2["EntityType"] && (
                                   <div className="error-text">
@@ -1420,13 +1420,13 @@ const Information = ({ id, pageStatus }) => {
                                 </label>
                                 <input
                                   type="text"
-                                  className={errors2["CompanyStatus"]  ? "error-field form-control" : "form-control"}
+                                  className={errors2["CompanyStatus"] ? "error-field form-control" : "form-control"}
 
                                   placeholder="Enter Company Status"
                                   name="CompanyStatus"
                                   id="CompanyStatus"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails.CompanyStatus}
+                                  value={getCompanyDetails?.CompanyStatus}
                                 />
                                 {errors2["CompanyStatus"] && (
                                   <div className="error-text">
@@ -1449,7 +1449,7 @@ const Information = ({ id, pageStatus }) => {
                                   placeholder="Enter Company Number"
                                   name="CompanyNumber"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails.CompanyNumber}
+                                  value={getCompanyDetails?.CompanyNumber}
                                 />
                                 {errors2["CompanyNumber"] && (
                                   <div className="error-text">
@@ -1473,7 +1473,7 @@ const Information = ({ id, pageStatus }) => {
                                   name="IncorporationDate"
                                   id="IncorporationDate"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails.IncorporationDate}
+                                  value={getCompanyDetails?.IncorporationDate}
                                 />
                                 {errors2["IncorporationDate"] && (
                                   <div className="error-text">
@@ -1496,25 +1496,25 @@ const Information = ({ id, pageStatus }) => {
                                   name="IncorporationIn"
                                   id="IncorporationIn"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails.IncorporationIn}
+                                  value={getCompanyDetails?.IncorporationIn}
                                 /> */}
 
                                 <select
-                                 
+
                                   className={errors2["IncorporationIn"] ? "error-field form-select" : "form-select"}
 
                                   name="IncorporationIn"
                                   id="IncorporationIn"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails.IncorporationIn}
+                                  value={getCompanyDetails?.IncorporationIn}
                                 >
                                   <option value="">
                                     Please Select Incorporation In
                                   </option>
                                   {incorporationDataAll &&
-                                    incorporationDataAll.map((data) => (
-                                      <option key={data.id} value={data.id}>
-                                        {data.name}
+                                    incorporationDataAll?.map((data) => (
+                                      <option key={data?.id} value={data?.id}>
+                                        {data?.name}
                                       </option>
                                     ))}
                                 </select>
@@ -1540,7 +1540,7 @@ const Information = ({ id, pageStatus }) => {
                                   id="RegisteredOfficeAddress"
                                   onChange={(e) => handleChange2(e)}
                                   value={
-                                    getCompanyDetails.RegisteredOfficeAddress
+                                    getCompanyDetails?.RegisteredOfficeAddress
                                   }
                                 />
                                 {errors2["RegisteredOfficeAddress"] && (
@@ -1560,7 +1560,7 @@ const Information = ({ id, pageStatus }) => {
                                   name="VATRegistered"
                                   id="VATRegistered"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails.VATRegistered}
+                                  value={getCompanyDetails?.VATRegistered}
                                 >
                                   <option value="">
                                     Please Select VAT Registered
@@ -1588,7 +1588,7 @@ const Information = ({ id, pageStatus }) => {
                                     name="VATNumber"
                                     id="VATNumber"
                                     onChange={(e) => handleChange2(e)}
-                                    value={getCompanyDetails.VATNumber}
+                                    value={getCompanyDetails?.VATNumber}
                                     maxLength={9}
                                   />
                                   {errors2["VATNumber"] && (
@@ -1609,7 +1609,7 @@ const Information = ({ id, pageStatus }) => {
                                   name="Website"
                                   id="Website"
                                   onChange={(e) => handleChange2(e)}
-                                  value={getCompanyDetails.Website}
+                                  value={getCompanyDetails?.Website}
                                   maxLength={200}
                                 />
                               </div>
@@ -1640,7 +1640,7 @@ const Information = ({ id, pageStatus }) => {
                                 name="TradingName"
                                 id="TradingName"
                                 onChange={(e) => handleChange2(e)}
-                                value={getCompanyDetails.TradingName}
+                                value={getCompanyDetails?.TradingName}
                               />
                               {errors2["TradingName"] && (
                                 <div className="error-text">
@@ -1649,6 +1649,7 @@ const Information = ({ id, pageStatus }) => {
                               )}
                             </div>
                           </div>
+                
                           <div className="col-lg-7">
                             <div className="mb-3">
                               <label className="form-label">
@@ -1662,7 +1663,7 @@ const Information = ({ id, pageStatus }) => {
                                 name="TradingAddress"
                                 id="TradingAddress"
                                 onChange={(e) => handleChange2(e)}
-                                value={getCompanyDetails.TradingAddress}
+                                value={getCompanyDetails?.TradingAddress}
                               />
                               {errors2["TradingAddress"] && (
                                 <div className="error-text">
@@ -1687,8 +1688,8 @@ const Information = ({ id, pageStatus }) => {
                           <div className="card-body">
                             <div className="row">
                               {contacts &&
-                                contacts.length > 0 &&
-                                contacts.map((contact, index) => (
+                                contacts?.length > 0 &&
+                                contacts?.map((contact, index) => (
                                   <div
                                     className="col-xl-12 col-lg-12 mt-3"
                                     key={index}
@@ -1703,7 +1704,7 @@ const Information = ({ id, pageStatus }) => {
                                                 onClick={() =>
                                                   handleDeleteContact(index)
                                                 }
-                                                disabled={contacts.length === 1}
+                                                disabled={contacts?.length === 1}
                                               >
                                                 <i className="ti-trash text-danger "></i>
                                               </button>
@@ -1723,10 +1724,10 @@ const Information = ({ id, pageStatus }) => {
                                             </label>
                                             <input
                                               type="text"
-                                              className={errors[index].firstName ? "error-field form-control" : "form-control"}
+                                              className={errors[index]?.firstName ? "error-field form-control" : "form-control"}
                                               placeholder="First Name"
                                               id={`firstName-${index}`}
-                                              value={contact.firstName}
+                                              value={contact?.firstName}
                                               onChange={(e) =>
                                                 handleChange(
                                                   index,
@@ -1736,12 +1737,12 @@ const Information = ({ id, pageStatus }) => {
                                               }
                                             />
                                             {errors[index] &&
-                                              errors[index].firstName && (
+                                              errors[index]?.firstName && (
                                                 <div
                                                   className="error-text"
                                                   style={{ color: "red" }}
                                                 >
-                                                  {errors[index].firstName}
+                                                  {errors[index]?.firstName}
                                                 </div>
                                               )}
                                           </div>
@@ -1759,10 +1760,10 @@ const Information = ({ id, pageStatus }) => {
                                             </label>
                                             <input
                                               type="text"
-                                              className={ errors[index].lastName ? "error-field form-control" : "form-control"}
+                                              className={errors[index]?.lastName ? "error-field form-control" : "form-control"}
                                               placeholder="Last Name"
                                               id={`lastName-${index}`}
-                                              value={contact.lastName}
+                                              value={contact?.lastName}
                                               onChange={(e) =>
                                                 handleChange(
                                                   index,
@@ -1772,12 +1773,12 @@ const Information = ({ id, pageStatus }) => {
                                               }
                                             />
                                             {errors[index] &&
-                                              errors[index].lastName && (
+                                              errors[index]?.lastName && (
                                                 <div
                                                   className="error-text"
                                                   style={{ color: "red" }}
                                                 >
-                                                  {errors[index].lastName}
+                                                  {errors[index]?.lastName}
                                                 </div>
                                               )}
                                           </div>
@@ -1794,7 +1795,7 @@ const Information = ({ id, pageStatus }) => {
                                             <select
                                               className="form-select"
                                               id={`role-${index}`}
-                                              value={contact.role}
+                                              value={contact?.role}
                                               onChange={(e) =>
                                                 handleChange(
                                                   index,
@@ -1807,24 +1808,21 @@ const Information = ({ id, pageStatus }) => {
                                                 Select Role
                                               </option>
                                               {personRoleDataAll &&
-                                                personRoleDataAll.map(
+                                                personRoleDataAll?.map(
                                                   (item) => (
                                                     <option
-                                                      value={item.id}
-                                                      key={item.id}
+                                                      value={item?.id}
+                                                      key={item?.id}
                                                     >
-                                                      {item.name}
+                                                      {item?.name}
                                                     </option>
                                                   )
                                                 )}
                                             </select>
                                             {errors[index] &&
-                                              errors[index].role && (
-                                                <div
-                                                  className="error-text"
-                                                  style={{ color: "red" }}
-                                                >
-                                                  {errors[index].role}
+                                              errors[index]?.role && (
+                                                <div className="error-text" style={{ color: "red" }}  >
+                                                  {errors[index]?.role}
                                                 </div>
                                               )}
                                           </div>
@@ -1847,16 +1845,16 @@ const Information = ({ id, pageStatus }) => {
                                                     )
                                                   }
                                                   name="phone_code"
-                                                  value={contact.phone_code}
+                                                  value={contact?.phone_code}
                                                 >
                                                   {countryDataAll &&
-                                                    countryDataAll.map(
+                                                    countryDataAll?.map(
                                                       (data) => (
                                                         <option
-                                                          key={data.code}
-                                                          value={data.code}
+                                                          key={data?.code}
+                                                          value={data?.code}
                                                         >
-                                                          {data.code}
+                                                          {data?.code}
                                                         </option>
                                                       )
                                                     )}
@@ -1869,7 +1867,7 @@ const Information = ({ id, pageStatus }) => {
                                                   placeholder="Phone Number"
                                                   name="phoneNumber"
                                                   id={`phoneNumber-${index}`}
-                                                  value={contact.phoneNumber}
+                                                  value={contact?.phoneNumber}
                                                   onChange={(e) =>
                                                     handleChange(
                                                       index,
@@ -1881,11 +1879,10 @@ const Information = ({ id, pageStatus }) => {
                                                   minLength={9}
                                                 />
                                                 {errors[index] &&
-                                                  errors[index].phoneNumber && (
+                                                  errors[index]?.phoneNumber && (
                                                     <div className="error-text">
                                                       {
-                                                        errors[index]
-                                                          .phoneNumber
+                                                        errors[index]?.phoneNumber
                                                       }
                                                     </div>
                                                   )}
@@ -1906,11 +1903,11 @@ const Information = ({ id, pageStatus }) => {
                                             </label>
                                             <input
                                               type="text"
-                                              className={errors[index].email ? "error-field form-control" : "form-control"}
+                                              className={errors[index]?.email ? "error-field form-control" : "form-control"}
 
                                               placeholder="Email"
                                               id={`email-${index}`}
-                                              value={contact.email}
+                                              value={contact?.email}
                                               onChange={(e) =>
                                                 handleChange(
                                                   index,
@@ -1920,12 +1917,12 @@ const Information = ({ id, pageStatus }) => {
                                               }
                                             />
                                             {errors[index] &&
-                                              errors[index].email && (
+                                              errors[index]?.email && (
                                                 <div
                                                   className="error-text"
                                                   style={{ color: "red" }}
                                                 >
-                                                  {errors[index].email}
+                                                  {errors[index]?.email}
                                                 </div>
                                               )}
                                           </div>
@@ -1976,7 +1973,7 @@ const Information = ({ id, pageStatus }) => {
                                 placeholder="Trading Name"
                                 name="TradingName"
                                 id="TradingName"
-                                value={getPartnershipDetails.TradingName}
+                                value={getPartnershipDetails?.TradingName}
                                 onChange={(e) => handleChange3(e)}
                                 maxLength={100}
                                 ref={(el) => (refs.current["TradingName"] = el)}
@@ -2001,7 +1998,7 @@ const Information = ({ id, pageStatus }) => {
                                 placeholder="Trading Address"
                                 name="TradingAddress"
                                 id="TradingAddress"
-                                value={getPartnershipDetails.TradingAddress}
+                                value={getPartnershipDetails?.TradingAddress}
                                 onChange={(e) => handleChange3(e)}
                                 maxLength={200}
                               />
@@ -2023,7 +2020,7 @@ const Information = ({ id, pageStatus }) => {
                                   className="form-select "
                                   name="VATRegistered"
                                   id="VATRegistered"
-                                  value={getPartnershipDetails.VATRegistered}
+                                  value={getPartnershipDetails?.VATRegistered}
                                   onChange={(e) => handleChange3(e)}
                                 >
                                   <option value="">
@@ -2053,7 +2050,7 @@ const Information = ({ id, pageStatus }) => {
                                   placeholder="VAT Number"
                                   name="VATNumber"
                                   id="VATNumber"
-                                  value={getPartnershipDetails.VATNumber}
+                                  value={getPartnershipDetails?.VATNumber}
                                   onChange={(e) => handleChange3(e)}
                                   maxLength={9}
                                 />
@@ -2074,7 +2071,7 @@ const Information = ({ id, pageStatus }) => {
                                 placeholder="URL"
                                 name="Website"
                                 id="Website"
-                                value={getPartnershipDetails.Website}
+                                value={getPartnershipDetails?.Website}
                                 onChange={(e) => handleChange3(e)}
                                 maxLength={200}
                               />
