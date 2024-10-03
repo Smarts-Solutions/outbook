@@ -1783,8 +1783,6 @@ ORDER BY
     return acc;
   }, []);
 
-  // Output the grouped result
-  // console.log(JSON.stringify(groupedResult, null, 2));
   return { status: true, message: "success.", data: groupedResult };
 
 }
@@ -1844,5 +1842,4 @@ module.exports = {
   deleteJobById,
   getJobTimeLine,
   updateJobStatus
-
 };

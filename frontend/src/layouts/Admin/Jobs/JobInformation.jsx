@@ -2,7 +2,7 @@ import React from 'react'
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { GetAllJabData, AddAllJobType, GET_ALL_CHECKLIST } from '../../../ReduxStore/Slice/Customer/CustomerSlice';
+import { GetAllJabData, Update_Status, GET_ALL_CHECKLIST } from '../../../ReduxStore/Slice/Customer/CustomerSlice';
 import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from 'sweetalert2';
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
@@ -21,8 +21,8 @@ const JobInformationPage = ({ job_id }) => {
     const [FeedbackIncorporationTime, setFeedbackIncorporationTime] = useState({ hours: "", minutes: "" })
     const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" })
     const [statusDataAll, setStatusDataAll] = useState([])
-    const [selectStatusIs , setStatusId] = useState('')
- 
+    const [selectStatusIs, setStatusId] = useState('')
+
 
     const [JobInformationData, setJobInformationData] = useState({
         AccountManager: "",
@@ -158,8 +158,7 @@ const JobInformationPage = ({ job_id }) => {
                         InvoiceTime: response.data.invoice_hours,
                         InvoiceRemark: response.data.invoice_remark,
                     }));
-
-
+                    setStatusId(response.data.status_type)
                 }
 
             })
@@ -209,7 +208,7 @@ const JobInformationPage = ({ job_id }) => {
 
     }
 
- 
+
     const filteredData = AllJobData.data?.engagement_model?.[0]
         ? Object.keys(AllJobData.data.engagement_model[0])
             .filter(key => AllJobData.data.engagement_model[0][key] === "1")
@@ -259,6 +258,87 @@ const JobInformationPage = ({ job_id }) => {
             });
     };
 
+
+
+    // Status Change Handler
+    const handleStatusChange = (e) => {
+        const Id = e.target.value;
+
+        sweatalert.fire({
+            title: "Are you sure?",
+            text: "Do you want to change the status?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, change it!",
+            cancelButtonText: "No, cancel",
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const req = { job_id: location.state.job_id, status_type: Id };
+                    const res = await dispatch(Update_Status({ req, authToken: token })).unwrap();
+
+                    if (res.status) {
+                        // Success message
+                        sweatalert.fire({
+                            title: "Success",
+                            text: res.message,
+                            icon: "success",
+                            timer: 1000,
+                            showConfirmButton: false,
+                        });
+
+                        // Update the local state to reflect the new status
+                        setStatusId(Id);
+
+                        // Fetch updated job data
+                        GetJobData();
+                    } else if (res.data === "W") {
+                        // Warning message
+                        sweatalert.fire({
+                            title: "Warning",
+                            text: res.message,
+                            icon: "warning",
+                            confirmButtonText: "Ok",
+                            timer: 1000,
+                            timerProgressBar: true,
+                        });
+                    } else {
+                        // Error message
+                        sweatalert.fire({
+                            title: "Error",
+                            text: res.message,
+                            icon: "error",
+                            confirmButtonText: "Ok",
+                            timer: 1000,
+                            timerProgressBar: true,
+                        });
+                    }
+                } catch (error) {
+                    // Catch error handling
+                    sweatalert.fire({
+                        title: "Error",
+                        text: "An error occurred while updating the status.",
+                        icon: "error",
+                        confirmButtonText: "Ok",
+                        timer: 1000,
+                        timerProgressBar: true,
+                    });
+                }
+            } else if (result.dismiss === sweatalert.DismissReason.cancel) {
+                sweatalert.fire({
+                    title: "Cancelled",
+                    text: "Status change was not performed",
+                    icon: "error",
+                    confirmButtonText: "Ok",
+                    timer: 1000,
+                    timerProgressBar: true,
+                });
+            }
+        });
+    };
+
+
+
     return (
         <div>
             <div className='row mb-3'>
@@ -270,12 +350,12 @@ const JobInformationPage = ({ job_id }) => {
                 <div className='col-md-4 '>
                     <div className='d-flex w-100'>
                         <div className='w-75'>
-                            <select  className="form-select form-control" onChange={(e)=> setStatusId(e.target.value)} >
+                            <select className="form-select form-control" onChange={handleStatusChange} value={selectStatusIs}>
                                 {
                                     statusDataAll.map((status) => (
                                         <option value={status.id} key={status.id}>{status.name}</option>
                                     ))
-                                } 
+                                }
                             </select>
                         </div>
                         <button className='edit-icon' onClick={handleJobEdit}>  <i className="ti-pencil text-primary" /></button>

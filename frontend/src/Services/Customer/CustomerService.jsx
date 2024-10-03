@@ -505,3 +505,15 @@ export async function GET_JOB_TIMELINE(data, token) {
     return await err;
   }
 }
+
+export async function UPDATE_STATUS(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}updateJobStatus`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
