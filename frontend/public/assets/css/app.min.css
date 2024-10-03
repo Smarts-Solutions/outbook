@@ -8721,7 +8721,7 @@ ul.steppedprogress li:first-child:after {
 }
 
 .account-body .auth-header-box {
-  background-color: #333547;
+  background: linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(51,53,71,1) 100%);
   border-radius: 0 150px 150px 0px;
 }
 
