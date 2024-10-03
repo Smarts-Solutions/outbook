@@ -20,8 +20,6 @@ const ClientList = () => {
   const [companyDetails, setCompanyDetails] = useState([]);
   const [hararchyData, setHararchyData] = useState(location.state.data);
 
-  
-
   useEffect(() => {
     GetAllJobList();
     GetClientDetails();
@@ -53,14 +51,12 @@ const ClientList = () => {
       });
   };
 
-
   const tabs = [
     { id: "NoOfJobs", label: "No. Of Jobs", icon: "fa-solid fa-briefcase" },
     { id: "viewclient", label: "View Client", icon: "fa-solid fa-user" },
     { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
   ];
   
-
   const columns = [
     {
       name: "Job ID (CustName+ClientName+UniqueNo)",
@@ -169,7 +165,6 @@ const ClientList = () => {
     });
   };
 
-
   function handleEdit(row) {
     navigate("/admin/job/edit", { state: { job_id: row.job_id, goto: "client" } });
   }
@@ -231,7 +226,6 @@ const ClientList = () => {
     }
   };
  
-
   function ClientEdit(row) {
 
     navigate("/admin/client/edit", { state: { row, id: row } });
@@ -599,8 +593,7 @@ const ClientList = () => {
                         </li>
                         <li className="mb-4">
                           <h6 className="">VAT Registered</h6>
-                          <p className="font-14  ml-3">
-                            {" "}
+                          <p className="font-14  ml-3"> 
                             {informationData &&
                               informationData.vat_registered == "0"
                               ? "No"
@@ -619,15 +612,13 @@ const ClientList = () => {
                       <ul className="list-unstyled faq-qa">
                         <li className="mb-4">
                           <h6 className="">Trading Address</h6>
-                          <p className="font-14  ml-3">
-                            {" "}
+                          <p className="font-14  ml-3"> 
                             {informationData && informationData.trading_address}
                           </p>
                         </li>
                         <li className="mb-4">
                           <h6 className="">VAT Number</h6>
                           <p className="font-14  ml-3">
-                            {" "}
                             {informationData && informationData.vat_number}
                           </p>
                         </li>
