@@ -22,6 +22,7 @@ const JobInformationPage = ({ job_id }) => {
     const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" })
     const [statusDataAll, setStatusDataAll] = useState([])
     const [selectStatusIs , setStatusId] = useState('')
+ 
 
     const [JobInformationData, setJobInformationData] = useState({
         AccountManager: "",
