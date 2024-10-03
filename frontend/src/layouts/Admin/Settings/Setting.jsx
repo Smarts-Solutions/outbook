@@ -1661,7 +1661,7 @@ const Setting = () => {
     { id: "7", label: "Incorporation", icon: "fas fa-file-alt" },
     { id: "8", label: "Source", icon: "fas fa-external-link-alt" },
     { id: "9", label: "Checklist", icon: "fas fa-check-square" },
-    { id: "10", label: "Internal", icon: "fas fa-lock" }
+    { id: "10", label: "Internal Task", icon: "fas fa-lock" }
   ];
 
   return (
@@ -1726,7 +1726,7 @@ const Setting = () => {
                         onClick={(e) => handleAdd(e, "1")}
                       >
                         {" "}
-                        <i className="fa fa-plus" /> 
+                        <i className="fa fa-plus" /> Add Staff Role
                       </button>
                     </div>
                   )}
@@ -1962,7 +1962,7 @@ const Setting = () => {
               <div className="report-data">
                 <div className="d-flex justify-content-between align-items-center">
                   <div className="tab-title">
-                    <h3 className="mt-0">Internal</h3>
+                    <h3 className="mt-0">Internal Task</h3>
                   </div>
                   {!showSettingInsertTab ? null : (
                     <div>
@@ -1971,7 +1971,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-end"
                         onClick={(e) => handleAdd(e, "10")}
                       >
-                        <i className="fa fa-plus" /> Add Job
+                        <i className="fa fa-plus" /> Add Job/Project
                       </button>
                     </div>
                   )}
@@ -2010,7 +2010,7 @@ const Setting = () => {
                   </>
                 ) : 
                   <>
-                    {/* <i className="far fa-save pe-1"></i>  */}
+                    <i className="far fa-save pe-1"></i> 
                     Save
                   </>
               }

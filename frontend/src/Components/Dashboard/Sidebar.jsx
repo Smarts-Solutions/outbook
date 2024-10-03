@@ -171,6 +171,22 @@ const Sidebar = () => {
                         </Link>
                       </li>
                     )}
+                    {((updatedShowTab && updatedShowTab.timesheet) ||
+                    role === "ADMIN" ||
+                    role === "SUPERADMIN") && (
+                      <li className={activeLink === "/admin/timesheet" ? "active" : ""}>
+                        <Link
+                          to="/admin/timesheet"
+                          aria-expanded="false"
+                          onClick={(e) => handleLinkClick(e, "/admin/timesheet")}
+                        >
+                          <span className="sidebar-icons">
+                            <i className="fas fa-clock"></i> {/* Time Sheet icon */}
+                          </span>
+                          <span>Time Sheet</span>
+                        </Link>
+                      </li>
+                    )}
                   {((updatedShowTab && updatedShowTab.setting) ||
                     role === "ADMIN" ||
                     role === "SUPERADMIN") && (
@@ -188,22 +204,7 @@ const Sidebar = () => {
                       </li>
                     )}
 
-                  {((updatedShowTab && updatedShowTab.timesheet) ||
-                    role === "ADMIN" ||
-                    role === "SUPERADMIN") && (
-                      <li className={activeLink === "/admin/timesheet" ? "active" : ""}>
-                        <Link
-                          to="/admin/timesheet"
-                          aria-expanded="false"
-                          onClick={(e) => handleLinkClick(e, "/admin/timesheet")}
-                        >
-                          <span className="sidebar-icons">
-                            <i className="fas fa-clock"></i> {/* Time Sheet icon */}
-                          </span>
-                          <span>Time Sheet</span>
-                        </Link>
-                      </li>
-                    )}
+                  
                 </ul>
               </div>
             </div>
