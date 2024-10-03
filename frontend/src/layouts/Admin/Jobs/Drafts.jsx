@@ -5,7 +5,6 @@ import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal"
 import { DraftAction, AddDraft, EditDraft } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
 import { useLocation } from "react-router-dom";
 import sweatalert from 'sweetalert2';
-import { all } from "axios";
 
 const Drafts = () => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -217,7 +216,6 @@ const Drafts = () => {
     { name: 'Draft Title', selector: row => row.title, sortable: true },
     { name: 'Draft Sent On', selector: row => row.draft_sent_on, sortable: true },
     { name: 'Final Draft Sent On', selector: row => row.final_draft_sent_on, sortable: true },
-
     { name: 'Feedback Received', selector: row => row.feedback_received == 1 ? "Yes" : "No", sortable: true },
     { name: 'Updated/Amendments', selector: row => row.updated_amendment == 1 ? "Amendment" : row.updated_amendment == 2 ? "Update" : row.updated_amendment == 3 ? "Both" : "None", sortable: true },
     { name: 'Was Draft Completed', selector: row => row.was_it_complete == 1 ? "Yes" : "No", sortable: true },
@@ -228,9 +226,12 @@ const Drafts = () => {
           <button className="view-icon" onClick={() => { HandleDraftView(row); setViewdraft(true) }}>
             <i className="fa fa-eye fs-6 text-warning" />
           </button>
-          <button className="edit-icon" onClick={() => { setShowEditModal(true); setEditData(row) }}>
-            <i className="ti-pencil" />
-          </button>
+         {
+            row.was_it_complete == 1 ? "" :
+              <button className="edit-icon" onClick={() => { setShowEditModal(true); setEditData(row) }}>
+                <i className="ti-pencil" />
+              </button>
+         }
 
         </div>
       ),
