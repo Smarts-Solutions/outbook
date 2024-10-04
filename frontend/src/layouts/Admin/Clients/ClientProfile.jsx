@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch , useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
-import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { JobAction, Update_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import sweatalert from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
+import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -19,11 +20,17 @@ const ClientList = () => {
   const [clientInformationData, setClientInformationData] = useState([]);
   const [companyDetails, setCompanyDetails] = useState([]);
   const [hararchyData, setHararchyData] = useState(location.state.data);
+  const [statusDataAll, setStatusDataAll] = useState([])
+  const [selectStatusIs, setStatusId] = useState('')
 
   useEffect(() => {
     GetAllJobList();
     GetClientDetails();
+    GetStatus();
   }, []);
+
+
+  console.log("customerData", customerData);
 
   const GetClientDetails = async () => {
     const req = { action: "getByid", client_id: location.state.Client_id };
@@ -56,7 +63,94 @@ const ClientList = () => {
     { id: "viewclient", label: "View Client", icon: "fa-solid fa-user" },
     { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
   ];
-  
+
+  const GetStatus = async () => {
+    const data = { req: { action: "get" }, authToken: token };
+    await dispatch(MasterStatusData(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setStatusDataAll(response.data);
+        } else {
+          setStatusDataAll([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+
+
+  const handleStatusChange = (e , row) => {
+    const Id = e.target.value;
+    sweatalert.fire({
+      title: "Are you sure?",
+      text: "Do you want to change the status?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, change it!",
+      cancelButtonText: "No, cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const req = { job_id: row.job_id, status_type: Number(Id) };
+          const res = await dispatch(Update_Status({ req, authToken: token })).unwrap();
+
+          if (res.status) {
+            sweatalert.fire({
+              title: "Success",
+              text: res.message,
+              icon: "success",
+              timer: 1000,
+              showConfirmButton: false,
+            });
+
+            setStatusId(Id); 
+            GetAllJobList();
+          } else if (res.data === "W") {
+            sweatalert.fire({
+              title: "Warning",
+              text: res.message,
+              icon: "warning",
+              confirmButtonText: "Ok",
+              timer: 1000,
+              timerProgressBar: true,
+            });
+          } else {
+            sweatalert.fire({
+              title: "Error",
+              text: res.message,
+              icon: "error",
+              confirmButtonText: "Ok",
+              timer: 1000,
+              timerProgressBar: true,
+            });
+          }
+        } catch (error) {
+          sweatalert.fire({
+            title: "Error",
+            text: "An error occurred while updating the status.",
+            icon: "error",
+            confirmButtonText: "Ok",
+            timer: 1000,
+            timerProgressBar: true,
+          });
+        }
+      } else if (result.dismiss === sweatalert.DismissReason.cancel) {
+        sweatalert.fire({
+          title: "Cancelled",
+          text: "Status change was not performed",
+          icon: "error",
+          confirmButtonText: "Ok",
+          timer: 1000,
+          timerProgressBar: true,
+        });
+      }
+    });
+  };
+
+
   const columns = [
     {
       name: "Job ID (CustName+ClientName+UniqueNo)",
@@ -92,11 +186,6 @@ const ClientList = () => {
       selector: (row) => row.client_trading_name,
       sortable: true,
     },
-    // {
-    //   name: "Client Job Code",
-    //   selector: (row) => row.client_job_code,
-    //   sortable: true,
-    // },
     {
       name: "Outbooks Acount Manager",
       selector: (row) =>
@@ -126,12 +215,25 @@ const ClientList = () => {
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
     },
-
     {
       name: "Status",
-      selector: (row) =>
-        
-        row.status == null || row.status == 0 ? "To Be Started - Not Yet Allocated Internally" : row.status,
+      cell: (row) => (
+        <div>
+          <div>
+            <select
+              className="form-select form-control"
+              value={row.status == "completed" ? 6 : row.status == "WIP – To Be Reviewed" ? 5 : row.status == "WIP – In queries" ? 4 : row.status == "WIP – Processing" ? 3 : row.status == "WIP – Missing Paperwork" ? 2 : row.status == "To Be Started - Not Yet Allocated Internally" ? 1 : 0}
+              onChange={(e) => handleStatusChange(e, row)}
+            >
+              {statusDataAll.map((status) => (
+                <option key={status.id} value={status.id}>
+                  {status.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      ),
       sortable: true,
       width: "325px"
     },
@@ -153,14 +255,15 @@ const ClientList = () => {
       button: true,
     },
   ];
-  
+
+
   const HandleJob = (row) => {
     setHararchyData(prevState => {
       const updatedData = {
         ...prevState,
         job: row
       };
-      navigate("/admin/job/logs", { state: { job_id: row.job_id, data: updatedData , goto: "client" } }); 
+      navigate("/admin/job/logs", { state: { job_id: row.job_id, data: updatedData, goto: "client" } });
       return updatedData;
     });
   };
@@ -221,11 +324,11 @@ const ClientList = () => {
   const handleAddClient = (row) => {
     if (getClientDetails?.data?.client?.customer_id) {
       navigate("/admin/createjob", {
-        state: { customer_id: getClientDetails?.data?.client?.customer_id,clientName: location?.state?.data?.client, goto: "client" },
+        state: { customer_id: getClientDetails?.data?.client?.customer_id, clientName: location?.state?.data?.client, goto: "client" },
       });
     }
   };
- 
+
   function ClientEdit(row) {
 
     navigate("/admin/client/edit", { state: { row, id: row } });
@@ -298,8 +401,8 @@ const ClientList = () => {
           </div>
         </div>
 
-        <Hierarchy show={["Customer" , "Client" , activeTab  ]} active={2} data={hararchyData} NumberOfActive={customerData.length}/>
-        
+        <Hierarchy show={["Customer", "Client", activeTab]} active={2} data={hararchyData} NumberOfActive={customerData.length} />
+
       </div>
 
       <div className="mt-4">
@@ -593,7 +696,7 @@ const ClientList = () => {
                         </li>
                         <li className="mb-4">
                           <h6 className="">VAT Registered</h6>
-                          <p className="font-14  ml-3"> 
+                          <p className="font-14  ml-3">
                             {informationData &&
                               informationData.vat_registered == "0"
                               ? "No"
@@ -612,7 +715,7 @@ const ClientList = () => {
                       <ul className="list-unstyled faq-qa">
                         <li className="mb-4">
                           <h6 className="">Trading Address</h6>
-                          <p className="font-14  ml-3"> 
+                          <p className="font-14  ml-3">
                             {informationData && informationData.trading_address}
                           </p>
                         </li>

@@ -53,6 +53,8 @@ import Timesheet from "../layouts/Admin/Timesheet/Timesheet";
 import TimesheetNew from "../layouts/Admin/Timesheet/TimesheetNew";
 import Reportsnew from "../layouts/Admin/ReportsNew/Reportsnew";
 
+import CustomerTable from "../layouts/Admin/ReportsNew/CustomerTable";
+
 
 
 const Admin_Route = () => {
@@ -233,6 +235,8 @@ const Admin_Route = () => {
             <Route path="/timesheetnew" element={<TimesheetNew />} />
             <Route path="/subinternal" element={<SubInternal />} />
             <Route path="/reportsnew" element={<Reportsnew />} />
+            <Route path="report/customer" element={<CustomerTable />} />
+
           </Routes>
         </div>
       </div>

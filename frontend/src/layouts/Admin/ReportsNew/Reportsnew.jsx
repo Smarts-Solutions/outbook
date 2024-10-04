@@ -102,9 +102,11 @@ function Reportsnew() {
               <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
             </div>
             <div className='datatable-wrapper mt-minus'>
-              <Datatable
+              <ExpandableTable
+                columns={columns}
+                data={data}
                 filter={true}
-                columns={columns} data={data} />
+              />
             </div>
           </div>
         </div>
@@ -168,6 +170,7 @@ function Reportsnew() {
                 data={data}
                 filter={true}
               />
+
             </div>
           </div>
         </div>

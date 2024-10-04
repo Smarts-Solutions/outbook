@@ -214,6 +214,7 @@ function Reports() {
               <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
             </div>
             <div className='datatable-wrapper mt-minus'>
+            
               <ExpandableTable
                 columns={columns}
                 data={data}
