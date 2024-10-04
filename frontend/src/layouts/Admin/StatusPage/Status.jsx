@@ -31,6 +31,28 @@ const Status = () => {
       [name]: value,
     }));
   };
+  const rows = [
+    { id: 1, status_type: 'completed' },
+    { id: 2, status_type: 'pending' },
+    { id: 3, status_type: 'hold' },
+    { id: 4, status_type: 'rejected' }
+  ];
+  
+  // Function to determine the CSS class based on status_type
+  const getStatusClass = (status_type) => {
+    switch (status_type) {
+      case 'completed':
+        return 'text-success';
+      case 'pending':
+        return 'text-warning';
+      case 'hold':
+        return 'text-primary';
+      case 'rejected':
+        return 'text-danger';
+      default:
+        return '';
+    }
+  };
 
   const columns = [
     {
@@ -51,6 +73,11 @@ const Status = () => {
     {
       name: "Status",
       selector: (row) => row.status_type,
+      cell: (row) => (
+        <span className={getStatusClass(row.status_type)}>
+          {row.status_type}
+        </span>
+      ),
       sortable: true,
     },
     // {

@@ -10449,7 +10449,7 @@ span.breadcrumb__desc {
 .tooltip--multiline ul {
   padding-left: 20px;
 }
-.tooltip--multiline:before {
+/* .tooltip--multiline:before {
   border-top: 10px solid #00afef;
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
@@ -10462,7 +10462,7 @@ span.breadcrumb__desc {
   -ms-transform: translate(-50%, 0%);
   -o-transform: translate(-50%, 0%);
   transform: translate(-50%, 0%);
-}
+} */
 .text-danger
 {
   color: #ff0000 !important;
