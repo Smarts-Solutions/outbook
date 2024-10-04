@@ -31,9 +31,11 @@ export const RoleAccess = createAsyncThunk("accessRolePermissions/roleAccess", a
   try {
     const { req, authToken } = data;
   
+
     let IP_Data = await GET_IP();
+    console.log("req" , IP_Data.ip )  
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: req.StaffUserId ?req.StaffUserId :StaffUserId.id };
+    const updatedReq = { ...req, ip: IP_Data.ip, StaffUserId: req.StaffUserId ?req.StaffUserId :StaffUserId.id };
     const res = await ROLEACCESS(updatedReq, authToken);
      
     return await res;

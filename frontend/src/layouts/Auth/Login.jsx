@@ -141,6 +141,7 @@ const Login = () => {
 
   const accessDataFetch = async (data, token) => {
     try {
+      console.log("data", data);
       const response = await dispatch(
         RoleAccess({
           req: { role_id: data.role_id, StaffUserId: data.id, action: "get" },
