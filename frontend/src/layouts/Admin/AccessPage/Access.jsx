@@ -43,7 +43,7 @@ const Access = () => {
             <div className="mb-3">
                 <div className="form-check form-check-outline form-check-dark">
                     <input
-                        className="form-check-input "
+                        className="form-check-input new-checkbox me-2"
                         type="checkbox"
                         id={id}
                         checked={isChecked}
