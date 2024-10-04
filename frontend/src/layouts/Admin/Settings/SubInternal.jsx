@@ -257,7 +257,7 @@ const SubInternal = () => {
                         >
                             <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
                         </button>
-                        <h4 className="card-title">Sub Internal</h4>
+                        <h4 className="card-title"> Internal Task</h4>
                     </div>
                     <div className="card-body">
                         <div className="d-flex justify-content-end align-items-center">
@@ -267,7 +267,7 @@ const SubInternal = () => {
                                     className="btn btn-info text-white float-end"
                                     onClick={(e) => handleAdd(e, "1")}
                                 >
-                                    <i className="fa fa-plus" /> Add Sub Internal
+                                    <i className="fa fa-plus" /> Add Internal Task
                                 </button>
                             </div>
                         </div>

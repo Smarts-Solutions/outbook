@@ -564,7 +564,7 @@ const Setting = () => {
           </span>
         </div>
       ),
-      width: "80px",
+      width: "100px",
     },
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
@@ -679,7 +679,7 @@ const Setting = () => {
           </span>
         </div>
       ),
-      width: "80px",
+      width: "100px",
     },
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
@@ -734,7 +734,7 @@ const Setting = () => {
           </span>
         </div>
       ),
-      width: "80px",
+      width: "100px",
     },
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
@@ -792,7 +792,7 @@ const Setting = () => {
           </span>
         </div>
       ),
-      width: "80px",
+      width: "100px",
     },
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
@@ -960,14 +960,14 @@ const Setting = () => {
     {
       name: "Job Type",
       selector: (row) => row.job_type_type, sortable: true,
-      width: "120px"
+      
     }
     ,
     {
       name: "Client Type",
       selector: (row) => row.client_type_type,
       sortable: true,
-      width: "300px",
+      
     },
     {
       name: "Status",
@@ -980,7 +980,7 @@ const Setting = () => {
         </span>
       </div>),
       sortable: true,
-      width: "100px",
+      
     },
     // {
     //   name: "Actions",
@@ -1022,7 +1022,7 @@ const Setting = () => {
         </span>
       </div>),
       sortable: true,
-      width: "100px",
+      width: "150px",
     },
     ...(showSettingUpdateTab || showSettingDeleteTab || showSettingInsertTab
       ? [
@@ -1041,7 +1041,7 @@ const Setting = () => {
               {showSettingInsertTab && (
                 <button className="btn btn-info btn-sm text-white ms-1" onClick={(e) => handleTaskAdd(row)}  >
                   <i className="fa fa-plus pe-1" />
-                  Add Task
+                  Add Internal Task
                 </button>
               )}
             </div>
