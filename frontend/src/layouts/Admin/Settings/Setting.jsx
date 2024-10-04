@@ -775,11 +775,11 @@ const Setting = () => {
     { name: "Country Code", selector: (row) => row.code, sortable: true, },
     { name: "Country Name", selector: (row) => row.name, sortable: true },
     { name: "Currency", selector: (row) => row.currency, sortable: true },
-    {
-      name: "Currency Status",
-      selector: (row) => (row.status == 1 ? "Yes" : "No"),
-      sortable: true,
-    },
+    // {
+    //   name: "Currency Status",
+    //   selector: (row) => (row.status == 1 ? "Yes" : "No"),
+    //   sortable: true,
+    // },
     {
       name: "Status",
       cell: (row) => (
