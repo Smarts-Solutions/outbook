@@ -9722,11 +9722,16 @@ body .btn-info:hover {
 
 .accordion-header .accordion-button {
   color: #4B4B4B !important;
-  background-color: #ebf4f7 !important;
+  background-color: transparent;
   outline: 0 !important;
-  padding: 5px 20px !important;
+  padding: 5px 14px !important;
+  font-weight: 600;
 }
-
+.accordion-button:not(.collapsed) {
+  background: #EBF4F7 !important;
+  border-radius: 21px 21px 0px 0px !important;
+ 
+}
 .accordion-header .accordion-button:focus {
   box-shadow: none !important;
 }
@@ -9943,9 +9948,11 @@ body .accordion-button:not(.collapsed)::after {
 
   transform: rotate(0deg) !important;
 }
-.accordion-item
-{ 
-  border-radius: 0px !important;
+.accordion-item {
+  border-radius: 20px !important;
+  border: 2px solid #b5a8a8 !important;
+  margin: 5px 0;
+  background: transparent;
 }
 .error-text {
   /* background: #f8d7da; */
