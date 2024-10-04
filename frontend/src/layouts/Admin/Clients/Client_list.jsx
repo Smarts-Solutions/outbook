@@ -4,11 +4,13 @@ import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useNavigate, useLocation } from "react-router-dom";
-import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { JobAction, Update_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import Statuses from "./Statuses";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
+import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
+
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -20,9 +22,9 @@ const ClientList = () => {
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
   const [hararchyData, setHararchyData] = useState({ customer: location.state });
-   const [searchQuery, setSearchQuery] = useState("");
-
-
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectStatusIs, setStatusId] = useState('')
+  const [statusDataAll, setStatusDataAll] = useState([])
   const [activeTab, setActiveTab] = useState(
     location.state &&
       location.state.route &&
@@ -42,6 +44,7 @@ const ClientList = () => {
     getCheckListData();
     GetAllClientData();
     JobDetails();
+    GetStatus();
   }, []);
 
   useEffect(() => {
@@ -66,6 +69,7 @@ const ClientList = () => {
     { id: "status", label: "Status", icon: "fa-solid fa-info-circle" },
     { id: "checklist", label: "Checklist", icon: "fa-solid fa-check-square" },
   ];
+
 
   const ClientListColumns = [
     {
@@ -97,20 +101,19 @@ const ClientList = () => {
       width: "150px",
     },
     { name: "Email Address", selector: (row) => row.email || "-", sortable: true, width: '250px' },
-    { name: "Phone", selector: (row) => row.phone || "-", sortable: true,width:'130px' },
+    { name: "Phone", selector: (row) => row.phone || "-", sortable: true, width: '130px' },
     {
       name: "Status",
       selector: (row) => (<div>
         <span
-          className={` ${
-            row.status === "1" ? "text-success" : "text-danger"
-          }`}
+          className={` ${row.status === "1" ? "text-success" : "text-danger"
+            }`}
         >
           {row.status === "1" ? "Active" : "Deactive"}
         </span>
       </div>),
       sortable: true,
-      width:'130px'
+      width: '130px'
     },
     {
       name: "Actions",
@@ -156,6 +159,28 @@ const ClientList = () => {
       name: "Job Type",
       selector: (row) => row.job_type_name || "-",
       sortable: true,
+    },
+    {
+      name: "Status",
+      cell: (row) => (
+        <div>
+          <div>
+            <select
+              className="form-select form-control"
+              value={row.status == "completed" ? 6 : row.status == "WIP – To Be Reviewed" ? 5 : row.status == "WIP – In queries" ? 4 : row.status == "WIP – Processing" ? 3 : row.status == "WIP – Missing Paperwork" ? 2 : row.status == "To Be Started - Not Yet Allocated Internally" ? 1 : 0}
+              onChange={(e) => handleStatusChange(e, row)}
+            >
+              {statusDataAll.map((status) => (
+                <option key={status.id} value={status.id}>
+                  {status.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      ),
+      sortable: true,
+      width: "325px"
     },
     {
       name: "Account Manager",
@@ -223,6 +248,91 @@ const ClientList = () => {
       button: true,
     },
   ];
+
+  const handleStatusChange = (e, row) => {
+    const Id = e.target.value;
+    sweatalert.fire({
+      title: "Are you sure?",
+      text: "Do you want to change the status?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, change it!",
+      cancelButtonText: "No, cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const req = { job_id: row.job_id, status_type: Number(Id) };
+          const res = await dispatch(Update_Status({ req, authToken: token })).unwrap();
+
+          if (res.status) {
+            sweatalert.fire({
+              title: "Success",
+              text: res.message,
+              icon: "success",
+              timer: 1000,
+              showConfirmButton: false,
+            });
+
+            setStatusId(Id);
+            JobDetails();
+          } else if (res.data === "W") {
+            sweatalert.fire({
+              title: "Warning",
+              text: res.message,
+              icon: "warning",
+              confirmButtonText: "Ok",
+              timer: 1000,
+              timerProgressBar: true,
+            });
+          } else {
+            sweatalert.fire({
+              title: "Error",
+              text: res.message,
+              icon: "error",
+              confirmButtonText: "Ok",
+              timer: 1000,
+              timerProgressBar: true,
+            });
+          }
+        } catch (error) {
+          sweatalert.fire({
+            title: "Error",
+            text: "An error occurred while updating the status.",
+            icon: "error",
+            confirmButtonText: "Ok",
+            timer: 1000,
+            timerProgressBar: true,
+          });
+        }
+      } else if (result.dismiss === sweatalert.DismissReason.cancel) {
+        sweatalert.fire({
+          title: "Cancelled",
+          text: "Status change was not performed",
+          icon: "error",
+          confirmButtonText: "Ok",
+          timer: 1000,
+          timerProgressBar: true,
+        });
+      }
+    });
+  };
+
+  const GetStatus = async () => {
+    const data = { req: { action: "get" }, authToken: token };
+    await dispatch(MasterStatusData(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setStatusDataAll(response.data);
+        } else {
+          setStatusDataAll([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
 
   const CheckListColumns = [
     {
@@ -487,7 +597,7 @@ const ClientList = () => {
     });
   };
 
-  
+
   const handleAddClient = () => {
     navigate("/admin/addclient", { state: { id: location.state.id } });
   };

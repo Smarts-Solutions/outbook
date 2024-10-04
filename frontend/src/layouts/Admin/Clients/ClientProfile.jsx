@@ -30,7 +30,6 @@ const ClientList = () => {
   }, []);
 
 
-  console.log("customerData", customerData);
 
   const GetClientDetails = async () => {
     const req = { action: "getByid", client_id: location.state.Client_id };
@@ -82,7 +81,7 @@ const ClientList = () => {
 
 
 
-  const handleStatusChange = (e , row) => {
+  const handleStatusChange = (e, row) => {
     const Id = e.target.value;
     sweatalert.fire({
       title: "Are you sure?",
@@ -106,7 +105,7 @@ const ClientList = () => {
               showConfirmButton: false,
             });
 
-            setStatusId(Id); 
+            setStatusId(Id);
             GetAllJobList();
           } else if (res.data === "W") {
             sweatalert.fire({
@@ -174,6 +173,29 @@ const ClientList = () => {
       sortable: true,
     },
     {
+      name: "Status",
+      cell: (row) => (
+        <div>
+          <div>
+            <select
+              className="form-select form-control"
+              value={row.status == "completed" ? 6 : row.status == "WIP – To Be Reviewed" ? 5 : row.status == "WIP – In queries" ? 4 : row.status == "WIP – Processing" ? 3 : row.status == "WIP – Missing Paperwork" ? 2 : row.status == "To Be Started - Not Yet Allocated Internally" ? 1 : 0}
+              onChange={(e) => handleStatusChange(e, row)}
+            >
+              {statusDataAll.map((status) => (
+                <option key={status.id} value={status.id}>
+                  {status.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      ),
+      sortable: true,
+      width: "325px"
+    },
+
+    {
       name: "Account Manager",
       selector: (row) =>
         row.account_manager_officer_first_name +
@@ -214,28 +236,6 @@ const ClientList = () => {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
-    },
-    {
-      name: "Status",
-      cell: (row) => (
-        <div>
-          <div>
-            <select
-              className="form-select form-control"
-              value={row.status == "completed" ? 6 : row.status == "WIP – To Be Reviewed" ? 5 : row.status == "WIP – In queries" ? 4 : row.status == "WIP – Processing" ? 3 : row.status == "WIP – Missing Paperwork" ? 2 : row.status == "To Be Started - Not Yet Allocated Internally" ? 1 : 0}
-              onChange={(e) => handleStatusChange(e, row)}
-            >
-              {statusDataAll.map((status) => (
-                <option key={status.id} value={status.id}>
-                  {status.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      ),
-      sortable: true,
-      width: "325px"
     },
 
     {
