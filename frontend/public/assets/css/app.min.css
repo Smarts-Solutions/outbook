@@ -9445,7 +9445,7 @@ span.sidebar-icons {
 }
 
 .datatable-container .rdt_TableHeadRow {
-  background: #EBF4F7 !important;
+  /* background: #EBF4F7 !important; */
   border-radius: 5px;
   border-bottom: 0;
   margin-bottom: 5px;
@@ -9458,6 +9458,11 @@ span.sidebar-icons {
   font-weight: 600;
   text-transform: none;
   padding: 10px 15px;
+}
+.datatable-container .rdt_TableCol{
+  color: #000;
+  font-size: 16px;
+ 
 }
 .datatable-container .rdt_TableCell div a {
 white-space: break-spaces;
@@ -9624,9 +9629,9 @@ body .btn-info:hover {
 .content-title {
   margin-top: 25px;
   background-color: #fff;
-  padding: 20px;
-  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
-  border-radius: 6px;
+  /* padding: 20px; */
+  /* box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px; */
+  /* border-radius: 6px; */
 }
 
 .datatable-wrapper {
@@ -10529,9 +10534,12 @@ right: 0;
 }
 .hours-div .input-group-text {
   position: absolute;
-  right: 1px;
-  top: 1px;
-  border-radius: 0 20px 20px 0px;
+  right: -1.5px;
+  background: #d5d5d5;
+  top: -0.3px;
+  height: 35.5px;
+  border-radius: 0 21px 20px 0px;
+  border: 1px solid #c5c5c5;
 }
 .swal2-popup .swal2-styled:focus {
   box-shadow: none !important;
@@ -10565,4 +10573,8 @@ select#tabSelect {
   margin-bottom: 0 !important;
   padding: 16px 17px;
   border-radius: 0 20px 20px 0px;
+}
+.form-control:disabled, .form-select:disabled {
+  background-color: #f1f1f1 !important;
+  border: 1px solid #c5c5c5 !important;
 }

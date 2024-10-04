@@ -49,7 +49,7 @@ const Access = () => {
                         checked={isChecked}
                         onChange={(e) => handleChange(e)}
                     />
-                    <label className="form-check-label new_checkbox" htmlFor={id}>
+                    <label className="form-check-label new_checkbox mb-0" htmlFor={id}>
                         {label}
                     </label>
                 </div>
