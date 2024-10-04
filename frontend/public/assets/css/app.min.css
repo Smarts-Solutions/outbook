@@ -10552,7 +10552,7 @@ right: 0;
   box-shadow: none !important;
 }
 select.error-field.form-select, input.error-field.form-control {
-  background: #fff3f3;
+  /* background: #fff3f3; */
   border: 1px solid #ef7e7e;
 }
 select#tabSelect {
