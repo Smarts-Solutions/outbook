@@ -10581,6 +10581,20 @@ select#tabSelect {
   padding: 16px 17px;
   border-radius: 0 20px 20px 0px;
 }
+
+.Plas-center {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  line-height: 25px;
+  text-align: center;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  font-size: 30px;
+  vertical-align: middle;
+}
 .form-control:disabled, .form-select:disabled {
   background-color: #f1f1f1 !important;
   border: 1px solid #c5c5c5 !important;

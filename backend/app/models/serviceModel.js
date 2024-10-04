@@ -95,6 +95,8 @@ const deleteServices = async (ServicesId) => {
 
 
 const updateServices = async (Services) => {
+console.log(Services);
+    
     const { id, ...fields } = Services;
     const name = Services.name
     // Create an array to hold the set clauses
@@ -129,7 +131,9 @@ const updateServices = async (Services) => {
           status_change = "Activate"
         }
         let log_message = existStatus.status === Services.status ?
-            `edited services ${type}`:
+            // `edited services ${type}`:
+            `edited services `:
+
             `changes the services status ${status_change} ${name}`
 
         const [result] = await pool.execute(query, values);

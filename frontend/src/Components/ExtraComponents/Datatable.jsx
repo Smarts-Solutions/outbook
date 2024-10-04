@@ -63,7 +63,7 @@ const Datatable = ({ columns, data, filter }) => {
           data={data}
           export={false}
           print={false}
-          search={true} // Ensure search is enabled
+          search={true} 
           filter={filter}
         >
           <DataTable

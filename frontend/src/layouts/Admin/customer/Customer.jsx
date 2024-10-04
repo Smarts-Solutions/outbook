@@ -38,7 +38,7 @@ const Customer = () => {
       (item) => item.permission_name === "client"
     )?.items || [];
 
- 
+
 
   useEffect(() => {
     GetAllCustomerData();
@@ -51,7 +51,7 @@ const Customer = () => {
       if (item.type === "insert") updatedAccess.insert = item.is_assigned;
       if (item.type === "update") updatedAccess.update = item.is_assigned;
       if (item.type === "delete") updatedAccess.delete = item.is_assigned;
-    }); 
+    });
     accessData1.forEach((item) => {
       if (item.type === "view") updatedAccess.client = item.is_assigned;
     });
@@ -90,7 +90,7 @@ const Customer = () => {
               title={row.trading_name}
             >
               {row.trading_name}
-            </a> :row.trading_name
+            </a> : row.trading_name
           )}
         </div>
       ),
@@ -133,10 +133,10 @@ const Customer = () => {
         row.customer_type === 1
           ? "Sole Trader"
           : row.customer_type === 2
-          ? "Company"
-          : row.customer_type === 3
-          ? "Partnership"
-          : "-",
+            ? "Company"
+            : row.customer_type === 3
+              ? "Partnership"
+              : "-",
       sortable: true,
       width: "150px",
     },
@@ -166,7 +166,7 @@ const Customer = () => {
       sortable: true,
       width: "120px",
     },
-    
+
     {
       name: "Progress",
       cell: (row) => (
@@ -230,7 +230,7 @@ const Customer = () => {
 
   const handleChangeStatus = async (e, row) => {
     const newStatus = e.target.value;
-  
+
     Swal.fire({
       title: "Are you sure?",
       text: "Do you want to change the status?",
@@ -243,7 +243,7 @@ const Customer = () => {
         try {
           const req = { customer_id: row.id, status: newStatus };
           const res = await dispatch(Update_Customer_Status({ req, authToken: token })).unwrap();
-  
+
           if (res.status) {
             Swal.fire({
               title: "Success",
@@ -295,7 +295,7 @@ const Customer = () => {
   ];
 
   useEffect(() => {
-    GetAllCustomerData(); 
+    GetAllCustomerData();
   }, []);
 
   useEffect(() => {
@@ -305,7 +305,7 @@ const Customer = () => {
   const handleTabChange = (event) => {
     setSelectedTab(event.target.value);
   };
-  
+
   const GetAllCustomerData = async () => {
     const req = { action: 'get', staff_id: staffDetails.id }; // Replace staffDetails.id with actual staff ID
     const data = { req, authToken: token }; // Make sure `token` is defined
@@ -344,7 +344,7 @@ const Customer = () => {
           ?.toLowerCase()
           .includes(searchValue)
       );
-    }); 
+    });
     setFilteredData(filtered);
   };
 
@@ -407,56 +407,56 @@ const Customer = () => {
           <div className="page-title-box pt-0">
             <div className="row align-items-start justify-content-end">
               <div className="col-4">
-              <div className="form-group mb-2 mt-1">
-        <select
-          className="form-control"
-          id="tabSelect"
-          value={selectedTab}
-          onChange={handleTabChange}
-        >
-          {tabs.map((tab) => (
-            <option key={tab.id} value={tab.id}>
-              {tab.label}
-            </option>
-          ))}
-        </select>
-      </div>
+                <div className="form-group mb-2 mt-1">
+                  <select
+                    className="form-control"
+                    id="tabSelect"
+                    value={selectedTab}
+                    onChange={handleTabChange}
+                  >
+                    {tabs.map((tab) => (
+                      <option key={tab.id} value={tab.id}>
+                        {tab.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-             
+
               <div className="col-12">
-         
 
-      {/* Tab content */}
-      <div className="tab-content mt-minus-60" id="pills-tabContent">
-        {tabs.map((tab) => (
-          <div
-            key={tab.id}
-            className={`tab-pane fade ${selectedTab === tab.id ? 'show active' : ''}`}
-            id={tab.id}
-            role="tabpanel"
-            aria-labelledby={`${tab.id}-tab`}
-          >
-            <div className="card-datatable">
-            
-              <div className="card-datatable">
-                {/* Render filtered data here, for example: */}
-                <Datatable columns={columns} data={filteredData} />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-              </div>
-           
-            
 
-       
-            
+                {/* Tab content */}
+                <div className="tab-content mt-minus-60" id="pills-tabContent">
+                  {tabs.map((tab) => (
+                    <div
+                      key={tab.id}
+                      className={`tab-pane fade ${selectedTab === tab.id ? 'show active' : ''}`}
+                      id={tab.id}
+                      role="tabpanel"
+                      aria-labelledby={`${tab.id}-tab`}
+                    >
+                      <div className="card-datatable">
+
+                        <div className="card-datatable">
+                          {/* Render filtered data here, for example: */}
+                          <Datatable columns={columns} data={filteredData} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+
+
+
+
             </div>
           </div>
         </div>
 
-     
+
       </div>
     </div>
   );

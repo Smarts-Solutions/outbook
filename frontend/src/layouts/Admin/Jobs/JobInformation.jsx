@@ -260,10 +260,8 @@ const JobInformationPage = ({ job_id }) => {
 
 
 
-    // Status Change Handler
     const handleStatusChange = (e) => {
         const Id = e.target.value;
-
         sweatalert.fire({
             title: "Are you sure?",
             text: "Do you want to change the status?",
@@ -277,8 +275,7 @@ const JobInformationPage = ({ job_id }) => {
                     const req = { job_id: location.state.job_id, status_type: Id };
                     const res = await dispatch(Update_Status({ req, authToken: token })).unwrap();
 
-                    if (res.status) {
-                        // Success message
+                    if (res.status) { 
                         sweatalert.fire({
                             title: "Success",
                             text: res.message,
@@ -286,14 +283,10 @@ const JobInformationPage = ({ job_id }) => {
                             timer: 1000,
                             showConfirmButton: false,
                         });
-
-                        // Update the local state to reflect the new status
+ 
                         setStatusId(Id);
-
-                        // Fetch updated job data
                         GetJobData();
                     } else if (res.data === "W") {
-                        // Warning message
                         sweatalert.fire({
                             title: "Warning",
                             text: res.message,
@@ -303,7 +296,6 @@ const JobInformationPage = ({ job_id }) => {
                             timerProgressBar: true,
                         });
                     } else {
-                        // Error message
                         sweatalert.fire({
                             title: "Error",
                             text: res.message,
@@ -314,7 +306,6 @@ const JobInformationPage = ({ job_id }) => {
                         });
                     }
                 } catch (error) {
-                    // Catch error handling
                     sweatalert.fire({
                         title: "Error",
                         text: "An error occurred while updating the status.",
