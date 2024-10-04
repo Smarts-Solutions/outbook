@@ -43,13 +43,13 @@ const Access = () => {
             <div className="mb-3">
                 <div className="form-check form-check-outline form-check-dark">
                     <input
-                        className="form-check-input "
+                        className="form-check-input new-checkbox me-2"
                         type="checkbox"
                         id={id}
                         checked={isChecked}
                         onChange={(e) => handleChange(e)}
                     />
-                    <label className="form-check-label new_checkbox" htmlFor={id}>
+                    <label className="form-check-label new_checkbox mb-0" htmlFor={id}>
                         {label}
                     </label>
                 </div>
@@ -217,7 +217,7 @@ const Access = () => {
                         ]} data={roleDataAll.data} /> */}
                     </div>
                     <div className="modal-footer"> 
-                       <button type="button" className="btn btn-info mt-3" onClick={handleSaveChanges}>    <i className="far fa-save pe-1" /> Save changes</button>
+                       <button type="button" className="btn btn-outline-success mt-3" onClick={handleSaveChanges}>    <i className="far fa-save pe-1" /> Save changes</button>
                     </div>
                 </div>
 
