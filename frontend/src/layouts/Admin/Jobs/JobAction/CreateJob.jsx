@@ -353,12 +353,15 @@ const CreateJob = () => {
     );
   }
 
+
+
+
   const handleSubmit = async () => {
     const req = {
       staffCreatedId: staffCreatedId,
       account_manager_id: AllJobData?.data?.Manager[0]?.manager_id,
       customer_id: AllJobData?.data?.customer?.customer_id,
-      client_id: location?.state?.clientName?.id,
+      client_id: location?.state?.goto=="Customer"? Number(jobData.Client) :  location?.state?.clientName?.id,
       client_job_code: jobData.ClientJobCode,
       customer_contact_details_id: Number(jobData.CustomerAccountManager),
       service_id: Number(jobData.Service),
