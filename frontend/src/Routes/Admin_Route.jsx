@@ -51,6 +51,7 @@ import CreateJob from "../layouts/Admin/Jobs/JobAction/CreateJob";
 import JobEdit from "../layouts/Admin/Jobs/JobAction/EditJob";
 import Timesheet from "../layouts/Admin/Timesheet/Timesheet";
 import TimesheetNew from "../layouts/Admin/Timesheet/TimesheetNew";
+import Reportsnew from "../layouts/Admin/ReportsNew/Reportsnew";
 
 
 
@@ -231,6 +232,7 @@ const Admin_Route = () => {
             <Route path="/timesheet" element={<Timesheet />} />
             <Route path="/timesheetnew" element={<TimesheetNew />} />
             <Route path="/subinternal" element={<SubInternal />} />
+            <Route path="/reportsnew" element={<Reportsnew />} />
           </Routes>
         </div>
       </div>
