@@ -900,27 +900,27 @@ const Engagement = () => {
                               {
                                 label: "Accountants",
                                 name: "adhoc_accountants",
-                                // feeName: "Fee Per Hour",
+                                feeName: "Fee Per Hour",
                               },
                               {
                                 label: "Bookkeepers",
                                 name: "adhoc_bookkeepers",
-                                // feeName: "Fee Per Hour",
+                                feeName: "Fee Per Hour",
                               },
                               {
                                 label: "Payroll Experts",
                                 name: "adhoc_payroll_experts",
-                                // feeName: "Fee Per Hour",
+                                feeName: "Fee Per Hour",
                               },
                               {
                                 label: "Tax Experts",
                                 name: "adhoc_tax_experts",
-                                // feeName: "Fee Per Hour",
+                                feeName: "Fee Per Hour",
                               },
                               {
                                 label: "Admin/Other Staff",
                                 name: "adhoc_admin_staff",
-                                // feeName: "Fee Per Hour",
+                                feeName: "Fee Per Hour",
                               },
                             ].map((field, index) => (
                               <div className="col-lg-4" key={index}>
@@ -929,12 +929,12 @@ const Engagement = () => {
                                     {field.label}
                                   </label>
                                  
-                                  <label
+                                  {/* <label
                                     className="form-label label_bottom"
                                     style={{ color: "#A2A0A0 !important" }}
                                   >
                                     {field.feeName}
-                                  </label>
+                                  </label> */}
                                   <input
                                     type="text"
                                     
