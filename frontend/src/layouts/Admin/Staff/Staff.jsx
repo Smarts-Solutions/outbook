@@ -689,7 +689,7 @@ const StaffPage = () => {
               <div>
                 <button
                   type="button"
-                  className="btn btn-secondary add-btn"
+                  className="btn btn-info add-btn"
                   data-bs-toggle="modal"
                   id="create-btn"
                   data-bs-target="#showModal123"
@@ -724,12 +724,12 @@ const StaffPage = () => {
                         <td className="tabel_left">
                           <div className=" gap-2">
                             <div className="remove">
-                              <a
+                              <button
                                 onclick="deleteRecordModalshow()"
-                                className="text-decoration-none remove-item-btn"
+                                className="text-decoration-none remove-item-btn delete-icon"
                               >
-                                <i className="ti-trash text-danger fs-5"></i>
-                              </a>
+                                <i className="ti-trash text-danger "></i>
+                              </button>
                             </div>
                           </div>
                         </td>
@@ -828,10 +828,11 @@ const StaffPage = () => {
         </FormGroup>
         <div className="d-flex justify-content-end">
           <Button
-            className="btn btn-info"
+            className="btn btn-outline-success"
             color="primary"
             onClick={handleUpdate}
           >
+            <i className="far fa-save pe-1"></i>
             Update
           </Button>
         </div>
