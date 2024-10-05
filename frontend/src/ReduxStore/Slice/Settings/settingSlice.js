@@ -23,16 +23,11 @@ import {
   
   
 } from "../../../Services/Settings/settingService";
-import axios from "axios";
+import { GET_IP } from "../../../Utils/Comman_function";
 
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 
-export async function GET_IP(data, token) {
-  try {
-    const res = await axios.get(`https://api.ipify.org?format=json`);
-    return await res;
-  } catch (err) {}
-}
+
 
 // Get Role
 export const Role = createAsyncThunk("role", async (data) => {

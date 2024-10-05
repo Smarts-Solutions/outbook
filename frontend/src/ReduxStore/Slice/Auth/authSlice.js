@@ -1,21 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 import { SIGN_IN_STAFF , SIGN_IN_AZURE_SSO,LOGIN_AUTH_TOKEN , IS_LOGIN_AUTH_TOKEN_CHECK ,IS_LOGOUT} from "../../../Services/Auth/authService";
+import {GET_IP} from "../../../Utils/Comman_function";
 
-import axios from "axios";
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 const token = localStorage.getItem("token");
-
-
-export async function GET_IP(data, token) {
-  try {
-    const res = await axios.get(`https://api.ipify.org?format=json`)
-    return await res;
-  }
-  catch (err) {
-  }
-}
-
 
 
 export const SignIn = createAsyncThunk("login", async (data) => {

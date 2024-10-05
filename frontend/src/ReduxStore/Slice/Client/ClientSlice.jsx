@@ -1,19 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { GET_CLIENT_INDUSTRY, ADD_CLIENT, CLIENT_ACTION, EDIT_CLIENT } from "../../../Services/Client/ClientService";
-
-import axios from "axios";
+import { GET_IP } from "../../../Utils/Comman_function";
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 const token = localStorage.getItem("token");
 
 
-export async function GET_IP(data, token) {
-  try {
-    const res = await axios.get(`https://api.ipify.org?format=json`)
-    return await res;
-  }
-  catch (err) {
-  }
-}
 
 
 export const GetClientIndustry = createAsyncThunk("clientIndustry", async (data) => {

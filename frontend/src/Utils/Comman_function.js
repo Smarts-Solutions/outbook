@@ -1,5 +1,6 @@
 import { ClientErrorMessages } from "./Common_Message";
 import { Email_regex } from "./Common_regex";
+import axios from "axios";
 
 export const getDateRange = (tabId) => {
   const today = new Date();
@@ -185,3 +186,13 @@ export const validate = (name, value, errors, setErrors) => {
 
   return Object.keys(newErrors).length === 0;
 };
+
+ 
+export async function GET_IP(data, token) {
+  try {
+    const res = await axios.get(`https://api.ipify.org?format=json`)
+    return await res;
+  }
+  catch (err) {
+  }
+}

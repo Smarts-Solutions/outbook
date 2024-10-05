@@ -31,17 +31,9 @@ import {
   UPDATE_STATUS,
    
 } from "../../../Services/Customer/CustomerService";
-
-import axios from "axios";
+import { GET_IP } from "../../../Utils/Comman_function";
 import { add } from "date-fns";
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-
-export async function GET_IP(data, token) {
-  try {
-    const res = await axios.get(`https://api.ipify.org?format=json`);
-    return await res;
-  } catch (err) {}
-}
 
 export const GetAllCompany = createAsyncThunk("seachCompany", async (data) => {
   try {
