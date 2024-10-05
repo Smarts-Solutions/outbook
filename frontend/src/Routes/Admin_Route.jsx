@@ -55,6 +55,8 @@ import Reportsnew from "../layouts/Admin/ReportsNew/Reportsnew";
 
 import CustomerTable from "../layouts/Admin/ReportsNew/CustomerTable";
 
+import CPP from '../layouts/Admin/ReportsNew/New'
+
 
 
 const Admin_Route = () => {
@@ -237,6 +239,8 @@ const Admin_Route = () => {
             <Route path="/subinternal" element={<SubInternal />} />
             <Route path="/reportsnew" element={<Reportsnew />} />
             <Route path="report/customer" element={<CustomerTable />} />
+            <Route path="cpp" element={<CPP />} />
+
 
           </Routes>
         </div>

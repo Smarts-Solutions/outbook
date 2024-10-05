@@ -93,8 +93,8 @@ const Service = () => {
           service_id: service.service_id,
           account_manager_ids: service.account_manager_ids
             ? service.account_manager_ids.map((id) =>
-                staffDataAll.data.find((staff) => staff.id === id)
-              )
+              staffDataAll.data.find((staff) => staff.id === id)
+            )
             : [],
         }))
       );
@@ -174,11 +174,11 @@ const Service = () => {
         .map((manager) =>
           manager.service_id === serviceId
             ? {
-                ...manager,
-                account_manager_ids: manager.account_manager_ids.filter(
-                  (accountManager) => accountManager.id !== id
-                ),
-              }
+              ...manager,
+              account_manager_ids: manager.account_manager_ids.filter(
+                (accountManager) => accountManager.id !== id
+              ),
+            }
             : manager
         )
         .filter((manager) => manager.account_manager_ids.length > 0)
@@ -266,7 +266,16 @@ const Service = () => {
   };
 
   const TaskUpdate = async (e, id, serviceId) => {
+ 
 
+    if (tasksGet.length > 0) {
+      setTasksData((prev) => 
+        prev.filter(
+          (task) => !tasksGet.some((item) => item.JobTypeId === id && item.serviceId === serviceId && task.JobTypeId === id && task.serviceId === serviceId)
+        )
+      );
+    }
+    
 
     if (e.target.files.length > 0) {
       // ONLY xlsx file is allowed
@@ -295,7 +304,7 @@ const Service = () => {
         },
       ]);
 
-      let file = e.target.files[0]; 
+      let file = e.target.files[0];
       setFileName(file.name);
       if (file) {
         let reader = new FileReader();
@@ -315,7 +324,7 @@ const Service = () => {
           let result = [];
           let currentId = null;
           let currentChecklistName = null;
-          let taskList = []; 
+          let taskList = [];
           rows.forEach((row, i) => {
             let idValue = i + 1;
             let taskName = row[headers.indexOf("Task Name")] || "";
@@ -377,7 +386,7 @@ const Service = () => {
 
   const handleDelete = (id) => {
 
-    
+
     setTasksData((prev) => prev.filter((task) => task.id !== id));
   };
 
@@ -403,7 +412,7 @@ const Service = () => {
   const handleSearchChange = (e) => {
     setSearchValue(e.target.value);
   };
- 
+
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
@@ -586,14 +595,14 @@ const Service = () => {
                                                             {uploadMessage}
                                                           </span> */}
                                                         </div>
-  <div className="table-responsive">
+                                                        <div className="table-responsive">
                                                           {tasksGet &&
                                                             tasksGet.filter(
                                                               (TaskShow) =>
                                                                 data1.id ===
-                                                                  TaskShow.JobTypeId &&
+                                                                TaskShow.JobTypeId &&
                                                                 item.id ===
-                                                                  TaskShow.serviceId
+                                                                TaskShow.serviceId
                                                             ).length > 0 && (
                                                               <table className="table table-bordered">
                                                                 <thead className="table-head-blue">
@@ -610,9 +619,9 @@ const Service = () => {
                                                                             TaskShow
                                                                           ) =>
                                                                             data1.id ===
-                                                                              TaskShow.JobTypeId &&
+                                                                            TaskShow.JobTypeId &&
                                                                             item.id ===
-                                                                              TaskShow.serviceId
+                                                                            TaskShow.serviceId
                                                                         )
                                                                           .checklistName
                                                                       }
@@ -638,9 +647,9 @@ const Service = () => {
                                                                     ) => {
                                                                       if (
                                                                         data1.id ===
-                                                                          TaskShow.JobTypeId &&
+                                                                        TaskShow.JobTypeId &&
                                                                         item.id ===
-                                                                          TaskShow.serviceId
+                                                                        TaskShow.serviceId
                                                                       ) {
                                                                         return (
                                                                           <tr
@@ -684,34 +693,34 @@ const Service = () => {
                                                                                   >
                                                                                     <div className="input-group">
                                                                                       <div className="hours-div">
-                                                                                      <input
-                                                                                        type="text"
-                                                                                        className="form-control"
-                                                                                        value={
-                                                                                          TaskData.BudgetHour.split(
-                                                                                            ":"
-                                                                                          )[0]
-                                                                                        }
-                                                                                        disabled
-                                                                                      />
-                                                                                      <span className="input-group-text">
-                                                                                        H
-                                                                                      </span>
+                                                                                        <input
+                                                                                          type="text"
+                                                                                          className="form-control"
+                                                                                          value={
+                                                                                            TaskData.BudgetHour.split(
+                                                                                              ":"
+                                                                                            )[0]
+                                                                                          }
+                                                                                          disabled
+                                                                                        />
+                                                                                        <span className="input-group-text">
+                                                                                          H
+                                                                                        </span>
                                                                                       </div>
                                                                                       <div className="hours-div">
-                                                                                      <input
-                                                                                        type="text"
-                                                                                        className="form-control"
-                                                                                        value={
-                                                                                          TaskData.BudgetHour.split(
-                                                                                            ":"
-                                                                                          )[1]
-                                                                                        }
-                                                                                        disabled
-                                                                                      />
-                                                                                      <span className="input-group-text">
-                                                                                        M
-                                                                                      </span>
+                                                                                        <input
+                                                                                          type="text"
+                                                                                          className="form-control"
+                                                                                          value={
+                                                                                            TaskData.BudgetHour.split(
+                                                                                              ":"
+                                                                                            )[1]
+                                                                                          }
+                                                                                          disabled
+                                                                                        />
+                                                                                        <span className="input-group-text">
+                                                                                          M
+                                                                                        </span>
                                                                                       </div>
                                                                                     </div>
                                                                                   </div>
@@ -834,7 +843,7 @@ const Service = () => {
                   onClick={AddManager}
                 > <i className="pe-1 fa fa-plus"></i>
                   Add
-                 
+
                 </button>
               </div>
 

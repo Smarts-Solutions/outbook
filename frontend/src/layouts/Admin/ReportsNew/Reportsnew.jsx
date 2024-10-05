@@ -6,28 +6,25 @@ import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal'
 
 const data = [
   { TradingName: 'W120', Code: '012_BlaK_T_1772', CustomerName: 'The Black T', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Admin/Support Tasks', JobType: 'Year End' },
-  { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-  { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-  { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-  { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-  { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-  { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
-
+  // { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
+  // { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
+  // { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
+  // { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
+  // { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' },
+  // { TradingName: 'W121', Code: '025_NesTea_1663', CustomerName: 'Nestea', AccountManager: 'Ajeet Aggarwal', ServiceType: 'Onboarding/Setup', JobType: 'Year End' }
 ];
 
 
-const columns1 = [
-  { name: 'Customer Code', selector: row => row.Code, sortable: true },
-]
+
 const columns = [
 
   {
     name: 'Trading Name',
     cell: (row) => (
       <div>
-        <span onClick={(e) => console.log(e.target)} className="mx-3 pointer  Plas-center">
+        {/* <span onClick={(e) => console.log(e.target)} className="mx-3 pointer  Plas-center">
           +
-        </span>
+        </span> */}
         {row.TradingName}
       </div>
     ),
@@ -55,6 +52,22 @@ const tabs = [
 function Reportsnew() {
 
   const [filter, setFilter] = useState(false);
+
+  const [expandedRows, setExpandedRows] = useState({
+    teamMember1: false,
+    customer1: false,
+    client1: false,
+    teamMember2: false,
+    customer2: false,
+    client2: false,
+  });
+
+  const toggleRow = (rowKey) => {
+    setExpandedRows((prevState) => ({
+      ...prevState,
+      [rowKey]: !prevState[rowKey],
+    }));
+  };
 
   return (
     <div className='container-fluid'>
@@ -94,87 +107,185 @@ function Reportsnew() {
       <div className="tab-content" id="pills-tabContent">
         <div className="tab-pane fade show active" id="job-status" role="tabpanel" aria-labelledby="job-status-tab"  >
           <div className='report-data'>
-            <div className='tab-title'>
-              <h3>Job Status Report</h3>
-            </div>
-            <div className='job-filter-btn'>
-              <button className='filter btn btn-info text-white fw-normal' onClick={() => setFilter(true)}><i className="fas fa-filter pe-2"></i>Filters</button>
-              <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
-            </div>
             <div className='datatable-wrapper mt-minus'>
-              <ExpandableTable
-                columns={columns}
-                data={data}
-                filter={true}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="tab-pane fade" id="job-received" role="tabpanel" aria-labelledby="job-received-tab" >
-          <div className='report-data'>
-            <div className='tab-title'>
-              <h3>Jobs Received Sent Reports</h3>
-            </div>
-            <div className='job-filter-btn'>
-              <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
-              <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
-            </div>
-            <div className='datatable-wrapper mt-minus'>
-              <ExpandableTable
-                columns={columns}
-                data={data}
-                filter={true}
-              />
-            </div>
-          </div>
-        </div>
+              <div className="card-body">
+                <div id="customerList">
+                  <div className="row">
 
-        <div
-          className="tab-pane fade"
-          id="team-performance"
-          role="tabpanel"
-          aria-labelledby="team-performance-tab"
-        >
-          <div className='report-data'>
-            <div className='tab-title'>
-              <h3>Team Performance Report by Month</h3>
-            </div>
-            <div className='job-filter-btn'>
-              <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
-              <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
-            </div>
-            <div className='datatable-wrapper mt-minus'>
-              <Datatable
-                filter={true}
-                columns={columns} data={data} />
+                    <div className="table-responsive table-card mt-4 mb-1">
+                      <div className='tab-title mb-3'>
+                        <h3>Job Status Report</h3>
+                      </div>
+                      <table className="table align-middle table-nowrap" id="customerTable">
+                        <thead className="table-light">
+                          <tr>
+                            <th>Team Member Name</th>
+                            <th>Task1</th>
+                            <th>Task2</th>
+                            <th>Task3</th>
+                            <th>Total</th>
+                            <th>Processor</th>
+                            <th>Reviewer</th>
+                            <th>Other</th>
+                            <th>Total</th>
+                          </tr>
+                        </thead>
+                        <tbody className="list form-check-all">
+                          {
+                            data.map((item, index) => (
+                              <>
+                                <tr className="tabel_new" key={`teamMember${index + 1}`}>
+                                  <td className="d-flex">
+                                    <span
+                                      onClick={() => toggleRow(`teamMember${index + 1}`)}
+                                      className="mx-1 pointer Plas-center"
+                                    >
+                                      {expandedRows[`teamMember${index + 1}`] ? '-' : '+'}
+                                    </span>
+                                    <span>{item.CustomerName}</span>
+                                  </td>
+                                  <td>23</td>
+                                  <td>23</td>
+                                  <td>8</td>
+                                  <td>4</td>
+                                  <td>3</td>
+                                  <td>8</td>
+                                  <td>4</td>
+                                  <td>23</td>
+                                </tr>
+
+                                {expandedRows[`teamMember${index + 1}`] && (
+                                  <>
+                                    {/* Customer row */}
+                                    <tr key="customer1">
+                                      <td className="d-flex ms-2">
+                                        <span
+                                          onClick={() => toggleRow('customer1')}
+                                          className="mx-1 pointer Plas-center"
+                                        >
+                                          {expandedRows.customer1 ? '-' : '+'}
+                                        </span>
+                                        <span>Customer 1</span>
+                                      </td>
+                                      <td>23</td>
+                                      <td>23</td>
+                                      <td>8</td>
+                                      <td>4</td>
+                                      <td>3</td>
+                                      <td>8</td>
+                                      <td>4</td>
+                                      <td>23</td>
+                                    </tr>
+
+                                    {/* Clients of Customer 1 */}
+                                    {expandedRows.customer1 && (
+                                      <>
+                                        <tr key="client1">
+                                          <td className="d-flex ms-3">
+                                            <span
+                                              onClick={() => toggleRow('client1')}
+                                              className="mx-1 pointer Plas-center"
+                                            >
+                                              {expandedRows.client1 ? '-' : '+'}
+                                            </span>
+                                            <span>Client 1</span>
+                                          </td>
+                                          <td>23</td>
+                                          <td>23</td>
+                                          <td>8</td>
+                                          <td>4</td>
+                                          <td>3</td>
+                                          <td>8</td>
+                                          <td>3</td>
+                                          <td>23</td>
+                                        </tr>
+
+                                        {/* Jobs of Client 1 */}
+                                        {expandedRows.client1 && (
+                                          <>
+                                            <tr key="job1 mx-5">
+                                              <td className="d-flex ms-5">
+                                              Job 1</td>
+                                              
+                                              <td>4</td>
+                                              <td>2</td>
+                                              <td>2</td>
+                                              <td>1</td>
+                                              <td>1</td>
+                                              <td>8</td>
+                                              <td>4</td>
+                                              <td>23</td>
+                                            </tr>
+                                            <tr key="job2">
+                                              <td className="d-flex ms-5" >
+                                                
+                                                Job 2 
+                                                </td>
+                                              <td>3</td>
+                                              <td>2</td>
+                                              <td>8</td>
+                                              <td>4</td>
+                                              <td>3</td>
+                                              <td>8</td>
+                                              <td>4</td>
+                                              <td>23</td>
+                                            </tr>
+                                          </>
+                                        )}
+                                      </>
+                                    )}
+                                  </>
+                                )}
+                              </>
+                            ))
+                          }
+
+
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="row align-items-center gy-2 text-center text-sm-start">
+                      <div className="col-sm">
+                        <div className="text-muted">
+                          Showing <span className="fw-semibold">1-2</span> of{" "}
+                          <span className="fw-semibold">13</span> Records
+                        </div>
+                      </div>
+                      <div className="col-sm-auto">
+                        <ul className="pagination pagination-separated pagination-sm mb-0 justify-content-center justify-content-sm-start">
+                          <li className="page-item disabled">
+                            <a href="#" className="page-link">
+                              <b>
+                                <i className="mdi mdi-chevron-left" />
+                              </b>
+                            </a>
+                          </li>
+                          <li className="page-item active">
+                            <a href="#" className="page-link">
+                              1
+                            </a>
+                          </li>
+                          <li className="page-item">
+                            <a href="#" className="page-link">
+                              2
+                            </a>
+                          </li>
+                          <li className="page-item">
+                            <a href="#" className="page-link">
+                              <b>
+                                <i className="mdi mdi-chevron-right" />
+                              </b>
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <div
-          className="tab-pane fade"
-          id="average-TAT"
-          role="tabpanel"
-          aria-labelledby="average-TAT-tab"
-        >
-          <div className='report-data'>
-            <div className='tab-title'>
-              <h3>Average TAT Report</h3>
-            </div>
-            <div className='job-filter-btn'>
-              <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
-              <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
-            </div>
-            <div className='datatable-wrapper mt-minus'>
-              <ExpandableTable
-                columns={columns}
-                data={data}
-                filter={true}
-              />
-
-            </div>
-          </div>
-        </div>
-
       </div>
       <CommanModal
         isOpen={filter}

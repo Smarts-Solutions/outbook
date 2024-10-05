@@ -302,6 +302,17 @@ const Service = () => {
   };
 
   const TaskUpdate = async (e, id, serviceId) => {
+
+    if (tasksGet.length > 0) {
+      setTasksData((prev) => 
+        prev.filter(
+          (task) => !tasksGet.some((item) => item.JobTypeId === id && item.serviceId === serviceId && task.JobTypeId === id && task.serviceId === serviceId)
+        )
+      );
+    }
+    
+
+
     if (e.target.files.length > 0) {
       // ONLY xlsx file is allowed
       if (!e.target.files[0].name.endsWith(".xlsx")) {

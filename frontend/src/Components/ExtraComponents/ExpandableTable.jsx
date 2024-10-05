@@ -26,6 +26,12 @@ const ExpandableTable = ({ columns, data, filter }) => {
     <div style={{ padding: '10px', backgroundColor: '#f9f9f9' }}>
       <CustomerTable data={data} />
       <CustomerTable data={data} />
+      <CustomerTable data={data} />
+      <CustomerTable data={data} />
+      <CustomerTable data={data} />
+      <CustomerTable data={data} />
+
+
     </div>
   );
 
