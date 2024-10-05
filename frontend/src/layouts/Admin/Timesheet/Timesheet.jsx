@@ -259,7 +259,7 @@ const Timesheet = () => {
                                   <td className="d-flex">
                                   <button
                                       className="edit-icon"
-                                      onClick={() => handleDeleteRow(index)}
+                                     
                                     >
                                       <i className="fa fa-pencil text-primary  "></i>
                                     </button>
