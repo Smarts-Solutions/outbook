@@ -125,11 +125,11 @@ const Drafts = () => {
             title: response.message,
             timerProgressBar: true,
             showConfirmButton: true,
-            timer: 1500
+            timer: 3000
           });
           setTimeout(() => {
             window.location.reload();
-          }, 1500);
+          }, 3000);
         }
         else {
           response.data == "W" ?
@@ -138,14 +138,14 @@ const Drafts = () => {
               title: response.message,
               timerProgressBar: true,
               showConfirmButton: true,
-              timer: 1500
+              timer: 3000
             }) :
             sweatalert.fire({
               icon: 'error',
               title: response.message,
               timerProgressBar: true,
               showConfirmButton: true,
-              timer: 1500
+              timer: 3000
             });
         }
       })
@@ -181,11 +181,11 @@ const Drafts = () => {
             title: response.message,
             timerProgressBar: true,
             showConfirmButton: true,
-            timer: 1500
+            timer: 3000
           });
           setTimeout(() => {
             window.location.reload();
-          }, 1500);
+          }, 3000);
         }
         else {
           console.log(response)
@@ -195,14 +195,14 @@ const Drafts = () => {
               title: response.message,
               timerProgressBar: true,
               showConfirmButton: true,
-              timer: 1500
+              timer: 3000
             }) :
             sweatalert.fire({
               icon: 'error',
               title: response.message,
               timerProgressBar: true,
               showConfirmButton: true,
-              timer: 1500
+              timer: 3000
             });
         }
       })

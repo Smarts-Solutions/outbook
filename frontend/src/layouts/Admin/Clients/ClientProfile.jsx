@@ -152,7 +152,7 @@ const ClientList = () => {
 
   const columns = [
     {
-      name: "Job ID (CustName+ClientName+UniqueNo)",
+      name: "Job ID",
       cell: (row) => (
         <div>
           <a
@@ -196,7 +196,7 @@ const ClientList = () => {
     },
 
     {
-      name: "Account Manager",
+      name: "Client Manager",
       selector: (row) =>
         row.account_manager_officer_first_name +
         " " +
@@ -224,14 +224,14 @@ const ClientList = () => {
           : "",
       sortable: true,
     },
-    {
-      name: "Timesheet",
-      selector: (row) =>
-        row.total_hours_status == "1" && row.total_hours != null ?
-          row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
-          : "",
-      sortable: true,
-    },
+    // {
+    //   name: "Timesheet",
+    //   selector: (row) =>
+    //     row.total_hours_status == "1" && row.total_hours != null ?
+    //       row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
+    //       : "",
+    //   sortable: true,
+    // },
     {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),

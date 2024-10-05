@@ -89,7 +89,7 @@ const ClientList = () => {
     },
 
     {
-      name: "Client Code (cli+CustName+ClientName+UniqueNo)",
+      name: "Client Code",
       selector: (row) => row.client_code || "-",
       sortable: true,
     },
@@ -100,8 +100,8 @@ const ClientList = () => {
       sortable: true,
       width: "150px",
     },
-    { name: "Email Address", selector: (row) => row.email || "-", sortable: true, width: '250px' },
-    { name: "Phone", selector: (row) => row.phone || "-", sortable: true, width: '130px' },
+    // { name: "Email Address", selector: (row) => row.email || "-", sortable: true, width: '250px' },
+    // { name: "Phone", selector: (row) => row.phone || "-", sortable: true, width: '130px' },
     {
       name: "Status",
       selector: (row) => (<div>

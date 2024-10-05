@@ -104,37 +104,37 @@ const Customer = () => {
       sortable: true,
       width: "250px",
     },
-    {
-      name: "Company Name",
-      cell: (row) => (
-        <div
-          style={{
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            maxWidth: "200px",
-          }}
-        >
-          <a title={row.company_name}>{row.company_name}</a>
-        </div>
-      ),
-      sortable: true,
-      width: "250px",
-    },
-    {
-      name: "Company Number",
-      selector: (row) => (row.company_number == null ? "" : row.company_number),
-      sortable: true,
-      width: "200px",
-    },
+    // {
+    //   name: "Company Name",
+    //   cell: (row) => (
+    //     <div
+    //       style={{
+    //         overflow: "hidden",
+    //         textOverflow: "ellipsis",
+    //         whiteSpace: "nowrap",
+    //         maxWidth: "200px",
+    //       }}
+    //     >
+    //       <a title={row.company_name}>{row.company_name}</a>
+    //     </div>
+    //   ),
+    //   sortable: true,
+    //   width: "250px",
+    // },
+    // {
+    //   name: "Company Number",
+    //   selector: (row) => (row.company_number == null ? "" : row.company_number),
+    //   sortable: true,
+    //   width: "200px",
+    // },
     {
       name: "Type",
       selector: (row) =>
-        row.customer_type === 1
+        row.customer_type === '1'
           ? "Sole Trader"
-          : row.customer_type === 2
+          : row.customer_type === '2'
             ? "Company"
-            : row.customer_type === 3
+            : row.customer_type === '3'
               ? "Partnership"
               : "-",
       sortable: true,
@@ -152,35 +152,41 @@ const Customer = () => {
       cell: (row) => (
         <div>
           <div>
-            <select
-              className="form-select form-control"
-              value={row.status}
-              onChange={(e) => handleChangeStatus(e, row)}
-            >
-              <option value="0">Deactive</option>
-              <option value="1">Active</option>
-            </select>
+          {row.form_process === "4" ? 
+           <select
+           className="form-select form-control"
+           value={row.status}
+           onChange={(e) => handleChangeStatus(e, row)}
+         >
+            <option value="0" className="text-danger">Deactive</option>
+            <option value="1" className="text-success">Active</option>
+         </select>
+          : (
+            <span className="text-warning">Inprogress</span>
+          )}
+
+           
           </div>
         </div>
       ),
       sortable: true,
-      width: "120px",
+      width: "150px",
     },
 
-    {
-      name: "Progress",
-      cell: (row) => (
-        <div>
-          {row.form_process === "4" ? (
-            <span className="text-success">Complete</span>
-          ) : (
-            <span className="text-danger">Pending</span>
-          )}
-        </div>
-      ),
-      sortable: true,
-      width: "120px",
-    },
+    // {
+    //   name: "Progress",
+    //   cell: (row) => (
+    //     <div>
+    //       {row.form_process === "4" ? (
+    //         <span className="text-success">Complete</span>
+    //       ) : (
+    //         <span className="text-danger">Pending</span>
+    //       )}
+    //     </div>
+    //   ),
+    //   sortable: true,
+    //   width: "120px",
+    // },
     {
       name: "Actions",
       cell: (row) => {

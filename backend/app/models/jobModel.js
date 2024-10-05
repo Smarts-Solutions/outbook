@@ -456,6 +456,7 @@ const getJobByCustomer = async (job) => {
         CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
+             SUBSTRING(job_types.type, 1, 4), '_',
             SUBSTRING(jobs.job_id, 1, 15)
             ) AS job_code_id
    
@@ -521,6 +522,7 @@ const getJobByCustomer = async (job) => {
         CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
+             SUBSTRING(job_types.type, 1, 4), '_',
             SUBSTRING(jobs.job_id, 1, 15)
             ) AS job_code_id
    
@@ -655,6 +657,7 @@ const getJobByCustomer = async (job) => {
         CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
             SUBSTRING(jobs.job_id, 1, 15)
             ) AS job_code_id
    
@@ -716,6 +719,7 @@ const getJobByCustomer = async (job) => {
           CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
             SUBSTRING(jobs.job_id, 1, 15)
             ) AS job_code_id
         FROM 
@@ -795,6 +799,7 @@ const getJobByClient = async (job) => {
      CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
             SUBSTRING(jobs.job_id, 1, 15)
             ) AS job_code_id
 
@@ -860,6 +865,7 @@ const getJobByClient = async (job) => {
    CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
             SUBSTRING(jobs.job_id, 1, 15)
             ) AS job_code_id
 
@@ -996,6 +1002,7 @@ const getJobByClient = async (job) => {
      CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
             SUBSTRING(jobs.job_id, 1, 15)
             ) AS job_code_id
 
@@ -1061,6 +1068,7 @@ const getJobByClient = async (job) => {
      CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
             SUBSTRING(jobs.job_id, 1, 15)
             ) AS job_code_id
 
@@ -1140,6 +1148,7 @@ const getByJobStaffId = async (job) => {
   CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
+             SUBSTRING(job_types.type, 1, 4), '_',
             SUBSTRING(jobs.job_id, 1, 15)
             ) AS job_code_id
 
