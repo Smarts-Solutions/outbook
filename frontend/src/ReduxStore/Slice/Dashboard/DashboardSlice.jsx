@@ -5,20 +5,16 @@ import { GET_IP } from "../../../Utils/Comman_function";
 
 const StaffUserId = JSON.parse(localStorage.getItem("staffDetails")) || {};
 
+let IP_Data = await GET_IP();
 export const DashboardData = createAsyncThunk("getDashboardData", async (data) => {
     try {
         const { req, authToken } = data;
-        let IP_Data = await GET_IP();
         var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-        
         const updatedReq = {
             ...req,
-            ip: IP_Data.data.ip,  
+            ip: IP_Data,  
             StaffUserId: StaffUserId.id,
         };
-
-        console.log("updatedReq", updatedReq);
-
         const res = await DASHBOARD(updatedReq, authToken);
         return res; 
     } catch (err) {
@@ -29,12 +25,12 @@ export const DashboardData = createAsyncThunk("getDashboardData", async (data) =
 export const ActivityLog = createAsyncThunk("getDashboardActivityLog", async (data) => {
     try {
         const { req, authToken } = data;
-        let IP_Data = await GET_IP();
+        
         var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 
         const updatedReq = {
             ...req,
-            ip: IP_Data.data.ip,  
+            ip: IP_Data,  
             StaffUserId: StaffUserId.id, 
         };
 

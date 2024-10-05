@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { GETACCESS, ROLEACCESS } from "../../../Services/Access/Accessservices";
 import axios from "axios";
 import {GET_IP} from "../../../Utils/Comman_function";
-
+let IP_Data = await GET_IP();
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 
  
@@ -11,10 +11,9 @@ var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 
 export const GetAccess = createAsyncThunk("accessRolePermissions/getAccess", async (data) => {
   try {
-    const { req, authToken } = data;
-    let IP_Data = await GET_IP();
+    const { req, authToken } = data; 
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails")); 
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
     const res = await GETACCESS(updatedReq, authToken); 
     return await res;
   } catch (err) {
@@ -25,11 +24,8 @@ export const GetAccess = createAsyncThunk("accessRolePermissions/getAccess", asy
 export const RoleAccess = createAsyncThunk("accessRolePermissions/roleAccess", async (data) => {
   try {
     const { req, authToken } = data;
-  
-
-    let IP_Data = await GET_IP();
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: req.StaffUserId ?req.StaffUserId :StaffUserId.id };
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: req.StaffUserId ?req.StaffUserId :StaffUserId.id };
     const res = await ROLEACCESS(updatedReq, authToken);
     return await res;
   } catch (err) {

@@ -25,6 +25,7 @@ import {
 } from "../../../Services/Settings/settingService";
 import { GET_IP } from "../../../Utils/Comman_function";
 
+let IP_Data = await GET_IP();
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 
 
@@ -33,11 +34,10 @@ var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 export const Role = createAsyncThunk("role", async (data) => {
   try {
     const { req, authToken } = data;
-    let IP_Data = await GET_IP();
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = {
       ...req,
-      ip: IP_Data.data.ip,
+      ip: IP_Data,
       StaffUserId: StaffUserId.id,
     };
     const res = await ROLE(updatedReq, authToken);
@@ -51,11 +51,10 @@ export const Role = createAsyncThunk("role", async (data) => {
 export const StatusType = createAsyncThunk("statusType", async (data) => {
   try {
     const { req, authToken } = data;
-    let IP_Data = await GET_IP();
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = {
       ...req,
-      ip: IP_Data.data.ip,
+      ip: IP_Data,
       StaffUserId: StaffUserId.id,
     };
     const res = await STATUS_TYPE(updatedReq, authToken);
@@ -69,11 +68,10 @@ export const StatusType = createAsyncThunk("statusType", async (data) => {
 export const Service = createAsyncThunk("service", async (data) => {
   try {
     const { req, authToken } = data;
-    let IP_Data = await GET_IP();
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = {
       ...req,
-      ip: IP_Data.data.ip,
+      ip: IP_Data,
       StaffUserId: StaffUserId.id,
     };
     const res = await SERVICE(updatedReq, authToken);
@@ -89,11 +87,10 @@ export const PersonRole = createAsyncThunk(
   async (data) => {
     try {
       const { req, authToken } = data;
-      let IP_Data = await GET_IP();
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
       const updatedReq = {
         ...req,
-        ip: IP_Data.data.ip,
+        ip: IP_Data,
         StaffUserId: StaffUserId.id,
       };
       const res = await PERSONROLE(updatedReq, authToken);
@@ -111,12 +108,10 @@ export const ClientIndustry = createAsyncThunk(
   async (data) => {
     try {
       const { req, authToken } = data;
-
-      let IP_Data = await GET_IP();
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
       const updatedReq = {
         ...req,
-        ip: IP_Data.data.ip,
+        ip: IP_Data,
         StaffUserId: StaffUserId.id,
       };
       const res = await CLIENTINDUSTRY(updatedReq, authToken);
@@ -132,11 +127,10 @@ export const ClientIndustry = createAsyncThunk(
 export const Country = createAsyncThunk("country", async (data) => {
   try {
     const { req, authToken } = data;
-    let IP_Data = await GET_IP();
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = {
       ...req,
-      ip: IP_Data.data.ip,
+      ip: IP_Data,
       StaffUserId: StaffUserId.id,
     };
     const res = await COUNTRY(updatedReq, authToken);
@@ -151,11 +145,10 @@ export const Country = createAsyncThunk("country", async (data) => {
 export const JobType = createAsyncThunk("jobType", async (data) => {
   try {
     const { req, authToken } = data;
-    let IP_Data = await GET_IP();
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = {
       ...req,
-      ip: IP_Data.data.ip,
+      ip: IP_Data,
       StaffUserId: StaffUserId.id,
     };
     const res = await JOBTYPE(updatedReq, authToken);
@@ -170,11 +163,10 @@ export const JobType = createAsyncThunk("jobType", async (data) => {
 export const InternalApi = createAsyncThunk("internal", async (data) => {
   try {
     const { req, authToken } = data;
-    let IP_Data = await GET_IP();
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = {
       ...req,
-      ip: IP_Data.data.ip,
+      ip: IP_Data,
       StaffUserId: StaffUserId.id,
     };
     const res = await INTERNALAPI(updatedReq, authToken);
@@ -188,11 +180,10 @@ export const InternalApi = createAsyncThunk("internal", async (data) => {
 export const AddTask = createAsyncThunk("addTask", async (data) => {
   try {
     const { req, authToken } = data;
-    let IP_Data = await GET_IP();
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = {
       ...req,
-      ip: IP_Data.data.ip,
+      ip: IP_Data,
       StaffUserId: StaffUserId.id,
     };
     const res = await ADDTASK(updatedReq, authToken);
@@ -208,11 +199,10 @@ export const GetServicesByCustomers = createAsyncThunk(
   async (data) => {
     try {
       const { req, authToken } = data;
-      let IP_Data = await GET_IP();
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
       const updatedReq = {
         ...req,
-        ip: IP_Data.data.ip,
+        ip: IP_Data,
         StaffUserId: StaffUserId.id,
       };
       const res = await GetServicesByCustomer(updatedReq, authToken);
@@ -227,11 +217,10 @@ export const GetServicesByCustomers = createAsyncThunk(
 export const GETTASKDATA = createAsyncThunk("getTask", async (data) => {
   try {
     const { req, authToken } = data;
-    let IP_Data = await GET_IP();
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = {
       ...req,
-      ip: IP_Data.data.ip,
+      ip: IP_Data,
       StaffUserId: StaffUserId.id,
     };
     const res = await GETTASK(updatedReq, authToken);
@@ -245,11 +234,10 @@ export const GETTASKDATA = createAsyncThunk("getTask", async (data) => {
 export const getList = createAsyncThunk("checklistAction", async (data) => {
   try {
     const { req, authToken } = data;
-    let IP_Data = await GET_IP();
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = {
       ...req,
-      ip: IP_Data.data.ip,
+      ip: IP_Data,
       StaffUserId: StaffUserId.id,
     };
     const res = await getListAction(updatedReq, authToken);
@@ -263,11 +251,10 @@ export const getList = createAsyncThunk("checklistAction", async (data) => {
 export const addChecklists = createAsyncThunk("addChecklist", async (data) => {
   try {
     const { req, authToken } = data;
-    let IP_Data = await GET_IP();
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = {
       ...req,
-      ip: IP_Data.data.ip,
+      ip: IP_Data,
       StaffUserId: StaffUserId.id,
     };
     const res = await addChecklist(updatedReq, authToken);
@@ -283,11 +270,10 @@ export const UpdateChecklistData = createAsyncThunk(
   async (data) => {
     try {
       const { req, authToken } = data;
-      let IP_Data = await GET_IP();
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
       const updatedReq = {
         ...req,
-        ip: IP_Data.data.ip,
+        ip: IP_Data,
         StaffUserId: StaffUserId.id,
       };
       const res = await UpdateChecklist(updatedReq, authToken);
@@ -304,11 +290,10 @@ export const MasterStatusData = createAsyncThunk(
   async (data) => {
     try {
       const { req, authToken } = data;
-      let IP_Data = await GET_IP();
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
       const updatedReq = {
         ...req,
-        ip: IP_Data.data.ip,
+        ip: IP_Data,
         StaffUserId: StaffUserId.id,
       };
       const res = await MasterStatus(updatedReq, authToken);
@@ -325,11 +310,10 @@ export const IncorporationApi = createAsyncThunk(
   async (data) => {
     try {
       const { req, authToken } = data;
-      let IP_Data = await GET_IP();
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
       const updatedReq = {
         ...req,
-        ip: IP_Data.data.ip,
+        ip: IP_Data,
         StaffUserId: StaffUserId.id,
       };
       const res = await incorporationApi(updatedReq, authToken);
@@ -346,11 +330,10 @@ export const customerSourceApi = createAsyncThunk(
   async (data) => {
     try {
       const { req, authToken } = data;
-      let IP_Data = await GET_IP();
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
       const updatedReq = {
         ...req,
-        ip: IP_Data.data.ip,
+        ip: IP_Data,
         StaffUserId: StaffUserId.id,
       };
       const res = await customerSource(updatedReq, authToken);
@@ -367,11 +350,10 @@ export const customerSubSourceApi = createAsyncThunk(
   async (data) => {
     try {
       const { req, authToken } = data;
-      let IP_Data = await GET_IP();
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
       const updatedReq = {
         ...req,
-        ip: IP_Data.data.ip,
+        ip: IP_Data,
         StaffUserId: StaffUserId.id,
       };
       const res = await customerSubSource(updatedReq, authToken);
@@ -388,11 +370,10 @@ export const customerSubInternalApi = createAsyncThunk(
   async (data) => {
     try {
       const { req, authToken } = data;
-      let IP_Data = await GET_IP();
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
       const updatedReq = {
         ...req,
-        ip: IP_Data.data.ip,
+        ip: IP_Data,
         StaffUserId: StaffUserId.id,
       };
       const res = await SUBINTERNALAPI(updatedReq, authToken);

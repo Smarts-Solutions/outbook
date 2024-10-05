@@ -10,10 +10,9 @@ const token = localStorage.getItem("token");
 
 export const GetClientIndustry = createAsyncThunk("clientIndustry", async (data) => {
   const { req, authToken } = data
-  try {
-    let IP_Data = await GET_IP();
+  try { 
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
     const res = await GET_CLIENT_INDUSTRY(updatedReq, authToken);
 
     return await res;
@@ -25,9 +24,7 @@ export const GetClientIndustry = createAsyncThunk("clientIndustry", async (data)
 export const ClientAction = createAsyncThunk("clientAction", async (data) => {
   const { req, authToken } = data
   try {
-    let IP_Data = await GET_IP();
-    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    console.log("IP_Data ",IP_Data)
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails")); 
     const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
     const res = await CLIENT_ACTION(updatedReq, authToken);
 
@@ -40,10 +37,9 @@ export const ClientAction = createAsyncThunk("clientAction", async (data) => {
 export const Add_Client = createAsyncThunk("addClient", async (req) => {
   const authToken = token;
 
-  try {
-    let IP_Data = await GET_IP();
+  try { 
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
     const res = await ADD_CLIENT(updatedReq, authToken);
 
     return await res;
@@ -54,10 +50,9 @@ export const Add_Client = createAsyncThunk("addClient", async (req) => {
 
 export const Edit_Client = createAsyncThunk("clientUpdate", async (req) => {
   const authToken = token;
-  try {
-    let IP_Data = await GET_IP();
+  try { 
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
     const res = await EDIT_CLIENT(updatedReq, authToken);
 
     return await res;
