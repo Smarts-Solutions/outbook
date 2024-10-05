@@ -720,7 +720,7 @@ const Engagement = () => {
                           <div className="card-body">
                             <div id="custprize">
                               {jobEntries.map((job, index) => (
-                                <div className="row align-items-center" key={index}>
+                                <div className="row " key={index}>
                                   <div className="col-lg-4">
                                     <div className="mb-3">
                                       <label
@@ -819,7 +819,7 @@ const Engagement = () => {
                                     <div className="col-lg-1 text-center d-flex">
                                       <button
                                       style={{height:'37px'}}
-                                        className="delete-icon"
+                                        className="delete-icon mt-4"
                                         onClick={(e) => handleRemoveJob(index)}
                                       >
                                         <i className="ti-trash text-danger " />

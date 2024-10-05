@@ -256,7 +256,13 @@ const Timesheet = () => {
                                     />
                                   </td>
 
-                                  <td>
+                                  <td className="d-flex">
+                                  <button
+                                      className="edit-icon"
+                                      onClick={() => handleDeleteRow(index)}
+                                    >
+                                      <i className="fa fa-pencil text-primary  "></i>
+                                    </button>
                                     <button
                                       className="delete-icon"
                                       onClick={() => handleDeleteRow(index)}
@@ -264,6 +270,7 @@ const Timesheet = () => {
                                       <i className="ti-trash text-danger  "></i>
                                     </button>
                                     {/* <Trash2 className="delete-icon" /> */}
+                                   
                                   </td>
                                 </tr>
                               ))}
@@ -319,6 +326,14 @@ const Timesheet = () => {
                   <div>Last year's content...</div>
                 )}
                 {selectedTab === "custom" && <div>Custom content...</div>}
+              </div>
+              <div className="d-flex justify-content-end mt-3">
+                <button className="btn btn-info">
+                  <i className="fa fa-check"></i> save
+                </button>
+                <button className="btn btn-outline-success ms-3">
+                  <i className="far fa-save"></i> submit
+                </button>
               </div>
             
           <CommonModal
@@ -454,6 +469,38 @@ const Timesheet = () => {
                   defaultValue=""
                 />
               </div>
+            </div>
+          </CommonModal>
+
+
+          <CommonModal
+            isOpen={addtask}
+            backdrop="static"
+            size="lg"
+            cancel_btn={false}
+            btn_2="true"
+            btn_name="Save"
+            title="Task"
+            hideBtn={false}
+            handleClose={() => {
+              setAddtask(false);
+            }}
+          >
+            <div className="modal-body">
+              <div className="row">
+             
+             
+              <div className="col-lg-12">
+                <label htmlFor="customername-field" className="form-label">
+                  Remark
+                </label>
+                <textarea
+                  className="form-control cursor-pointer"
+                  placeholder="Remark"
+                  defaultValue=""
+                />
+              </div>
+            </div>
             </div>
           </CommonModal>
         </div>

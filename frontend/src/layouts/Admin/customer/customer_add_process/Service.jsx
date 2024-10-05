@@ -473,7 +473,7 @@ const Service = () => {
                                   id={`heading-${index}`}
                                 >
                                   <button
-                                    className="accordion-button collapsed fw-bold "
+                                    className="accordion-button collapsed fw-bold bg-transparant"
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target={`#collapse-${index}`}
@@ -504,7 +504,7 @@ const Service = () => {
                                                 <div className="accordion-item" key={`${item.id}_${data1.id}_${jobIndex}`}>
                                                   <h2 className="accordion-header" id={`sub-headingOne${item.id}_${data1.id}_${jobIndex}`}>
                                                     <button
-                                                      className="accordion-button collapsed"
+                                                      className="accordion-button  collapsed"
                                                       type="button"
                                                       data-bs-toggle="collapse"
                                                       data-bs-target={`#sub-collapseOne${item.id}_${data1.id}_${jobIndex}`}
@@ -550,7 +550,7 @@ const Service = () => {
                                                                   data1.id === TaskShow.JobTypeId && item.id === TaskShow.serviceId
                                                               )
                                                               .length > 0 && (
-                                                              <table className="table table-bordered">
+                                                              <table className="table table-bordered mt-4">
                                                                 <thead className="table-head-blue">
                                                                   <tr>
                                                                     <th colSpan="3" className="fs-6 text-center card-header step-header-blue">
@@ -565,7 +565,7 @@ const Service = () => {
                                                                   </tr>
                                                                   <tr>
                                                                     <th className="text-center">Tasks</th>
-                                                                    <th className="text-center">Budgeted Hour</th>
+                                                                    <th className="text-center" width="250">Budgeted Time</th>
                                                                     <th className="text-center">Action</th>
                                                                   </tr>
                                                                 </thead>
@@ -616,7 +616,7 @@ const Service = () => {
                                                                               </div>
                                                                             ))}
                                                                           </td>
-                                                                          <td>
+                                                                          <td className="text-center">
                                                                             <button
                                                                               className=" delete-icon"
                                                                               onClick={() => handleDelete(TaskShow.id)}

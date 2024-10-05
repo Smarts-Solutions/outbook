@@ -214,7 +214,7 @@ const Paper = () => {
                                 </button>
 
                                 <Button
-                                  className="btn btn-info text-white text-center blue-btn"
+                                  className="btn btn-outline-success text-center  d-flex align-items-center"
                                   type="submit"
                                   onClick={(e) => handleSubmit(e)}
                                 >

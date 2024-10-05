@@ -1250,7 +1250,7 @@ const Information = ({ id, pageStatus }) => {
                               </label>
                               <input
                                 type="text"
-                                className={errors1["eamil"] ? "error-field form-control" : "form-control"}
+                                className={errors1["email"] &&errors1["email"] ? "error-field form-control" : "form-control"}
                                 placeholder="Enter Email ID"
                                 name="email"
                                 id="email"
