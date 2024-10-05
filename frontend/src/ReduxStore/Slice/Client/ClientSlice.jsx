@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { GET_CLIENT_INDUSTRY, ADD_CLIENT, CLIENT_ACTION, EDIT_CLIENT } from "../../../Services/Client/ClientService";
 import { GET_IP } from "../../../Utils/Comman_function";
+let IP_Data = await GET_IP();
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 const token = localStorage.getItem("token");
 
@@ -26,7 +27,8 @@ export const ClientAction = createAsyncThunk("clientAction", async (data) => {
   try {
     let IP_Data = await GET_IP();
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    console.log("IP_Data ",IP_Data)
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
     const res = await CLIENT_ACTION(updatedReq, authToken);
 
     return await res;

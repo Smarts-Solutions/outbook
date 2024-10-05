@@ -191,7 +191,8 @@ export const validate = (name, value, errors, setErrors) => {
 export async function GET_IP(data, token) {
   try {
     const res = await axios.get(`https://api.ipify.org?format=json`)
-    return await res;
+    console.log("res - ip ",res.data.ip)
+    return await res.data.ip;
   }
   catch (err) {
   }
