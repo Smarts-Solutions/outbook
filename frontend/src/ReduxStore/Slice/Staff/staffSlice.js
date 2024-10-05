@@ -1,20 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { STAFF ,SERVICE,COMPETENCY , GETPROFILE} from "../../../Services/Staff/staff";
-
-
-import axios from "axios";
-
+import { GET_IP } from "../../../Utils/Comman_function";
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-export async function GET_IP(data, token) {
-  try {
-    const res = await axios.get(`https://api.ipify.org?format=json`)
-    return await res;
-  }
-  catch (err) {
-  }
-}
-
-
 
 export const Staff = createAsyncThunk("staff", async (data) => {
   try {
@@ -71,7 +58,6 @@ export const getProfile = createAsyncThunk("profile", async (data) => {
     return err;
   }
 });
-
 
 
 const StaffSlice = createSlice({

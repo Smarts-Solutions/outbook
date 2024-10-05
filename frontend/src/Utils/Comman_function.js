@@ -185,3 +185,13 @@ export const validate = (name, value, errors, setErrors) => {
 
   return Object.keys(newErrors).length === 0;
 };
+
+ 
+export async function GET_IP(data, token) {
+  try {
+    const res = await axios.get(`https://api.ipify.org?format=json`)
+    return await res;
+  }
+  catch (err) {
+  }
+}
