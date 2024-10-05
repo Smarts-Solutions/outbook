@@ -2,13 +2,13 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { STAFF ,SERVICE,COMPETENCY , GETPROFILE} from "../../../Services/Staff/staff";
 import { GET_IP } from "../../../Utils/Comman_function";
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+let IP_Data = await GET_IP();
 
 export const Staff = createAsyncThunk("staff", async (data) => {
   try {
     const { req, authToken } = data;
-    let IP_Data = await GET_IP();
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
     const res = await STAFF(updatedReq, authToken);
      
     return await res;
@@ -20,9 +20,8 @@ export const Staff = createAsyncThunk("staff", async (data) => {
 export const Service = createAsyncThunk("service", async (data) => {
   try {
     const { req, authToken } = data;
-    let IP_Data = await GET_IP();
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
     const res = await SERVICE(updatedReq, authToken);
   
     return await res;
@@ -34,9 +33,8 @@ export const Service = createAsyncThunk("service", async (data) => {
 export const Competency = createAsyncThunk("staffCompetency", async (data) => {
   try {
     const { req , authToken } = data
-    let IP_Data = await GET_IP();
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = { ...req, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
     const res = await COMPETENCY(updatedReq, authToken);
    
     return await res;
@@ -48,9 +46,8 @@ export const Competency = createAsyncThunk("staffCompetency", async (data) => {
 export const getProfile = createAsyncThunk("profile", async (data) => {
   try {
 
-    let IP_Data = await GET_IP();
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = { ...data, ip: IP_Data.data.ip, StaffUserId: StaffUserId.id };
+    const updatedReq = { ...data, ip: IP_Data, StaffUserId: StaffUserId.id };
     const res = await GETPROFILE(updatedReq);
      
     return await res;
