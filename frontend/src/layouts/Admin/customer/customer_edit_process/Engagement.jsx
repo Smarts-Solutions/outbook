@@ -1121,7 +1121,7 @@ const Engagement = () => {
                                   {jobEntries.length > 1 && (
                                     <div className="col-lg-1 text-center mt-4">
                                       <button
-                                        className="delete-icon"
+                                        className="delete-icon "
                                         onClick={(e) => handleRemoveJob(index)}
                                       >
                                         <i

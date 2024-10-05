@@ -443,7 +443,7 @@ const Paper = () => {
                           <i className="pe-2 fa-regular fa-arrow-left-long"></i>  Previous
                           </button>
                           <Button
-                            className="btn btn-info text-white text-center blue-btn float-end"
+                            className=" py-3 btn btn-outline-success  text-center d-flex align-items-center float-end"
                             type="submit"
                             onClick={(e) => handleSubmit(e)}
                           >

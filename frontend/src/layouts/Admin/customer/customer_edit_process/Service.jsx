@@ -462,7 +462,7 @@ const Service = () => {
                                   id={`heading-${index}`}
                                 >
                                   <button
-                                    className="accordion-button collapsed fw-bold"
+                                    className="accordion-button collapsed fw-bold bg-transparant"
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target={`#collapse-${index}`}
@@ -604,7 +604,7 @@ const Service = () => {
                                                                 item.id ===
                                                                 TaskShow.serviceId
                                                             ).length > 0 && (
-                                                              <table className="table table-bordered">
+                                                              <table className="table table-bordered mt-4">
                                                                 <thead className="table-head-blue">
                                                                   <tr>
                                                                     <th

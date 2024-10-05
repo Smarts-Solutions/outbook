@@ -9740,8 +9740,8 @@ body .btn-info:hover {
 }
 
 .account-body .container input {
-  background-color: #eee;
-  border: none;
+  /* background-color: #eee; */
+  border: 1px solid #dbd0d0;
   /* margin: 8px 0; */
   margin-top: 10px;
   padding: 10px 15px;
@@ -9950,18 +9950,27 @@ thead.table-striped th,
 body .bg-info.modal-header .modal-title, .modal-header .modal-title{
   color: #fff !important;
 } */
-.search-results .search-result-item {
-  padding: 4px;
+.search-results {
+  padding: 8px;
   border: 1px solid #d9d9d9;
   /* background: red; */
   border-radius: 5px;
   margin: 3px 0;
 }
-
-.table td {
-  font-size: 14px;
-  color: #4B4B4B;
-  font-weight: 600;
+.search-results .search-item-result {
+  padding: 5px 0;
+}
+.search-results  .search-result-item {
+  padding: 3px 3px;
+}
+.no-results p {
+  margin-bottom: 0;
+}
+.table td
+{
+font-size: 14px;
+    color: #4B4B4B;
+    font-weight: 600;
 }
 
 .modal .btn-close {
@@ -10077,19 +10086,25 @@ body .accordion-button:not(.collapsed)::after {
 
 .search {
   position: relative;
-  text-indent: 15px;
+  /* text-indent: 15px; */
 }
-
 .search-box {
   display: flex;
   align-items: center;
+  position: relative;
 }
 
 .search-icon {
   position: absolute;
-  left: 20px;
+  right: 0;
   z-index: 1;
   text-indent: 8px;
+  background: #ebf4f7;
+  height: 100%;
+  border-radius: 0 20px 20px 0;
+  width: 35px;
+  top: 0px;
+  line-height: 34px;
 }
 
 .data-table-header {
@@ -10552,8 +10567,7 @@ li::marker {
 .tooltip--multiline ul {
   padding-left: 20px;
 }
-
-.tooltip--multiline:before {
+/* .tooltip--multiline:before {
   border-top: 10px solid #00afef;
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
@@ -10566,9 +10580,9 @@ li::marker {
   -ms-transform: translate(-50%, 0%);
   -o-transform: translate(-50%, 0%);
   transform: translate(-50%, 0%);
-}
-
-.text-danger {
+} */
+.text-danger
+{
   color: #ff0000 !important;
 }
 
@@ -10619,7 +10633,7 @@ a.nav-link.dropdown-toggle.arrow-none.waves-light.waves-effect img {
   border-radius: 20px !important;
   font-weight: 600;
   font-size: 14px;
-  padding: 8px 20px;
+  padding: 8px 20px !important;
 }
 
 .btn-outline-success:hover {
@@ -10662,10 +10676,8 @@ a.nav-link.dropdown-toggle.arrow-none.waves-light.waves-effect img {
 .swal2-popup .swal2-styled:focus {
   box-shadow: none !important;
 }
-
-select.error-field.form-select,
-input.error-field.form-control {
-  background: #fff3f3;
+select.error-field.form-select, input.error-field.form-control {
+  background: #fff !important;
   border: 1px solid #ef7e7e;
 }
 
@@ -10720,4 +10732,8 @@ select#tabSelect {
 .jobs{
   position: relative;
   left: 11px;
+}
+.accordion-button.bg-transparant:not(.collapsed) {
+  background: transparent !important;
+  border: none !important;
 }

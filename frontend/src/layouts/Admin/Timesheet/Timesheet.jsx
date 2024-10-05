@@ -256,7 +256,16 @@ const Timesheet = () => {
                                     />
                                   </td>
 
-                                  <td>
+                                  <td className="d-flex">
+                                  <button
+                                      className="edit-icon"
+                                      onClick={() => {
+                                        
+                                        setAddtask(true);
+                                      }}
+                                    >
+                                      <i className="fa fa-pencil text-primary  "></i>
+                                    </button>
                                     <button
                                       className="delete-icon"
                                       onClick={() => handleDeleteRow(index)}
@@ -264,6 +273,7 @@ const Timesheet = () => {
                                       <i className="ti-trash text-danger  "></i>
                                     </button>
                                     {/* <Trash2 className="delete-icon" /> */}
+                                   
                                   </td>
                                 </tr>
                               ))}
@@ -320,7 +330,19 @@ const Timesheet = () => {
                 )}
                 {selectedTab === "custom" && <div>Custom content...</div>}
               </div>
+              <div className="d-flex justify-content-end mt-3">
+                <button className="btn btn-info">
+                  <i className="fa fa-check"></i> save
+                </button>
+                <button className="btn btn-outline-success ms-3">
+                  <i className="far fa-save"></i> submit
+                </button>
+              </div>
             
+       
+       
+
+
           <CommonModal
             isOpen={addtask}
             backdrop="static"
@@ -336,124 +358,19 @@ const Timesheet = () => {
           >
             <div className="modal-body">
               <div className="row">
-                <div className="col-lg-6">
-                  <div className="form-group">
-                    <label htmlFor="customername-field" className="form-label">
-                      Task Type
-                    </label>
-                    <input
-                      className="form-control cursor-pointer"
-                      disabled=""
-                      readOnly=""
-                      defaultValue="Internal"
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-6">
-                  <div className="form-group">
-                    <label htmlFor="customername-field" className="form-label">
-                      Date
-                    </label>
-                    <input
-                      className="form-control cursor-pointer"
-                      disabled=""
-                      readOnly=""
-                      defaultValue="Monday, 12th 2024"
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-6">
-                  <div className="form-group">
-                    <label htmlFor="customername-field" className="form-label">
-                      Customer
-                    </label>
-                    <input
-                      className="form-control cursor-pointer"
-                      disabled=""
-                      readOnly=""
-                      defaultValue="Customer 1"
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-6">
-                  <div className="form-group">
-                    <label htmlFor="customername-field" className="form-label">
-                      Client
-                    </label>
-                    <input
-                      className="form-control cursor-pointer"
-                      disabled=""
-                      readOnly=""
-                      defaultValue="Client 1"
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-6">
-                  <div className="form-group">
-                    <label htmlFor="customername-field" className="form-label">
-                      Job
-                    </label>
-                    <input
-                      className="form-control cursor-pointer"
-                      disabled=""
-                      readOnly=""
-                      defaultValue="Job 1"
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-6">
-                  <div className="form-group">
-                    <label htmlFor="customername-field" className="form-label">
-                      Task
-                    </label>
-                    <input
-                      className="form-control cursor-pointer"
-                      disabled=""
-                      readOnly=""
-                      defaultValue="Task 1"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="mb-3" id="modal-id" style={{ display: "none" }}>
-                <label htmlFor="id-field" className="form-label">
-                  ID
-                </label>
-                <input
-                  type="text"
-                  id="id-field"
-                  className="form-control"
-                  placeholder="ID"
-                  readOnly=""
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="customername-field" className="form-label">
-                  Hours
-                </label>
-                <div className="input-group">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Hours"
-                    aria-label="Recipient's username"
-                    aria-describedby="basic-addon2"
-                  />
-                  <span className="input-group-text" id="basic-addon2">
-                    Hours
-                  </span>
-                </div>
-              </div>
+             
+             
               <div className="col-lg-12">
                 <label htmlFor="customername-field" className="form-label">
                   Remark
                 </label>
-                <input
+                <textarea
                   className="form-control cursor-pointer"
-                  placeholder="Remark"
+                  // placeholder="Remark"
                   defaultValue=""
                 />
               </div>
+            </div>
             </div>
           </CommonModal>
         </div>
