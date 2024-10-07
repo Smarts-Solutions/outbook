@@ -16,9 +16,9 @@ const Timesheet = () => {
     const res = await dispatch(getTimesheetData({ req, authToken: token })).unwrap();
     console.log("res", res)
     if (res.status) {
-      setTimeSheetRows(res.data)
+     // setJobData(res.data)
     } else {
-      setTimeSheetRows([])
+      //setJobData([])
     }
   }
 
@@ -33,7 +33,22 @@ const Timesheet = () => {
   const [jobData, setJobData] = useState([]);
 
   const [addtask, setAddtask] = useState(false);
-  const [timeSheetRows, setTimeSheetRows] = useState([]);
+  const [timeSheetRows, setTimeSheetRows] = useState([
+    {
+      TaskType: "",
+      Customer: "",
+      Client: "",
+      Job: "",
+      Task: "",
+      Mon: "",
+      Tue: "",
+      Wed: "",
+      Thu: "",
+      Fri: "",
+      Sat: "",
+      Sun: "",
+    },
+  ]);
   const [selectedTab, setSelectedTab] = useState("this-week");
 
   // Function to handle dropdown change
@@ -208,48 +223,23 @@ const Timesheet = () => {
                                   style={{ width: '100px' }}
                                   onChange={(e) => handleChangeTaskType(e)}
                                 >
-                                  <option value="1" selected={item.task_type === "1"}>Internal</option>
-                                  <option value="2" selected={item.task_type === "2"}>External</option>
+                                  <option value="1">Internal</option>
+                                  <option value="2">External</option>
                                 </select>
                               </td>
                               <td >
-                                 
-                                {
-                                  item.task_type === "1" ? 
-                                  <input
-                                  className="form-control cursor-pointer"
-                                  disabled
-                                  readOnly
-                                  defaultValue={"No Customer"}
-                                  />
-                                  :
-                                  <select className="form-select" style={{ width: '150px' }}>
+                                <select className="form-select" style={{ width: '150px' }}>
                                   <option selected>Customer 1</option>
                                   <option value={1}>
                                     THE BLACK T COMPANY LTD
                                   </option>
-                                 </select>
-
-                                } 
-
+                                </select>
                               </td>
                               <td>
-
-                              {
-                                  item.task_type === "1" ? 
-                                  <input
-                                  className="form-control cursor-pointer"
-                                  disabled
-                                  readOnly
-                                  defaultValue={"No Client"}
-                                  />
-                                  :
-                                  <select className="form-select" style={{ width: '150px' }}>
+                                <select className="form-select" style={{ width: '150px' }}>
                                   <option selected>Client 1</option>
                                   <option value={1}>MT LIMITED</option>
                                 </select>
-
-                                } 
                               </td>
                               <td>
                                 {/* <select className="form-select" style={{ width: '120px' }}>

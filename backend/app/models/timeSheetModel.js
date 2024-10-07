@@ -1,5 +1,18 @@
 const pool = require("../config/database");
 
+const getTimesheet = async (Timesheet) => {
+  const { staff_id } = Timesheet;
+
+  try {
+    const [rows] = await pool.query(
+      "SELECT * FROM timesheet WHERE staff_id = ?",
+      [staff_id]
+    );
+    return { status: true, message: "success.", data: rows };
+  } catch (err) {
+    return { status: false, message: "Err Dashboard Data View Get", error: err.message };
+  }
+}
 
 const getTimesheetTaskType = async (Timesheet) => {
  const  { staff_id , task_type} = Timesheet
@@ -24,5 +37,6 @@ const getTimesheetTaskType = async (Timesheet) => {
 
 
 module.exports = {
+  getTimesheet,
   getTimesheetTaskType
 };

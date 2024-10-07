@@ -7,6 +7,7 @@ const uploadMultiple  = require('../../middlewares/uploadFile');
 
 const router = express.Router();
 
+router.post('/getTimesheet',verifyToken, timeSheetController.getTimesheet);
 router.post('/getTimesheetTaskType',verifyToken, timeSheetController.getTimesheetTaskType);
 
 module.exports = router;
