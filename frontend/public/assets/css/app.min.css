@@ -9491,7 +9491,10 @@ span.sidebar-icons {
   margin: 2px 0;
   border-radius: 5px;
 }
-
+button.secondary-icon {
+  color: #222222;
+  border: 3px solid #222222;
+}
 .datatable-container button.edit-icon,
 .datatable-container button.delete-icon,
 button.delete-icon,
@@ -9628,7 +9631,7 @@ body .blue-btn:hover,
 body .btn-info:hover {
   color: #fff !important;
   border-color: #00AFEF !important;
-  border: 3px solid !important;
+  border: 3px solid #00AFEF !important;
   background: #00AFEF !important;
 }
 

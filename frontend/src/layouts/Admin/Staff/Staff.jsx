@@ -597,8 +597,8 @@ const StaffPage = () => {
           
           </div>
           <div className="col-md-6">
-            <div className="d-flex">
-          <div className="form-group w-75">
+            <div className="d-flex justify-content-end">
+          <div className="form-group w-50">
               <select
                 className="form-control"
                 id="tabSelect"
