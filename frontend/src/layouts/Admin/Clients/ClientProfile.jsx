@@ -313,7 +313,7 @@ const ClientList = () => {
         if (response.status) {
           setCustomerData(response.data);
         } else {
-          setCustomerData(response.data);
+          setCustomerData([]);
         }
       })
       .catch((error) => {

@@ -824,12 +824,13 @@ const getJobByClient = async (job) => {
      LEFT JOIN 
      master_status ON master_status.id = jobs.status_type   
      WHERE 
-     jobs.client_id = clients.id AND
-     jobs.allocated_to = ? AND jobs.client_id = ? 
+     jobs.client_id = clients.id 
+     AND (jobs.allocated_to = ? OR jobs.staff_created_id = ?)
+     AND jobs.client_id = ? 
       ORDER BY
       jobs.id DESC;
      `;
-        const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, client_id]);
+        const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id , client_id]);
         result = rowsAllocated
 
       }
@@ -890,12 +891,13 @@ const getJobByClient = async (job) => {
    LEFT JOIN 
    master_status ON master_status.id = jobs.status_type   
    WHERE 
-   jobs.client_id = clients.id AND
-   jobs.account_manager_id = ? AND jobs.client_id = ? 
+   jobs.client_id = clients.id 
+   AND (jobs.account_manager_id = ? OR jobs.staff_created_id = ?)
+   AND jobs.client_id = ? 
     ORDER BY
    jobs.id DESC;
    `;
-        const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, client_id]);
+        const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id,client_id]);
         result = rowsAllocated
         if (rowsAllocated.length === 0) {
           const query = `
@@ -1029,12 +1031,14 @@ const getJobByClient = async (job) => {
      LEFT JOIN 
      master_status ON master_status.id = jobs.status_type   
      WHERE 
-     jobs.client_id = clients.id AND
-     jobs.reviewer = ? AND jobs.client_id = ? 
+     jobs.client_id = clients.id 
+     AND
+     (jobs.reviewer = ? OR jobs.staff_created_id = ?) 
+     AND jobs.client_id = ? 
       ORDER BY
       jobs.id DESC;
      `;
-        const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, client_id]);
+        const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id,ExistStaff[0].id,client_id]);
         result = rowsAllocated
 
       }

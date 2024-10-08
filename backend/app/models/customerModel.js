@@ -393,57 +393,60 @@ const getCustomer = async (customer) => {
     const { staff_id } = customer;
 
 
+
     const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + staff_id + '" LIMIT 1');
 
     let result = []
     if (rows.length > 0) {
         // Allocated to
         if (rows[0].role_id == 3) {
-
             const query = `
-            SELECT  
-            customers.id AS id,
-            customers.customer_type AS customer_type,
-            customers.staff_id AS staff_id,
-            customers.account_manager_id AS account_manager_id,
-            customers.trading_name AS trading_name,
-           
-            customers.trading_address AS trading_address,
-            customers.vat_registered AS vat_registered,
-            customers.vat_number AS vat_number,
-            customers.website AS website,
-            customers.form_process AS form_process,
-            customers.created_at AS created_at,
-            customers.updated_at AS updated_at,
-            customers.status AS status,
-            staff1.first_name AS staff_firstname, 
-            staff1.last_name AS staff_lastname,
-            staff2.first_name AS account_manager_firstname, 
-            staff2.last_name AS account_manager_lastname,
-            customer_company_information.company_name AS company_name,
-            customer_company_information.company_number AS company_number,
-         CONCAT(
-            'cust_', 
-            SUBSTRING(customers.trading_name, 1, 3), '_',
-            SUBSTRING(customers.customer_code, 1, 15)
-            ) AS customer_code
-        FROM 
-            customers
-        JOIN 
-            jobs ON jobs.customer_id = customers.id   
-        JOIN 
-            staffs AS staff1 ON customers.staff_id = staff1.id
-        JOIN 
-            staffs AS staff2 ON customers.account_manager_id = staff2.id
-        LEFT JOIN 
-            customer_company_information ON customers.id = customer_company_information.customer_id
-        WHERE jobs.allocated_to = ?   
-        GROUP BY 
-        jobs.customer_id
-        ORDER BY 
-            customers.id DESC;
+           SELECT  
+    customers.id AS id,
+    customers.customer_type AS customer_type,
+    customers.staff_id AS staff_id,
+    customers.account_manager_id AS account_manager_id,
+    customers.trading_name AS trading_name,
+    customers.trading_address AS trading_address,
+    customers.vat_registered AS vat_registered,
+    customers.vat_number AS vat_number,
+    customers.website AS website,
+    customers.form_process AS form_process,
+    customers.created_at AS created_at,
+    customers.updated_at AS updated_at,
+    customers.status AS status,
+    staff1.first_name AS staff_firstname, 
+    staff1.last_name AS staff_lastname,
+    staff2.first_name AS account_manager_firstname, 
+    staff2.last_name AS account_manager_lastname,
+    customer_company_information.company_name AS company_name,
+    customer_company_information.company_number AS company_number,
+    CONCAT(
+        'cust_', 
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(customers.customer_code, 1, 15)
+    ) AS customer_code
+FROM 
+    customers
+LEFT JOIN
+    jobs ON jobs.customer_id = customers.id   
+JOIN 
+    staffs AS staff1 ON customers.staff_id = staff1.id
+JOIN 
+    staffs AS staff2 ON customers.account_manager_id = staff2.id
+LEFT JOIN
+    customer_company_information ON customers.id = customer_company_information.customer_id
+WHERE 
+    jobs.allocated_to = ? OR customers.staff_id = ?
+GROUP BY 
+    CASE 
+        WHEN jobs.allocated_to = ? THEN jobs.customer_id
+        ELSE customers.id
+    END
+ORDER BY 
+    customers.id DESC
             `;
-            const [resultAllocated] = await pool.execute(query, [staff_id]);
+            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
             result = resultAllocated
 
         }
@@ -478,7 +481,7 @@ const getCustomer = async (customer) => {
             ) AS customer_code
         FROM 
             customers
-        JOIN 
+        LEFT JOIN 
             jobs ON jobs.customer_id = customers.id   
         JOIN 
             staffs AS staff1 ON customers.staff_id = staff1.id
@@ -486,13 +489,16 @@ const getCustomer = async (customer) => {
             staffs AS staff2 ON customers.account_manager_id = staff2.id
         LEFT JOIN 
             customer_company_information ON customers.id = customer_company_information.customer_id
-        WHERE jobs.account_manager_id = ?   
+        WHERE jobs.account_manager_id = ? OR customers.staff_id = ?
         GROUP BY 
-        jobs.customer_id
+    CASE 
+        WHEN jobs.account_manager_id = ? THEN jobs.customer_id
+        ELSE customers.id
+    END
         ORDER BY 
             customers.id DESC;
             `;
-            const [resultAllocated] = await pool.execute(query, [staff_id]);
+            const [resultAllocated] = await pool.execute(query, [staff_id,staff_id,staff_id]);
             result = resultAllocated;
 
             if (resultAllocated.length === 0) {
@@ -580,13 +586,16 @@ const getCustomer = async (customer) => {
             staffs AS staff2 ON customers.account_manager_id = staff2.id
         LEFT JOIN 
             customer_company_information ON customers.id = customer_company_information.customer_id
-        WHERE jobs.reviewer = ?   
-        GROUP BY 
-        jobs.customer_id
+        WHERE jobs.reviewer = ? OR customers.staff_id = ?  
+         GROUP BY 
+    CASE 
+        WHEN jobs.reviewer = ? THEN jobs.customer_id
+        ELSE customers.id
+    END
         ORDER BY 
             customers.id DESC;
             `;
-            const [resultAllocated] = await pool.execute(query, [staff_id]);
+            const [resultAllocated] = await pool.execute(query, [staff_id,staff_id,staff_id]);
             result = resultAllocated
 
         }
@@ -803,55 +812,55 @@ const updateProcessCustomerServices = async (customerProcessData) => {
         `;
             const [result] = await pool.execute(insertChecklistQuery, [customer_id, serviceId, JobTypeId, client_type_id, checklistName]);
             const checklist_id = result.insertId;
-        
-        if (Task[0].Task.length > 0) {
-            for (const tsk_name of Task[0].Task) {
-                const TaskName = tsk_name.TaskName;
-                const BudgetHour = tsk_name.BudgetHour;
-                const checkQuery = `SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?`;
-                const [existing] = await pool.execute(checkQuery, [TaskName, serviceId, JobTypeId,
-                ]);
-            if (existing.length === 0) {
-                    const InsertTaskquery = `
+
+            if (Task[0].Task.length > 0) {
+                for (const tsk_name of Task[0].Task) {
+                    const TaskName = tsk_name.TaskName;
+                    const BudgetHour = tsk_name.BudgetHour;
+                    const checkQuery = `SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?`;
+                    const [existing] = await pool.execute(checkQuery, [TaskName, serviceId, JobTypeId,
+                    ]);
+                    if (existing.length === 0) {
+                        const InsertTaskquery = `
               INSERT INTO task (name,service_id,job_type_id)
               VALUES (?, ?, ?)
               `;
-                    const [result] = await pool.execute(InsertTaskquery, [
-                        TaskName,
-                        serviceId,
-                        JobTypeId,
-                    ]);
-                    const task_id = result.insertId;
-                    const checklistTasksQuery = `
+                        const [result] = await pool.execute(InsertTaskquery, [
+                            TaskName,
+                            serviceId,
+                            JobTypeId,
+                        ]);
+                        const task_id = result.insertId;
+                        const checklistTasksQuery = `
               INSERT INTO checklist_tasks (checklist_id, task_id, task_name, budgeted_hour)
               VALUES (?, ?, ?, ?)
               `;
-                    const [result1] = await pool.execute(checklistTasksQuery, [
-                        checklist_id,
-                        task_id,
-                        TaskName,
-                        BudgetHour,
-                    ]);
-                }else{
-                    const task_id = existing[0].id;
-                    const checklistTasksQuery = `
+                        const [result1] = await pool.execute(checklistTasksQuery, [
+                            checklist_id,
+                            task_id,
+                            TaskName,
+                            BudgetHour,
+                        ]);
+                    } else {
+                        const task_id = existing[0].id;
+                        const checklistTasksQuery = `
                 INSERT INTO checklist_tasks (checklist_id, task_id, task_name, budgeted_hour)
                 VALUES (?, ?, ?, ?)
                 `;
-                    const [result1] = await pool.execute(checklistTasksQuery, [
-                        checklist_id,
-                        task_id,
-                        TaskName,
-                        BudgetHour,
-                    ]);
+                        const [result1] = await pool.execute(checklistTasksQuery, [
+                            checklist_id,
+                            task_id,
+                            TaskName,
+                            BudgetHour,
+                        ]);
+
+                    }
 
                 }
-
             }
-          }
-         }
-
         }
+
+    }
 
     // const resultTsk = {};
     // if (Task.length > 0) {
@@ -2255,7 +2264,7 @@ const customerUpdate = async (customer) => {
     //  Page Status 2 Service Part
     else if (pageStatus === "2") {
         const { services, Task } = customer;
-        
+
         const [ExistServiceids] = await pool.execute('SELECT service_id  FROM `customer_services` WHERE customer_id =' + customer_id);
         const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
         var account_manager_id = ExistCustomer[0].account_manager_id;
@@ -2383,71 +2392,71 @@ const customerUpdate = async (customer) => {
             }
         }
 
-      
-        if (Task.length > 0) {
-        const checklistName = Task[0].checklistName;
-        const JobTypeId = Task[0].JobTypeId;
-        const serviceId = Task[0].serviceId;
 
-        const client_type_id = customer_type
-        const checkQueryChecklist = `
+        if (Task.length > 0) {
+            const checklistName = Task[0].checklistName;
+            const JobTypeId = Task[0].JobTypeId;
+            const serviceId = Task[0].serviceId;
+
+            const client_type_id = customer_type
+            const checkQueryChecklist = `
     SELECT id FROM checklists WHERE customer_id = ? AND service_id = ? AND job_type_id = ? AND client_type_id = ? AND check_list_name = ?
     `;
-        const [existingChecklist] = await pool.execute(checkQueryChecklist, [customer_id, serviceId, JobTypeId, client_type_id, checklistName]);
-        if (existingChecklist.length === 0) {
-            const insertChecklistQuery = `
+            const [existingChecklist] = await pool.execute(checkQueryChecklist, [customer_id, serviceId, JobTypeId, client_type_id, checklistName]);
+            if (existingChecklist.length === 0) {
+                const insertChecklistQuery = `
         INSERT INTO checklists (customer_id,service_id,job_type_id,client_type_id,check_list_name)
         VALUES (?, ?, ?, ?, ?)
         `;
-            const [result] = await pool.execute(insertChecklistQuery, [customer_id, serviceId, JobTypeId, client_type_id, checklistName]);
-            const checklist_id = result.insertId;
-        
-        if (Task[0].Task.length > 0) {
-            for (const tsk_name of Task[0].Task) {
-                const TaskName = tsk_name.TaskName;
-                const BudgetHour = tsk_name.BudgetHour;
-                const checkQuery = `SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?`;
-                const [existing] = await pool.execute(checkQuery, [TaskName, serviceId, JobTypeId,
-                ]);
-            if (existing.length === 0) {
-                    const InsertTaskquery = `
+                const [result] = await pool.execute(insertChecklistQuery, [customer_id, serviceId, JobTypeId, client_type_id, checklistName]);
+                const checklist_id = result.insertId;
+
+                if (Task[0].Task.length > 0) {
+                    for (const tsk_name of Task[0].Task) {
+                        const TaskName = tsk_name.TaskName;
+                        const BudgetHour = tsk_name.BudgetHour;
+                        const checkQuery = `SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?`;
+                        const [existing] = await pool.execute(checkQuery, [TaskName, serviceId, JobTypeId,
+                        ]);
+                        if (existing.length === 0) {
+                            const InsertTaskquery = `
               INSERT INTO task (name,service_id,job_type_id)
               VALUES (?, ?, ?)
               `;
-                    const [result] = await pool.execute(InsertTaskquery, [
-                        TaskName,
-                        serviceId,
-                        JobTypeId,
-                    ]);
-                    const task_id = result.insertId;
-                    const checklistTasksQuery = `
+                            const [result] = await pool.execute(InsertTaskquery, [
+                                TaskName,
+                                serviceId,
+                                JobTypeId,
+                            ]);
+                            const task_id = result.insertId;
+                            const checklistTasksQuery = `
               INSERT INTO checklist_tasks (checklist_id, task_id, task_name, budgeted_hour)
               VALUES (?, ?, ?, ?)
               `;
-                    const [result1] = await pool.execute(checklistTasksQuery, [
-                        checklist_id,
-                        task_id,
-                        TaskName,
-                        BudgetHour,
-                    ]);
-                }else{
-                    const task_id = existing[0].id;
-                    const checklistTasksQuery = `
+                            const [result1] = await pool.execute(checklistTasksQuery, [
+                                checklist_id,
+                                task_id,
+                                TaskName,
+                                BudgetHour,
+                            ]);
+                        } else {
+                            const task_id = existing[0].id;
+                            const checklistTasksQuery = `
                 INSERT INTO checklist_tasks (checklist_id, task_id, task_name, budgeted_hour)
                 VALUES (?, ?, ?, ?)
                 `;
-                    const [result1] = await pool.execute(checklistTasksQuery, [
-                        checklist_id,
-                        task_id,
-                        TaskName,
-                        BudgetHour,
-                    ]);
+                            const [result1] = await pool.execute(checklistTasksQuery, [
+                                checklist_id,
+                                task_id,
+                                TaskName,
+                                BudgetHour,
+                            ]);
 
+                        }
+
+                    }
                 }
-
             }
-          }
-         }
 
 
 
@@ -2594,7 +2603,7 @@ const customerUpdate = async (customer) => {
 
 
 
-  
+
         let logUpdateRequired = false;
         let logAdditional = false;
         let model_name = [];
@@ -2678,21 +2687,21 @@ const customerUpdate = async (customer) => {
                     fte_dedicated_staffing_id
                 ]);
 
-                if(result.changedRows > 0){
+                if (result.changedRows > 0) {
                     model_name.push('edited FTE/Dedicated Staffing')
                     logUpdateRequired = true
-                   }
+                }
 
                 const updateQueryEngagementModel = `UPDATE customer_engagement_model SET fte_dedicated_staffing = ? WHERE customer_id = ? `;
-               await pool.execute(updateQueryEngagementModel, [fte_dedicated_staffing, customer_id]);
-              
+                await pool.execute(updateQueryEngagementModel, [fte_dedicated_staffing, customer_id]);
+
             }
 
 
         }
 
         if (percentage_model === "1") {
-           
+
             const { customer_id, percentage_model, total_outsourcing, accountants, bookkeepers, payroll_experts, tax_experts, admin_staff } = customer;
 
 
@@ -2700,7 +2709,7 @@ const customerUpdate = async (customer) => {
             const [exist2] = await pool.execute(checkQuery2, [customer_engagement_model_id]);
             let customer_engagement_percentage_id;
             if (exist2.length === 0) {
-              
+
                 // INSER
                 const insertQuery = `
             INSERT INTO customer_engagement_percentage (
@@ -2729,7 +2738,7 @@ const customerUpdate = async (customer) => {
                 const updateQueryEngagementModel = `UPDATE customer_engagement_model SET percentage_model = ? WHERE customer_id = ? `;
                 await pool.execute(updateQueryEngagementModel, [percentage_model, customer_id]);
             } else {
-                
+
                 customer_engagement_percentage_id = exist2[0].id;
                 // UPDATE
                 const updateQuery = `
@@ -2752,7 +2761,7 @@ const customerUpdate = async (customer) => {
                     customer_engagement_percentage_id
                 ]);
 
-                if(result.changedRows > 0){
+                if (result.changedRows > 0) {
                     model_name.push('edited Percentage Model')
                     logUpdateRequired = true
                 }
@@ -2821,15 +2830,15 @@ const customerUpdate = async (customer) => {
                     customer_engagement_adhoc_hourly_id
                 ]);
 
-                if(result.changedRows > 0){
+                if (result.changedRows > 0) {
                     model_name.push('edited Adhoc/PAYG/Hourly')
                     logUpdateRequired = true
                 }
 
                 const updateQueryEngagementModel = `UPDATE customer_engagement_model SET adhoc_payg_hourly = ? WHERE customer_id = ? `;
                 await pool.execute(updateQueryEngagementModel, [adhoc_payg_hourly, customer_id]);
-                
-                
+
+
             }
 
         }
@@ -2901,11 +2910,11 @@ const customerUpdate = async (customer) => {
             }
             const updateQueryEngagementModel = `UPDATE customer_engagement_model SET customised_pricing = ? WHERE customer_id = ? `;
             const [rows] = await pool.execute(updateQueryEngagementModel, [customised_pricing, customer_id]);
-            if(rows.changedRows > 0){
+            if (rows.changedRows > 0) {
                 model_name.push('added Customised Pricing')
                 logAdditional = true
-            }else{
-                if(logUpdate == true){
+            } else {
+                if (logUpdate == true) {
                     model_name.push('edited Customised Pricing')
                     logUpdateRequired = true
                 }
@@ -2913,7 +2922,7 @@ const customerUpdate = async (customer) => {
 
         }
 
-       
+
         // Delete Entry
         if (fte_dedicated_staffing === "0" || percentage_model === "0" || adhoc_payg_hourly === "0" || customised_pricing === "0") {
 
@@ -2928,7 +2937,7 @@ const customerUpdate = async (customer) => {
                 }
                 const updateQueryEngagementModel = `UPDATE customer_engagement_model SET fte_dedicated_staffing = ? WHERE customer_id = ? `;
                 const [result] = await pool.execute(updateQueryEngagementModel, [fte_dedicated_staffing, customer_id]);
-                if(result.changedRows > 0){
+                if (result.changedRows > 0) {
                     model_name.push('Removed FTE/Dedicated Staffing')
                     logUpdateRequired = true
                 }
@@ -2947,10 +2956,10 @@ const customerUpdate = async (customer) => {
 
                 const updateQueryEngagementModel = `UPDATE customer_engagement_model SET percentage_model = ? WHERE customer_id = ? `;
                 const [result] = await pool.execute(updateQueryEngagementModel, [percentage_model, customer_id]);
-                if(result.changedRows > 0){
+                if (result.changedRows > 0) {
                     model_name.push('Removed Percentage Model')
                     logUpdateRequired = true
-                    }
+                }
 
             }
 
@@ -2966,10 +2975,10 @@ const customerUpdate = async (customer) => {
 
                 const updateQueryEngagementModel = `UPDATE customer_engagement_model SET adhoc_payg_hourly = ? WHERE customer_id = ? `;
                 const [result] = await pool.execute(updateQueryEngagementModel, [adhoc_payg_hourly, customer_id]);
-                if(result.changedRows > 0){
+                if (result.changedRows > 0) {
                     model_name.push('Removed Adhoc/PAYG/Hourly')
                     logUpdateRequired = true
-                    }
+                }
 
             }
 
@@ -2985,22 +2994,22 @@ const customerUpdate = async (customer) => {
 
                 const updateQueryEngagementModel = `UPDATE customer_engagement_model SET customised_pricing = ? WHERE customer_id = ? `;
                 const [result] = await pool.execute(updateQueryEngagementModel, [customised_pricing, customer_id]);
-                if(result.changedRows > 0){
+                if (result.changedRows > 0) {
                     model_name.push('Removed Customised Pricing')
                     logUpdateRequired = true
-                 }
+                }
 
             }
 
 
         }
 
-        if(model_name.length > 0){
-            const msgLog = model_name.length > 1 
-            ? model_name.slice(0, -1).join(', ') + ' and ' + model_name.slice(-1)
-            : model_name[0];
-    
-           const currentDate = new Date();
+        if (model_name.length > 0) {
+            const msgLog = model_name.length > 1
+                ? model_name.slice(0, -1).join(', ') + ' and ' + model_name.slice(-1)
+                : model_name[0];
+
+            const currentDate = new Date();
             await SatffLogUpdateOperation(
                 {
                     staff_id: customer.StaffUserId,
@@ -3015,7 +3024,7 @@ const customerUpdate = async (customer) => {
 
         }
 
-       
+
 
         return { status: true, message: 'customers model updated successfully.', data: customer_id };
 
@@ -3038,15 +3047,15 @@ const customerUpdate = async (customer) => {
 
 const customerStatusUpdate = async (customer) => {
     const { customer_id, status } = customer;
-     console.log("status ",typeof status)
+    console.log("status ", typeof status)
     const query = `UPDATE customers SET status = ? WHERE id = ?`;
     const [result] = await pool.execute(query, [status, customer_id]);
 
     if (result.affectedRows > 0) {
-        if(result.changedRows > 0){
+        if (result.changedRows > 0) {
             let status_change = "Deactivate"
-            if(parseInt(status) == 1){
-            status_change = "Activate"
+            if (parseInt(status) == 1) {
+                status_change = "Activate"
             }
             const currentDate = new Date();
             await SatffLogUpdateOperation(
