@@ -63,6 +63,8 @@ const Setting = () => {
     }
   }, [accessData]);
 
+
+
   const token = JSON.parse(localStorage.getItem("token"));
   const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
   const [personRoleDataAll, setPersonRoleDataAll] = useState({ loading: true, data: [], });
@@ -78,7 +80,7 @@ const Setting = () => {
   const [getShowTabId, setShowTabId] = useState("1");
   const [isEdit, setIsEdit] = useState(false);
   const [getCheckList, setCheckList] = useState([]);
-  const [getCheckList1, setCheckList1] = useState([]); 
+  const [getCheckList1, setCheckList1] = useState([]);
 
 
   const getCheckListData = async () => {
@@ -849,18 +851,20 @@ const Setting = () => {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="edit-icon" onClick={() => handleEdit(row, "7")}>
-            {" "}
-            <i className="ti-pencil" />
-          </button>
-
-          <button
-            className="delete-icon"
-            onClick={() => handleDelete(row, "7")}
-          >
-            {" "}
-            <i className="ti-trash text-danger" />
-          </button>
+          {
+            showSettingUpdateTab && (
+              <button className="edit-icon" onClick={() => handleEdit(row, "7")} >
+                <i className="ti-pencil" />
+              </button>
+            )
+          }
+          {
+            showSettingDeleteTab && (
+              <button className="delete-icon" onClick={() => handleDelete(row, "7")} >
+                <i className="ti-trash text-danger" />
+              </button>
+            )
+          }
         </div>
       ),
       ignoreRowClick: true,
@@ -960,14 +964,14 @@ const Setting = () => {
     {
       name: "Job Type",
       selector: (row) => row.job_type_type, sortable: true,
-      
+
     }
     ,
     {
       name: "Client Type",
       selector: (row) => row.client_type_type,
       sortable: true,
-      
+
     },
     {
       name: "Status",
@@ -980,7 +984,7 @@ const Setting = () => {
         </span>
       </div>),
       sortable: true,
-      
+
     },
     // {
     //   name: "Actions",
@@ -1077,8 +1081,8 @@ const Setting = () => {
 
   const handleTaskAdd = (row) => {
     navigate("/admin/subinternal", { state: { Id: row.id } });
-    
-    
+
+
   };
   const handleAdd = (e, tabStatus) => {
     if (tabStatus === "1") {
@@ -1697,7 +1701,7 @@ const Setting = () => {
                               aria-selected={tabStatus.current === tab.id}
                               onClick={() => handleTabChange(tab.id)}
                             >
-                                <i className={`${tab.icon} me-2`}></i>
+                              <i className={`${tab.icon} me-2`}></i>
                               {tab.label}
                             </button>
                           </li>
@@ -2008,15 +2012,15 @@ const Setting = () => {
                   <>
                     <i className="fa fa-edit"></i> Update
                   </>
-                ) : 
+                ) :
                   <>
-                    <i className="far fa-save pe-1"></i> 
+                    <i className="far fa-save pe-1"></i>
                     Save
                   </>
               }
             />
           )}
-        </>  
+        </>
       </div>
     </>
   );
