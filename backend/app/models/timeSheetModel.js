@@ -56,12 +56,24 @@ const getTimesheet = async (Timesheet) => {
 
 const getTimesheetTaskType = async (Timesheet) => {
   const { staff_id, task_type } = Timesheet
+  console.log("Timesheet ", Timesheet)
 
   try {
+    //get internal Data
     if (task_type === "1") {
       const [rows] = await pool.query("SELECT id , name FROM internal");
       return { status: true, message: "success.", data: rows };
     }
+
+
+    //get Sub internal Data by Internal
+    else if (task_type === "5") {
+      const internal_id = Timesheet.internal_id
+      const [rows] = await pool.query(`SELECT id , name FROM sub_internal WHERE status = '1' AND internal_id=${internal_id} ORDER BY id DESC`);
+      return { status: true, message: "success.", data: rows };
+    }
+
+    // get Customer by Staff
     else if (task_type === "2") {
 
 
@@ -194,6 +206,85 @@ LEFT JOIN
 
 
       return { status: true, message: "success.", data: result };
+    }
+
+    // get Client by Customer
+    else if (task_type === "3") {
+      const customer_id = Timesheet.customer_id
+      const [rows] = await pool.query(`SELECT id , trading_name FROM clients WHERE status = '1' AND customer_id=${customer_id} ORDER BY id DESC`);
+      return { status: true, message: "success.", data: rows };
+    }
+
+    // get job by Client
+    else if (task_type === "4") {
+      const client_id = Timesheet.client_id
+
+      const query = `
+     SELECT 
+     jobs.id AS id,
+     CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS name
+
+     FROM 
+     jobs
+     LEFT JOIN 
+     customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+     LEFT JOIN 
+     clients ON jobs.client_id = clients.id
+      LEFT JOIN
+      customers ON jobs.customer_id = customers.id
+     LEFT JOIN 
+     job_types ON jobs.job_type_id = job_types.id 
+     WHERE 
+     jobs.client_id = clients.id AND
+     jobs.client_id = ?
+      ORDER BY
+      jobs.id DESC;
+     `;
+      const [rows] = await pool.execute(query, [client_id]);
+      return { status: true, message: "success.", data: rows };
+    }
+
+    //get Task Data by job
+    else if (task_type === "6") {
+      const job_id = Timesheet.job_id
+      const query = `
+     SELECT 
+     task.id AS id,
+     task.name AS name
+     FROM 
+     client_job_task
+     LEFT JOIN 
+     task ON task.id = client_job_task.task_id
+     WHERE 
+     client_job_task.job_id = ?
+      ORDER BY
+      client_job_task.id DESC;
+     `;
+      const [rows] = await pool.execute(query, [job_id]);
+      console.log("rows job", rows)
+      if (rows.length > 0) {
+        return { status: true, message: "success.", data: rows };
+      } else {
+
+        const query = `
+     SELECT task.id AS id, task.name AS name
+     FROM task
+     INNER JOIN jobs 
+        ON task.service_id = jobs.service_id 
+        AND task.job_type_id = jobs.job_type_id
+     WHERE 
+     jobs.id = ?
+     `;
+        const [rows] = await pool.execute(query, [job_id]);
+        console.log("rows job", rows)
+
+        return { status: true, message: "success.", data: rows };
+      }
     }
 
     return { status: false, message: "Invalid Task Type." };
