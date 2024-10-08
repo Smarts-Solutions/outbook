@@ -3,7 +3,7 @@ import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal"
 import { Trash2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {getTimesheetData, getTimesheetTaskTypedData } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
+import { getTimesheetData, getTimesheetTaskTypedData } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
 
 const Timesheet = () => {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ const Timesheet = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
 
-  const GetTimeSheet = async ()=>{
+  const GetTimeSheet = async () => {
     const req = { staff_id: staffDetails.id };
     const res = await dispatch(getTimesheetData({ req, authToken: token })).unwrap();
     console.log("res", res)
@@ -23,8 +23,8 @@ const Timesheet = () => {
   }
 
   useEffect(() => {
-   GetTimeSheet()
-}, [])
+    GetTimeSheet()
+  }, [])
 
 
 
@@ -42,21 +42,24 @@ const Timesheet = () => {
   };
   const handleAddNewSheet = () => {
     const newSheetRow = {
-      TaskType: "",
-      Customer: "",
-      Client: "",
-      Job: "",
-      Task: "",
-      Mon: "",
-      Tue: "",
-      Wed: "",
-      Thu: "",
-      Fri: "",
-      Sat: "",
-      Sun: "",
+      task_type: null,
+      customer_id: null,
+      client_id: null,
+      job_id: null,
+      task_id: null,
+      monday_hours: null,
+      tuesday_hours: null,
+      wednesday_hours: null,
+      thursday_hours: null,
+      friday_hours: null,
+      saturday_hours: null,
+      sunday_date: null,
+      newRow: 1
     };
     setTimeSheetRows((prevRows) => [...prevRows, newSheetRow]);
   };
+
+  console.log("setTimeSheetRows", timeSheetRows)
 
   const handleDeleteRow = (index) => {
     const newSheetRows = [...timeSheetRows];
@@ -76,21 +79,32 @@ const Timesheet = () => {
   };
 
   const handleChangeTaskType = async (e) => {
+    console.log(e.target.value);
     console.log(typeof e.target.value);
-    if(e.target.value === "1"){
+    if (e.target.value === "1") {
       TaskType.current = "1"
+      const req = { staff_id: staffDetails.id, task_type: e.target.value };
+      const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
+      console.log("res", res)
+      if (res.status) {
+        setJobData(res.data)
+      } else {
+        setJobData([])
+      }
     }
-    else if(e.target.value === "2"){
+    else if (e.target.value === "2") {
       TaskType.current = "2"
+      const req = { staff_id: staffDetails.id, task_type: e.target.value };
+      const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
+      console.log("res", res)
+      if (res.status) {
+      //  setJobData(res.data)
+      } else {
+      //  setJobData([])
+      }
+
     }
-    const req = { staff_id: staffDetails.id, task_type: e.target.value };
-    const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
-    console.log("res", res)
-    if (res.status) {
-      setJobData(res.data)
-    } else {
-      setJobData([])
-    }
+
   }
 
   const selectJobData = (e) => {
@@ -204,75 +218,106 @@ const Timesheet = () => {
                             <tr className="tabel_new">
                               <td>{index + 1}</td>
                               <td >
-                                <select className="form-select form-control"
-                                  style={{ width: '100px' }}
-                                  onChange={(e) => handleChangeTaskType(e)}
-                                >
-                                  <option value="1" selected={item.task_type === "1"}>Internal</option>
-                                  <option value="2" selected={item.task_type === "2"}>External</option>
-                                </select>
-                              </td>
-                              <td >
-                                 
                                 {
-                                  item.task_type === "1" ? 
-                                  <input
-                                  className="form-control cursor-pointer"
-                                  disabled
-                                  readOnly
-                                  defaultValue={"No Customer"}
-                                  />
-                                  :
-                                  <select className="form-select" style={{ width: '150px' }}>
-                                  <option selected>Customer 1</option>
-                                  <option value={1}>
-                                    THE BLACK T COMPANY LTD
-                                  </option>
-                                 </select>
+                                  item.newRow != undefined && item.newRow === 1 ?
+                                    <select className="form-select form-control"
+                                      style={{ width: '100px' }}
+                                      onChange={(e) => handleChangeTaskType(e)}
+                                    >
+                                      <option value="1" selected={item.task_type === "1"}>Internal</option>
+                                      <option value="2" selected={item.task_type === "2"}>External</option>
+                                    </select>
 
-                                } 
+                                    :
+
+                                    <select disabled className="form-select form-control"
+                                      style={{ width: '100px' }}
+                                      onChange={(e) => handleChangeTaskType(e)}
+                                    >
+                                      <option value="1" selected={item.task_type === "1"}>Internal</option>
+                                      <option value="2" selected={item.task_type === "2"}>External</option>
+                                    </select>
+                                }
+                              </td>
+
+                              <td >
+
+                                {
+
+                                  item.newRow != undefined && item.newRow === 1 ?
+
+                                    <select className="form-select" style={{ width: '150px' }}>
+                                      <option value={item.customer_id}>{item.customer_name}</option>
+                                    </select>
+                                    :
+
+                                    item.task_type === "1" ?
+                                      <input
+                                        className="form-control cursor-pointer"
+                                        style={{ width: '150px' }}
+                                        disabled
+                                        readOnly
+                                        defaultValue={"No Customer"}
+                                      />
+                                      :
+                                      <select disabled className="form-select" style={{ width: '150px' }}>
+                                        <option value={item.customer_id}>{item.customer_name}</option>
+                                      </select>
+                                }
 
                               </td>
                               <td>
 
-                              {
-                                  item.task_type === "1" ? 
-                                  <input
-                                  className="form-control cursor-pointer"
-                                  disabled
-                                  readOnly
-                                  defaultValue={"No Client"}
-                                  />
-                                  :
-                                  <select className="form-select" style={{ width: '150px' }}>
-                                  <option selected>Client 1</option>
-                                  <option value={1}>MT LIMITED</option>
-                                </select>
+                                {
+                                  item.task_type === "1" ?
+                                    <input
+                                      className="form-control cursor-pointer"
+                                      style={{ width: '150px' }}
+                                      disabled
+                                      readOnly
+                                      defaultValue={"No Client"}
+                                    />
+                                    :
+                                    <select disabled className="form-select" style={{ width: '150px' }}>
+                                      <option value={item.client_id}>{item.client_name}</option>
+                                    </select>
 
-                                } 
+                                }
                               </td>
                               <td>
-                                {/* <select className="form-select" style={{ width: '120px' }}>
-                                  <option selected>Job 1</option>
-                                  <option value={1}>VAT</option>
-                                </select> */}
-
-
-                                <select className="form-select"
+                                {
+                                  item.task_type === "1" ?
+                                    <select disabled className="form-select" style={{ width: '150px' }}>
+                                      <option value={item.internal_id}>{item.internal_name}</option>
+                                    </select>
+                                    :
+                                    <select disabled className="form-select" style={{ width: '150px' }}>
+                                      <option value={item.job_id}>{item.job_name}</option>
+                                    </select>
+                                }
+                                {/* <select className="form-select"
                                  name="jobData" onChange={(e) => { selectJobData(e) }}
                                  style={{ width: '120px' }}
                                  defaultValue={jobData && jobData[0]?.id}
                                   >
                                   {jobData && jobData?.map((val, i) =>
                                     <option value={val.id}>{val.name}</option>)}
-                                </select>
+                                </select> */}
 
                               </td>
                               <td>
-                                <select className="form-select" style={{ width: '120px' }}>
-                                  <option selected>Task 1</option>
-                                  <option value={1}>Task 2</option>
-                                </select>
+
+                                {
+                                  item.task_type === "1" ?
+                                    <select disabled className="form-select" style={{ width: '150px' }}>
+                                      <option value={item.sub_internal_id}>{item.sub_internal_name}</option>
+                                    </select>
+                                    :
+                                    <select disabled className="form-select" style={{ width: '150px' }}>
+                                      <option value={item.task_id}>{item.task_name}</option>
+                                    </select>
+                                }
+
                               </td>
                               <td>
                                 <input
