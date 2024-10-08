@@ -66,24 +66,33 @@ const getCustomerContactPersonRoleAll = async () => {
 }
 
 const deleteCustomerContactPersonRole = async (CustomerContactPersonRole) => {
-    if(parseInt(CustomerContactPersonRole.id) > 0){
-        const currentDate = new Date();
-        await SatffLogUpdateOperation(
-            {
-                staff_id: CustomerContactPersonRole.StaffUserId,
-                ip: CustomerContactPersonRole.ip,
-                date: currentDate.toISOString().split('T')[0],
-                module_name: "customer contact person role",
-                log_message: `deleted customer contact person role ${existName.name}`,
-                permission_type: "deleted",
-                module_id:CustomerContactPersonRole.id
-            }
-        );
+    const [[existName]] = await pool.execute(`SELECT name FROM customer_contact_person_role WHERE id = ?`, [CustomerContactPersonRole.id]);
+  
+    try {
+        if(parseInt(CustomerContactPersonRole.id) > 0){
+            const currentDate = new Date();
+            await SatffLogUpdateOperation(
+                {
+                    staff_id: CustomerContactPersonRole.StaffUserId,
+                    ip: CustomerContactPersonRole.ip,
+                    date: currentDate.toISOString().split('T')[0],
+                    module_name: "customer contact person role",
+                    log_message: `deleted customer contact person role ${existName.name}`,
+                    permission_type: "deleted",
+                    module_id:CustomerContactPersonRole.id
+                }
+            );
+        }
+    } catch (error) {
+        console.log("error", error)
     }
+   
+
+   
     const query = `
     DELETE FROM customer_contact_person_role WHERE id = ?
     `;
-    const [[existName]] = await pool.execute(`SELECT name FROM customer_contact_person_role WHERE id = ?`, [CustomerContactPersonRole.id]);
+    
     try {
         await pool.execute(query, [CustomerContactPersonRole.id]);
 

@@ -66,6 +66,8 @@ const getStatusTypeAll = async () => {
 };
 
 const deleteStatusType = async (StatusTypeId) => {
+  const [[existType]] = await pool.execute(`SELECT type FROM status_types WHERE id = ?`, [StatusTypeId.id]);
+
   if(parseInt(StatusTypeId.id) > 0){
     const currentDate = new Date();
     await SatffLogUpdateOperation(
@@ -83,9 +85,7 @@ const deleteStatusType = async (StatusTypeId) => {
   const query = `
     DELETE FROM status_types WHERE id = ?
     `;
-
-  const [[existType]] = await pool.execute(`SELECT type FROM status_types WHERE id = ?`, [StatusTypeId.id]);
-
+    
   try {
     await pool.execute(query, [StatusTypeId.id]);
    

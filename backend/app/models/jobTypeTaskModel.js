@@ -48,6 +48,7 @@ const getJobType = async (JobType) => {
 };
 
 const deleteJobType = async (JobTypeId) => {
+  const [[existType]] = await pool.execute(`SELECT type FROM job_types WHERE id = ?`, [JobTypeId.id]);
   if(parseInt(JobTypeId.id) > 0){
     const currentDate = new Date();
     await SatffLogUpdateOperation(
@@ -66,7 +67,7 @@ const deleteJobType = async (JobTypeId) => {
     DELETE FROM job_types WHERE id = ?
     `;
 
-   const [[existType]] = await pool.execute(`SELECT type FROM job_types WHERE id = ?`, [JobTypeId.id]);
+  
 
   try {
     await pool.execute(query, [JobTypeId.id]);

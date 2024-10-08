@@ -66,6 +66,7 @@ const getClientIndustryAll = async () => {
 }
 
 const deleteClientIndustry = async (ClientIndustryId) => {
+    const [[existType]] = await pool.execute(`SELECT business_type FROM client_industry_types WHERE id = ?`, [ClientIndustryId.id]);
     if(parseInt(ClientIndustryId.id) > 0){
         const currentDate = new Date();
         await SatffLogUpdateOperation(
@@ -84,7 +85,7 @@ const deleteClientIndustry = async (ClientIndustryId) => {
     DELETE FROM client_industry_types WHERE id = ?
     `;
     
-    const [[existType]] = await pool.execute(`SELECT business_type FROM client_industry_types WHERE id = ?`, [ClientIndustryId.id]);
+  
     try {
         await pool.execute(query, [ClientIndustryId.id]);
     } catch (err) {

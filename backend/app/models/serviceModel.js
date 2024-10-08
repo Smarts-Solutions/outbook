@@ -65,6 +65,8 @@ const getServicesAll = async () => {
 }
 
 const deleteServices = async (ServicesId) => {
+    const [[existName]] = await pool.execute(`SELECT name FROM services WHERE id = ?`, [ServicesId.id]);
+    
     if(parseInt(ServicesId.id) > 0){
         const currentDate = new Date();
         await SatffLogUpdateOperation(
@@ -82,7 +84,7 @@ const deleteServices = async (ServicesId) => {
     const query = `
     DELETE FROM services WHERE id = ?
     `;
-    const [[existName]] = await pool.execute(`SELECT name FROM services WHERE id = ?`, [ServicesId.id]);
+   
 
     try {
         await pool.execute(query, [ServicesId.id]);

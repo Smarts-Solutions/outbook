@@ -72,6 +72,7 @@ const getCustomerSubSourceAll = async (CustomerSubSource) => {
 };
 
 const deleteCustomerSubSource = async (CustomerSubSourceId) => {
+  const [[existName]] = await pool.execute(`SELECT name FROM customer_sub_source WHERE id = ?`, [CustomerSubSourceId.id]);
   if(parseInt(CustomerSubSourceId.id) > 0){
     const currentDate = new Date();
     await SatffLogUpdateOperation(
@@ -89,7 +90,7 @@ const deleteCustomerSubSource = async (CustomerSubSourceId) => {
   const query = `
     DELETE FROM customer_sub_source WHERE id = ?
     `;
-    const [[existName]] = await pool.execute(`SELECT name FROM customer_sub_source WHERE id = ?`, [CustomerSubSourceId.id]);
+   
   try {
     await pool.execute(query, [CustomerSubSourceId.id]);
    
