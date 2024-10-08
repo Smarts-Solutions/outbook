@@ -392,10 +392,10 @@ const createCustomer = async (customer) => {
 const getCustomer = async (customer) => {
     const { staff_id } = customer;
 
-
+     console.log("staff id",staff_id)
 
     const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + staff_id + '" LIMIT 1');
-
+  
     let result = []
     if (rows.length > 0) {
         // Allocated to
@@ -578,7 +578,7 @@ ORDER BY
             ) AS customer_code
         FROM 
             customers
-        JOIN 
+        LEFT JOIN 
             jobs ON jobs.customer_id = customers.id   
         JOIN 
             staffs AS staff1 ON customers.staff_id = staff1.id

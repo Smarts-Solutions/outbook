@@ -481,12 +481,14 @@ const getJobByCustomer = async (job) => {
         LEFT JOIN 
         master_status ON master_status.id = jobs.status_type
         WHERE 
-        jobs.customer_id = customers.id AND 
-        jobs.allocated_to = ? AND jobs.customer_id = ?
+        jobs.customer_id = customers.id 
+        AND 
+        (jobs.allocated_to = ? OR jobs.staff_created_id = ?)
+        AND jobs.customer_id = ?
         ORDER BY 
          jobs.id DESC;
         `;
-        const [rows] = await pool.execute(query, [ExistStaff[0].id, customer_id]);
+        const [rows] = await pool.execute(query, [ExistStaff[0].id,ExistStaff[0].id, customer_id]);
         result = rows
       }
       // Account Manger
@@ -525,7 +527,6 @@ const getJobByCustomer = async (job) => {
              SUBSTRING(job_types.type, 1, 4), '_',
             SUBSTRING(jobs.job_id, 1, 15)
             ) AS job_code_id
-   
         FROM 
         jobs
         LEFT JOIN 
@@ -547,12 +548,14 @@ const getJobByCustomer = async (job) => {
         LEFT JOIN 
         master_status ON master_status.id = jobs.status_type
         WHERE 
-        jobs.customer_id = customers.id AND 
-        jobs.account_manager_id = ? AND jobs.customer_id = ? 
+        jobs.customer_id = customers.id 
+        AND 
+        (jobs.account_manager_id = ? OR jobs.staff_created_id = ?)
+        AND jobs.customer_id = ? 
         ORDER BY 
          jobs.id DESC;
         `;
-        const [rows] = await pool.execute(query, [ExistStaff[0].id, customer_id]);
+        const [rows] = await pool.execute(query, [ExistStaff[0].id,ExistStaff[0].id, customer_id]);
         result = rows
         if (rows.length === 0) {
           const query = `
@@ -682,12 +685,14 @@ const getJobByCustomer = async (job) => {
         LEFT JOIN 
         master_status ON master_status.id = jobs.status_type
         WHERE 
-        jobs.customer_id = customers.id AND 
-        jobs.reviewer = ? AND jobs.customer_id = ? 
+        jobs.customer_id = customers.id 
+        AND 
+        (jobs.reviewer = ? OR jobs.staff_created_id = ?)
+        AND jobs.customer_id = ? 
         ORDER BY 
          jobs.id DESC;
         `;
-        const [rows] = await pool.execute(query, [ExistStaff[0].id, customer_id]);
+        const [rows] = await pool.execute(query, [ExistStaff[0].id,ExistStaff[0].id, customer_id]);
         result = rows
       }
       else {
