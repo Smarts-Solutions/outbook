@@ -63,7 +63,7 @@ const Timesheet = () => {
   const handleTabChange = (event) => {
     setSelectedTab(event.target.value);
   };
-  const handleAddNewSheet = () => {
+  const handleAddNewSheet = async () => {
     const newSheetRow = {
       task_type: null,
       customer_id: null,
@@ -87,7 +87,40 @@ const Timesheet = () => {
     setCustomerData([]);
     setClientData([]);
     setTaskData([]);
-    setTimeSheetRows((prevRows) => [...prevRows, newSheetRow]);
+    // setTimeSheetRows((prevRows) => [...prevRows, newSheetRow]);
+
+    setTimeSheetRows((prevRows) => {
+      const updatedRows = [...prevRows, newSheetRow];
+      const newIndex = updatedRows.length - 1; // Index of the newly added row
+      updatedRows[newIndex].task_type = "1";
+      setTimeSheetRows(updatedRows);
+      return updatedRows;
+    });
+
+    let req = { staff_id: staffDetails.id, task_type: "1" };
+    const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
+
+    if (res.status) {
+
+      let req = { staff_id: staffDetails.id, task_type: "5", internal_id: res.data[0].id };
+      const res1 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
+      setTimeSheetRows((prevRows) => {
+        const updatedRows = [...prevRows];
+        const newIndex = updatedRows.length - 1;
+        updatedRows[newIndex].task_type = "1";
+        updatedRows[newIndex].jobData = res.data;
+        updatedRows[newIndex].job_id = res.data[0].id;
+        updatedRows[newIndex].taskData = res1.data;
+        updatedRows[newIndex].task_id = res1.data[0].id;
+        return updatedRows;
+      });
+    } else {
+      // Handle the error case as needed
+      console.log("API call failed:", res);
+    }
+
+
+
   };
 
   console.log("setTimeSheetRows", timeSheetRows)
@@ -128,14 +161,25 @@ const Timesheet = () => {
       const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
 
       if (res.status) {
+        let req = { staff_id: staffDetails.id, task_type: "5", internal_id: res.data[0].id };
+        const res1 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
         updatedRows[index].jobData = res.data;
+        updatedRows[index].job_id = res.data[0].id;
+        updatedRows[index].taskData = res1.data;
+        updatedRows[index].task_id = res1.data[0].id;
       }
     } else if (e.target.value === "2") {
+      updatedRows[index].jobData = [];
+      updatedRows[index].job_id = null;
+      updatedRows[index].taskData = [];
+      updatedRows[index].task_id = null;
       const req = { staff_id: staffDetails.id, task_type: e.target.value };
       const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
-
       if (res.status) {
-        updatedRows[index].customerData = res.data;
+        if (res.data.length > 0) {
+          updatedRows[index].customerData = res.data;
+          updatedRows[index].customer_id = res.data[0].id;
+        }
       }
     }
     setTimeSheetRows([...updatedRows]); // Save changes
@@ -153,8 +197,12 @@ const Timesheet = () => {
     const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
 
     if (res.status) {
-      updatedRows[index].customer_id = e.target.value;
-      updatedRows[index].clientData = res.data;
+      if (res.data.length > 0) {
+        updatedRows[index].customer_id = e.target.value;
+        updatedRows[index].clientData = res.data;
+        updatedRows[index].client_id = res.data[0].id;
+
+      }
     }
     setTimeSheetRows(updatedRows);
   };
@@ -167,8 +215,26 @@ const Timesheet = () => {
     const req = { staff_id: staffDetails.id, task_type: "4", client_id: e.target.value };
     const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
     if (res.status) {
-      updatedRows[index].client_id = e.target.value;
-      updatedRows[index].jobData = res.data;
+      if (res.data.length > 0) {
+        updatedRows[index].client_id = e.target.value;
+        updatedRows[index].jobData = res.data;
+        updatedRows[index].job_id = res.data[0].id;
+        let req;
+        if (updatedRows[index].task_type === "1") {
+          req = { staff_id: staffDetails.id, task_type: "5", internal_id: res.data[0].id };
+        } else if (updatedRows[index].task_type === "2") {
+          req = { staff_id: staffDetails.id, task_type: "6", job_id: res.data[0].id };
+        }
+        if (req.staff_id != undefined) {
+          const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
+          if (res.status) {
+            if (res.data.length > 0) {
+              updatedRows[index].taskData = res.data;
+              updatedRows[index].task_id = res.data[0].id;
+            }
+          }
+        }
+      }
     }
     setTimeSheetRows(updatedRows);
   };
@@ -185,18 +251,21 @@ const Timesheet = () => {
     if (req.staff_id != undefined) {
       const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
       if (res.status) {
-        updatedRows[index].job_id = e.target.value;
-        updatedRows[index].taskData = res.data;
+        if (res.data.length > 0) {
+          updatedRows[index].job_id = e.target.value;
+          updatedRows[index].taskData = res.data;
+          updatedRows[index].task_id = res.data[0].id;
+        }
       }
     }
     setTimeSheetRows(updatedRows);
   };
 
-  const selectTaskData = async (e ,index) => {
+  const selectTaskData = async (e, index) => {
     const updatedRows = [...timeSheetRows];
     updatedRows[index].task_id = e.target.value;
     setTimeSheetRows(updatedRows);
-    
+
   }
   return (
     <div className="page-content">
@@ -305,7 +374,7 @@ const Timesheet = () => {
                           {timeSheetRows?.map((item, index) => (
                             <tr className="tabel_new">
                               <td>{index + 1}</td>
-                              
+
                               <td>
                                 {item.newRow === 1 ? (
                                   <select
