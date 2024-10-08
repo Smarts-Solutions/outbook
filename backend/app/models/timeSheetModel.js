@@ -11,7 +11,7 @@ const getTimesheet = async (Timesheet) => {
     const [internal] = await pool.execute(`SELECT id,name FROM internal`);
     const [sub_internal] = await pool.execute(`SELECT id , internal_id , name  FROM sub_internal`);
 
- const query =   `SELECT 
+    const query = `SELECT 
     timesheet.*,
     internal.name as internal_name,
     internal.id as internal_id,
@@ -55,21 +55,151 @@ const getTimesheet = async (Timesheet) => {
 }
 
 const getTimesheetTaskType = async (Timesheet) => {
- const  { staff_id , task_type} = Timesheet
- console.log("staff_id ",staff_id)
-  try {
-     if(task_type === "1"){
-       const [rows] = await pool.query("SELECT id , name FROM internal");
-       return { status: true, message: "success.", data: rows };
-     }
-     else if(task_type === "2"){
-      
-      return { status: true, message: "success.", data: [] };
-     }
+  const { staff_id, task_type } = Timesheet
 
-   return { status: false, message: "Invalid Task Type." };
+  try {
+    if (task_type === "1") {
+      const [rows] = await pool.query("SELECT id , name FROM internal");
+      return { status: true, message: "success.", data: rows };
+    }
+    else if (task_type === "2") {
+
+
+      const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + staff_id + '" LIMIT 1');
+      let result = []
+      const Query_Select = ` SELECT  
+    customers.id AS id,
+    customers.trading_name AS trading_name,
+    CONCAT(
+        'cust_', 
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(customers.customer_code, 1, 15)
+    ) AS customer_code
+FROM 
+    customers
+LEFT JOIN
+    jobs ON jobs.customer_id = customers.id   
+JOIN 
+    staffs AS staff1 ON customers.staff_id = staff1.id
+JOIN 
+    staffs AS staff2 ON customers.account_manager_id = staff2.id
+LEFT JOIN
+    customer_company_information ON customers.id = customer_company_information.customer_id`
+
+      if (rows.length > 0) {
+        // Allocated to
+        if (rows[0].role_id == 3) {
+          const query = `${Query_Select} 
+            WHERE 
+            jobs.allocated_to = ? OR customers.staff_id = ?
+        GROUP BY 
+            CASE 
+                WHEN jobs.allocated_to = ? THEN jobs.customer_id
+                ELSE customers.id
+            END
+        ORDER BY 
+        customers.id DESC
+            `;
+          const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
+          result = resultAllocated
+
+        }
+        // Account Manger
+        else if (rows[0].role_id == 4) {
+
+          const query = `${Query_Select} 
+            WHERE jobs.account_manager_id = ? OR customers.staff_id = ?
+            GROUP BY 
+        CASE 
+            WHEN jobs.account_manager_id = ? THEN jobs.customer_id
+            ELSE customers.id
+        END
+            ORDER BY 
+            customers.id DESC;
+            `;
+          const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
+          result = resultAllocated;
+
+          if (resultAllocated.length === 0) {
+            const query = `
+            SELECT  
+            customers.id AS id,
+            customers.trading_name AS trading_name
+        FROM 
+            customers
+        JOIN 
+            customer_services ON customer_services.customer_id = customers.id
+        JOIN 
+            customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
+        JOIN 
+            staffs AS staff1 ON customers.staff_id = staff1.id
+        JOIN 
+            staffs AS staff2 ON customers.account_manager_id = staff2.id
+        LEFT JOIN 
+            customer_company_information ON customers.id = customer_company_information.customer_id
+        WHERE customer_service_account_managers.account_manager_id = ? OR customers.staff_id= ?
+        GROUP BY 
+        customers.id
+        ORDER BY 
+        customers.id DESC;
+            `;
+            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id]);
+            result = resultAllocated;
+          }
+
+        }
+        // Reviewer
+        else if (rows[0].role_id == 6) {
+
+          const query = `${Query_Select} 
+            WHERE jobs.reviewer = ? OR customers.staff_id = ?  
+            GROUP BY 
+        CASE 
+            WHEN jobs.reviewer = ? THEN jobs.customer_id
+            ELSE customers.id
+        END
+            ORDER BY 
+            customers.id DESC;
+            `;
+          const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
+          result = resultAllocated
+
+        }
+        else {
+          const query = `
+            SELECT  
+            customers.id AS id,
+            customers.trading_name AS trading_name,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
+        FROM 
+            customers
+        JOIN 
+            staffs AS staff1 ON customers.staff_id = staff1.id
+        JOIN 
+            staffs AS staff2 ON customers.account_manager_id = staff2.id
+        LEFT JOIN 
+            customer_company_information ON customers.id = customer_company_information.customer_id
+        WHERE staff1.id = ?   
+        ORDER BY 
+            customers.id DESC;
+            `;
+          const [result1] = await pool.execute(query, [staff_id]);
+          result = result1
+        }
+      }
+
+
+      return { status: true, message: "success.", data: result };
+    }
+
+    return { status: false, message: "Invalid Task Type." };
 
   } catch (err) {
+    console.log(err);
     return { status: false, message: "Err Dashboard Data View Get", error: err.message };
   }
 
