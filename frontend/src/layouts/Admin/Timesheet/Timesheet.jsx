@@ -305,69 +305,7 @@ const Timesheet = () => {
                           {timeSheetRows?.map((item, index) => (
                             <tr className="tabel_new">
                               <td>{index + 1}</td>
-                              {/* <td >
-                                {
-                                  item.newRow != undefined && item.newRow === 1 ?
-                                    <select className="form-select form-control"
-                                      style={{ width: '100px' }}
-                                      onChange={(e) => handleChangeTaskType(e, item, index)}
-                                    >
-                                      <option value="1" selected={item.task_type === "1"}>Internal</option>
-                                      <option value="2" selected={item.task_type === "2"}>External</option>
-                                    </select>
-
-                                    :
-
-                                    <select disabled className="form-select form-control"
-                                      style={{ width: '100px' }}
-                                      onChange={(e) => handleChangeTaskType(e, item, index)}
-                                    >
-                                      <option value="1" selected={item.task_type === "1"}>Internal</option>
-                                      <option value="2" selected={item.task_type === "2"}>External</option>
-                                    </select>
-                                }
-                              </td>
-
-                              <td >
-                                {
-
-                                  item.newRow != undefined && item.newRow === 1 ?
-                                    item.task_type === "2" ?
-
-                                      <select className="form-select"
-                                        name="customerData" onChange={(e) => { selectCustomerData(e , index) }}
-                                        style={{ width: '150px' }}
-                                        defaultValue={customerData && customerData[0]?.id}
-                                      >
-                                        {customerData && customerData?.map((val, i) =>
-                                          <option value={val.id}>{val.trading_name}</option>)}
-                                      </select>
-                                      :
-                                      <input
-                                        className="form-control cursor-pointer"
-                                        style={{ width: '150px' }}
-                                        disabled
-                                        readOnly
-                                        defaultValue={"No Customer"}
-                                      />
-                                    :
-
-                                    item.task_type === "1" ?
-                                      <input
-                                        className="form-control cursor-pointer"
-                                        style={{ width: '150px' }}
-                                        disabled
-                                        readOnly
-                                        defaultValue={"No Customer"}
-                                      />
-                                      :
-                                      <select disabled className="form-select" style={{ width: '150px' }}>
-                                        <option value={item.customer_id}>{item.customer_name}</option>
-                                      </select>
-                                }
-
-                              </td> */}
-
+                              
                               <td>
                                 {item.newRow === 1 ? (
                                   <select
