@@ -19,10 +19,10 @@ const SubInternal = () => {
 
 
     const customerSubInternalData = async (req) => {
-        if (location.state.Id) {
+        if (location?.state?.Id) {
             req = {
                 ...req,
-                internal_id: location.state.Id,
+                internal_id: location?.state?.Id,
             };
         }
         const data = { req: req, authToken: token };
@@ -59,7 +59,7 @@ const SubInternal = () => {
     const fetchApiData = () => {
         const req = {
             action: "getAll",
-            internal_id: location.state.Id,
+            internal_id: location?.state?.Id,
         };
         customerSubInternalData(req);
     };
@@ -189,7 +189,7 @@ const SubInternal = () => {
                 },
             ],
             title: "Sub Internal",
-            id: data.id,
+            id: data?.id,
             internal_id: data.internal_id,
         });
 
@@ -209,7 +209,7 @@ const SubInternal = () => {
         }
         const req = { action: isEdit ? "update" : "add" };
         if (isEdit) {
-            req.id = modalData.id;
+            req.id = modalData?.id;
         }
         modalData.fields.map((field) => {
             req[field.name] = field.value;
@@ -237,7 +237,7 @@ const SubInternal = () => {
                 if (result.isConfirmed) {
                     const req = {
                         action: "delete",
-                        id: data.id,
+                        id: data?.id,
                     };
                     customerSubInternalData(req);
 
