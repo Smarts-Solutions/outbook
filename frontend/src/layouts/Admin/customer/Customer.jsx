@@ -39,6 +39,9 @@ const Customer = () => {
     )?.items || [];
 
 
+    
+
+
 
   useEffect(() => {
     GetAllCustomerData();
@@ -453,16 +456,9 @@ const Customer = () => {
                   ))}
                 </div>
               </div>
-
-
-
-
-
             </div>
           </div>
         </div>
-
-
       </div>
     </div>
   );

@@ -90,7 +90,7 @@ const Admin_Route = () => {
 
   const accessDataFetch = async () => {
     try {
-      console.log("staffDetails---", staffDetails);
+     
       const response = await dispatch(
         RoleAccess({
           req: { role_id: staffDetails.role_id, action: "get" },

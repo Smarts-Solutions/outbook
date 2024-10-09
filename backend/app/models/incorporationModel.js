@@ -70,6 +70,7 @@ const getIncorporationAll = async () => {
 };
 
 const deleteIncorporation = async (IncorporationId) => {
+  const [[existName]] = await pool.execute(`SELECT name FROM incorporation_in WHERE id = ?`, [IncorporationId.id]);
   if(parseInt(IncorporationId.id) > 0){
     const currentDate = new Date();
     await SatffLogUpdateOperation(
@@ -87,7 +88,7 @@ const deleteIncorporation = async (IncorporationId) => {
   const query = `
     DELETE FROM incorporation_in WHERE id = ?
     `;
-    const [[existName]] = await pool.execute(`SELECT name FROM incorporation_in WHERE id = ?`, [IncorporationId.id]);
+    
   try {
     await pool.execute(query, [IncorporationId.id]);
   

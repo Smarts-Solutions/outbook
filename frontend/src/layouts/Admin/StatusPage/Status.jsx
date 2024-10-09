@@ -14,15 +14,29 @@ const Status = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const [statusTypeDataAll, setStatusTypeDataAll] = useState([]);
   const [statusDataAll, setStatusDataAll] = useState([]);
-
-
-  console.log("statusDataAll", statusDataAll);
-  const [getStatsAdd, setStatsAdd] = useState({
-    statusname: "",
-    statustype: "",
-  });
+  const [getStatsAdd, setStatsAdd] = useState({ statusname: "", statustype: "", });
   const [editItem, setEditItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [getAccessData, setAccessData] = useState({ insert: 0 });
+
+
+  const accessData =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "status"
+    )?.items || [];
+
+
+  useEffect(() => {
+    if (accessData.length === 0) return;
+    const updatedAccess = { insert: 0 };
+    accessData.forEach((item) => {
+      if (item.type === "insert") updatedAccess.insert = item.is_assigned;
+      setAccessData(updatedAccess);
+    });
+  }, []);
+
+
+  console.log("getAccessData", getAccessData);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,7 +51,7 @@ const Status = () => {
     { id: 3, status_type: 'hold' },
     { id: 4, status_type: 'rejected' }
   ];
-  
+
   // Function to determine the CSS class based on status_type
   const getStatusClass = (status_type) => {
     switch (status_type) {
@@ -136,7 +150,7 @@ const Status = () => {
       };
 
       const response = await dispatch(MasterStatusData(data)).unwrap();
- 
+
       if (response.status) {
         Swal.fire({
           title: "Updated!",
@@ -290,26 +304,25 @@ const Status = () => {
         <div className="report-data mt-4 ">
           <div className="d-flex justify-content-end align-items-center">
             <div>
-              <button
-                type="button"
-                className="btn btn-info text-white float-end ms-2"
-                onClick={() => {
-                  setShowModal(true);
-                  setEditItem(null);
-                  setStatsAdd({
-                    statusname: "",
-                    statustype: "",
-                  });
-                }}
-              >
-                <i className="fa fa-plus pe-1" /> Add Status
-              </button>
-              {/* <button
-                type="button"
-                className="btn btn-info text-white float-end "
-              >
-                <i className="fa-regular fa-eye pe-1"></i> View Log
-              </button> */}
+              {
+                getAccessData.insert === 1 ? (
+                  <button
+                    type="button"
+                    className="btn btn-info text-white float-end ms-2"
+                    onClick={() => {
+                      setShowModal(true);
+                      setEditItem(null);
+                      setStatsAdd({
+                        statusname: "",
+                        statustype: "",
+                      });
+                    }}
+                  >
+                    <i className="fa fa-plus pe-1" /> Add Status
+                  </button>
+                ) : <div className="mt-5"></div>
+              }
+              
             </div>
           </div>
           <div className="datatable-wrapper mt-minus">

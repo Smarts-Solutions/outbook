@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
@@ -7,7 +6,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { JobAction, Update_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
-import Statuses from "./Statuses";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 
@@ -25,16 +23,60 @@ const ClientList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectStatusIs, setStatusId] = useState('')
   const [statusDataAll, setStatusDataAll] = useState([])
-  const [activeTab, setActiveTab] = useState(
-    location.state &&
-      location.state.route &&
-      location.state.route == "Checklist"
-      ? "checklist"
-      : location.state.route == "job"
-        ? "job"
-        : "client"
-  );
+  const [getAccessDataClient, setAccessDataClient] = useState({ insert: 0, update: 0, delete: 0, client: 0, });
+  const [getAccessDataJob, setAccessDataJob] = useState({ insert: 0, update: 0, delete: 0, job: 0, });
+  const [activeTab, setActiveTab] = useState('');
+  
+  useEffect(() => {
+    setActiveTab( 
+      getAccessDataClient && getAccessDataClient.client==1 ? "client" : 
+      getAccessDataJob && getAccessDataJob.job == 1 ? "job" : 
+      "documents")
+  }, [getAccessDataJob, getAccessDataClient]);
 
+
+  const initialTabs = [
+    { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
+    { id: "status", label: "Status", icon: "fa-solid fa-info-circle" },
+    { id: "checklist", label: "Checklist", icon: "fa-solid fa-check-square" },
+  ];
+
+  // Use state to manage tabs
+  const [tabs, setTabs] = useState(initialTabs);
+
+  const accessDataClient =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "client"
+    )?.items || [];
+
+  const accessDataJob =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "job"
+    )?.items || [];
+
+  useEffect(() => {
+    if (accessDataClient.length === 0) return;
+    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0 };
+    accessDataClient.forEach((item) => {
+      if (item.type === "insert") updatedAccess.insert = item.is_assigned;
+      if (item.type === "update") updatedAccess.update = item.is_assigned;
+      if (item.type === "delete") updatedAccess.delete = item.is_assigned;
+      if (item.type === "view") updatedAccess.client = item.is_assigned;
+    });
+    setAccessDataClient(updatedAccess);
+  }, []);
+
+  useEffect(() => {
+    if (accessDataJob.length === 0) return;
+    const updatedAccess = { insert: 0, update: 0, delete: 0, job: 0 };
+    accessDataJob.forEach((item) => {
+      if (item.type === "insert") updatedAccess.insert = item.is_assigned;
+      if (item.type === "update") updatedAccess.update = item.is_assigned;
+      if (item.type === "delete") updatedAccess.delete = item.is_assigned;
+      if (item.type === "view") updatedAccess.job = item.is_assigned;
+    });
+    setAccessDataJob(updatedAccess);
+  }, []);
 
   const SetTab = (e) => {
     setActiveTab(e);
@@ -60,28 +102,40 @@ const ClientList = () => {
     }
   }, [searchQuery]);
 
-  let tabs = [
-    { id: "client", label: "Client", icon: "fa-solid fa-user" },
-    ...(ClientData && ClientData.length > 0
-      ? [{ id: "job", label: "Job", icon: "fa-solid fa-briefcase" }]
-      : []),
-    { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
-    { id: "status", label: "Status", icon: "fa-solid fa-info-circle" },
-    { id: "checklist", label: "Checklist", icon: "fa-solid fa-check-square" },
-  ];
+  useEffect(() => {
+    let tabsData = [];
+    if (getAccessDataClient && getAccessDataClient.client == 1) { 
+      tabsData.push({ id: "client", label: "Client", icon: "fa-solid fa-user" });
+    }
+    if (getAccessDataJob && getAccessDataJob.job == 1) {
+      tabsData.push(
+        ...(ClientData && ClientData.length > 0
+          ? [{ id: "job", label: "Job", icon: "fa-solid fa-briefcase" }]
+          : [])
+      );
+    }
 
+    // Update the tabs state with new data
+    setTabs([...tabsData, ...initialTabs]);
+  }, [getAccessDataJob, getAccessDataClient, ClientData]);
+ 
 
   const ClientListColumns = [
     {
       name: "Client Name",
       cell: (row) => (
         <div>
-          <a
-            onClick={() => HandleClientView(row)}
-            style={{ cursor: "pointer", color: "#26bdf0" }}
-          >
-            {row.client_name}
-          </a>
+          {
+            getAccessDataJob.job === 1 ? (
+              <a
+                onClick={() => HandleClientView(row)}
+                style={{ cursor: "pointer", color: "#26bdf0" }}
+              >
+                {row.client_name}
+              </a>
+            ) : row.client_name
+          }
+
         </div>
       ),
       selector: (row) => row.trading_name,
@@ -119,17 +173,31 @@ const ClientList = () => {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="edit-icon" onClick={() => handleEdit(row)}>
-            {" "}
-            <i className="ti-pencil" />
-          </button>
-          <button
+          {
+            getAccessDataClient.update === 1 ? (
+              <button className="edit-icon" onClick={() => handleEdit(row)}>
+                <i className="ti-pencil" />
+              </button>
+            ) : null
+          }
+          {
+            getAccessDataClient.delete === 1 ? (
+              <button
+                className="delete-icon"
+                onClick={() => handleDelete(row, "client")}
+              >
+                {" "}
+                <i className="ti-trash text-danger" />
+              </button>
+            ) : null
+          }
+          {/* <button
             className="delete-icon"
             onClick={() => handleDelete(row, "client")}
           >
             {" "}
             <i className="ti-trash text-danger" />
-          </button>
+          </button> */}
         </div>
       ),
       ignoreRowClick: true,
@@ -235,12 +303,21 @@ const ClientList = () => {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="edit-icon" onClick={() => handleJobEdit(row)}>
-            <i className="ti-pencil" />
-          </button>
-          <button className="delete-icon" onClick={() => handleDelete(row, "job")}>
-            <i className="ti-trash text-danger" />
-          </button>
+          {
+            getAccessDataJob.update === 1 ? (
+              <button className="edit-icon" onClick={() => handleJobEdit(row)}>
+                <i className="ti-pencil" />
+              </button>
+            ) : null
+          }
+          {
+            getAccessDataJob.delete === 1 ? (
+              <button className="delete-icon" onClick={() => handleDelete(row, "job")}>
+                <i className="ti-trash text-danger" />
+              </button>
+            ) : null
+          }
+
         </div>
       ),
       ignoreRowClick: true,
@@ -449,6 +526,7 @@ const ClientList = () => {
         return;
       });
   };
+
   const GetAllClientData = async () => {
     const req = { action: "get", customer_id: location.state.id };
     const data = { req: req, authToken: token };
@@ -465,6 +543,7 @@ const ClientList = () => {
         return;
       });
   };
+
   const getCheckListData = async () => {
     const req = { action: "get", customer_id: location.state.id };
     const data = { req: req, authToken: token };
@@ -512,6 +591,7 @@ const ClientList = () => {
         return;
       });
   };
+
   const ChecklistDelete = async (row) => {
     const req = { action: "delete", checklist_id: row.checklists_id };
     const data = { req: req, authToken: token };
@@ -541,6 +621,7 @@ const ClientList = () => {
         return;
       });
   };
+
   const handleDelete = async (row, type) => {
     const req = {
       action: "delete",
@@ -596,7 +677,6 @@ const ClientList = () => {
       return updatedData;
     });
   };
-
 
   const handleAddClient = () => {
     navigate("/admin/addclient", { state: { id: location.state.id } });
@@ -662,23 +742,32 @@ const ClientList = () => {
                   activeTab === "" ||
                   activeTab === "job" ? (
                   <>
-                    <div
-                      className="btn btn-info text-white float-end blue-btn"
-                      onClick={
-                        activeTab === "client"
-                          ? handleAddClient
-                          : activeTab === "checklist"
-                            ? handleClick
-                            : handleAddJob
-                      }
-                    >
-                      <i className="fa fa-plus pe-1" />
-                      {activeTab === "client"
-                        ? "Add Client"
-                        : activeTab === "checklist"
-                          ? "Add Checklist"
-                          : "Create Job"}
-                    </div>
+
+                    {
+                      getAccessDataClient.insert === 1 && activeTab === "client" ? (
+                        <>
+                          <div className="btn btn-info text-white float-end blue-btn" onClick={handleAddClient} >
+                            <i className="fa fa-plus pe-1" /> Add Client
+                          </div>
+                        </>
+                      ) : getAccessDataJob.insert == 1 && activeTab === "job" ? (
+                        <>
+                          <div className="btn btn-info text-white float-end blue-btn" onClick={handleAddJob} >
+                            <i className="fa fa-plus pe-1" /> Create Job
+
+                          </div>
+                        </>
+                      ) : activeTab === "checklist" ? (
+                        <>
+                          <div className="btn btn-info text-white float-end blue-btn" onClick={handleClick} >
+                            <i className="fa fa-plus pe-1" /> Add Checklist
+                          </div>
+                        </>
+                      ) : (
+                        null
+                      )}
+
+
                     <div
                       className="btn btn-info text-white float-end blue-btn me-2"
                       onClick={() => window.history.back()}

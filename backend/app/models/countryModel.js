@@ -64,6 +64,8 @@ const getCountryAll = async () => {
 }
 
 const deleteCountry = async (CountryId) => {
+    
+    const [[existName]] = await pool.execute(`SELECT name FROM countries WHERE id = ?`, [CountryId.id]);
     if(parseInt(CountryId.id) > 0){
         const currentDate = new Date();
         await SatffLogUpdateOperation(
@@ -81,7 +83,6 @@ const deleteCountry = async (CountryId) => {
     const query = `
     DELETE FROM countries WHERE id = ?
     `;
-    const [[existName]] = await pool.execute(`SELECT name FROM countries WHERE id = ?`, [CountryId.id]);
     try {
         await pool.execute(query, [CountryId.id]);
     } catch (err) {
