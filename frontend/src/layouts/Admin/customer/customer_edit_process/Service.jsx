@@ -556,20 +556,20 @@ console.log("tasksGet1", [...tasksGet1, ...tasksGet]);
                                               data.data.map(
                                                 (data1, jobIndex) => (
                                                   <div
-                                                    className="accordion-item"
+                                                    className={`accordion-item ${data1.type}`}
                                                     key={jobIndex}
                                                    
                                                   >
                                                     <h2
                                                       className="accordion-header"
-                                                      id={`sub-headingOne${jobIndex}`}
+                                                      id={`sub-headingOne${data1.type}`}
                                                       onClick={() =>getCheckListData(item.id, data1)}
                                                     >
                                                       <button
                                                         className="accordion-button collapsed"
                                                         type="button"
                                                         data-bs-toggle="collapse"
-                                                        data-bs-target={`#sub-collapseOne${jobIndex}`}
+                                                        data-bs-target={`#sub-collapseOne${data1.type}`}
                                                         aria-expanded="true"
                                                         aria-controls="collapseOne"
                                                       >
@@ -577,9 +577,9 @@ console.log("tasksGet1", [...tasksGet1, ...tasksGet]);
                                                       </button>
                                                     </h2>
                                                     <div
-                                                      id={`sub-collapseOne${jobIndex}`}
+                                                      id={`sub-collapseOne${data1.type}`}
                                                       className="accordion-collapse collapse "
-                                                      aria-labelledby={`sub-headingOne${jobIndex}`}
+                                                      aria-labelledby={`sub-headingOne${data1.type}`}
                                                       data-bs-parent="#sub-accordionExample"
                                                     >
                                                       <div className="accordion-body">
