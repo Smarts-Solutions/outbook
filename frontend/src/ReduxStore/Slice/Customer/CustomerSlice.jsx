@@ -16,7 +16,7 @@ import {
   GETALLCHECKLIST,
   GET_ALL_TASK_TIME_SHEET,
   GET_JOB_TIME_SHEET,
-  GET_MISSING_LOG, 
+  GET_MISSING_LOG,
   ADD_MISSION_LOG,
   QUERY_ACTION,
   ADD_QUERY,
@@ -29,7 +29,7 @@ import {
   UPDATE_CUSTOMER_STATUS,
   GET_JOB_TIMELINE,
   UPDATE_STATUS,
-   
+  getcustomerschecklist,
 } from "../../../Services/Customer/CustomerService";
 import { GET_IP } from "../../../Utils/Comman_function";
 import { add } from "date-fns";
@@ -81,7 +81,9 @@ export const Get_Service = createAsyncThunk("service", async (data) => {
   }
 });
 
-export const ADD_SERVICES_CUSTOMERS = createAsyncThunk("updateProcessCustomer",async (data) => {
+export const ADD_SERVICES_CUSTOMERS = createAsyncThunk(
+  "updateProcessCustomer",
+  async (data) => {
     try {
       const { req, authToken } = data;
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -99,7 +101,9 @@ export const ADD_SERVICES_CUSTOMERS = createAsyncThunk("updateProcessCustomer",a
   }
 );
 
-export const ADD_PEPPER_WORKS = createAsyncThunk("updateProcessCustomerFile",async (data) => {
+export const ADD_PEPPER_WORKS = createAsyncThunk(
+  "updateProcessCustomerFile",
+  async (data) => {
     try {
       const { req, authToken } = data;
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -118,7 +122,9 @@ export const ADD_PEPPER_WORKS = createAsyncThunk("updateProcessCustomerFile",asy
   }
 );
 
-export const GET_ALL_CUSTOMERS = createAsyncThunk("customerAction",async (data) => {
+export const GET_ALL_CUSTOMERS = createAsyncThunk(
+  "customerAction",
+  async (data) => {
     try {
       const { req, authToken } = data;
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -136,7 +142,9 @@ export const GET_ALL_CUSTOMERS = createAsyncThunk("customerAction",async (data) 
   }
 );
 
-export const GET_CUSTOMER_DATA = createAsyncThunk("getSingleCustomer",async (data) => {
+export const GET_CUSTOMER_DATA = createAsyncThunk(
+  "getSingleCustomer",
+  async (data) => {
     try {
       const { req, authToken } = data;
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -154,7 +162,9 @@ export const GET_CUSTOMER_DATA = createAsyncThunk("getSingleCustomer",async (dat
   }
 );
 
-export const Edit_Customer = createAsyncThunk("customerUpdate",async (data) => {
+export const Edit_Customer = createAsyncThunk(
+  "customerUpdate",
+  async (data) => {
     try {
       const { req, authToken } = data;
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -172,7 +182,9 @@ export const Edit_Customer = createAsyncThunk("customerUpdate",async (data) => {
   }
 );
 
-export const DELETE_CUSTOMER_FILE = createAsyncThunk("updateProcessCustomerFileAction", async (data) => {
+export const DELETE_CUSTOMER_FILE = createAsyncThunk(
+  "updateProcessCustomerFileAction",
+  async (data) => {
     try {
       const { req, authToken } = data;
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -224,7 +236,7 @@ export const AddAllJobType = createAsyncThunk("jobAdd", async (data) => {
   }
 });
 
-export const JobAction= createAsyncThunk("jobAction", async (data) => {
+export const JobAction = createAsyncThunk("jobAction", async (data) => {
   try {
     const { req, authToken } = data;
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -256,7 +268,9 @@ export const UpdateJob = createAsyncThunk("jobUpdate", async (data) => {
   }
 });
 
-export const GET_ALL_CHECKLIST = createAsyncThunk("checklistAction", async (data) => {
+export const GET_ALL_CHECKLIST = createAsyncThunk(
+  "checklistAction",
+  async (data) => {
     try {
       const { req, authToken } = data;
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -273,38 +287,43 @@ export const GET_ALL_CHECKLIST = createAsyncThunk("checklistAction", async (data
   }
 );
 
-export const getAllTaskTimeSheet = createAsyncThunk("getTaskTimeSheet", async (data) => {
-  try {
-    const { req, authToken } = data;
-    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = {
-      ...req,
-      ip: IP_Data,
-      StaffUserId: StaffUserId.id,
-    };
-    const res = await GET_ALL_TASK_TIME_SHEET(updatedReq, authToken);
-    return await res;
-  } catch (err) {
-    throw err;
+export const getAllTaskTimeSheet = createAsyncThunk(
+  "getTaskTimeSheet",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+      const updatedReq = {
+        ...req,
+        ip: IP_Data,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await GET_ALL_TASK_TIME_SHEET(updatedReq, authToken);
+      return await res;
+    } catch (err) {
+      throw err;
+    }
   }
-});
+);
 
-export const JobTimeSheetAction = createAsyncThunk("jobTimeSheet", async (data) => {
-  try {
-    const { req, authToken } = data;
-    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = {
-      ...req,
-      ip: IP_Data,
-      StaffUserId: StaffUserId.id,
-    };
-    const res = await GET_JOB_TIME_SHEET(updatedReq, authToken);
-    return await res;
-  } catch (err) {
-    throw err;
+export const JobTimeSheetAction = createAsyncThunk(
+  "jobTimeSheet",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+      const updatedReq = {
+        ...req,
+        ip: IP_Data,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await GET_JOB_TIME_SHEET(updatedReq, authToken);
+      return await res;
+    } catch (err) {
+      throw err;
+    }
   }
-});
-
+);
 
 export const GetMissingLog = createAsyncThunk("getMissingLog", async (data) => {
   try {
@@ -338,21 +357,24 @@ export const AddMissionLog = createAsyncThunk("addMissingLog", async (data) => {
   }
 });
 
-export const EditMissingLog = createAsyncThunk("editMissingLog", async (data) => {
-  try {
-    const { req, authToken } = data;
-    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = {
-      ...req,
-      ip: IP_Data,
-      StaffUserId: StaffUserId.id,
-    };
-    const res = await EDIT_MISSION_LOG(updatedReq, authToken);
-    return await res;
-  } catch (err) {
-    throw err;
+export const EditMissingLog = createAsyncThunk(
+  "editMissingLog",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+      const updatedReq = {
+        ...req,
+        ip: IP_Data,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await EDIT_MISSION_LOG(updatedReq, authToken);
+      return await res;
+    } catch (err) {
+      throw err;
+    }
   }
-});
+);
 
 export const QueryAction = createAsyncThunk("getQuerie", async (data) => {
   try {
@@ -450,71 +472,100 @@ export const EditDraft = createAsyncThunk("editDraft", async (data) => {
   }
 });
 
-export const JobDocumentAction = createAsyncThunk("jobDocumentAction", async (data) => {
-  try {
-    const { req, authToken } = data;
-    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = {
-      ...req,
-      ip: IP_Data,
-      StaffUserId: StaffUserId.id,
-    };
-    const res = await JOBDOCUMENT_ACTION(updatedReq, authToken);
-    return await res;
-  } catch (err) {
-    throw err;
+export const JobDocumentAction = createAsyncThunk(
+  "jobDocumentAction",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+      const updatedReq = {
+        ...req,
+        ip: IP_Data,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await JOBDOCUMENT_ACTION(updatedReq, authToken);
+      return await res;
+    } catch (err) {
+      throw err;
+    }
   }
-});
+);
 
-export const Update_Customer_Status = createAsyncThunk("customerStatusUpdate", async (data) => {
-  try {
-    const { req, authToken } = data;
-    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = {
-      ...req,
-      ip: IP_Data,
-      StaffUserId: StaffUserId.id,
-    };
-    const res = await UPDATE_CUSTOMER_STATUS(updatedReq, authToken);
-    return await res;
-  } catch (err) {
-    throw err;
+export const Update_Customer_Status = createAsyncThunk(
+  "customerStatusUpdate",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+      const updatedReq = {
+        ...req,
+        ip: IP_Data,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await UPDATE_CUSTOMER_STATUS(updatedReq, authToken);
+      return await res;
+    } catch (err) {
+      throw err;
+    }
   }
-});
+);
 
-export const getJobTimeline = createAsyncThunk("getJobTimeLine", async (data) => {
-  try {
-    const { req, authToken } = data;
-    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = {
-      ...req,
-      ip: IP_Data,
-      StaffUserId: StaffUserId.id,
-    };
-    const res = await GET_JOB_TIMELINE(updatedReq, authToken);
-    return await res;
-  } catch (err) {
-    throw err;
+export const getJobTimeline = createAsyncThunk(
+  "getJobTimeLine",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+      const updatedReq = {
+        ...req,
+        ip: IP_Data,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await GET_JOB_TIMELINE(updatedReq, authToken);
+      return await res;
+    } catch (err) {
+      throw err;
+    }
   }
-});
+);
 
-export const Update_Status = createAsyncThunk("updateJobStatus", async (data) => {
-  try {
-    const { req, authToken } = data;
-    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = {
-      ...req,
-      ip: IP_Data,
-      StaffUserId: StaffUserId.id,
-    };
-    const res = await UPDATE_STATUS(updatedReq, authToken);
-    return await res;
-  } catch (err) {
-    throw err;
+export const Update_Status = createAsyncThunk(
+  "updateJobStatus",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+      const updatedReq = {
+        ...req,
+        ip: IP_Data,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await UPDATE_STATUS(updatedReq, authToken);
+      return await res;
+    } catch (err) {
+      throw err;
+    }
   }
-});
+);
 
-
+export const getcustomerschecklistApi = createAsyncThunk(
+  "getcustomerschecklist",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+      const updatedReq = {
+        ...req,
+        ip: IP_Data,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await getcustomerschecklist(updatedReq, authToken);
+      return await res;
+    } catch (err) {
+      throw err;
+    }
+  }
+);
 
 const CustomerSlice = createSlice({
   name: "CustomerSlice",
@@ -546,8 +597,8 @@ const CustomerSlice = createSlice({
     editmissinglog: [],
     editquery: [],
     getjobtimeline: [],
-    updatestatus : [],
-    
+    updatestatus: [],
+    customerchcklist: [],
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -770,7 +821,7 @@ const CustomerSlice = createSlice({
       })
       .addCase(AddQuery.rejected, (state) => {
         state.isLoading = false;
-        state.isError = true
+        state.isError = true;
       })
       .addCase(DraftAction.pending, (state) => {
         state.isLoading = true;
@@ -849,10 +900,18 @@ const CustomerSlice = createSlice({
       .addCase(Update_Customer_Status.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
+      })
+      .addCase(getcustomerschecklistApi.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getcustomerschecklistApi.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.customerchcklist = action.payload;
+      })
+      .addCase(getcustomerschecklistApi.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
       });
-      
-
-      
   },
 });
 

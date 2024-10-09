@@ -17,7 +17,7 @@ router.post('/customerUpdate',verifyToken, customerController.customerUpdate);
 router.post('/customerStatusUpdate',verifyToken, customerController.customerStatusUpdate);
 
 
-
+router.post('/getcustomerschecklist',verifyToken, customerController.getcustomerschecklist);
 
 
 module.exports = router;

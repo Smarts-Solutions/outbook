@@ -7,6 +7,7 @@ import {
   Get_Service,
   GET_CUSTOMER_DATA,
   Edit_Customer,
+  getcustomerschecklistApi
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import MultiStepFormContext from "./MultiStepFormContext";
 import CommanModal from "../../../../Components/ExtraComponents/Modals/CommanModal";
@@ -37,6 +38,8 @@ const Service = () => {
   const [jobTypeData, setJobTypeData] = useState([]);
   const [showJobTabel, setShowJobTabel] = useState("");
   const [tasksGet, setTasksData] = useState([]);
+  const [tasksGet1, setTasksData1] = useState([]);
+
   const [getCustomerService, setCustomerService] = useState({
     loading: true,
     data: [],
@@ -368,6 +371,9 @@ const Service = () => {
               Task: taskList,
             });
           }
+
+
+
           setTasksData((prev) => [
             ...prev,
             ...result.map((item) => ({
@@ -385,9 +391,12 @@ const Service = () => {
   };
 
   const handleDelete = (id) => {
-
-
     setTasksData((prev) => prev.filter((task) => task.id !== id));
+  };
+
+  const handleDelete1 = (id) => {
+    console.log("id", id);
+    setTasksData1((prev) => prev.filter((task) => task.id !== id));
   };
 
   const handleDownload = () => {
@@ -413,6 +422,40 @@ const Service = () => {
     setSearchValue(e.target.value);
   };
 
+
+
+  const getCheckListData = async (service_id, item) => {
+    const req = { service_id: service_id, job_type_id: item.id , customer_id: address};
+    const data = { req, authToken: token };
+    await dispatch(getcustomerschecklistApi(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          if (response.data.length > 0) {
+
+
+
+            setTasksData1((prev) => {
+              const mergedTasks = [...prev, ...response.data];
+  
+              const uniqueTasks = mergedTasks.filter(
+                (task, index, self) =>
+                  index === self.findIndex((t) => t.id === task.id)
+              );
+  
+              return uniqueTasks;
+            });
+          } else {
+            setTasksData1((prev) => [...prev, ...response.data]);
+          }
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+  
+console.log("tasksGet1", [...tasksGet1, ...tasksGet]);
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
@@ -486,8 +529,8 @@ const Service = () => {
                                       >
                                         {services.includes(item.id) &&
                                           jobTypeData &&
-                                          jobTypeData
-                                            .filter(
+                                            
+                                          jobTypeData.filter(
                                               (data) =>
                                                 data.service_id === item.id
                                             )
@@ -497,6 +540,7 @@ const Service = () => {
                                                   <div
                                                     className="accordion-item"
                                                     key={jobIndex}
+                                                    onClick={() =>getCheckListData(item.id, data1)}
                                                   >
                                                     <h2
                                                       className="accordion-header"
@@ -551,28 +595,7 @@ const Service = () => {
                                                               </label>
                                                             </div>
 
-                                                            {/* File Name Display and Clear Icon */}
-                                                            {/* <div className="col-auto d-flex align-items-center">
-                                                              <span className="form-text me-2">
-                                                                {fileName}
-                                                              </span>
-                                                              {fileName !==
-                                                                "No file selected" && (
-                                                                <i
-                                                                  className="fas fa-trash text-danger"
-                                                                  style={{
-                                                                    cursor:
-                                                                      "pointer",
-                                                                  }}
-                                                                  onClick={
-                                                                    handleClearFile
-                                                                  }
-                                                                  title="Clear file"
-                                                                ></i>
-                                                              )}
-                                                            </div> */}
-
-                                                            {/* Download Button */}
+                                                        
                                                             <div className="col-auto ms-auto">
                                                               <button
                                                                 onClick={
@@ -586,18 +609,11 @@ const Service = () => {
                                                               </button>
                                                             </div>
                                                           </div>
-                                                          {/* <span
-                                                            className="form-text"
-                                                            style={{
-                                                              color: "green",
-                                                            }}
-                                                          >
-                                                            {uploadMessage}
-                                                          </span> */}
+                                                     
                                                         </div>
                                                         <div className="table-responsive">
                                                           {tasksGet &&
-                                                            tasksGet.filter(
+                                                            [...tasksGet1, ...tasksGet].filter(
                                                               (TaskShow) =>
                                                                 data1.id ===
                                                                 TaskShow.JobTypeId &&
@@ -614,7 +630,7 @@ const Service = () => {
                                                                       Checklist
                                                                       Name:{" "}
                                                                       {
-                                                                        tasksGet.find(
+                                                                        [...tasksGet1, ...tasksGet].find(
                                                                           (
                                                                             TaskShow
                                                                           ) =>
@@ -641,7 +657,113 @@ const Service = () => {
                                                                   </tr>
                                                                 </thead>
                                                                 <tbody>
-                                                                  {tasksGet.map(
+                                                                  {tasksGet1.map(
+                                                                    (
+                                                                      TaskShow
+                                                                    ) => {
+                                                                      if (
+                                                                        data1.id ===
+                                                                        TaskShow.JobTypeId &&
+                                                                        item.id ===
+                                                                        TaskShow.serviceId
+                                                                      ) {
+                                                                        return (
+                                                                          <tr
+                                                                            key={
+                                                                              TaskShow.id
+                                                                            }
+                                                                          >
+                                                                            <td>
+                                                                              {TaskShow.Task.map(
+                                                                                (
+                                                                                  TaskData
+                                                                                ) => (
+                                                                                  <div
+                                                                                    key={
+                                                                                      TaskData.id
+                                                                                    }
+                                                                                    className="mb-2"
+                                                                                  >
+                                                                                    <input
+                                                                                      type="text"
+                                                                                      className="form-control"
+                                                                                      value={
+                                                                                        TaskData.TaskName
+                                                                                      }
+                                                                                      disabled
+                                                                                    />
+                                                                                  </div>
+                                                                                )
+                                                                              )}
+                                                                            </td>
+                                                                            <td>
+                                                                              {TaskShow.Task.map(
+                                                                                (
+                                                                                  TaskData
+                                                                                ) => (
+                                                                                  <div
+                                                                                    key={
+                                                                                      TaskData.id
+                                                                                    }
+                                                                                    className="mb-2"
+                                                                                  >
+                                                                                    <div className="input-group">
+                                                                                      <div className="hours-div">
+                                                                                        <input
+                                                                                          type="text"
+                                                                                          className="form-control"
+                                                                                          value={
+                                                                                            TaskData.BudgetHour.split(
+                                                                                              ":"
+                                                                                            )[0]
+                                                                                          }
+                                                                                          disabled
+                                                                                        />
+                                                                                        <span className="input-group-text">
+                                                                                          H
+                                                                                        </span>
+                                                                                      </div>
+                                                                                      <div className="hours-div">
+                                                                                        <input
+                                                                                          type="text"
+                                                                                          className="form-control"
+                                                                                          value={
+                                                                                            TaskData.BudgetHour.split(
+                                                                                              ":"
+                                                                                            )[1]
+                                                                                          }
+                                                                                          disabled
+                                                                                        />
+                                                                                        <span className="input-group-text">
+                                                                                          M
+                                                                                        </span>
+                                                                                      </div>
+                                                                                    </div>
+                                                                                  </div>
+                                                                                )
+                                                                              )}
+                                                                            </td>
+                                                                            <td className="text-center">
+                                                                              <button
+                                                                                className="delete-icon"
+                                                                                onClick={() =>
+                                                                                  handleDelete1(
+                                                                                    TaskShow.id
+                                                                                  )
+                                                                                }
+                                                                              >
+                                                                                <i className=" ti-trash text-danger"></i>
+                                                                              </button>
+                                                                            </td>
+                                                                          </tr>
+                                                                        );
+                                                                      }
+                                                                      return null;
+                                                                    }
+                                                                  )}
+
+
+{tasksGet.map(
                                                                     (
                                                                       TaskShow
                                                                     ) => {
@@ -938,30 +1060,3 @@ export default Service;
 //   }
 // };
 
-// const getCheckListData = async (service_id, item) => {
-//   const req = { service_id: service_id, job_type_id: item.id };
-//   const data = { req, authToken: token };
-//   await dispatch(GETTASKDATA(data))
-//     .unwrap()
-//     .then((response) => {
-//       if (response.status) {
-//         if (response.data.length > 0) {
-//           setTasks((prev) => {
-//             const mergedTasks = [...prev, ...response.data];
-
-//             const uniqueTasks = mergedTasks.filter(
-//               (task, index, self) =>
-//                 index === self.findIndex((t) => t.id === task.id)
-//             );
-
-//             return uniqueTasks;
-//           });
-//         } else {
-//           setTasks((prev) => [...prev, ...response.data]);
-//         }
-//       }
-//     })
-//     .catch((error) => {
-//       return;
-//     });
-// };
