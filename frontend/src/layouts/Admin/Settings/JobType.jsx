@@ -520,36 +520,25 @@ const Setting = () => {
               <thead className="table-light">
                 <tr>
                   <th className="">Task</th>
-                  <th className="">&nbsp;&nbsp;</th>
-                  <th className="">&nbsp;&nbsp;</th>
-                  <th className="">&nbsp;&nbsp;</th>
-                  <th className="">&nbsp;&nbsp;</th>
-                  <th className="tabel_left">Action</th>
+                 
+                  <th className="tabel_left" width="80">Action</th>
                 </tr>
               </thead>
               <tbody className="list form-check-all">
                 {tasks.map((task, index) => (
                   <tr className="tabel_new" key={index}>
                     <td>{task}</td>
-                    <td>&nbsp;&nbsp;</td>
-                    <td>&nbsp;&nbsp;</td>
-                    <td>&nbsp;&nbsp;</td>
-                    <td>&nbsp;&nbsp;</td>
+                    
                     <td className="tabel_left">
                       <div className="d-flex gap-2">
                         <div className="remove">
-                          <a
-                            style={{
-                              backgroundColor: "rgb(75, 175, 75)",
-                              color: "white",
-                              width: "60px",
-                              fontSize: "12px",
-                            }}
-                            className="btn btn-sm "
+                          <button
+                            
+                            className="delete-icon "
                           >
                           
-                            Enable
-                          </a>
+                            <i className="ti-trash text-danger"/>
+                          </button>
                         </div>
                       </div>
                     </td>
@@ -608,7 +597,7 @@ const Setting = () => {
                 <tr>
                   <th className="">Task</th>
 
-                  <th className="tabel_left">Status</th>
+                  {/* <th className="tabel_left">Status</th> */}
                 </tr>
               </thead>
               <tbody className="list form-check-all">
@@ -616,7 +605,7 @@ const Setting = () => {
                   <tr className="tabel_new" key={index}>
                     <td>{task}</td>
 
-                    <td className="tabel_left">
+                    {/* <td className="tabel_left">
                       <div className="d-flex gap-2">
                         <div className="remove">
                           <a
@@ -632,13 +621,18 @@ const Setting = () => {
                           </a>
                         </div>
                       </div>
-                    </td>
+                    </td> */}
                   </tr>
                 ))}
+                <tr className="tabel_new" >
+                    <td className="text-center">Task not created</td>
+
+                    
+                  </tr>
               </tbody>
             </table>
           </div>
-          <div className="col-lg-12">
+          {/* <div className="col-lg-12">
             <div className="remove" style={{ float: "right" }}>
               <button
                 className="btn btn-info text-white "
@@ -647,7 +641,7 @@ const Setting = () => {
                 Submit
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
       </CommanModal>
     </div>

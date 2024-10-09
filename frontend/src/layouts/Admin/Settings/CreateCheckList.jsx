@@ -353,7 +353,8 @@ const CreateCheckList = () => {
                 <div className="col-lg-12">
                   <label className="form-label"> Select Service Type</label>
                   <select
-                    className="default-select wide form-select"
+                    
+                    className={errors.service_id ? "error-field form-select" : "form-select"}
                     name="service_id"
                     defaultValue={formData.service_id}
                     onChange={(e) => {
@@ -383,7 +384,8 @@ const CreateCheckList = () => {
                 <div className="col-lg-12">
                   <label className="form-label"> Select Job Typ</label>
                   <select
-                    className="default-select wide form-select"
+                   className={errors.job_type_id ? "error-field form-select" : "form-select"}
+                    // className="default-select wide form-select"
                     name="job_type_id"
                     defaultValue={formData.job_type_id}
                     onChange={(e) => {
@@ -429,7 +431,8 @@ const CreateCheckList = () => {
                   <label className="form-label">Check List Name</label>
                   <input
                     type="text"
-                    className="form-control"
+                    
+                    className={errors.check_list_name ? "error-field form-control" : "form-control"}
                     placeholder="Check List Name"
                     name="check_list_name"
                     defaultValue={formData.check_list_name}
@@ -447,7 +450,7 @@ const CreateCheckList = () => {
                   <label className="form-label">Status</label>
 
                   <select
-                    className="default-select wide form-select"
+                    className={errors.status ? "error-field form-select" : "form-select"}
                     name="status"
                     defaultValue={formData.status}
                     onChange={handleInputChange}
@@ -492,9 +495,9 @@ const CreateCheckList = () => {
                 </div>
 
                 <div className="col-lg-5">
-                  <label className="form-label">Budgeted Hours</label>
+                  {/* <label className="form-label">Budgeted Hours</label>
                   <div className="input-group">
-                    {/* Hours Input */}
+                  
                     <input
                       type="number"
                       className="form-control"
@@ -503,9 +506,9 @@ const CreateCheckList = () => {
                       defaultValue={task.budgeted_hour?.hours || ""}
                       onChange={(e) => handleTaskChange(index, e)}
                     />
-                    {/* Hours Error */}
+                  
 
-                    {/* Minutes Input */}
+                  
                     <input
                       type="number"
                       className="form-control"
@@ -516,13 +519,53 @@ const CreateCheckList = () => {
                       defaultValue={task.budgeted_hour?.minutes || ""}
                       onChange={(e) => handleTaskChange(index, e)}
                     />
-                    {/* Minutes Error */}
+                   
                   </div>
                   {errors1[`budgeted_hour_${index}`] && (
                     <p className="error-text">
                       {errors1[`budgeted_hour_${index}`]}
                     </p>
-                  )}
+                  )} */}
+                  <label className="form-label">Budgeted Time</label>
+<div className="input-group">
+  {/* Hours Input */}
+  <div className="hours-div w-50">
+    <input
+      type="number"
+  
+      className={errors1[`budgeted_hour_${index}`] ? "error-field form-control" : "form-control"}
+
+      placeholder="Hours"
+      name="hours"
+      defaultValue={task.budgeted_hour?.hours || ""}
+      onChange={(e) => handleTaskChange(index, e)}
+    />
+    <span className="input-group-text">H</span>
+  </div>
+
+  {/* Minutes Input */}
+  <div className="hours-div w-50">
+    <input
+      type="number"
+      className="form-control"
+      placeholder="Minutes"
+      name="minutes"
+      min="0"
+      max="59"
+      defaultValue={task.budgeted_hour?.minutes || ""}
+      onChange={(e) => handleTaskChange(index, e)}
+    />
+    <span className="input-group-text">M</span>
+  </div>
+</div>
+
+{/* Error Message */}
+{errors1[`budgeted_hour_${index}`] && (
+  <p className="error-text">
+    {errors1[`budgeted_hour_${index}`]}
+  </p>
+)}
+
                 </div>
                 <div className="col-lg-2">
                   <button className="delete-icon" onClick={() => removeTask(index)}>
