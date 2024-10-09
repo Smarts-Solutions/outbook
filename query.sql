@@ -755,6 +755,39 @@ CREATE TABLE sub_internal (
     FOREIGN KEY (internal_id) REFERENCES internal(id)
 );
 
+-- TABLE FOR TIMESHEET
+CREATE TABLE timesheet (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    staff_id INT NOT NULL,
+    task_type ENUM('1', '2') NOT NULL DEFAULT '1' COMMENT '1: Internal, 2: External',
+    customer_id INT NOT NULL DEFAULT 0,
+    client_id INT NOT NULL DEFAULT 0,
+    job_id INT NOT NULL,
+    task_id INT NOT NULL,
+    monday_date  DATE DEFAULT NULL,
+    monday_hours TIME DEFAULT NULL,
+    tuesday_date  DATE DEFAULT NULL,
+    tuesday_hours TIME DEFAULT NULL,
+    wednesday_date  DATE DEFAULT NULL,
+    wednesday_hours TIME DEFAULT NULL,
+    thursday_date  DATE DEFAULT NULL,
+    thursday_hours TIME DEFAULT NULL,
+    friday_date  DATE DEFAULT NULL,
+    friday_hours TIME DEFAULT NULL,
+    saturday_date  DATE DEFAULT NULL,
+    saturday_hours TIME DEFAULT NULL,
+    sunday_date  DATE DEFAULT NULL,
+    sunday_hours TIME DEFAULT NULL,
+    status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (staff_id) REFERENCES staffs(id),
+    FOREIGN KEY (customer_id) REFERENCES customers(id),
+    FOREIGN KEY (client_id) REFERENCES clients(id),
+    FOREIGN KEY (job_id) REFERENCES jobs(id),
+    FOREIGN KEY (task_id) REFERENCES task(id)
+);
+
 
 
     

@@ -1,21 +1,296 @@
 const pool = require("../config/database");
 
-
-const getTimesheetTaskType = async (Timesheet) => {
- const  { staff_id , task_type} = Timesheet
+const getTimesheet = async (Timesheet) => {
+  const { staff_id } = Timesheet;
 
   try {
-     if(task_type === "1"){
-       const [rows] = await pool.query("SELECT id , name FROM internal");
-       return { status: true, message: "success.", data: rows };
-     }
-     else if(task_type === "2"){
-      return { status: true, message: "success.", data: [] };
-     }
+    // const [rows] = await pool.query(
+    //   "SELECT * FROM timesheet WHERE staff_id = ?",
+    //   [staff_id]
+    // );
+    const [internal] = await pool.execute(`SELECT id,name FROM internal`);
+    const [sub_internal] = await pool.execute(`SELECT id , internal_id , name  FROM sub_internal`);
 
-   return { status: false, message: "Invalid Task Type." };
+    const query = `SELECT 
+    timesheet.*,
+    internal.name as internal_name,
+    internal.id as internal_id,
+    sub_internal.name as sub_internal_name,
+    sub_internal.id as sub_internal_id,
+    customers.trading_name as customer_name,
+    customers.id as customer_id,
+    clients.trading_name as client_name,
+    clients.id as client_id,
+    CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_name,
+    jobs.id as job_id,
+    task.name as task_name,
+    task.id as task_id
+  FROM 
+    timesheet 
+   LEFT JOIN internal  ON timesheet.job_id = internal.id AND timesheet.task_type = 1
+   LEFT JOIN sub_internal  ON timesheet.task_id = sub_internal.id AND timesheet.task_type = 1
+   LEFT JOIN customers  ON customers.id = timesheet.customer_id AND timesheet.task_type = 2
+   LEFT JOIN clients  ON clients.id = timesheet.client_id AND timesheet.task_type = 2
+   LEFT JOIN jobs  ON jobs.id = timesheet.job_id AND timesheet.task_type = 2
+   LEFT JOIN job_types ON jobs.job_type_id = job_types.id AND timesheet.task_type = 2
+   LEFT JOIN task  ON task.id = timesheet.task_id AND timesheet.task_type = 2
+  WHERE 
+    timesheet.staff_id = ?`
+
+    const [rows] = await pool.query(
+      query,
+      [staff_id]
+    );
+
+    return { status: true, message: "success.", data: rows };
+  } catch (err) {
+    console.log(err);
+    return { status: false, message: "Err getTimesheet Data View Get", error: err.message };
+  }
+}
+
+const getTimesheetTaskType = async (Timesheet) => {
+  const { staff_id, task_type } = Timesheet
+  console.log("Timesheet ", Timesheet)
+
+  try {
+    //get internal Data
+    if (task_type === "1") {
+      const [rows] = await pool.query("SELECT id , name FROM internal");
+      return { status: true, message: "success.", data: rows };
+    }
+
+
+    //get Sub internal Data by Internal
+    else if (task_type === "5") {
+      const internal_id = Timesheet.internal_id
+      const [rows] = await pool.query(`SELECT id , name FROM sub_internal WHERE status = '1' AND internal_id=${internal_id} ORDER BY id DESC`);
+      return { status: true, message: "success.", data: rows };
+    }
+
+    // get Customer by Staff
+    else if (task_type === "2") {
+
+
+      const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + staff_id + '" LIMIT 1');
+      let result = []
+      const Query_Select = ` SELECT  
+    customers.id AS id,
+    customers.trading_name AS trading_name,
+    CONCAT(
+        'cust_', 
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(customers.customer_code, 1, 15)
+    ) AS customer_code
+FROM 
+    customers
+LEFT JOIN
+    jobs ON jobs.customer_id = customers.id   
+JOIN 
+    staffs AS staff1 ON customers.staff_id = staff1.id
+JOIN 
+    staffs AS staff2 ON customers.account_manager_id = staff2.id
+LEFT JOIN
+    customer_company_information ON customers.id = customer_company_information.customer_id`
+
+      if (rows.length > 0) {
+        // Allocated to
+        if (rows[0].role_id == 3) {
+          const query = `${Query_Select} 
+            WHERE 
+            jobs.allocated_to = ? OR customers.staff_id = ?
+        GROUP BY 
+            CASE 
+                WHEN jobs.allocated_to = ? THEN jobs.customer_id
+                ELSE customers.id
+            END
+        ORDER BY 
+        customers.id DESC
+            `;
+          const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
+          result = resultAllocated
+
+        }
+        // Account Manger
+        else if (rows[0].role_id == 4) {
+
+          const query = `${Query_Select} 
+            WHERE jobs.account_manager_id = ? OR customers.staff_id = ?
+            GROUP BY 
+        CASE 
+            WHEN jobs.account_manager_id = ? THEN jobs.customer_id
+            ELSE customers.id
+        END
+            ORDER BY 
+            customers.id DESC;
+            `;
+          const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
+          result = resultAllocated;
+
+          if (resultAllocated.length === 0) {
+            const query = `
+            SELECT  
+            customers.id AS id,
+            customers.trading_name AS trading_name
+        FROM 
+            customers
+        JOIN 
+            customer_services ON customer_services.customer_id = customers.id
+        JOIN 
+            customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
+        JOIN 
+            staffs AS staff1 ON customers.staff_id = staff1.id
+        JOIN 
+            staffs AS staff2 ON customers.account_manager_id = staff2.id
+        LEFT JOIN 
+            customer_company_information ON customers.id = customer_company_information.customer_id
+        WHERE customer_service_account_managers.account_manager_id = ? OR customers.staff_id= ?
+        GROUP BY 
+        customers.id
+        ORDER BY 
+        customers.id DESC;
+            `;
+            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id]);
+            result = resultAllocated;
+          }
+
+        }
+        // Reviewer
+        else if (rows[0].role_id == 6) {
+
+          const query = `${Query_Select} 
+            WHERE jobs.reviewer = ? OR customers.staff_id = ?  
+            GROUP BY 
+        CASE 
+            WHEN jobs.reviewer = ? THEN jobs.customer_id
+            ELSE customers.id
+        END
+            ORDER BY 
+            customers.id DESC;
+            `;
+          const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
+          result = resultAllocated
+
+        }
+        else {
+          const query = `
+            SELECT  
+            customers.id AS id,
+            customers.trading_name AS trading_name,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
+        FROM 
+            customers
+        JOIN 
+            staffs AS staff1 ON customers.staff_id = staff1.id
+        JOIN 
+            staffs AS staff2 ON customers.account_manager_id = staff2.id
+        LEFT JOIN 
+            customer_company_information ON customers.id = customer_company_information.customer_id
+        WHERE staff1.id = ?   
+        ORDER BY 
+            customers.id DESC;
+            `;
+          const [result1] = await pool.execute(query, [staff_id]);
+          result = result1
+        }
+      }
+
+
+      return { status: true, message: "success.", data: result };
+    }
+
+    // get Client by Customer
+    else if (task_type === "3") {
+      const customer_id = Timesheet.customer_id
+      const [rows] = await pool.query(`SELECT id , trading_name FROM clients WHERE status = '1' AND customer_id=${customer_id} ORDER BY id DESC`);
+      return { status: true, message: "success.", data: rows };
+    }
+
+    // get job by Client
+    else if (task_type === "4") {
+      const client_id = Timesheet.client_id
+
+      const query = `
+     SELECT 
+     jobs.id AS id,
+     CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS name
+
+     FROM 
+     jobs
+     LEFT JOIN 
+     customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+     LEFT JOIN 
+     clients ON jobs.client_id = clients.id
+      LEFT JOIN
+      customers ON jobs.customer_id = customers.id
+     LEFT JOIN 
+     job_types ON jobs.job_type_id = job_types.id 
+     WHERE 
+     jobs.client_id = clients.id AND
+     jobs.client_id = ?
+      ORDER BY
+      jobs.id DESC;
+     `;
+      const [rows] = await pool.execute(query, [client_id]);
+      return { status: true, message: "success.", data: rows };
+    }
+
+    //get Task Data by job
+    else if (task_type === "6") {
+      const job_id = Timesheet.job_id
+      const query = `
+     SELECT 
+     task.id AS id,
+     task.name AS name
+     FROM 
+     client_job_task
+     LEFT JOIN 
+     task ON task.id = client_job_task.task_id
+     WHERE 
+     client_job_task.job_id = ?
+      ORDER BY
+      client_job_task.id DESC;
+     `;
+      const [rows] = await pool.execute(query, [job_id]);
+      console.log("rows job", rows)
+      if (rows.length > 0) {
+        return { status: true, message: "success.", data: rows };
+      } else {
+
+        const query = `
+     SELECT task.id AS id, task.name AS name
+     FROM task
+     INNER JOIN jobs 
+        ON task.service_id = jobs.service_id 
+        AND task.job_type_id = jobs.job_type_id
+     WHERE 
+     jobs.id = ?
+     `;
+        const [rows] = await pool.execute(query, [job_id]);
+        console.log("rows job", rows)
+
+        return { status: true, message: "success.", data: rows };
+      }
+    }
+
+    return { status: false, message: "Invalid Task Type." };
 
   } catch (err) {
+    console.log(err);
     return { status: false, message: "Err Dashboard Data View Get", error: err.message };
   }
 
@@ -24,5 +299,6 @@ const getTimesheetTaskType = async (Timesheet) => {
 
 
 module.exports = {
+  getTimesheet,
   getTimesheetTaskType
 };

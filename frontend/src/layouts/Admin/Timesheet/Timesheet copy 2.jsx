@@ -38,32 +38,32 @@ const Timesheet = () => {
   const [timeSheetRows, setTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
 
-  // Initial state for timeSheetRows
-  //    const [timeSheetRows, setTimeSheetRows] = useState([
-  //     {
-  //         task_type: '',       // Will store "1" for Internal or "2" for External
-  //         customer_id: '',      // Stores selected customer ID
-  //         customer_name: '',    // Stores customer name if task_type is "2"
-  //         client_id: '',        // Stores selected client ID
-  //         client_name: '',      // Stores client name if task_type is "2"
-  //         job_id: '',           // Stores selected job ID
-  //         job_name: '',         // Stores job name
-  //         internal_name: '',    // Stores internal job name if task_type is "1"
-  //         task_id: '',          // Stores selected task ID
-  //         task_name: '',        // Stores selected task name
-  //         newRow: 1,     // To enable or disable inputs based on newRow flag
-  //         customerData: [],     // Holds the data for customer dropdown
-  //         clientData: [],       // Holds the data for client dropdown
-  //         jobData: [],          // Holds the data for job dropdown
-  //         taskData: []          // Holds the data for task dropdown
-  //     }
-  // ]);
+   // Initial state for timeSheetRows
+//    const [timeSheetRows, setTimeSheetRows] = useState([
+//     {
+//         task_type: '',       // Will store "1" for Internal or "2" for External
+//         customer_id: '',      // Stores selected customer ID
+//         customer_name: '',    // Stores customer name if task_type is "2"
+//         client_id: '',        // Stores selected client ID
+//         client_name: '',      // Stores client name if task_type is "2"
+//         job_id: '',           // Stores selected job ID
+//         job_name: '',         // Stores job name
+//         internal_name: '',    // Stores internal job name if task_type is "1"
+//         task_id: '',          // Stores selected task ID
+//         task_name: '',        // Stores selected task name
+//         newRow: 1,     // To enable or disable inputs based on newRow flag
+//         customerData: [],     // Holds the data for customer dropdown
+//         clientData: [],       // Holds the data for client dropdown
+//         jobData: [],          // Holds the data for job dropdown
+//         taskData: []          // Holds the data for task dropdown
+//     }
+// ]);
 
   // Function to handle dropdown change
   const handleTabChange = (event) => {
     setSelectedTab(event.target.value);
   };
-  const handleAddNewSheet = async () => {
+  const handleAddNewSheet = () => {
     const newSheetRow = {
       task_type: null,
       customer_id: null,
@@ -87,40 +87,7 @@ const Timesheet = () => {
     setCustomerData([]);
     setClientData([]);
     setTaskData([]);
-    // setTimeSheetRows((prevRows) => [...prevRows, newSheetRow]);
-
-    setTimeSheetRows((prevRows) => {
-      const updatedRows = [...prevRows, newSheetRow];
-      const newIndex = updatedRows.length - 1; // Index of the newly added row
-      updatedRows[newIndex].task_type = "1";
-      setTimeSheetRows(updatedRows);
-      return updatedRows;
-    });
-
-    let req = { staff_id: staffDetails.id, task_type: "1" };
-    const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
-
-    if (res.status) {
-
-      let req = { staff_id: staffDetails.id, task_type: "5", internal_id: res.data[0].id };
-      const res1 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
-      setTimeSheetRows((prevRows) => {
-        const updatedRows = [...prevRows];
-        const newIndex = updatedRows.length - 1;
-        updatedRows[newIndex].task_type = "1";
-        updatedRows[newIndex].jobData = res.data;
-        updatedRows[newIndex].job_id = res.data[0].id;
-        updatedRows[newIndex].taskData = res1.data;
-        updatedRows[newIndex].task_id = res1.data[0].id;
-        return updatedRows;
-      });
-    } else {
-      // Handle the error case as needed
-      console.log("API call failed:", res);
-    }
-
-
-
+    setTimeSheetRows((prevRows) => [...prevRows, newSheetRow]);
   };
 
   console.log("setTimeSheetRows", timeSheetRows)
@@ -142,130 +109,132 @@ const Timesheet = () => {
     }
   };
 
+  // const handleChangeTaskType = async (e, item, index) => {
 
+  //   const updatedRows = [...timeSheetRows];
+  //   updatedRows[index] = {
+  //     ...updatedRows[index],
+  //     task_type: e.target.value
+  //   };
+
+  //   setTimeSheetRows(updatedRows);
+
+  //   setJobData([]);
+  //   setCustomerData([]);
+  //   setClientData([]);
+  //   setTaskData([]);
+  //   if (e.target.value === "1") {
+  //     const req = { staff_id: staffDetails.id, task_type: e.target.value };
+  //     const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
+  //     if (res.status) {
+  //       setJobData(res.data)
+  //     } else {
+  //       setJobData([])
+  //     }
+  //   }
+  //   else if (e.target.value === "2") {
+  //     const req = { staff_id: staffDetails.id, task_type: e.target.value };
+  //     const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
+  //     if (res.status) {
+  //       setCustomerData(res.data)
+  //     } else {
+  //       setCustomerData([])
+  //     }
+
+  //   }
+
+  // }
   const handleChangeTaskType = async (e, item, index) => {
     const updatedRows = [...timeSheetRows];
+    
+    // Update task_type for the specific row
     updatedRows[index] = {
-      ...updatedRows[index],
-      task_type: e.target.value,
-      jobData: [],
-      customerData: [],
-      clientData: [],
-      taskData: []
+        ...updatedRows[index],
+        task_type: e.target.value,
+        jobData: [], // Reset dependent data fields
+        customerData: [],
+        clientData: [],
+        taskData: []
     };
 
     setTimeSheetRows(updatedRows);
 
+    // Fetch data based on task type
     if (e.target.value === "1") {
-      const req = { staff_id: staffDetails.id, task_type: e.target.value };
-      const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
-
-      if (res.status) {
-        let req = { staff_id: staffDetails.id, task_type: "5", internal_id: res.data[0].id };
-        const res1 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
-        updatedRows[index].jobData = res.data;
-        updatedRows[index].job_id = res.data[0].id;
-        updatedRows[index].taskData = res1.data;
-        updatedRows[index].task_id = res1.data[0].id;
-      }
-    } else if (e.target.value === "2") {
-      updatedRows[index].jobData = [];
-      updatedRows[index].job_id = null;
-      updatedRows[index].taskData = [];
-      updatedRows[index].task_id = null;
-      const req = { staff_id: staffDetails.id, task_type: e.target.value };
-      const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
-      if (res.status) {
-        if (res.data.length > 0) {
-          updatedRows[index].customerData = res.data;
-          updatedRows[index].customer_id = res.data[0].id;
+        const req = { staff_id: staffDetails.id, task_type: e.target.value };
+        const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
+        
+        if (res.status) {
+            updatedRows[index].jobData = res.data;
         }
-      }
+    } else if (e.target.value === "2") {
+        const req = { staff_id: staffDetails.id, task_type: e.target.value };
+        const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
+        
+        if (res.status) {
+            updatedRows[index].customerData = res.data;
+        }
     }
+
     setTimeSheetRows([...updatedRows]); // Save changes
-  };
+};
 
 
 
   const selectCustomerData = async (e, index) => {
-    const updatedRows = [...timeSheetRows];
-    updatedRows[index].jobData = [];
-    updatedRows[index].clientData = [];
-    updatedRows[index].taskData = [];
+
+    setJobData([]);
+    setClientData([]);
+    setTaskData([]);
 
     const req = { staff_id: staffDetails.id, task_type: "3", customer_id: e.target.value };
     const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
-
     if (res.status) {
-      if (res.data.length > 0) {
-        updatedRows[index].customer_id = e.target.value;
-        updatedRows[index].clientData = res.data;
-        updatedRows[index].client_id = res.data[0].id;
-
-      }
+      setClientData(res.data)
+    } else {
+      setClientData([])
     }
-    setTimeSheetRows(updatedRows);
-  };
+  }
+
 
   const selectClientData = async (e, index) => {
-    const updatedRows = [...timeSheetRows];
-    updatedRows[index].jobData = [];
-    updatedRows[index].taskData = [];
+
+    setJobData([]);
+    setTaskData([]);
 
     const req = { staff_id: staffDetails.id, task_type: "4", client_id: e.target.value };
     const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
     if (res.status) {
-      if (res.data.length > 0) {
-        updatedRows[index].client_id = e.target.value;
-        updatedRows[index].jobData = res.data;
-        updatedRows[index].job_id = res.data[0].id;
-        let req;
-        if (updatedRows[index].task_type === "1") {
-          req = { staff_id: staffDetails.id, task_type: "5", internal_id: res.data[0].id };
-        } else if (updatedRows[index].task_type === "2") {
-          req = { staff_id: staffDetails.id, task_type: "6", job_id: res.data[0].id };
-        }
-        if (req.staff_id != undefined) {
-          const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
-          if (res.status) {
-            if (res.data.length > 0) {
-              updatedRows[index].taskData = res.data;
-              updatedRows[index].task_id = res.data[0].id;
-            }
-          }
-        }
-      }
+      setJobData(res.data)
+    } else {
+      setJobData([])
     }
-    setTimeSheetRows(updatedRows);
-  };
+  }
 
   const selectJobData = async (e, task_type, index) => {
-    const updatedRows = [...timeSheetRows];
-    updatedRows[index].taskData = [];
+    setTaskData([]);
+
     let req;
     if (task_type === "1") {
       req = { staff_id: staffDetails.id, task_type: "5", internal_id: e.target.value };
-    } else if (task_type === "2") {
+    }
+    else if (task_type === "2") {
       req = { staff_id: staffDetails.id, task_type: "6", job_id: e.target.value };
     }
+
     if (req.staff_id != undefined) {
       const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
+      console.log("res", res)
       if (res.status) {
-        if (res.data.length > 0) {
-          updatedRows[index].job_id = e.target.value;
-          updatedRows[index].taskData = res.data;
-          updatedRows[index].task_id = res.data[0].id;
-        }
+        setTaskData(res.data)
+      } else {
+        setTaskData([])
       }
     }
-    setTimeSheetRows(updatedRows);
-  };
+  }
 
-  const selectTaskData = async (e, index) => {
-    const updatedRows = [...timeSheetRows];
-    updatedRows[index].task_id = e.target.value;
-    setTimeSheetRows(updatedRows);
-
+  const selectTaskData = async (e) => {
+    console.log(e.target.value);
   }
   return (
     <div className="page-content">
@@ -374,129 +343,208 @@ const Timesheet = () => {
                           {timeSheetRows?.map((item, index) => (
                             <tr className="tabel_new">
                               <td>{index + 1}</td>
+                              {/* <td >
+                                {
+                                  item.newRow != undefined && item.newRow === 1 ?
+                                    <select className="form-select form-control"
+                                      style={{ width: '100px' }}
+                                      onChange={(e) => handleChangeTaskType(e, item, index)}
+                                    >
+                                      <option value="1" selected={item.task_type === "1"}>Internal</option>
+                                      <option value="2" selected={item.task_type === "2"}>External</option>
+                                    </select>
 
-                              <td>
-                                {item.newRow === 1 ? (
-                                  <select
-                                    className="form-select form-control"
-                                    style={{ width: '100px' }}
-                                    value={item.task_type}
-                                    onChange={(e) => handleChangeTaskType(e, item, index)}
-                                  >
-                                    <option value="1">Internal</option>
-                                    <option value="2">External</option>
-                                  </select>
-                                ) : (
-                                  <select
-                                    className="form-select form-control"
-                                    style={{ width: '100px' }}
-                                    value={item.task_type}
-                                    disabled
-                                  >
-                                    <option value="1">Internal</option>
-                                    <option value="2">External</option>
-                                  </select>
-                                )}
+                                    :
+
+                                    <select disabled className="form-select form-control"
+                                      style={{ width: '100px' }}
+                                      onChange={(e) => handleChangeTaskType(e, item, index)}
+                                    >
+                                      <option value="1" selected={item.task_type === "1"}>Internal</option>
+                                      <option value="2" selected={item.task_type === "2"}>External</option>
+                                    </select>
+                                }
                               </td>
 
-                              {/* Customer Selection */}
-                              <td>
-                                {item.newRow === 1 && item.task_type === "2" ? (
-                                  <select
-                                    className="form-select"
-                                    style={{ width: '150px' }}
-                                    defaultValue={item.customer_id || ''}
-                                    onChange={(e) => selectCustomerData(e, index)}
-                                  >
-                                    {item.customerData?.map((customer) => (
-                                      <option key={customer.id} value={customer.id}>
-                                        {customer.trading_name}
-                                      </option>
-                                    ))}
-                                  </select>
-                                ) : (
-                                  <input
-                                    className="form-control cursor-pointer"
-                                    style={{ width: '150px' }}
-                                    defaultValue={item.task_type === "1" ? "No Customer" : item.customer_name}
-                                    disabled
-                                  />
-                                )}
-                              </td>
+                              <td >
+                                {
 
-                              {/* Client Selection */}
-                              <td>
-                                {item.newRow === 1 && item.task_type === "2" ? (
-                                  <select
-                                    className="form-select"
-                                    style={{ width: '150px' }}
-                                    defaultValue={item.client_id || ''}
-                                    onChange={(e) => selectClientData(e, index)}
-                                  >
-                                    {item.clientData?.map((client) => (
-                                      <option key={client.id} value={client.id}>
-                                        {client.trading_name}
-                                      </option>
-                                    ))}
-                                  </select>
-                                ) : (
-                                  <input
-                                    className="form-control cursor-pointer"
-                                    style={{ width: '150px' }}
-                                    defaultValue={item.task_type === "1" ? "No Client" : item.client_name}
-                                    disabled
-                                  />
-                                )}
-                              </td>
+                                  item.newRow != undefined && item.newRow === 1 ?
+                                    item.task_type === "2" ?
 
-                              {/* Job Selection */}
-                              <td>
-                                {item.newRow === 1 ? (
-                                  <select
-                                    className="form-select"
-                                    style={{ width: '150px' }}
-                                    defaultValue={item.job_id || ''}
-                                    onChange={(e) => selectJobData(e, item.task_type, index)}
-                                  >
-                                    {item.jobData?.map((job) => (
-                                      <option key={job.id} value={job.id}>
-                                        {job.name}
-                                      </option>
-                                    ))}
-                                  </select>
-                                ) : (
-                                  <input
-                                    className="form-control cursor-pointer"
-                                    style={{ width: '150px' }}
-                                    defaultValue={item.task_type === "1" ? item.internal_name : item.job_name}
-                                    disabled
-                                  />
-                                )}
-                              </td>
+                                      <select className="form-select"
+                                        name="customerData" onChange={(e) => { selectCustomerData(e , index) }}
+                                        style={{ width: '150px' }}
+                                        defaultValue={customerData && customerData[0]?.id}
+                                      >
+                                        {customerData && customerData?.map((val, i) =>
+                                          <option value={val.id}>{val.trading_name}</option>)}
+                                      </select>
+                                      :
+                                      <input
+                                        className="form-control cursor-pointer"
+                                        style={{ width: '150px' }}
+                                        disabled
+                                        readOnly
+                                        defaultValue={"No Customer"}
+                                      />
+                                    :
 
-                              {/* Task Selection */}
+                                    item.task_type === "1" ?
+                                      <input
+                                        className="form-control cursor-pointer"
+                                        style={{ width: '150px' }}
+                                        disabled
+                                        readOnly
+                                        defaultValue={"No Customer"}
+                                      />
+                                      :
+                                      <select disabled className="form-select" style={{ width: '150px' }}>
+                                        <option value={item.customer_id}>{item.customer_name}</option>
+                                      </select>
+                                }
+
+                              </td> */}
+
+<td>
+                {item.newRow === 1 ? (
+                    <select
+                        className="form-select form-control"
+                        style={{ width: '100px' }}
+                        value={item.task_type}
+                        onChange={(e) => handleChangeTaskType(e, item, index)}
+                    >
+                        <option value="1">Internal</option>
+                        <option value="2">External</option>
+                    </select>
+                ) : (
+                    <select
+                        className="form-select form-control"
+                        style={{ width: '100px' }}
+                        value={item.task_type}
+                        disabled
+                    >
+                        <option value="1">Internal</option>
+                        <option value="2">External</option>
+                    </select>
+                )}
+            </td>
+
+            {/* Customer Selection */}
+            <td>
+                {item.newRow === 1 && item.task_type === "2" ? (
+                    <select
+                        className="form-select"
+                        style={{ width: '150px' }}
+                        value={item.customer_id || ''}
+                        onChange={(e) => selectCustomerData(e, index)}
+                    >
+                        {item.customerData?.map((customer) => (
+                            <option key={customer.id} value={customer.id}>
+                                {customer.trading_name}
+                            </option>
+                        ))}
+                    </select>
+                ) : (
+                    <input
+                        className="form-control cursor-pointer"
+                        style={{ width: '150px' }}
+                        value={item.task_type === "1" ? "No Customer" : item.customer_name}
+                        disabled
+                    />
+                )}
+            </td>
+                            
                               <td>
-                                {item.newRow === 1 ? (
-                                  <select
-                                    className="form-select"
-                                    style={{ width: '150px' }}
-                                    defaultValue={item.task_id || ''}
-                                    onChange={(e) => selectTaskData(e, index)}
-                                  >
-                                    {item.taskData?.map((task) => (
-                                      <option key={task.id} value={task.id}>
-                                        {task.name}
-                                      </option>
-                                    ))}
-                                  </select>
-                                ) : (
-                                  <input
-                                    className="form-control cursor-pointer"
-                                    style={{ width: '150px' }}
-                                    defaultValue={item.task_name || ''}
-                                    disabled
-                                  />
-                                )}
+
+                                {
+
+                                  item.newRow != undefined && item.newRow === 1 ?
+                                    item.task_type === "2" ?
+
+                                      <select className="form-select"
+                                        name="clientData" onChange={(e) => { selectClientData(e, index) }}
+                                        style={{ width: '150px' }}
+                                        defaultValue={clientData && clientData[0]?.id}
+                                      >
+                                        {clientData && clientData?.map((val, i) =>
+                                          <option value={val.id}>{val.trading_name}</option>)}
+                                      </select>
+                                      :
+                                      <input
+                                        className="form-control cursor-pointer"
+                                        style={{ width: '150px' }}
+                                        disabled
+                                        readOnly
+                                        defaultValue={"No Client"}
+                                      />
+                                    :
+
+                                    item.task_type === "1" ?
+                                      <input
+                                        className="form-control cursor-pointer"
+                                        style={{ width: '150px' }}
+                                        disabled
+                                        readOnly
+                                        defaultValue={"No Client"}
+                                      />
+                                      :
+                                      <select disabled className="form-select" style={{ width: '150px' }}>
+                                        <option value={item.client_id}>{item.client_name}</option>
+                                      </select>
+
+                                }
+                              </td>
+                              <td>
+                                {
+
+                                  item.newRow != undefined && item.newRow === 1 ?
+                                    <select className="form-select"
+                                      name="jobData" onChange={(e) => { selectJobData(e, item.task_type, index) }}
+                                      style={{ width: '120px' }}
+                                      defaultValue={jobData && jobData[0]?.id}
+                                    >
+                                      {jobData && jobData?.map((val, i) =>
+                                        <option value={val.id}>{val.name}</option>)}
+                                    </select>
+                                    :
+
+                                    item.task_type === "1" ?
+                                      <select disabled className="form-select" style={{ width: '150px' }}>
+                                        <option value={item.internal_id}>{item.internal_name}</option>
+                                      </select>
+                                      :
+                                      <select disabled className="form-select" style={{ width: '150px' }}>
+                                        <option value={item.job_id}>{item.job_name}</option>
+                                      </select>
+                                }
+                              </td>
+                              <td>
+
+                                {
+
+
+                                  item.newRow != undefined && item.newRow === 1 ?
+                                    <select className="form-select"
+                                      name="taskData" onChange={(e) => { selectTaskData(e, index) }}
+                                      style={{ width: '120px' }}
+                                      defaultValue={taskData && taskData[0]?.id}
+                                    >
+                                      {taskData && taskData?.map((val, i) =>
+                                        <option value={val.id}>{val.name}</option>)}
+                                    </select>
+                                    :
+
+                                    item.task_type === "1" ?
+                                      <select disabled className="form-select" style={{ width: '150px' }}>
+                                        <option value={item.sub_internal_id}>{item.sub_internal_name}</option>
+                                      </select>
+                                      :
+                                      <select disabled className="form-select" style={{ width: '150px' }}>
+                                        <option value={item.task_id}>{item.task_name}</option>
+                                      </select>
+                                }
+
                               </td>
                               <td>
                                 <input
