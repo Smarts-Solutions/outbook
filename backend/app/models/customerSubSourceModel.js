@@ -54,7 +54,6 @@ const getCustomerSubSource = async (CustomerSubSource) => {
   }
 }
   
-
 const getCustomerSubSourceAll = async (CustomerSubSource) => {
   const { customer_source_id } = CustomerSubSource;
   const query = `
