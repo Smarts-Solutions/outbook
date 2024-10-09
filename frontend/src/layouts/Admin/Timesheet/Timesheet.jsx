@@ -21,72 +21,107 @@ const Timesheet = () => {
     }
   }
 
+  const [currentDay, setCurrentDay] = useState('');
+
+  const [weekDays, setWeekDays] = useState({
+    monday: '',
+    tuesday: '',
+    wednesday: '',
+    thursday: '',
+    friday: '',
+    saturday: '',
+    sunday: '',
+  });
+
   useEffect(() => {
-    GetTimeSheet()
+    GetTimeSheet();
+
+    // set day wise Input
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const todays = new Date().getDay();
+    setCurrentDay(days[todays]);
+  
+    // set date in table heading wise Input
+    const today = new Date();
+    const dayOfWeek = today.getDay(); 
+    const startOfWeek = new Date(today);
+
+    if (dayOfWeek === 0) {
+      startOfWeek.setDate(today.getDate() - 6);
+    } else {
+      startOfWeek.setDate(today.getDate() - (dayOfWeek - 1));
+    }
+
+    setWeekDays({
+      monday: formatDate(new Date(startOfWeek)),
+      tuesday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
+      wednesday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
+      thursday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
+      friday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
+      saturday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
+      sunday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
+    });
+
+
   }, [])
 
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-GB', {
+      weekday: 'short',  // Mon, Tue, etc.
+      day: '2-digit',    // 01, 02, etc.
+      month: '2-digit',  // 01, 02, etc.
+      year: 'numeric',   // 2024, etc.
+    });
+  };
 
-
-  const TaskType = useRef("0")
-
-  const [jobData, setJobData] = useState([]);
-  const [customerData, setCustomerData] = useState([]);
-  const [clientData, setClientData] = useState([]);
-  const [taskData, setTaskData] = useState([]);
+  console.log("currentDay", currentDay);
 
   const [addtask, setAddtask] = useState(false);
   const [timeSheetRows, setTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
 
-  // Initial state for timeSheetRows
-  //    const [timeSheetRows, setTimeSheetRows] = useState([
-  //     {
-  //         task_type: '',       // Will store "1" for Internal or "2" for External
-  //         customer_id: '',      // Stores selected customer ID
-  //         customer_name: '',    // Stores customer name if task_type is "2"
-  //         client_id: '',        // Stores selected client ID
-  //         client_name: '',      // Stores client name if task_type is "2"
-  //         job_id: '',           // Stores selected job ID
-  //         job_name: '',         // Stores job name
-  //         internal_name: '',    // Stores internal job name if task_type is "1"
-  //         task_id: '',          // Stores selected task ID
-  //         task_name: '',        // Stores selected task name
-  //         newRow: 1,     // To enable or disable inputs based on newRow flag
-  //         customerData: [],     // Holds the data for customer dropdown
-  //         clientData: [],       // Holds the data for client dropdown
-  //         jobData: [],          // Holds the data for job dropdown
-  //         taskData: []          // Holds the data for task dropdown
-  //     }
-  // ]);
 
   // Function to handle dropdown change
   const handleTabChange = (event) => {
     setSelectedTab(event.target.value);
   };
   const handleAddNewSheet = async () => {
+
+    if (timeSheetRows.length > 0) {
+      const lastObject = timeSheetRows[timeSheetRows.length - 1];
+      if (lastObject.task_id == null) {
+        alert("Please select the Task")
+        return
+      }
+    }
+
     const newSheetRow = {
       task_type: null,
       customer_id: null,
       client_id: null,
       job_id: null,
       task_id: null,
+      monday_date: null,
       monday_hours: null,
+      tuesday_date: null,
       tuesday_hours: null,
+      wednesday_date: null,
       wednesday_hours: null,
+      thursday_date: null,
       thursday_hours: null,
+      friday_date: null,
       friday_hours: null,
+      saturday_date: null,
       saturday_hours: null,
       sunday_date: null,
+      sunday_hours: null,
       newRow: 1,
       customerData: [],     // Holds the data for customer dropdown
       clientData: [],       // Holds the data for client dropdown
       jobData: [],          // Holds the data for job dropdown
       taskData: []          // Holds the data for task dropdown
     };
-    setJobData([]);
-    setCustomerData([]);
-    setClientData([]);
-    setTaskData([]);
+
     // setTimeSheetRows((prevRows) => [...prevRows, newSheetRow]);
 
     setTimeSheetRows((prevRows) => {
@@ -267,6 +302,27 @@ const Timesheet = () => {
     setTimeSheetRows(updatedRows);
 
   }
+
+  const handleHoursInput = async (e, index , day_name , date_value) => {
+    console.log("day_name ",day_name)
+    console.log("date_value ",date_value)
+    let value = e.target.value;
+    let name = e.target.name;
+    const updatedRows = [...timeSheetRows]
+    if(updatedRows[index][name]  == null){
+      updatedRows[index][name] = ""
+      setTimeSheetRows(updatedRows);
+    }
+    // if (!/^[0-9.]*$/.test(value)) {
+    //   return;
+    // }
+    if (!/^\d*\.?\d{0,2}$/.test(value)) {
+      return;
+    }
+    // const updatedRows = [...timeSheetRows]
+    updatedRows[index][name] = value;
+    setTimeSheetRows(updatedRows);
+  }
   return (
     <div className="page-content">
       <div className="container-fluid">
@@ -341,28 +397,28 @@ const Timesheet = () => {
                               className="dropdwnCol5"
                               data-field="customer_name"
                             >
-                              Mon 12/02/2024
+                            {weekDays.monday.replace(",", "")}
                             </th>
                             <th
                               className="dropdwnCol5"
                               data-field="customer_name"
                             >
-                              Tue 13/02/2024
+                            {weekDays.tuesday.replace(",", "")}
                             </th>
                             <th className="dropdwnCol5" data-field="phone">
-                              Wed 14/02/2024
+                            {weekDays.wednesday.replace(",", "")}
                             </th>
                             <th className="dropdwnCol5" data-field="phone">
-                              Thu 15/02/2024
+                            {weekDays.thursday.replace(",", "")}
                             </th>
                             <th className="dropdwnCol5" data-field="phone">
-                              Fri 16/02/2024
+                            {weekDays.friday.replace(",", "")}
                             </th>
                             <th className="dropdwnCol5" data-field="phone">
-                              Sat 17/02/2024
+                            {weekDays.saturday.replace(",", "")}
                             </th>
                             <th className="dropdwnCol5" data-field="phone">
-                              Sun 18/02/2024
+                            {weekDays.sunday.replace(",", "")}
                             </th>
                             <th className="dropdwnCol5" data-field="phone">
                               Action
@@ -493,65 +549,81 @@ const Timesheet = () => {
                                   <input
                                     className="form-control cursor-pointer"
                                     style={{ width: '150px' }}
-                                    defaultValue={item.task_name || ''}
+                                    defaultValue={item.task_type === "1" ? item.sub_internal_name : item.task_name}
                                     disabled
                                   />
                                 )}
                               </td>
+
+                              {/*Monday Input*/}
                               <td>
                                 <input
                                   className="form-control cursor-pointer"
-                                  disabled
-                                  readOnly
-                                  defaultValue={2}
+                                  type="text"
+                                  name="monday_hours"
+                                  disabled={currentDay !== 'monday'}
                                 />
                               </td>
+
+                              {/*Tuesday Input*/}
                               <td>
                                 <input
                                   className="form-control cursor-pointer"
-                                  disabled
-                                  readOnly
-                                  defaultValue={5}
+                                   type="text"
+                                  name="tuesday_hours"
+                                  disabled={currentDay !== 'tuesday'}
                                 />
                               </td>
+
+                              {/*Wednesday Input*/}
                               <td>
                                 <input
                                   className="form-control cursor-pointer"
-                                  disabled
-                                  readOnly
-                                  defaultValue={7}
+                                  type="text"
+                                  name="wednesday_hours"
+                                  onChange={(e) => handleHoursInput(e, index , 'wednesday_date' , weekDays.monday)}
+                                  value={item.wednesday_hours}
+                                  disabled={currentDay !== 'wednesday'}
                                 />
                               </td>
+
+                              {/*Thursday Input*/}
                               <td>
                                 <input
                                   className="form-control cursor-pointer"
-                                  disabled
-                                  readOnly
-                                  defaultValue={9}
+                                   type="text"
+                                  name="thursday_hours"
+                                  disabled={currentDay !== 'thursday'}
                                 />
                               </td>
+
+                              {/*Friday Input*/}
                               <td>
                                 <input
                                   className="form-control cursor-pointer"
-                                  disabled
-                                  readOnly
-                                  defaultValue={3}
+                                   type="text"
+                                  name="friday_hours"
+                                  disabled={currentDay !== 'friday'}
                                 />
                               </td>
+
+                              {/*Saturday Input*/}
                               <td>
                                 <input
                                   className="form-control cursor-pointer"
-                                  disabled
-                                  readOnly
-                                  defaultValue={2}
+                                   type="text"
+                                  name="saturday_hours"
+                                  disabled={currentDay !== 'saturday'}
                                 />
                               </td>
+
+                              {/*Sunday Input*/}
                               <td>
                                 <input
                                   className="form-control cursor-pointer"
-                                  disabled
-                                  readOnly
-                                  defaultValue={5}
+                                   type="text"
+                                  name="sunday_hours"
+                                  disabled={currentDay !== 'sunday'}
                                 />
                               </td>
 
