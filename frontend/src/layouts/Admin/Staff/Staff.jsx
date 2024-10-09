@@ -628,7 +628,7 @@ const StaffPage = () => {
         </div>
       </div>
     </div>
-    <div className="tab-content mt-minus-60" id="pills-tabContent">
+    <div className="tab-content mt-minus-90" id="pills-tabContent">
       {tabs.map((tab) => (
         <div
           key={tab.id}
@@ -710,7 +710,7 @@ const StaffPage = () => {
                       Company Name
                     </th>
 
-                    <th className="tabel_left" data-="action">
+                    <th className="tabel_left" data-="action" width="80">
                       Action
                     </th>
                   </tr>

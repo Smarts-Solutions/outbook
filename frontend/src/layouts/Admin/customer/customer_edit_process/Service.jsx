@@ -851,7 +851,7 @@ const Service = () => {
                 <table className="table align-middle table-nowrap">
                   <thead className="table-light">
                     <tr>
-                      <th>Account Name</th>
+                      <th>Add Account Manager</th>
                       <th className="text-end">Action</th>
                     </tr>
                   </thead>
@@ -888,7 +888,7 @@ const Service = () => {
                     ) : (
                       <tr>
                         <td colSpan="2" className="text-center">
-                          No staff available
+                        No Account Manager Found!
                         </td>
                       </tr>
                     )}
