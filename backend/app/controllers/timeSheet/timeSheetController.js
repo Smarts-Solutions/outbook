@@ -34,6 +34,20 @@ const getTimesheetTaskType = async (req, res) => {
     }
 }
 
+const saveTimesheet = async (req,res) => {
+  try {
+    const { ...Timesheet } = req.body;
+    const result = await timeSheetService.saveTimesheet(Timesheet);
+    if(!result.status){
+      return  res.status(200).json({ status: false, message: result.message });  
+      }else{
+      return  res.status(200).json({ status: true, message: result.message , data : result.data});
+      }
+  } catch (error) {
+    res.status(500).json({ status:false, message: error.message});
+  }
+}
+
 
 
 
@@ -42,4 +56,5 @@ const getTimesheetTaskType = async (req, res) => {
 module.exports = {
   getTimesheet,
   getTimesheetTaskType,
+  saveTimesheet
 };

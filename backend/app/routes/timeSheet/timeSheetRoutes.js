@@ -9,5 +9,6 @@ const router = express.Router();
 
 router.post('/getTimesheet',verifyToken, timeSheetController.getTimesheet);
 router.post('/getTimesheetTaskType',verifyToken, timeSheetController.getTimesheetTaskType);
+router.post('/saveTimesheet',verifyToken, timeSheetController.saveTimesheet);
 
 module.exports = router;
