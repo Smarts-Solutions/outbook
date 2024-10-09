@@ -39,6 +39,8 @@ const Service = () => {
   const [showJobTabel, setShowJobTabel] = useState("");
   const [tasksGet, setTasksData] = useState([]);
   const [tasksGet1, setTasksData1] = useState([]);
+  const [tasksGetRemove, setTasksDataRemove] = useState([]);
+
 
   const [getCustomerService, setCustomerService] = useState({
     loading: true,
@@ -220,6 +222,7 @@ const Service = () => {
       pageStatus: "2",
       services: filteredMatchData,
       Task: tasksGet,
+      RemoveTask:tasksGetRemove
     };
 
     try {
@@ -228,6 +231,13 @@ const Service = () => {
       ).unwrap();
       if (response.status) {
         next(response.data);
+      }else{
+        console.log(response);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: response.message,
+        });
       }
     } catch (error) {
       return;
@@ -395,7 +405,15 @@ const Service = () => {
   };
 
   const handleDelete1 = (id) => {
-    console.log("id", id);
+  
+    if(tasksGet1.length > 0){
+      tasksGet1.map((task) => {
+        if(task.id === id){
+          setTasksDataRemove( prev => [...prev, task]);
+        }
+      })
+          
+    }
     setTasksData1((prev) => prev.filter((task) => task.id !== id));
   };
 
@@ -540,11 +558,12 @@ console.log("tasksGet1", [...tasksGet1, ...tasksGet]);
                                                   <div
                                                     className="accordion-item"
                                                     key={jobIndex}
-                                                    onClick={() =>getCheckListData(item.id, data1)}
+                                                   
                                                   >
                                                     <h2
                                                       className="accordion-header"
                                                       id={`sub-headingOne${jobIndex}`}
+                                                      onClick={() =>getCheckListData(item.id, data1)}
                                                     >
                                                       <button
                                                         className="accordion-button collapsed"
