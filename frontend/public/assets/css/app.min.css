@@ -9491,7 +9491,10 @@ span.sidebar-icons {
   margin: 2px 0;
   border-radius: 5px;
 }
-
+button.secondary-icon {
+  color: #222222;
+  border: 3px solid #222222;
+}
 .datatable-container button.edit-icon,
 .datatable-container button.delete-icon,
 button.delete-icon,
@@ -9539,6 +9542,7 @@ button.delete-icon,
   border: 3px solid #ff0000;
 
 }
+
 
 button.secondary-icon i,
 button.view-icon i,
@@ -9628,7 +9632,7 @@ body .blue-btn:hover,
 body .btn-info:hover {
   color: #fff !important;
   border-color: #00AFEF !important;
-  border: 3px solid !important;
+  border: 3px solid #00AFEF !important;
   background: #00AFEF !important;
 }
 
@@ -10679,6 +10683,8 @@ a.nav-link.dropdown-toggle.arrow-none.waves-light.waves-effect img {
 select.error-field.form-select, input.error-field.form-control {
   background: #fff !important;
   border: 1px solid #ef7e7e;
+  appearance: auto;
+  padding: 8px;
 }
 
 select#tabSelect {
@@ -10736,4 +10742,5 @@ select#tabSelect {
 .accordion-button.bg-transparant:not(.collapsed) {
   background: transparent !important;
   border: none !important;
+  box-shadow: none;
 }
