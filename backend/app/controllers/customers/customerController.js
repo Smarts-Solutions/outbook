@@ -123,6 +123,20 @@ const customerStatusUpdate = async (req, res) => {
     }
 }
 
+const getcustomerschecklist = async (req, res) => {
+  try {
+     const { ...customer } = req.body;
+  
+      const data = await customerService.getcustomerschecklist(customer);
+      if(data != undefined){
+       return res.status(200).json({ status:true,message: "Success..",data : data});
+      }else{
+       return res.status(200).json({ status:false, message: "Invalid..."});
+      }
+    } catch (error) {
+      res.status(500).json({ status:false, message: error.message});
+    }
+}
 
 
 
@@ -134,5 +148,6 @@ module.exports = {
   updateProcessCustomerFile,
   updateProcessCustomerFileAction,
   customerUpdate,
-  customerStatusUpdate
+  customerStatusUpdate,
+  getcustomerschecklist
 };

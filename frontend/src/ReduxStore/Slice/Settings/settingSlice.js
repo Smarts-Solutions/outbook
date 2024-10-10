@@ -23,12 +23,7 @@ import {
   
   
 } from "../../../Services/Settings/settingService";
-import { GET_IP } from "../../../Utils/Comman_function";
-
-let IP_Data = await GET_IP();
-var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-
-
+const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
 // Get Role
 export const Role = createAsyncThunk("role", async (data) => {

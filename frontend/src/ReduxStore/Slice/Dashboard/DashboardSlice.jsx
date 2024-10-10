@@ -1,11 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { DASHBOARD, ACTIVITYLOG } from "../../../Services/Dashboard/DashboardService";
-import axios from "axios";
-import { GET_IP } from "../../../Utils/Comman_function";
+const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
-const StaffUserId = JSON.parse(localStorage.getItem("staffDetails")) || {};
-
-let IP_Data = await GET_IP();
 export const DashboardData = createAsyncThunk("getDashboardData", async (data) => {
     try {
         const { req, authToken } = data;

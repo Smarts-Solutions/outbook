@@ -1,8 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { STAFF ,SERVICE,COMPETENCY , GETPROFILE} from "../../../Services/Staff/staff";
-import { GET_IP } from "../../../Utils/Comman_function";
-var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-let IP_Data = await GET_IP();
+const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
 export const Staff = createAsyncThunk("staff", async (data) => {
   try {

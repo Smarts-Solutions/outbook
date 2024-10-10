@@ -1,10 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { GET_TIMESHEET_TASK_TYPE ,GET_TIMESHEET ,SAVE_TIMESHEET } from "../../../Services/Timesheet/TimesheetService";
-import axios from "axios";
-import { GET_IP } from "../../../Utils/Comman_function";
-const StaffUserId = JSON.parse(localStorage.getItem("staffDetails")) || {};
+const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
-let IP_Data = await GET_IP();
 export const getTimesheetTaskTypedData = createAsyncThunk("getTimesheetTaskType", async (data) => {
     try {
         const { req, authToken } = data;
