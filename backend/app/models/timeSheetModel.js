@@ -12,7 +12,30 @@ const getTimesheet = async (Timesheet) => {
     const [sub_internal] = await pool.execute(`SELECT id , internal_id , name  FROM sub_internal`);
 
     const query = `SELECT 
-    timesheet.*,
+    timesheet.id AS id,
+    timesheet.staff_id AS staff_id,
+    timesheet.task_type AS task_type,
+    timesheet.customer_id AS customer_id,
+    timesheet.client_id AS client_id,
+    timesheet.job_id AS job_id,
+    timesheet.task_id AS task_id,
+    DATE_FORMAT(timesheet.monday_date, '%Y-%m-%d') AS monday_date,
+    REPLACE(SUBSTRING_INDEX(timesheet.monday_hours, ':', 2), ':', '.') AS monday_hours,
+    DATE_FORMAT(timesheet.tuesday_date, '%Y-%m-%d') AS tuesday_date,
+    REPLACE(SUBSTRING_INDEX(timesheet.tuesday_hours, ':', 2), ':', '.') AS tuesday_hours,
+    DATE_FORMAT(timesheet.wednesday_date, '%Y-%m-%d') AS wednesday_date,
+    REPLACE(SUBSTRING_INDEX(timesheet.wednesday_hours, ':', 2), ':', '.') AS wednesday_hours,
+    DATE_FORMAT(timesheet.thursday_date, '%Y-%m-%d') AS thursday_date,
+    REPLACE(SUBSTRING_INDEX(timesheet.thursday_hours, ':', 2), ':', '.') AS thursday_hours,
+    DATE_FORMAT(timesheet.friday_date, '%Y-%m-%d') AS friday_date,
+    REPLACE(SUBSTRING_INDEX(timesheet.friday_hours, ':', 2), ':', '.') AS friday_hours,
+    DATE_FORMAT(timesheet.saturday_date, '%Y-%m-%d') AS saturday_date,
+    REPLACE(SUBSTRING_INDEX(timesheet.saturday_hours, ':', 2), ':', '.') AS saturday_hours,
+    DATE_FORMAT(timesheet.sunday_date, '%Y-%m-%d') AS sunday_date,
+    REPLACE(SUBSTRING_INDEX(timesheet.sunday_hours, ':', 2), ':', '.') AS sunday_hours,
+    timesheet.status AS status,
+    timesheet.created_at AS created_at,
+    timesheet.updated_at AS updated_at,
     internal.name as internal_name,
     internal.id as internal_id,
     sub_internal.name as sub_internal_name,
@@ -27,9 +50,7 @@ const getTimesheet = async (Timesheet) => {
             SUBSTRING(job_types.type, 1, 4), '_',
             SUBSTRING(jobs.job_id, 1, 15)
             ) AS job_name,
-    jobs.id as job_id,
-    task.name as task_name,
-    task.id as task_id
+    task.name as task_name
   FROM 
     timesheet 
    LEFT JOIN internal  ON timesheet.job_id = internal.id AND timesheet.task_type = 1
@@ -46,7 +67,6 @@ const getTimesheet = async (Timesheet) => {
       query,
       [staff_id]
     );
-
     return { status: true, message: "success.", data: rows };
   } catch (err) {
     console.log(err);
@@ -298,7 +318,81 @@ LEFT JOIN
 
 
 
+ const saveTimesheet = async (Timesheet) => {
+  try {
+    const {staff_id , data} = Timesheet;
+  console.log("data ",data)
+    const formatTime = input => {
+      if(input == null){
+        return null 
+      }
+      const [hours, minutes = '00'] = input.toString().split('.');
+      return `${hours}:${(minutes + '00').slice(0, 2)}`;
+    };
+
+    for (const row of data) {
+      const customer_id = row.customer_id == null ? 0 :row.customer_id;
+      const client_id = row.client_id == null ? 0 :row.client_id;
+
+      const monday_hours =  formatTime(row.monday_hours);
+      const tuesday_hours =  formatTime(row.tuesday_hours);
+      const wednesday_hours =  formatTime(row.wednesday_hours);
+      const thursday_hours =  formatTime(row.thursday_hours);
+      const friday_hours =  formatTime(row.friday_hours);
+      const saturday_hours =  formatTime(row.saturday_hours);
+      const sunday_hours =  formatTime(row.sunday_hours);
+
+  
+      if (row.id === null) {
+        const insertQuery = `
+          INSERT INTO timesheet (
+            staff_id, task_type, customer_id, client_id, job_id, task_id, monday_date, monday_hours,
+            tuesday_date, tuesday_hours, wednesday_date, wednesday_hours, thursday_date, thursday_hours,
+            friday_date, friday_hours, saturday_date, saturday_hours, sunday_date, sunday_hours
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?)`;
+
+        const insertValues = [
+          staff_id , row.task_type, customer_id, client_id, row.job_id, row.task_id,
+          row.monday_date, monday_hours, row.tuesday_date, tuesday_hours, row.wednesday_date,
+          wednesday_hours, row.thursday_date, thursday_hours, row.friday_date, friday_hours,
+          row.saturday_date, saturday_hours, row.sunday_date,sunday_hours
+        ];
+
+        await pool.query(insertQuery, insertValues);
+
+      } else {
+        const updateQuery = `
+          UPDATE timesheet
+          SET
+            task_type = ?, customer_id = ?, client_id = ?, job_id = ?, task_id = ?,
+            monday_date = ?, monday_hours = ?, tuesday_date = ?, tuesday_hours = ?, wednesday_date = ?,
+            wednesday_hours = ?, thursday_date = ?, thursday_hours = ?, friday_date = ?, friday_hours = ?,
+            saturday_date = ?, saturday_hours = ?, sunday_date = ?, sunday_hours = ?
+          WHERE id = ?`;
+
+        const updateValues = [
+          row.task_type, customer_id, client_id, row.job_id, row.task_id,
+          row.monday_date, monday_hours, row.tuesday_date, tuesday_hours, row.wednesday_date,
+          wednesday_hours, row.thursday_date, thursday_hours, row.friday_date, friday_hours,
+          row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, row.id
+        ];
+
+        await pool.query(updateQuery, updateValues);
+      }
+    }
+
+    return { status: true, message: "Timesheet data saved successfully." };
+  } catch (err) {
+    console.error(err);
+    return { status: false, message: "Error saving timesheet data.", error: err.message };
+  }
+}
+
+
+
+
 module.exports = {
   getTimesheet,
-  getTimesheetTaskType
+  getTimesheetTaskType,
+  saveTimesheet
 };

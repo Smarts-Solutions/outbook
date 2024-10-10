@@ -3,7 +3,7 @@ import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal"
 import { Trash2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getTimesheetData, getTimesheetTaskTypedData } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
+import { getTimesheetData, getTimesheetTaskTypedData ,saveTimesheetData } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
 
 const Timesheet = () => {
   const navigate = useNavigate();
@@ -21,72 +21,110 @@ const Timesheet = () => {
     }
   }
 
+  const [currentDay, setCurrentDay] = useState('');
+
+  const [weekDays, setWeekDays] = useState({
+    monday: '',
+    tuesday: '',
+    wednesday: '',
+    thursday: '',
+    friday: '',
+    saturday: '',
+    sunday: '',
+  });
+
   useEffect(() => {
-    GetTimeSheet()
+    GetTimeSheet();
+
+    // set day wise Input
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const todays = new Date().getDay();
+    setCurrentDay(days[todays]);
+
+    // set date in table heading wise Input
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const startOfWeek = new Date(today);
+
+    if (dayOfWeek === 0) {
+      startOfWeek.setDate(today.getDate() - 6);
+    } else {
+      startOfWeek.setDate(today.getDate() - (dayOfWeek - 1));
+    }
+
+    setWeekDays({
+      monday: formatDate(new Date(startOfWeek)),
+      tuesday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
+      wednesday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
+      thursday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
+      friday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
+      saturday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
+      sunday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
+    });
+
+
   }, [])
 
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-GB', {
+      weekday: 'short',  // Mon, Tue, etc.
+      day: '2-digit',    // 01, 02, etc.
+      month: '2-digit',  // 01, 02, etc.
+      year: 'numeric',   // 2024, etc.
+    });
+  };
 
+  console.log("currentDay", currentDay);
+  // 2024-10-09
 
-  const TaskType = useRef("0")
-
-  const [jobData, setJobData] = useState([]);
-  const [customerData, setCustomerData] = useState([]);
-  const [clientData, setClientData] = useState([]);
-  const [taskData, setTaskData] = useState([]);
-
-  const [addtask, setAddtask] = useState(false);
+  const [addRemark, setAddRemark] = useState(false);
   const [timeSheetRows, setTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
 
-  // Initial state for timeSheetRows
-  //    const [timeSheetRows, setTimeSheetRows] = useState([
-  //     {
-  //         task_type: '',       // Will store "1" for Internal or "2" for External
-  //         customer_id: '',      // Stores selected customer ID
-  //         customer_name: '',    // Stores customer name if task_type is "2"
-  //         client_id: '',        // Stores selected client ID
-  //         client_name: '',      // Stores client name if task_type is "2"
-  //         job_id: '',           // Stores selected job ID
-  //         job_name: '',         // Stores job name
-  //         internal_name: '',    // Stores internal job name if task_type is "1"
-  //         task_id: '',          // Stores selected task ID
-  //         task_name: '',        // Stores selected task name
-  //         newRow: 1,     // To enable or disable inputs based on newRow flag
-  //         customerData: [],     // Holds the data for customer dropdown
-  //         clientData: [],       // Holds the data for client dropdown
-  //         jobData: [],          // Holds the data for job dropdown
-  //         taskData: []          // Holds the data for task dropdown
-  //     }
-  // ]);
 
   // Function to handle dropdown change
   const handleTabChange = (event) => {
     setSelectedTab(event.target.value);
   };
   const handleAddNewSheet = async () => {
+
+    if (timeSheetRows.length > 0) {
+      const lastObject = timeSheetRows[timeSheetRows.length - 1];
+      if (lastObject.task_id == null) {
+        alert("Please select the Task")
+        return
+      }
+    }
+
     const newSheetRow = {
+      id: null,
       task_type: null,
       customer_id: null,
       client_id: null,
       job_id: null,
       task_id: null,
+      monday_date: null,
       monday_hours: null,
+      tuesday_date: null,
       tuesday_hours: null,
+      wednesday_date: null,
       wednesday_hours: null,
+      thursday_date: null,
       thursday_hours: null,
+      friday_date: null,
       friday_hours: null,
+      saturday_date: null,
       saturday_hours: null,
       sunday_date: null,
+      sunday_hours: null,
       newRow: 1,
+      editRow: 0,
       customerData: [],     // Holds the data for customer dropdown
       clientData: [],       // Holds the data for client dropdown
       jobData: [],          // Holds the data for job dropdown
       taskData: []          // Holds the data for task dropdown
     };
-    setJobData([]);
-    setCustomerData([]);
-    setClientData([]);
-    setTaskData([]);
+
     // setTimeSheetRows((prevRows) => [...prevRows, newSheetRow]);
 
     setTimeSheetRows((prevRows) => {
@@ -267,6 +305,68 @@ const Timesheet = () => {
     setTimeSheetRows(updatedRows);
 
   }
+
+  const handleHoursInput = async (e, index, day_name, date_value) => {
+
+    let value = e.target.value;
+    let name = e.target.name;
+    const updatedRows = [...timeSheetRows]
+    if (updatedRows[index][name] == null) {
+      updatedRows[index][name] = ""
+      setTimeSheetRows(updatedRows);
+    }
+    // if (!/^[0-9.]*$/.test(value)) {
+    //   return;
+    // }
+    if (!/^\d*\.?\d{0,2}$/.test(value)) {
+      return;
+    }
+
+
+    const datePart = date_value.split(',')[1].trim(); // "07/10/2024"
+    const [day, month, year] = datePart.split('/');
+    const formattedDate = new Date(`${year}-${month}-${day}`);
+    const date_final_value = formattedDate.toISOString().split('T')[0];
+
+
+    // const updatedRows = [...timeSheetRows]
+    updatedRows[index][day_name] = date_final_value;
+    updatedRows[index][name] = value;
+    setTimeSheetRows(updatedRows);
+  }
+
+  const editRow = async (e, index) => {
+    console.log("e ",e)
+    console.log("index ",index)
+    const updatedRows = [...timeSheetRows];
+    updatedRows[index].editRow = 1;
+    setTimeSheetRows(updatedRows);
+    
+  }
+
+  const saveData = async (e) => {
+
+    const hasEditRow = timeSheetRows.some(item => item.editRow === 1);
+    if(hasEditRow == true){
+      setAddRemark(true);
+      return
+    }
+
+  alert("Okkk")
+
+    const updatedTimeSheetRows = timeSheetRows.map(row => {
+      const { customerData, clientData,jobData,taskData, ...rest } = row; 
+      return rest; 
+    });
+
+    const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows };
+    const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
+    if (res.status) {
+      GetTimeSheet();
+    }
+  }
+
+  
   return (
     <div className="page-content">
       <div className="container-fluid">
@@ -341,28 +441,28 @@ const Timesheet = () => {
                               className="dropdwnCol5"
                               data-field="customer_name"
                             >
-                              Mon 12/02/2024
+                              {weekDays.monday.replace(",", "")}
                             </th>
                             <th
                               className="dropdwnCol5"
                               data-field="customer_name"
                             >
-                              Tue 13/02/2024
+                              {weekDays.tuesday.replace(",", "")}
                             </th>
                             <th className="dropdwnCol5" data-field="phone">
-                              Wed 14/02/2024
+                              {weekDays.wednesday.replace(",", "")}
                             </th>
                             <th className="dropdwnCol5" data-field="phone">
-                              Thu 15/02/2024
+                              {weekDays.thursday.replace(",", "")}
                             </th>
                             <th className="dropdwnCol5" data-field="phone">
-                              Fri 16/02/2024
+                              {weekDays.friday.replace(",", "")}
                             </th>
                             <th className="dropdwnCol5" data-field="phone">
-                              Sat 17/02/2024
+                              {weekDays.saturday.replace(",", "")}
                             </th>
                             <th className="dropdwnCol5" data-field="phone">
-                              Sun 18/02/2024
+                              {weekDays.sunday.replace(",", "")}
                             </th>
                             <th className="dropdwnCol5" data-field="phone">
                               Action
@@ -493,74 +593,103 @@ const Timesheet = () => {
                                   <input
                                     className="form-control cursor-pointer"
                                     style={{ width: '150px' }}
-                                    defaultValue={item.task_name || ''}
+                                    defaultValue={item.task_type === "1" ? item.sub_internal_name : item.task_name}
                                     disabled
                                   />
                                 )}
                               </td>
+
+                              {/*Monday Input*/}
                               <td>
                                 <input
                                   className="form-control cursor-pointer"
-                                  disabled
-                                  readOnly
-                                  defaultValue={2}
+                                  type="text"
+                                  name="monday_hours"
+                                  onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday)}
+                                  value={item.monday_hours == null ? "0":item.monday_hours}
+                                  disabled={item.editRow==1 ? new Date(weekDays.monday) > new Date() ? true: false: currentDay !== 'monday'}
                                 />
                               </td>
+
+                              {/*Tuesday Input*/}
                               <td>
                                 <input
                                   className="form-control cursor-pointer"
-                                  disabled
-                                  readOnly
-                                  defaultValue={5}
+                                  type="text"
+                                  name="tuesday_hours"
+                                  onChange={(e) => handleHoursInput(e, index, 'tuesday_date', weekDays.tuesday)}
+                                  value={item.tuesday_hours == null ? "0" : item.tuesday_hours}
+                                  disabled={item.editRow==1 ? new Date(weekDays.tuesday) > new Date() ? true: false: currentDay !== 'tuesday'}
                                 />
                               </td>
+
+                              {/*Wednesday Input*/}
                               <td>
                                 <input
                                   className="form-control cursor-pointer"
-                                  disabled
-                                  readOnly
-                                  defaultValue={7}
+                                  type="text"
+                                  name="wednesday_hours"
+                                  onChange={(e) => handleHoursInput(e, index, 'wednesday_date', weekDays.wednesday)}
+                                  value={item.wednesday_hours ==null ? "0" :item.wednesday_hours}
+                                  disabled={item.editRow==1 ? new Date(weekDays.wednesday) > new Date() ? true: false:currentDay !== 'wednesday'}
                                 />
                               </td>
+
+                              {/*Thursday Input*/}
                               <td>
                                 <input
                                   className="form-control cursor-pointer"
-                                  disabled
-                                  readOnly
-                                  defaultValue={9}
+                                  type="text"
+                                  name="thursday_hours"
+                                  onChange={(e) => handleHoursInput(e, index, 'thursday_date', weekDays.thursday)}
+                                  value={item.thursday_hours == null ? "0" : item.thursday_hours}
+                                  disabled={item.editRow==1 ?  new Date(weekDays.thursday) > new Date() ? true: false: currentDay !== 'thursday'}
                                 />
                               </td>
+
+                              {/*Friday Input*/}
                               <td>
                                 <input
                                   className="form-control cursor-pointer"
-                                  disabled
-                                  readOnly
-                                  defaultValue={3}
+                                  type="text"
+                                  name="friday_hours"
+                                  onChange={(e) => handleHoursInput(e, index, 'friday_date', weekDays.friday)}
+                                  value={item.friday_hours == null ? "0" : item.friday_hours}
+                                  disabled={item.editRow==1 ? new Date(weekDays.friday) > new Date() ? true: false:currentDay !== 'friday'}
                                 />
                               </td>
+
+                              {/*Saturday Input*/}
                               <td>
                                 <input
                                   className="form-control cursor-pointer"
-                                  disabled
-                                  readOnly
-                                  defaultValue={2}
+                                  type="text"
+                                  name="saturday_hours"
+                                  onChange={(e) => handleHoursInput(e, index, 'saturday_date', weekDays.saturday)}
+                                  value={item.saturday_hours == null ? "0" : item.saturday_hours}
+                                  disabled={item.editRow==1 ? new Date(weekDays.saturday) > new Date() ? true: false: currentDay !== 'saturday'}
                                 />
                               </td>
+
+                              {/*Sunday Input*/}
                               <td>
                                 <input
                                   className="form-control cursor-pointer"
-                                  disabled
-                                  readOnly
-                                  defaultValue={5}
+                                  type="text"
+                                  name="sunday_hours"
+                                  onChange={(e) => handleHoursInput(e, index, 'sunday_date', weekDays.sunday)}
+                                  value={item.sunday_hours == null ? "0" : item.sunday_hours}
+                                  disabled={item.editRow==1 ? new Date(weekDays.sunday) > new Date() ? true: false: currentDay !== 'sunday'}
                                 />
+                                
                               </td>
 
                               <td className="d-flex">
                                 <button
                                   className="edit-icon"
-                                  onClick={() => {
-
-                                    setAddtask(true);
+                                  onClick={(e) => {
+                                      editRow(e , index);
+                
                                   }}
                                 >
                                   <i className="fa fa-pencil text-primary  "></i>
@@ -630,7 +759,10 @@ const Timesheet = () => {
             {selectedTab === "custom" && <div>Custom content...</div>}
           </div>
           <div className="d-flex justify-content-end mt-3">
-            <button className="btn btn-info">
+            <button className="btn btn-info"
+             onClick={(e) => {
+              saveData(e);
+             }}>
               <i className="fa fa-check"></i> save
             </button>
             <button className="btn btn-outline-success ms-3">
@@ -643,16 +775,16 @@ const Timesheet = () => {
 
 
           <CommonModal
-            isOpen={addtask}
+            isOpen={addRemark}
             backdrop="static"
             size="lg"
             cancel_btn={false}
             btn_2="true"
             btn_name="Save"
-            title="Task"
+            title="Remark"
             hideBtn={false}
             handleClose={() => {
-              setAddtask(false);
+              setAddRemark(false);
             }}
           >
             <div className="modal-body">
