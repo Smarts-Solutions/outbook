@@ -117,6 +117,7 @@ const Timesheet = () => {
       saturday_hours: null,
       sunday_date: null,
       sunday_hours: null,
+      remark: null,
       newRow: 1,
       editRow: 0,
       customerData: [],     // Holds the data for customer dropdown
@@ -352,7 +353,7 @@ const Timesheet = () => {
       return
     }
 
-  alert("Okkk")
+    alert("Okkk")
 
     const updatedTimeSheetRows = timeSheetRows.map(row => {
       const { customerData, clientData,jobData,taskData, ...rest } = row; 
@@ -366,6 +367,10 @@ const Timesheet = () => {
     }
   }
 
+  const saveTimeSheetRemark = async (e) => {
+    
+    alert("DONEEE")
+    }
   
   return (
     <div className="page-content">
@@ -786,6 +791,7 @@ const Timesheet = () => {
             handleClose={() => {
               setAddRemark(false);
             }}
+            Submit_Function={(e) => saveTimeSheetRemark(e)}
           >
             <div className="modal-body">
               <div className="row">
