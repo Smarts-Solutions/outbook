@@ -816,7 +816,7 @@ const Engagement = () => {
                                   </div>
 
                                   {jobEntries.length > 1 && (
-                                    <div className="col-lg-1 text-center d-flex">
+                                    <div className="col-lg-1 justify-content-end d-flex">
                                       <button
                                       style={{height:'37px'}}
                                         className="delete-icon mt-4"
@@ -829,7 +829,7 @@ const Engagement = () => {
                                 </div>
                               ))}
                               <div
-                                className="col-lg-12 text-end pe-3"
+                                className="col-lg-12 text-end pe-2"
                                 style={{ marginTop: 22 }}
                               >
                                 <a className="add_icon" onClick={handleAddJob}>

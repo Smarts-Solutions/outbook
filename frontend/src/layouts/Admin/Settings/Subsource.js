@@ -219,7 +219,7 @@ const Setting = () => {
           customerSubSourceData(req);
           sweatalert.fire({
             title: "Deleted!",
-            text: "Your file has been deleted.",
+            text: "Sub-source delete successfully",
             icon: "success",
           });
         }

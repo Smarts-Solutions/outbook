@@ -29,7 +29,7 @@ const Setting = () => {
   const accessData = useSelector(
     (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data
   );
-
+ 
   useEffect(() => {
     if (
       accessData &&
@@ -608,7 +608,7 @@ const Setting = () => {
       name: "Service Name",
       selector: (row) => row.name,
       sortable: true,
-      width: "60%",
+      width: "70%",
     },
     {
       name: "Status",
@@ -879,7 +879,7 @@ const Setting = () => {
       name: "Source Name",
       selector: (row) => row.name,
       sortable: true,
-      width: "60%",
+    
     },
     {
       name: "Status",

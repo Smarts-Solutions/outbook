@@ -10010,6 +10010,7 @@ font-size: 14px;
   font-size: 14px !important;
   color: #4B4B4B !important;
   border-radius: 20px;
+  height: 36px;
 }
 
 body .accordion-button:not(.collapsed)::after {
@@ -10669,12 +10670,12 @@ a.nav-link.dropdown-toggle.arrow-none.waves-light.waves-effect img {
 
 .hours-div .input-group-text {
   position: absolute;
-  right: -1.5px;
+  right: 0.5px;
   background: #d5d5d5;
-  top: -0.3px;
-  height: 35.5px;
+  top: 0.6px;
+  height: 35px;
   border-radius: 0 21px 20px 0px;
-  border: 1px solid #c5c5c5;
+  border: 2px solid #878484;
 }
 
 .swal2-popup .swal2-styled:focus {
@@ -10684,7 +10685,7 @@ select.error-field.form-select, input.error-field.form-control {
   background: #fff !important;
   border: 1px solid #ef7e7e;
   appearance: auto;
-  padding: 8px;
+
 }
 
 select#tabSelect {
@@ -10743,4 +10744,28 @@ select#tabSelect {
   background: transparent !important;
   border: none !important;
   box-shadow: none;
+}
+
+.data-table-cell {
+  position: relative;
+  white-space: nowrap; /* Prevents text wrapping */
+  overflow: hidden; /* Hides overflowing content */
+  text-overflow: ellipsis; /* Adds ellipsis for truncated text */
+}
+
+.data-table-cell:hover::after {
+  content: attr(data-fulltext); /* Displays the full text */
+  position: absolute;
+  left: 0;
+  top: 100%; /* Places tooltip below the cell */
+  white-space: normal; /* Allows text to wrap in the tooltip */
+  background-color: rgba(0, 0, 0, 0.75); /* Tooltip background color */
+  color: #fff; /* Tooltip text color */
+  padding: 5px; /* Padding around tooltip text */
+  border-radius: 4px; /* Rounded corners for tooltip */
+  z-index: 10; /* Ensures tooltip appears above other elements */
+  max-width: 300px; /* Maximum width for the tooltip */
+  overflow-wrap: break-word; /* Prevents long words from overflowing */
+  transition: opacity 0.2s; /* Smooth transition */
+  opacity: 1; /* Make the tooltip fully visible */
 }

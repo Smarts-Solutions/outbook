@@ -72,7 +72,7 @@ const modifySubInternal = async (sub_internal) => {
     try {
         const [result] = await pool.query
             (query, [name, status, id]);
-        return { status: true, message: 'sub internal updated successfully.', data: result.insertId };
+        return { status: true, message: 'Sub-Internal task updated successfully.', data: result.insertId };
     }
     catch (err) {
         console.error('Error updating data:', err);

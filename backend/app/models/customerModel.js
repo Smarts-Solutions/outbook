@@ -645,7 +645,7 @@ ORDER BY
 
     try {
 
-        return { status: true, message: 'Success..', data: result };
+        return { status: true, message: 'Customer details have been successfully added!', data: result };
 
     } catch (err) {
 
