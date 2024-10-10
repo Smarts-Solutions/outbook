@@ -62,7 +62,9 @@ const customerStatusUpdate = async (customer) => {
   return customerModel.customerStatusUpdate(customer);
 }
 
-
+const getcustomerschecklist = async (customer) => {
+  return customerModel.getcustomerschecklist(customer);
+}
 
 module.exports = {
   addCustomer,
@@ -73,4 +75,5 @@ module.exports = {
   updateProcessCustomerFileAction,
   customerUpdate,
   customerStatusUpdate,
+  getcustomerschecklist
 };
