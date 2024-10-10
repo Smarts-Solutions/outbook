@@ -1527,7 +1527,9 @@ const Setting = () => {
 
   const handleSave = (e) => {
     e.preventDefault();
+    console.log("sss",modalData.fields[0].value);
     if (
+  
       modalData.fields[0].value == "" ||
       modalData.fields[0].value == undefined
     ) {
