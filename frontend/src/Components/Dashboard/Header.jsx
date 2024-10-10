@@ -470,12 +470,12 @@ const Header = () => {
                 </svg>
               </button>
             </li>
-            <li>
+            {/* <li>
               <p className="mb-0 page-subtitle">{formatTime(currentTime)}</p>
               <h2 className="header-page-title mt-1 mb-0">
                 {formatDate(currentTime)}
               </h2>
-            </li>
+            </li> */}
           </ul>
         </nav>
         {/* end navbar*/}

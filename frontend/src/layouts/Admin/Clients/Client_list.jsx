@@ -26,12 +26,13 @@ const ClientList = () => {
   const [getAccessDataClient, setAccessDataClient] = useState({ insert: 0, update: 0, delete: 0, client: 0, });
   const [getAccessDataJob, setAccessDataJob] = useState({ insert: 0, update: 0, delete: 0, job: 0, });
   const [activeTab, setActiveTab] = useState('');
-  
+  const role = JSON.parse(localStorage.getItem("role"));
+
   useEffect(() => {
-    setActiveTab( 
-      getAccessDataClient && getAccessDataClient.client==1 ? "client" : 
-      getAccessDataJob && getAccessDataJob.job == 1 ? "job" : 
-      "documents")
+    setActiveTab(
+      (getAccessDataClient && getAccessDataClient.client == 1) || role === "ADMIN" || role === "SUPERADMIN" ? "client" :
+        (getAccessDataJob && getAccessDataJob.job == 1) || role === "ADMIN" || role === "SUPERADMIN" ? "job" :
+          "documents")
   }, [getAccessDataJob, getAccessDataClient]);
 
 
@@ -104,10 +105,10 @@ const ClientList = () => {
 
   useEffect(() => {
     let tabsData = [];
-    if (getAccessDataClient && getAccessDataClient.client == 1) { 
+    if ((getAccessDataClient && getAccessDataClient.client == 1) || role === "ADMIN" || role === "SUPERADMIN") {
       tabsData.push({ id: "client", label: "Client", icon: "fa-solid fa-user" });
     }
-    if (getAccessDataJob && getAccessDataJob.job == 1) {
+    if ((getAccessDataJob && getAccessDataJob.job == 1) || role === "ADMIN" || role === "SUPERADMIN") {
       tabsData.push(
         ...(ClientData && ClientData.length > 0
           ? [{ id: "job", label: "Job", icon: "fa-solid fa-briefcase" }]
@@ -118,7 +119,7 @@ const ClientList = () => {
     // Update the tabs state with new data
     setTabs([...tabsData, ...initialTabs]);
   }, [getAccessDataJob, getAccessDataClient, ClientData]);
- 
+
 
   const ClientListColumns = [
     {
@@ -126,7 +127,7 @@ const ClientList = () => {
       cell: (row) => (
         <div>
           {
-            getAccessDataJob.job === 1 ? (
+            getAccessDataJob.job === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
               <a
                 onClick={() => HandleClientView(row)}
                 style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -174,14 +175,14 @@ const ClientList = () => {
       cell: (row) => (
         <div>
           {
-            getAccessDataClient.update === 1 ? (
+            getAccessDataClient.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
               <button className="edit-icon" onClick={() => handleEdit(row)}>
                 <i className="ti-pencil" />
               </button>
             ) : null
           }
           {
-            getAccessDataClient.delete === 1 ? (
+            getAccessDataClient.delete === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
               <button
                 className="delete-icon"
                 onClick={() => handleDelete(row, "client")}
@@ -744,13 +745,13 @@ const ClientList = () => {
                   <>
 
                     {
-                      getAccessDataClient.insert === 1 && activeTab === "client" ? (
+                      (getAccessDataClient.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") && activeTab === "client" ? (
                         <>
                           <div className="btn btn-info text-white float-end blue-btn" onClick={handleAddClient} >
                             <i className="fa fa-plus pe-1" /> Add Client
                           </div>
                         </>
-                      ) : getAccessDataJob.insert == 1 && activeTab === "job" ? (
+                      ) : (getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN") && activeTab === "job" ? (
                         <>
                           <div className="btn btn-info text-white float-end blue-btn" onClick={handleAddJob} >
                             <i className="fa fa-plus pe-1" /> Create Job
@@ -782,7 +783,7 @@ const ClientList = () => {
         </div>
       </div>
 
-      <Hierarchy show={["Customer", activeTab]} active={1} data={hararchyData} NumberOfActive={ClientData.length} />
+      <Hierarchy show={["Customer", activeTab]} active={1} data={hararchyData} NumberOfActive={ClientData?.length} />
 
       <div className="tab-content" id="pills-tabContent">
         {tabs1.map((tab) => (

@@ -21,10 +21,10 @@ const Setting = () => {
   const [isEdit, setIsEdit] = useState(false);
 
   const customerSubSourceData = async (req) => {
-    if (location.state.Id) {
+    if (location?.state?.Id) {
       req = {
         ...req,
-        customer_source_id: location.state.Id,
+        customer_source_id: location?.state?.Id,
       };
     }
     const data = { req: req, authToken: token };

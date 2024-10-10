@@ -18,6 +18,7 @@ const Status = () => {
   const [editItem, setEditItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [getAccessData, setAccessData] = useState({ insert: 0 });
+  const role = JSON.parse(localStorage.getItem("role"));
 
 
   const accessData =
@@ -34,9 +35,7 @@ const Status = () => {
       setAccessData(updatedAccess);
     });
   }, []);
-
-
-  console.log("getAccessData", getAccessData);
+ 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -305,7 +304,7 @@ const Status = () => {
           <div className="d-flex justify-content-end align-items-center">
             <div>
               {
-                getAccessData.insert === 1 ? (
+                getAccessData.insert === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
                   <button
                     type="button"
                     className="btn btn-info text-white float-end ms-2"

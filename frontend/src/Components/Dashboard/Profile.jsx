@@ -37,7 +37,7 @@ const Profile = () => {
               <div className="row py-3">
                 <div className="col-lg-4 align-self-center mb-3 mb-lg-0">
                   <div className="dastyle-profile-main justify-content-center">
-                    <div className="dastyle-profile-main-pic">
+                    <div className="">
                       <img
                         src="https://bootdey.com/img/Content/avatar/avatar7.png"
                         alt="Admin"
@@ -75,7 +75,7 @@ const Profile = () => {
                     <li className="mb-3">
                       <i className="fa-regular fa-power-off text-secondary font-22 align-middle mr-2" />{" "}
                       <b>Status </b>:{" "}
-                      {getProfileDetails && getProfileDetails.status}
+                      {getProfileDetails && getProfileDetails.status==1 ? "Active" : "Inactive"}
                     </li>
                     <li className="">
                       <button className="btn btn-info">
