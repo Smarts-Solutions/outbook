@@ -31,10 +31,9 @@ import {
   UPDATE_STATUS,
    
 } from "../../../Services/Customer/CustomerService";
-import { GET_IP } from "../../../Utils/Comman_function";
 import { add } from "date-fns";
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-let IP_Data = await GET_IP();
+const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
 export const GetAllCompany = createAsyncThunk("seachCompany", async (data) => {
   try {

@@ -1,11 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
 import { SIGN_IN_STAFF , SIGN_IN_AZURE_SSO,LOGIN_AUTH_TOKEN , IS_LOGIN_AUTH_TOKEN_CHECK ,IS_LOGOUT} from "../../../Services/Auth/authService";
-import {GET_IP} from "../../../Utils/Comman_function";
-
-let IP_Data = await GET_IP();
-var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 const token = localStorage.getItem("token");
+const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
 
 export const SignIn = createAsyncThunk("login", async (data) => {
