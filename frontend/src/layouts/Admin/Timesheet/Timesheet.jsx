@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getTimesheetData, getTimesheetTaskTypedData ,saveTimesheetData } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
+import sweatalert from 'sweetalert2';
 
 const Timesheet = () => {
   const navigate = useNavigate();
@@ -74,11 +75,11 @@ const Timesheet = () => {
     });
   };
 
-  console.log("currentDay", currentDay);
-  // 2024-10-09
 
-  const [addRemark, setAddRemark] = useState(false);
+  const [remarkText, setRemarkText] = useState(null);
+  const [remarkModel, setRemarkModel] = useState(false);
   const [timeSheetRows, setTimeSheetRows] = useState([]);
+  const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
 
 
@@ -153,6 +154,11 @@ const Timesheet = () => {
         updatedRows[newIndex].task_id = res1.data[0].id;
         return updatedRows;
       });
+
+     // update record only
+      
+      updateRecordSheet(null , 'task_type' , '1');
+
     } else {
       // Handle the error case as needed
       console.log("API call failed:", res);
@@ -163,6 +169,8 @@ const Timesheet = () => {
   };
 
   console.log("setTimeSheetRows", timeSheetRows)
+ 
+  console.log("updateTimeSheetRows", updateTimeSheetRows)
 
   const handleDeleteRow = (index) => {
     const newSheetRows = [...timeSheetRows];
@@ -222,9 +230,11 @@ const Timesheet = () => {
       }
     }
     setTimeSheetRows([...updatedRows]); // Save changes
+
+   // update record only
+   const rowId = updatedRows[index].id;
+   updateRecordSheet(rowId , 'task_type' , e.target.value);
   };
-
-
 
   const selectCustomerData = async (e, index) => {
     const updatedRows = [...timeSheetRows];
@@ -244,6 +254,10 @@ const Timesheet = () => {
       }
     }
     setTimeSheetRows(updatedRows);
+
+     // update record only
+     const rowId = updatedRows[index].id;
+     updateRecordSheet(rowId , 'customer_id' , e.target.value);
   };
 
   const selectClientData = async (e, index) => {
@@ -276,6 +290,11 @@ const Timesheet = () => {
       }
     }
     setTimeSheetRows(updatedRows);
+
+
+     // update record only
+     const rowId = updatedRows[index].id;
+     updateRecordSheet(rowId , 'client_id' , e.target.value);
   };
 
   const selectJobData = async (e, task_type, index) => {
@@ -298,6 +317,10 @@ const Timesheet = () => {
       }
     }
     setTimeSheetRows(updatedRows);
+
+     // update record only
+     const rowId = updatedRows[index].id;
+     updateRecordSheet(rowId , 'job_id' , e.target.value);
   };
 
   const selectTaskData = async (e, index) => {
@@ -305,10 +328,14 @@ const Timesheet = () => {
     updatedRows[index].task_id = e.target.value;
     setTimeSheetRows(updatedRows);
 
+    // update record only
+    const rowId = updatedRows[index].id;
+    updateRecordSheet(rowId , 'task_id' , e.target.value);
+
   }
 
   const handleHoursInput = async (e, index, day_name, date_value) => {
-
+  
     let value = e.target.value;
     let name = e.target.name;
     const updatedRows = [...timeSheetRows]
@@ -334,7 +361,30 @@ const Timesheet = () => {
     updatedRows[index][day_name] = date_final_value;
     updatedRows[index][name] = value;
     setTimeSheetRows(updatedRows);
+
+    // update record only
+    const rowId = updatedRows[index].id;
+    updateRecordSheet(rowId , name , value);
+  
   }
+  
+  // update record only Function
+  function updateRecordSheet(rowId , name , value) {
+     // update record only
+     const updatedRows_update = [...updateTimeSheetRows];
+     const existingUpdateIndex = updatedRows_update.findIndex(row => row.id === rowId);
+     if (existingUpdateIndex !== -1) {
+         updatedRows_update[existingUpdateIndex][name] = value;
+     } else {
+         updatedRows_update.push({
+             id: rowId,           
+             [name]: value        
+         });
+     }
+     setUpdateTimeSheetRows(updatedRows_update);
+  }
+
+  // update record Function
 
   const editRow = async (e, index) => {
     console.log("e ",e)
@@ -346,15 +396,21 @@ const Timesheet = () => {
   }
 
   const saveData = async (e) => {
-
-    const hasEditRow = timeSheetRows.some(item => item.editRow === 1);
-    if(hasEditRow == true){
-      setAddRemark(true);
-      return
+    
+    if (timeSheetRows.length > 0) {
+      const lastObject = timeSheetRows[timeSheetRows.length - 1];
+      if (lastObject.task_id == null) {
+        alert("Please select the Task")
+        return
+      }
     }
 
-    alert("Okkk")
-
+    if(updateTimeSheetRows.length > 0){
+    const hasEditRow = timeSheetRows.some(item => item.editRow === 1);
+    if(hasEditRow == true){
+      setRemarkModel(true);
+      return
+    }
     const updatedTimeSheetRows = timeSheetRows.map(row => {
       const { customerData, clientData,jobData,taskData, ...rest } = row; 
       return rest; 
@@ -363,13 +419,51 @@ const Timesheet = () => {
     const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows };
     const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
     if (res.status) {
+      sweatalert.fire({
+        icon: 'success',
+        title: res.message,
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500
+      });
       GetTimeSheet();
+      setUpdateTimeSheetRows([])
     }
+  }
   }
 
   const saveTimeSheetRemark = async (e) => {
-    
-    alert("DONEEE")
+    const updatedTimeSheetRows = timeSheetRows.map(item => {
+      if (item.editRow === 1) {
+        return {
+          ...item,
+          remark: remarkText 
+        };
+      }
+      return item;
+    });
+   
+  
+    const updatedTimeSheetRows1 = updatedTimeSheetRows.map(row => {
+      const { customerData, clientData,jobData,taskData, ...rest } = row; 
+      return rest; 
+    });
+
+    const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows1 };
+    const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
+    if (res.status) {
+      setRemarkText(null)
+      setUpdateTimeSheetRows([])
+      setRemarkModel(false)
+      sweatalert.fire({
+        icon: 'success',
+        title: res.message,
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500
+      });
+      GetTimeSheet();
+    }
     }
   
   return (
@@ -780,7 +874,7 @@ const Timesheet = () => {
 
 
           <CommonModal
-            isOpen={addRemark}
+            isOpen={remarkModel}
             backdrop="static"
             size="lg"
             cancel_btn={false}
@@ -789,7 +883,7 @@ const Timesheet = () => {
             title="Remark"
             hideBtn={false}
             handleClose={() => {
-              setAddRemark(false);
+              setRemarkModel(false);
             }}
             Submit_Function={(e) => saveTimeSheetRemark(e)}
           >
@@ -802,9 +896,12 @@ const Timesheet = () => {
                     Remark
                   </label>
                   <textarea
+                    type="text"
                     className="form-control cursor-pointer"
-                    // placeholder="Remark"
+                    placeholder="Enter Remark"
                     defaultValue=""
+                    onChange={(e) => setRemarkText(e.target.value)}
+                    value={remarkText}
                   />
                 </div>
               </div>

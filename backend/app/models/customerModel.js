@@ -171,7 +171,7 @@ const createCustomer = async (customer) => {
 
                 for (const detail of contactDetails) {
 
-                    let role = detail.role;
+                    let role = detail.role == ''? 0:detail.role;
                     let first_name = detail.firstName;
                     let last_name = detail.lastName;
                     let phone_code = detail.phone_code == undefined ? "" : detail.phone_code;

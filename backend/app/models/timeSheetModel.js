@@ -4,12 +4,6 @@ const getTimesheet = async (Timesheet) => {
   const { staff_id } = Timesheet;
 
   try {
-    // const [rows] = await pool.query(
-    //   "SELECT * FROM timesheet WHERE staff_id = ?",
-    //   [staff_id]
-    // );
-    const [internal] = await pool.execute(`SELECT id,name FROM internal`);
-    const [sub_internal] = await pool.execute(`SELECT id , internal_id , name  FROM sub_internal`);
 
     const query = `SELECT 
     timesheet.id AS id,
@@ -33,6 +27,7 @@ const getTimesheet = async (Timesheet) => {
     REPLACE(SUBSTRING_INDEX(timesheet.saturday_hours, ':', 2), ':', '.') AS saturday_hours,
     DATE_FORMAT(timesheet.sunday_date, '%Y-%m-%d') AS sunday_date,
     REPLACE(SUBSTRING_INDEX(timesheet.sunday_hours, ':', 2), ':', '.') AS sunday_hours,
+    timesheet.remark AS remark,
     timesheet.status AS status,
     timesheet.created_at AS created_at,
     timesheet.updated_at AS updated_at,
@@ -61,7 +56,10 @@ const getTimesheet = async (Timesheet) => {
    LEFT JOIN job_types ON jobs.job_type_id = job_types.id AND timesheet.task_type = 2
    LEFT JOIN task  ON task.id = timesheet.task_id AND timesheet.task_type = 2
   WHERE 
-    timesheet.staff_id = ?`
+    timesheet.staff_id = ?
+  ORDER BY
+    timesheet.id ASC;
+    `
 
     const [rows] = await pool.query(
       query,
@@ -322,6 +320,7 @@ LEFT JOIN
   try {
     const {staff_id , data} = Timesheet;
   console.log("data ",data)
+
     const formatTime = input => {
       if(input == null){
         return null 
@@ -333,6 +332,7 @@ LEFT JOIN
     for (const row of data) {
       const customer_id = row.customer_id == null ? 0 :row.customer_id;
       const client_id = row.client_id == null ? 0 :row.client_id;
+      const remark = row.remark == "" ? null :row.remark;
 
       const monday_hours =  formatTime(row.monday_hours);
       const tuesday_hours =  formatTime(row.tuesday_hours);
@@ -348,14 +348,14 @@ LEFT JOIN
           INSERT INTO timesheet (
             staff_id, task_type, customer_id, client_id, job_id, task_id, monday_date, monday_hours,
             tuesday_date, tuesday_hours, wednesday_date, wednesday_hours, thursday_date, thursday_hours,
-            friday_date, friday_hours, saturday_date, saturday_hours, sunday_date, sunday_hours
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?)`;
+            friday_date, friday_hours, saturday_date, saturday_hours, sunday_date, sunday_hours,remark
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ? , ?)`;
 
         const insertValues = [
           staff_id , row.task_type, customer_id, client_id, row.job_id, row.task_id,
           row.monday_date, monday_hours, row.tuesday_date, tuesday_hours, row.wednesday_date,
           wednesday_hours, row.thursday_date, thursday_hours, row.friday_date, friday_hours,
-          row.saturday_date, saturday_hours, row.sunday_date,sunday_hours
+          row.saturday_date, saturday_hours, row.sunday_date,sunday_hours , remark
         ];
 
         await pool.query(insertQuery, insertValues);
@@ -367,14 +367,14 @@ LEFT JOIN
             task_type = ?, customer_id = ?, client_id = ?, job_id = ?, task_id = ?,
             monday_date = ?, monday_hours = ?, tuesday_date = ?, tuesday_hours = ?, wednesday_date = ?,
             wednesday_hours = ?, thursday_date = ?, thursday_hours = ?, friday_date = ?, friday_hours = ?,
-            saturday_date = ?, saturday_hours = ?, sunday_date = ?, sunday_hours = ?
+            saturday_date = ?, saturday_hours = ?, sunday_date = ?, sunday_hours = ?, remark = ?
           WHERE id = ?`;
 
         const updateValues = [
           row.task_type, customer_id, client_id, row.job_id, row.task_id,
           row.monday_date, monday_hours, row.tuesday_date, tuesday_hours, row.wednesday_date,
           wednesday_hours, row.thursday_date, thursday_hours, row.friday_date, friday_hours,
-          row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, row.id
+          row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, remark , row.id
         ];
 
         await pool.query(updateQuery, updateValues);
