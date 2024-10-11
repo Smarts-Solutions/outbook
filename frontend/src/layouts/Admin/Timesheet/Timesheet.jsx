@@ -397,7 +397,7 @@ const Timesheet = () => {
        if(updatedRows[index].total_hours > parseFloat(convertTimeFormat(updatedRows[index].job_total_time))){
         sweatalert.fire({
           icon: 'warning',
-          title: "msg...",
+          title: "Your total allotted time has exceeded.",
           timerProgressBar: true,
           showConfirmButton: true,
           timer: 3000
@@ -609,9 +609,9 @@ const Timesheet = () => {
                             <th className="dropdwnCol5" data-field="phone">
                               {weekDays.saturday.replace(",", "")}
                             </th>
-                            <th className="dropdwnCol5" data-field="phone">
+                            {/* <th className="dropdwnCol5" data-field="phone">
                               {weekDays.sunday.replace(",", "")}
-                            </th>
+                            </th> */}
                             <th className="dropdwnCol5" data-field="phone">
                               Action
                             </th>
@@ -758,7 +758,7 @@ const Timesheet = () => {
                                   name="monday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday ,item)}
                                   value={item.monday_hours == null ? "0" : item.monday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? true : false : currentDay !== 'monday'}
+                                  disabled={item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday'?false:true : false : currentDay !== 'monday'}
                                 />
                               </td>
 
@@ -770,7 +770,7 @@ const Timesheet = () => {
                                   name="tuesday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'tuesday_date', weekDays.tuesday,item)}
                                   value={item.tuesday_hours == null ? "0" : item.tuesday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? true : false : currentDay !== 'tuesday'}
+                                  disabled={item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false:true : false : currentDay !== 'tuesday'}
                                 />
                               </td>
 
@@ -782,7 +782,7 @@ const Timesheet = () => {
                                   name="wednesday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'wednesday_date', weekDays.wednesday,item)}
                                   value={item.wednesday_hours == null ? "0" : item.wednesday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? true : false : currentDay !== 'wednesday'}
+                                  disabled={item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false :true : false : currentDay !== 'wednesday'}
                                 />
                               </td>
 
@@ -794,7 +794,7 @@ const Timesheet = () => {
                                   name="thursday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'thursday_date', weekDays.thursday , item)}
                                   value={item.thursday_hours == null ? "0" : item.thursday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ? true : false : currentDay !== 'thursday'}
+                                  disabled={item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ?currentDay === 'thursday' ?false: true : false : currentDay !== 'thursday'}
                                 />
                               </td>
 
@@ -806,7 +806,7 @@ const Timesheet = () => {
                                   name="friday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'friday_date', weekDays.friday ,item )}
                                   value={item.friday_hours == null ? "0" : item.friday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? true : false : currentDay !== 'friday'}
+                                  disabled={item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ?false :true : false : currentDay !== 'friday'}
                                 />
                               </td>
 
@@ -818,22 +818,26 @@ const Timesheet = () => {
                                   name="saturday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'saturday_date', weekDays.saturday ,item)}
                                   value={item.saturday_hours == null ? "0" : item.saturday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? true : false : currentDay !== 'saturday'}
+                                  disabled={item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
                                 />
                               </td>
 
                               {/*Sunday Input*/}
-                              <td>
+                              {/* 
+                               <td>
                                 <input
                                   className="form-control cursor-pointer"
                                   type="text"
                                   name="sunday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'sunday_date', weekDays.sunday ,item )}
                                   value={item.sunday_hours == null ? "0" : item.sunday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.sunday) > new Date() ? true : false : currentDay !== 'sunday'}
+                                  disabled={item.editRow == 1 ? new Date(weekDays.sunday) > new Date() ? currentDay === 'sunday' ? false: true : false : currentDay !== 'sunday'}
                                 />
 
                               </td>
+                              
+                              */}
+                             
 
                               <td className="d-flex">
                                 {
