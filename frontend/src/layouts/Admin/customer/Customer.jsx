@@ -218,12 +218,12 @@ const Customer = () => {
                 <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
                   <i className="ti-pencil text-primary" />
                 </button>
-                <button
+                {/* <button
                   className="delete-icon "
                   onClick={() => handleDelete(row)}
                 >
                   <i className="ti-trash text-danger " />
-                </button>
+                </button> */}
               </>
             ) : (
               <>
@@ -232,14 +232,14 @@ const Customer = () => {
                     <i className="ti-pencil text-primary" />
                   </button>
                 )}
-                {hasDeleteAccess && (
+                {/* {hasDeleteAccess && (
                   <button
                     className="delete-icon"
                     onClick={() => handleDelete(row)}
                   >
                     <i className="ti-trash text-danger" />
                   </button>
-                )}
+                )} */}
               </>
             )}
           </div>

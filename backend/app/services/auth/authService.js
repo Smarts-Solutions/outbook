@@ -133,6 +133,10 @@ const isLogOut = async(credentials) => {
   return {status:true,message:"Success.."}
 }
 
+const status = async (id) => {
+  return staffModel.status(id);
+}
+
 
 
 
@@ -155,5 +159,6 @@ module.exports = {
     loginWithAzure,
     isLoginAuthTokenCheck,
     isLogOut,
-    managePortfolio
+    managePortfolio,
+    status
 };
