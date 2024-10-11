@@ -2262,13 +2262,14 @@ const CreateJob = () => {
                             <div className="col-lg-12 mt-2">
                               <div className="mb-3">
                                 <label className="form-label">
-                                  Budgeted Hours
+                                  Budgeted Time
                                 </label>
                                 <div className="input-group">
+                                <div className="hours-div">
                                   <input
                                     type="text"
-                                    className="form-control"
-                                    
+                                    className={BudgetedHoureError  ? "error-field form-control" : "form-control"}
+
                                     placeholder="Hours"
                                     name="budgeted_hour"
                                     onChange={(e) => {
@@ -2276,10 +2277,13 @@ const CreateJob = () => {
                                     }}
                                     value={BudgetedHoursAddTask.hours}
                                   />
-
+                                    <span className="input-group-text">H</span>
+                                  </div>
+                                  <div className="hours-div ">
                                   <input
                                     type="text"
-                                    className="form-control"
+                                    className={BudgetedMinuteError  ? "error-field form-control" : "form-control"}
+
                                     placeholder="Minutes"
                                     name="budgeted_minute"
                                     onChange={(e) => {
@@ -2287,6 +2291,8 @@ const CreateJob = () => {
                                     }}
                                     value={BudgetedHoursAddTask.minutes}
                                   />
+                                  <span className="input-group-text">M</span>
+                                  </div>
                                 </div>
                                 {BudgetedHoureError ? (
                                   <div className="error-text text-danger">

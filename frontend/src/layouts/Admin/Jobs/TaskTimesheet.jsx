@@ -423,6 +423,7 @@ const TaskTimesheet = () => {
             <div className="mb-3">
               <label className="form-label">Budgeted Hours</label>
               <div className="input-group">
+              <div className="hours-div w-100">
                 <input
                   type="number"
                   className="form-control"
@@ -434,6 +435,9 @@ const TaskTimesheet = () => {
                   onChange={(e) => handleChange(e)}
                   value={BudgetedTime.hours}
                 />
+                <span className="input-group-text">H</span>
+                </div>
+                <div className="hours-div w-100">
                 <input
                   type="number"
                   className="form-control"
@@ -445,6 +449,8 @@ const TaskTimesheet = () => {
                   onChange={(e) => handleChange(e)}
                   value={BudgetedTime.minutes}
                 />
+                <span className="input-group-text">M</span>
+              </div>
               </div>
             </div>
           </div>
@@ -452,8 +458,9 @@ const TaskTimesheet = () => {
             <div className="mb-3">
               <label className="form-label">Tolal Hours</label>
               <div className="input-group">
+              <div className="hours-div w-100">
                 <input
-                  type="number"
+                  type="text"
                   className={error['totalHours'] ? "error-field form-control" : "form-control"}
                   placeholder="Hours"
                   defaultValue=""
@@ -462,8 +469,11 @@ const TaskTimesheet = () => {
                   onChange={(e) => handleChange(e)}
                   value={GetTimeSheetTotalHours.hours}
                 />
+                <span className="input-group-text">H</span>
+                </div>
+                <div className="hours-div w-100">
                 <input
-                  type=""
+                  type="text"
                   className={error['totalMinutes'] ? "error-field form-control" : "form-control"}
                   placeholder="Minutes"
                   defaultValue=""
@@ -472,8 +482,10 @@ const TaskTimesheet = () => {
                   onChange={(e) => handleChange(e)}
                   value={GetTimeSheetTotalHours.minutes}
                 />
+                 <span className="input-group-text">M</span>
               </div>
-
+             
+             </div>
               {error['totalHours'] ? <div className="error-text">{error['totalHours']}</div> :
                 <div className="error-text">{error['totalMinutes']}</div>
               }
@@ -694,24 +706,13 @@ const TaskTimesheet = () => {
                   <span className="text-muted">{jobTimeData && jobTimeData[0] && jobTimeData[0].job_code_id}</span>
                 </div>
               </div>
-              {/* <div className="row">
-                <div className="col-md-4">
-                  <label htmlFor="customername-field" className="form-label">
-                    Message
-                  </label>
-                </div>
-                <div className="col-md-8">
-                  <span className="text-muted">
-                    This Task is Completed on 31st March 2023 by Nirav Patel
-                  </span>
-                </div>
-              </div> */}
+           
             </div>
           </div>
           <div className="col-md-12 ">
             <div className="mb-4 mt-3">
-              <div className="card">
-                <div className="card-body">
+              <div className="">
+                <div className="">
                   <div className="col-lg-12">
                     <label htmlFor="firstNameinput" className="form-label">
                       Total Time
@@ -719,9 +720,11 @@ const TaskTimesheet = () => {
                     <div className="row">
                       <div className="col-md-6 pe-0">
                         <div className="input-group">
+                        <div className="hours-div w-100">
                           <input
                             type="text"
-                            className="form-control"
+                            className={error1['TotalHours'] ? "error-field form-control" : "form-control"}
+
                             aria-label="Recipient's username"
                             aria-describedby="basic-addon2"
                             id="TotalHours"
@@ -731,15 +734,18 @@ const TaskTimesheet = () => {
                             placeholder="Hours"
                           />
                           <span className="input-group-text" id="basic-addon2">
-                            Hours
+                            H
                           </span>
+                          </div>
                         </div>
                       </div>
                       <div className="col-md-6 ps-0">
                         <div className="input-group">
+                        <div className="hours-div w-100">
                           <input
                             type="text"
-                            className="form-control"
+                            className={error1['TotalMinutes'] ? "error-field form-control" : "form-control"}
+
                             aria-label="Recipient's username"
                             aria-describedby="basic-addon2"
                             placeholder="Minutes"
@@ -749,12 +755,13 @@ const TaskTimesheet = () => {
                             value={TotalTime.minutes}
                           />
                           <span className="input-group-text" id="basic-addon2">
-                            Minutes
+                            M
                           </span>
+                          </div>
                         </div>
                       </div>
-                      {error1['TotalHours'] ? <div className="error-text">{error1['TotalHours']}</div> :
-                        <div className="error-text">{error1['TotalMinutes']}</div>
+                      {error1['TotalHours'] ? <div className="error-text ps-3">{error1['TotalHours']}</div> :
+                        <div className="error-text ps-2">{error1['TotalMinutes']}</div>
                       }
                     </div>
                   </div>
@@ -764,7 +771,9 @@ const TaskTimesheet = () => {
                         Task Status
                       </label>
                       <select
-                        className="form-control"
+                       
+                        className={error1['status'] ? "error-field form-select" : "form-select"}
+
                         data-trigger=""
                         name="status"
                         id="status"

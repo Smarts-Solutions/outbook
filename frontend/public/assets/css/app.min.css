@@ -4263,15 +4263,14 @@ a.nav-link.dropdown-toggle.arrow-none.waves-light.waves-effect img {
 }
 
 .hours-div .input-group-text {
-	position: absolute;
-	right: 0.5px;
-	background: #d5d5d5;
-	top: 0.6px;
-	height: 35px;
-	border-radius: 0 21px 20px 0px;
-	border: 2px solid #878484;
+    position: absolute;
+    /* right: 0.5px; */
+    background: #d5d5d5;
+    top: 0;
+    height: 36px;
+    border-radius: 0 21px 20px 0px;
+    border: 2px solid #878484;
 }
-
 .swal2-popup .swal2-styled:focus {
 	box-shadow: none !important;
 }

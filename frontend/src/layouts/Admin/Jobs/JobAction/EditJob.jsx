@@ -2385,7 +2385,7 @@ const EditJob = () => {
                                   <div className="col-lg-12 mt-2">
                                     <div className="mb-3">
                                       <label className="form-label">
-                                        Budgeted tIME
+                                        Budgeted Time
                                       </label>
                                       <div className="input-group">
                                         <div className="hours-div">

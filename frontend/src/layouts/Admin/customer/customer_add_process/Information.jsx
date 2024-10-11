@@ -1289,7 +1289,7 @@ const Information = ({ id, pageStatus }) => {
                             </div>
                           </div>
 
-                          <div>
+                          {/* <div>
                             <label htmlFor="location">Enter Location:</label>
                             <input
                               type="text"
@@ -1299,7 +1299,7 @@ const Information = ({ id, pageStatus }) => {
                               value={location} // Use value prop to bind state
                               onChange={(e) => setLocation(e.target.value)}
                             />
-                          </div>
+                          </div> */}
                         </div>
                       </div>
                     </div>
