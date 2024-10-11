@@ -433,7 +433,7 @@ const Customer = () => {
               <div className="col-4">
                 <div className="form-group mb-2 mt-1">
                   <select
-                    className="form-control"
+                    className="form-select"
                     id="tabSelect"
                     value={selectedTab}
                     onChange={handleTabChange}

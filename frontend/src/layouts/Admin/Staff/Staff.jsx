@@ -600,7 +600,7 @@ const StaffPage = () => {
             <div className="d-flex justify-content-end">
           <div className="form-group w-50">
               <select
-                className="form-control"
+                className="form-select"
                 id="tabSelect"
                 value={activeTab}
                 onChange={(e) => setActiveTab(e.target.value)}
