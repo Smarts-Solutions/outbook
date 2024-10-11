@@ -56,11 +56,22 @@ export async function IS_LOGIN_AUTH_TOKEN_CHECK(data) {
     }
 }
 
-
 // IS LOGIN AUTH TOKEN CHECK
 export async function IS_LOGOUT(data) {
     try {
         const res = await axios.post(`${Config.base_url}isLogOut`, data, {
+            data: {},
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+export async function STATUS(data) {
+    try {
+        const res = await axios.post(`${Config.base_url}status`, data, {
             data: {},
         })
         return await res?.data;

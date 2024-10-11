@@ -3075,6 +3075,43 @@ const customerStatusUpdate = async (customer) => {
     return { status: false, message: 'Error updating customer status.' };
 }
 
+const getcustomerschecklist = async (customer) => {
+  try {
+    const { customer_id, service_id, job_type_id } = customer;
+    const query = `SELECT c.*, ct.* FROM checklists c JOIN checklist_tasks ct ON c.id = ct.checklist_id   WHERE c.service_id = ? AND c.job_type_id = ?;`;
+    // c.customer_id = ? AND 
+    const [result] = await pool.execute(query, [
+      // customer_id,
+      service_id,
+      job_type_id,
+    ]);
+
+    console.log("result", result);
+
+
+    if (result.length === 0) {
+      return [];
+    }
+    const formattedResults = result.map((item) => ({
+      checklistName: item.check_list_name,
+      JobTypeId: item.job_type_id,
+      Task: [
+        {
+          TaskName: item.task_name,
+          BudgetHour: item.budgeted_hour,
+        },
+      ],
+      serviceId: item.service_id,
+      id: item.id,
+    }));
+    
+
+    return formattedResults
+
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 module.exports = {
     createCustomer,
