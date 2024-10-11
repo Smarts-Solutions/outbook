@@ -1168,7 +1168,7 @@ const Engagement = () => {
                 </h4>
               </div>
               <div className="card-body">
-                {customerDetails?.data?.customer && (
+            
                   <div className="row">
                     {/* Customer Joining Date */}
                     <div className="col-lg-4">
@@ -1244,7 +1244,7 @@ const Engagement = () => {
                       )}
                     </div>
                   </div>
-                )}
+          
               </div>
             </div>
             <div className="form__item button__items d-flex justify-content-between">

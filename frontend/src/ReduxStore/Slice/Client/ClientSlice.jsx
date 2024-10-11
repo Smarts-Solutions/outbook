@@ -1,10 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { GET_CLIENT_INDUSTRY, ADD_CLIENT, CLIENT_ACTION, EDIT_CLIENT } from "../../../Services/Client/ClientService";
-import { GET_IP } from "../../../Utils/Comman_function";
-let IP_Data = await GET_IP();
-var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 const token = localStorage.getItem("token");
-
+const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
 
 

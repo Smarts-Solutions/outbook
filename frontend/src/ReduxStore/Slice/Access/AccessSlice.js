@@ -1,14 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { GETACCESS, ROLEACCESS } from "../../../Services/Access/Accessservices";
-import axios from "axios";
-import {GET_IP} from "../../../Utils/Comman_function";
-let IP_Data = await GET_IP();
-var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-
+const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
  
-
-
-
 export const GetAccess = createAsyncThunk("accessRolePermissions/getAccess", async (data) => {
   try {
     const { req, authToken } = data; 

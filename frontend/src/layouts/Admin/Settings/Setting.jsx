@@ -63,8 +63,6 @@ const Setting = () => {
     }
   }, [accessData]);
 
-
-
   const token = JSON.parse(localStorage.getItem("token"));
   const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
   const [personRoleDataAll, setPersonRoleDataAll] = useState({ loading: true, data: [], });
@@ -1527,20 +1525,23 @@ const Setting = () => {
 
   const handleSave = (e) => {
     e.preventDefault();
-    console.log("sss",modalData.fields[0].value);
-    if (
-  
-      modalData.fields[0].value == "" ||
-      modalData.fields[0].value == undefined
-    ) {
+    let err = []
+    modalData.fields.map((field) => {
+      if (field.value == "" || field.value == undefined) {
+        console.log("field", field.value);
+        err.push("Please enter " + field.label);
+      }
+    });
+
+    if (err.length > 0) {
       sweatalert.fire({
-        title: "Please enter " + modalData.fields[0].label,
+        title: err[0],
         icon: "warning",
         timer: 2000,
       });
-
       return;
     }
+
     const req = { action: isEdit ? "update" : "add" };
     if (isEdit) {
       req.id = modalData.id;

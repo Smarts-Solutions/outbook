@@ -913,7 +913,7 @@ const Information = ({ id, pageStatus }) => {
         const place = autocomplete.getPlace();
         if (place && place.geometry) {
           setLocation(place.formatted_address);
-          sendPlaceDetailsToApi(place);
+          // sendPlaceDetailsToApi(place);
         }
       });
     };
@@ -921,24 +921,24 @@ const Information = ({ id, pageStatus }) => {
     initializeAutocomplete();
   }, []);
 
-  const sendPlaceDetailsToApi = (place) => {
-    const apiUrl = "https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=AIzaSyAwLuK1P6GQk2WpYZCm0fnp9HmVhNTEeq4";
+  // const sendPlaceDetailsToApi = (place) => {
+  //   const apiUrl = "https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=AIzaSyAwLuK1P6GQk2WpYZCm0fnp9HmVhNTEeq4";
 
-    const placeDetails = {
-      address: place.formatted_address,
-      latitude: place.geometry.location.lat(),
-      longitude: place.geometry.location.lng(),
-    };
+  //   const placeDetails = {
+  //     address: place.formatted_address,
+  //     latitude: place.geometry.location.lat(),
+  //     longitude: place.geometry.location.lng(),
+  //   };
 
-    axios
-      .post(apiUrl, placeDetails)
-      .then((response) => {
-      })
-      .catch((error) => {
-        console.error("Error sending data to API:", error);
-      });
-  };
-  console.log("getCompanyDetails", getCompanyDetails)
+  //   axios
+  //     .post(apiUrl, placeDetails)
+  //     .then((response) => {
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error sending data to API:", error);
+  //     });
+  // };
+  // console.log("getCompanyDetails", getCompanyDetails)
 
 
   return (
