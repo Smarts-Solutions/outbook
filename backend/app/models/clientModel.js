@@ -275,6 +275,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 const getClient = async (client) => {
   const { customer_id } = client;
 
+  console.log("client ",client)
+  console.log("customer_id ",customer_id)
+
   const query = `
     SELECT  
         clients.id AS id,

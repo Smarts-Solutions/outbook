@@ -778,6 +778,7 @@ CREATE TABLE timesheet (
     saturday_hours TIME DEFAULT NULL,
     sunday_date  DATE DEFAULT NULL,
     sunday_hours TIME DEFAULT NULL,
+    remark TEXT DEFAULT NULL,
     status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
