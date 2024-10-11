@@ -979,7 +979,7 @@ const getJobByClient = async (job) => {
       }
       // Reviewer
       else if (ExistStaff[0].role_id == 6) {
-
+     console.log("ExistStaff[0].role_id ",ExistStaff[0].role_id)
         const query = `
      SELECT 
      jobs.id AS job_id,
@@ -1017,12 +1017,10 @@ const getJobByClient = async (job) => {
      jobs
      LEFT JOIN 
       clients ON jobs.client_id = clients.id
-      LEFT JOIN
+     LEFT JOIN
       customers ON jobs.customer_id = customers.id
      LEFT JOIN 
      customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-     LEFT JOIN 
-     clients ON jobs.client_id = clients.id
      LEFT JOIN 
      job_types ON jobs.job_type_id = job_types.id
      LEFT JOIN 
@@ -1043,8 +1041,14 @@ const getJobByClient = async (job) => {
       ORDER BY
       jobs.id DESC;
      `;
+       try {
         const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id,ExistStaff[0].id,client_id]);
         result = rowsAllocated
+       } catch (error) {
+          console.log("error",error)
+        
+       }
+        
 
       }
       else {

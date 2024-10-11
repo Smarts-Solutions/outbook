@@ -56,16 +56,16 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       const currentDate = new Date();
       await SatffLogUpdateOperation(
         {
-            staff_id: client.StaffUserId,
-            ip: client.ip,
-            date: currentDate.toISOString().split('T')[0],
-            module_name: 'client',
-            log_message: `created client profile. client code :`,
-            permission_type: 'created',
-            module_id: client_id,
+          staff_id: client.StaffUserId,
+          ip: client.ip,
+          date: currentDate.toISOString().split('T')[0],
+          module_name: 'client',
+          log_message: `created client profile. client code :`,
+          permission_type: 'created',
+          module_id: client_id,
         }
-    );
-    
+      );
+
     } catch (err) {
       console.error("Error inserting data:", err);
       throw err;
@@ -88,15 +88,15 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       const currentDate = new Date();
       await SatffLogUpdateOperation(
         {
-            staff_id: client.StaffUserId,
-            ip: client.ip,
-            date: currentDate.toISOString().split('T')[0],
-            module_name: 'client',
-            log_message: `created client profile. client code :`,
-            permission_type: 'created',
-            module_id: client_id,
+          staff_id: client.StaffUserId,
+          ip: client.ip,
+          date: currentDate.toISOString().split('T')[0],
+          module_name: 'client',
+          log_message: `created client profile. client code :`,
+          permission_type: 'created',
+          module_id: client_id,
         }
-    );
+      );
     } catch (err) {
       console.error("Error inserting data:", err);
       throw err;
@@ -214,7 +214,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             : detail.phone_code;
         let alternate_phone_code =
           detail.alternate_phone_code == undefined ||
-          detail.alternate_phone_code == ""
+            detail.alternate_phone_code == ""
             ? ""
             : detail.alternate_phone_code;
         let phone = detail.phone;
@@ -273,12 +273,13 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 };
 
 const getClient = async (client) => {
-  const { customer_id } = client;
+  const { customer_id, StaffUserId } = client;
 
-  console.log("client ",client)
-  console.log("customer_id ",customer_id)
-
-  const query = `
+  try {
+  const [existStaffbyCustomer] = await pool.execute('SELECT id  FROM customers WHERE id = "' + customer_id + '" AND staff_id = "'+StaffUserId+'" LIMIT 1');
+  
+  if(existStaffbyCustomer.length >  0){
+    const query = `
     SELECT  
         clients.id AS id,
         clients.trading_name AS client_name,
@@ -309,10 +310,163 @@ const getClient = async (client) => {
  ORDER BY 
     clients.id DESC;
 `;
+ const [result] = await pool.execute(query, [customer_id]);
+ return { status: true, message: "success.", data: result };
 
-  try {
-    const [result] = await pool.execute(query, [customer_id]);
-    return { status: true, message: "success.", data: result };
+  }else{
+    const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + StaffUserId + '" LIMIT 1');
+ 
+    if (rows.length > 0) {
+      // Allocated to
+      if (rows[0].role_id == 3) {
+        const query = `
+           SELECT  
+          clients.id AS id,
+          clients.trading_name AS client_name,
+          clients.status AS status,
+          client_types.type AS client_type_name,
+          client_contact_details.email AS email,
+          client_contact_details.phone_code AS phone_code,
+          client_contact_details.phone AS phone,
+          CONCAT(
+              'cli_', 
+              SUBSTRING(customers.trading_name, 1, 3), '_',
+              SUBSTRING(clients.trading_name, 1, 3), '_',
+              SUBSTRING(clients.client_code, 1, 15)
+              ) AS client_code
+        FROM 
+            clients
+        JOIN 
+          customers ON customers.id = clients.customer_id    
+        JOIN 
+            client_types ON client_types.id = clients.client_type
+            LEFT JOIN 
+            client_contact_details ON client_contact_details.id = (
+                SELECT MIN(cd.id)
+                FROM client_contact_details cd
+                WHERE cd.client_id = clients.id
+            )
+        LEFT JOIN
+          jobs ON jobs.customer_id = clients.customer_id
+        LEFT JOIN 
+          staffs ON customers.staff_id = staffs.id   
+        WHERE 
+          jobs.allocated_to = ? AND clients.customer_id = ? 
+        GROUP BY 
+        CASE 
+            WHEN jobs.allocated_to = ? THEN jobs.client_id
+            ELSE clients.id
+        END
+        ORDER BY 
+        clients.id DESC
+            `;
+        const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId]);
+        return { status: true, message: "success.", data: resultAllocated };
+  
+      }
+      // Account Manger
+      else if (rows[0].role_id == 4) {
+        const query = `
+           SELECT  
+          clients.id AS id,
+          clients.trading_name AS client_name,
+          clients.status AS status,
+          client_types.type AS client_type_name,
+          client_contact_details.email AS email,
+          client_contact_details.phone_code AS phone_code,
+          client_contact_details.phone AS phone,
+          CONCAT(
+              'cli_', 
+              SUBSTRING(customers.trading_name, 1, 3), '_',
+              SUBSTRING(clients.trading_name, 1, 3), '_',
+              SUBSTRING(clients.client_code, 1, 15)
+              ) AS client_code
+        FROM 
+            clients
+        JOIN 
+          customers ON customers.id = clients.customer_id    
+        JOIN 
+            client_types ON client_types.id = clients.client_type
+            LEFT JOIN 
+            client_contact_details ON client_contact_details.id = (
+                SELECT MIN(cd.id)
+                FROM client_contact_details cd
+                WHERE cd.client_id = clients.id
+            )
+        LEFT JOIN
+          jobs ON jobs.customer_id = clients.customer_id
+        LEFT JOIN 
+          staffs ON customers.staff_id = staffs.id   
+        WHERE 
+          jobs.account_manager_id = ? AND clients.customer_id = ? 
+        GROUP BY 
+        CASE 
+            WHEN jobs.account_manager_id = ? THEN jobs.client_id
+            ELSE clients.id
+        END
+        ORDER BY 
+        clients.id DESC
+            `;
+        const [resultAccounrManage] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId]);
+        return { status: true, message: "success.", data: resultAccounrManage };
+  
+      }
+      // Reviewer
+      else if (rows[0].role_id == 6) {
+        const query = `
+           SELECT  
+          clients.id AS id,
+          clients.trading_name AS client_name,
+          clients.status AS status,
+          client_types.type AS client_type_name,
+          client_contact_details.email AS email,
+          client_contact_details.phone_code AS phone_code,
+          client_contact_details.phone AS phone,
+          CONCAT(
+              'cli_', 
+              SUBSTRING(customers.trading_name, 1, 3), '_',
+              SUBSTRING(clients.trading_name, 1, 3), '_',
+              SUBSTRING(clients.client_code, 1, 15)
+              ) AS client_code
+        FROM 
+            clients
+        JOIN 
+          customers ON customers.id = clients.customer_id    
+        JOIN 
+            client_types ON client_types.id = clients.client_type
+            LEFT JOIN 
+            client_contact_details ON client_contact_details.id = (
+                SELECT MIN(cd.id)
+                FROM client_contact_details cd
+                WHERE cd.client_id = clients.id
+            )
+        LEFT JOIN
+          jobs ON jobs.customer_id = clients.customer_id
+        LEFT JOIN 
+          staffs ON customers.staff_id = staffs.id   
+        WHERE 
+          jobs.reviewer = ? AND clients.customer_id = ? 
+        GROUP BY 
+        CASE 
+            WHEN jobs.reviewer = ? THEN jobs.client_id
+            ELSE clients.id
+        END
+        ORDER BY 
+        clients.id DESC
+            `;
+        const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId]);
+        return { status: true, message: "success.", data: resultReviewer };
+  
+      }
+  
+    }
+
+ }
+
+
+
+
+ 
   } catch (err) {
     return { status: false, message: "Err Client Get" };
   }
@@ -407,7 +561,7 @@ WHERE
     } else {
       return { status: false, message: "No customer found with the given ID." };
     }
-  } 
+  }
   else if (client_type == "2") {
     const query = `
  SELECT 
@@ -768,20 +922,20 @@ WHERE
 
 const deleteClient = async (client) => {
   const { client_id } = client;
-  if(parseInt(client_id) > 0){
+  if (parseInt(client_id) > 0) {
     const currentDate = new Date();
     await SatffLogUpdateOperation(
-        {
-            staff_id: client.StaffUserId,
-            ip: client.ip,
-            date: currentDate.toISOString().split('T')[0],
-            module_name: 'client',
-            log_message: `deleted client profile. client code :`,
-            permission_type: 'deleted',
-            module_id: client_id,
-            }
-        );
-    }
+      {
+        staff_id: client.StaffUserId,
+        ip: client.ip,
+        date: currentDate.toISOString().split('T')[0],
+        module_name: 'client',
+        log_message: `deleted client profile. client code :`,
+        permission_type: 'deleted',
+        module_id: client_id,
+      }
+    );
+  }
 
   try {
     await pool.execute("DELETE FROM clients WHERE id = ?", [client_id]);
@@ -815,14 +969,14 @@ const clientUpdate = async (client) => {
     website,
   } = client;
 
- 
+
   const checkQuery = `SELECT 1 FROM clients WHERE trading_name = ? AND id != ?`;
 
   const [check] = await pool.execute(checkQuery, [trading_name, client_id]);
   if (check.length > 0) {
     return { status: false, message: "Client Trading Name Already Exists." };
   }
- 
+
   let information_client = false
 
 
@@ -831,7 +985,7 @@ const clientUpdate = async (client) => {
     cli_type = 'company'
   } else if (client_type === '3') {
     cli_type = 'partnership'
-  }else if (client_type === '4') {
+  } else if (client_type === '4') {
     cli_type = 'individual'
   }
 
@@ -860,7 +1014,7 @@ const clientUpdate = async (client) => {
         website,
         client_id,
       ]);
-      if(result.changedRows > 0){
+      if (result.changedRows > 0) {
         information_client = true
       }
     } catch (err) {
@@ -882,11 +1036,11 @@ const clientUpdate = async (client) => {
         trading_name,
         client_id
       ]);
-      if(result.changedRows > 0){
+      if (result.changedRows > 0) {
         information_client = true
       }
     } catch (err) {
-    
+
       return { status: false, message: "client update Err" };
     }
   }
@@ -910,62 +1064,62 @@ const clientUpdate = async (client) => {
         client_id,
       ]);
 
-      if(result2.changedRows > 0 && information_client == true){
+      if (result2.changedRows > 0 && information_client == true) {
         const currentDate = new Date();
         await SatffLogUpdateOperation(
-            {
-                staff_id: client.StaffUserId,
-                ip: client.ip,
-                date: currentDate.toISOString().split('T')[0],
-                module_name: 'client',
-                log_message: `edited ${cli_type} information and Officer information. client code :`,
-                permission_type: 'updated',
-                module_id: client_id,
-            }
+          {
+            staff_id: client.StaffUserId,
+            ip: client.ip,
+            date: currentDate.toISOString().split('T')[0],
+            module_name: 'client',
+            log_message: `edited ${cli_type} information and Officer information. client code :`,
+            permission_type: 'updated',
+            module_id: client_id,
+          }
         );
       }
-      else if(information_client == true){
+      else if (information_client == true) {
         const currentDate = new Date();
         await SatffLogUpdateOperation(
-            {
-                staff_id: client.StaffUserId,
-                ip: client.ip,
-                date: currentDate.toISOString().split('T')[0],
-                module_name: 'client',
-                log_message: `edited ${cli_type} information. client code :`,
-                permission_type: 'updated',
-                module_id: client_id,
-            }
+          {
+            staff_id: client.StaffUserId,
+            ip: client.ip,
+            date: currentDate.toISOString().split('T')[0],
+            module_name: 'client',
+            log_message: `edited ${cli_type} information. client code :`,
+            permission_type: 'updated',
+            module_id: client_id,
+          }
         );
       }
-      else if(result2.changedRows > 0){
+      else if (result2.changedRows > 0) {
         const currentDate = new Date();
         await SatffLogUpdateOperation(
-            {
-                staff_id: client.StaffUserId,
-                ip: client.ip,
-                date: currentDate.toISOString().split('T')[0],
-                module_name: 'client',
-                log_message: `edited ${cli_type} Officer information. client code :`,
-                permission_type: 'updated',
-                module_id: client_id,
-            }
+          {
+            staff_id: client.StaffUserId,
+            ip: client.ip,
+            date: currentDate.toISOString().split('T')[0],
+            module_name: 'client',
+            log_message: `edited ${cli_type} Officer information. client code :`,
+            permission_type: 'updated',
+            module_id: client_id,
+          }
         );
-      
+
       }
 
     } catch (err) {
       console.log("err", err);
       return { status: false, message: "client update Err Client Type 1" };
     }
-  } 
-  
+  }
+
   else if (client_type == "2") {
 
     let addedOfficer = false;
     let removeOfficer = false;
     let editOfficer = false;
-   
+
 
     const {
       company_name,
@@ -997,7 +1151,7 @@ const clientUpdate = async (client) => {
         client_id,
       ]);
       if (result1.changedRows > 0) {
-         information_client = true
+        information_client = true
       }
 
     } catch (err) {
@@ -1020,7 +1174,7 @@ const clientUpdate = async (client) => {
     `;
       if (contactDetails.length > 0) {
         for (const detail of contactDetails) {
-          console.log("detail",detail.customer_contact_person_role_id)
+          console.log("detail", detail.customer_contact_person_role_id)
           let {
             first_name,
             last_name,
@@ -1033,7 +1187,7 @@ const clientUpdate = async (client) => {
               ? ""
               : detail.phone_code;
 
-          let customer_contact_person_role_id = detail.customer_contact_person_role_id == null || detail.customer_contact_person_role_id == '' || detail.customer_contact_person_role_id == undefined? 0 : detail.customer_contact_person_role_id   
+          let customer_contact_person_role_id = detail.customer_contact_person_role_id == null || detail.customer_contact_person_role_id == '' || detail.customer_contact_person_role_id == undefined ? 0 : detail.customer_contact_person_role_id
 
           if (
             contact_id == "" ||
@@ -1052,7 +1206,7 @@ const clientUpdate = async (client) => {
                 email,
               ]
             );
-            if(result2.changedRows > 0){
+            if (result2.changedRows > 0) {
               addedOfficer = true
             }
           } else {
@@ -1067,7 +1221,7 @@ const clientUpdate = async (client) => {
               client_id,
               contact_id,
             ]);
-            if(result2.changedRows > 0){
+            if (result2.changedRows > 0) {
               editOfficer = true
             }
           }
@@ -1075,7 +1229,7 @@ const clientUpdate = async (client) => {
 
         let deleteIdArray = idArray.filter((id) => !arrayInterId.includes(id));
         if (deleteIdArray.length > 0) {
-          removeOfficer =true
+          removeOfficer = true
           for (const id of deleteIdArray) {
             const query3 = `
                     DELETE FROM client_contact_details WHERE id = ?
@@ -1086,39 +1240,39 @@ const clientUpdate = async (client) => {
       }
 
       let model_name = [];
-      if(information_client == true){
+      if (information_client == true) {
         model_name.push(`edited information`)
       }
-      if(addedOfficer == true){
+      if (addedOfficer == true) {
         model_name.push('added additional Officer information')
       }
-      if(editOfficer == true){
+      if (editOfficer == true) {
         model_name.push('edited Officer information')
       }
-      if(removeOfficer == true){
+      if (removeOfficer == true) {
         model_name.push('removed Officer information')
       }
-      
 
-      if(model_name.length > 0){
-        const msgLog = model_name.length > 1 
-        ? model_name.slice(0, -1).join(', ') + ' and ' + model_name.slice(-1)
-        : model_name[0];
 
-       const currentDate = new Date();
+      if (model_name.length > 0) {
+        const msgLog = model_name.length > 1
+          ? model_name.slice(0, -1).join(', ') + ' and ' + model_name.slice(-1)
+          : model_name[0];
+
+        const currentDate = new Date();
         await SatffLogUpdateOperation(
-            {
-                staff_id: client.StaffUserId,
-                ip: client.ip,
-                date: currentDate.toISOString().split('T')[0],
-                module_name: 'client',
-                log_message: `${cli_type} ${msgLog}. client code :`,
-                permission_type: 'updated',
-                module_id: client_id,
-            }
+          {
+            staff_id: client.StaffUserId,
+            ip: client.ip,
+            date: currentDate.toISOString().split('T')[0],
+            module_name: 'client',
+            log_message: `${cli_type} ${msgLog}. client code :`,
+            permission_type: 'updated',
+            module_id: client_id,
+          }
         );
 
-    }
+      }
 
 
     } catch (err) {
@@ -1146,7 +1300,7 @@ const clientUpdate = async (client) => {
     `;
 
       for (const detail of contactDetails) {
-        let customer_contact_person_role_id = detail.customer_contact_person_role_id == null || detail.customer_contact_person_role_id == '' || detail.customer_contact_person_role_id == undefined? 0 : detail.customer_contact_person_role_id
+        let customer_contact_person_role_id = detail.customer_contact_person_role_id == null || detail.customer_contact_person_role_id == '' || detail.customer_contact_person_role_id == undefined ? 0 : detail.customer_contact_person_role_id
 
         let first_name = detail.first_name;
         let last_name = detail.last_name;
@@ -1159,11 +1313,11 @@ const clientUpdate = async (client) => {
         let phone = detail.phone;
         let alternate_phone_code =
           detail.alternate_phone_code == undefined ||
-          detail.alternate_phone_code == ""
+            detail.alternate_phone_code == ""
             ? ""
             : detail.alternate_phone_code;
         let alternate_phone = detail.alternate_phone;
-      
+
         let contact_id = detail.contact_id; // Assuming each contactDetail has an id
         if (contact_id == "" || contact_id == undefined || contact_id == null) {
           const [result2] = await pool.execute(
@@ -1179,10 +1333,10 @@ const clientUpdate = async (client) => {
               phone,
               alternate_phone_code,
               alternate_phone,
-              
+
             ]
           );
-          if(result2.changedRows > 0){
+          if (result2.changedRows > 0) {
             addedOfficer = true
           }
         } else {
@@ -1200,7 +1354,7 @@ const clientUpdate = async (client) => {
             client_id,
             contact_id,
           ]);
-          if(result2.changedRows > 0){
+          if (result2.changedRows > 0) {
             editOfficer = true
           }
         }
@@ -1217,35 +1371,35 @@ const clientUpdate = async (client) => {
         }
       }
       let model_name = [];
-      if(information_client == true){
+      if (information_client == true) {
         model_name.push(`edited information`)
       }
-      if(addedOfficer == true){
+      if (addedOfficer == true) {
         model_name.push('added additional Officer information')
       }
-      if(editOfficer == true){
+      if (editOfficer == true) {
         model_name.push('edited Officer information')
       }
-      if(removeOfficer == true){
+      if (removeOfficer == true) {
         model_name.push('removed Officer information')
       }
 
-      if(model_name.length > 0){
-        const msgLog = model_name.length > 1 
-        ? model_name.slice(0, -1).join(', ') + ' and ' + model_name.slice(-1)
-        : model_name[0];
+      if (model_name.length > 0) {
+        const msgLog = model_name.length > 1
+          ? model_name.slice(0, -1).join(', ') + ' and ' + model_name.slice(-1)
+          : model_name[0];
 
-       const currentDate = new Date();
+        const currentDate = new Date();
         await SatffLogUpdateOperation(
-            {
-                staff_id: client.StaffUserId,
-                ip: client.ip,
-                date: currentDate.toISOString().split('T')[0],
-                module_name: 'client',
-                log_message: `${cli_type} ${msgLog}. client code :`,
-                permission_type: 'updated',
-                module_id: client_id,
-            }
+          {
+            staff_id: client.StaffUserId,
+            ip: client.ip,
+            date: currentDate.toISOString().split('T')[0],
+            module_name: 'client',
+            log_message: `${cli_type} ${msgLog}. client code :`,
+            permission_type: 'updated',
+            module_id: client_id,
+          }
         );
 
       }
@@ -1254,7 +1408,7 @@ const clientUpdate = async (client) => {
       console.log("err", err);
       return { status: false, message: "client update Err Client Type 3" };
     }
-  } 
+  }
   else if (client_type == "4") {
     const { first_name, last_name, phone, email, residential_address } = client;
     let phone_code = client.phone_code == undefined ? "" : client.phone_code;
@@ -1273,47 +1427,47 @@ const clientUpdate = async (client) => {
         residential_address,
         client_id,
       ]);
-      if(result2.changedRows  > 0 && information_client == true){
+      if (result2.changedRows > 0 && information_client == true) {
         const currentDate = new Date();
         await SatffLogUpdateOperation(
-            {
-                staff_id: client.StaffUserId,
-                ip: client.ip,
-                date: currentDate.toISOString().split('T')[0],
-                module_name: 'client',
-                log_message: `edited ${cli_type} information and Officer information. client code :`,
-                permission_type: 'updated',
-                module_id: client_id,
-            }
+          {
+            staff_id: client.StaffUserId,
+            ip: client.ip,
+            date: currentDate.toISOString().split('T')[0],
+            module_name: 'client',
+            log_message: `edited ${cli_type} information and Officer information. client code :`,
+            permission_type: 'updated',
+            module_id: client_id,
+          }
         );
 
       }
-      else if(information_client == true){
+      else if (information_client == true) {
         const currentDate = new Date();
         await SatffLogUpdateOperation(
-            {
-                staff_id: client.StaffUserId,
-                ip: client.ip,
-                date: currentDate.toISOString().split('T')[0],
-                module_name: 'client',
-                log_message: `edited ${cli_type} information. client code :`,
-                permission_type: 'updated',
-                module_id: client_id,
-            }
+          {
+            staff_id: client.StaffUserId,
+            ip: client.ip,
+            date: currentDate.toISOString().split('T')[0],
+            module_name: 'client',
+            log_message: `edited ${cli_type} information. client code :`,
+            permission_type: 'updated',
+            module_id: client_id,
+          }
         );
       }
-      else if(result2.changedRows  > 0){
+      else if (result2.changedRows > 0) {
         const currentDate = new Date();
         await SatffLogUpdateOperation(
-            {
-                staff_id: client.StaffUserId,
-                ip: client.ip,
-                date: currentDate.toISOString().split('T')[0],
-                module_name: 'client',
-                log_message: `edited ${cli_type} Officer information. client code :`,
-                permission_type: 'updated',
-                module_id: client_id,
-            }
+          {
+            staff_id: client.StaffUserId,
+            ip: client.ip,
+            date: currentDate.toISOString().split('T')[0],
+            module_name: 'client',
+            log_message: `edited ${cli_type} Officer information. client code :`,
+            permission_type: 'updated',
+            module_id: client_id,
+          }
         );
       }
     } catch (err) {
