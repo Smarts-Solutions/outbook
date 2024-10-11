@@ -135,6 +135,18 @@ const isLogOut = async (req, res) => {
   }
 }
 
+const status = async (req, res) => {
+  try {
+    const { id } = req.body;
+    console.log(id)
+    const data = await authService.status(id);
+    return res.send({ status: true, message: "Success.." , data });
+  } catch (error
+  ) {
+    return res.send({ status: false, message: error.message });
+  } 
+}
+
 
 module.exports = {
   handleStaff,
@@ -144,5 +156,6 @@ module.exports = {
   loginAuthToken,
   isLoginAuthTokenCheck,
   profile,
-  isLogOut
+  isLogOut,
+  status
 };

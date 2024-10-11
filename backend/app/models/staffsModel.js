@@ -210,6 +210,18 @@ const managePortfolio = async (staff_id) => {
 
 };
 
+const status = async (id) => {
+    const query = `SELECT status FROM staffs WHERE id = ?`;
+
+    try {
+       const [result]= await pool.execute(query, [id]);
+        return result;
+    } catch (err) {
+        console.error('Error updating data:', err);
+        throw err;
+    }
+};
+
 module.exports = {
     createStaff,
     getStaff,
@@ -221,5 +233,6 @@ module.exports = {
     getStaffById,
     isLoginAuthTokenCheckmodel,
     profile,
-    managePortfolio
+    managePortfolio,
+    status
 };

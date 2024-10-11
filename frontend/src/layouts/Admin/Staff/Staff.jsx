@@ -56,14 +56,9 @@ const StaffPage = () => {
   const [editStaffData, setEditStaffData] = useState(false);
   const [addCompetancy, SetCompetancy] = useState(false);
   const [refresh, SetRefresh] = useState(false);
-  const [activeTab, setActiveTab] = useState("this-year");
-  const [modalData, setModalData] = useState({ fields: [] });
+  const [activeTab, setActiveTab] = useState("this-year"); 
   const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
-  const [serviceDataAll, setServiceDataAll] = useState({
-    loading: true,
-    data: [],
-    staff_id: "",
-  });
+  const [serviceDataAll, setServiceDataAll] = useState({loading: true, data: [], staff_id: "",});
   const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
  
   useEffect(() => {
@@ -71,17 +66,7 @@ const StaffPage = () => {
     roleData();
   }, [refresh , activeTab]);
 
-  useEffect(() => {
-    if (editStaffData && editStaffData) {
-      formik.setFieldValue("first_name", editStaffData.first_name || "null");
-      formik.setFieldValue("last_name", editStaffData.last_name || "null");
-      formik.setFieldValue("email", editStaffData.email || "null");
-      formik.setFieldValue("phone", editStaffData.phone || "null");
-      formik.setFieldValue("role", editStaffData.role_id || "null");
-      formik.setFieldValue("status", editStaffData.status || "null");
-    }
-  }, [editStaffData]);
-
+ 
   const staffData = async () => {
     await dispatch(Staff({ req: { action: "get" }, authToken: token }))
       .unwrap()
@@ -219,8 +204,7 @@ const StaffPage = () => {
       cell: (row) => (
         <div>
           {/* <button className='edit-icon' onClick={() => setIsModalOpen(true)}> <i className="ti-user" /></button> */}
-          <button className="secondary-icon" onClick={() =>{ setPortfolio(true) ; GetAllCustomer()}}>
-            {" "}
+          <button className="secondary-icon" onClick={() =>{ setPortfolio(true) ; GetAllCustomer()}}> 
             <i className="ti-briefcase" />
           </button>
           {showStaffUpdateTab && (
@@ -518,8 +502,18 @@ const StaffPage = () => {
     }
   };
 
+  useEffect(() => {
+    if (editStaffData && editStaffData) {
+      formik.setFieldValue("first_name", editStaffData.first_name || "null");
+      formik.setFieldValue("last_name", editStaffData.last_name || "null");
+      formik.setFieldValue("email", editStaffData.email || "null");
+      formik.setFieldValue("phone", editStaffData.phone || "null");
+      formik.setFieldValue("role", editStaffData.role_id || "null");
+      formik.setFieldValue("status", editStaffData.status || "null");
+    }
+  }, [editStaffData ]);
 
-
+ 
   return (
     <div>
       <div className="container-fluid">
@@ -528,65 +522,7 @@ const StaffPage = () => {
             <h3 className="mt-0">Manage Staff</h3>
           </div>
         </div>
-        {/* <div className="report-data mt-4">
-          <div className="col-sm-12">
-            <div className="page-title-box pt-0">
-              <div className="row align-items-start">
-                <div className="col-md-8">
-                  <>
-                    <ul
-                      className="nav nav-pills rounded-tabs"
-                      id="pills-tab"
-                      role="tablist"
-                    >
-                      {tabs.map((tab) => (
-                        <li
-                          className="nav-item"
-                          role="presentation"
-                          key={tab.id}
-                        >
-                          <button
-                            className={`nav-link ${
-                              activeTab === tab.id ? "active" : ""
-                            }`}
-                            id={`${tab.id}-tab`}
-                            data-bs-toggle="pill"
-                            data-bs-target={`#${tab.id}`}
-                            type="button"
-                            role="tab"
-                            aria-controls={tab.id}
-                            aria-selected={activeTab === tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                          >
-                            {tab.label}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                </div>
-                <div className="col-md-4">
-                  {showStaffInsertTab && (
-                    <button
-                      type="button"
-                      className="btn btn-info text-white float-end"
-                      onClick={() => setAddStaff(true)}
-                    >
-                      <i className="fa fa-plus" /> Add Staff
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="tab-content" id="pills-tabContent">
-            <Datatable
-              columns={columns}
-              data={staffDataAll.data}
-              filter={true}
-            />
-          </div>
-        </div> */}
+         
       </div>
       <div className="report-data mt-4">
        <div className="col-sm-12">
@@ -784,7 +720,7 @@ const StaffPage = () => {
         hideBtn={true}
         handleClose={() => {
           setEditStaff(false);
-          formik.resetForm();
+          // formik.resetForm();
         }}
       >
         <Formicform
@@ -793,6 +729,7 @@ const StaffPage = () => {
           )}
           formik={formik}
           btn_name="Update"
+          closeBtn={(e)=>setEditStaff(false)}
         />
       </CommanModal>
       {/* CLOSE Edit Staff */}
