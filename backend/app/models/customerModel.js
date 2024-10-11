@@ -3528,13 +3528,15 @@ const customerStatusUpdate = async (customer) => {
 const getcustomerschecklist = async (customer) => {
   try {
     const { customer_id, service_id, job_type_id } = customer;
-    const query = `SELECT c.*, ct.* FROM checklists c JOIN checklist_tasks ct ON c.id = ct.task_id  WHERE c.customer_id = ? AND c.service_id = ? AND c.job_type_id = ?;`;
-
+    const query = `SELECT c.*, ct.* FROM checklists c JOIN checklist_tasks ct ON c.id = ct.checklist_id   WHERE c.service_id = ? AND c.job_type_id = ?;`;
+    // c.customer_id = ? AND 
     const [result] = await pool.execute(query, [
-      customer_id,
+      // customer_id,
       service_id,
       job_type_id,
     ]);
+
+    console.log("result", result);
 
 
     if (result.length === 0) {
