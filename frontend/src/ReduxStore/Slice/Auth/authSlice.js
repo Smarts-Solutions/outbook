@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { SIGN_IN_STAFF , SIGN_IN_AZURE_SSO,LOGIN_AUTH_TOKEN , IS_LOGIN_AUTH_TOKEN_CHECK ,IS_LOGOUT} from "../../../Services/Auth/authService";
+import { SIGN_IN_STAFF , SIGN_IN_AZURE_SSO,LOGIN_AUTH_TOKEN , IS_LOGIN_AUTH_TOKEN_CHECK ,IS_LOGOUT , STATUS} from "../../../Services/Auth/authService";
 const token = localStorage.getItem("token");
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
@@ -25,7 +25,6 @@ export const SignInWithAzure = createAsyncThunk("loginWithAzure", async (data) =
     return err;
   }
 });
-
 
 export const LoginAuthToken = createAsyncThunk("loginAuthToken", async (data) => {
   try {
@@ -57,6 +56,16 @@ export const isLogOut = createAsyncThunk("isLogOut", async (data) => {
   }
 });
 
+export const Status = createAsyncThunk("status", async (data) => {
+  try {
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = { ...data, ip: IP_Data };
+    const res = await STATUS(updatedReq);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
 
 const AuthSlice = createSlice({
   name: "AuthSlice",
@@ -64,7 +73,8 @@ const AuthSlice = createSlice({
     isLoading: false,
     isError: false,
     signIn : [],
-    signInWithAzure:[]
+    signInWithAzure:[],
+    status:[],
   },
 
   reducers: {},  
@@ -91,6 +101,18 @@ const AuthSlice = createSlice({
       .addCase(SignInWithAzure.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
+      })
+      .addCase(Status.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      }
+      )
+      .addCase(Status.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(Status.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.status = action.payload;
       })
        
   },

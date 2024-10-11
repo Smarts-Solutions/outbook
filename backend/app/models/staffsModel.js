@@ -211,6 +211,7 @@ const managePortfolio = async (staff_id) => {
 };
 
 const status = async (id) => {
+    console.log(id);
     const query = `SELECT status FROM staffs WHERE id = ?`;
 
     try {
