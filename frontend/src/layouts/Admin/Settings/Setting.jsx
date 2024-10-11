@@ -877,7 +877,7 @@ const Setting = () => {
       name: "Source Name",
       selector: (row) => row.name,
       sortable: true,
-    
+    width:'60%'
     },
     {
       name: "Status",

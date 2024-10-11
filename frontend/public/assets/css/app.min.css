@@ -4280,7 +4280,7 @@ select.error-field.form-select,
 input.error-field.form-control {
 	background: #fff !important;
 	border: 1px solid #ef7e7e;
-	appearance: auto;
+	appearance: initial;
 }
 
 select#tabSelect {
