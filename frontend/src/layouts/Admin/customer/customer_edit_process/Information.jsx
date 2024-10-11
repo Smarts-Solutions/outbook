@@ -42,6 +42,9 @@ const Information = ({ id, pageStatus }) => {
   const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
   const [contacts1, setContacts1] = useState([]);
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);
+
+
+  console.log("ManagerType", ManagerType);
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     tradingName: "",
     tradingAddress: "",
@@ -451,7 +454,7 @@ const Information = ({ id, pageStatus }) => {
           pageStatus: "1",
           customer_type: "1",
           staff_id: id?.staff_id,
-          account_manager_id: id?.account_manager_id,
+          account_manager_id: Number(ManagerType),
           trading_name: getSoleTraderDetails?.tradingName,
           customer_code: id?.customer_code,
           trading_address: getSoleTraderDetails?.tradingAddress,
