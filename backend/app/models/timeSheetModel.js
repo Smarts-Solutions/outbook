@@ -45,7 +45,8 @@ const getTimesheet = async (Timesheet) => {
             SUBSTRING(job_types.type, 1, 4), '_',
             SUBSTRING(jobs.job_id, 1, 15)
             ) AS job_name,
-    task.name as task_name
+    task.name as task_name,
+    jobs.total_time as job_total_time
   FROM 
     timesheet 
    LEFT JOIN internal  ON timesheet.job_id = internal.id AND timesheet.task_type = 1
@@ -240,6 +241,7 @@ LEFT JOIN
       const query = `
      SELECT 
      jobs.id AS id,
+     jobs.total_time AS job_total_time,
      CONCAT(
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',

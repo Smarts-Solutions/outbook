@@ -3,7 +3,7 @@ import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal"
 import { Trash2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getTimesheetData, getTimesheetTaskTypedData ,saveTimesheetData } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
+import { getTimesheetData, getTimesheetTaskTypedData, saveTimesheetData } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
 import sweatalert from 'sweetalert2';
 
 const Timesheet = () => {
@@ -12,11 +12,19 @@ const Timesheet = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
 
+  
+
   const GetTimeSheet = async () => {
     const req = { staff_id: staffDetails.id };
     const res = await dispatch(getTimesheetData({ req, authToken: token })).unwrap();
     if (res.status) {
       setTimeSheetRows(res.data)
+      setTimeSheetRows((prevRows) =>
+        prevRows.map((row) => {
+          const sum = (parseFloat(row.monday_hours) || 0) + (parseFloat(row.tuesday_hours) || 0) + (parseFloat(row.wednesday_hours) || 0) + (parseFloat(row.thursday_hours) || 0) + (parseFloat(row.friday_hours) || 0) + (parseFloat(row.saturday_hours) || 0) + (parseFloat(row.sunday_hours) || 0); 
+          return { ...row, total_hours: parseFloat(sum).toFixed(2) };
+        })
+      );
     } else {
       setTimeSheetRows([])
     }
@@ -104,6 +112,7 @@ const Timesheet = () => {
       client_id: null,
       job_id: null,
       task_id: null,
+      job_total_time:null,
       monday_date: null,
       monday_hours: null,
       tuesday_date: null,
@@ -155,9 +164,9 @@ const Timesheet = () => {
         return updatedRows;
       });
 
-     // update record only
-      
-      updateRecordSheet(null , 'task_type' , '1');
+      // update record only
+
+      updateRecordSheet(null, 'task_type', '1');
 
     } else {
       // Handle the error case as needed
@@ -169,7 +178,7 @@ const Timesheet = () => {
   };
 
   console.log("setTimeSheetRows", timeSheetRows)
- 
+
   console.log("updateTimeSheetRows", updateTimeSheetRows)
 
   const handleDeleteRow = (index) => {
@@ -231,9 +240,9 @@ const Timesheet = () => {
     }
     setTimeSheetRows([...updatedRows]); // Save changes
 
-   // update record only
-   const rowId = updatedRows[index].id;
-   updateRecordSheet(rowId , 'task_type' , e.target.value);
+    // update record only
+    const rowId = updatedRows[index].id;
+    updateRecordSheet(rowId, 'task_type', e.target.value);
   };
 
   const selectCustomerData = async (e, index) => {
@@ -255,10 +264,19 @@ const Timesheet = () => {
     }
     setTimeSheetRows(updatedRows);
 
-     // update record only
-     const rowId = updatedRows[index].id;
-     updateRecordSheet(rowId , 'customer_id' , e.target.value);
+    // update record only
+    const rowId = updatedRows[index].id;
+    updateRecordSheet(rowId, 'customer_id', e.target.value);
   };
+
+  function convertTimeFormat(timeString) {
+    if(timeString == null){
+      return null;
+    }
+    const [hours, minutes] = timeString.split(':');
+    const formattedTime = `${hours}.${minutes}`;
+    return formattedTime;
+  }
 
   const selectClientData = async (e, index) => {
     const updatedRows = [...timeSheetRows];
@@ -272,6 +290,7 @@ const Timesheet = () => {
         updatedRows[index].client_id = e.target.value;
         updatedRows[index].jobData = res.data;
         updatedRows[index].job_id = res.data[0].id;
+        updatedRows[index].job_total_time = convertTimeFormat(res.data[0].job_total_time);
         let req;
         if (updatedRows[index].task_type === "1") {
           req = { staff_id: staffDetails.id, task_type: "5", internal_id: res.data[0].id };
@@ -292,13 +311,14 @@ const Timesheet = () => {
     setTimeSheetRows(updatedRows);
 
 
-     // update record only
-     const rowId = updatedRows[index].id;
-     updateRecordSheet(rowId , 'client_id' , e.target.value);
+    // update record only
+    const rowId = updatedRows[index].id;
+    updateRecordSheet(rowId, 'client_id', e.target.value);
   };
 
   const selectJobData = async (e, task_type, index) => {
     const updatedRows = [...timeSheetRows];
+
     updatedRows[index].taskData = [];
     let req;
     if (task_type === "1") {
@@ -310,7 +330,10 @@ const Timesheet = () => {
       const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
       if (res.status) {
         if (res.data.length > 0) {
+          let job_total_time =  updatedRows[index].jobData.find(item => item.id === parseInt(e.target.value));
           updatedRows[index].job_id = e.target.value;
+          updatedRows[index].job_total_time = job_total_time.job_total_time==undefined?null:convertTimeFormat(job_total_time.job_total_time);
+          
           updatedRows[index].taskData = res.data;
           updatedRows[index].task_id = res.data[0].id;
         }
@@ -318,9 +341,9 @@ const Timesheet = () => {
     }
     setTimeSheetRows(updatedRows);
 
-     // update record only
-     const rowId = updatedRows[index].id;
-     updateRecordSheet(rowId , 'job_id' , e.target.value);
+    // update record only
+    const rowId = updatedRows[index].id;
+    updateRecordSheet(rowId, 'job_id', e.target.value);
   };
 
   const selectTaskData = async (e, index) => {
@@ -330,12 +353,12 @@ const Timesheet = () => {
 
     // update record only
     const rowId = updatedRows[index].id;
-    updateRecordSheet(rowId , 'task_id' , e.target.value);
+    updateRecordSheet(rowId, 'task_id', e.target.value);
 
   }
 
-  const handleHoursInput = async (e, index, day_name, date_value) => {
-  
+  const handleHoursInput = async (e, index, day_name, date_value ,item) => {
+
     let value = e.target.value;
     let name = e.target.name;
     const updatedRows = [...timeSheetRows]
@@ -350,6 +373,11 @@ const Timesheet = () => {
       return;
     }
 
+    const [integerPart, fractionalPart] = value.split('.');
+    if (fractionalPart && parseInt(fractionalPart) > 59) {
+      return;
+    }
+
 
     const datePart = date_value.split(',')[1].trim(); // "07/10/2024"
     const [day, month, year] = datePart.split('/');
@@ -357,46 +385,67 @@ const Timesheet = () => {
     const date_final_value = formattedDate.toISOString().split('T')[0];
 
 
-    // const updatedRows = [...timeSheetRows]
     updatedRows[index][day_name] = date_final_value;
     updatedRows[index][name] = value;
-    setTimeSheetRows(updatedRows);
 
+    
+    const sum = (parseFloat(updatedRows[index].monday_hours) || 0) + (parseFloat(updatedRows[index].tuesday_hours) || 0) + (parseFloat(updatedRows[index].wednesday_hours) || 0) + (parseFloat(updatedRows[index].thursday_hours) || 0) + (parseFloat(updatedRows[index].friday_hours) || 0) + (parseFloat(updatedRows[index].saturday_hours) || 0) + (parseFloat(updatedRows[index].sunday_hours) || 0); 
+    updatedRows[index].total_hours = sum;
+    
+    // warning total hours
+    if(updatedRows[index].job_total_time != null && updatedRows[index].job_total_time != undefined && e.target.value != ''){
+       if(updatedRows[index].total_hours > parseFloat(convertTimeFormat(updatedRows[index].job_total_time))){
+        sweatalert.fire({
+          icon: 'warning',
+          title: "msg...",
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 3000
+        })
+       }
+      }
+ 
+    setTimeSheetRows(updatedRows);
+  
     // update record only
     const rowId = updatedRows[index].id;
-    updateRecordSheet(rowId , name , value);
-  
+    updateRecordSheet(rowId, name, value);
+
   }
-  
+
   // update record only Function
-  function updateRecordSheet(rowId , name , value) {
-     // update record only
-     const updatedRows_update = [...updateTimeSheetRows];
-     const existingUpdateIndex = updatedRows_update.findIndex(row => row.id === rowId);
-     if (existingUpdateIndex !== -1) {
-         updatedRows_update[existingUpdateIndex][name] = value;
-     } else {
-         updatedRows_update.push({
-             id: rowId,           
-             [name]: value        
-         });
-     }
-     setUpdateTimeSheetRows(updatedRows_update);
+  function updateRecordSheet(rowId, name, value) {
+    // update record only
+    const updatedRows_update = [...updateTimeSheetRows];
+    const existingUpdateIndex = updatedRows_update.findIndex(row => row.id === rowId);
+    if (existingUpdateIndex !== -1) {
+      updatedRows_update[existingUpdateIndex][name] = value;
+    } else {
+      updatedRows_update.push({
+        id: rowId,
+        [name]: value
+      });
+    }
+    setUpdateTimeSheetRows(updatedRows_update);
   }
 
   // update record Function
 
   const editRow = async (e, index) => {
-    console.log("e ",e)
-    console.log("index ",index)
     const updatedRows = [...timeSheetRows];
     updatedRows[index].editRow = 1;
     setTimeSheetRows(updatedRows);
-    
+
+  }
+
+  const undoEditRow = async (e, index) => {
+    const updatedRows = [...timeSheetRows];
+    updatedRows[index].editRow = 0;
+    setTimeSheetRows(updatedRows);
   }
 
   const saveData = async (e) => {
-    
+
     if (timeSheetRows.length > 0) {
       const lastObject = timeSheetRows[timeSheetRows.length - 1];
       if (lastObject.task_id == null) {
@@ -405,31 +454,31 @@ const Timesheet = () => {
       }
     }
 
-    if(updateTimeSheetRows.length > 0){
-    const hasEditRow = timeSheetRows.some(item => item.editRow === 1);
-    if(hasEditRow == true){
-      setRemarkModel(true);
-      return
-    }
-    const updatedTimeSheetRows = timeSheetRows.map(row => {
-      const { customerData, clientData,jobData,taskData, ...rest } = row; 
-      return rest; 
-    });
-
-    const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows };
-    const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
-    if (res.status) {
-      sweatalert.fire({
-        icon: 'success',
-        title: res.message,
-        timerProgressBar: true,
-        showConfirmButton: true,
-        timer: 1500
+    if (updateTimeSheetRows.length > 0) {
+      const hasEditRow = timeSheetRows.some(item => item.editRow === 1);
+      if (hasEditRow == true) {
+        setRemarkModel(true);
+        return
+      }
+      const updatedTimeSheetRows = timeSheetRows.map(row => {
+        const { customerData, clientData, jobData, taskData, ...rest } = row;
+        return rest;
       });
-      GetTimeSheet();
-      setUpdateTimeSheetRows([])
+
+      const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows };
+      const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
+      if (res.status) {
+        sweatalert.fire({
+          icon: 'success',
+          title: res.message,
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 1500
+        });
+        GetTimeSheet();
+        setUpdateTimeSheetRows([])
+      }
     }
-  }
   }
 
   const saveTimeSheetRemark = async (e) => {
@@ -437,16 +486,16 @@ const Timesheet = () => {
       if (item.editRow === 1) {
         return {
           ...item,
-          remark: remarkText 
+          remark: remarkText
         };
       }
       return item;
     });
-   
-  
+
+
     const updatedTimeSheetRows1 = updatedTimeSheetRows.map(row => {
-      const { customerData, clientData,jobData,taskData, ...rest } = row; 
-      return rest; 
+      const { customerData, clientData, jobData, taskData, ...rest } = row;
+      return rest;
     });
 
     const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows1 };
@@ -464,8 +513,8 @@ const Timesheet = () => {
       });
       GetTimeSheet();
     }
-    }
-  
+  }
+
   return (
     <div className="page-content">
       <div className="container-fluid">
@@ -571,9 +620,12 @@ const Timesheet = () => {
 
                         <tbody className="list form-check-all">
                           {timeSheetRows?.map((item, index) => (
+                            
+
+                             
                             <tr className="tabel_new">
                               <td>{index + 1}</td>
-
+                               
                               <td>
                                 {item.newRow === 1 ? (
                                   <select
@@ -704,9 +756,9 @@ const Timesheet = () => {
                                   className="form-control cursor-pointer"
                                   type="text"
                                   name="monday_hours"
-                                  onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday)}
-                                  value={item.monday_hours == null ? "0":item.monday_hours}
-                                  disabled={item.editRow==1 ? new Date(weekDays.monday) > new Date() ? true: false: currentDay !== 'monday'}
+                                  onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday ,item)}
+                                  value={item.monday_hours == null ? "0" : item.monday_hours}
+                                  disabled={item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? true : false : currentDay !== 'monday'}
                                 />
                               </td>
 
@@ -716,9 +768,9 @@ const Timesheet = () => {
                                   className="form-control cursor-pointer"
                                   type="text"
                                   name="tuesday_hours"
-                                  onChange={(e) => handleHoursInput(e, index, 'tuesday_date', weekDays.tuesday)}
+                                  onChange={(e) => handleHoursInput(e, index, 'tuesday_date', weekDays.tuesday,item)}
                                   value={item.tuesday_hours == null ? "0" : item.tuesday_hours}
-                                  disabled={item.editRow==1 ? new Date(weekDays.tuesday) > new Date() ? true: false: currentDay !== 'tuesday'}
+                                  disabled={item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? true : false : currentDay !== 'tuesday'}
                                 />
                               </td>
 
@@ -728,9 +780,9 @@ const Timesheet = () => {
                                   className="form-control cursor-pointer"
                                   type="text"
                                   name="wednesday_hours"
-                                  onChange={(e) => handleHoursInput(e, index, 'wednesday_date', weekDays.wednesday)}
-                                  value={item.wednesday_hours ==null ? "0" :item.wednesday_hours}
-                                  disabled={item.editRow==1 ? new Date(weekDays.wednesday) > new Date() ? true: false:currentDay !== 'wednesday'}
+                                  onChange={(e) => handleHoursInput(e, index, 'wednesday_date', weekDays.wednesday,item)}
+                                  value={item.wednesday_hours == null ? "0" : item.wednesday_hours}
+                                  disabled={item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? true : false : currentDay !== 'wednesday'}
                                 />
                               </td>
 
@@ -740,9 +792,9 @@ const Timesheet = () => {
                                   className="form-control cursor-pointer"
                                   type="text"
                                   name="thursday_hours"
-                                  onChange={(e) => handleHoursInput(e, index, 'thursday_date', weekDays.thursday)}
+                                  onChange={(e) => handleHoursInput(e, index, 'thursday_date', weekDays.thursday , item)}
                                   value={item.thursday_hours == null ? "0" : item.thursday_hours}
-                                  disabled={item.editRow==1 ?  new Date(weekDays.thursday) > new Date() ? true: false: currentDay !== 'thursday'}
+                                  disabled={item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ? true : false : currentDay !== 'thursday'}
                                 />
                               </td>
 
@@ -752,9 +804,9 @@ const Timesheet = () => {
                                   className="form-control cursor-pointer"
                                   type="text"
                                   name="friday_hours"
-                                  onChange={(e) => handleHoursInput(e, index, 'friday_date', weekDays.friday)}
+                                  onChange={(e) => handleHoursInput(e, index, 'friday_date', weekDays.friday ,item )}
                                   value={item.friday_hours == null ? "0" : item.friday_hours}
-                                  disabled={item.editRow==1 ? new Date(weekDays.friday) > new Date() ? true: false:currentDay !== 'friday'}
+                                  disabled={item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? true : false : currentDay !== 'friday'}
                                 />
                               </td>
 
@@ -764,9 +816,9 @@ const Timesheet = () => {
                                   className="form-control cursor-pointer"
                                   type="text"
                                   name="saturday_hours"
-                                  onChange={(e) => handleHoursInput(e, index, 'saturday_date', weekDays.saturday)}
+                                  onChange={(e) => handleHoursInput(e, index, 'saturday_date', weekDays.saturday ,item)}
                                   value={item.saturday_hours == null ? "0" : item.saturday_hours}
-                                  disabled={item.editRow==1 ? new Date(weekDays.saturday) > new Date() ? true: false: currentDay !== 'saturday'}
+                                  disabled={item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? true : false : currentDay !== 'saturday'}
                                 />
                               </td>
 
@@ -776,23 +828,37 @@ const Timesheet = () => {
                                   className="form-control cursor-pointer"
                                   type="text"
                                   name="sunday_hours"
-                                  onChange={(e) => handleHoursInput(e, index, 'sunday_date', weekDays.sunday)}
+                                  onChange={(e) => handleHoursInput(e, index, 'sunday_date', weekDays.sunday ,item )}
                                   value={item.sunday_hours == null ? "0" : item.sunday_hours}
-                                  disabled={item.editRow==1 ? new Date(weekDays.sunday) > new Date() ? true: false: currentDay !== 'sunday'}
+                                  disabled={item.editRow == 1 ? new Date(weekDays.sunday) > new Date() ? true : false : currentDay !== 'sunday'}
                                 />
-                                
+
                               </td>
 
                               <td className="d-flex">
-                                <button
+                                {
+                                  item.editRow == 0 || item.editRow == undefined? 
+                                  <button
                                   className="edit-icon"
                                   onClick={(e) => {
-                                      editRow(e , index);
-                
+                                    editRow(e, index);
                                   }}
-                                >
-                                  <i className="fa fa-pencil text-primary  "></i>
+                                 >
+                                 <i className="fa fa-pencil text-primary  "></i>
                                 </button>
+                                  :
+
+                                  <button
+                                  className="edit-icon"
+                                  onClick={(e) => {
+                                    undoEditRow(e, index);
+                                  }}
+                                 >
+                                <i class="fa-solid fa-arrow-rotate-left"></i>
+                                </button>
+
+                                }
+                                
                                 <button
                                   className="delete-icon"
                                   onClick={() => handleDeleteRow(index)}
@@ -859,9 +925,9 @@ const Timesheet = () => {
           </div>
           <div className="d-flex justify-content-end mt-3">
             <button className="btn btn-info"
-             onClick={(e) => {
-              saveData(e);
-             }}>
+              onClick={(e) => {
+                saveData(e);
+              }}>
               <i className="fa fa-check"></i> save
             </button>
             <button className="btn btn-outline-success ms-3">

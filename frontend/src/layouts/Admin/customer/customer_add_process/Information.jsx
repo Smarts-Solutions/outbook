@@ -902,24 +902,24 @@ const Information = ({ id, pageStatus }) => {
 
 
 
-  useEffect(() => {
-    const initializeAutocomplete = () => {
-      const input = document.getElementById("location");
-      const autocomplete = new window.google.maps.places.Autocomplete(input, {
-        types: ["geocode"],
-      });
+  // useEffect(() => {
+  //   const initializeAutocomplete = () => {
+  //     const input = document.getElementById("location");
+  //     const autocomplete = new window.google.maps.places.Autocomplete(input, {
+  //       types: ["geocode"],
+  //     });
 
-      autocomplete.addListener("place_changed", () => {
-        const place = autocomplete.getPlace();
-        if (place && place.geometry) {
-          setLocation(place.formatted_address);
-          // sendPlaceDetailsToApi(place);
-        }
-      });
-    };
+  //     autocomplete.addListener("place_changed", () => {
+  //       const place = autocomplete.getPlace();
+  //       if (place && place.geometry) {
+  //         setLocation(place.formatted_address);
+  //         // sendPlaceDetailsToApi(place);
+  //       }
+  //     });
+  //   };
 
-    initializeAutocomplete();
-  }, []);
+  //   initializeAutocomplete();
+  // }, []);
 
   // const sendPlaceDetailsToApi = (place) => {
   //   const apiUrl = "https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=AIzaSyAwLuK1P6GQk2WpYZCm0fnp9HmVhNTEeq4";
