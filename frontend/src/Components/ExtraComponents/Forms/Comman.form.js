@@ -78,32 +78,21 @@ const ReusableForm = ({
             <>
               {field.type === "select" ? (
                 <>
-                  <div
-                    className={`col-lg-${
-                      title === "update_theme" ? 12 : field.col_size
-                    }`}
-                  >
+                  <div className={`col-lg-${title === "update_theme" ? 12 : field.col_size}`}  >
                     <div className=" row">
-                      <label
-                        className={`col-lg-${field.label_size}`}
-                        htmlFor={field.name}
-                      >
+                      <label className={`col-lg-${field.label_size}`} htmlFor={field.name} >
                         {field.label}
                         <span className="text-danger">*</span>
                       </label>
-                      <div
-                        className={`col-lg-${title === "addgroup" ? 12 : 12}`}
-                      >
+                      <div className={`col-lg-${title === "addgroup" ? 12 : 12}`}  >
                         <select
-                          className="default-select wide form-control"
+                          className={formik.touched[field.name] && formik.errors[field.name] ? "default-select wide error-field form-select" : " default-select wide form-select"}
                           id={field.name}
                           style={{ background: field.disable ? "#eeeeee" : "" }}
                           {...formik.getFieldProps(field.name)}
                           disabled={field.disable}
                         >
-                          <option value="" selected disable={field.disable}>
-                            Please Select {field.label}
-                          </option>
+                          <option value="" selected disable={field.disable}>  Please Select {field.label} </option>
                           {field.options.map((option) => (
                             <option key={option.value} value={option.value}>
                               {option.label}
@@ -136,7 +125,9 @@ const ReusableForm = ({
                                   <div className="form-check custom-checkbox mb-3">
                                     <input
                                       type={field.type}
-                                      className="form-check-input"
+                                      // className="form-check-input"
+                                      className={formik.touched[field.name] && formik.errors[field.name] ? "error-field form-check-input" : "form-check-input"}
+
                                       id={option.label}
                                       {...formik.getFieldProps(option.name)}
                                     />
@@ -210,7 +201,9 @@ const ReusableForm = ({
                         type={field.type}
                         name={field.name}
                         value={field.value1}
-                        className="form-check-input"
+                        // className="form-check-input"
+                        className={formik.touched[field.name] && formik.errors[field.name] ? "form-check-input error-field" : " form-check-input"}
+
                         id={field.title1}
                         {...formik.getFieldProps(field.name)}
                       />
@@ -228,7 +221,8 @@ const ReusableForm = ({
                         type={field.type}
                         name={field.name}
                         value={field.value2}
-                        className="form-check-input"
+                        className={formik.touched[field.name] && formik.errors[field.name] ? "form-check-input error-field" : " form-check-input"}
+
                         id={field.title2}
                         {...formik.getFieldProps(field.name)}
                       />
@@ -255,20 +249,19 @@ const ReusableForm = ({
                       <div style={{ position: "relative" }}>
                         <input
                           id={field.name}
-                          type={
-                            passwordVisible[field.name] ? "text" : field.type
-                          }
+                          type={  passwordVisible[field.name] ? "text" : field.type }
                           placeholder={field.label}
                           {...formik.getFieldProps(field.name)}
-                          className={`form-control`}
+                          className={formik.touched[field.name] && formik.errors[field.name] ? "form-control error-field" : " form-control"}
+
+                          // className={`form-control`}
                           autoComplete="off"
                         />
                         <i
-                          className={`fa-solid ${
-                            passwordVisible[field.name]
-                              ? "fa-eye-slash"
-                              : "fa-eye"
-                          }`}
+                          className={`fa-solid ${passwordVisible[field.name]
+                            ? "fa-eye-slash"
+                            : "fa-eye"
+                            }`}
                           style={{
                             position: "absolute",
                             top: "1.5px",
@@ -305,7 +298,8 @@ const ReusableForm = ({
                           <input
                             type={field.type}
                             name={field.name}
-                            className="form-control"
+                            // className="form-control"
+                            className={formik.touched[field.name] && formik.errors[field.name] ? "form-control error-field" : " form-control"}
                             id={field.name}
                             {...formik.getFieldProps(field.name)}
                             readOnly={field.disable}
@@ -339,8 +333,9 @@ const ReusableForm = ({
                           id={field.name}
                           onChange={(e) =>
                             handleFileChange(e, index, field.name)
-                          } // Pass the index to the handler
-                          className={`form-control`}
+                          }
+                          className={formik.touched[field.name] && formik.errors[field.name] ? "form-control error-field" : " form-control"}
+
                         />
                       </div>
                       <img
@@ -375,7 +370,7 @@ const ReusableForm = ({
                       <div>
                         <input
                           type="email"
-                          className="form-control"
+                          className={formik.touched[field.name] && formik.errors[field.name] ? "form-control error-field" : " form-control"}
                           style={{ background: field.disable ? "#eeeeee" : "" }}
                           id={field.name}
                           placeholder={`Enter ${field.label}`}
@@ -411,7 +406,7 @@ const ReusableForm = ({
                       <div>
                         <input
                           type="text"
-                          className="form-control"
+                          className={formik.touched[field.name] && formik.errors[field.name] ? "error-field form-control" : "form-control"}
                           style={{ background: field.disable ? "#eeeeee" : "" }}
                           id={field.name}
                           placeholder={`Enter ${field.label}`}
@@ -447,7 +442,7 @@ const ReusableForm = ({
                       <div>
                         <input
                           type="number"
-                          className="form-control"
+                          className={formik.touched[field.name] && formik.errors[field.name] ? "form-control error-field" : " form-control"}
                           style={{ background: field.disable ? "#eeeeee" : "" }}
                           id={field.name}
                           placeholder={`Enter ${field.label}`}
@@ -483,7 +478,7 @@ const ReusableForm = ({
                       <div className="position-relative">
                         <input
                           type="text"
-                          className="form-control"
+                          className={formik.touched[field.name] && formik.errors[field.name] ? "form-control error-field" : " form-control"}
                           style={{ background: field.disable ? "#eeeeee" : "" }}
                           id={field.name}
                           value={selectSearchItem}
@@ -495,7 +490,7 @@ const ReusableForm = ({
                         />
 
                         {field.filteredCompanies.length > 0 &&
-                        !selectSearchItem ? (
+                          !selectSearchItem ? (
                           <div className="dropdown-list">
                             {field.filteredCompanies &&
                               field.filteredCompanies.map((company, index) => (
@@ -569,20 +564,19 @@ const ReusableForm = ({
           <div className="modal-footer mt-4 mb-0">
             <button
               type="button"
-              className="btn btn-secondary m-2"
+              className="btn btn-secondary m-2 "
               onClick={closeBtn}
             >
-              Cancel
+             <i className='fa fa-xmark'></i>  Cancel
             </button>
 
             <button
-              className={`btn btn-info ${
-                location.pathname === "resetpassword" ? "col-md-11" : ""
-              }`}
+              className={`btn btn-outline-success ${location.pathname === "resetpassword" ? "col-md-11" : ""
+                }`}
               type="submit"
               disabled={formik.isSubmitting}
             >
-              {btn_name}
+             <i className='far fa-save'></i> {btn_name}
             </button>
           </div>
         )}

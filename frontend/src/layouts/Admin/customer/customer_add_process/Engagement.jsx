@@ -23,7 +23,7 @@ const Engagement = () => {
   const [coustomerSubSource, setCoustomerSubSource] = useState([]);
   const [formState1, setFormState1] = useState({});
 
-
+ 
   const [formValues1, setFormValues1] = useState({
     accountants: "",
     feePerAccountant: "",
@@ -38,9 +38,8 @@ const Engagement = () => {
   });
   const [formValues2, setFormValues2] = useState({
     total_outsourcing: "",
-    accountants: "",
-    bookkeepers: "",
-    bookkeepers: "",
+    accountants1: "",
+    bookkeepers1: "",
     payroll_experts: "",
     tax_experts: "",
     admin_staff: "",
@@ -151,7 +150,7 @@ const Engagement = () => {
       if (!entry.cost_per_job) {
         entryErrors.cost_per_job = "Please Enter Cost Per Job";
       } else if (entry.cost_per_job < 20 || entry.cost_per_job > 500) {
-        entryErrors.cost_per_job = "Cost Per Job must be between 20 and 500";
+        entryErrors.cost_per_job = "Cost Per Job must be between £20 and £500";
       }
 
       if (Object.keys(entryErrors).length !== 0) {
@@ -279,8 +278,8 @@ const Engagement = () => {
       req = {
         ...req,
         total_outsourcing: formValues2.total_outsourcing,
-        accountants: formValues2.accountants,
-        bookkeepers: formValues2.bookkeepers,
+        accountants: formValues2.accountants1,
+        bookkeepers: formValues2.bookkeepers1,
         payroll_experts: formValues2.payroll_experts,
         tax_experts: formValues2.tax_experts,
         admin_staff: formValues2.admin_staff,
@@ -576,12 +575,12 @@ const Engagement = () => {
                                 },
                                 {
                                   label: "Accountants",
-                                  name: "accountants",
+                                  name: "accountants1",
                                   feeName: "Fee Percentage",
                                 },
                                 {
                                   label: "Bookkeepers",
-                                  name: "bookkeepers",
+                                  name: "bookkeepers1",
                                   feeName: "Fee Percentage",
                                 },
                                 {

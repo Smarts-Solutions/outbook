@@ -1082,6 +1082,7 @@ const Setting = () => {
 
 
   };
+  
   const handleAdd = (e, tabStatus) => {
     if (tabStatus === "1") {
       setModalData({
@@ -1407,17 +1408,17 @@ const Setting = () => {
             placeholder: "Enter Currency",
             value: data.currency,
           },
-          {
-            type: "select",
-            name: "status",
-            label: "Currency Status",
-            placeholder: "Enter Currency Status",
-            options: [
-              { label: "Active", value: "1" },
-              { label: "Deactive", value: "0" },
-            ],
-            value: data.status === "1" ? "1" : "0",
-          },
+          // {
+          //   type: "select",
+          //   name: "status",
+          //   label: "Currency Status",
+          //   placeholder: "Enter Currency Status",
+          //   options: [
+          //     { label: "Active", value: "1" },
+          //     { label: "Deactive", value: "0" },
+          //   ],
+          //   value: data.status === "1" ? "1" : "0",
+          // },
           {
             type: "select",
             name: "status",
@@ -1431,7 +1432,7 @@ const Setting = () => {
 
           },
         ],
-        title: "Service",
+        title: "Country Details",
         tabStatus: tabStatus,
         id: data.id,
       });
