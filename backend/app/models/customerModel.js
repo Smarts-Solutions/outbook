@@ -2265,6 +2265,9 @@ const customerUpdate = async (customer) => {
     else if (pageStatus === "2") {
         const { services, Task } = customer;
 
+        console.log("customer ",customer)
+        return
+
         const [ExistServiceids] = await pool.execute('SELECT service_id  FROM `customer_services` WHERE customer_id =' + customer_id);
         const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
         var account_manager_id = ExistCustomer[0].account_manager_id;
