@@ -276,10 +276,24 @@ const getClient = async (client) => {
   const { customer_id, StaffUserId } = client;
 
   try {
-  const [existStaffbyCustomer] = await pool.execute('SELECT id  FROM customers WHERE id = "' + customer_id + '" AND staff_id = "'+StaffUserId+'" LIMIT 1');
-  
-  if(existStaffbyCustomer.length >  0){
-    const query = `
+    const QueryRole = `
+  SELECT
+    staffs.id AS id,
+    staffs.role_id AS role_id,
+    roles.role AS role_name
+  FROM
+    staffs
+  JOIN
+    roles ON roles.id = staffs.role_id
+  WHERE
+    staffs.id = ${StaffUserId}
+  LIMIT 1
+  `
+    const [rows] = await pool.execute(QueryRole);
+
+    // Condition with Admin And SuperAdmin
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+      const query = `
     SELECT  
         clients.id AS id,
         clients.trading_name AS client_name,
@@ -309,17 +323,55 @@ const getClient = async (client) => {
     WHERE clients.customer_id = ?
  ORDER BY 
     clients.id DESC;
-`;
- const [result] = await pool.execute(query, [customer_id]);
- return { status: true, message: "success.", data: result };
+    `;
+      const [result] = await pool.execute(query, [customer_id]);
+      return { status: true, message: "success.", data: result };
+    }
 
-  }else{
-    const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + StaffUserId + '" LIMIT 1');
- 
-    if (rows.length > 0) {
-      // Allocated to
-      if (rows[0].role_id == 3) {
-        const query = `
+    const [existStaffbyCustomer] = await pool.execute('SELECT id  FROM customers WHERE id = "' + customer_id + '" AND staff_id = "' + StaffUserId + '" LIMIT 1');
+
+    if (existStaffbyCustomer.length > 0) {
+      const query = `
+    SELECT  
+        clients.id AS id,
+        clients.trading_name AS client_name,
+        clients.status AS status,
+        client_types.type AS client_type_name,
+        client_contact_details.email AS email,
+        client_contact_details.phone_code AS phone_code,
+        client_contact_details.phone AS phone,
+        CONCAT(
+            'cli_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(clients.client_code, 1, 15)
+            ) AS client_code
+    FROM 
+        clients
+    JOIN 
+       customers ON customers.id = clients.customer_id    
+    JOIN 
+        client_types ON client_types.id = clients.client_type
+    LEFT JOIN 
+        client_contact_details ON client_contact_details.id = (
+            SELECT MIN(cd.id)
+            FROM client_contact_details cd
+            WHERE cd.client_id = clients.id
+        )
+    WHERE clients.customer_id = ?
+ ORDER BY 
+    clients.id DESC;
+    `;
+      const [result] = await pool.execute(query, [customer_id]);
+      return { status: true, message: "success.", data: result };
+
+    } else {
+      const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + StaffUserId + '" LIMIT 1');
+
+      if (rows.length > 0) {
+        // Allocated to
+        if (rows[0].role_id == 3) {
+          const query = `
            SELECT  
           clients.id AS id,
           clients.trading_name AS client_name,
@@ -360,13 +412,13 @@ const getClient = async (client) => {
         ORDER BY 
         clients.id DESC
             `;
-        const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId]);
-        return { status: true, message: "success.", data: resultAllocated };
-  
-      }
-      // Account Manger
-      else if (rows[0].role_id == 4) {
-        const query = `
+          const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId]);
+          return { status: true, message: "success.", data: resultAllocated };
+
+        }
+        // Account Manger
+        else if (rows[0].role_id == 4) {
+          const query = `
            SELECT  
           clients.id AS id,
           clients.trading_name AS client_name,
@@ -407,13 +459,13 @@ const getClient = async (client) => {
         ORDER BY 
         clients.id DESC
             `;
-        const [resultAccounrManage] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId]);
-        return { status: true, message: "success.", data: resultAccounrManage };
-  
-      }
-      // Reviewer
-      else if (rows[0].role_id == 6) {
-        const query = `
+          const [resultAccounrManage] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId]);
+          return { status: true, message: "success.", data: resultAccounrManage };
+
+        }
+        // Reviewer
+        else if (rows[0].role_id == 6) {
+          const query = `
            SELECT  
           clients.id AS id,
           clients.trading_name AS client_name,
@@ -454,19 +506,19 @@ const getClient = async (client) => {
         ORDER BY 
         clients.id DESC
             `;
-        const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId]);
-        return { status: true, message: "success.", data: resultReviewer };
-  
+          const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId]);
+          return { status: true, message: "success.", data: resultReviewer };
+
+        }
+
       }
-  
+
     }
 
- }
 
 
 
 
- 
   } catch (err) {
     return { status: false, message: "Err Client Get" };
   }

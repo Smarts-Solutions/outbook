@@ -109,7 +109,28 @@ LEFT JOIN
 
 const getDashboardActivityLog = async (dashboard) => {
   const { staff_id } = dashboard;
-try {
+  const QueryRole = `
+  SELECT
+    staffs.id AS id,
+    staffs.role_id AS role_id,
+    roles.role AS role_name
+  FROM
+    staffs
+  JOIN
+    roles ON roles.id = staffs.role_id
+  WHERE
+    staffs.id = ${staff_id}
+  LIMIT 1
+  `
+  const [rows] = await pool.execute(QueryRole);
+  // Condition with Admin And SuperAdmin
+  let MatchCondition = `WHERE
+    staff_logs.staff_id = ${staff_id}`
+  if(rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")){
+    MatchCondition = ''
+  }
+
+ try {
   const query = `
   SELECT
     staff_logs.id AS log_id,
@@ -119,8 +140,7 @@ try {
     staff_logs.log_message_all AS log_message
   FROM
     staff_logs
-  WHERE
-    staff_logs.staff_id = ${staff_id}
+   ${MatchCondition}
   ORDER BY
     staff_logs.id DESC
 `;
