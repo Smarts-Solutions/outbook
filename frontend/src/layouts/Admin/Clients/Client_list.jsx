@@ -292,13 +292,13 @@ const ClientList = () => {
       sortable: true,
     },
 
-    {
-      name: "Status",
-      selector: (row) =>
-        row.status == null || row.status == 0 ? "To Be Started - Not Yet Allocated Internally" : row.status,
-      sortable: true,
-      width: "325px"
-    },
+    // {
+    //   name: "Status",
+    //   selector: (row) =>
+    //     row.status == null || row.status == 0 ? "To Be Started - Not Yet Allocated Internally" : row.status,
+    //   sortable: true,
+    //   width: "325px"
+    // },
 
     {
       name: "Actions",
