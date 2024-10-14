@@ -35,7 +35,6 @@ JOIN
 LEFT JOIN 
     customer_company_information ON customers.id = customer_company_information.customer_id;
 `;
-
   try {
     // Check if view exists
     const [checkViewResult] = await pool.execute(checkViewQuery);
