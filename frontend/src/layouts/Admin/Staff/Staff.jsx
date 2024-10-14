@@ -515,15 +515,15 @@ const StaffPage = () => {
 
  
   return (
-    <div>
-      <div className="container-fluid">
+    <div className="container-fluid">
+    
         <div className="content-title">
           <div className="tab-title">
             <h3 className="mt-0">Manage Staff</h3>
           </div>
         </div>
          
-      </div>
+      
       <div className="report-data mt-4">
        <div className="col-sm-12">
         <div className="page-title-box pt-0">
@@ -579,12 +579,15 @@ const StaffPage = () => {
     </div>
   </div>
       {/* Add Staff */}
+   
       <CommanModal
         isOpen={addStaff}
+        
         backdrop="static"
         size="ms-5"
         title="Add Staff"
         hideBtn={true}
+      
         handleClose={() => {
           setAddStaff(false);
           formik.resetForm();
@@ -599,6 +602,7 @@ const StaffPage = () => {
         />
       </CommanModal>
       {/* CLOSE Add Staff */}
+     
 
       {/* Manage Portfolio */}
       <CommanModal
@@ -769,7 +773,7 @@ const StaffPage = () => {
             color="primary"
             onClick={handleUpdate}
           >
-            <i className="far fa-save pe-1"></i>
+            <i className="fa fa-edit pe-1"></i>
             Update
           </Button>
         </div>

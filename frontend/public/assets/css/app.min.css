@@ -4235,10 +4235,10 @@ a.nav-link.dropdown-toggle.arrow-none.waves-light.waves-effect img {
 	padding: 8px 20px !important;
 }
 
-.btn-outline-success:hover {
+.btn-outline-success:hover ,.btn-outline-success:active,:not(.btn-check)+.btn:active{
 
 	color: #fff;
-	background-color: #43c752;
+	background-color: #43c752 !important;
 
 }
 

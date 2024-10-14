@@ -516,7 +516,7 @@ const Timesheet = () => {
   }
 
   return (
-    <div className="page-content">
+   
       <div className="container-fluid">
         <div className="content-title">
           <div className="row">
@@ -979,7 +979,7 @@ const Timesheet = () => {
           </CommonModal>
         </div>
       </div>
-    </div>
+    
   );
 };
 

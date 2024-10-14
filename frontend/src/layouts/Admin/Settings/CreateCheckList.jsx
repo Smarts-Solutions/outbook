@@ -473,7 +473,7 @@ const CreateCheckList = () => {
 
           <div className="mt-4">
             {tasks.map((task, index) => (
-              <div key={index} className="row  mt-4 align-items-end">
+              <div key={index} className="row  mt-4 ">
                 <div className="col-lg-5">
                   <div>
                     <label className="form-label">Task Name</label>
@@ -568,7 +568,7 @@ const CreateCheckList = () => {
 
                 </div>
                 <div className="col-lg-2">
-                  <button className="delete-icon" onClick={() => removeTask(index)}>
+                  <button className="delete-icon mt-4" onClick={() => removeTask(index)}>
                     <i className="ti-trash text-danger "></i>
                   </button>
                 </div>
