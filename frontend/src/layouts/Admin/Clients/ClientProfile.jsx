@@ -401,7 +401,7 @@ const ClientList = () => {
           </div>
         </div>
 
-        <Hierarchy show={["Customer", "Client", activeTab]} active={2} data={hararchyData} NumberOfActive={customerData.length} />
+        <Hierarchy show={["Customer", "Client", activeTab=='NoOfJobs' ? 'No. Of Jobs' : activeTab]} active={2} data={hararchyData} NumberOfActive={customerData.length} />
 
       </div>
 

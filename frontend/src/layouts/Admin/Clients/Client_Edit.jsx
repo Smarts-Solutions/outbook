@@ -143,6 +143,12 @@ const ClientEdit = () => {
   }, [searchItem]);
 
 
+  console.log('errors1', errors1);
+  console.log('errors2', errors2);
+  console.log('errors3', errors3);
+  console.log('errors4', errors4);
+  
+
 
   useEffect(() => {
     if (location.state.row.client_type_name == "SoleTrader") {
@@ -568,14 +574,7 @@ const ClientEdit = () => {
   const validateField = (index, field, value, Type) => {
     const errors = ErrorsArr[Type - 1];
     const newErrors = [...errors];
-
-    console.log("index", index)
-    console.log("field", field)
-    console.log("value", value)
-    console.log("Type", Type)
-    console.log("newErrors", newErrors)
-
-
+ 
     switch (field) {
       case "first_name":
       case "last_name":

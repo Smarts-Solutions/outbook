@@ -343,14 +343,16 @@ const CreateClient = () => {
           newErrors[name] = "Please enter Last Name";
           break;
         case "email":
-          newErrors[name] = "Please enter Email";
+          newErrors[name] = null;
           break;
+        case "phone":
+          newErrors[name] = null;
         default:
           break;
       }
     }
     else {
-      console.log(name, value);
+
       if (value && name === "email" && !Email_regex(value)) {
         newErrors[name] = "Please enter valid Email";
       } else if (name === "phone" && !/^\d{9,12}$/.test(value)) {
@@ -365,8 +367,8 @@ const CreateClient = () => {
       }
     }
 
-    ScrollToViewFirstError(newErrors);
 
+    ScrollToViewFirstError(newErrors);
     if (Object.keys(newErrors).length !== 0) {
       setErrors1((prevErrors) => ({
         ...prevErrors,
@@ -695,8 +697,8 @@ const CreateClient = () => {
   };
 
   const HandleCancel = () => {
-   // navigate("/admin/Clientlist", { state: { id: location.state.id } });
-   window.history.back()
+    // navigate("/admin/Clientlist", { state: { id: location.state.id } });
+    window.history.back()
   };
 
 
@@ -804,7 +806,7 @@ const CreateClient = () => {
         await AddClientFun(req);
       }
       else {
-        ScrollToViewFirstErrorContactForm(errors);  
+        ScrollToViewFirstErrorContactForm(errors);
       }
     }
     if (selectClientType == 3 && validateAllFields(3)) {
@@ -870,7 +872,7 @@ const CreateClient = () => {
       }
       else {
         ScrollToViewFirstErrorContactForm(contactsErrors);
-        
+
       }
     }
     if (selectClientType == 4 && validateAllFields(4)) {
@@ -911,7 +913,7 @@ const CreateClient = () => {
         });
     }
   };
-  
+
   return (
     <div>
       <div className="container-fluid mt-4">
@@ -990,7 +992,7 @@ const CreateClient = () => {
                                             Client Industry
                                           </label>
                                           <select
-                                            
+
                                             className={errors1["IndustryType"] ? "error-field form-select" : "form-select"}
                                             aria-label="Default select example"
                                             name="IndustryType"
@@ -1035,7 +1037,7 @@ const CreateClient = () => {
                                             type="text"
                                             name="tradingName"
                                             id="tradingName"
-                                            
+
                                             className={errors1["tradingName"] ? "error-field form-control" : "form-control"}
                                             placeholder="Trading Name"
                                             onChange={(e) => handleChange1(e)}
@@ -1060,7 +1062,7 @@ const CreateClient = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            
+
                                             className={errors1["tradingAddress"] ? "error-field form-control" : "form-control"}
                                             placeholder="Trading Address"
                                             name="tradingAddress"
@@ -1083,7 +1085,7 @@ const CreateClient = () => {
                                             VAT Registered
                                           </label>
                                           <select
-                                           
+
                                             className={errors1["vatRegistered"] ? "error-field form-select" : "form-select"}
                                             aria-label="Default select example"
                                             name="vatRegistered"
@@ -1165,7 +1167,7 @@ const CreateClient = () => {
                                         </label>
                                         <input
                                           type="text"
-                                         
+
                                           className={errors1["first_name"] ? "error-field form-control" : "form-control"}
                                           placeholder="First Name"
                                           name="first_name"
@@ -1395,7 +1397,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.CompanyName
                                               }
-                                              // disabled
+                                            // disabled
                                             />
                                             {errors2["CompanyName"] && (
                                               <div className="error-text">
@@ -1423,7 +1425,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.EntityType
                                               }
-                                              // disabled
+                                            // disabled
                                             />
                                             {errors2["EntityType"] && (
                                               <div className="error-text">
@@ -1452,7 +1454,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.CompanyStatus
                                               }
-                                              // disabled
+                                            // disabled
                                             />
                                             {errors2["CompanyStatus"] && (
                                               <div className="error-text">
@@ -1471,7 +1473,7 @@ const CreateClient = () => {
                                             </label>
                                             <input
                                               type="text"
-                                              
+
                                               className={errors2["CompanyNumber"] ? "error-field form-control" : "form-control"}
 
                                               placeholder="Enter Company Number"
@@ -1481,7 +1483,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.CompanyNumber
                                               }
-                                              // disabled
+                                            // disabled
                                             />
                                             {errors2["CompanyNumber"] && (
                                               <div className="error-text">
@@ -1506,7 +1508,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.IncorporationDate
                                               }
-                                              // disabled
+                                            // disabled
                                             />
                                             {errors2["IncorporationDate"] && (
                                               <div className="error-text">
@@ -1534,7 +1536,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.RegisteredOfficeAddress
                                               }
-                                              // disabled
+                                            // disabled
                                             />
                                             {errors2[
                                               "RegisteredOfficeAddress"
@@ -1569,7 +1571,7 @@ const CreateClient = () => {
                                               value={
                                                 getCompanyDetails.IncorporationIn
                                               }
-                                              // disabled
+                                            // disabled
                                             />
 
                                             {errors2["IncorporationIn"] && (
@@ -1665,7 +1667,7 @@ const CreateClient = () => {
                                             Client Industry
                                           </label>
                                           <select
-                                            
+
                                             className={errors2["ClientIndustry"] ? "error-field form-select" : "form-select"}
                                             name="ClientIndustry"
                                             id="ClientIndustry"
@@ -1796,7 +1798,7 @@ const CreateClient = () => {
                                                       </label>
                                                       <input
                                                         type="text"
-                                                        className={errors[index].first_name  ? "error-field form-control" : "form-control"}
+                                                        className={errors[index].first_name ? "error-field form-control" : "form-control"}
 
                                                         placeholder="First Name"
                                                         id={`first_name-${index}`}
@@ -1837,7 +1839,7 @@ const CreateClient = () => {
                                                       </label>
                                                       <input
                                                         type="text"
-                                                        className={errors[index].last_name  ? "error-field form-control" : "form-control"}
+                                                        className={errors[index].last_name ? "error-field form-control" : "form-control"}
                                                         placeholder="Last Name"
                                                         id={`last_name-${index}`}
                                                         value={
@@ -2078,7 +2080,7 @@ const CreateClient = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className={errors3["TradingName"]  ? "error-field form-control" : "form-control"}
+                                            className={errors3["TradingName"] ? "error-field form-control" : "form-control"}
 
                                             placeholder="Trading Name"
                                             name="TradingName"
@@ -2106,7 +2108,7 @@ const CreateClient = () => {
                                           </label>
                                           <input
                                             type="text"
-                                            className={errors3["TradingAddress"]  ? "error-field form-control" : "form-control"}
+                                            className={errors3["TradingAddress"] ? "error-field form-control" : "form-control"}
 
                                             placeholder="Trading Address"
                                             name="TradingAddress"
@@ -2218,40 +2220,14 @@ const CreateClient = () => {
                                             <div className="card pricing-box p-4 m-2 mt-0">
                                               <div className="row">
                                                 <div className="col-lg-12">
+                                                  <div>
+                                                    <h4 className="flex-grow-1 fs-16" style={{fontWeight:'600'}}>Partnership {index+1}</h4>
+                                                  </div>
                                                   <div
                                                     className="form-check form-switch form-switch-md mb-3 d-flex justify-content-end"
                                                     dir="ltr"
                                                   >
-                                                    {/* <div>
-                                                      <input
-                                                        type="checkbox"
-                                                        className="form-check-input"
-                                                        id={`customSwitchsizemd-${index}`}
-                                                        checked={
-                                                          contacts1.authorised_signatory_status
-                                                        }
-                                                        onChange={(e) =>
-                                                          handleChange4(
-                                                            index,
-                                                            "authorised_signatory_status",
-                                                            e.target.checked
-                                                          )
-                                                        }
-                                                        defaultChecked={
-                                                          index === 0 ||
-                                                          index === 1
-                                                        }
-                                                        disabled={
-                                                          contacts1.length === 2
-                                                            ? index === 0 ||
-                                                            index === 1
-                                                            : false
-                                                        }
-                                                      />
-                                                      <label className="form-check-label">
-                                                        Authorised Signatory
-                                                      </label>
-                                                    </div> */}
+
                                                     {index !== 0 &&
                                                       index !== 1 && (
                                                         <div>
@@ -2269,7 +2245,7 @@ const CreateClient = () => {
                                                             }
                                                           >
                                                             <i className="ti-trash  text-danger"></i>{" "}
-                                                         
+
                                                           </button>
                                                         </div>
                                                       )}
@@ -2287,7 +2263,7 @@ const CreateClient = () => {
                                                     </label>
                                                     <input
                                                       type="text"
-                                                 
+
                                                       className={contactsErrors[index].first_name ? "error-field form-control" : "form-control"}
 
                                                       placeholder="First Name"
