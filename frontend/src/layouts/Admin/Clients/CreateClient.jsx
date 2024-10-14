@@ -342,9 +342,9 @@ const CreateClient = () => {
         case "last_name":
           newErrors[name] = "Please enter Last Name";
           break;
-        // case "email":
-        //   newErrors[name] = "Please enter Email";
-        //   break;
+        case "email":
+          newErrors[name] = "Please enter Email";
+          break;
         default:
           break;
       }
