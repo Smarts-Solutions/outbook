@@ -2257,7 +2257,7 @@ const customerUpdate = async (customer) => {
 
                 const query3 = `
                 UPDATE customer_contact_details
-                SET contact_person_role_id = ?, first_name = ?, last_name = ?,phone_code = ? ,phone = ?, email = ? ,authorised_signatory_status = ?
+                SET contact_person_role_id = ?, first_name = ?, last_name = ?,phone_code = ? ,phone = ?, email = ? 
                 WHERE customer_id = ? AND id = ?
                `;
 
@@ -2268,27 +2268,26 @@ const customerUpdate = async (customer) => {
                 for (const detail of contactDetails) {
 
                     let contact_id = detail.contact_id;
-                    let customer_contact_person_role_id = detail.customer_contact_person_role_id;
+                    let customer_contact_person_role_id = detail.customer_contact_person_role_id == "" ? 0 : detail.customer_contact_person_role_id;
                     let first_name = detail.first_name;
                     let last_name = detail.last_name;
                     let email = detail.email;
                     let phone_code = detail.phone_code;
                     let phone = detail.phone;
-                    // let residential_address = detail.residential_address;
-                    let authorised_signatory_status = detail.authorised_signatory_status;
+                    
                     if (contact_id == "" || contact_id == undefined || contact_id == null) {
                         const query4 = `
-                        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email,authorised_signatory_status)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
                         `;
-                        const [result3, err3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, authorised_signatory_status]);
+                        const [result3, err3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone_code, phone, email]);
                         logAdditional = true;
 
 
                     } else {
 
                         arrayInterId.push(contact_id)
-                        const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, authorised_signatory_status, customer_id, contact_id]);
+                        const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, customer_id, contact_id]);
 
                         if (result3.changedRows > 0) {
                             logUpdateRequired = true;
@@ -2355,7 +2354,7 @@ const customerUpdate = async (customer) => {
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
-
+                 console.log("err ",err)
                 return { status: false, message: 'Update Error Customer Type 3' };
             }
 
