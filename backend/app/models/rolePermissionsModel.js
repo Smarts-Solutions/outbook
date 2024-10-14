@@ -2,12 +2,15 @@ const pool = require('../config/database');
 const { SatffLogUpdateOperation } = require('../utils/helper');
 
 const createRole = async (Role) => {
-    const { role_name } = Role;
+    const { role_name,hourminute } = Role;
+
+    console.log("Role",hourminute)
+
     const role = role_name.trim().toUpperCase().replace(/[-\s]/g, '');
     const checkQuery = `SELECT 1 FROM roles WHERE role_name = ?`;
     const query = `
-    INSERT INTO roles (role_name, role)
-    VALUES (?, ?)
+    INSERT INTO roles (role_name, role,hourminute)
+    VALUES (?, ?,?)
     `;
 
     try {
@@ -15,7 +18,7 @@ const createRole = async (Role) => {
         if (checkResult.length > 0) {
           return  {status:false , message : "Role already exists"}
           }
-        const [result] = await pool.execute(query, [role_name, role]);
+        const [result] = await pool.execute(query, [role_name, role,hourminute]);
 
 
 
@@ -120,14 +123,14 @@ const getRoleById = async (roleId) => {
 
 
 const updateRole = async (Role) => {
-    const { id, role_name, status } = Role;
+    const { id, role_name, status,hourminute } = Role;
     const role = role_name.trim().toUpperCase().replace(/[-\s]/g, '');
 
     const checkQuery = `SELECT 1 FROM roles WHERE role = ? AND id != ?`;
 
     const query = `
     UPDATE roles
-    SET role_name = ?, role = ?, status = ? WHERE id = ?
+    SET role_name = ?, role = ?, status = ?,hourminute = ? WHERE id = ?
     `;
 
     try {
@@ -138,7 +141,7 @@ const updateRole = async (Role) => {
         }
 
         const [[existStatus]] = await pool.execute(`SELECT status FROM roles WHERE id = ?`, [id]);
-        const [result] = await pool.execute(query, [role_name, role,status, id]);
+        const [result] = await pool.execute(query, [role_name, role,status,hourminute, id]);
   
         let status_change = "Deactivate"
         if(status == "1"){
