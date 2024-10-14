@@ -5,11 +5,7 @@ import MultiStepFormContext from "./MultiStepFormContext";
 import { useDispatch } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import sweatalert from "sweetalert2";
-import {
-  ADD_PEPPER_WORKS,
-  GET_CUSTOMER_DATA,
-  DELETE_CUSTOMER_FILE,
-} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import {  ADD_PEPPER_WORKS,  GET_CUSTOMER_DATA,   DELETE_CUSTOMER_FILE} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 
 const Paper = () => {
