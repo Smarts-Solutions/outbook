@@ -23,6 +23,7 @@ const CreateClient = () => {
   const [errors2, setErrors2] = useState({});
   const [errors3, setErrors3] = useState({});
   const [errors4, setErrors4] = useState({});
+  
 
   const [personRoleDataAll, setPersonRoleDataAll] = useState({
     loading: true,
@@ -342,11 +343,11 @@ const CreateClient = () => {
         case "last_name":
           newErrors[name] = "Please enter Last Name";
           break;
-        case "email":
-          newErrors[name] = null;
-          break;
-        case "phone":
-          newErrors[name] = null;
+        // case "email":
+        //   newErrors[name] = null;
+        //   break;
+        // case "phone":
+        //   newErrors[name] = null;
         default:
           break;
       }
@@ -529,7 +530,6 @@ const CreateClient = () => {
   const validateAllFields = (type) => {
     const customer_type = [getSoleTraderDetails, getCompanyDetails, getPartnershipDetails, getIndivisualDetails];
     const validate = [validate1, validate2, validate3, validate4];
-
     let isValid = true;
     for (const key in customer_type[type - 1]) {
       if (!validate[type - 1](key, customer_type[type - 1][key])) {
@@ -704,6 +704,7 @@ const CreateClient = () => {
 
   // common submit function for all type of customer
   const AddClientFun = async (req) => {
+   
     const data = { req: req, authToken: token };
     await dispatch(Add_Client(req))
       .unwrap()
