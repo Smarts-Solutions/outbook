@@ -450,13 +450,13 @@ const ClientList = () => {
                     </li>
                   </ul>
 
-                  <div className="search-input">
+                  {/* <div className="search-input">
                     <input
                       type="text"
                       className="form-control"
                       placeholder="Search Job.."
                     />
-                  </div>
+                  </div> */}
                 </div>
                 <div className="tab-content" id="pills-tabContent">
                   <div
@@ -471,7 +471,7 @@ const ClientList = () => {
                         <Datatable
                           columns={columns}
                           data={customerData}
-                          filter={false}
+                          filter={true}
                         />
                       )}
                     </div>
