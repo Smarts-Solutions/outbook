@@ -226,6 +226,7 @@ const ClientList = () => {
 
     {
       name: "Job Type",
+    
       selector: (row) => row.job_type_name || "-",
       sortable: true,
     },
@@ -265,7 +266,7 @@ const ClientList = () => {
       sortable: true,
     },
     {
-      name: "Outbooks Acount Manager",
+      name: "Outbook Account Manager",
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
         " " +
