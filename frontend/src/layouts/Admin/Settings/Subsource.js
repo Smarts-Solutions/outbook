@@ -33,8 +33,8 @@ const Setting = () => {
       .then(async (response) => {
         if (req.action == "add" || req.action == "update" || req.action == "delete") {
           sweatalert.fire({
-            icon: "error",
-            title: "Error",
+            icon: "success",
+            title: "Success",
             text: response.message,
             timer: 2000,
           });

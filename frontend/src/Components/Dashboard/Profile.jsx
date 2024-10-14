@@ -41,7 +41,7 @@ const Profile = () => {
                   <div className="dastyle-profile-main justify-content-center">
                     <div className="">
                       <img
-                        src="https://bootdey.com/img/Content/avatar/avatar7.png"
+                        src="assets/images/users/profile.png"
                         alt="Admin"
                         className="rounded-circle"
                         width={200}

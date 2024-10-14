@@ -43,8 +43,7 @@ const Information = ({ id, pageStatus }) => {
   const [contacts1, setContacts1] = useState([]);
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);
 
-
-  console.log("ManagerType", ManagerType);
+ 
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     tradingName: "",
     tradingAddress: "",
@@ -266,6 +265,8 @@ const Information = ({ id, pageStatus }) => {
         CompanyStatus: getSearchDetails[0]?.company_status,
         CompanyNumber: getSearchDetails[0]?.company_number,
         RegisteredOfficeAddress: getSearchDetails[0]?.address_snippet,
+        TradingName: getSearchDetails[0].title,
+        TradingAddress: getSearchDetails[0].address_snippet,
         IncorporationDate: getSearchDetails[0]?.date_of_creation
           ? getSearchDetails[0]?.date_of_creation
           : "",

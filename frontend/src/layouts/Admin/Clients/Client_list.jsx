@@ -226,6 +226,7 @@ const ClientList = () => {
 
     {
       name: "Job Type",
+    
       selector: (row) => row.job_type_name || "-",
       sortable: true,
     },
@@ -265,7 +266,7 @@ const ClientList = () => {
       sortable: true,
     },
     {
-      name: "Outbooks Acount Manager",
+      name: "Outbook Account Manager",
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
         " " +
@@ -292,13 +293,13 @@ const ClientList = () => {
       sortable: true,
     },
 
-    {
-      name: "Status",
-      selector: (row) =>
-        row.status == null || row.status == 0 ? "To Be Started - Not Yet Allocated Internally" : row.status,
-      sortable: true,
-      width: "325px"
-    },
+    // {
+    //   name: "Status",
+    //   selector: (row) =>
+    //     row.status == null || row.status == 0 ? "To Be Started - Not Yet Allocated Internally" : row.status,
+    //   sortable: true,
+    //   width: "325px"
+    // },
 
     {
       name: "Actions",

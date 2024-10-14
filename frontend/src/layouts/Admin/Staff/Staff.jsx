@@ -180,7 +180,7 @@ const StaffPage = () => {
     },
     {
       name: "Role",
-      selector: (row) => row.role,
+      selector: (row) => row.role_name,
       sortable: true,
       width: "200px",
     },
