@@ -171,7 +171,7 @@ const createCustomer = async (customer) => {
 
                 for (const detail of contactDetails) {
 
-                    let role = detail.role == ''? 0:detail.role;
+                    let role = detail.role == '' ? 0 : detail.role;
                     let first_name = detail.firstName;
                     let last_name = detail.lastName;
                     let phone_code = detail.phone_code == undefined ? "" : detail.phone_code;
@@ -392,7 +392,7 @@ const createCustomer = async (customer) => {
 const getCustomer = async (customer) => {
     const { staff_id } = customer;
 
-     
+
     const QueryRole = `
   SELECT
     staffs.id AS id,
@@ -406,11 +406,11 @@ const getCustomer = async (customer) => {
     staffs.id = ${staff_id}
   LIMIT 1
   `
-  const [rows] = await pool.execute(QueryRole);
+    const [rows] = await pool.execute(QueryRole);
 
-  // Condition with Admin And SuperAdmin
-   if(rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")){
-    const query = `
+    // Condition with Admin And SuperAdmin
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+        const query = `
     SELECT  
     customers.id AS id,
     customers.customer_type AS customer_type,
@@ -447,9 +447,9 @@ LEFT JOIN
 ORDER BY 
     customers.id DESC;
     `;
-    const [result] = await pool.execute(query);
-    return { status: true, message: 'Success..', data: result };
-   }
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success..', data: result };
+    }
 
 
     let result = []
@@ -508,8 +508,8 @@ ORDER BY
         }
         // Account Manger
         else if (rows[0].role_id == 4) {
-       
-           
+
+
             const query = `
             SELECT  
             customers.id AS id,
@@ -555,9 +555,9 @@ ORDER BY
         ORDER BY 
             customers.id DESC;
             `;
-            const [resultAllocated] = await pool.execute(query, [staff_id,staff_id,staff_id]);
+            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
             result = resultAllocated;
-           
+
             if (resultAllocated.length > 0) {
                 const query = `
             SELECT  
@@ -601,7 +601,7 @@ ORDER BY
             `;
                 const [resultAllocated2] = await pool.execute(query, [staff_id, staff_id]);
                 result = resultAllocated2;
-            }else{
+            } else {
 
                 const query = `
                 SELECT  
@@ -643,8 +643,8 @@ ORDER BY
             ORDER BY 
             customers.id DESC;
                 `;
-                    const [resultAllocated3] = await pool.execute(query, [staff_id, staff_id]);
-                    result = resultAllocated3;
+                const [resultAllocated3] = await pool.execute(query, [staff_id, staff_id]);
+                result = resultAllocated3;
 
             }
 
@@ -697,7 +697,7 @@ ORDER BY
         ORDER BY 
             customers.id DESC;
             `;
-            const [resultAllocated] = await pool.execute(query, [staff_id,staff_id,staff_id]);
+            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
             result = resultAllocated
 
         }
@@ -2274,7 +2274,7 @@ const customerUpdate = async (customer) => {
                     let email = detail.email;
                     let phone_code = detail.phone_code;
                     let phone = detail.phone;
-                    
+
                     if (contact_id == "" || contact_id == undefined || contact_id == null) {
                         const query4 = `
                         INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email)
@@ -2354,7 +2354,7 @@ const customerUpdate = async (customer) => {
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
-                 console.log("err ",err)
+                console.log("err ", err)
                 return { status: false, message: 'Update Error Customer Type 3' };
             }
 
@@ -2366,7 +2366,6 @@ const customerUpdate = async (customer) => {
     else if (pageStatus === "2") {
         const { services, Task } = customer;
 
-       
 
         const [ExistServiceids] = await pool.execute('SELECT service_id  FROM `customer_services` WHERE customer_id =' + customer_id);
         const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
@@ -2380,6 +2379,24 @@ const customerUpdate = async (customer) => {
         let logAdditional = false;
         for (const serVal of services) {
             let service_id = serVal.service_id;
+
+            //checklist submit customer
+            const QueryCustomerAssign = `
+            UPDATE checklists 
+SET is_all_customer = 
+    IF(
+        is_all_customer IS NULL, 
+        JSON_ARRAY(${customer_id}), 
+        IF(
+            JSON_CONTAINS(is_all_customer, JSON_ARRAY(${customer_id}), '$'), 
+            is_all_customer, 
+            JSON_ARRAY_APPEND(is_all_customer, '$', ${customer_id})
+        )
+    ) 
+WHERE service_id = ${service_id} AND customer_id = 0;
+            `
+            const [QueryCustomerAssignData] = await pool.execute(QueryCustomerAssign);
+
             let account_manager_ids = serVal.account_manager_ids;
             arrayInterId.push(service_id)
             try {
@@ -2476,6 +2493,32 @@ const customerUpdate = async (customer) => {
         if (deleteIdArray.length > 0) {
             logUpdateRequired = true
             for (const id of deleteIdArray) {
+
+        
+              const QueryCustomerRemoveChecklist1 = `SELECT is_all_customer FROM checklists WHERE service_id = ${id} AND customer_id = 0`;
+
+              const [QueryCustomerRemoveChecklistData] = await pool.execute(QueryCustomerRemoveChecklist1);
+               
+               
+             if (QueryCustomerRemoveChecklistData.length > 0 &&  QueryCustomerRemoveChecklistData[0].is_all_customer != null) {
+                   
+                    const updatValue = QueryCustomerRemoveChecklistData[0].is_all_customer.filter(item => item !== customer_id)
+                    const QueryCustomerRemoveChecklist = `
+                    UPDATE checklists
+                    SET is_all_customer = '${JSON.stringify(updatValue)}'
+                    WHERE service_id = ${id} AND customer_id = 0;
+                    `
+                    try {
+                        const [QueryCustomerRemoveChecklistData] = await pool.execute(QueryCustomerRemoveChecklist);
+                    } catch (error) {
+                        console.log("error ", error)  
+                    }
+                    
+                }
+
+
+
+
 
                 const query = `
             SELECT id 
@@ -3179,9 +3222,9 @@ const customerStatusUpdate = async (customer) => {
 }
 
 const getcustomerschecklist = async (customer) => {
-  try {
-    const { customer_id, service_id, job_type_id } = customer;
-    const query = `SELECT c.*, ct.* 
+    try {
+        const { customer_id, service_id, job_type_id } = customer;
+        const query = `SELECT c.*, ct.* 
     FROM checklists c 
     JOIN checklist_tasks ct 
     ON c.id = ct.checklist_id 
@@ -3189,37 +3232,37 @@ const getcustomerschecklist = async (customer) => {
     AND c.job_type_id = ? 
     AND (c.customer_id = ? OR c.customer_id = 0);`;
 
-    const [result] = await pool.execute(query, [
-        service_id,
-        job_type_id,
-        customer_id,
-    ]);
+        const [result] = await pool.execute(query, [
+            service_id,
+            job_type_id,
+            customer_id,
+        ]);
 
-    console.log("result", result);
+        console.log("result", result);
 
 
-    if (result.length === 0) {
-      return [];
+        if (result.length === 0) {
+            return [];
+        }
+        const formattedResults = result.map((item) => ({
+            checklistName: item.check_list_name,
+            JobTypeId: item.job_type_id,
+            Task: [
+                {
+                    TaskName: item.task_name,
+                    BudgetHour: item.budgeted_hour,
+                },
+            ],
+            serviceId: item.service_id,
+            id: item.id,
+        }));
+
+
+        return formattedResults
+
+    } catch (err) {
+        console.log(err);
     }
-    const formattedResults = result.map((item) => ({
-      checklistName: item.check_list_name,
-      JobTypeId: item.job_type_id,
-      Task: [
-        {
-          TaskName: item.task_name,
-          BudgetHour: item.budgeted_hour,
-        },
-      ],
-      serviceId: item.service_id,
-      id: item.id,
-    }));
-    
-
-    return formattedResults
-
-  } catch (err) {
-    console.log(err);
-  }
 };
 
 module.exports = {

@@ -1,7 +1,8 @@
 const pool = require('../config/database');
   const SatffLogUpdateOperation = async (logData) => {
-    console.log("logData ",logData)
+    //console.log("logData ",logData)
     try {
+      if(logData.staff_id != undefined){
         let staff_id = logData.staff_id;
         let date = logData.date;
         let module_name = logData.module_name;
@@ -59,6 +60,7 @@ const pool = require('../config/database');
     WHERE staff_logs.id = ?;
 `;
   await pool.execute(queryUpdate, [result.insertId]);
+      }
 
     } catch (error) {
         console.log("error  - Logs create", error)

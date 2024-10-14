@@ -3,13 +3,21 @@ const { SatffLogUpdateOperation } = require("../utils/helper");
 
 const createJobType = async (JobType) => {
   const { service_id, type } = JobType;
-
+  const checkQuery = `SELECT 1 FROM job_types WHERE type = ?`
   const query = `
     INSERT INTO job_types (service_id,type)
     VALUES (?,?)
     `;
 
   try {
+    console.log("service_id",service_id)
+    console.log("type",type)
+    
+    const [check] = await pool.query(checkQuery, [type]);
+    console.log("check",check)
+    if (check.length > 0) {
+      return { status: false, message: "Job Type already exists." };
+    }
     const [result] = await pool.execute(query, [service_id, type]);
     const currentDate = new Date();
         await SatffLogUpdateOperation(
@@ -23,7 +31,7 @@ const createJobType = async (JobType) => {
                 module_id:result.insertId
             }
         );
-    return result.insertId;
+    return {status: true ,message: 'Job Type created successfully.' , data : result.insertId};
   } catch (err) {
     console.error("Error inserting data:", err);
     throw err;
@@ -32,6 +40,9 @@ const createJobType = async (JobType) => {
 
 const getJobType = async (JobType) => {
   const { service_id } = JobType;
+ if(service_id == undefined){
+  return []
+ }
   const query = `
     SELECT job_types.id, job_types.type , job_types.status ,services.name as service_name FROM job_types JOIN services ON job_types.service_id = services.id 
     WHERE job_types.service_id = ?
@@ -119,6 +130,7 @@ const updateJobType = async (JobType) => {
       }
     );
   }
+  return {status: true ,message: 'job types updated successfully.' , data : result.affectedRows};
   } catch (err) {
     console.log("Error updating data:", err);
     throw err;

@@ -8,14 +8,14 @@ const handleJobType = async (req, res) => {
     switch (action) {
       case "add":
         result = await jobTypeTaskService.addJobType(JobType);
-        res
-          .status(201)
-          .json({
-            status: true,
-            userId: result,
-            message: "JobType created successfully",
-          });
-        break;
+        if(!result.status){
+          res.status(200).json({ status: false, message: result.message });
+          break;
+       }else{
+          res.status(200).json({ status: true, message: result.message , userId: result.data});
+          break;
+       }
+    
       case "get":
         result = await jobTypeTaskService.getJobType(JobType);
         res.status(200).json({ status: true, data: result });
@@ -27,11 +27,14 @@ const handleJobType = async (req, res) => {
           .json({ status: true, message: "JobType deleted successfully" });
         break;
       case "update":
-        await jobTypeTaskService.modifyJobType(JobType);
-        res
-          .status(200)
-          .json({ status: true, message: "JobType updated successfully" });
-        break;
+        result = await jobTypeTaskService.modifyJobType(JobType);
+        if(!result.status){
+          res.status(200).json({ status: false, message: result.message });
+          break;
+      }else{
+          res.status(200).json({ status: true, message: result.message , userId: result.data});
+          break;
+      }
       default:
         res.status(200).json({ status: false, message: "Invalid action" });
     }
