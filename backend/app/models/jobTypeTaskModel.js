@@ -42,7 +42,7 @@ const getJobType = async (JobType) => {
     const [result] = await pool.execute(query, [service_id]);
     return result;
   } catch (err) {
-    console.error("Error selecting data:", err);
+    console.log("Error selecting data:", err);
     throw err;
   }
 };
@@ -73,7 +73,7 @@ const deleteJobType = async (JobTypeId) => {
     await pool.execute(query, [JobTypeId.id]);
     
   } catch (err) {
-    console.error("Error deleting data:", err);
+    console.log("Error deleting data:", err);
     throw err;
   }
 };
@@ -123,7 +123,7 @@ const updateJobType = async (JobType) => {
     );
   }
   } catch (err) {
-    console.error("Error updating data:", err);
+    console.log("Error updating data:", err);
     throw err;
   }
 };
