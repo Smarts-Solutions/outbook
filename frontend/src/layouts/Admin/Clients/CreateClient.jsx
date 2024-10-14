@@ -962,7 +962,7 @@ const CreateClient = () => {
                                       <option value={1}>Sole Trader</option>
                                       <option value={2}>Company</option>
                                       <option value={3}>Partnership</option>
-                                      <option value={4}>individual</option>
+                                      <option value={4}>Individual</option>
                                     </select>
                                   </div>
                                 </div>

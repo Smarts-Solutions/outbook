@@ -333,14 +333,14 @@ const JobInformationPage = ({ job_id }) => {
     return (
         <div>
             <div className='row mb-3'>
-                <div className='col-md-8'>
+                <div className='col-md-7'>
                     <div className='tab-title'>
                         <h3>Job Information </h3>
                     </div>
                 </div>
-                <div className='col-md-4 '>
-                    <div className='d-flex w-100'>
-                        <div className='w-75'>
+                <div className='col-md-5 '>
+                    <div className='d-flex w-100 justify-content-end'>
+                        <div className='w-auto'>
                             <select className="form-select form-control" onChange={handleStatusChange} value={selectStatusIs}>
                                 {
                                     statusDataAll.map((status) => (

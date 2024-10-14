@@ -70,7 +70,15 @@ const Status = () => {
   const columns = [
     {
       name: "Status Name",
-      selector: (row) => row.name,
+      
+      cell: (row) => (
+        <div
+        title={row.name}
+        >
+         {row.name}
+        </div>
+   ),
+   width:"50%",
       sortable: true,
     },
     {

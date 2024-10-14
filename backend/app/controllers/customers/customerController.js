@@ -53,7 +53,7 @@ const updateProcessCustomer = async (req, res) => {
    
       const data = await customerService.updateProcessCustomer(customerProcessData);
       if(data != undefined){
-       return res.status(200).json({ status:true,message: "Success..",data : data});
+       return res.status(200).json({ status:true,message: "Customer details have been saved successfully!",data : data});
       }else{
        return res.status(400).json({ status:false, message: "Invalid..."});
       }
@@ -68,7 +68,7 @@ const updateProcessCustomerFile = async (req, res) => {
       const customerProcessDataFiles = req.files;
       const data = await customerService.updateProcessCustomerFile(customerProcessDataFiles , customer_id);
       if(data != undefined){
-       return res.status(200).json({ status:true,message: "Success..",data : data});
+       return res.status(200).json({ status:true,message: "Customer details have been saved successfully!",data : data});
       }else{
        return res.status(400).json({ status:false, message: "Invalid..."});
       }

@@ -1120,8 +1120,8 @@ const Information = ({ id, pageStatus }) => {
                               </label>
                               <input
                                 type="text"
-                                
-                                className={errors1["firstName"] ? "error-field form-control" : "form-control"}
+                                placeholder="First Name"
+                                className={errors1["first_name"] ? "error-field form-control" : "form-control"}
                                 name="first_name"
                                 id="first_name"
                                 value={getSoleTraderDetails?.first_name}
@@ -1142,7 +1142,7 @@ const Information = ({ id, pageStatus }) => {
                               </label>
                               <input
                                 type="text"
-                                className={errors1["lastName"] ? "error-field form-control" : "form-control"}
+                                className={errors1["last_name"] ? "error-field form-control" : "form-control"}
                                 placeholder="Last Name"
                                 name="last_name"
                                 id="last_name"
@@ -1183,7 +1183,8 @@ const Information = ({ id, pageStatus }) => {
                                 <div className="mb-3 col-md-8 ps-0">
                                   <input
                                     type="text"
-                                    className="form-control"
+                                    className={errors1["phone"] ? "error-field form-control" : "form-control"}
+                                    
                                     placeholder="Phone Number"
                                     name="phone"
                                     id="phone"
@@ -1208,7 +1209,7 @@ const Information = ({ id, pageStatus }) => {
                               </label>
                               <input
                                 type="text"
-                                className={errors1["eamil"] ? "error-field form-control" : "form-control"}
+                                className={errors1["email"] ? "error-field form-control" : "form-control"}
 
                                 placeholder="Enter Email ID"
                                 name="email"

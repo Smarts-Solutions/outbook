@@ -464,7 +464,7 @@ const Service = () => {
                           <th scope="row" className="align-top">
                             <div className="form-check">
                               <input
-                                className="form-check-input new_input new-checkbox"
+                                className="form-check-input new_input new-checkbox mt-3"
                                 type="checkbox"
                                 checked={services.includes(item.id)}
                                 onChange={(e) => handleCheckboxChange(e, item)}
@@ -662,7 +662,7 @@ const Service = () => {
 
                           <td className="align-top text-end">
                             <button
-                              className="btn  btn-info remove-item-btn"
+                              className="btn  btn-info remove-item-btn mt-3"
                               onClick={() => {
                                 setModal(true);
                                 setTempServices(item.id);

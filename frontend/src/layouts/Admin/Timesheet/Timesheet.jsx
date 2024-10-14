@@ -516,7 +516,7 @@ const Timesheet = () => {
   }
 
   return (
-    <div className="page-content">
+   
       <div className="container-fluid">
         <div className="content-title">
           <div className="row">
@@ -532,7 +532,7 @@ const Timesheet = () => {
             <div className="form-group">
               {/* <label htmlFor="tabSelect">Filter:</label> */}
               <select
-                className="form-control"
+                className="form-select"
                 id="tabSelect"
                 value={selectedTab}
                 onChange={handleTabChange}
@@ -979,7 +979,7 @@ const Timesheet = () => {
           </CommonModal>
         </div>
       </div>
-    </div>
+    
   );
 };
 

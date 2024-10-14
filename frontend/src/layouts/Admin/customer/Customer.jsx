@@ -75,7 +75,7 @@ const Customer = () => {
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
-            maxWidth: "150px",
+            
           }}
         >
           {role === "ADMIN" || role === "SUPERADMIN" ? (
@@ -99,13 +99,19 @@ const Customer = () => {
       ),
       selector: (row) => row.trading_name,
       sortable: true,
-      width: "200px",
+      
     },
     {
       name: "Customer Code",
-      selector: (row) => row.customer_code,
+      cell: (row) => (
+           <div
+           title={row.customer_code}
+           >
+            {row.customer_code}
+           </div>
+      ),
       sortable: true,
-      width: "250px",
+    
     },
     // {
     //   name: "Company Name",
@@ -141,15 +147,24 @@ const Customer = () => {
               ? "Partnership"
               : "-",
       sortable: true,
-      width: "150px",
+      
     },
-    {
-      name: "Account Manager",
-      selector: (row) =>
-        row.account_manager_firstname + " " + row.account_manager_lastname,
-      sortable: true,
-      width: "180px",
-    },
+  {
+  name: "Account Manager",
+  selector: (row) => row.account_manager_firstname + " " + row.account_manager_lastname,
+  sortable: true,
+
+  cell: row => (
+    <div 
+    title={row.account_manager_firstname + " " + row.account_manager_lastname}
+      className="data-table-cell" 
+      data-fulltext={row.account_manager_firstname + " " + row.account_manager_lastname}
+      style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+    >
+      {row.account_manager_firstname + " " + row.account_manager_lastname}
+    </div>
+  ),
+},
     {
       name: "Status",
       cell: (row) => (
@@ -173,7 +188,7 @@ const Customer = () => {
         </div>
       ),
       sortable: true,
-      width: "150px",
+     
     },
 
     // {
@@ -203,12 +218,12 @@ const Customer = () => {
                 <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
                   <i className="ti-pencil text-primary" />
                 </button>
-                {/* <button
+                <button
                   className="delete-icon "
                   onClick={() => handleDelete(row)}
                 >
                   <i className="ti-trash text-danger " />
-                </button> */}
+                </button>
               </>
             ) : (
               <>
@@ -217,14 +232,14 @@ const Customer = () => {
                     <i className="ti-pencil text-primary" />
                   </button>
                 )}
-                {/* {hasDeleteAccess && (
+                {hasDeleteAccess && (
                   <button
                     className="delete-icon"
                     onClick={() => handleDelete(row)}
                   >
                     <i className="ti-trash text-danger" />
                   </button>
-                )} */}
+                )}
               </>
             )}
           </div>
@@ -233,7 +248,7 @@ const Customer = () => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      width: "150px",
+    
     },
   ];
 
@@ -418,7 +433,7 @@ const Customer = () => {
               <div className="col-4">
                 <div className="form-group mb-2 mt-1">
                   <select
-                    className="form-control"
+                    className="form-select"
                     id="tabSelect"
                     value={selectedTab}
                     onChange={handleTabChange}
