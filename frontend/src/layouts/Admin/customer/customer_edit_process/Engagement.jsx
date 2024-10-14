@@ -282,7 +282,7 @@ const Engagement = () => {
       setFormValues1({ ...formValues1, [name]: value });
     }
   };
- 
+
   const handleChange2 = (e) => {
     const { name, value } = e.target;
     if (value === "" || (/^\d*\.?\d*$/.test(value) && value <= 100)) {
@@ -298,19 +298,24 @@ const Engagement = () => {
       setFormValues3({ ...formValues3, [name]: value });
     }
   };
+ 
 
   const handleChange4 = (index, e) => {
     const { name, value } = e.target;
+    if (!/^[0-9+]*$/.test(value)) { return }
 
-    if (!/^[0-9+]*$/.test(value)) {
-      return;
-    }
-    const newJobEntries = [...jobEntries];
-    newJobEntries[index][name] = value;
-    validate4();
+    let newJobEntries = [...jobEntries];
+    let updatedJobEntry = { ...newJobEntries[index] };
+    updatedJobEntry[name] = value;
+    newJobEntries[index] = updatedJobEntry;
+  
     setJobEntries(newJobEntries);
   };
 
+  useEffect(() => {
+    validate4();
+  }, [jobEntries]);
+  
   const handleAddJob = () => {
     setJobEntries([
       ...jobEntries,
@@ -318,7 +323,6 @@ const Engagement = () => {
         minimum_number_of_jobs: "",
         job_type_id: "",
         service_id: "",
-
         cost_per_job: "",
         customised_pricing_id: "",
       },
@@ -421,7 +425,7 @@ const Engagement = () => {
       if (!entry.cost_per_job) {
         entryErrors.cost_per_job = "Please Enter Cost Per Job";
       } else if (entry.cost_per_job < 20 || entry.cost_per_job > 500) {
-        entryErrors.cost_per_job = "Cost Per Job must be between 20 and 500";
+        entryErrors.cost_per_job = "Cost Per Job must be between £20 and £500";
       }
 
       if (Object.keys(entryErrors).length !== 0) {
@@ -462,7 +466,7 @@ const Engagement = () => {
     }
     return isValid;
   };
- 
+
   const GetJobTypeApi = async () => {
     const req = { action: "get" };
     const data = { req: req, authToken: token };
@@ -544,7 +548,7 @@ const Engagement = () => {
         return;
       }
     }
-  
+
 
     let req = {
       customer_id: address,
@@ -774,7 +778,7 @@ const Engagement = () => {
                                     type="text"
                                     className={errors1[field.name] ? "error-field form-control" : "form-control"}
 
-                                   
+
                                     name={field.name}
                                     id={field.name}
                                     placeholder={field.feeName}
@@ -848,7 +852,7 @@ const Engagement = () => {
                                   <label className="form-label">
                                     {field.label}
                                   </label>{" "}
-                                 
+
                                   {/* <label
                                     className="form-label label_bottom"
                                     style={{ color: "#A2A0A0 !important" }}
@@ -857,7 +861,7 @@ const Engagement = () => {
                                   </label> */}
                                   <input
                                     type="text"
-                                   
+
                                     className={errors2[field.name] ? "error-field form-control" : "form-control"}
 
                                     name={field.name}
@@ -928,7 +932,7 @@ const Engagement = () => {
                                   <label className="form-label">
                                     {field.label}
                                   </label>
-                                 
+
                                   {/* <label
                                     className="form-label label_bottom"
                                     style={{ color: "#A2A0A0 !important" }}
@@ -937,9 +941,7 @@ const Engagement = () => {
                                   </label> */}
                                   <input
                                     type="text"
-                                    
                                     className={errors3[field.name] ? "error-field form-control" : "form-control"}
-
                                     name={field.name}
                                     id={field.name}
                                     value={formValues3[field.name]}
@@ -985,7 +987,7 @@ const Engagement = () => {
                                       </label>
                                       <input
                                         type="text"
-                                        
+
                                         className={errors4[index] ? "error-field form-control" : "form-control"}
 
                                         placeholder={
@@ -994,15 +996,12 @@ const Engagement = () => {
                                         name="minimum_number_of_jobs"
                                         id={`minimumJobs_${index}`}
                                         value={job.minimum_number_of_jobs}
-                                        onChange={(e) =>
-                                          handleChange4(index, e)
-                                        }
+                                        onChange={(e) => handleChange4(index, e)}
                                       />
                                       {errors4[index] && (
                                         <div className="error-text">
                                           {
-                                            errors4[index]
-                                              .minimum_number_of_jobs
+                                            errors4[index].minimum_number_of_jobs
                                           }
                                         </div>
                                       )}
@@ -1059,7 +1058,7 @@ const Engagement = () => {
                                         id={`service${index}`}
                                         className={errors4[index] ? "error-field form-select" : "form-select"}
 
-                                      
+
                                         name="service_id"
                                         value={job.service_id}
                                         onChange={(e) =>
@@ -1126,7 +1125,7 @@ const Engagement = () => {
                                       >
                                         <i
                                           style={{
-                                           
+
                                             cursor: "pointer",
                                           }}
                                           className="ti-trash text-danger"
@@ -1168,83 +1167,83 @@ const Engagement = () => {
                 </h4>
               </div>
               <div className="card-body">
-            
-                  <div className="row">
-                    {/* Customer Joining Date */}
-                    <div className="col-lg-4">
-                      <label className="form-label">
-                        Customer Joining Date
-                      </label>
-                      <input
-                        type="date"
-                        className={formErrors.customerJoiningDate ? "error-field form-control" : "form-control"}
-                        name="customerJoiningDate"
-                        defaultValue={
-                          customerDetails?.data?.customer
-                            ?.customerJoiningDate || ""
-                        }
-                        onChange={handleInputChange}
-                      />
-                      {formErrors.customerJoiningDate && (
-                        <span className="error-text d-block">
-                          {formErrors.customerJoiningDate}
-                        </span>
-                      )}
-                    </div>
 
-                    {/* Select Customer Source */}
-                    <div className="col-lg-4">
-                      <label className="form-label">
-                        Select Customer Source
-                      </label>
-                      <select
-                       className={formErrors.customerSource ? "error-field form-select" : "form-select"}
-                        name="customerSource"
-                        value={formState1.customerSource}
-                        onChange={handleInputChange}
-                      >
-                        <option value="">Select Customer Source</option>
-                        {coustomerSource &&
-                          coustomerSource.map((data) => (
-                            <option key={data.id} value={data.id}>
-                              {data.name}
-                            </option>
-                          ))}
-                      </select>
-                      {formErrors.customerSource && (
-                        <span className="error-text d-block">
-                          {formErrors.customerSource}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Select Customer Sub-Source */}
-                    <div className="col-lg-4">
-                      <label className="form-label">
-                        Select Customer Sub-Source
-                      </label>
-                      <select
-                        className={formErrors.customerSubSource ? "error-field form-select" : "form-select"}
-                        name="customerSubSource"
-                        value={formState1.customerSubSource}
-                        onChange={(e) => handleInputChange(e)}
-                      >
-                        <option value="">Select Customer Sub-Source</option>
-                        {coustomerSubSource &&
-                          coustomerSubSource.map((data) => (
-                            <option key={data.id} value={data.id}>
-                              {data.name}
-                            </option>
-                          ))}
-                      </select>
-                      {formErrors.customerSubSource && (
-                        <span className="error-text d-block">
-                          {formErrors.customerSubSource}
-                        </span>
-                      )}
-                    </div>
+                <div className="row">
+                  {/* Customer Joining Date */}
+                  <div className="col-lg-4">
+                    <label className="form-label">
+                      Customer Joining Date
+                    </label>
+                    <input
+                      type="date"
+                      className={formErrors.customerJoiningDate ? "error-field form-control" : "form-control"}
+                      name="customerJoiningDate"
+                      defaultValue={
+                        customerDetails?.data?.customer
+                          ?.customerJoiningDate || ""
+                      }
+                      onChange={handleInputChange}
+                    />
+                    {formErrors.customerJoiningDate && (
+                      <span className="error-text d-block">
+                        {formErrors.customerJoiningDate}
+                      </span>
+                    )}
                   </div>
-          
+
+                  {/* Select Customer Source */}
+                  <div className="col-lg-4">
+                    <label className="form-label">
+                      Select Customer Source
+                    </label>
+                    <select
+                      className={formErrors.customerSource ? "error-field form-select" : "form-select"}
+                      name="customerSource"
+                      value={formState1.customerSource}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Select Customer Source</option>
+                      {coustomerSource &&
+                        coustomerSource.map((data) => (
+                          <option key={data.id} value={data.id}>
+                            {data.name}
+                          </option>
+                        ))}
+                    </select>
+                    {formErrors.customerSource && (
+                      <span className="error-text d-block">
+                        {formErrors.customerSource}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Select Customer Sub-Source */}
+                  <div className="col-lg-4">
+                    <label className="form-label">
+                      Select Customer Sub-Source
+                    </label>
+                    <select
+                      className={formErrors.customerSubSource ? "error-field form-select" : "form-select"}
+                      name="customerSubSource"
+                      value={formState1.customerSubSource}
+                      onChange={(e) => handleInputChange(e)}
+                    >
+                      <option value="">Select Customer Sub-Source</option>
+                      {coustomerSubSource &&
+                        coustomerSubSource.map((data) => (
+                          <option key={data.id} value={data.id}>
+                            {data.name}
+                          </option>
+                        ))}
+                    </select>
+                    {formErrors.customerSubSource && (
+                      <span className="error-text d-block">
+                        {formErrors.customerSubSource}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
               </div>
             </div>
             <div className="form__item button__items d-flex justify-content-between">

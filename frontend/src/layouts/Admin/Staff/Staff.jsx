@@ -56,22 +56,22 @@ const StaffPage = () => {
   const [editStaffData, setEditStaffData] = useState(false);
   const [addCompetancy, SetCompetancy] = useState(false);
   const [refresh, SetRefresh] = useState(false);
-  const [activeTab, setActiveTab] = useState("this-year"); 
+  const [activeTab, setActiveTab] = useState("this-year");
   const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
-  const [serviceDataAll, setServiceDataAll] = useState({loading: true, data: [], staff_id: "",});
+  const [serviceDataAll, setServiceDataAll] = useState({ loading: true, data: [], staff_id: "", });
   const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
- 
+
   useEffect(() => {
     staffData();
     roleData();
-  }, [refresh , activeTab]);
+  }, [refresh, activeTab]);
 
- 
+
   const staffData = async () => {
     await dispatch(Staff({ req: { action: "get" }, authToken: token }))
       .unwrap()
       .then(async (response) => {
-        if (response.status) { 
+        if (response.status) {
           const filteredData = response.data.filter((item) => {
             const itemDate = new Date(item.created_at);
             const { startDate, endDate } = getDateRange(activeTab);
@@ -87,15 +87,15 @@ const StaffPage = () => {
         return;
       });
   };
- 
+
   const GetAllCustomer = async () => {
-    await dispatch(Staff({ req: { action: "portfolio" , staff_id: StaffUserId.id}, authToken: token }))
+    await dispatch(Staff({ req: { action: "portfolio", staff_id: StaffUserId.id }, authToken: token }))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setAllCustomerData(response.data); 
+          setAllCustomerData(response.data);
         } else {
-          setAllCustomerData([]); 
+          setAllCustomerData([]);
         }
       })
       .catch((error) => {
@@ -152,20 +152,20 @@ const StaffPage = () => {
     { id: "last-year", label: "Last year" },
   ];
 
- 
+
   const columns = [
     {
-      name: "First Name",
-      selector: (row) => row.first_name,
+      name: "Full Name",
+      selector: (row) => row.first_name + " " + row.last_name,
       sortable: true,
       width: "150px",
     },
-    {
-      name: "Last Name",
-      selector: (row) => row.last_name,
-      sortable: true,
-      width: "150px",
-    },
+    // {
+    //   name: "Last Name",
+    //   selector: (row) => row.last_name,
+    //   sortable: true,
+    //   width: "150px",
+    // },
     {
       name: "Email Address",
       selector: (row) => row.email,
@@ -189,9 +189,8 @@ const StaffPage = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${
-              row.status === "1" ? "text-success" : "text-danger"
-            }`}
+            className={` ${row.status === "1" ? "text-success" : "text-danger"
+              }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
           </span>
@@ -204,7 +203,7 @@ const StaffPage = () => {
       cell: (row) => (
         <div>
           {/* <button className='edit-icon' onClick={() => setIsModalOpen(true)}> <i className="ti-user" /></button> */}
-          <button className="secondary-icon" onClick={() =>{ setPortfolio(true) ; GetAllCustomer()}}> 
+          <button className="secondary-icon" onClick={() => { setPortfolio(true); GetAllCustomer() }}>
             <i className="ti-briefcase" />
           </button>
           {showStaffUpdateTab && (
@@ -231,10 +230,10 @@ const StaffPage = () => {
             </button>
           )}
 
-          <button className="view-icon fs-6"> 
-               <i className="fa fa-eye" />  Logs</button>
+          <button className="view-icon fs-6">
+            <i className="fa fa-eye" />  Logs</button>
 
-          {row.role === "ADMIN" || row.role === "SUPERADMIN"
+          {/* {row.role === "ADMIN" || row.role === "SUPERADMIN"
             ? showStaffDeleteTab && (
                 <button className="delete-icon" disabled>
                   <i className="ti-trash text-danger" />
@@ -247,7 +246,7 @@ const StaffPage = () => {
                 >
                   <i className="ti-trash text-danger" />
                 </button>
-              )}
+              )} */}
         </div>
       ),
       ignoreRowClick: true,
@@ -279,8 +278,8 @@ const StaffPage = () => {
       password: editStaff
         ? Yup.string().min(8, Validation_Message.PasswordValidation)
         : Yup.string()
-            .min(8, Validation_Message.PasswordValidation)
-            .required(Validation_Message.PasswordIsRequire),
+          .min(8, Validation_Message.PasswordValidation)
+          .required(Validation_Message.PasswordIsRequire),
       role: Yup.string().required(Validation_Message.RoleValidation),
       status: Yup.string().required(Validation_Message.StatusValidation),
     }),
@@ -511,9 +510,9 @@ const StaffPage = () => {
       formik.setFieldValue("role", editStaffData.role_id || "null");
       formik.setFieldValue("status", editStaffData.status || "null");
     }
-  }, [editStaffData ]);
+  }, [editStaffData]);
 
- 
+
   return (
     <div>
       <div className="container-fluid">
@@ -522,62 +521,62 @@ const StaffPage = () => {
             <h3 className="mt-0">Manage Staff</h3>
           </div>
         </div>
-         
+
       </div>
       <div className="report-data mt-4">
-       <div className="col-sm-12">
-        <div className="page-title-box pt-0">
-        <div className="row align-items-start">
-          <div className="col-md-6">
-            {/* Dropdown for selecting tabs */}
-          
-          </div>
-          <div className="col-md-6">
-            <div className="d-flex justify-content-end">
-          <div className="form-group w-50">
-              <select
-                className="form-control"
-                id="tabSelect"
-                value={activeTab}
-                onChange={(e) => setActiveTab(e.target.value)}
-              >
-                {tabs.map((tab) => (
-                  <option key={tab.id} value={tab.id}>
-                    {tab.label}
-                  </option>
-                ))}
-              </select>
+        <div className="col-sm-12">
+          <div className="page-title-box pt-0">
+            <div className="row align-items-start">
+              <div className="col-md-6">
+                {/* Dropdown for selecting tabs */}
+
+              </div>
+              <div className="col-md-6">
+                <div className="d-flex justify-content-end">
+                  <div className="form-group w-50">
+                    <select
+                      className="form-control"
+                      id="tabSelect"
+                      value={activeTab}
+                      onChange={(e) => setActiveTab(e.target.value)}
+                    >
+                      {tabs.map((tab) => (
+                        <option key={tab.id} value={tab.id}>
+                          {tab.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="w-25">
+                    {showStaffInsertTab && (
+                      <button
+                        type="button"
+                        className="btn btn-info text-white float-end"
+                        onClick={() => setAddStaff(true)}
+                      >
+                        <i className="fa fa-plus" /> Add Staff
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="w-25">
-            {showStaffInsertTab && (
-              <button
-                type="button"
-                className="btn btn-info text-white float-end"
-                onClick={() => setAddStaff(true)}
-              >
-                <i className="fa fa-plus" /> Add Staff
-              </button>
-            )}
           </div>
-          </div>
-          </div>
+        </div>
+        <div className="tab-content mt-minus-90" id="pills-tabContent">
+          {tabs.map((tab) => (
+            <div
+              key={tab.id}
+              className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""}`}
+              id={tab.id}
+              role="tabpanel"
+            >
+              {/* Your Datatable component */}
+              <Datatable columns={columns} data={staffDataAll.data} filter={true} />
+            </div>
+          ))}
         </div>
       </div>
-    </div>
-    <div className="tab-content mt-minus-90" id="pills-tabContent">
-      {tabs.map((tab) => (
-        <div
-          key={tab.id}
-          className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""}`}
-          id={tab.id}
-          role="tabpanel"
-        >
-          {/* Your Datatable component */}
-          <Datatable columns={columns} data={staffDataAll.data} filter={true} />
-        </div>
-      ))}
-    </div>
-  </div>
       {/* Add Staff */}
       <CommanModal
         isOpen={addStaff}
@@ -608,6 +607,8 @@ const StaffPage = () => {
         btn_name="Save"
         title="Manage Portfolio"
         handleClose={() => setPortfolio(false)}
+        Submit_Function={() => { setPortfolio(false) }}
+        Submit_Cancel_Function={() => { setPortfolio(false) }}
       >
         <div className="modal-body px-0">
           <div className="row w-100">
@@ -729,7 +730,7 @@ const StaffPage = () => {
           )}
           formik={formik}
           btn_name="Update"
-          closeBtn={(e)=>setEditStaff(false)}
+          closeBtn={(e) => setEditStaff(false)}
         />
       </CommanModal>
       {/* CLOSE Edit Staff */}

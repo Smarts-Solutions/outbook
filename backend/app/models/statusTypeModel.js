@@ -2,6 +2,7 @@ const pool = require("../config/database");
 const { SatffLogUpdateOperation } = require('../utils/helper'); 
 
 const createStatusType = async (StatusType) => {
+ 
   const { type } = StatusType;
   const checkQuery = `SELECT 1 FROM status_types WHERE type = ?`;
   const query = `

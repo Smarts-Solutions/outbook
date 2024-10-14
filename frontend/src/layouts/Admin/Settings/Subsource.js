@@ -36,8 +36,20 @@ const Setting = () => {
           customerSubSourceData({ action: "getAll" });
         } else {
           if (response.status) {
+            sweatalert.fire({
+              icon: "success",
+              title: "Success",
+              text: response.message,
+              timer: 2000,
+            });
             setSubSourceData({ loading: false, data: response.data });
           } else {
+            sweatalert.fire({
+              icon: "error",
+              title: "Error",
+              text: response.message,
+              timer: 2000,
+            });
             setSubSourceData({ loading: false, data: [] });
           }
         }
@@ -171,10 +183,7 @@ const Setting = () => {
 
   const handleSave = (e) => {
     e.preventDefault();
-    if (
-      modalData.fields[0].value == "" ||
-      modalData.fields[0].value == undefined
-    ) {
+    if (  modalData.fields[0].value == "" ||  modalData.fields[0].value == undefined ) {
       sweatalert.fire({
         title: "Please enter " + modalData.fields[0].label,
         icon: "warning",
