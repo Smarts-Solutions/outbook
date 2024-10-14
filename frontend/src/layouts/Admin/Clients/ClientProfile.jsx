@@ -544,15 +544,12 @@ const ClientList = () => {
                       <ul className="list-unstyled personal-detail mb-0">
                         <li className="row">
                           <div className="col-md-12">
-                            <b>Trading Name</b>:{" "}</div>
-                          <div className="col-md-12">{informationData && informationData.trading_name}</div>
+                            <b>Trading Name : {informationData && informationData.trading_name}</b></div>
+
                         </li>
                         <li className="mt-2 row">
                           <div className="col-md-12">
-                            <b>Trading Address</b>:
-                          </div>
-                          <div className="col-md-12">
-                            {informationData && informationData.trading_address}
+                            <b>Trading Address :  {informationData && informationData.trading_address}</b>
                           </div>
                         </li>
                       </ul>
@@ -597,41 +594,41 @@ const ClientList = () => {
                     <div className="col-lg-6">
                       <ul className="list-unstyled faq-qa">
                         <li className="mb-4">
-                          <h6 className="">Trading Name</h6>
-                          <p className="font-14  ml-3">
+                          <h6 className="">Trading Name : {informationData.trading_name}</h6>
+                          {/* <p className="font-14  ml-3">
                             {informationData.trading_name}
-                          </p>
+                          </p> */}
                         </li>
                         <li className="mb-4">
-                          <h6 className="">VAT Registered</h6>
-                          <p className="font-14  ml-3">
+                          <h6 className="">VAT Registered : {informationData.vat_registered == 0 ? "Yes" : "No"}</h6>
+                          {/* <p className="font-14  ml-3">
                             {" "}
-                            {informationData.vat_registered == 0 ? "Yes" : "No"}
-                          </p>
+                            
+                          </p> */}
                         </li>
                         <li className="mb-4">
-                          <h6 className="">Website</h6>
-                          <p className="font-14  ml-3">
-                            {informationData.website}
-                          </p>
+                          <h6 className="">Website : {informationData.website}</h6>
+                          {/* <p className="font-14  ml-3">
+                            
+                          </p> */}
                         </li>
                       </ul>
                     </div>
                     <div className="col-lg-6">
                       <ul className="list-unstyled faq-qa">
                         <li className="mb-4">
-                          <h6 className="">Trading Address</h6>
-                          <p className="font-14  ml-3">
+                          <h6 className="">Trading Address : {informationData.trading_address}</h6>
+                          {/* <p className="font-14  ml-3">
                             {" "}
                             {informationData.trading_address}
-                          </p>
+                          </p> */}
                         </li>
                         <li className="mb-4">
-                          <h6 className="">VAT Number</h6>
-                          <p className="font-14  ml-3">
+                          <h6 className="">VAT Number :  {informationData.vat_number}</h6>
+                          {/* <p className="font-14  ml-3">
                             {" "}
                             {informationData.vat_number}
-                          </p>
+                          </p> */}
                         </li>
                       </ul>
                     </div>
@@ -643,41 +640,28 @@ const ClientList = () => {
                     <div className="col-lg-6">
                       <ul className="list-unstyled faq-qa">
                         <li className="mb-4">
-                          <h6 className="">Company Name</h6>
-                          <p className="font-14  ml-3">
-                            {companyDetails.company_name}
-                          </p>
+                          <h6 className="">Company Name :  {companyDetails.company_name}</h6>
+
                         </li>
                         <li className="mb-4">
-                          <h6 className="">Company Status</h6>
-                          <p className="font-14  ml-3">
-                            {" "}
-                            {companyDetails.company_status}
-                          </p>
+                          <h6 className="">Company Status :  {companyDetails.company_status}</h6>
+
                         </li>
                         <li className="mb-4">
-                          <h6 className="">Registered Office Address</h6>
-                          <p className="font-14  ml-3">
-                            {companyDetails.registered_office_address}
-                          </p>
+                          <h6 className="">Registered Office Address :  {companyDetails.registered_office_address}</h6>
+
                         </li>
                       </ul>
                     </div>
                     <div className="col-lg-6">
                       <ul className="list-unstyled faq-qa">
                         <li className="mb-4">
-                          <h6 className="">Entity Type</h6>
-                          <p className="font-14  ml-3">
-                            {" "}
-                            {companyDetails.entity_type}
-                          </p>
+                          <h6 className="">Entity Type : {companyDetails.entity_type}</h6>
+
                         </li>
                         <li className="mb-4">
-                          <h6 className="">Company Number</h6>
-                          <p className="font-14  ml-3">
-                            {" "}
-                            {companyDetails.company_number}
-                          </p>
+                          <h6 className="">Company Number : {companyDetails.company_number}</h6>
+
                         </li>
                       </ul>
                     </div>
@@ -689,41 +673,33 @@ const ClientList = () => {
                     <div className="col-lg-6">
                       <ul className="list-unstyled faq-qa">
                         <li className="mb-4">
-                          <h6 className="">Trading Name</h6>
+                          <h6 className="">Trading Name : {informationData && informationData.trading_name}</h6>
                           <p className="font-14  ml-3">
-                            {informationData && informationData.trading_name}
+
                           </p>
                         </li>
                         <li className="mb-4">
-                          <h6 className="">VAT Registered</h6>
-                          <p className="font-14  ml-3">
-                            {informationData &&
-                              informationData.vat_registered == "0"
-                              ? "No"
-                              : "Yes"}
-                          </p>
+                          <h6 className="">VAT Registered : {informationData &&
+                            informationData.vat_registered == "0"
+                            ? "No"
+                            : "Yes"}</h6>
+
                         </li>
                         <li className="mb-4">
-                          <h6 className="">Website</h6>
-                          <p className="font-14  ml-3">
-                            {informationData && informationData.website}
-                          </p>
+                          <h6 className="">Website : {informationData && informationData.website}</h6>
+
                         </li>
                       </ul>
                     </div>
                     <div className="col-lg-6">
                       <ul className="list-unstyled faq-qa">
                         <li className="mb-4">
-                          <h6 className="">Trading Address</h6>
-                          <p className="font-14  ml-3">
-                            {informationData && informationData.trading_address}
-                          </p>
+                          <h6 className="">Trading Address : {informationData && informationData.trading_address}</h6>
+
                         </li>
                         <li className="mb-4">
-                          <h6 className="">VAT Number</h6>
-                          <p className="font-14  ml-3">
-                            {informationData && informationData.vat_number}
-                          </p>
+                          <h6 className="">VAT Number : {informationData && informationData.vat_number}</h6>
+
                         </li>
                       </ul>
                     </div>
