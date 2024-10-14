@@ -2495,26 +2495,26 @@ WHERE service_id = ${service_id} AND customer_id = 0;
             for (const id of deleteIdArray) {
 
         
-              const QueryCustomerRemoveChecklist1 = `SELECT is_all_customer FROM checklists WHERE service_id = ${id} AND customer_id = 0`;
+            //   const QueryCustomerRemoveChecklist1 = `SELECT is_all_customer FROM checklists WHERE service_id = ${id} AND customer_id = 0`;
 
-              const [QueryCustomerRemoveChecklistData] = await pool.execute(QueryCustomerRemoveChecklist1);
+            //   const [QueryCustomerRemoveChecklistData] = await pool.execute(QueryCustomerRemoveChecklist1);
                
                
-             if (QueryCustomerRemoveChecklistData.length > 0 && QueryCustomerRemoveChecklistData[0].is_all_customer != null) {
+            //  if (QueryCustomerRemoveChecklistData.length > 0 && QueryCustomerRemoveChecklistData[0].is_all_customer != null) {
                    
-                    const updatValue = QueryCustomerRemoveChecklistData[0].is_all_customer.filter(item => item !== customer_id)
-                    const QueryCustomerRemoveChecklist = `
-                    UPDATE checklists
-                    SET is_all_customer = '${JSON.stringify(updatValue)}'
-                    WHERE service_id = ${id} AND customer_id = 0;
-                    `
-                    try {
-                        const [QueryCustomerRemoveChecklistData1] = await pool.execute(QueryCustomerRemoveChecklist);
-                    } catch (error) {
-                        console.log("error ", error)  
-                    }
+            //         const updatValue = QueryCustomerRemoveChecklistData[0].is_all_customer.filter(item => item !== customer_id)
+            //         const QueryCustomerRemoveChecklist = `
+            //         UPDATE checklists
+            //         SET is_all_customer = '${JSON.stringify(updatValue)}'
+            //         WHERE service_id = ${id} AND customer_id = 0;
+            //         `
+            //         try {
+            //             const [QueryCustomerRemoveChecklistData1] = await pool.execute(QueryCustomerRemoveChecklist);
+            //         } catch (error) {
+            //             console.log("error ", error)  
+            //         }
                     
-                }
+            //     }
 
 
 
