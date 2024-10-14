@@ -29,7 +29,7 @@ const createCustomerSubSource = async (CustomerSubSource) => {
     );
     return {
       status: true,
-      message: "CustomerSubSource In created successfully.",
+      message: "Customer Sub-source updated successfully ",
       data: result.insertId,
     };
   } catch (err) {

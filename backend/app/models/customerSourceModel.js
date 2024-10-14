@@ -12,7 +12,7 @@ const createCustomerSource = async (CustomerSource) => {
   try {
     const [check] = await pool.query(checkQuery, [name]);
     if (check.length > 0) {
-      return { status: false, message: "CustomerSource In already exists." };
+      return { status: false, message: "Customer Source In already exists." };
     }
     const [result] = await pool.query(query, [name]);
     const currentDate = new Date();
@@ -29,7 +29,7 @@ const createCustomerSource = async (CustomerSource) => {
     );
     return {
       status: true,
-      message: "CustomerSource In created successfully.",
+      message: "Customer source updated successfully.",
       data: result.insertId,
     };
   } catch (err) {
@@ -123,7 +123,7 @@ const updateCustomerSource = async (CustomerSource) => {
   try {
     const [check] = await pool.execute(checkQuery, [name, id]);
     if (check.length > 0) {
-      return { status: false, message: "CustomerSource In already exists." };
+      return { status: false, message: "Customer Source already exists." };
     }
 
     const [[existStatus]] = await pool.execute(`SELECT status FROM customer_source WHERE id = ?`, [id]);
@@ -151,7 +151,7 @@ const updateCustomerSource = async (CustomerSource) => {
     }
     return {
       status: true,
-      message: "CustomerSource In updated successfully.",
+      message: "Customer Source updated successfully.",
       data: result.affectedRows,
     };
   } catch (err) {

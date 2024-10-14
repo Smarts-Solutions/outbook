@@ -209,7 +209,7 @@ const ClientList = () => {
       sortable: true,
     },
     {
-      name: "Outbooks Acount Manager",
+      name: "Outbook Account Manager",
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
         " " +
@@ -454,7 +454,7 @@ const ClientList = () => {
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Search clients..."
+                      placeholder="Search Job.."
                     />
                   </div>
                 </div>

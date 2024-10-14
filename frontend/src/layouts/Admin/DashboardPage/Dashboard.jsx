@@ -117,7 +117,7 @@ const Dashboard = () => {
                   <div className="form-group">
                     {/* <label htmlFor="tabSelect">Filter:</label> */}
                     <select
-                      className="form-control"
+                      className="form-select"
                       id="tabSelect"
                       value={selectedTab}
                       onChange={handleTabChange}

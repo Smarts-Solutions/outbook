@@ -107,7 +107,7 @@ const Setting = () => {
       name: "Job Type",
       selector: (row) => row.type,
       sortable: true,
-      width: "85%",
+      width: "80%",
     },
     {
       name: "Actions",
@@ -436,7 +436,11 @@ const Setting = () => {
           }}
           onSave={handleSave}
           onChange={handleModalChange}
-          buttonName={isEdit ? "Update" : "Save"}
+          buttonName={
+            <>
+              <i className={`far ${isEdit ? 'fa-edit' : 'fa-save'}`}></i> {isEdit ? "Update" : "Save"}
+            </>
+          }
         />
       )}
 

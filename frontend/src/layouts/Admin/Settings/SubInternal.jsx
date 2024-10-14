@@ -293,8 +293,12 @@ const SubInternal = () => {
                     }}
                     onSave={handleSave}
                     onChange={handleModalChange}
-                    buttonName={isEdit ? "Update" : "Save"}
-                />
+                    buttonName={
+                        <>
+                          <i className={`far ${isEdit ? 'fa-edit' : 'fa-save'}`}></i> {isEdit ? "Update" : "Save"}
+                        </>
+                      }
+                    />
             )}
         </div>
     );

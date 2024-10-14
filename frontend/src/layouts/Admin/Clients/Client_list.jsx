@@ -802,7 +802,7 @@ const ClientList = () => {
                   <h3 className="mt-0">{tab.title}</h3>
                 </div>
 
-                {tab.placeholder && (
+                {/* {tab.placeholder && (
                   <div className="search-input">
                     <input
                       type="text"
@@ -812,7 +812,7 @@ const ClientList = () => {
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
-                )}
+                )} */}
               </div>
 
               <div className="datatable-wrapper">
@@ -820,7 +820,7 @@ const ClientList = () => {
                   <Datatable
                     columns={tab.columns}
                     data={tab.data}
-                    filter={false}
+                    filter={true}
                   />
                 ) : (
                   <div className="text-center">

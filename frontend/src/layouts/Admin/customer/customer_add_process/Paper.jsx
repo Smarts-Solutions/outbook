@@ -213,7 +213,7 @@ const Paper = () => {
                                   Previous
                                 </button>
 
-                                <Button
+                            <Button style={{height:'40px'}}
                                   className="btn btn-outline-success text-center  d-flex align-items-center"
                                   type="submit"
                                   onClick={(e) => handleSubmit(e)}
