@@ -867,10 +867,9 @@ const Engagement = () => {
                     <label className="form-label">Customer Joining Date</label>
                     <input
                       type="date"
-                  
                       className={formErrors.customerJoiningDate ? "error-field form-control" : "form-control"}
                       name="customerJoiningDate"
-                      value={formState1.customerJoiningDate}
+                      value={formState1.customerJoiningDate || new Date().toISOString().split('T')[0]}
                       onChange={handleInputChange}
                     />
                     {formErrors.customerJoiningDate && (

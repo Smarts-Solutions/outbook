@@ -421,7 +421,7 @@ const Engagement = () => {
       if (!entry.cost_per_job) {
         entryErrors.cost_per_job = "Please Enter Cost Per Job";
       } else if (entry.cost_per_job < 20 || entry.cost_per_job > 500) {
-        entryErrors.cost_per_job = "Cost Per Job must be between 20 and 500";
+        entryErrors.cost_per_job = "Cost Per Job must be between £20 and £500";
       }
 
       if (Object.keys(entryErrors).length !== 0) {
