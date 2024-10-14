@@ -1176,16 +1176,16 @@ const Setting = () => {
             label: "Currency",
             placeholder: "Enter Currency",
           },
-          {
-            type: "select",
-            name: "status",
-            label: "Currency Status",
-            placeholder: "Enter Currency Status",
-            options: [
-              { label: "Active", value: "1" },
-              { label: "Deactive", value: "0" },
-            ],
-          },
+          // {
+          //   type: "select",
+          //   name: "status",
+          //   label: "Currency Status",
+          //   placeholder: "Enter Currency Status",
+          //   options: [
+          //     { label: "Active", value: "1" },
+          //     { label: "Deactive", value: "0" },
+          //   ],
+          // },
         ],
         title: " Country",
         tabStatus: tabStatus,
@@ -1228,15 +1228,15 @@ const Setting = () => {
             label: "Job Name",
             placeholder: "Enter Job Name",
           },
-          {
-            type: "select",
-            name: "status",
-            label: "Status",
-            options: [
-              { label: "Active", value: "1" },
-              { label: "Deactive", value: "0" },
-            ],
-          },
+          // {
+          //   type: "select",
+          //   name: "status",
+          //   label: "Status",
+          //   options: [
+          //     { label: "Active", value: "1" },
+          //     { label: "Deactive", value: "0" },
+          //   ],
+          // },
         ],
         title: "Job",
         tabStatus: tabStatus,

@@ -1,18 +1,19 @@
 const pool = require('../config/database');
 const AddInternal = async (Internal) => {
-  const { name, status } = Internal;
+
+  const { name } = Internal;
   // add internal
   const checkQuery = `SELECT 1 FROM internal WHERE name = ?`;
   const query = `
-  INSERT INTO internal (name,status)
-  VALUES (?,?)
+  INSERT INTO internal (name)
+  VALUES (?)
   `;
   try {
     const [check] = await pool.query(checkQuery, [name]);
     if (check.length > 0) {
       return { status: false, message: 'Internal already exists.' };
     }
-    const [result] = await pool.execute(query, [name, status]);
+    const [result] = await pool.execute(query, [name]);
     return { status: true, message: 'Internal created successfully.', data: result.insertId };
   } catch (err) {
     console.error('Error inserting data:', err);
@@ -22,10 +23,9 @@ const AddInternal = async (Internal) => {
 
 
 const getInternal = async (Internal) => {
-  console.log(Internal);
   const { id } = Internal;
   // get internal
-  const query = `SELECT * FROM internal WHERE id = ?`;
+  const query = `SELECT * FROM internal WHERE id = ? ORDER BY id DESC`;
   try {
     const [result] = await pool.query(query, [id]);
     return result;
@@ -38,7 +38,7 @@ const getInternal = async (Internal) => {
 
 const getInternalAll = async (Internal) => {
   // get all internal
-  const query = `SELECT * FROM internal`;
+  const query = `SELECT * FROM internal ORDER BY id DESC`;
   try {
     const [result] = await pool.query
 

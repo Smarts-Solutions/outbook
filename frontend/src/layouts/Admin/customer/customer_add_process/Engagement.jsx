@@ -5,7 +5,7 @@ import MultiStepFormContext from "./MultiStepFormContext";
 import { JobType, customerSourceApi, customerSubSourceApi, } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import { useDispatch } from "react-redux";
 import { EngagementErrorMsg } from "../../../../Utils/Common_Message";
-import { ScrollToViewFirstError  } from "../../../../Utils/Comman_function";
+import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { ADD_SERVICES_CUSTOMERS, Get_Service } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 
@@ -21,9 +21,11 @@ const Engagement = () => {
   const [getAllServices, setAllServices] = useState([]);
   const [coustomerSource, setCoustomerSource] = useState([]);
   const [coustomerSubSource, setCoustomerSubSource] = useState([]);
-  const [formState1, setFormState1] = useState({});
+  const [formState1, setFormState1] = useState({
+    customerJoiningDate: new Date().toISOString().split('T')[0]
+  });
 
- 
+
   const [formValues1, setFormValues1] = useState({
     accountants: "",
     feePerAccountant: "",
@@ -75,7 +77,7 @@ const Engagement = () => {
   const ErrorArr = [errors1, errors2, errors3, errors4];
   const setErrorsArr = [setErrors1, setErrors2, setErrors3, setErrors4];
   const InputsArr = [formValues1, formValues2, formValues3, jobEntries];
-  const setInputArr = [setFormValues1, setFormValues2, setFormValues3, setJobEntries]; 
+  const setInputArr = [setFormValues1, setFormValues2, setFormValues3, setJobEntries];
 
   useEffect(() => {
     customerSourceData();
@@ -90,7 +92,7 @@ const Engagement = () => {
       return newStates;
     });
   };
- 
+
   const RemoveErrorFromErrors = (name, setErrors) => {
     setErrors((prevErrors) => {
       const updatedErrors = { ...prevErrors };
@@ -104,7 +106,7 @@ const Engagement = () => {
     if (!value && EngagementErrorMsg[name]) {
       newErrors[name] = EngagementErrorMsg[name];
     }
-   else if ((!value || value < 7 || value > 25) && (name === "adhoc_accountants" || name === "adhoc_bookkeepers" || name === "adhoc_payroll_experts" || name === "adhoc_tax_experts" || name === "adhoc_admin_staff")) {
+    else if ((!value || value < 7 || value > 25) && (name === "adhoc_accountants" || name === "adhoc_bookkeepers" || name === "adhoc_payroll_experts" || name === "adhoc_tax_experts" || name === "adhoc_admin_staff")) {
       if (EngagementErrorMsg[name]) {
         newErrors[name] = EngagementErrorMsg[name];
       }
@@ -122,10 +124,10 @@ const Engagement = () => {
         ...newErrors,
       }));
     }
-  
+
     return Object.keys(newErrors).length === 0;
   }
-    
+
   const validate4 = () => {
     const newErrors = [];
 
@@ -237,19 +239,21 @@ const Engagement = () => {
       });
       return;
     }
-    
+
     for (let i = 0; i < checkboxStates.length; i++) {
-      if(checkboxStates[i] === 1 && i==3 && !validate4()) {
+      if (checkboxStates[i] === 1 && i == 3 && !validate4()) {
         ScrollToViewFirstError(ErrorArr[i]);
         return;
       }
-      else if (checkboxStates[i] == 1 && !validateAllFields(i+1)) {
+      else if (checkboxStates[i] == 1 && !validateAllFields(i + 1)) {
         ScrollToViewFirstError(ErrorArr[i]);
         return;
       }
     }
 
+    console.log("formState1", formState1);
     let req = {
+
       customer_id: address,
       pageStatus: "3",
       fte_dedicated_staffing: checkboxStates[0].toString(),
@@ -528,13 +532,13 @@ const Engagement = () => {
                                     </label>
                                     <input
                                       type="text"
-                                      
-                                      className={errors1[field.name]? "error-field form-control" : "form-control"}
+
+                                      className={errors1[field.name] ? "error-field form-control" : "form-control"}
                                       name={field.name}
                                       id={field.name}
                                       placeholder={field.feeName}
                                       value={formValues1[field.name]}
-                                      onChange={(e) => handleChange(e , 1)}
+                                      onChange={(e) => handleChange(e, 1)}
                                     />
                                     {errors1[field.name] && (
                                       <div className="error-text">
@@ -607,13 +611,13 @@ const Engagement = () => {
                                     <br />
                                     <input
                                       type="text"
-                                      
+
                                       className={errors2[field.name] ? "error-field form-control" : "form-control"}
                                       name={field.name}
                                       id={field.name}
                                       value={formValues2[field.name]}
                                       placeholder={field.feeName}
-                                      onChange={(e)=>handleChange(e , 2)}
+                                      onChange={(e) => handleChange(e, 2)}
                                     />
                                     {errors2[field.name] && (
                                       <div className="error-text">
@@ -688,7 +692,7 @@ const Engagement = () => {
                                       id={field.name}
                                       value={formValues3[field.name]}
                                       placeholder={field.feeName}
-                                      onChange={(e)=>handleChange(e , 3)}
+                                      onChange={(e) => handleChange(e, 3)}
                                     />
                                     {errors3[field.name] && (
                                       <div className="error-text">
@@ -751,7 +755,7 @@ const Engagement = () => {
                                       )}
                                     </div>
                                   </div>
-                                  
+
                                   <div className="col-lg-4">
                                     <label
                                       htmlFor={`services_${index}`}
@@ -761,7 +765,7 @@ const Engagement = () => {
                                     </label>
                                     <select
                                       id={`services_${index}`}
-                                      
+
                                       className={errors4[index] ? "error-field form-select" : "form-select"}
                                       name="service_id"
                                       value={job.service_id}
@@ -817,7 +821,7 @@ const Engagement = () => {
                                   {jobEntries.length > 1 && (
                                     <div className="col-lg-1 text-center d-flex">
                                       <button
-                                      style={{height:'37px'}}
+                                        style={{ height: '37px' }}
                                         className="delete-icon mt-4"
                                         onClick={(e) => handleRemoveJob(index)}
                                       >
@@ -869,7 +873,7 @@ const Engagement = () => {
                       type="date"
                       className={formErrors.customerJoiningDate ? "error-field form-control" : "form-control"}
                       name="customerJoiningDate"
-                      value={formState1.customerJoiningDate || new Date().toISOString().split('T')[0]}
+                      defaultValue={formState1.customerJoiningDate || new Date().toISOString().split('T')[0]}
                       onChange={handleInputChange}
                     />
                     {formErrors.customerJoiningDate && (
@@ -881,7 +885,7 @@ const Engagement = () => {
                   <div className="col-lg-4">
                     <label className="form-label">Select Customer Source</label>
                     <select
-                     
+
                       className={formErrors.customerSource ? "error-field form-select" : "form-select"}
                       name="customerSource"
                       value={formState1.customerSource}
@@ -906,7 +910,7 @@ const Engagement = () => {
                       Select Customer Sub-Source
                     </label>
                     <select
-                    
+
                       name="customerSubSource"
                       className={formErrors.customerSubSource ? "error-field form-select" : "form-select"}
                       value={formState1.customerSubSource}
