@@ -2500,7 +2500,7 @@ WHERE service_id = ${service_id} AND customer_id = 0;
               const [QueryCustomerRemoveChecklistData] = await pool.execute(QueryCustomerRemoveChecklist1);
                
                
-             if (QueryCustomerRemoveChecklistData.length > 0 &&  QueryCustomerRemoveChecklistData[0].is_all_customer != null) {
+             if (QueryCustomerRemoveChecklistData.length > 0 && QueryCustomerRemoveChecklistData[0].is_all_customer != null) {
                    
                     const updatValue = QueryCustomerRemoveChecklistData[0].is_all_customer.filter(item => item !== customer_id)
                     const QueryCustomerRemoveChecklist = `
@@ -2509,7 +2509,7 @@ WHERE service_id = ${service_id} AND customer_id = 0;
                     WHERE service_id = ${id} AND customer_id = 0;
                     `
                     try {
-                        const [QueryCustomerRemoveChecklistData] = await pool.execute(QueryCustomerRemoveChecklist);
+                        const [QueryCustomerRemoveChecklistData1] = await pool.execute(QueryCustomerRemoveChecklist);
                     } catch (error) {
                         console.log("error ", error)  
                     }
