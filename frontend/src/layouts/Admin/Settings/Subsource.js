@@ -31,25 +31,19 @@ const Setting = () => {
     await dispatch(customerSubSourceApi(data))
       .unwrap()
       .then(async (response) => {
-  
         if (req.action == "add" || req.action == "update" || req.action == "delete") {
+          sweatalert.fire({
+            icon: "error",
+            title: "Error",
+            text: response.message,
+            timer: 2000,
+          });
           customerSubSourceData({ action: "getAll" });
         } else {
           if (response.status) {
-            sweatalert.fire({
-              icon: "success",
-              title: "Success",
-              text: response.message,
-              timer: 2000,
-            });
             setSubSourceData({ loading: false, data: response.data });
           } else {
-            sweatalert.fire({
-              icon: "error",
-              title: "Error",
-              text: response.message,
-              timer: 2000,
-            });
+            
             setSubSourceData({ loading: false, data: [] });
           }
         }
