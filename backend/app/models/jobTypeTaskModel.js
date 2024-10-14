@@ -66,9 +66,6 @@ const deleteJobType = async (JobTypeId) => {
   const query = `
     DELETE FROM job_types WHERE id = ?
     `;
-
-  
-
   try {
     await pool.execute(query, [JobTypeId.id]);
     
@@ -107,7 +104,7 @@ const updateJobType = async (JobType) => {
     let log_message = existStatus.status === JobType.status ?
         `edited job types ${JobType.type}`:
         `changes the job types status ${status_change} ${JobType.type}`
-      const [result] =  await pool.execute(query, values);
+     const [result] =  await pool.execute(query, values);
     if(result.changedRows){
     const currentDate = new Date();
     await SatffLogUpdateOperation(

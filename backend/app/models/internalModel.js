@@ -1,4 +1,6 @@
 const pool = require('../config/database');
+const { SatffLogUpdateOperation } = require("../utils/helper");
+
 const AddInternal = async (Internal) => {
   const { name, status } = Internal;
   // add internal
@@ -13,6 +15,18 @@ const AddInternal = async (Internal) => {
       return { status: false, message: 'Internal already exists.' };
     }
     const [result] = await pool.execute(query, [name, status]);
+    const currentDate = new Date();
+    await SatffLogUpdateOperation(
+      {
+          staff_id: Internal.StaffUserId,
+          ip: Internal.ip,
+          date: currentDate.toISOString().split('T')[0],
+          module_name: "Internal",
+          log_message: `created Internal ${name}`,
+          permission_type: "created",
+          module_id:result.insertId
+      }
+  );
     return { status: true, message: 'Internal created successfully.', data: result.insertId };
   } catch (err) {
     console.error('Error inserting data:', err);
@@ -53,8 +67,23 @@ const getInternalAll = async (Internal) => {
 
 
 const removeInternal = async (Internal) => {
-  const { id } = Internal;
+  const { id ,StaffUserId,ip} = Internal;
+  const [[existName]] = await pool.execute(`SELECT name FROM internal WHERE id = ?`, [id]);
   // delete internal
+  if(parseInt(id) > 0){
+    const currentDate = new Date();
+    await SatffLogUpdateOperation(
+        {
+            staff_id: StaffUserId,
+            ip: ip,
+            date: currentDate.toISOString().split('T')[0],
+            module_name: "Internal",
+            log_message: `Deleted Internal ${existName.name}`,
+            permission_type: "deleted",
+            module_id:id
+        }
+    );
+  }
   const query = `DELETE FROM internal WHERE id = ?`;
   try {
     await pool.query
@@ -73,8 +102,31 @@ const modifyInternal = async (Internal) => {
   // update internal
   const query = `UPDATE internal SET name = ?, status = ? WHERE id = ?`;
   try {
-    const [result] = await pool.query
-    (query, [name,status, id]);
+    const [[existStatus]] = await pool.execute(`SELECT status FROM internal WHERE id = ?`, [id]);
+    let status_change = "Deactivate"
+    if(status == "1"){
+      status_change = "Activate"
+    }
+    let log_message = existStatus.status === status ?
+        `edited internal ${name}`:
+        `changes the internal status ${status_change} ${name}`
+
+    const [result] = await pool.query(query, [name,status, id]);
+    if(result.changedRows > 0){
+      const currentDate = new Date();
+      await SatffLogUpdateOperation(
+          {
+              staff_id: Internal.StaffUserId,
+              ip: Internal.ip,
+              date: currentDate.toISOString().split('T')[0],
+              module_name: "Internal",
+              log_message: log_message,
+              permission_type: "updated",
+              module_id:id
+          }
+      );
+    }
+
     return { status: true, message: 'Internal updated successfully.', data: result.insertId };
   }
   catch (err) {
