@@ -143,13 +143,6 @@ const ClientEdit = () => {
   }, [searchItem]);
 
 
-  console.log('errors1', errors1);
-  console.log('errors2', errors2);
-  console.log('errors3', errors3);
-  console.log('errors4', errors4);
-  
-
-
   useEffect(() => {
     if (location.state.row.client_type_name == "SoleTrader") {
       setSoleTraderDetails((prevState) => ({
@@ -340,6 +333,8 @@ const ClientEdit = () => {
         RegisteredOfficeAddress: getSearchDetails[0].address_snippet,
         IncorporationDate: getSearchDetails[0].date_of_creation,
         IncorporationIn: getSearchDetails[0].description,
+        TradingName: getSearchDetails[0].title,
+        TradingAddress: getSearchDetails[0].address_snippet,
       }));
     }
   }, [getSearchDetails]);
