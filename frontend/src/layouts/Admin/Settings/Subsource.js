@@ -265,19 +265,24 @@ const Setting = () => {
       </div>
 
       {isModalOpen && (
-        <Modal
-          modalId="exampleModal3"
-          title={isEdit ? "Edit " + modalData.title : "Add " + modalData.title}
-          fields={modalData.fields}
-          onClose={() => {
-            setIsModalOpen(false);
-            setModalData({});
-          }}
-          onSave={handleSave}
-          onChange={handleModalChange}
-          buttonName={isEdit ? "Update" : "Save"}
-        />
-      )}
+  <Modal
+    modalId="exampleModal3"
+    title={isEdit ? "Edit " + modalData.title : "Add " + modalData.title}
+    fields={modalData.fields}
+    onClose={() => {
+      setIsModalOpen(false);
+      setModalData({});
+    }}
+    onSave={handleSave}
+    onChange={handleModalChange}
+    buttonName={
+      <>
+        <i className={`fas ${isEdit ? 'fa-edit' : 'fa-save'}`}></i> {isEdit ? "Update" : "Save"}
+      </>
+    }
+  />
+)}
+
     </div>
   );
 };
