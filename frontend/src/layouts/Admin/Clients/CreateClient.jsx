@@ -342,15 +342,16 @@ const CreateClient = () => {
         case "last_name":
           newErrors[name] = "Please enter Last Name";
           break;
-        case "email":
-          newErrors[name] = "Please enter Email";
-          break;
+        // case "email":
+        //   newErrors[name] = "Please enter Email";
+        //   break;
         default:
           break;
       }
     }
     else {
-      if (name === "email" && !Email_regex(value)) {
+      console.log(name, value);
+      if (value && name === "email" && !Email_regex(value)) {
         newErrors[name] = "Please enter valid Email";
       } else if (name === "phone" && !/^\d{9,12}$/.test(value)) {
         newErrors[name] = "Phone Number must be between 9 to 12 digits";
