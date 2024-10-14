@@ -3078,12 +3078,18 @@ const customerStatusUpdate = async (customer) => {
 const getcustomerschecklist = async (customer) => {
   try {
     const { customer_id, service_id, job_type_id } = customer;
-    const query = `SELECT c.*, ct.* FROM checklists c JOIN checklist_tasks ct ON c.id = ct.checklist_id   WHERE c.service_id = ? AND c.job_type_id = ?;`;
-    // c.customer_id = ? AND 
+    const query = `SELECT c.*, ct.* 
+    FROM checklists c 
+    JOIN checklist_tasks ct 
+    ON c.id = ct.checklist_id 
+    WHERE c.service_id = ? 
+    AND c.job_type_id = ? 
+    AND (c.customer_id = ? OR c.customer_id = 0);`;
+
     const [result] = await pool.execute(query, [
-      // customer_id,
-      service_id,
-      job_type_id,
+        service_id,
+        job_type_id,
+        customer_id,
     ]);
 
     console.log("result", result);
@@ -3124,6 +3130,7 @@ module.exports = {
     updateProcessCustomerFileDelete,
     getSingleCustomer,
     customerUpdate,
-    customerStatusUpdate
+    customerStatusUpdate,
+    getcustomerschecklist
 
 };
