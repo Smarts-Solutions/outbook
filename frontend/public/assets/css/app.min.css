@@ -425,17 +425,19 @@
 }
 
 .app-search-topbar button {
-	position: absolute;
-	width: 30px;
-	height: 30px;
-	left: 4px;
-	top: 50%;
-	-webkit-transform: translateY(-50%);
-	transform: translateY(-50%);
-	border: none;
-	text-align: center;
-	background-color: transparent;
-	color: #C0C0C0;
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    right: 1px;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
+    border: none;
+    text-align: center;
+    font-weight: bold;
+    background-color: #f1f5fa;
+    color: #4b96ef;
+    border-radius: 0px 20px 20px 0;
 }
 
 .app-search-topbar button i {
