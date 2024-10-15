@@ -524,18 +524,18 @@ const ClientList = () => {
                       <ul className="list-unstyled personal-detail mb-0">
                         <li className="">
                           <i className="fa-regular fa-phone me-2 text-secondary font-22 align-middle"></i>
-                          <b>Phone </b>
+                          <b>Phone : </b>
                           {clientInformationData &&
                             clientInformationData.phone &&
                             clientInformationData.phone_code +
                             " " +
-                            clientInformationData.phone}
+                            clientInformationData.phone || 'NA'}
 
                         </li>
                         <li className="mt-2">
                           <i className="fa-regular fa-envelope text-secondary font-22 align-middle me-2"></i>
-                          <b>Email </b>:{" "}
-                          {clientInformationData && clientInformationData.email}
+                          <b>Email : </b>:{" "}
+                          {clientInformationData && clientInformationData.email || 'NA'}
                         </li>
                       </ul>
                     </div>
@@ -544,12 +544,12 @@ const ClientList = () => {
                       <ul className="list-unstyled personal-detail mb-0">
                         <li className="row">
                           <div className="col-md-12">
-                            <b>Trading Name : {informationData && informationData.trading_name}</b></div>
+                            <b>Trading Name : {informationData && informationData.trading_name || 'NA'}</b></div>
 
                         </li>
                         <li className="mt-2 row">
                           <div className="col-md-12">
-                            <b>Trading Address :  {informationData && informationData.trading_address}</b>
+                            <b>Trading Address :  {informationData && informationData.trading_address || 'NA'}</b>
                           </div>
                         </li>
                       </ul>
@@ -594,7 +594,7 @@ const ClientList = () => {
                     <div className="col-lg-6">
                       <ul className="list-unstyled faq-qa">
                         <li className="mb-4">
-                          <h6 className="">Trading Name : {informationData.trading_name}</h6>
+                          <h6 className="">Trading Name : {informationData.trading_name || 'NA'}</h6>
                           {/* <p className="font-14  ml-3">
                             {informationData.trading_name}
                           </p> */}
@@ -607,7 +607,7 @@ const ClientList = () => {
                           </p> */}
                         </li>
                         <li className="mb-4">
-                          <h6 className="">Website : {informationData.website}</h6>
+                          <h6 className="">Website : {informationData.website || 'NA'}</h6>
                           {/* <p className="font-14  ml-3">
                             
                           </p> */}
@@ -617,14 +617,14 @@ const ClientList = () => {
                     <div className="col-lg-6">
                       <ul className="list-unstyled faq-qa">
                         <li className="mb-4">
-                          <h6 className="">Trading Address : {informationData.trading_address}</h6>
+                          <h6 className="">Trading Address : {informationData.trading_address || 'NA'}</h6>
                           {/* <p className="font-14  ml-3">
                             {" "}
                             {informationData.trading_address}
                           </p> */}
                         </li>
                         <li className="mb-4">
-                          <h6 className="">VAT Number :  {informationData.vat_number}</h6>
+                          <h6 className="">VAT Number :  {informationData.vat_number || 'NA'}</h6>
                           {/* <p className="font-14  ml-3">
                             {" "}
                             {informationData.vat_number}

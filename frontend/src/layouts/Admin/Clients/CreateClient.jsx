@@ -23,7 +23,7 @@ const CreateClient = () => {
   const [errors2, setErrors2] = useState({});
   const [errors3, setErrors3] = useState({});
   const [errors4, setErrors4] = useState({});
-  
+
 
   const [personRoleDataAll, setPersonRoleDataAll] = useState({
     loading: true,
@@ -343,11 +343,21 @@ const CreateClient = () => {
         case "last_name":
           newErrors[name] = "Please enter Last Name";
           break;
-        // case "email":
-        //   newErrors[name] = null;
-        //   break;
-        // case "phone":
-        //   newErrors[name] = null;
+        case "email":
+          delete newErrors[name];
+          setErrors1((prevErrors) => {
+            const updatedErrors = { ...prevErrors };
+            delete updatedErrors[name];
+            return updatedErrors;
+          });
+          break;
+        case "phone":
+          delete newErrors[name];
+          setErrors1((prevErrors) => {
+            const updatedErrors = { ...prevErrors };
+            delete updatedErrors[name];
+            return updatedErrors;
+          });
         default:
           break;
       }
@@ -704,7 +714,7 @@ const CreateClient = () => {
 
   // common submit function for all type of customer
   const AddClientFun = async (req) => {
-   
+
     const data = { req: req, authToken: token };
     await dispatch(Add_Client(req))
       .unwrap()
@@ -2222,7 +2232,7 @@ const CreateClient = () => {
                                               <div className="row">
                                                 <div className="col-lg-12">
                                                   <div>
-                                                    <h4 className="flex-grow-1 fs-16" style={{fontWeight:'600'}}>Partnership {index+1}</h4>
+                                                    <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partnership {index + 1}</h4>
                                                   </div>
                                                   <div
                                                     className="form-check form-switch form-switch-md mb-3 d-flex justify-content-end"
