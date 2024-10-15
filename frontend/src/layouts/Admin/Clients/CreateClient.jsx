@@ -1282,9 +1282,7 @@ const CreateClient = () => {
                                       <div className="mb-3">
                                         <label className="form-label">
                                           Residential Address
-                                          <span style={{ color: "red" }}>
-                                            *
-                                          </span>
+                                         
                                         </label>
                                         <input
                                           type="text"

@@ -239,7 +239,7 @@ const New = () => {
                                     <li className="page-item disabled">
                                         <a href="#" className="page-link">
                                             <b>
-                                                <i className="mdi mdi-chevron-left" />
+                                                <i className="fa fa-angle-left" />
                                             </b>
                                         </a>
                                     </li>

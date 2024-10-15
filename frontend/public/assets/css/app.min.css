@@ -3623,13 +3623,16 @@ main .error__feedback {
 
 }
 
-thead.table-striped th,
-.table-head-blue th {
-	background: #EBF4F7 !important;
-	font-size: 14px;
-	color: #4B4B4B;
-	font-weight: 600;
-	padding: 10px 10px;
+thead.table-striped th, .table-head-blue th {
+    background: #fff !important;
+    font-size: 16px;
+    color: #000;
+    font-weight: 600;
+    padding: 10px 10px;
+    /* border-radius: 5px; */
+    border-bottom: 3px solid #333547;
+    margin-bottom: 5px;
+    /* box-shadow: 2px 2px 0px #333547; */
 }
 
 .new-checkbox {
@@ -4368,4 +4371,16 @@ select#tabSelect {
 	overflow-wrap: break-word;
 	transition: opacity 0.2s;
 	opacity: 1;
+}
+.report-table tr td {
+	font-size: 14px;
+    color: #4B4B4B;
+    font-weight: 600;
+    text-transform: none;
+    padding: 15px 15px;
+}
+.report-table tr  {
+	box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+    margin: 2px 0;
+    border-radius: 5px;
 }
