@@ -146,16 +146,16 @@ const SubInternal = () => {
                     label: "Sub Internal",
                     placeholder: "Enter Sub Internal",
                 },
-                {
-                    type: "select",
-                    name: "status",
-                    label: "Status",
-                    placeholder: "Select Status",
-                    options: [
-                        { label: "Active", value: "1" },
-                        { label: "Deactive", value: "0" },
-                    ],
-                },
+                // {
+                //     type: "select",
+                //     name: "status",
+                //     label: "Status",
+                //     placeholder: "Select Status",
+                //     options: [
+                //         { label: "Active", value: "1" },
+                //         { label: "Deactive", value: "0" },
+                //     ],
+                // },
             ],
             title: "Sub Internal",
 

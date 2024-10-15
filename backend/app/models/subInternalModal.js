@@ -1,11 +1,13 @@
 const pool = require('../config/database');
+const { SatffLogUpdateOperation } = require("../utils/helper");
+
 const AddSubInternal = async (subInternal) => {
     const { name, status , internal_id } = subInternal;
     // add internal
     const checkQuery = `SELECT 1 FROM sub_internal WHERE name = ?`;
     const query = `
-  INSERT INTO sub_internal (name,status, internal_id)
-  VALUES (?,?,?)
+  INSERT INTO sub_internal (name, internal_id)
+  VALUES (?,?)
   `;
     try {
         const [check] = await pool.query(checkQuery, [name]);
@@ -20,9 +22,9 @@ const AddSubInternal = async (subInternal) => {
     }
 }
 
-const getSubInternal = async (subInternal) => { 
+const getSubInternal = async (subInternal) => {
     const { id } = subInternal;
-    const query = `SELECT * FROM sub_internal WHERE id = ?`;
+    const query = `SELECT * FROM sub_internal WHERE id = ? ORDER BY id DESC`;
     try {
         const [result] = await pool.query(query, [id]);
         return result;
@@ -35,11 +37,11 @@ const getSubInternal = async (subInternal) => {
 
 const getSubInternalAll = async (internal_id) => {
     const id = internal_id.internal_id;
-     
+
     // get all internal based on internal_id
-    const query = `SELECT * FROM sub_internal WHERE internal_id = ?`;
+    const query = `SELECT * FROM sub_internal WHERE internal_id = ? ORDER BY id DESC`;
     try {
-        const [result] = await pool.query(query, [id]);  
+        const [result] = await pool.query(query, [id]);
         return result;
     } catch (err) {
         console.error('Error getting data:', err);
@@ -51,7 +53,22 @@ const getSubInternalAll = async (internal_id) => {
 
 const removeSubInternal = async (sub_internal) => {
     const { id } = sub_internal;
+    const [[existName]] = await pool.execute(`SELECT name FROM sub_internal WHERE id = ?`, [id]);
     // delete internal
+    if (parseInt(id) > 0) {
+        const currentDate = new Date();
+        await SatffLogUpdateOperation(
+            {
+                staff_id: sub_internal.StaffUserId,
+                ip: sub_internal.ip,
+                date: currentDate.toISOString().split('T')[0],
+                module_name: "Sub Internal",
+                log_message: `deleted Sub Internal ${existName.name}`,
+                permission_type: "deleted",
+                module_id: id
+            }
+        );
+    }
     const query = `DELETE FROM sub_internal WHERE id = ?`;
     try {
         await pool.query
@@ -70,9 +87,31 @@ const modifySubInternal = async (sub_internal) => {
     // update internal
     const query = `UPDATE sub_internal SET name = ?, status = ? WHERE id = ?`;
     try {
-        const [result] = await pool.query
-            (query, [name, status, id]);
-        return { status: true, message: 'Sub-Internal task updated successfully.', data: result.insertId };
+        const [[existStatus]] = await pool.execute(`SELECT status FROM sub_internal WHERE id = ?`, [id]);
+        let status_change = "Deactivate"
+        if (status == "1") {
+            status_change = "Activate"
+        }
+        let log_message = existStatus.status === status ?
+            `edited Sub Internal ${name}` :
+            `changes the Sub Internal status ${status_change} ${name}`
+
+        const [result] = await pool.query(query, [name, status, id]);
+        if(result.changedRows > 0){
+            const currentDate = new Date();
+            await SatffLogUpdateOperation(
+                {
+                    staff_id: sub_internal.StaffUserId,
+                    ip: sub_internal.ip,
+                    date: currentDate.toISOString().split('T')[0],
+                    module_name: "Sub Internal",
+                    log_message: log_message,
+                    permission_type: "updated",
+                    module_id: id
+                }
+            );
+        }
+        return { status: true, message: 'sub internal updated successfully.', data: result.insertId };
     }
     catch (err) {
         console.error('Error updating data:', err);

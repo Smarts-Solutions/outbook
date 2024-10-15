@@ -1535,7 +1535,7 @@ const Information = ({ id, pageStatus }) => {
                                 <input
                                   type="text"
                                   className={errors2["RegisteredOfficeAddress"] ? "error-field form-control" : "form-control"}
-                                  placeholder="Suite Winsor & Netwon Building, White Fridrs Avenue, England,HA3 5RN"
+                                  placeholder="Please Enter Registered Office Address"
                                   name="RegisteredOfficeAddress"
                                   id="RegisteredOfficeAddress"
                                   onChange={(e) => handleChange2(e)}

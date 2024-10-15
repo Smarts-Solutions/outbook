@@ -31,13 +31,19 @@ const Setting = () => {
     await dispatch(customerSubSourceApi(data))
       .unwrap()
       .then(async (response) => {
-  
         if (req.action == "add" || req.action == "update" || req.action == "delete") {
+          sweatalert.fire({
+            icon: "success",
+            title: "Success",
+            text: response.message,
+            timer: 2000,
+          });
           customerSubSourceData({ action: "getAll" });
         } else {
           if (response.status) {
             setSubSourceData({ loading: false, data: response.data });
           } else {
+            
             setSubSourceData({ loading: false, data: [] });
           }
         }
@@ -171,10 +177,7 @@ const Setting = () => {
 
   const handleSave = (e) => {
     e.preventDefault();
-    if (
-      modalData.fields[0].value == "" ||
-      modalData.fields[0].value == undefined
-    ) {
+    if (  modalData.fields[0].value == "" ||  modalData.fields[0].value == undefined ) {
       sweatalert.fire({
         title: "Please enter " + modalData.fields[0].label,
         icon: "warning",

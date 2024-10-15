@@ -139,55 +139,61 @@ const RemoveErrorFromErrors = (name, setErrors) => {
 
 export const validate = (name, value, errors, setErrors) => {
   const newErrors = { ...errors };
-  if (!value && ClientErrorMessages[name]) {
-    newErrors[name] = ClientErrorMessages[name];
-  }
-  else {
+  if (!value && ClientErrorMessages[name]) { 
+    if (name === "email" || name === "phone") {
+      delete newErrors[name]; 
+      RemoveErrorFromErrors(name, setErrors);  
+    } else {
+      newErrors[name] = ClientErrorMessages[name];   
+    }
+  } else { 
     switch (name) {
       case "email":
         if (!Email_regex(value)) {
-          newErrors[name] = "Please enter valid Email";
+          newErrors[name] = "Please enter a valid email";
         } else {
-          delete newErrors[name];
-          RemoveErrorFromErrors(name, setErrors);
+          delete newErrors[name];   
+          RemoveErrorFromErrors(name, setErrors);  
         }
         break;
 
       case "phone":
         if (!/^\d{9,12}$/.test(value)) {
-          newErrors[name] = "Phone Number must be between 9 to 12 digits";
+          newErrors[name] = "Phone number must be between 9 to 12 digits";
         } else {
-          delete newErrors[name];
+          delete newErrors[name];  
           RemoveErrorFromErrors(name, setErrors);
         }
         break;
+
       case "VATNumber":
         if (!/^[0-9+]*$/.test(value)) {
-          newErrors[name] = "Please enter valid VAT Number";
+          newErrors[name] = "Please enter a valid VAT Number";
         } else {
-          delete newErrors[name];
+          delete newErrors[name];   
           RemoveErrorFromErrors(name, setErrors);
         }
+        break;
+
       default:
-        delete newErrors[name];
+        delete newErrors[name];  
         RemoveErrorFromErrors(name, setErrors);
         break;
     }
   }
-
+ 
   ScrollToViewFirstError(newErrors);
-
-  if (Object.keys(newErrors).length !== 0) {
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      ...newErrors,
-    }));
-  }
-
+ 
+  setErrors((prevErrors) => ({
+    ...prevErrors,
+    ...newErrors,
+  }));
+ 
   return Object.keys(newErrors).length === 0;
 };
 
- 
+
+
 export async function GET_IP(data, token) {
   try {
     const res = await axios.get(`https://api.ipify.org?format=json`)

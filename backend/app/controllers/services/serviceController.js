@@ -28,7 +28,7 @@ const handleServices = async (req, res) => {
               res.status(200).json({ status:true,message: 'Services deleted successfully' });
               break;
           case 'update':
-              result =await serviceService.modifyServices(Services);
+              result = await serviceService.modifyServices(Services);
               if(!result.status){
                 res.status(200).json({ status: false, message: result.message });
                 break;

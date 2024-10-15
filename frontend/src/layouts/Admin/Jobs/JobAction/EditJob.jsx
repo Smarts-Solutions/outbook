@@ -964,7 +964,7 @@ const EditJob = () => {
                                                 ? budgeted_hour_totalTime.hours
                                                 : "0"
                                             }
-                                            disabled
+                                            
                                           />
                                           <span
                                             className="input-group-text"
@@ -997,7 +997,7 @@ const EditJob = () => {
                                                 ? budgeted_hour_totalTime.minutes
                                                 : "0"
                                             }
-                                            disabled
+                                            
                                           />
                                           <span
                                             className="input-group-text"

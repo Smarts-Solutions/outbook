@@ -143,7 +143,6 @@ const ClientEdit = () => {
   }, [searchItem]);
 
 
-
   useEffect(() => {
     if (location.state.row.client_type_name == "SoleTrader") {
       setSoleTraderDetails((prevState) => ({
@@ -334,6 +333,8 @@ const ClientEdit = () => {
         RegisteredOfficeAddress: getSearchDetails[0].address_snippet,
         IncorporationDate: getSearchDetails[0].date_of_creation,
         IncorporationIn: getSearchDetails[0].description,
+        TradingName: getSearchDetails[0].title,
+        TradingAddress: getSearchDetails[0].address_snippet,
       }));
     }
   }, [getSearchDetails]);
@@ -568,14 +569,7 @@ const ClientEdit = () => {
   const validateField = (index, field, value, Type) => {
     const errors = ErrorsArr[Type - 1];
     const newErrors = [...errors];
-
-    console.log("index", index)
-    console.log("field", field)
-    console.log("value", value)
-    console.log("Type", Type)
-    console.log("newErrors", newErrors)
-
-
+ 
     switch (field) {
       case "first_name":
       case "last_name":

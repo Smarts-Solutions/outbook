@@ -450,9 +450,6 @@ const Service = () => {
       .then((response) => {
         if (response.status) {
           if (response.data.length > 0) {
-
-
-
             setTasksData1((prev) => {
               const mergedTasks = [...prev, ...response.data];
   

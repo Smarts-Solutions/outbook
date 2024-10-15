@@ -435,6 +435,7 @@ const getJobByCustomer = async (job) => {
         SELECT 
         jobs.id AS job_id,
         job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
         customer_contact_details.id AS account_manager_officer_id,
         customer_contact_details.first_name AS account_manager_officer_first_name,
         customer_contact_details.last_name AS account_manager_officer_last_name,
@@ -498,6 +499,7 @@ const getJobByCustomer = async (job) => {
         SELECT 
         jobs.id AS job_id,
         job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
         customer_contact_details.id AS account_manager_officer_id,
         customer_contact_details.first_name AS account_manager_officer_first_name,
         customer_contact_details.last_name AS account_manager_officer_last_name,
@@ -634,6 +636,7 @@ const getJobByCustomer = async (job) => {
         SELECT 
         jobs.id AS job_id,
         job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
         customer_contact_details.id AS account_manager_officer_id,
         customer_contact_details.first_name AS account_manager_officer_first_name,
         customer_contact_details.last_name AS account_manager_officer_last_name,
@@ -700,6 +703,7 @@ const getJobByCustomer = async (job) => {
         SELECT 
         jobs.id AS job_id,
         job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
         customer_contact_details.id AS account_manager_officer_id,
         customer_contact_details.first_name AS account_manager_officer_first_name,
         customer_contact_details.last_name AS account_manager_officer_last_name,
@@ -779,6 +783,7 @@ const getJobByClient = async (job) => {
      SELECT 
      jobs.id AS job_id,
      job_types.type AS job_type_name,
+     jobs.status_type AS status_type,
      customer_contact_details.id AS account_manager_officer_id,
      customer_contact_details.first_name AS account_manager_officer_first_name,
      customer_contact_details.last_name AS account_manager_officer_last_name,
@@ -846,6 +851,7 @@ const getJobByClient = async (job) => {
    SELECT 
    jobs.id AS job_id,
    job_types.type AS job_type_name,
+   jobs.status_type AS status_type,
    customer_contact_details.id AS account_manager_officer_id,
    customer_contact_details.first_name AS account_manager_officer_first_name,
    customer_contact_details.last_name AS account_manager_officer_last_name,
@@ -979,11 +985,12 @@ const getJobByClient = async (job) => {
       }
       // Reviewer
       else if (ExistStaff[0].role_id == 6) {
-
+     console.log("ExistStaff[0].role_id ",ExistStaff[0].role_id)
         const query = `
      SELECT 
      jobs.id AS job_id,
      job_types.type AS job_type_name,
+     jobs.status_type AS status_type,
      customer_contact_details.id AS account_manager_officer_id,
      customer_contact_details.first_name AS account_manager_officer_first_name,
      customer_contact_details.last_name AS account_manager_officer_last_name,
@@ -1017,12 +1024,10 @@ const getJobByClient = async (job) => {
      jobs
      LEFT JOIN 
       clients ON jobs.client_id = clients.id
-      LEFT JOIN
+     LEFT JOIN
       customers ON jobs.customer_id = customers.id
      LEFT JOIN 
      customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-     LEFT JOIN 
-     clients ON jobs.client_id = clients.id
      LEFT JOIN 
      job_types ON jobs.job_type_id = job_types.id
      LEFT JOIN 
@@ -1043,8 +1048,14 @@ const getJobByClient = async (job) => {
       ORDER BY
       jobs.id DESC;
      `;
+       try {
         const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id,ExistStaff[0].id,client_id]);
         result = rowsAllocated
+       } catch (error) {
+          console.log("error",error)
+        
+       }
+        
 
       }
       else {
@@ -1052,6 +1063,7 @@ const getJobByClient = async (job) => {
      SELECT 
      jobs.id AS job_id,
      job_types.type AS job_type_name,
+     jobs.status_type AS status_type,
      customer_contact_details.id AS account_manager_officer_id,
      customer_contact_details.first_name AS account_manager_officer_first_name,
      customer_contact_details.last_name AS account_manager_officer_last_name,
@@ -1132,6 +1144,7 @@ const getByJobStaffId = async (job) => {
   SELECT 
   jobs.id AS job_id,
   job_types.type AS job_type_name,
+  jobs.status_type AS status_type,
   customer_contact_details.id AS account_manager_officer_id,
   customer_contact_details.first_name AS account_manager_officer_first_name,
   customer_contact_details.last_name AS account_manager_officer_last_name,

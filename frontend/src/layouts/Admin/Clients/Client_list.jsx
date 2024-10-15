@@ -237,7 +237,7 @@ const ClientList = () => {
           <div>
             <select
               className="form-select form-control"
-              value={row.status == "completed" ? 6 : row.status == "WIP – To Be Reviewed" ? 5 : row.status == "WIP – In queries" ? 4 : row.status == "WIP – Processing" ? 3 : row.status == "WIP – Missing Paperwork" ? 2 : row.status == "To Be Started - Not Yet Allocated Internally" ? 1 : 0}
+              value={row.status_type}
               onChange={(e) => handleStatusChange(e, row)}
             >
               {statusDataAll.map((status) => (

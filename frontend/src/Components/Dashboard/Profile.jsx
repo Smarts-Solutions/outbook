@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { getProfile } from "../../ReduxStore/Slice/Staff/staffSlice";
-import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const dispatch = useDispatch(); 
@@ -62,17 +61,17 @@ const Profile = () => {
                       {getProfileDetails &&
                         getProfileDetails.first_name +
                           " " +
-                          getProfileDetails.last_name}
+                          getProfileDetails.last_name || 'NA'}
                     </li>
                     <li className="mb-3">
                       <i className="fa-regular fa-phone mr-2 text-secondary font-22 align-middle" />{" "}
                       <b>phone </b>:{" "}
-                      {getProfileDetails && getProfileDetails.phone}
+                      {getProfileDetails && getProfileDetails.phone || 'NA'}
                     </li>
                     <li className="mb-3">
                       <i className="fa-regular fa-envelope text-secondary font-22 align-middle mr-2" />{" "}
                       <b>Email </b>:{" "}
-                      {getProfileDetails && getProfileDetails.email}
+                      {getProfileDetails && getProfileDetails.email || 'NA'}
                     </li>
                     <li className="mb-3">
                       <i className="fa-regular fa-power-off text-secondary font-22 align-middle mr-2" />{" "}

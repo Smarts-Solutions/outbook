@@ -97,8 +97,6 @@ const deleteServices = async (ServicesId) => {
 
 
 const updateServices = async (Services) => {
-console.log(Services);
-    
     const { id, ...fields } = Services;
     const name = Services.name
     // Create an array to hold the set clauses

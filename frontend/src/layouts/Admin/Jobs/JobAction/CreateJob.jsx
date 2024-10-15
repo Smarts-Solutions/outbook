@@ -50,10 +50,7 @@ const CreateJob = () => {
   const [taskName, setTaskName] = useState("");
   const [taskNameError, setTaskNameError] = useState("");
   const [jobModalStatus, jobModalSetStatus] = useState(false);
-  const [BudgetedHoursAddTask, setBudgetedHoursAddTask] = useState({
-    hours: "",
-    minutes: "",
-  });
+  const [BudgetedHoursAddTask, setBudgetedHoursAddTask] = useState({   hours: "",  minutes: "", });
   const [BudgetedHoureError, setBudgetedHourError] = useState("");
   const [BudgetedMinuteError, setBudgetedMinuteError] = useState("");
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" });
@@ -448,13 +445,25 @@ const CreateJob = () => {
     }
   };
 
+  const RearrangeEngagementOptionArr = [];
   const filteredData = AllJobData.data?.engagement_model?.[0]
     ? Object.keys(AllJobData.data.engagement_model[0])
-        .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
-        .reduce((obj, key) => {
-          obj[key] = AllJobData.data.engagement_model[0][key];
-          return obj;
-        }, {})
+      .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
+      .reduce((obj, key) => {
+        const keyMapping = {
+          "fte_dedicated_staffing": "Fte Dedicated Staffing",
+          "percentage_model": "Percentage Model",
+          "adhoc_payg_hourly": "Adhoc Payg Hourly",
+          "customised_pricing": "Customised Pricing"
+        };
+        
+        if (keyMapping[key]) {
+          RearrangeEngagementOptionArr.push(keyMapping[key]);
+        }
+        
+        obj[key] = AllJobData.data.engagement_model[0][key];
+        return obj;
+      }, {})
     : {};
 
   const totalHours =
@@ -876,7 +885,7 @@ const CreateJob = () => {
                                                 ? budgeted_hour_totalTime.hours
                                                 : "0"
                                             }
-                                            disabled
+                                             
                                           />
                                           <span
                                             className="input-group-text"
@@ -909,7 +918,7 @@ const CreateJob = () => {
                                                 ? budgeted_hour_totalTime.minutes
                                                 : "0"
                                             }
-                                            disabled
+                                             
                                           />
                                           <span
                                             className="input-group-text"
@@ -1334,9 +1343,9 @@ const CreateJob = () => {
                                       <option value="">
                                         Please Select Engagement Model
                                       </option>
-                                      {Object.keys(filteredData).map((key) => (
+                                      {Object.keys(filteredData).map((key, index) => (
                                         <option key={key} value={key}>
-                                          {key}
+                                         {RearrangeEngagementOptionArr[index]}
                                         </option>
                                       ))}
                                     </select>

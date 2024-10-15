@@ -171,7 +171,7 @@ const createCustomer = async (customer) => {
 
                 for (const detail of contactDetails) {
 
-                    let role = detail.role == ''? 0:detail.role;
+                    let role = detail.role == '' ? 0 : detail.role;
                     let first_name = detail.firstName;
                     let last_name = detail.lastName;
                     let phone_code = detail.phone_code == undefined ? "" : detail.phone_code;
@@ -392,10 +392,66 @@ const createCustomer = async (customer) => {
 const getCustomer = async (customer) => {
     const { staff_id } = customer;
 
-     console.log("staff id",staff_id)
 
-    const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + staff_id + '" LIMIT 1');
-  
+    const QueryRole = `
+  SELECT
+    staffs.id AS id,
+    staffs.role_id AS role_id,
+    roles.role AS role_name
+  FROM
+    staffs
+  JOIN
+    roles ON roles.id = staffs.role_id
+  WHERE
+    staffs.id = ${staff_id}
+  LIMIT 1
+  `
+    const [rows] = await pool.execute(QueryRole);
+
+    // Condition with Admin And SuperAdmin
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+        const query = `
+    SELECT  
+    customers.id AS id,
+    customers.customer_type AS customer_type,
+    customers.staff_id AS staff_id,
+    customers.account_manager_id AS account_manager_id,
+    customers.trading_name AS trading_name,
+    customers.trading_address AS trading_address,
+    customers.vat_registered AS vat_registered,
+    customers.vat_number AS vat_number,
+    customers.website AS website,
+    customers.form_process AS form_process,
+    customers.created_at AS created_at,
+    customers.updated_at AS updated_at,
+    customers.status AS status,
+    staff1.first_name AS staff_firstname, 
+    staff1.last_name AS staff_lastname,
+    staff2.first_name AS account_manager_firstname, 
+    staff2.last_name AS account_manager_lastname,
+    customer_company_information.company_name AS company_name,
+    customer_company_information.company_number AS company_number,
+    CONCAT(
+    'cust_', 
+    SUBSTRING(customers.trading_name, 1, 3), '_',
+    SUBSTRING(customers.customer_code, 1, 15)
+    ) AS customer_code
+FROM 
+    customers
+JOIN 
+    staffs AS staff1 ON customers.staff_id = staff1.id
+JOIN 
+    staffs AS staff2 ON customers.account_manager_id = staff2.id
+LEFT JOIN 
+    customer_company_information ON customers.id = customer_company_information.customer_id   
+ORDER BY 
+    customers.id DESC;
+    `;
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success..', data: result };
+    }
+
+
     let result = []
     if (rows.length > 0) {
         // Allocated to
@@ -453,6 +509,7 @@ ORDER BY
         // Account Manger
         else if (rows[0].role_id == 4) {
 
+
             const query = `
             SELECT  
             customers.id AS id,
@@ -498,10 +555,10 @@ ORDER BY
         ORDER BY 
             customers.id DESC;
             `;
-            const [resultAllocated] = await pool.execute(query, [staff_id,staff_id,staff_id]);
+            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
             result = resultAllocated;
 
-            if (resultAllocated.length === 0) {
+            if (resultAllocated.length > 0) {
                 const query = `
             SELECT  
             customers.id AS id,
@@ -542,8 +599,53 @@ ORDER BY
         ORDER BY 
         customers.id DESC;
             `;
-                const [resultAllocated] = await pool.execute(query, [staff_id, staff_id]);
-                result = resultAllocated;
+                const [resultAllocated2] = await pool.execute(query, [staff_id, staff_id]);
+                result = resultAllocated2;
+            } else {
+
+                const query = `
+                SELECT  
+                customers.id AS id,
+                customers.customer_type AS customer_type,
+                customers.staff_id AS staff_id,
+                customers.account_manager_id AS account_manager_id,
+                customers.trading_name AS trading_name,
+                customers.customer_code AS customer_code,
+                customers.trading_address AS trading_address,
+                customers.vat_registered AS vat_registered,
+                customers.vat_number AS vat_number,
+                customers.website AS website,
+                customers.form_process AS form_process,
+                customers.created_at AS created_at,
+                customers.updated_at AS updated_at,
+                customers.status AS status,
+                staff1.first_name AS staff_firstname, 
+                staff1.last_name AS staff_lastname,
+                staff2.first_name AS account_manager_firstname, 
+                staff2.last_name AS account_manager_lastname,
+                customer_company_information.company_name AS company_name,
+                customer_company_information.company_number AS company_number
+            FROM 
+                customers
+            JOIN 
+                customer_services ON customer_services.customer_id = customers.id
+            JOIN 
+                customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
+            JOIN 
+                staffs AS staff1 ON customers.staff_id = staff1.id
+            JOIN 
+                staffs AS staff2 ON customers.account_manager_id = staff2.id
+            LEFT JOIN 
+                customer_company_information ON customers.id = customer_company_information.customer_id
+            WHERE customer_service_account_managers.account_manager_id = ? OR customers.staff_id= ?
+            GROUP BY 
+            customers.id
+            ORDER BY 
+            customers.id DESC;
+                `;
+                const [resultAllocated3] = await pool.execute(query, [staff_id, staff_id]);
+                result = resultAllocated3;
+
             }
 
         }
@@ -595,7 +697,7 @@ ORDER BY
         ORDER BY 
             customers.id DESC;
             `;
-            const [resultAllocated] = await pool.execute(query, [staff_id,staff_id,staff_id]);
+            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
             result = resultAllocated
 
         }
@@ -2155,7 +2257,7 @@ const customerUpdate = async (customer) => {
 
                 const query3 = `
                 UPDATE customer_contact_details
-                SET contact_person_role_id = ?, first_name = ?, last_name = ?,phone_code = ? ,phone = ?, email = ? ,authorised_signatory_status = ?
+                SET contact_person_role_id = ?, first_name = ?, last_name = ?,phone_code = ? ,phone = ?, email = ? 
                 WHERE customer_id = ? AND id = ?
                `;
 
@@ -2166,27 +2268,26 @@ const customerUpdate = async (customer) => {
                 for (const detail of contactDetails) {
 
                     let contact_id = detail.contact_id;
-                    let customer_contact_person_role_id = detail.customer_contact_person_role_id;
+                    let customer_contact_person_role_id = detail.customer_contact_person_role_id == "" ? 0 : detail.customer_contact_person_role_id;
                     let first_name = detail.first_name;
                     let last_name = detail.last_name;
                     let email = detail.email;
                     let phone_code = detail.phone_code;
                     let phone = detail.phone;
-                    // let residential_address = detail.residential_address;
-                    let authorised_signatory_status = detail.authorised_signatory_status;
+
                     if (contact_id == "" || contact_id == undefined || contact_id == null) {
                         const query4 = `
-                        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email,authorised_signatory_status)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
                         `;
-                        const [result3, err3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, authorised_signatory_status]);
+                        const [result3, err3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone_code, phone, email]);
                         logAdditional = true;
 
 
                     } else {
 
                         arrayInterId.push(contact_id)
-                        const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, authorised_signatory_status, customer_id, contact_id]);
+                        const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, customer_id, contact_id]);
 
                         if (result3.changedRows > 0) {
                             logUpdateRequired = true;
@@ -2253,7 +2354,7 @@ const customerUpdate = async (customer) => {
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
-
+                console.log("err ", err)
                 return { status: false, message: 'Update Error Customer Type 3' };
             }
 
@@ -2264,6 +2365,7 @@ const customerUpdate = async (customer) => {
     //  Page Status 2 Service Part
     else if (pageStatus === "2") {
         const { services, Task } = customer;
+
 
         const [ExistServiceids] = await pool.execute('SELECT service_id  FROM `customer_services` WHERE customer_id =' + customer_id);
         const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
@@ -2277,6 +2379,24 @@ const customerUpdate = async (customer) => {
         let logAdditional = false;
         for (const serVal of services) {
             let service_id = serVal.service_id;
+
+            //checklist submit customer
+            const QueryCustomerAssign = `
+            UPDATE checklists 
+SET is_all_customer = 
+    IF(
+        is_all_customer IS NULL, 
+        JSON_ARRAY(${customer_id}), 
+        IF(
+            JSON_CONTAINS(is_all_customer, JSON_ARRAY(${customer_id}), '$'), 
+            is_all_customer, 
+            JSON_ARRAY_APPEND(is_all_customer, '$', ${customer_id})
+        )
+    ) 
+WHERE service_id = ${service_id} AND customer_id = 0;
+            `
+            const [QueryCustomerAssignData] = await pool.execute(QueryCustomerAssign);
+
             let account_manager_ids = serVal.account_manager_ids;
             arrayInterId.push(service_id)
             try {
@@ -2373,6 +2493,29 @@ const customerUpdate = async (customer) => {
         if (deleteIdArray.length > 0) {
             logUpdateRequired = true
             for (const id of deleteIdArray) {
+
+        
+              const QueryCustomerRemoveChecklist1 = `SELECT is_all_customer FROM checklists WHERE service_id = ${id} AND customer_id = 0`;
+
+              const [QueryCustomerRemoveChecklistData] = await pool.execute(QueryCustomerRemoveChecklist1);
+                
+            if(QueryCustomerRemoveChecklistData != undefined){
+             if (QueryCustomerRemoveChecklistData.length > 0 && QueryCustomerRemoveChecklistData[0].is_all_customer != null) {
+                   
+                    const updatValue = JSON.parse(QueryCustomerRemoveChecklistData[0].is_all_customer).filter(item => item !== customer_id)
+                    const QueryCustomerRemoveChecklist = `
+                    UPDATE checklists
+                    SET is_all_customer = '${JSON.stringify(updatValue)}'
+                    WHERE service_id = ${id} AND customer_id = 0;
+                    `
+                    try {
+                        const [QueryCustomerRemoveChecklistData1] = await pool.execute(QueryCustomerRemoveChecklist);
+                    } catch (error) {
+                        console.log("error ", error)  
+                    }
+                    
+             }
+            }
 
                 const query = `
             SELECT id 
@@ -3076,41 +3219,47 @@ const customerStatusUpdate = async (customer) => {
 }
 
 const getcustomerschecklist = async (customer) => {
-  try {
-    const { customer_id, service_id, job_type_id } = customer;
-    const query = `SELECT c.*, ct.* FROM checklists c JOIN checklist_tasks ct ON c.id = ct.checklist_id   WHERE c.service_id = ? AND c.job_type_id = ?;`;
-    // c.customer_id = ? AND 
-    const [result] = await pool.execute(query, [
-      // customer_id,
-      service_id,
-      job_type_id,
-    ]);
+    try {
+        const { customer_id, service_id, job_type_id } = customer;
+        const query = `SELECT c.*, ct.* 
+    FROM checklists c 
+    JOIN checklist_tasks ct 
+    ON c.id = ct.checklist_id 
+    WHERE c.service_id = ? 
+    AND c.job_type_id = ? 
+    AND (c.customer_id = ? OR c.customer_id = 0);`;
 
-    console.log("result", result);
+        const [result] = await pool.execute(query, [
+            service_id,
+            job_type_id,
+            customer_id,
+        ]);
+
+        console.log("result", result);
 
 
-    if (result.length === 0) {
-      return [];
+        if (result.length === 0) {
+            return [];
+        }
+        const formattedResults = result.map((item) => ({
+            checklistName: item.check_list_name,
+            JobTypeId: item.job_type_id,
+            Task: [
+                {
+                    TaskName: item.task_name,
+                    BudgetHour: item.budgeted_hour,
+                },
+            ],
+            serviceId: item.service_id,
+            id: item.id,
+        }));
+
+
+        return formattedResults
+
+    } catch (err) {
+        console.log(err);
     }
-    const formattedResults = result.map((item) => ({
-      checklistName: item.check_list_name,
-      JobTypeId: item.job_type_id,
-      Task: [
-        {
-          TaskName: item.task_name,
-          BudgetHour: item.budgeted_hour,
-        },
-      ],
-      serviceId: item.service_id,
-      id: item.id,
-    }));
-    
-
-    return formattedResults
-
-  } catch (err) {
-    console.log(err);
-  }
 };
 
 module.exports = {
@@ -3124,6 +3273,7 @@ module.exports = {
     updateProcessCustomerFileDelete,
     getSingleCustomer,
     customerUpdate,
-    customerStatusUpdate
+    customerStatusUpdate,
+    getcustomerschecklist
 
 };
