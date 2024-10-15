@@ -12,12 +12,11 @@ import {
   getList,
   InternalApi
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
-
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import Modal from "../../../Components/ExtraComponents/Modals/Modal";
 import { useDispatch, useSelector } from "react-redux";
 import sweatalert from "sweetalert2";
-
+import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 const Setting = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -26,10 +25,12 @@ const Setting = () => {
   const [showSettingInsertTab, setShowSettingInsertTab] = useState(true);
   const [showSettingUpdateTab, setShowSettingUpdateTab] = useState(true);
   const [showSettingDeleteTab, setSettingDeleteTab] = useState(true);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewData, setViewData] = useState({});
   const accessData = useSelector(
     (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data
   );
- 
+
   useEffect(() => {
     if (
       accessData &&
@@ -440,6 +441,28 @@ const Setting = () => {
         return;
       });
   };
+
+
+  const getTaskData = async (row) => {
+    const req = { action: "getById", checklist_id: row.checklists_id};
+    const data = { req: req, authToken: token };
+    await dispatch(getList(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setViewData(response.data);
+        } else {
+          setViewData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  }
+
+  console.log("viewData", viewData);  
+ 
+
 
   useEffect(() => {
     fetchApiData(tabStatus.current);
@@ -877,7 +900,7 @@ const Setting = () => {
       name: "Source Name",
       selector: (row) => row.name,
       sortable: true,
-    width:'60%'
+      width: '60%'
     },
     {
       name: "Status",
@@ -1002,6 +1025,20 @@ const Setting = () => {
     //   allowOverflow: true,
     //   button: true,
     // },
+
+    {
+      name: "Task",
+      cell: (row) => (
+        <div>
+          <button className="view-icon" onClick={() => { setShowViewModal(true); getTaskData(row) }}>
+            <i className="ti-eye" />
+          </button>
+        </div>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+    },
   ];
 
   const InternalColumns = [
@@ -1082,7 +1119,7 @@ const Setting = () => {
 
 
   };
-  
+
   const handleAdd = (e, tabStatus) => {
     if (tabStatus === "1") {
       setModalData({
@@ -2023,6 +2060,38 @@ const Setting = () => {
                   </>
               }
             />
+          )}
+
+
+          {console.log("viewData", viewData)}
+          {showViewModal && (
+            <CommonModal
+              isOpen={showViewModal}
+              backdrop="static"
+              size="md"
+              title="View Task"
+              hideBtn={true}
+              handleClose={() => {
+                setShowViewModal(false);
+              }}
+              Submit_Function={() => setShowViewModal(false)}
+            >
+              <div className="av">
+                <div className="row">
+                  <div className="col-md-6">
+                    <label htmlFor="customername-field" className="form-label">
+                      Check List Name
+                    </label>
+                  </div>
+                  <div className="col-md-6">
+                    <span className="text-muted">{viewData && viewData?.check_list_name}</span>
+                  </div>
+                </div>
+
+              </div>
+
+
+            </CommonModal>
           )}
         </>
       </div>

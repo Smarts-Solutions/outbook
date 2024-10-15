@@ -78,7 +78,7 @@ const Customer = () => {
             
           }}
         >
-          {role === "ADMIN" || role === "SUPERADMIN" ? (
+          {(role === "ADMIN" || role === "SUPERADMIN") && row.status==1 ? (
             <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -87,7 +87,7 @@ const Customer = () => {
               {row.trading_name}
             </a>
           ) : (
-            getAccessData.client == 1 ? <a
+            getAccessData.client == 1 && row.status==1 ? <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
               title={row.trading_name}
@@ -209,37 +209,36 @@ const Customer = () => {
       name: "Actions",
       cell: (row) => {
         const hasUpdateAccess = getAccessData.update === 1;
-        const hasDeleteAccess = getAccessData.delete === 1;
-
+        const hasDeleteAccess = getAccessData.delete === 1; 
         return (
           <div style={{ textAlign: "center" }}>
-            {role === "ADMIN" || role === "SUPERADMIN" ? (
+            {(role === "ADMIN" || role === "SUPERADMIN") && row.status==1 ? (
               <>
                 <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
                   <i className="ti-pencil text-primary" />
                 </button>
-                <button
+                {/* <button
                   className="delete-icon "
                   onClick={() => handleDelete(row)}
                 >
                   <i className="ti-trash text-danger " />
-                </button>
+                </button> */}
               </>
             ) : (
               <>
-                {hasUpdateAccess && (
+                {hasUpdateAccess && row.status==1 &&  (
                   <button className="edit-icon " onClick={() => handleEdit(row)}>
                     <i className="ti-pencil text-primary" />
                   </button>
                 )}
-                {hasDeleteAccess && (
+                {/* {hasDeleteAccess && row.status==1 &&  (
                   <button
                     className="delete-icon"
                     onClick={() => handleDelete(row)}
                   >
                     <i className="ti-trash text-danger" />
                   </button>
-                )}
+                )} */}
               </>
             )}
           </div>
