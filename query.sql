@@ -556,7 +556,7 @@ CREATE TABLE jobs (
         id INT AUTO_INCREMENT PRIMARY KEY,
         job_id INT NOT NULL,
         client_id INT NOT NULL,
-        checklist_id INT NOT NULL,
+        -- checklist_id INT NOT NULL,
         task_id INT NOT NULL,
         task_status INT NOT NULL,
         time TIME DEFAULT NULL,
@@ -567,7 +567,7 @@ CREATE TABLE jobs (
         FOREIGN KEY (checklist_id) REFERENCES checklists(id),
         FOREIGN KEY (task_id) REFERENCES task(id),
         FOREIGN KEY (task_status) REFERENCES master_status(id),
-        UNIQUE (job_id,client_id,checklist_id,task_id)
+        UNIQUE (job_id,client_id,task_id)
     );
     
      /*--TABLE:- CHECKLIST  */  

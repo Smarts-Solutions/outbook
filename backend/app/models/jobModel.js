@@ -120,10 +120,6 @@ const getAddJobData = async (job) => {
       }));
     }
 
-
-
-
-
     // Allocated
     const queryAllocated = `
      SELECT  
@@ -259,7 +255,6 @@ const getAddJobData = async (job) => {
 
 const jobAdd = async (job) => {
 
-
   const {
     staffCreatedId,
     account_manager_id,
@@ -307,7 +302,7 @@ const jobAdd = async (job) => {
     invoice_hours,
     invoice_remark
   } = job;
-
+ 
 
   // Set Status type
   let status_type = 0
@@ -334,10 +329,6 @@ const jobAdd = async (job) => {
   
   try {
 
-
-    
-  console.log("job   ii4",  client_id)
-
     const query = `
 INSERT INTO jobs (staff_created_id,job_id,account_manager_id,customer_id,client_id,client_job_code,customer_contact_details_id, service_id,job_type_id, budgeted_hours,reviewer, allocated_to,allocated_on,date_received_on,year_end,total_preparation_time, review_time, feedback_incorporation_time,total_time, engagement_model, expected_delivery_date,due_on,submission_deadline, customer_deadline_date, sla_deadline_date,internal_deadline_date, filing_Companies_required, filing_Companies_date,filing_hmrc_required, filing_hmrc_date, opening_balance_required,opening_balance_date, number_of_transaction, number_of_balance_items,turnover, number_of_employees, vat_reconciliation, bookkeeping,processing_type, invoiced, currency, invoice_value, invoice_date,invoice_hours, invoice_remark,status_type)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -359,13 +350,13 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
         }
       );
 
-
-
+  
       if (tasks.task.length > 0) {
         const job_id = result.insertId;
-        const checklist_id = tasks.checklist_id;
+        //const checklist_id = tasks.checklist_id;
         for (const tsk of tasks.task) {
 
+          let checklist_id = tsk.checklist_id;
           let task_id = tsk.task_id;
           let task_name = tsk.task_name;
           let budgeted_hour = tsk.budgeted_hour;
@@ -376,26 +367,18 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
                     SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?
                 `;
             const [existing] = await pool.execute(checkQuery, [task_name, service_id, job_type_id]);
+        
             if (existing.length === 0) {
               const query = `INSERT INTO task (name,service_id,job_type_id) VALUES (?, ?, ?) `;
               const [result] = await pool.execute(query, [task_name, service_id, job_type_id]);
               if (result.insertId > 0) {
                 let task_id_new = result.insertId;
-                const checklistAddTasksQuery = `
-               INSERT INTO checklist_tasks (checklist_id,task_id,task_name,budgeted_hour)
+                 const query3 = `
+               INSERT INTO client_job_task (job_id,client_id,task_id,time)
                VALUES (?, ?, ?, ?)
                `;
-                const [result2] = await pool.execute(checklistAddTasksQuery, [checklist_id, task_id_new, task_name, budgeted_hour]);
-
-                if (result2.insertId > 0) {
-                  const query3 = `
-               INSERT INTO client_job_task (job_id,client_id,checklist_id,task_id)
-               VALUES (?, ?, ?, ?)
-               `;
-                  const [result3] = await pool.execute(query3, [job_id, client_id, checklist_id, task_id_new]);
-                }
-
-
+                  const [result3] = await pool.execute(query3, [job_id, client_id, task_id_new,budgeted_hour]);
+                
               }
 
 
@@ -406,10 +389,10 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
           else {
 
             const query = `
-               INSERT INTO client_job_task (job_id,client_id,checklist_id,task_id)
+               INSERT INTO client_job_task (job_id,client_id,task_id,time)
                VALUES (?, ?, ?, ?)
                `;
-            const [result] = await pool.execute(query, [job_id, client_id, checklist_id, task_id]);
+            const [result] = await pool.execute(query, [job_id, client_id, task_id,budgeted_hour]);
           }
         }
       }
@@ -1278,8 +1261,7 @@ const getJobById = async (job) => {
      jobs.invoice_hours AS invoice_hours,
      jobs.invoice_remark AS invoice_remark,
      jobs.status_type AS status_type,
-     client_job_task.checklist_id AS checklist_id,
-     checklist_tasks.budgeted_hour AS task_budgeted_hour,
+     client_job_task.time AS task_budgeted_hour,
      task.id AS task_id,
      task.name AS task_name
      FROM 
@@ -1306,13 +1288,12 @@ const getJobById = async (job) => {
      client_job_task ON client_job_task.job_id = jobs.id
      LEFT JOIN
      task ON client_job_task.task_id = task.id
-     LEFT JOIN
-     checklist_tasks ON checklist_tasks.checklist_id = client_job_task.checklist_id AND
-     checklist_tasks.checklist_id = client_job_task.checklist_id AND checklist_tasks.task_id = client_job_task.task_id
      WHERE
       jobs.id = ? 
      `;
-
+     
+    //  checklist_tasks ON checklist_tasks.checklist_id = client_job_task.checklist_id AND
+    //  checklist_tasks.checklist_id = client_job_task.checklist_id AND checklist_tasks.task_id = client_job_task.task_id
 
     const [rows] = await pool.execute(query, [job_id]);
 
@@ -1457,7 +1438,8 @@ const jobUpdate = async (job) => {
     invoice_remark,
     status_type
   } = job;
-
+ 
+  
 
   const ExistJobQuery = `
  SELECT 
@@ -1572,32 +1554,23 @@ const jobUpdate = async (job) => {
 
         // Get existing task IDs for the checklist
         const getExistingTasksQuery = `
-            SELECT task_id FROM client_job_task WHERE checklist_id = ?
+            SELECT task_id FROM client_job_task WHERE job_id = ?
           `;
-        const [existingTasks] = await pool.execute(getExistingTasksQuery, [checklist_id]);
+        const [existingTasks] = await pool.execute(getExistingTasksQuery, [job_id]);
         const existingTaskIds = existingTasks.map(task => task.task_id);
-
-
-
-
         // Find task IDs that need to be deleted
         const tasksToDelete = existingTaskIds.filter(id => !providedTaskIds.includes(id));
-
-
-
         if (tasksToDelete.length > 0) {
           // const deleteQuery = `
           //     DELETE FROM client_job_task WHERE job_id = ? checklist_id = ? AND task_id IN (?)
           //   `;
           // await pool.execute(deleteQuery, [job_id, checklist_id, tasksToDelete]);
-
           const deleteQuery = `
     DELETE FROM client_job_task 
     WHERE job_id = ? AND client_id = ? AND task_id IN (${tasksToDelete.map(() => '?').join(',')})
 `;
           await pool.execute(deleteQuery, [job_id, client_id, ...tasksToDelete]);
         }
-
         // Insert or update tasks
         for (const tsk of tasks.task) {
           let task_id = tsk.task_id;
@@ -1619,27 +1592,21 @@ const jobUpdate = async (job) => {
 
               if (result.insertId > 0) {
                 let task_id_new = result.insertId;
-                const checklistAddTasksQuery = `
-                    INSERT INTO checklist_tasks (checklist_id, task_id, task_name, budgeted_hour)
-                    VALUES (?, ?, ?, ?)
-                  `;
-                await pool.execute(checklistAddTasksQuery, [checklist_id, task_id_new, task_name, budgeted_hour]);
-
                 const query3 = `
-                    INSERT INTO client_job_task (job_id, client_id, checklist_id, task_id)
+                    INSERT INTO client_job_task (job_id, client_id, task_id,time)
                     VALUES (?, ?, ?, ?)
                   `;
-                await pool.execute(query3, [job_id, client_id, checklist_id, task_id_new]);
+                await pool.execute(query3, [job_id, client_id, task_id_new,budgeted_hour]);
               }
             }
           } else {
             // Update existing task or add to the job
             const query = `
-                INSERT INTO client_job_task (job_id, client_id, checklist_id, task_id)
+                INSERT INTO client_job_task (job_id, client_id, task_id,time)
                 VALUES (?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE task_id = VALUES(task_id), checklist_id = VALUES(checklist_id);
+                ON DUPLICATE KEY UPDATE task_id = VALUES(task_id), job_id = VALUES(job_id);
               `;
-            await pool.execute(query, [job_id, client_id, checklist_id, task_id]);
+            await pool.execute(query, [job_id, client_id, task_id,budgeted_hour]);
           }
         }
       }

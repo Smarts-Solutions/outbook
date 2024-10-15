@@ -2072,7 +2072,7 @@ const CreateJob = () => {
                                     <div className="col-sm-auto">
                                       <button
                                         className="btn btn-info float-end "
-                                        disabled={getChecklistId == ""}
+                                        // disabled={getChecklistId == ""}
                                         onClick={() => setShowAddJobModal(true)}
                                       >
                                         <i className="fa fa-plus pe-1" /> Add
