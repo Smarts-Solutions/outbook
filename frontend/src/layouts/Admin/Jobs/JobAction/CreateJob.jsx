@@ -159,17 +159,32 @@ const CreateJob = () => {
       await dispatch(GET_ALL_CHECKLIST(data))
         .unwrap()
         .then(async (response) => {
+          console.log("response -",response)
+          // if (response.status) {
+          //   setAllChecklist({
+          //     loading: true,
+          //     data: response.data,
+          //   });
+          // } else {
+          //   setAllChecklist({
+          //     loading: true,
+          //     data: [],
+          //   });
+          // }
+
           if (response.status) {
-            setAllChecklist({
+            setAllChecklistData({
               loading: true,
-              data: response.data,
+              data: response.data
             });
           } else {
-            setAllChecklist({
+            setAllChecklistData({
               loading: true,
               data: [],
             });
           }
+
+
         })
         .catch((error) => {
           return;
@@ -2036,7 +2051,7 @@ const CreateJob = () => {
                                   style={{ display: "flex" }}
                                 >
                                   <div className="col-lg-6">
-                                    <select
+                                    {/* <select
                                       id="search-select"
                                       className="form-select mb-3"
                                       aria-label="Default select example"
@@ -2058,7 +2073,7 @@ const CreateJob = () => {
                                             {checklist.check_list_name}
                                           </option>
                                         ))}
-                                    </select>
+                                    </select> */}
                                   </div>
                                   <div className="col-lg-6">
                                     <div className="col-sm-auto">
