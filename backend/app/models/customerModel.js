@@ -3092,7 +3092,6 @@ const getcustomerschecklist = async (customer) => {
         customer_id,
     ]);
 
-    console.log("result", result);
 
 
     if (result.length === 0) {
@@ -3109,6 +3108,7 @@ const getcustomerschecklist = async (customer) => {
       ],
       serviceId: item.service_id,
       id: item.id,
+      checklist_id: item.checklist_id,
     }));
     
 
