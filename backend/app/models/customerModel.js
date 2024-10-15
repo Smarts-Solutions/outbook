@@ -2499,11 +2499,10 @@ WHERE service_id = ${service_id} AND customer_id = 0;
 
               const [QueryCustomerRemoveChecklistData] = await pool.execute(QueryCustomerRemoveChecklist1);
                 
-              console.log("QueryCustomerRemoveChecklistData ",QueryCustomerRemoveChecklistData)
-               
+            if(QueryCustomerRemoveChecklistData != undefined){
              if (QueryCustomerRemoveChecklistData.length > 0 && QueryCustomerRemoveChecklistData[0].is_all_customer != null) {
                    
-                    const updatValue = QueryCustomerRemoveChecklistData[0].is_all_customer.filter(item => item !== customer_id)
+                    const updatValue = JSON.parse(QueryCustomerRemoveChecklistData[0].is_all_customer).filter(item => item !== customer_id)
                     const QueryCustomerRemoveChecklist = `
                     UPDATE checklists
                     SET is_all_customer = '${JSON.stringify(updatValue)}'
@@ -2515,11 +2514,8 @@ WHERE service_id = ${service_id} AND customer_id = 0;
                         console.log("error ", error)  
                     }
                     
-                }
-
-
-
-
+             }
+            }
 
                 const query = `
             SELECT id 
