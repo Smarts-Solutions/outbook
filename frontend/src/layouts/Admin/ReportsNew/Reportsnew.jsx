@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Datatable from '../../../Components/ExtraComponents/Datatable';
 import ExpandableTable from '../../../Components/ExtraComponents/ExpandableTable';
 import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
+import TimesheetReport from './TimesheetReport';
 
 
 const data = [
@@ -69,55 +70,31 @@ function Reportsnew() {
     }));
   };
 
-  return (
-    <div className='container-fluid'>
-      <div className="row ">
-        <div className="col-sm-12">
-          <div className="page-title-box">
-            <div className="row align-items-start">
-              <div className="col-md-9">
-                <>
-                  <ul className="nav nav-pills rounded-tabs" role="tablist">
-                    {
-                      tabs.map((tab, index) => (
-                        <li className="nav-item" role="presentation">
-                          <button
-                            className={`nav-link ${index === 1 ? 'active' : ''}`}
-                            id={tab.value}
-                            data-bs-toggle="pill"
-                            data-bs-target={`#${tab.value}`}
-                            type="button"
-                            role="tab"
-                            aria-controls={tab.value}
-                            aria-selected={index === 1 ? 'true' : 'false'}
-                          >
-                            <i className={tab.icon}></i>
-                            {tab.name}
-                          </button>
-                        </li>
-                      ))
-                    }
-                  </ul>
-                </>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="tab-content" id="pills-tabContent">
-        <div className="tab-pane fade show active" id="job-status" role="tabpanel" aria-labelledby="job-status-tab"  >
+  const [activeTab, setActiveTab] = useState(tabs[0].value);
+
+  const handleTabClick = (tabValue) => {
+    setActiveTab(tabValue);
+  };
+
+  const getTabContent = () => {
+    switch (activeTab) {
+      case 'timesheetReport':
+        return <div>
+          <TimesheetReport />
+        </div>;
+      case 'jobStatusReport':
+        return (
           <div className='report-data'>
             <div className='datatable-wrapper mt-minus'>
               <div className="card-body">
                 <div id="customerList">
                   <div className="row">
-
-                    <div className="table-responsive table-card mt-4 mb-1">
+                    <div className="table-responsive report-table table-card mt-4 mb-1">
                       <div className='tab-title mb-3'>
                         <h3>Job Status Report</h3>
                       </div>
                       <table className="table align-middle table-nowrap" id="customerTable">
-                        <thead className="table-light">
+                        <thead className="table-light table-light table-head-blue">
                           <tr>
                             <th>Team Member Name</th>
                             <th>Task1</th>
@@ -133,8 +110,8 @@ function Reportsnew() {
                         <tbody className="list form-check-all">
                           {
                             data.map((item, index) => (
-                              <>
-                                <tr className="tabel_new" key={`teamMember${index + 1}`}>
+                              <React.Fragment key={`teamMember${index + 1}`}>
+                                <tr className="tabel_new">
                                   <td className="d-flex">
                                     <span
                                       onClick={() => toggleRow(`teamMember${index + 1}`)}
@@ -156,7 +133,6 @@ function Reportsnew() {
 
                                 {expandedRows[`teamMember${index + 1}`] && (
                                   <>
-                                    {/* Customer row */}
                                     <tr key="customer1">
                                       <td className="d-flex ms-2">
                                         <span
@@ -177,7 +153,6 @@ function Reportsnew() {
                                       <td>23</td>
                                     </tr>
 
-                                    {/* Clients of Customer 1 */}
                                     {expandedRows.customer1 && (
                                       <>
                                         <tr key="client1">
@@ -200,13 +175,12 @@ function Reportsnew() {
                                           <td>23</td>
                                         </tr>
 
-                                        {/* Jobs of Client 1 */}
                                         {expandedRows.client1 && (
                                           <>
                                             <tr key="job1 mx-5">
                                               <td className="d-flex ms-5">
-                                              Job 1</td>
-                                              
+                                                Job 1
+                                              </td>
                                               <td>4</td>
                                               <td>2</td>
                                               <td>2</td>
@@ -217,10 +191,9 @@ function Reportsnew() {
                                               <td>23</td>
                                             </tr>
                                             <tr key="job2">
-                                              <td className="d-flex ms-5" >
-                                                
-                                                Job 2 
-                                                </td>
+                                              <td className="d-flex ms-5">
+                                                Job 2
+                                              </td>
                                               <td>3</td>
                                               <td>2</td>
                                               <td>8</td>
@@ -236,11 +209,9 @@ function Reportsnew() {
                                     )}
                                   </>
                                 )}
-                              </>
+                              </React.Fragment>
                             ))
                           }
-
-
                         </tbody>
                       </table>
                     </div>
@@ -256,7 +227,7 @@ function Reportsnew() {
                           <li className="page-item disabled">
                             <a href="#" className="page-link">
                               <b>
-                                <i className="mdi mdi-chevron-left" />
+                                <i className="fa fa-angle-left" />
                               </b>
                             </a>
                           </li>
@@ -273,7 +244,7 @@ function Reportsnew() {
                           <li className="page-item">
                             <a href="#" className="page-link">
                               <b>
-                                <i className="mdi mdi-chevron-right" />
+                                <i className="fa fa-angle-right" />
                               </b>
                             </a>
                           </li>
@@ -285,7 +256,62 @@ function Reportsnew() {
               </div>
             </div>
           </div>
+        );
+      case 'jobsReceivedSentReports':
+        return <div>Jobs Received Sent Reports Content</div>;
+      case 'jobSummaryReport':
+        return <div>Job Summary Report Content</div>;
+      case 'jobsPendingReport':
+        return <div>Jobs Pending Report Content</div>;
+      case 'dueByReport':
+        return <div>Due By Report Content</div>;
+      case 'teamPerformanceReport':
+        return <div>Team Performance Report by Month Content</div>;
+      case 'averageTATReport':
+        return <div>Average TAT Report Content</div>;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className='container-fluid'>
+      <div className="row ">
+        <div className="col-sm-12">
+          <div className="page-title-box">
+            <div className="row align-items-start">
+              <div className="col-md-9">
+                <>
+                  <ul className="nav nav-pills rounded-tabs" role="tablist">
+                    {
+                      tabs.map((tab, index) => (
+                        <li className="nav-item" role="presentation" key={tab.value}>
+                          <button
+                            className={`nav-link ${activeTab === tab.value ? 'active' : ''}`}
+                            id={tab.value}
+                            data-bs-toggle="pill"
+                            data-bs-target={`#${tab.value}`}
+                            type="button"
+                            role="tab"
+                            aria-controls={tab.value}
+                            aria-selected={activeTab === tab.value ? 'true' : 'false'}
+                            onClick={() => handleTabClick(tab.value)}
+                          >
+                            <i className={tab.icon}></i>
+                            {tab.name}
+                          </button>
+                        </li>
+                      ))
+                    }
+                  </ul>
+                </>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+      <div className="tab-content" id="pills-tabContent">
+        {getTabContent()}
       </div>
       <CommanModal
         isOpen={filter}
@@ -297,415 +323,9 @@ function Reportsnew() {
         btn_name="Save"
         handleClose={() => setFilter(false)}
       >
-
-        <div className="row">
-          <div className="accordion" id="default-accordion-example">
-            <div className="accordion-item mt-2">
-              <h2 className="accordion-header" id="headingOne">
-                <button
-                  className="accordion-button "
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#collapseOne"
-                  aria-expanded="true"
-                  aria-controls="collapseOne"
-                >
-                  Date Range
-                </button>
-              </h2>
-              <div
-                id="collapseOne"
-                className="accordion-collapse collapsed"
-                aria-labelledby="headingOne"
-                data-bs-parent="#default-accordion-example"
-                style={{}}
-              >
-                <div className="accordion-body">
-                  <div className="row">
-                    <div className="col-md-6">
-                      <div className="row">
-                        <div className="col-md-10">
-                          <div className="row">
-                            <div className="mb-3">
-                              <div className="form-check form-check-outline form-check-dark">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="formCheck"
-                                />
-                                <label
-                                  className="form-check-label new_checkbox"
-                                  htmlFor="formCheck"
-                                >
-                                  This Week
-                                </label>
-                              </div>
-                            </div>
-                            <div className="mb-3">
-                              <div className="form-check form-check-outline form-check-dark">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="formCheck"
-                                />
-                                <label
-                                  className="form-check-label new_checkbox"
-                                  htmlFor="formCheck"
-                                >
-                                  Last Week
-                                </label>
-                              </div>
-                            </div>
-                            <div className="mb-3">
-                              <div className="form-check form-check-outline form-check-dark">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="formCheck"
-                                />
-                                <label
-                                  className="form-check-label new_checkbox"
-                                  htmlFor="formCheck"
-                                >
-                                  This Month
-                                </label>
-                              </div>
-                            </div>
-                            <div className="mb-3">
-                              <div className="form-check form-check-outline form-check-dark">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="formCheck"
-                                />
-                                <label
-                                  className="form-check-label new_checkbox"
-                                  htmlFor="formCheck"
-                                >
-                                  Last Month
-                                </label>
-                              </div>
-                            </div>
-                            <div className="mb-3">
-                              <div className="form-check form-check-outline form-check-dark">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="formCheck"
-                                />
-                                <label
-                                  className="form-check-label new_checkbox"
-                                  htmlFor="formCheck"
-                                >
-                                  This Quarter
-                                </label>
-                              </div>
-                            </div>
-                            <div className="mb-3">
-                              <div className="form-check form-check-outline form-check-dark">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="formCheck"
-                                />
-                                <label
-                                  className="form-check-label new_checkbox"
-                                  htmlFor="formCheck"
-                                >
-                                  Last Quarter
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-md-6">
-                      <div className="row">
-                        <div className="col-md-10">
-                          <div className="row">
-                            <div className="mb-3">
-                              <div className="form-check form-check-outline form-check-dark">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="formCheck"
-                                />
-                                <label
-                                  className="form-check-label new_checkbox"
-                                  htmlFor="formCheck"
-                                >
-                                  This 6 Months
-                                </label>
-                              </div>
-                            </div>
-                            <div className="mb-3">
-                              <div className="form-check form-check-outline form-check-dark">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="formCheck"
-                                />
-                                <label
-                                  className="form-check-label new_checkbox"
-                                  htmlFor="formCheck"
-                                >
-                                  Last 6 Months
-                                </label>
-                              </div>
-                            </div>
-                            <div className="mb-3">
-                              <div className="form-check form-check-outline form-check-dark">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="formCheck"
-                                />
-                                <label
-                                  className="form-check-label new_checkbox"
-                                  htmlFor="formCheck"
-                                >
-                                  This Year
-                                </label>
-                              </div>
-                            </div>
-                            <div className="mb-3">
-                              <div className="form-check form-check-outline form-check-dark">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="formCheck"
-                                />
-                                <label
-                                  className="form-check-label new_checkbox"
-                                  htmlFor="formCheck"
-                                >
-                                  Last Year
-                                </label>
-                              </div>
-                            </div>
-                            <div className="mb-3">
-                              <div className="form-check form-check-outline form-check-dark">
-                                <input
-                                  className="form-check-input "
-                                  type="checkbox"
-                                  id="customdate"
-                                />
-                                <label
-                                  className="form-check-label new_checkbox"
-                                  htmlFor="customdate"
-                                >
-                                  Custom Date Range
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="accordion-item mt-2">
-              <h2 className="accordion-header" id="headingTwo">
-                <button
-                  className="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#collapseTwo"
-                  aria-expanded="true"
-                  aria-controls="collapseTwo"
-                >
-                  Job Type
-                </button>
-              </h2>
-              <div
-                id="collapseTwo"
-                className="accordion-collapse collapse"
-                aria-labelledby="headingTwo"
-                data-bs-parent="#default-accordion-example"
-                style={{}}
-              >
-                <div className="accordion-body">
-                  <div className="row">
-                    <div className="col-md-6">
-                      <div className="row">
-                        <div className="col-md-10">
-                          <div className="row">
-                            <div className="mb-3">
-                              <div className="form-check form-check-outline form-check-dark">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="formCheck"
-                                  defaultChecked=""
-                                />
-                                <label
-                                  className="form-check-label new_checkbox"
-                                  htmlFor="formCheck"
-                                >
-                                  All
-                                </label>
-                              </div>
-                            </div>
-                            <div className="mb-3">
-                              <div className="form-check form-check-outline form-check-dark">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="formCheck"
-                                  defaultChecked=""
-                                />
-                                <label
-                                  className="form-check-label new_checkbox"
-                                  htmlFor="formCheck"
-                                >
-                                  Year End
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="accordion-item mt-2">
-              <h2 className="accordion-header" id="headingFour">
-                <button
-                  className="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#collapseFour"
-                  aria-expanded="true"
-                  aria-controls="collapseFour"
-                >
-                  Service Type
-                </button>
-              </h2>
-              <div
-                id="collapseFour"
-                className="accordion-collapse collapse"
-                aria-labelledby="headingFour"
-                data-bs-parent="#default-accordion-example"
-                style={{}}
-              >
-                <div className="accordion-body">
-                  <div className="row">
-                    <div className="col-md-6">
-                      <div className="row">
-                        <div className="col-md-10">
-                          <div className="row">
-                            <div className="mb-3">
-                              <div className="form-check form-check-outline form-check-dark">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="formCheck"
-                                  defaultChecked=""
-                                />
-                                <label
-                                  className="form-check-label new_checkbox"
-                                  htmlFor="formCheck"
-                                >
-                                  All
-                                </label>
-                              </div>
-                            </div>
-                            <div className="mb-3">
-                              <div className="form-check form-check-outline form-check-dark">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="formCheck"
-                                  defaultChecked=""
-                                />
-                                <label
-                                  className="form-check-label new_checkbox"
-                                  htmlFor="formCheck"
-                                >
-                                  LTD
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-6">
-            <div className="mb-3 mt-3">
-              <label htmlFor="firstNameinput" className="form-label">
-                Account Manager
-              </label>
-              <div>
-                <datalist id="suggestions">
-                  <option>Ajeet Agarwal</option>
-                  <option>Hemant D</option>
-                </datalist>
-                <input
-                  type="text"
-                  placeholder="Search Account Manager"
-                  className="form-control"
-                  autoComplete="on"
-                  list="suggestions"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-6">
-            <div className="mb-3 mt-3">
-              <label htmlFor="firstNameinput" className="form-label">
-                Customer
-              </label>
-              <div>
-                <datalist id="suggestions1">
-                  <option>Outbooks Outsourcing PVT LTD</option>
-                  <option>NSGC LTD</option>
-                </datalist>
-                <input
-                  type="text"
-                  placeholder="Search Customer"
-                  className="form-control"
-                  autoComplete="on"
-                  list="suggestions1"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-6">
-            <div className="mb-3 mt-3">
-              <label htmlFor="firstNameinput" className="form-label">
-                Processor
-              </label>
-              <div>
-                <datalist id="suggestions2">
-                  <option>Harsh Mehta </option>
-                  <option>Devang Agarwal</option>
-                </datalist>
-                <input
-                  type="text"
-                  placeholder="Search Processor"
-                  className="form-control"
-                  autoComplete="on"
-                  list="suggestions2"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </CommanModal >
+        {/* Modal content here */}
+      </CommanModal>
     </div>
-
   );
 }
 
