@@ -229,13 +229,24 @@ const EditJob = () => {
     await dispatch(GET_ALL_CHECKLIST(data))
       .unwrap()
       .then(async (response) => {
+        // if (response.status) {
+        //   setAllChecklist({
+        //     loading: true,
+        //     data: response.data,
+        //   });
+        // } else {
+        //   setAllChecklist({
+        //     loading: true,
+        //     data: [],
+        //   });
+        // }
         if (response.status) {
-          setAllChecklist({
+          setAllChecklistData({
             loading: true,
-            data: response.data,
+            data: response.data
           });
         } else {
-          setAllChecklist({
+          setAllChecklistData({
             loading: true,
             data: [],
           });
@@ -2133,7 +2144,7 @@ const EditJob = () => {
                                           style={{ display: "flex" }}
                                         >
                                           <div className="col-lg-6">
-                                            <select
+                                            {/* <select
                                               id="search-select"
                                               className="form-select"
                                               aria-label="Default select example"
@@ -2166,7 +2177,7 @@ const EditJob = () => {
                                                     </option>
                                                   )
                                                 )}
-                                            </select>
+                                            </select> */}
                                           </div>
                                           <div className="col-lg-6">
                                             <div className="">

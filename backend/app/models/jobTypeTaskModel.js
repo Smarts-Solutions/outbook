@@ -383,7 +383,7 @@ const getByIdChecklist = async (checklist) => {
     checklist_tasks.task_name AS task_name,
     checklist_tasks.budgeted_hour AS budgeted_hour
     FROM checklists 
-    JOIN 
+    LEFT JOIN 
          customers ON customers.id = checklists.customer_id
     JOIN 
          services ON services.id = checklists.service_id
@@ -590,68 +590,89 @@ const getClientTypeChecklist = async (checklist) => {
 
 const getByServiceWithJobType = async (checklist) => {
   const { customer_id, service_id, job_type_id, clientId } = checklist;
-  
-   
-  //   const query = `
-  //     SELECT
-  //     checklists.id AS checklists_id,
-  //     checklists.check_list_name AS check_list_name,
-  //     checklists.status AS status,
-  //     checklists.client_type_id AS client_type_id,
 
-  //     customers.id AS customer_id,
-  //     services.id AS service_id,
-  //     services.name AS service_name,
-  //     job_types.id AS job_type_id,
-  //     job_types.type AS job_type_type
-  //     FROM checklists
-  //     JOIN
-  //          customers ON customers.id = checklists.customer_id
-  //     JOIN
-  //          services ON services.id = checklists.service_id
-  //     JOIN
-  //          job_types ON job_types.id = checklists.job_type_id
+//   const query = `
+//     SELECT 
+//     checklists.id AS checklists_id,
+//     checklists.check_list_name AS check_list_name,
+//     checklists.status AS status,
+//     checklists.client_type_id AS client_type_id,
+//     clients.client_type AS client_type,
+//     customers.id AS customer_id,
+//     services.id AS service_id,
+//     services.name AS service_name,
+//     job_types.id AS job_type_id,
+//     job_types.type AS job_type_type
+//     FROM checklists 
+//     LEFT JOIN 
+//          customers ON customers.id = checklists.customer_id
+//     JOIN 
+//          services ON services.id = checklists.service_id
+//     JOIN
+//          job_types ON job_types.id = checklists.job_type_id
+//     JOIN
+//          clients ON clients.id = ${clientId}
+//     WHERE checklists.service_id = ? 
+//     AND checklists.job_type_id = ?
+//     AND FIND_IN_SET(clients.client_type, checklists.client_type_id) > 0
+//     AND checklists.customer_id = ? OR
+//         checklists.is_all_customer LIKE '%[${customer_id}]%' OR
+//         checklists.is_all_customer LIKE '[${customer_id},%' OR
+//         checklists.is_all_customer LIKE '%,${customer_id}]' OR
+//         checklists.is_all_customer LIKE '[${customer_id}]'
+//     ORDER BY checklists.id DESC
+// `;
 
-  //     WHERE checklists.service_id = ? AND checklists.job_type_id = ? AND checklists.customer_id = ?
-  //     ORDER BY checklists.id DESC
-  //     `;
-  const query = `
-    SELECT 
-    checklists.id AS checklists_id,
-    checklists.check_list_name AS check_list_name,
-    checklists.status AS status,
-    checklists.client_type_id AS client_type_id,
-    clients.client_type AS client_type,
-    customers.id AS customer_id,
-    services.id AS service_id,
-    services.name AS service_name,
-    job_types.id AS job_type_id,
-    job_types.type AS job_type_type
-    FROM checklists 
-    JOIN 
-         customers ON customers.id = checklists.customer_id
-    JOIN 
-         services ON services.id = checklists.service_id
-    JOIN
-         job_types ON job_types.id = checklists.job_type_id
-    JOIN
-         clients ON clients.id = ${clientId}
-    WHERE checklists.service_id = ? 
-    AND checklists.job_type_id = ? 
-    AND checklists.customer_id = ? 
-    AND FIND_IN_SET(clients.client_type, checklists.client_type_id) > 0
-    ORDER BY checklists.id DESC
+const query = `
+SELECT 
+checklists.id AS checklists_id,
+checklists.check_list_name AS check_list_name,
+checklists.status AS status,
+checklists.client_type_id AS client_type_id,
+clients.client_type AS client_type,
+customers.id AS customer_id,
+services.id AS service_id,
+services.name AS service_name,
+job_types.id AS job_type_id,
+job_types.type AS job_type_type,
+checklist_tasks.task_id AS task_id,
+checklist_tasks.budgeted_hour AS budgeted_hour,
+task.name AS task_name
+FROM checklists 
+LEFT JOIN 
+     customers ON customers.id = checklists.customer_id
+JOIN 
+     services ON services.id = checklists.service_id
+JOIN
+     job_types ON job_types.id = checklists.job_type_id
+JOIN
+     checklist_tasks ON checklist_tasks.checklist_id = checklists.id
+JOIN
+     task ON task.id = checklist_tasks.task_id     
+JOIN
+     clients ON clients.id = ${clientId}
+WHERE checklists.service_id = ? 
+AND checklists.job_type_id = ?
+AND FIND_IN_SET(clients.client_type, checklists.client_type_id) > 0
+AND checklists.customer_id = ? OR
+    checklists.is_all_customer LIKE '%[${customer_id}]%' OR
+    checklists.is_all_customer LIKE '[${customer_id},%' OR
+    checklists.is_all_customer LIKE '%,${customer_id}]' OR
+    checklists.is_all_customer LIKE '[${customer_id}]'
+GROUP BY  checklist_tasks.task_id
+ORDER BY checklists.id DESC
 `;
   try {
-
-
+  
+    console.log("query ",query)
     const [result] = await pool.execute(query, [
       service_id,
       job_type_id,
       customer_id,
     ]);
 
-  
+    console.log("result ",result)
+
     return {
       status: true,
       message: "checklist get successfully.",
