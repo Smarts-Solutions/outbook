@@ -6,8 +6,10 @@ import { DraftAction, AddDraft, EditDraft } from '../../../ReduxStore/Slice/Cust
 import { useLocation } from "react-router-dom";
 import sweatalert from 'sweetalert2';
 
-const Drafts = () => {
+const Drafts = ({ getAccessDataJob }) => {
   const token = JSON.parse(localStorage.getItem("token"));
+  const role = JSON.parse(localStorage.getItem("role"));
+
   const location = useLocation()
   const dispatch = useDispatch();
   const [adddraft, setAdddraft] = useState(false);
@@ -226,12 +228,12 @@ const Drafts = () => {
           <button className="view-icon" onClick={() => { HandleDraftView(row); setViewdraft(true) }}>
             <i className="fa fa-eye fs-6 text-warning" />
           </button>
-         {
-            row.was_it_complete == 1 ? "" :
+          {
+            row.was_it_complete == 1 ? "" : (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
               <button className="edit-icon" onClick={() => { setShowEditModal(true); setEditData(row) }}>
                 <i className="ti-pencil" />
-              </button>
-         }
+              </button> : ""
+          }
 
         </div>
       ),
@@ -253,10 +255,13 @@ const Drafts = () => {
           </div>
         </div>
         <div className='col-md-4'>
-          <div>
-            <button type="button" className="btn btn-info text-white float-end " onClick={() => setAdddraft(true)}>
-              <i className="fa-regular fa-plus pe-1"></i> Add Drafts</button>
-          </div>
+          {
+            (getAccessDataJob.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") ? <div>
+              <button type="button" className="btn btn-info text-white float-end " onClick={() => setAdddraft(true)}>
+                <i className="fa-regular fa-plus pe-1"></i> Add Drafts</button>
+            </div> : ""
+          }
+
 
         </div>
       </div>

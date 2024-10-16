@@ -10,9 +10,10 @@ import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlic
 
 const ClientList = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const location = useLocation(); 
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
+  const role = JSON.parse(localStorage.getItem("role"));
   const [customerData, setCustomerData] = useState([]);
   const [activeTab, setActiveTab] = useState("NoOfJobs");
   const [getClientDetails, setClientDetails] = useState({ loading: true, data: [], });
@@ -31,7 +32,6 @@ const ClientList = () => {
   }, []);
 
 
-  console.log("getAccessDataJob", getAccessDataJob);
   const accessDataJob =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
       (item) => item.permission_name === "job"
@@ -249,8 +249,8 @@ const ClientList = () => {
     //       row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
     //       : "",
     //   sortable: true,
-    // },
-    {
+      // },
+      {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
@@ -260,18 +260,17 @@ const ClientList = () => {
       name: "Actions",
       cell: (row) => (
         <div>
-          {getAccessDataJob.view == 1 && (
+          {(getAccessDataJob.update == 1 || role === "ADMIN" || role === "SUPERADMIN") && (
             <button className="edit-icon" onClick={() => handleEdit(row)}>
               <i className="ti-pencil" />
             </button>
           )}
           {
-            getAccessDataJob.delete == 1 && (
+            (getAccessDataJob.delete == 1 || role === "ADMIN" || role === "SUPERADMIN") && (
               <button className="delete-icon" onClick={() => handleDelete(row, 'job')}>
                 <i className="ti-trash text-danger" />
               </button>
             )}
-
         </div>
       ),
       ignoreRowClick: true,
@@ -394,7 +393,7 @@ const ClientList = () => {
               <>
                 <div className="col-md-4 col-auto">
                   {
-                    getAccessDataJob.view == 1 && (
+                    (getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN") && (
                       <div className="btn btn-info text-white float-end blue-btn ms-2" onClick={handleAddClient}   >
                         <i className="fa fa-plus pe-1" /> Create Job
                       </div>

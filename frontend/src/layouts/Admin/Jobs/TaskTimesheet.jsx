@@ -8,8 +8,9 @@ import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlic
 import sweatalert from 'sweetalert2';
 
 
-const TaskTimesheet = () => {
+const TaskTimesheet = ({ getAccessDataJob }) => {
   const token = JSON.parse(localStorage.getItem("token"));
+  const role = JSON.parse(localStorage.getItem("role"));
   const location = useLocation();
   const dispatch = useDispatch();
   const [addjobtimesheet, setAddjobtimesheet] = useState(false);
@@ -194,17 +195,17 @@ const TaskTimesheet = () => {
       selector: (row) => row.time ? row.time.split(":")[0] + "h " + row.time.split(":")[1] + "m" : '-',
       sortable: true,
     },
-
-
-
-
     {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="view-icon" onClick={() => { handleTimeSheetView(location.state.job_id); setRowData(row); setViewtimesheet(true) }}>
-            <i className="fa fa-eye fs-6 text-warning" />
-          </button>
+          {
+            (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
+              <button className="view-icon" onClick={() => { handleTimeSheetView(location.state.job_id); setRowData(row); setViewtimesheet(true) }}>
+                <i className="fa fa-eye fs-6 text-warning" />
+              </button>)
+          }
+
         </div>
       ),
       ignoreRowClick: true,
@@ -372,13 +373,16 @@ const TaskTimesheet = () => {
           </div>
           <div className="col-md-4">
             <div>
-              <button
-                type="button"
-                onClick={() => { handleTimeSheetView(location.state.job_id); setAddjobtimesheet(true) }}
-                className="btn btn-info text-white float-end ms-2"
-              >
-                <i className="fa fa-plus pe-1"></i> Job Timesheet
-              </button>
+              {
+                (getAccessDataJob.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
+                  <button type="button"
+                    onClick={() => { handleTimeSheetView(location.state.job_id); setAddjobtimesheet(true) }}
+                    className="btn btn-info text-white float-end ms-2">
+                    <i className="fa fa-plus pe-1"></i> Job Timesheet
+                  </button>
+                )
+              }
+
               {/* <button
                 type="button"
                 onClick={() => { setAddtask(true) }}
@@ -423,34 +427,34 @@ const TaskTimesheet = () => {
             <div className="mb-3">
               <label className="form-label">Budgeted Hours</label>
               <div className="input-group">
-              <div className="hours-div w-100">
-                <input
-                  type="number"
-                  className="form-control"
-                  placeholder="Hours"
-                  id="budgetedHours"
-                  name="budgetedHours"
-                  defaultValue=""
-                  disabled
-                  onChange={(e) => handleChange(e)}
-                  value={BudgetedTime.hours}
-                />
-                <span className="input-group-text">H</span>
+                <div className="hours-div w-100">
+                  <input
+                    type="number"
+                    className="form-control"
+                    placeholder="Hours"
+                    id="budgetedHours"
+                    name="budgetedHours"
+                    defaultValue=""
+                    disabled
+                    onChange={(e) => handleChange(e)}
+                    value={BudgetedTime.hours}
+                  />
+                  <span className="input-group-text">H</span>
                 </div>
                 <div className="hours-div w-100">
-                <input
-                  type="number"
-                  className="form-control"
-                  placeholder="Minutes"
-                  defaultValue=""
-                  id="budgetedMinutes"
-                  name="budgetedMinutes"
-                  disabled
-                  onChange={(e) => handleChange(e)}
-                  value={BudgetedTime.minutes}
-                />
-                <span className="input-group-text">M</span>
-              </div>
+                  <input
+                    type="number"
+                    className="form-control"
+                    placeholder="Minutes"
+                    defaultValue=""
+                    id="budgetedMinutes"
+                    name="budgetedMinutes"
+                    disabled
+                    onChange={(e) => handleChange(e)}
+                    value={BudgetedTime.minutes}
+                  />
+                  <span className="input-group-text">M</span>
+                </div>
               </div>
             </div>
           </div>
@@ -458,34 +462,34 @@ const TaskTimesheet = () => {
             <div className="mb-3">
               <label className="form-label">Tolal Hours</label>
               <div className="input-group">
-              <div className="hours-div w-100">
-                <input
-                  type="text"
-                  className={error['totalHours'] ? "error-field form-control" : "form-control"}
-                  placeholder="Hours"
-                  defaultValue=""
-                  id="totalHours"
-                  name="totalHours"
-                  onChange={(e) => handleChange(e)}
-                  value={GetTimeSheetTotalHours.hours}
-                />
-                <span className="input-group-text">H</span>
+                <div className="hours-div w-100">
+                  <input
+                    type="text"
+                    className={error['totalHours'] ? "error-field form-control" : "form-control"}
+                    placeholder="Hours"
+                    defaultValue=""
+                    id="totalHours"
+                    name="totalHours"
+                    onChange={(e) => handleChange(e)}
+                    value={GetTimeSheetTotalHours.hours}
+                  />
+                  <span className="input-group-text">H</span>
                 </div>
                 <div className="hours-div w-100">
-                <input
-                  type="text"
-                  className={error['totalMinutes'] ? "error-field form-control" : "form-control"}
-                  placeholder="Minutes"
-                  defaultValue=""
-                  id="totalMinutes"
-                  name="totalMinutes"
-                  onChange={(e) => handleChange(e)}
-                  value={GetTimeSheetTotalHours.minutes}
-                />
-                 <span className="input-group-text">M</span>
+                  <input
+                    type="text"
+                    className={error['totalMinutes'] ? "error-field form-control" : "form-control"}
+                    placeholder="Minutes"
+                    defaultValue=""
+                    id="totalMinutes"
+                    name="totalMinutes"
+                    onChange={(e) => handleChange(e)}
+                    value={GetTimeSheetTotalHours.minutes}
+                  />
+                  <span className="input-group-text">M</span>
+                </div>
+
               </div>
-             
-             </div>
               {error['totalHours'] ? <div className="error-text">{error['totalHours']}</div> :
                 <div className="error-text">{error['totalMinutes']}</div>
               }
@@ -494,9 +498,9 @@ const TaskTimesheet = () => {
           <div className="col-lg-12">
             <div className="mb-3">
               <label className="form-label">Status</label>
-              <select 
-               className={error['status'] ? "error-field form-select" : "form-select"}
-              // className="form-select"
+              <select
+                className={error['status'] ? "error-field form-select" : "form-select"}
+                // className="form-select"
                 id="status"
                 name="status"
                 onChange={(e) => handleChange(e)}
@@ -706,7 +710,7 @@ const TaskTimesheet = () => {
                   <span className="text-muted">{jobTimeData && jobTimeData[0] && jobTimeData[0].job_code_id}</span>
                 </div>
               </div>
-           
+
             </div>
           </div>
           <div className="col-md-12 ">
@@ -720,43 +724,43 @@ const TaskTimesheet = () => {
                     <div className="row">
                       <div className="col-md-6 pe-0">
                         <div className="input-group">
-                        <div className="hours-div w-100">
-                          <input
-                            type="text"
-                            className={error1['TotalHours'] ? "error-field form-control" : "form-control"}
+                          <div className="hours-div w-100">
+                            <input
+                              type="text"
+                              className={error1['TotalHours'] ? "error-field form-control" : "form-control"}
 
-                            aria-label="Recipient's username"
-                            aria-describedby="basic-addon2"
-                            id="TotalHours"
-                            name="TotalHours"
-                            onChange={(e) => handleChangeTimeSheet(e)}
-                            value={TotalTime.hours}
-                            placeholder="Hours"
-                          />
-                          <span className="input-group-text" id="basic-addon2">
-                            H
-                          </span>
+                              aria-label="Recipient's username"
+                              aria-describedby="basic-addon2"
+                              id="TotalHours"
+                              name="TotalHours"
+                              onChange={(e) => handleChangeTimeSheet(e)}
+                              value={TotalTime.hours}
+                              placeholder="Hours"
+                            />
+                            <span className="input-group-text" id="basic-addon2">
+                              H
+                            </span>
                           </div>
                         </div>
                       </div>
                       <div className="col-md-6 ps-0">
                         <div className="input-group">
-                        <div className="hours-div w-100">
-                          <input
-                            type="text"
-                            className={error1['TotalMinutes'] ? "error-field form-control" : "form-control"}
+                          <div className="hours-div w-100">
+                            <input
+                              type="text"
+                              className={error1['TotalMinutes'] ? "error-field form-control" : "form-control"}
 
-                            aria-label="Recipient's username"
-                            aria-describedby="basic-addon2"
-                            placeholder="Minutes"
-                            id="TotalMinutes"
-                            name="TotalMinutes"
-                            onChange={(e) => handleChangeTimeSheet(e)}
-                            value={TotalTime.minutes}
-                          />
-                          <span className="input-group-text" id="basic-addon2">
-                            M
-                          </span>
+                              aria-label="Recipient's username"
+                              aria-describedby="basic-addon2"
+                              placeholder="Minutes"
+                              id="TotalMinutes"
+                              name="TotalMinutes"
+                              onChange={(e) => handleChangeTimeSheet(e)}
+                              value={TotalTime.minutes}
+                            />
+                            <span className="input-group-text" id="basic-addon2">
+                              M
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -771,7 +775,7 @@ const TaskTimesheet = () => {
                         Task Status
                       </label>
                       <select
-                       
+
                         className={error1['status'] ? "error-field form-select" : "form-select"}
 
                         data-trigger=""

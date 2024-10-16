@@ -6,10 +6,11 @@ import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal"
 import { QueryAction, AddQuery, EditQuery } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
 import sweatalert from 'sweetalert2';
 
-const Queries = () => {
+const Queries = ({getAccessDataJob}) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
+  const role = JSON.parse(localStorage.getItem("role"));
   const [addquery, setAddquery] = useState(false);
   const [viewquery, setViewquery] = useState(false);
   const [editViewquery, setEditViewquery] = useState(false);
@@ -205,10 +206,10 @@ const Queries = () => {
             <i className="fa fa-eye fs-6 text-warning" />
           </button>
           {
-            row.status == 1 ? "" :
+            row.status == 1 ? "" : (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ? 
               <button className="edit-icon" onClick={() => { setEditViewquery(true); setEditData(row) }}>
                 <i className="ti-pencil" />
-              </button>
+              </button> : ""
           }
 
         </div>
@@ -230,7 +231,7 @@ const Queries = () => {
         <div className='col-md-4'>
           <div>
             {
-              draftStatus == 0 ?
+              draftStatus == 0 && (getAccessDataJob.insert === 1 || role === "ADMIN" || role === "SUPERADMIN")?
                 <button type="button" className="btn btn-info text-white float-end " onClick={() => setAddquery(true)} >
                   <i className="fa-regular fa-plus pe-1"></i> Add Query</button>
                 :

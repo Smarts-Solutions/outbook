@@ -8,9 +8,10 @@ import { getProfile } from '../../../ReduxStore/Slice/Staff/staffSlice';
 import sweatalert from 'sweetalert2';
 import { AddMissionLogErros } from '../../../Utils/Common_Message';
 
-const MissingLogs = () => {
+const MissingLogs = ({ getAccessDataJob }) => {
   const location = useLocation();
   const fileInputRef = useRef(null);
+  const role = JSON.parse(localStorage.getItem("role"));
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
@@ -228,8 +229,6 @@ const MissingLogs = () => {
     { name: 'Missing Log Sent On', selector: row => row.missing_log_sent_on, sortable: true },
     { name: 'Missing Log Prepared Date', selector: row => row.missing_log_prepared_date, sortable: true },
     { name: 'Missing Log Reviewed Date', selector: row => row.missing_log_reviewed_date, sortable: true },
-
-
     { name: 'status', selector: row => row.status == 1 ? "Completed" : "Incomplete", sortable: true },
     {
       name: "Actions",
@@ -239,16 +238,14 @@ const MissingLogs = () => {
             <i className="fa fa-eye fs-6 text-warning" />
           </button>
           {
-            row.status == 1 ? "" :
+            row.status == 1 ? "" : (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
               <button className="edit-icon" onClick={() => {
                 setShowEditMissinglogsModal(true);
                 setEditData(row)
               }}>
                 <i className="ti-pencil" />
-              </button>
+              </button> : ""
           }
-
-
         </div>
       ),
       ignoreRowClick: true,
@@ -268,7 +265,7 @@ const MissingLogs = () => {
         <div className='col-md-4'>
           <div>
             {
-              draftStatus == 0 ? <button type="button" className="btn btn-info text-white float-end" onClick={() => setAddmissinglogs(true)}>
+              draftStatus == 0 && (getAccessDataJob.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") ? <button type="button" className="btn btn-info text-white float-end" onClick={() => setAddmissinglogs(true)}>
                 <i className="fa-regular fa-plus pe-1"></i> Add Missing Logs
               </button> : ""
             }
@@ -307,7 +304,7 @@ const MissingLogs = () => {
                 name="missing_log"
                 id="missing_log"
                 className={errors1["missing_log"] ? "error-field form-select mb-3 ismissinglog" : "form-select mb-3 ismissinglog"}
-                
+
                 aria-label="Default select example"
                 style={{ color: "#8a8c8e !important" }}
                 onChange={(e) => handleChange(e)}
@@ -331,7 +328,7 @@ const MissingLogs = () => {
               <input
                 type="date"
                 className={errors1["missing_log_sent_on"] ? "error-field form-control" : "form-control"}
-                
+
                 placeholder=""
                 id="missing_log_sent_on"
                 name="missing_log_sent_on"
@@ -352,7 +349,7 @@ const MissingLogs = () => {
               </label>
               <input
                 type="date"
-                
+
                 className={errors1["missing_log_prepared_date"] ? "error-field form-control" : "form-control"}
                 placeholder=""
                 id="missing_log_prepared_date"
@@ -510,7 +507,7 @@ const MissingLogs = () => {
                 name="missing_log"
                 id="missing_log"
                 className={errors1["missing_log"] ? "error-field form-select mb-3 ismissinglog" : "form-select mb-3 ismissinglog"}
-               
+
                 aria-label="Default select example"
                 style={{ color: "#8a8c8e !important" }}
                 onChange={(e) => handleChange(e)}
@@ -535,7 +532,7 @@ const MissingLogs = () => {
               <input
                 type="date"
                 className={errors1["missing_log_sent_on"] ? "error-field form-control" : "form-control"}
-              
+
                 placeholder=""
                 id="missing_log_sent_on"
                 name="missing_log_sent_on"
@@ -630,7 +627,7 @@ const MissingLogs = () => {
                 name="missing_log_document"
                 onChange={(event) => { handleChange(event) }}
                 className={errors1["missing_log_document"] ? "error-field custom-file-input form-control" : "custom-file-input form-control"}
-                
+
               />
               {errors1["missing_log_document"] && (
                 <div className="error-text">
