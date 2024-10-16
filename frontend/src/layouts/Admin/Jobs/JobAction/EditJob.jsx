@@ -89,8 +89,7 @@ const EditJob = () => {
     InvoiceRemark: "",
     status_type: null,
   });
-
-  console.log("AllJobData", AllJobData);
+ 
 
   const JobDetails = async () => {
     const req = { action: "getByJobId", job_id: location.state.job_id };
@@ -407,8 +406,10 @@ const EditJob = () => {
       service_id: Number(jobData.Service),
       job_type_id: Number(jobData.JobType),
       budgeted_hours: formatTime(
-        budgeted_hour_totalTime.hours,
-        budgeted_hour_totalTime.minutes
+        budgetedHours.hours,
+        budgetedHours.minutes
+        // budgeted_hour_totalTime.hours,
+        // budgeted_hour_totalTime.minutes
       ),
       reviewer: Number(jobData.Reviewer),
       allocated_to: Number(jobData.AllocatedTo),
@@ -675,6 +676,19 @@ const EditJob = () => {
       { hours: 0, minutes: 0 }
     );
   }
+
+  // useEffect(() => {
+  //   console.log("budgeted_hour_totalTime", budgeted_hour_totalTime);
+
+  //   if(budgeted_hour_totalTime.hours && budgeted_hour_totalTime.minutes){
+  //   console.log("AddTaskArr", AddTaskArr);
+
+  //   setBudgetedHours({
+  //     hours: budgeted_hour_totalTime.hours || '0',
+  //     minutes: budgeted_hour_totalTime.minutes || '0'
+  //   });
+  // }
+  // }, [AddTaskArr]);
 
 
 
@@ -958,12 +972,13 @@ const EditJob = () => {
                                                 });
                                               }
                                             }}
-                                            value={
-                                              budgeted_hour_totalTime !=
-                                                undefined
-                                                ? budgeted_hour_totalTime.hours
-                                                : "0"
-                                            }
+                                            value={budgetedHours?.hours || ""}
+                                            // value={
+                                            //   budgeted_hour_totalTime !=
+                                            //     undefined
+                                            //     ? budgeted_hour_totalTime.hours
+                                            //     : "0"
+                                            // }
                                             
                                           />
                                           <span
@@ -991,12 +1006,13 @@ const EditJob = () => {
                                                 });
                                               }
                                             }}
-                                            value={
-                                              budgeted_hour_totalTime !=
-                                                undefined
-                                                ? budgeted_hour_totalTime.minutes
-                                                : "0"
-                                            }
+                                            value={budgetedHours?.minutes || ""}
+                                            // value={
+                                            //   budgeted_hour_totalTime !=
+                                            //     undefined
+                                            //     ? budgeted_hour_totalTime.minutes
+                                            //     : "0"
+                                            // }
                                             
                                           />
                                           <span
