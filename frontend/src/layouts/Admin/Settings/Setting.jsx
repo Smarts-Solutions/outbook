@@ -27,10 +27,8 @@ const Setting = () => {
   const [showSettingDeleteTab, setSettingDeleteTab] = useState(true);
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewData, setViewData] = useState({});
-  const accessData = useSelector(
-    (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data
-  );
-
+  const accessData = useSelector((state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data);
+  
   useEffect(() => {
     if (
       accessData &&
@@ -442,7 +440,6 @@ const Setting = () => {
       });
   };
 
-
   const getTaskData = async (row) => {
     const req = { action: "getById", checklist_id: row.checklists_id};
     const data = { req: req, authToken: token };
@@ -460,9 +457,6 @@ const Setting = () => {
       });
   }
   
- 
-
-
   useEffect(() => {
     fetchApiData(tabStatus.current);
   }, [tabStatus.current]);
@@ -1693,7 +1687,6 @@ const Setting = () => {
   const HandleAddCheckList = () => {
     navigate("/admin/setting/checklist");
   };
-
 
   const tabsArr = [
     { id: "1", label: "Staff Role", icon: "fas fa-user" },
