@@ -4332,12 +4332,10 @@ select#tabSelect {
 	vertical-align: middle;
 }
 
-.form-control:disabled,
-.form-select:disabled {
-	background-color: #f1f1f1 !important;
-	border: 1px solid #c5c5c5 !important;
+.form-control:disabled, .form-select:disabled {
+    background-color: #f5f5f5 !important;
+    border: 1px solid #c5c5c5 !important;
 }
-
 .jobs {
 	position: relative;
 	left: 11px;
@@ -4384,3 +4382,26 @@ select#tabSelect {
     margin: 2px 0;
     border-radius: 5px;
 }
+.h-m-container input { 
+	padding-left: 8px !important;
+} 
+.h-m-span {
+    position: absolute;
+    background: #f1f5fa;
+    height: 36px;
+    width: 20px;
+    font-size: 12px;
+    padding-left: 3px;
+    top: 0;
+    /* color: #92bde9; */
+    line-height: 33px;
+    right: 0;
+    border-radius: 0 20px 20px 0;
+    border: 1px solid #afacac;
+}
+.h-m-container
+{
+	position: relative;
+	width: 60px;
+}
+
