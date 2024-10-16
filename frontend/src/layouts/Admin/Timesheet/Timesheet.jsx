@@ -752,6 +752,7 @@ const Timesheet = () => {
 
                               {/*Monday Input*/}
                               <td>
+                               
                                 <input
                                   className="form-control cursor-pointer"
                                   type="text"
@@ -764,6 +765,7 @@ const Timesheet = () => {
 
                               {/*Tuesday Input*/}
                               <td>
+                              
                                 <input
                                   className="form-control cursor-pointer"
                                   type="text"
@@ -772,6 +774,31 @@ const Timesheet = () => {
                                   value={item.tuesday_hours == null ? "0" : item.tuesday_hours}
                                   disabled={item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false:true : false : currentDay !== 'tuesday'}
                                 />
+                                {/* <div className="input-group ">
+  <div className="hours-div ">
+    <input
+      type="number"
+      className="form-control"
+      placeholder="Hours"
+      name="hours"
+      defaultValue=""
+    />
+    <span className="input-group-text">H</span>
+  </div>
+  <div className="hours-div ">
+    <input
+      type="number"
+      className="form-control"
+      placeholder="Minutes"
+      name="minutes"
+      min={0}
+      max={59}
+      defaultValue=""
+    />
+    <span className="input-group-text">M</span>
+  </div>
+</div> */}
+
                               </td>
 
                               {/*Wednesday Input*/}

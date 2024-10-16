@@ -2230,10 +2230,10 @@ const CreateClient = () => {
                                               <div className="row">
                                                 <div className="col-lg-12">
                                                   <div>
-                                                    <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partnership {index + 1}</h4>
+                                                    <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
                                                   </div>
                                                   <div
-                                                    className="form-check form-switch form-switch-md mb-3 d-flex justify-content-end"
+                                                    className="form-check form-switch form-switch-md d-flex justify-content-end"
                                                     dir="ltr"
                                                   >
 
