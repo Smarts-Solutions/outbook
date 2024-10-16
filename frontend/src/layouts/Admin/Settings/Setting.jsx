@@ -459,8 +459,7 @@ const Setting = () => {
         return;
       });
   }
-
-  console.log("viewData", viewData);  
+  
  
 
 
