@@ -8,9 +8,10 @@ import sweatalert from 'sweetalert2';
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 
 
-const JobInformationPage = ({ job_id }) => {
+const JobInformationPage = ({ job_id , getAccessDataJob }) => {
     const navigate = useNavigate();
     const token = JSON.parse(localStorage.getItem("token"));
+    const role = JSON.parse(localStorage.getItem("role"));
     const location = useLocation();
     const [AllJobData, setAllJobData] = useState([]);
     const dispatch = useDispatch();
@@ -22,7 +23,6 @@ const JobInformationPage = ({ job_id }) => {
     const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" })
     const [statusDataAll, setStatusDataAll] = useState([])
     const [selectStatusIs, setStatusId] = useState('')
-
 
     const [JobInformationData, setJobInformationData] = useState({
         AccountManager: "",
@@ -80,6 +80,9 @@ const JobInformationPage = ({ job_id }) => {
     useEffect(() => {
         GetJobData()
     }, [JobInformationData]);
+
+  
+
 
     const JobDetails = async () => {
         const req = { action: "getByJobId", job_id: location.state.job_id }
@@ -218,8 +221,6 @@ const JobInformationPage = ({ job_id }) => {
             }, {})
         : {};
 
-
-
     const handleJobEdit = () => {
         navigate('/admin/job/edit', { state: { job_id: location.state.job_id } })
     }
@@ -275,7 +276,7 @@ const JobInformationPage = ({ job_id }) => {
                     const req = { job_id: location.state.job_id, status_type: Id };
                     const res = await dispatch(Update_Status({ req, authToken: token })).unwrap();
 
-                    if (res.status) { 
+                    if (res.status) {
                         sweatalert.fire({
                             title: "Success",
                             text: res.message,
@@ -283,7 +284,7 @@ const JobInformationPage = ({ job_id }) => {
                             timer: 1000,
                             showConfirmButton: false,
                         });
- 
+
                         setStatusId(Id);
                         GetJobData();
                     } else if (res.data === "W") {
@@ -340,7 +341,7 @@ const JobInformationPage = ({ job_id }) => {
                 </div>
                 <div className='col-md-5 '>
                     <div className='d-flex w-100 justify-content-end'>
-                        <div className='w-auto'>
+                        {  (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") && <div className='w-auto'>
                             <select className="form-select form-control" onChange={handleStatusChange} value={selectStatusIs}>
                                 {
                                     statusDataAll.map((status) => (
@@ -348,10 +349,15 @@ const JobInformationPage = ({ job_id }) => {
                                     ))
                                 }
                             </select>
-                        </div>
-                        <button className='edit-icon' onClick={handleJobEdit}>  <i className="ti-pencil text-primary" /></button>
+                        </div>}
+                        {
+                            (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") && <button className='edit-icon' onClick={handleJobEdit}>  <i className="ti-pencil text-primary" /></button>
 
-                        <button className='delete-icon' onClick={handleDelete}><i className="ti-trash text-danger"></i></button>
+                        }
+                        {
+                            (getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN") && <button className='delete-icon' onClick={handleDelete}><i className="ti-trash text-danger"></i></button>
+                        }
+
                     </div>
 
                 </div>

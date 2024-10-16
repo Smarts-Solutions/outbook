@@ -22,6 +22,7 @@ const ClientList = () => {
   const [hararchyData, setHararchyData] = useState(location.state.data);
   const [statusDataAll, setStatusDataAll] = useState([])
   const [selectStatusIs, setStatusId] = useState('')
+  const [getAccessDataJob, setAccessDataJob] = useState({ insert: 0, update: 0, delete: 0, view: 0, });
 
   useEffect(() => {
     GetAllJobList();
@@ -30,6 +31,24 @@ const ClientList = () => {
   }, []);
 
 
+  console.log("getAccessDataJob", getAccessDataJob);
+  const accessDataJob =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "job"
+    )?.items || [];
+
+
+  useEffect(() => {
+    if (accessDataJob.length === 0) return;
+    const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0 };
+    accessDataJob.forEach((item) => {
+      if (item.type === "insert") updatedAccess.insert = item.is_assigned;
+      if (item.type === "update") updatedAccess.update = item.is_assigned;
+      if (item.type === "delete") updatedAccess.delete = item.is_assigned;
+      if (item.type === "view") updatedAccess.view = item.is_assigned;
+    });
+    setAccessDataJob(updatedAccess);
+  }, []);
 
   const GetClientDetails = async () => {
     const req = { action: "getByid", client_id: location.state.Client_id };
@@ -78,8 +97,6 @@ const ClientList = () => {
         return;
       });
   };
-
-
 
   const handleStatusChange = (e, row) => {
     const Id = e.target.value;
@@ -155,12 +172,13 @@ const ClientList = () => {
       name: "Job ID",
       cell: (row) => (
         <div>
-          <a
-            onClick={() => HandleJob(row)}
-            style={{ cursor: "pointer", color: "#26bdf0" }}
-          >
-            {row.job_code_id}
-          </a>
+          {
+            getAccessDataJob.view == 1 ? (
+              <a onClick={() => HandleJob(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
+                {row.job_code_id}
+              </a>
+            ) : <a>{row.job_code_id}</a>
+          }
         </div>
       ),
       selector: (row) => row.trading_name,
@@ -242,12 +260,18 @@ const ClientList = () => {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="edit-icon" onClick={() => handleEdit(row)}>
-            <i className="ti-pencil" />
-          </button>
-          <button className="delete-icon" onClick={() => handleDelete(row, 'job')}>
-            <i className="ti-trash text-danger" />
-          </button>
+          {getAccessDataJob.view == 1 && (
+            <button className="edit-icon" onClick={() => handleEdit(row)}>
+              <i className="ti-pencil" />
+            </button>
+          )}
+          {
+            getAccessDataJob.delete == 1 && (
+              <button className="delete-icon" onClick={() => handleDelete(row, 'job')}>
+                <i className="ti-trash text-danger" />
+              </button>
+            )}
+
         </div>
       ),
       ignoreRowClick: true,
@@ -369,13 +393,13 @@ const ClientList = () => {
             {activeTab == "NoOfJobs" && (
               <>
                 <div className="col-md-4 col-auto">
-                  <div
-                    className="btn btn-info text-white float-end blue-btn ms-2"
-                    onClick={handleAddClient}
-                  >
-                    <i className="fa fa-plus pe-1" /> Create Job
-                  </div>
-
+                  {
+                    getAccessDataJob.view == 1 && (
+                      <div className="btn btn-info text-white float-end blue-btn ms-2" onClick={handleAddClient}   >
+                        <i className="fa fa-plus pe-1" /> Create Job
+                      </div>
+                    )
+                  }
                   <button
                     type="button"
                     className="btn btn-info text-white float-end blue-btn"
@@ -401,7 +425,7 @@ const ClientList = () => {
           </div>
         </div>
 
-        <Hierarchy show={["Customer", "Client", activeTab=='NoOfJobs' ? 'No. Of Jobs' : activeTab]} active={2} data={hararchyData} NumberOfActive={customerData.length} />
+        <Hierarchy show={["Customer", "Client", activeTab == 'NoOfJobs' ? 'No. Of Jobs' : activeTab]} active={2} data={hararchyData} NumberOfActive={customerData.length} />
 
       </div>
 
@@ -430,7 +454,7 @@ const ClientList = () => {
                         aria-selected="true"
                         tabIndex={-1}
                       >
-                        Assigned Jobs
+                        All Jobs
                       </button>
                     </li>
                     <li className="nav-item" role="presentation">
@@ -445,7 +469,7 @@ const ClientList = () => {
                         aria-selected="false"
                         tabIndex={-1}
                       >
-                        All Jobs
+                        Assigned Jobs
                       </button>
                     </li>
                   </ul>
@@ -519,7 +543,6 @@ const ClientList = () => {
                         </div>
                       </div>
                     </div>
-
                     <div className="col-lg-4 ml-auto align-self-center">
                       <ul className="list-unstyled personal-detail mb-0">
                         <li className="">

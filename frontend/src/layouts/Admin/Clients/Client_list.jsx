@@ -28,8 +28,7 @@ const ClientList = () => {
   const [activeTab, setActiveTab] = useState('');
   const role = JSON.parse(localStorage.getItem("role"));
 
-
-  console.log("getJobDetails", getJobDetails);
+ 
   useEffect(() => {
     setActiveTab(
       (getAccessDataClient && getAccessDataClient.client == 1) || role === "ADMIN" || role === "SUPERADMIN" ? "client" :

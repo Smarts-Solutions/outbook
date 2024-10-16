@@ -10,6 +10,7 @@ const Sidebar = () => {
   const menuRef = useRef(null);
   const role = JSON.parse(localStorage.getItem("role"));
   const updatedShowTab = JSON.parse(localStorage.getItem("updatedShowTab"));
+
   const [activeLink, setActiveLink] = useState(location.pathname);
 
   useEffect(() => {
@@ -50,6 +51,8 @@ const Sidebar = () => {
     setActiveLink(linkPathname);
     navigate(linkPathname);
   };
+
+  
 
   return (
     <div ref={menuRef}>
