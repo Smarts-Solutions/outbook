@@ -315,14 +315,14 @@ const StaffPage = () => {
         role_id: values.role,
         status: values.status,
         created_by: StaffUserId.id,
-        hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"}`,
+        hourminute: `${budgetedHours.hours || "00"}:${
+          budgetedHours.minutes || "00"
+        }`,
       };
 
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
       }
-
-
 
       // return
       await dispatch(
@@ -533,14 +533,14 @@ const StaffPage = () => {
       formik.setFieldValue("phone", editStaffData.phone || "null");
       formik.setFieldValue("role", editStaffData.role_id || "null");
       formik.setFieldValue("status", editStaffData.status || "null");
-    
+
       console.log(editStaffData.hourminute);
-     if(editStaffData.hourminute){
-      setBudgetedHours({
-        hours: editStaffData.hourminute.split(":")[0],
-        minutes: editStaffData.hourminute.split(":")[1],
-      });
-     }
+      if (editStaffData.hourminute) {
+        setBudgetedHours({
+          hours: editStaffData.hourminute.split(":")[0],
+          minutes: editStaffData.hourminute.split(":")[1],
+        });
+      }
     }
   }, [editStaffData]);
 
@@ -581,7 +581,11 @@ const StaffPage = () => {
                       <button
                         type="button"
                         className="btn btn-info text-white float-end"
-                        onClick={() => setAddStaff(true)}
+                        onClick={() => {
+                          setAddStaff(true);
+
+                          formik.resetForm();
+                        }}
                       >
                         <i className="fa fa-plus" /> Add Staff
                       </button>
@@ -770,67 +774,66 @@ const StaffPage = () => {
           closeBtn={(e) => setEditStaff(false)}
           additional_field={
             <div className="row">
-            <div className="col-lg-8">
-              <div className="mb-3">
-                <label className="form-label">Budgeted Time</label>
-                <div className="input-group">
-                  {/* Hours Input */}
-                  <div className="hours-div">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Hours"
-                      onChange={(e) => {
-                        const value = e.target.value;
-                      
+              <div className="col-lg-8">
+                <div className="mb-3">
+                  <label className="form-label">Budgeted Time</label>
+                  <div className="input-group">
+                    {/* Hours Input */}
+                    <div className="hours-div">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Hours"
+                        onChange={(e) => {
+                          const value = e.target.value;
 
-                        if (value === "" || Number(value) >= 0) {
-                          setBudgetedHours({
-                            ...budgetedHours,
-                            hours: value,
-                          });
-                        }
-                      }}
-                      value={budgetedHours?.hours || ""}
-                    />
-                    <span className="input-group-text" id="basic-addon2">
-                      H
-                    </span>
-                  </div>
+                          if (value === "" || Number(value) >= 0) {
+                            setBudgetedHours({
+                              ...budgetedHours,
+                              hours: value,
+                            });
+                          }
+                        }}
+                        value={budgetedHours?.hours || ""}
+                      />
+                      <span className="input-group-text" id="basic-addon2">
+                        H
+                      </span>
+                    </div>
 
-                  {/* Minutes Input */}
-                  <div className="hours-div">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Minutes"
-                      onChange={(e) => {
-                        const value = e.target.value;
+                    {/* Minutes Input */}
+                    <div className="hours-div">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Minutes"
+                        onChange={(e) => {
+                          const value = e.target.value;
 
-                        if (
-                          value === "" ||
-                          (Number(value) >= 0 && Number(value) <= 59)
-                        ) {
-                          setBudgetedHours({
-                            ...budgetedHours,
-                            minutes: value,
-                          });
-                        }else{
-                          setBudgetedHours({
-                            ...budgetedHours,
-                            minutes: "59",
-                          });
-                        }
-                      }}
-                      value={budgetedHours?.minutes || ""}
-                    />
-                    <span className="input-group-text" id="basic-addon2">
-                      M
-                    </span>
+                          if (
+                            value === "" ||
+                            (Number(value) >= 0 && Number(value) <= 59)
+                          ) {
+                            setBudgetedHours({
+                              ...budgetedHours,
+                              minutes: value,
+                            });
+                          } else {
+                            setBudgetedHours({
+                              ...budgetedHours,
+                              minutes: "59",
+                            });
+                          }
+                        }}
+                        value={budgetedHours?.minutes || ""}
+                      />
+                      <span className="input-group-text" id="basic-addon2">
+                        M
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
             </div>
           }
         />
