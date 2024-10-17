@@ -533,9 +533,8 @@ const Timesheet = () => {
           </div>
         </div>
         <div className="report-data mt-4">
-          <div className="col-md-4">
+          {/* <div className="col-md-4">
             <div className="form-group">
-              {/* <label htmlFor="tabSelect">Filter:</label> */}
               <select
                 className="form-select"
                 id="tabSelect"
@@ -555,7 +554,7 @@ const Timesheet = () => {
                 <option value="custom">Custom</option>
               </select>
             </div>
-          </div>
+          </div> */}
 
           {/* Tabs Content */}
           <div className="tab-content mt-5">
