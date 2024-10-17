@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Trash2 } from "lucide-react";
+import { Trash2 ,ChevronLeft ,ChevronRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getTimesheetData, getTimesheetTaskTypedData, saveTimesheetData } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
@@ -11,11 +11,11 @@ const Timesheet = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+  const weekOffSetValue = useRef(0);
+ 
+  const GetTimeSheet = async (weekOffset) => {
 
-  
-
-  const GetTimeSheet = async () => {
-    const req = { staff_id: staffDetails.id };
+    const req = { staff_id: staffDetails.id ,weekOffset : weekOffset };
     const res = await dispatch(getTimesheetData({ req, authToken: token })).unwrap();
     if (res.status) {
       setTimeSheetRows(res.data)
@@ -24,6 +24,7 @@ const Timesheet = () => {
           const sum = (parseFloat(row.monday_hours) || 0) + (parseFloat(row.tuesday_hours) || 0) + (parseFloat(row.wednesday_hours) || 0) + (parseFloat(row.thursday_hours) || 0) + (parseFloat(row.friday_hours) || 0) + (parseFloat(row.saturday_hours) || 0) + (parseFloat(row.sunday_hours) || 0); 
           return { ...row, total_hours: parseFloat(sum).toFixed(2) };
         })
+        
       );
     } else {
       setTimeSheetRows([])
@@ -31,7 +32,26 @@ const Timesheet = () => {
   }
 
   const [currentDay, setCurrentDay] = useState('');
+  useEffect(() => {
+    GetTimeSheet(weekOffSetValue.current);
+    // set day wise Input
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const todays = new Date().getDay();
+    setCurrentDay(days[todays]);
+  }, [])
 
+
+
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-GB', {
+      weekday: 'short',  // Mon, Tue, etc.
+      day: '2-digit',    // 01, 02, etc.
+      month: '2-digit',  // 01, 02, etc.
+      year: 'numeric',   // 2024, etc.
+    });
+  };
+
+  const [weekOffset, setWeekOffset] = useState(0); // 0 for current week
   const [weekDays, setWeekDays] = useState({
     monday: '',
     tuesday: '',
@@ -43,26 +63,15 @@ const Timesheet = () => {
   });
 
   useEffect(() => {
-    GetTimeSheet();
-
-    // set day wise Input
-    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const todays = new Date().getDay();
-    setCurrentDay(days[todays]);
-
-    // set date in table heading wise Input
     const today = new Date();
     const dayOfWeek = today.getDay();
     const startOfWeek = new Date(today);
 
-    if (dayOfWeek === 0) {
-      startOfWeek.setDate(today.getDate() - 6);
-    } else {
-      startOfWeek.setDate(today.getDate() - (dayOfWeek - 1));
-    }
+    // Calculate the start of the week based on weekOffset
+    startOfWeek.setDate(today.getDate() - (dayOfWeek - 1) + weekOffset * 7);
 
     setWeekDays({
-      monday: formatDate(new Date(startOfWeek)),
+      monday: formatDate(startOfWeek),
       tuesday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
       wednesday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
       thursday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
@@ -70,17 +79,13 @@ const Timesheet = () => {
       saturday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
       sunday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
     });
+  }, [weekOffset]); // Depend on weekOffset
 
-
-  }, [])
-
-  const formatDate = (date) => {
-    return date.toLocaleDateString('en-GB', {
-      weekday: 'short',  // Mon, Tue, etc.
-      day: '2-digit',    // 01, 02, etc.
-      month: '2-digit',  // 01, 02, etc.
-      year: 'numeric',   // 2024, etc.
-    });
+  // Function to handle week change
+  const changeWeek = (offset) => {
+    setWeekOffset(weekOffset + offset);
+    GetTimeSheet(weekOffset + offset);
+    weekOffSetValue.current = parseInt(weekOffset) + offset
   };
 
 
@@ -475,7 +480,7 @@ const Timesheet = () => {
           showConfirmButton: true,
           timer: 1500
         });
-        GetTimeSheet();
+        GetTimeSheet(weekOffSetValue.current);
         setUpdateTimeSheetRows([])
       }
     }
@@ -511,7 +516,7 @@ const Timesheet = () => {
         showConfirmButton: true,
         timer: 1500
       });
-      GetTimeSheet();
+      GetTimeSheet(weekOffSetValue.current);
     }
   }
 
@@ -585,6 +590,9 @@ const Timesheet = () => {
                             <th className="dropdwnCol5" data-field="phone">
                               Task
                             </th>
+                            <th>
+                            <ChevronLeft onClick={(e) => { e.preventDefault(); changeWeek(-1); }}/>
+                            </th>
                             <th
                               className="dropdwnCol5"
                               data-field="customer_name"
@@ -612,6 +620,7 @@ const Timesheet = () => {
                             {/* <th className="dropdwnCol5" data-field="phone">
                               {weekDays.sunday.replace(",", "")}
                             </th> */}
+                            <th> <ChevronRight onClick={(e) => { e.preventDefault(); changeWeek(1); }}/></th>
                             <th className="dropdwnCol5" data-field="phone">
                               Action
                             </th>
@@ -749,7 +758,9 @@ const Timesheet = () => {
                                   />
                                 )}
                               </td>
+                               <td>
 
+                               </td>
                               {/*Monday Input*/}
                               <td >
                               <input
@@ -826,6 +837,7 @@ const Timesheet = () => {
                                   disabled={item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
                                 />
                               </td>
+                                <td></td>
 
                               {/*Sunday Input*/}
                               {/* 
