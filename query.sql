@@ -4,6 +4,7 @@ CREATE TABLE roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     role_name VARCHAR(100) NOT NULL UNIQUE,
     role VARCHAR(100) NOT NULL,
+    hourminute VARCHAR(100) DEFAULT NULL,
     status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -42,6 +43,7 @@ CREATE TABLE staffs (
     email VARCHAR(100) NOT NULL UNIQUE,
     phone VARCHAR(20) NOT NULL,
     password VARCHAR(255) NOT NULL,
+    hourminute VARCHAR(100) DEFAULT NULL,
     status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
     created_by  INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
