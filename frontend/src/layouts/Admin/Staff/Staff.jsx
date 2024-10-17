@@ -315,7 +315,7 @@ const StaffPage = () => {
         role_id: values.role,
         status: values.status,
         created_by: StaffUserId.id,
-        budgeted_hours: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"}`,
+        hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"}`,
       };
 
       if (editStaff) {
@@ -534,11 +534,11 @@ const StaffPage = () => {
       formik.setFieldValue("role", editStaffData.role_id || "null");
       formik.setFieldValue("status", editStaffData.status || "null");
     
-      console.log(editStaffData.budgeted_hours);
-     if(editStaffData.budgeted_hours){
+      console.log(editStaffData.hourminute);
+     if(editStaffData.hourminute){
       setBudgetedHours({
-        hours: editStaffData.budgeted_hours.split(":")[0],
-        minutes: editStaffData.budgeted_hours.split(":")[1],
+        hours: editStaffData.hourminute.split(":")[0],
+        minutes: editStaffData.hourminute.split(":")[1],
       });
      }
     }

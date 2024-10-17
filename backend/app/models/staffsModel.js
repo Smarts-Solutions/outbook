@@ -18,14 +18,13 @@ const createStaff = async (staff) => {
   const Role_query = `SELECT role ,hourminute FROM roles WHERE id = ?`;
   const [role] = await pool.execute(Role_query, [role_id]);
 
-  let budgeted_hours = "00:00";
+  let hourminute = "00:00";
   if (role.length > 0) {
-    budgeted_hours = role[0].hourminute;
+    hourminute = role[0].hourminute;
   }
-  console.log("budgeted_hours", budgeted_hours);
 
   const query = `
-    INSERT INTO staffs (role_id, first_name, last_name, email, phone, password,budgeted_hours, status ,created_by)
+    INSERT INTO staffs (role_id, first_name, last_name, email, phone, password,hourminute, status ,created_by)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)
     `;
 
@@ -37,7 +36,7 @@ const createStaff = async (staff) => {
       email,
       phone,
       password,
-      budgeted_hours,
+      hourminute,
       status,
       created_by,
     ]);
@@ -61,7 +60,7 @@ const createStaff = async (staff) => {
 
 const getStaff = async () => {
   const [rows] = await pool.query(
-    "SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email , staffs.phone , staffs.status , staffs.created_at , staffs.budgeted_hours , roles.role_name , roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id ORDER BY staffs.id DESC"
+    "SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email , staffs.phone , staffs.status , staffs.created_at , staffs.hourminute , roles.role_name , roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id ORDER BY staffs.id DESC"
   );
   return rows;
 };
