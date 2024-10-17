@@ -358,7 +358,7 @@ const Timesheet = () => {
   }
 
   const handleHoursInput = async (e, index, day_name, date_value ,item) => {
-   
+
     let value = e.target.value;
     let name = e.target.name;
     const updatedRows = [...timeSheetRows]
@@ -761,7 +761,31 @@ const Timesheet = () => {
                                   value={item.monday_hours == null ? "0" : item.monday_hours}
                                   disabled={item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday'?false:true : false : currentDay !== 'monday'}
                                 />
-                               
+                                <div className="d-flex">
+                              <div className="h-m-container">
+                               <input
+                                  className="form-control cursor-pointer border-radius-end"
+                                  type="text"
+                                  name="monday_hours"
+                                  
+                                  onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday ,item)}
+                                  value={item.monday_hours == null ? "0" : item.monday_hours}
+                                  disabled={item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday'?false:true : false : currentDay !== 'monday'}
+                                />
+                                <span className="h-m-span">H</span>
+                              </div>
+                             <div className="h-m-container ms-1">
+                                <input
+                                  className="form-control cursor-pointer border-radius-start"
+                                  type="text"
+                                  name="monday_hours"
+                                  // onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday ,item)}
+                                  // value={item.monday_hours == null ? "0" : item.monday_hours}
+                                  // disabled={item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday'?false:true : false : currentDay !== 'monday'}
+                                />
+                                 <span className="h-m-span minute-span">M</span>
+                                    </div>
+                                  </div>
                               </td>
                              
                               {/*Tuesday Input*/}
