@@ -1,18 +1,27 @@
-import React from 'react';
+import React from "react";
 
-const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange, buttonName }) => {
-
-  const columnClass = fields && fields.length === 1 ? 'col-12' : 'col-md-12';
+const CommonModal = ({
+  modalId,
+  title,
+  fields,
+  onClose,
+  onSave,
+  onChange,
+  buttonName,
+}) => {
+  const columnClass = fields && fields.length === 1 ? "col-12" : "col-md-12";
 
   return (
     <div
       className={`modal ${modalId}`}
-      style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
+      style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
     >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
           <div className="modal-header">
-            <h5 className="modal-title" id={`${modalId}Label`}>{title}</h5>
+            <h5 className="modal-title" id={`${modalId}Label`}>
+              {title}
+            </h5>
             <button
               type="button"
               className="btn-close"
@@ -22,9 +31,49 @@ const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange, button
           </div>
           <div className="modal-body pb-4">
             {fields.map((field, index) => (
-              <div className={`data-table-extensions-filter ${columnClass}`} key={index}>
-                <label htmlFor={field.name} className="icon mb-1 mt-2">{field.label}</label>
-                {field.type === 'text' ? (
+              <div
+                className={`data-table-extensions-filter ${columnClass}`}
+                key={index}
+              >
+                <label htmlFor={field.name} className="icon mb-1 mt-2">
+                  {field.label}
+                </label>
+                {field.type === "hourminute" ? (
+                  <>
+                    <div className="input-group">
+                      <input
+                        type="number"
+                        className="form-control"
+                        placeholder="Hours"
+                        name="hours"
+                        defaultValue={field.value?.split(":")[0] || "00"}
+                        onChange={(e) => onChange(e, index)}
+                      />
+
+                      <input
+                        type="number"
+                        className="form-control"
+                        placeholder="Minutes"
+                        name="minutes"
+                        min="0"
+                        max="59"
+                        defaultValue={field.value?.split(":")[1] || "00"}
+                        onChange={(e) => onChange(e, index)}
+                      />
+                    </div>
+                  </>
+                ) : field.type === "text" ? (
+                  <>
+                    <input
+                      type="text"
+                      name={field.name}
+                      className="filter-text form-control"
+                      placeholder={field.placeholder}
+                      value={field.value}
+                      onChange={(e) => onChange(e, index)}
+                    />
+                  </>
+                ) : field.type === "email" ? (
                   <input
                     type="text"
                     name={field.name}
@@ -33,7 +82,7 @@ const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange, button
                     value={field.value}
                     onChange={(e) => onChange(e, index)}
                   />
-                ) : field.type === 'email' ? (
+                ) : field.type === "password" ? (
                   <input
                     type="text"
                     name={field.name}
@@ -42,23 +91,14 @@ const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange, button
                     value={field.value}
                     onChange={(e) => onChange(e, index)}
                   />
-                ) : field.type === 'password' ? (
-                  <input
-                    type="text"
-                    name={field.name}
-                    className="filter-text form-control"
-                    placeholder={field.placeholder}
-                    value={field.value}
-                    onChange={(e) => onChange(e, index)}
-                  />
-                ) : field.type === 'select' ? (
+                ) : field.type === "select" ? (
                   <select
                     name={field.name}
                     className="filter-select form-select"
                     value={field.value}
                     onChange={(e) => onChange(e, index)}
                   >
-                    {field.options.map(option => (
+                    {field.options.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
@@ -67,8 +107,6 @@ const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange, button
                 ) : null}
               </div>
             ))}
-
-
           </div>
           <div className="modal-footer ">
             <button
@@ -76,16 +114,14 @@ const CommonModal = ({ modalId, title, fields, onClose, onSave, onChange, button
               className="btn btn-secondary"
               onClick={onClose}
             >
-              <i className='fa fa-times pe-1 '></i>
+              <i className="fa fa-times pe-1 "></i>
               Cancel
             </button>
             <button
               type="button"
               className="btn btn-outline-success"
-              
               onClick={onSave}
             >
-           
               {buttonName}
             </button>
           </div>

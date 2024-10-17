@@ -2365,10 +2365,10 @@ const customerUpdate = async (customer) => {
     //  Page Status 2 Service Part
     else if (pageStatus === "2") {
         const { services, Task } = customer;
-     
-        console.log("services",services)
-        console.log("Task",Task)
-        
+
+        console.log("services", services)
+        console.log("Task", Task)
+
 
         const [ExistServiceids] = await pool.execute('SELECT service_id  FROM `customer_services` WHERE customer_id =' + customer_id);
         const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
@@ -2497,28 +2497,28 @@ WHERE service_id = ${service_id} AND customer_id = 0;
             logUpdateRequired = true
             for (const id of deleteIdArray) {
 
-        
-              const QueryCustomerRemoveChecklist1 = `SELECT is_all_customer FROM checklists WHERE service_id = ${id} AND customer_id = 0`;
 
-              const [QueryCustomerRemoveChecklistData] = await pool.execute(QueryCustomerRemoveChecklist1);
-                
-            if(QueryCustomerRemoveChecklistData != undefined){
-             if (QueryCustomerRemoveChecklistData.length > 0 && QueryCustomerRemoveChecklistData[0].is_all_customer != null) {
-                   
-                    const updatValue = JSON.parse(QueryCustomerRemoveChecklistData[0].is_all_customer).filter(item => item !== customer_id)
-                    const QueryCustomerRemoveChecklist = `
+                const QueryCustomerRemoveChecklist1 = `SELECT is_all_customer FROM checklists WHERE service_id = ${id} AND customer_id = 0`;
+
+                const [QueryCustomerRemoveChecklistData] = await pool.execute(QueryCustomerRemoveChecklist1);
+
+                if (QueryCustomerRemoveChecklistData != undefined) {
+                    if (QueryCustomerRemoveChecklistData.length > 0 && QueryCustomerRemoveChecklistData[0].is_all_customer != null) {
+
+                        const updatValue = JSON.parse(QueryCustomerRemoveChecklistData[0].is_all_customer).filter(item => item !== customer_id)
+                        const QueryCustomerRemoveChecklist = `
                     UPDATE checklists
                     SET is_all_customer = '${JSON.stringify(updatValue)}'
                     WHERE service_id = ${id} AND customer_id = 0;
                     `
-                    try {
-                        const [QueryCustomerRemoveChecklistData1] = await pool.execute(QueryCustomerRemoveChecklist);
-                    } catch (error) {
-                        console.log("error ", error)  
+                        try {
+                            const [QueryCustomerRemoveChecklistData1] = await pool.execute(QueryCustomerRemoveChecklist);
+                        } catch (error) {
+                            console.log("error ", error)
+                        }
+
                     }
-                    
-             }
-            }
+                }
 
                 const query = `
             SELECT id 
@@ -3224,23 +3224,18 @@ const customerStatusUpdate = async (customer) => {
 const getcustomerschecklist = async (customer) => {
     try {
         const { customer_id, service_id, job_type_id } = customer;
-        const query = `SELECT c.*, ct.* 
-    FROM checklists c 
-    JOIN checklist_tasks ct 
-    ON c.id = ct.checklist_id 
-    WHERE c.service_id = ? 
-    AND c.job_type_id = ? 
+        const query = `SELECT c., ct.
+    FROM checklists c
+    JOIN checklist_tasks ct
+    ON c.id = ct.checklist_id
+    WHERE c.service_id = ?
+    AND c.job_type_id = ?
     AND (c.customer_id = ? OR c.customer_id = 0);`;
-
         const [result] = await pool.execute(query, [
             service_id,
             job_type_id,
             customer_id,
         ]);
-
-        console.log("result", result);
-
-
         if (result.length === 0) {
             return [];
         }
@@ -3255,11 +3250,9 @@ const getcustomerschecklist = async (customer) => {
             ],
             serviceId: item.service_id,
             id: item.id,
+            checklist_id: item.checklist_id,
         }));
-
-
         return formattedResults
-
     } catch (err) {
         console.log(err);
     }

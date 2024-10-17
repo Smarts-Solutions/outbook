@@ -470,7 +470,6 @@ const Service = () => {
       });
   };
   
-console.log("tasksGet1", [...tasksGet1, ...tasksGet]);
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
