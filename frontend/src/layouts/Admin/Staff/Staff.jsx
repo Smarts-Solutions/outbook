@@ -622,6 +622,7 @@ const StaffPage = () => {
         backdrop="static"
         size="ms-5"
         title="Add Staff"
+         
         hideBtn={true}
         handleClose={() => {
           setAddStaff(false);
@@ -634,6 +635,7 @@ const StaffPage = () => {
           )}
           formik={formik}
           btn_name="Add"
+          closeBtn={(e) => setAddStaff(false)}
         />
       </CommanModal>
       {/* CLOSE Add Staff */}
