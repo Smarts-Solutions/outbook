@@ -28,10 +28,6 @@ const Setting = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewData, setViewData] = useState({});
   const accessData = useSelector((state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data);
-  
-  const accessData = useSelector(
-    (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data
-  );
   const [HourMinut, setHourMinut] = useState({ hours: "00", minutes: "00" });
 
   useEffect(() => {
