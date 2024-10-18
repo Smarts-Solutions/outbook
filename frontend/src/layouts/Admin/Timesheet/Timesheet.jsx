@@ -396,10 +396,14 @@ const Timesheet = () => {
     
     const sum = (parseFloat(updatedRows[index].monday_hours) || 0) + (parseFloat(updatedRows[index].tuesday_hours) || 0) + (parseFloat(updatedRows[index].wednesday_hours) || 0) + (parseFloat(updatedRows[index].thursday_hours) || 0) + (parseFloat(updatedRows[index].friday_hours) || 0) + (parseFloat(updatedRows[index].saturday_hours) || 0) + (parseFloat(updatedRows[index].sunday_hours) || 0); 
     updatedRows[index].total_hours = sum;
+
+    // console.log("updatedRows[index] ",updatedRows[index])
+    // console.log("updatedRows[index] staffs_hourminute ",updatedRows[index].staffs_hourminute)
+    // console.log("updatedRows[index] staffs_hourminute parsfloat",parseFloat(convertTimeFormat(updatedRows[index].staffs_hourminute)))
     
     // warning total hours
-    if(updatedRows[index].job_total_time != null && updatedRows[index].job_total_time != undefined && e.target.value != ''){
-       if(updatedRows[index].total_hours > parseFloat(convertTimeFormat(updatedRows[index].job_total_time))){
+    if(updatedRows[index].staffs_hourminute != null && updatedRows[index].staffs_hourminute != undefined && e.target.value != ''){
+       if(updatedRows[index].total_hours > parseFloat(convertTimeFormat(updatedRows[index].staffs_hourminute))){
         sweatalert.fire({
           icon: 'warning',
           title: "Your total allotted time has exceeded.",

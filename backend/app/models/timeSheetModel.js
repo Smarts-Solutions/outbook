@@ -53,9 +53,11 @@ try {
         SUBSTRING(jobs.job_id, 1, 15)
       ) AS job_name,
       task.name AS task_name,
-      jobs.total_time AS job_total_time
+      jobs.total_time AS job_total_time,
+      staffs.hourminute AS staffs_hourminute
     FROM 
       timesheet 
+      JOIN staffs ON staffs.id = timesheet.staff_id
       LEFT JOIN internal ON timesheet.job_id = internal.id AND timesheet.task_type = 1
       LEFT JOIN sub_internal ON timesheet.task_id = sub_internal.id AND timesheet.task_type = 1
       LEFT JOIN customers ON customers.id = timesheet.customer_id AND timesheet.task_type = 2
@@ -90,7 +92,8 @@ try {
     startOfWeekFormatted,
     endOfWeekFormatted
   ]);
-
+ 
+  console.log("rows ",rows)
   return { status: true, message: "success.", data: rows };
 } catch (err) {
   console.log(err);
