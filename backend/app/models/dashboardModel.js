@@ -5,12 +5,50 @@ const { SatffLogUpdateOperation, generateNextUniqueCode } = require('../utils/he
 const getDashboardData = async (dashboard) => {
   const { staff_id } = dashboard;
 
+  try {
+    const QueryRole = `
+    SELECT
+      staffs.id AS id,
+      staffs.role_id AS role_id,
+      roles.role AS role_name
+    FROM
+      staffs
+    JOIN
+      roles ON roles.id = staffs.role_id
+    WHERE
+      staffs.id = ${staff_id}
+    LIMIT 1
+    `
+    const [rowRoles] = await pool.execute(QueryRole);
+    if (rowRoles.length > 0 && (rowRoles[0].role_name == "SUPERADMIN" || rowRoles[0].role_name == "ADMIN")) {
+
+      const QueryAllCount = `
+    SELECT
+    (SELECT COUNT(*) FROM customers) AS customer,
+    (SELECT COUNT(*) FROM clients) AS client,
+    (SELECT COUNT(*) FROM staffs) AS staff,
+    (SELECT COUNT(*) FROM jobs) AS job,
+    (SELECT COUNT(*) FROM jobs WHERE status_type != '6') AS pending_job,
+    (SELECT COUNT(*) FROM jobs WHERE status_type = '6') AS completed_job
+    `
+    const [rowAllCounts] = await pool.execute(QueryAllCount);
+      const result = {
+        customer: rowAllCounts[0].customer,
+        client: rowAllCounts[0].client,
+        job: rowAllCounts[0].job,
+        staff : rowAllCounts[0].staff,
+        pending_job : rowAllCounts[0].pending_job,
+        completed_job : rowAllCounts[0].completed_job
+      };
+
+      return { status: true, message: "success.", data: result };
+    }
+    else{
   const checkViewQuery = `
   SELECT table_name 
   FROM information_schema.views 
   WHERE table_name = 'dashboard_data_view'
 `;
-
   const createViewQuery = `
   CREATE  VIEW dashboard_data_view AS
 SELECT  
@@ -35,13 +73,11 @@ JOIN
 LEFT JOIN 
     customer_company_information ON customers.id = customer_company_information.customer_id;
 `;
-  try {
     // Check if view exists
     const [checkViewResult] = await pool.execute(checkViewQuery);
     if (checkViewResult.length === 0) {
       await pool.execute(createViewQuery);
     }
-
 
     const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + staff_id + '" LIMIT 1');
 
@@ -71,8 +107,9 @@ LEFT JOIN
       params.push(staff_id);
     }
 
-
-    const [viewResult] = await pool.execute(query, params);
+  const [viewResult] = await pool.execute(query, params);
+ 
+  console.log("viewResult ",viewResult)
 
 
     const uniqueCustomers = [...new Set(viewResult.map(item => item.customer_id))].length;
@@ -90,15 +127,16 @@ LEFT JOIN
         .map(item => item.job_id)
     )].length;
 
-
     const result = {
       customer: uniqueCustomers,
       client: uniqueClients,
       job: uniqueJobIds,
-      staff : staffCount[0].count
+      staff : staffCount[0].count,
+      pending_job : 0,
+      completed_job : 0
     };
-
     return { status: true, message: "success.", data: result };
+  }
 
   } catch (err) {
     return { status: false, message: "Err Dashboard Data View Get", error: err.message };

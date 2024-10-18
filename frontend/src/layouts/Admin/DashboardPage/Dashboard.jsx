@@ -278,7 +278,7 @@ const Dashboard = () => {
                                 {/* <h3 className="mt-5">233</h3> */}
                               </div>
                               <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">0</h3>
+                                <h3 className="my-4">{dashboard.pending_job}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/pending.png"
@@ -303,7 +303,7 @@ const Dashboard = () => {
                                 {/* <h3 className="mt-5">870</h3> */}
                               </div>
                               <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">0</h3>
+                                <h3 className="my-4">{dashboard.completed_job}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/time-management.png"
