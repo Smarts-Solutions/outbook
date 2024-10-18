@@ -94,7 +94,7 @@ try {
     startOfWeekFormatted,
     endOfWeekFormatted
   ]);
-
+ 
   return { status: true, message: "success.", data: rows };
 } catch (err) {
   console.log(err);

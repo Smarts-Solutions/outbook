@@ -12,12 +12,18 @@ const Timesheet = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const weekOffSetValue = useRef(0);
+  const [submitStatusAllKey, setSubmitStatusAllKey] = useState(0);
  
   const GetTimeSheet = async (weekOffset) => {
 
     const req = { staff_id: staffDetails.id ,weekOffset : weekOffset };
+    
     const res = await dispatch(getTimesheetData({ req, authToken: token })).unwrap();
+    setSubmitStatusAllKey(0)
     if (res.status) {
+      if(res.data.length > 0 && res.data[0].submit_status === "1" ){
+        setSubmitStatusAllKey(1)
+      }
       setTimeSheetRows(res.data)
       setTimeSheetRows((prevRows) =>
         prevRows.map((row) => {
@@ -27,6 +33,7 @@ const Timesheet = () => {
         
       );
     } else {
+      setSubmitStatusAllKey(0)
       setTimeSheetRows([])
     }
   }
@@ -486,6 +493,8 @@ const Timesheet = () => {
           showConfirmButton: true,
           timer: 1500
         });
+        setSubmitStatus(0)
+        setSubmitStatusAllKey(0)
         GetTimeSheet(weekOffSetValue.current);
         setUpdateTimeSheetRows([])
       }
@@ -545,6 +554,7 @@ const Timesheet = () => {
         timer: 1500
       });
       setSubmitStatus(0)
+      setSubmitStatusAllKey(0)
       GetTimeSheet(weekOffSetValue.current);
     }
    return
@@ -584,6 +594,7 @@ const Timesheet = () => {
         timer: 1500
       });
       setSubmitStatus(0)
+      setSubmitStatusAllKey(0)
       GetTimeSheet(weekOffSetValue.current);
     }
   }
@@ -688,9 +699,12 @@ const Timesheet = () => {
                               {weekDays.sunday.replace(",", "")}
                             </th> */}
                             <th> <ChevronRight onClick={(e) => { e.preventDefault(); changeWeek(1); }}/></th>
-                            <th className="dropdwnCol5" data-field="phone">
-                              Action
-                            </th>
+                            {submitStatusAllKey === 0? 
+                             <th className="dropdwnCol5" data-field="phone">
+                             Action
+                           </th>
+                            :""}
+                           
                           </tr>
                         </thead>
 
@@ -922,58 +936,64 @@ const Timesheet = () => {
                               
                               */}
                              
+                              {submitStatusAllKey === 0?
+                               <td className="d-flex">
+                               {
+                                 item.submit_status === "0"?
 
-                              <td className="d-flex">
-                                {
-                                   item.submit_status === "0"?
-                                  item.editRow == 0 || item.editRow == undefined? 
-                                  <button
-                                  className="edit-icon"
-                                  onClick={(e) => {
-                                    editRow(e, index);
-                                  }}
-                                 >
-                                 <i className="fa fa-pencil text-primary  "></i>
-                                </button>
-                                  :
-
-                                  <button
-                                  className="edit-icon"
-                                  onClick={(e) => {
-                                    undoEditRow(e, index);
-                                  }}
-                                 >
-                                <i class="fa-solid fa-arrow-rotate-left"></i>
-                                </button>
-                                  :""
-                                }
-                                
-                                <button
-                                  className="delete-icon"
-                                  onClick={() => handleDeleteRow(index)}
+                                 item.editRow == 0 || item.editRow == undefined?
+                                 <button
+                                 className="edit-icon"
+                                 onClick={(e) => {
+                                   editRow(e, index);
+                                 }}
                                 >
-                                  <i className="ti-trash text-danger  "></i>
-                                </button>
-                                {/* <Trash2 className="delete-icon" /> */}
-
-                              </td>
+                                <i className="fa fa-pencil text-primary  "></i>
+                               </button>
+                                 :
+                                 <button
+                                 className="edit-icon"
+                                 onClick={(e) => {
+                                   undoEditRow(e, index);
+                                 }}
+                                >
+                               <i class="fa-solid fa-arrow-rotate-left"></i>
+                               </button>
+                                 :""
+                               }
+                               {submitStatusAllKey === 0?
+                               <button
+                               className="delete-icon"
+                               onClick={() => handleDeleteRow(index)}
+                             >
+                               <i className="ti-trash text-danger  "></i>
+                               </button> 
+                               :""}
+                               {/* <Trash2 className="delete-icon" /> */}
+                             </td>
+                              :""}
+                             
                             </tr>
                           ))}
                           <tr className="tabel_new">
                             <td>
+                            {
+                              submitStatusAllKey === 0?
                               <button
-                                className="d-flex btn btn-info fw-normal px-2"
-                                onClick={handleAddNewSheet}
-                              >
-                                <i
-                                  style={{
-                                    display: "block",
-                                    fontSize: 18,
-                                    cursor: "pointer",
-                                  }}
-                                  className="ri-add-circle-fill"
-                                />
-                              </button>
+                              className="d-flex btn btn-info fw-normal px-2"
+                              onClick={handleAddNewSheet}
+                            >
+                              <i
+                                style={{
+                                  display: "block",
+                                  fontSize: 18,
+                                  cursor: "pointer",
+                                }}
+                                className="ri-add-circle-fill"
+                              />
+                            </button>
+                              :""
+                            }  
                             </td>
                             <td colSpan={12}></td>
                           </tr>
@@ -1013,18 +1033,24 @@ const Timesheet = () => {
             {selectedTab === "custom" && <div>Custom content...</div>}
           </div>
           <div className="d-flex justify-content-end mt-3">
+            {submitStatusAllKey === 0 ? 
+            <>
             <button className="btn btn-info"
               onClick={(e) => {
                 saveData(e);
               }}>
               <i className="fa fa-check"></i> save
             </button>
-            <button className="btn btn-outline-success ms-3"
+             
+             <button className="btn btn-outline-success ms-3"
             onClick={(e) => {
               submitData(e);
             }}>
               <i className="far fa-save"></i> submit
             </button>
+            </>
+            :""}
+        
           </div>
 
 
