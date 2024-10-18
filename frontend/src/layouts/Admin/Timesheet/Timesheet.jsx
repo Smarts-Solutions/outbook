@@ -20,6 +20,7 @@ const Timesheet = () => {
     
     const res = await dispatch(getTimesheetData({ req, authToken: token })).unwrap();
     setSubmitStatusAllKey(0)
+    setDeleteRows([])
     if (res.status) {
       if(res.data.length > 0 && res.data[0].submit_status === "1" ){
         setSubmitStatusAllKey(1)
@@ -191,12 +192,23 @@ const Timesheet = () => {
 
   };
 
-  console.log("setTimeSheetRows", timeSheetRows)
+  // console.log("setTimeSheetRows", timeSheetRows)
+  // console.log("updateTimeSheetRows", updateTimeSheetRows)
 
-  console.log("updateTimeSheetRows", updateTimeSheetRows)
-
+  const [deleteRows, setDeleteRows] = useState([]);
   const handleDeleteRow = (index) => {
-    const newSheetRows = [...timeSheetRows];
+   const newSheetRows = [...timeSheetRows];
+   const id = newSheetRows[index].id;
+    if(id != null){
+      setDeleteRows((prevRows) => {
+        const existingIds = new Set(prevRows); 
+        if (!existingIds.has(id)) { 
+            return [...prevRows, id];
+        }
+        return prevRows;
+    });
+   }
+   
     newSheetRows.splice(index, 1);
     setTimeSheetRows(newSheetRows);
   };
@@ -446,7 +458,6 @@ const Timesheet = () => {
     }
     setUpdateTimeSheetRows(updatedRows_update);
   }
-
   // update record Function
 
   const editRow = async (e, index) => {
@@ -472,7 +483,7 @@ const Timesheet = () => {
       }
     }
 
-    if (updateTimeSheetRows.length > 0) {
+    if (updateTimeSheetRows.length > 0 || deleteRows.length > 0) {
       const hasEditRow = timeSheetRows.some(item => item.editRow === 1);
       if (hasEditRow == true) {
         setRemarkModel(true);
@@ -483,7 +494,7 @@ const Timesheet = () => {
         return rest;
       });
 
-      const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows };
+      const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows ,deleteRows:deleteRows };
       const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
       if (res.status) {
         sweatalert.fire({
@@ -520,13 +531,6 @@ const Timesheet = () => {
 
    if(submitStatus == 1){
     const updatedTimeSheetRows = timeSheetRows.map(item => {
-      // if (item.editRow === 1) {
-      //   return {
-      //     ...item,
-      //     remark: remarkText
-      //   };
-      // }
-      // return item;
       return {
         ...item,
         submit_status: "1",
@@ -534,13 +538,12 @@ const Timesheet = () => {
       };
     });
 
-
     const updatedTimeSheetRows1 = updatedTimeSheetRows.map(row => {
       const { customerData, clientData, jobData, taskData, ...rest } = row;
       return rest;
     });
 
-    const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows1 };
+    const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows1 , deleteRows:deleteRows};
     const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
     if (res.status) {
       setRemarkText(null)
@@ -548,7 +551,7 @@ const Timesheet = () => {
       setRemarkModel(false)
       sweatalert.fire({
         icon: 'success',
-        title: res.message,
+        title: "Timesheet data submit successfully.",
         timerProgressBar: true,
         showConfirmButton: true,
         timer: 1500
@@ -580,7 +583,7 @@ const Timesheet = () => {
       return rest;
     });
 
-    const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows1 };
+    const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows1 ,deleteRows:deleteRows };
     const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
     if (res.status) {
       setRemarkText(null)

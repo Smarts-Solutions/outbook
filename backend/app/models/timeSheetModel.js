@@ -350,16 +350,16 @@ LEFT JOIN
 
  const saveTimesheet = async (Timesheet) => {
   try {
-    const {staff_id , data} = Timesheet;
-    const formatTime = input => {
+    const {staff_id , data ,deleteRows} = Timesheet;
+     if(data.length > 0){
+     const formatTime = input => {
       if(input == null){
         return null 
       }
       const [hours, minutes = '00'] = input.toString().split('.');
       return `${hours}:${(minutes + '00').slice(0, 2)}`;
-    };
-
-    for (const row of data) {
+     };
+      for (const row of data) {
       const customer_id = row.customer_id == null ? 0 :row.customer_id;
       const client_id = row.client_id == null ? 0 :row.client_id;
       const remark = row.remark == "" ? null :row.remark;
@@ -408,6 +408,14 @@ LEFT JOIN
         ];
 
         await pool.query(updateQuery, updateValues);
+      }
+      }
+     }
+   
+    if(deleteRows.length > 0){
+      for (const id of deleteRows) {
+        const deleteQuery = `DELETE FROM timesheet WHERE id = ?`;
+        await pool.query(deleteQuery, [id]);
       }
     }
 
