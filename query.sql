@@ -782,6 +782,7 @@ CREATE TABLE timesheet (
     sunday_hours VARCHAR(100) DEFAULT NULL,
     remark TEXT DEFAULT NULL,
     status ENUM('0', '1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+    submit_status ENUM('0', '1') NOT NULL DEFAULT '0' COMMENT '0: enable, 1: disable',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (staff_id) REFERENCES staffs(id),

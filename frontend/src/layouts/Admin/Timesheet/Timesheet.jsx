@@ -89,12 +89,13 @@ const Timesheet = () => {
   };
 
 
+  const [submitStatus, setSubmitStatus] = useState(0);
   const [remarkText, setRemarkText] = useState(null);
   const [remarkModel, setRemarkModel] = useState(false);
   const [timeSheetRows, setTimeSheetRows] = useState([]);
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
-
+ 
 
   // Function to handle dropdown change
   const handleTabChange = (event) => {
@@ -135,6 +136,7 @@ const Timesheet = () => {
       remark: null,
       newRow: 1,
       editRow: 0,
+      submit_status: "0",
       customerData: [],     // Holds the data for customer dropdown
       clientData: [],       // Holds the data for client dropdown
       jobData: [],          // Holds the data for job dropdown
@@ -490,7 +492,68 @@ const Timesheet = () => {
     }
   }
 
+  const submitData = async (e) => {
+
+    if (timeSheetRows.length > 0) {
+      const lastObject = timeSheetRows[timeSheetRows.length - 1];
+      if (lastObject.task_id == null) {
+        alert("Please select the Task")
+        return
+      }
+    }
+   
+     setSubmitStatus(1)
+     setRemarkModel(true);
+    
+  }
+  
   const saveTimeSheetRemark = async (e) => {
+
+   if(submitStatus == 1){
+    const updatedTimeSheetRows = timeSheetRows.map(item => {
+      // if (item.editRow === 1) {
+      //   return {
+      //     ...item,
+      //     remark: remarkText
+      //   };
+      // }
+      // return item;
+      return {
+        ...item,
+        submit_status: "1",
+        remark: item.editRow === 1 ? remarkText : null 
+      };
+    });
+
+
+    const updatedTimeSheetRows1 = updatedTimeSheetRows.map(row => {
+      const { customerData, clientData, jobData, taskData, ...rest } = row;
+      return rest;
+    });
+
+    const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows1 };
+    const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
+    if (res.status) {
+      setRemarkText(null)
+      setUpdateTimeSheetRows([])
+      setRemarkModel(false)
+      sweatalert.fire({
+        icon: 'success',
+        title: res.message,
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500
+      });
+      setSubmitStatus(0)
+      GetTimeSheet(weekOffSetValue.current);
+    }
+   return
+   }
+
+
+
+
+
     const updatedTimeSheetRows = timeSheetRows.map(item => {
       if (item.editRow === 1) {
         return {
@@ -520,6 +583,7 @@ const Timesheet = () => {
         showConfirmButton: true,
         timer: 1500
       });
+      setSubmitStatus(0)
       GetTimeSheet(weekOffSetValue.current);
     }
   }
@@ -773,7 +837,7 @@ const Timesheet = () => {
                                   
                                   onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday ,item)}
                                   value={item.monday_hours == null ? "0" : item.monday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday'?false:true : false : currentDay !== 'monday'}
+                                  disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday'?false:true : false : currentDay !== 'monday'}
                                 />
                                
                               </td>
@@ -787,7 +851,7 @@ const Timesheet = () => {
                                   name="tuesday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'tuesday_date', weekDays.tuesday,item)}
                                   value={item.tuesday_hours == null ? "0" : item.tuesday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false:true : false : currentDay !== 'tuesday'}
+                                  disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false:true : false : currentDay !== 'tuesday'}
                                 />
                      
 
@@ -801,7 +865,7 @@ const Timesheet = () => {
                                   name="wednesday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'wednesday_date', weekDays.wednesday,item)}
                                   value={item.wednesday_hours == null ? "0" : item.wednesday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false :true : false : currentDay !== 'wednesday'}
+                                  disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false :true : false : currentDay !== 'wednesday'}
                                 />
                               </td>
 
@@ -813,7 +877,7 @@ const Timesheet = () => {
                                   name="thursday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'thursday_date', weekDays.thursday , item)}
                                   value={item.thursday_hours == null ? "0" : item.thursday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ?currentDay === 'thursday' ?false: true : false : currentDay !== 'thursday'}
+                                  disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ?currentDay === 'thursday' ?false: true : false : currentDay !== 'thursday'}
                                 />
                               </td>
 
@@ -825,7 +889,7 @@ const Timesheet = () => {
                                   name="friday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'friday_date', weekDays.friday ,item )}
                                   value={item.friday_hours == null ? "0" : item.friday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ?false :true : false : currentDay !== 'friday'}
+                                  disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ? false :true : false : currentDay !== 'friday'}
                                 />
                               </td>
 
@@ -837,7 +901,7 @@ const Timesheet = () => {
                                   name="saturday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'saturday_date', weekDays.saturday ,item)}
                                   value={item.saturday_hours == null ? "0" : item.saturday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
+                                  disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
                                 />
                               </td>
                                 <td></td>
@@ -851,7 +915,7 @@ const Timesheet = () => {
                                   name="sunday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'sunday_date', weekDays.sunday ,item )}
                                   value={item.sunday_hours == null ? "0" : item.sunday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.sunday) > new Date() ? currentDay === 'sunday' ? false: true : false : currentDay !== 'sunday'}
+                                  disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.sunday) > new Date() ? currentDay === 'sunday' ? false: true : false : currentDay !== 'sunday'}
                                 />
 
                               </td>
@@ -861,6 +925,7 @@ const Timesheet = () => {
 
                               <td className="d-flex">
                                 {
+                                   item.submit_status === "0"?
                                   item.editRow == 0 || item.editRow == undefined? 
                                   <button
                                   className="edit-icon"
@@ -880,7 +945,7 @@ const Timesheet = () => {
                                  >
                                 <i class="fa-solid fa-arrow-rotate-left"></i>
                                 </button>
-
+                                  :""
                                 }
                                 
                                 <button
@@ -954,7 +1019,10 @@ const Timesheet = () => {
               }}>
               <i className="fa fa-check"></i> save
             </button>
-            <button className="btn btn-outline-success ms-3">
+            <button className="btn btn-outline-success ms-3"
+            onClick={(e) => {
+              submitData(e);
+            }}>
               <i className="far fa-save"></i> submit
             </button>
           </div>
@@ -969,11 +1037,12 @@ const Timesheet = () => {
             size="lg"
             cancel_btn={false}
             btn_2="true"
-            btn_name="Save"
+            btn_name={submitStatus===1?"Submit":"Save"}
             title="Remark"
             hideBtn={false}
             handleClose={() => {
               setRemarkModel(false);
+              setSubmitStatus(0)
             }}
             Submit_Function={(e) => saveTimeSheetRemark(e)}
           >

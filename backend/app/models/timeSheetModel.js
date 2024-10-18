@@ -36,6 +36,7 @@ try {
       REPLACE(SUBSTRING_INDEX(timesheet.saturday_hours, ':', 2), ':', '.') AS saturday_hours,
       timesheet.remark AS remark,
       timesheet.status AS status,
+      timesheet.submit_status AS submit_status,
       timesheet.created_at AS created_at,
       timesheet.updated_at AS updated_at,
       internal.name AS internal_name,
@@ -350,8 +351,6 @@ LEFT JOIN
  const saveTimesheet = async (Timesheet) => {
   try {
     const {staff_id , data} = Timesheet;
-  console.log("data ",data)
-
     const formatTime = input => {
       if(input == null){
         return null 
@@ -398,14 +397,14 @@ LEFT JOIN
             task_type = ?, customer_id = ?, client_id = ?, job_id = ?, task_id = ?,
             monday_date = ?, monday_hours = ?, tuesday_date = ?, tuesday_hours = ?, wednesday_date = ?,
             wednesday_hours = ?, thursday_date = ?, thursday_hours = ?, friday_date = ?, friday_hours = ?,
-            saturday_date = ?, saturday_hours = ?, sunday_date = ?, sunday_hours = ?, remark = ?
+            saturday_date = ?, saturday_hours = ?, sunday_date = ?, sunday_hours = ?, remark = ? ,submit_status = ?
           WHERE id = ?`;
 
         const updateValues = [
           row.task_type, customer_id, client_id, row.job_id, row.task_id,
           row.monday_date, monday_hours, row.tuesday_date, tuesday_hours, row.wednesday_date,
           wednesday_hours, row.thursday_date, thursday_hours, row.friday_date, friday_hours,
-          row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, remark , row.id
+          row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, remark ,row.submit_status , row.id
         ];
 
         await pool.query(updateQuery, updateValues);
