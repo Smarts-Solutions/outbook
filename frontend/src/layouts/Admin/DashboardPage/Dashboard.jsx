@@ -136,7 +136,7 @@ const Dashboard = () => {
                     </select>
                   </div>
                 </div>
-                <div className="col-md-3">
+                {/* <div className="col-md-3">
                   <div className="custom-multiselect">
                     <DropdownMultiselect
                       options={optiondata}
@@ -162,7 +162,7 @@ const Dashboard = () => {
                       className=""
                     />
                   </div>
-                </div>
+                </div> */}
               </div>
               {/* Dropdown to select a tab */}
 
