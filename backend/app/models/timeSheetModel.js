@@ -1,7 +1,7 @@
 const pool = require("../config/database");
 
 const getTimesheet = async (Timesheet) => {
-const { staff_id , weekOffset } = Timesheet; 
+const { staff_id , weekOffset } = Timesheet;
 const currentDate = new Date();
 const currentWeekday = currentDate.getUTCDay(); 
 const startOfWeek = new Date(currentDate);
@@ -67,13 +67,14 @@ try {
       LEFT JOIN job_types ON jobs.job_type_id = job_types.id AND timesheet.task_type = 2
       LEFT JOIN task ON task.id = timesheet.task_id AND timesheet.task_type = 2
     WHERE 
-      timesheet.staff_id = ? AND
-      (timesheet.monday_date BETWEEN ? AND ?) OR
-      (timesheet.tuesday_date BETWEEN ? AND ?) OR
-      (timesheet.wednesday_date BETWEEN ? AND ?) OR
-      (timesheet.thursday_date BETWEEN ? AND ?) OR
-      (timesheet.friday_date BETWEEN ? AND ?) OR
-      (timesheet.saturday_date BETWEEN ? AND ?)
+      timesheet.staff_id = ? AND (
+        timesheet.monday_date BETWEEN ? AND ? OR
+        timesheet.tuesday_date BETWEEN ? AND ? OR
+        timesheet.wednesday_date BETWEEN ? AND ? OR
+        timesheet.thursday_date BETWEEN ? AND ? OR
+        timesheet.friday_date BETWEEN ? AND ? OR
+        timesheet.saturday_date BETWEEN ? AND ?
+    )
     ORDER BY
       timesheet.id ASC;
   `;
@@ -93,8 +94,7 @@ try {
     startOfWeekFormatted,
     endOfWeekFormatted
   ]);
- 
-  console.log("rows ",rows)
+
   return { status: true, message: "success.", data: rows };
 } catch (err) {
   console.log(err);

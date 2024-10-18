@@ -448,9 +448,13 @@ const getClient = async (client) => {
         LEFT JOIN
           jobs ON jobs.customer_id = clients.customer_id
         LEFT JOIN 
-          staffs ON customers.staff_id = staffs.id   
+          staffs ON customers.staff_id = staffs.id
+        LEFT JOIN 
+          customer_services ON customer_services.customer_id = customers.id
+        LEFT JOIN 
+          customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id    
         WHERE 
-          jobs.account_manager_id = ? AND clients.customer_id = ? 
+          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND clients.customer_id = ? AND jobs.client_id = clients.id
         GROUP BY 
         CASE 
             WHEN jobs.account_manager_id = ? THEN jobs.client_id
@@ -459,7 +463,7 @@ const getClient = async (client) => {
         ORDER BY 
         clients.id DESC
             `;
-          const [resultAccounrManage] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId]);
+          const [resultAccounrManage] = await pool.execute(query, [StaffUserId,StaffUserId ,customer_id, StaffUserId]);
           return { status: true, message: "success.", data: resultAccounrManage };
 
         }
