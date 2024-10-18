@@ -2196,9 +2196,7 @@ const Setting = () => {
                 )
               }
             />
-          )}
-
-
+          )} 
           {console.log("viewData", viewData)}
           {showViewModal && (
             <CommonModal
@@ -2219,8 +2217,24 @@ const Setting = () => {
                       Check List Name
                     </label>
                   </div>
-                  <div className="col-md-6">
+                  <div className="col-md-6" style={{fontWeight:600}}>
                     <span className="text-muted">{viewData && viewData?.check_list_name}</span>
+                  </div>
+                  <div className="col-md-6">
+                    <label htmlFor="customername-field" className="form-label">
+                      Task Name
+                    </label>
+                  </div>
+                  <div className="col-md-6" style={{fontWeight:600}}>
+                  {viewData && viewData.task?.map(task => task.task_name).join(',  ')}
+                  </div>
+                  <div className="col-md-6">
+                    <label htmlFor="customername-field" className="form-label">
+                    status
+                    </label>
+                  </div>
+                  <div className="col-md-6" style={{fontWeight:600}}>
+                    <span className="text-muted">{viewData && viewData?.status==1 ? "Active" : "Inactvie" }</span>
                   </div>
                 </div>
 
