@@ -137,9 +137,8 @@ const isLogOut = async (req, res) => {
 
 const status = async (req, res) => {
   try {
-    console.log(req.body)
+    // console.log(req.body)
     const { id } = req.body;
-    console.log(id)
     const data = await authService.status(id);
     return res.send({ status: true, message: "Success.." , data });
   } catch (error
