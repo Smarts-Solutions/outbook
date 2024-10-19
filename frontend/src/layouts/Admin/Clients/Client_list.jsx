@@ -307,14 +307,14 @@ const ClientList = () => {
       cell: (row) => (
         <div>
           {
-            getAccessDataJob.update === 1 ? (
+            getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
               <button className="edit-icon" onClick={() => handleJobEdit(row)}>
                 <i className="ti-pencil" />
               </button>
             ) : null
           }
           {
-            getAccessDataJob.delete === 1 ? (
+            getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN"? (
               <button className="delete-icon" onClick={() => handleDelete(row, "job")}>
                 <i className="ti-trash text-danger" />
               </button>
