@@ -12,12 +12,19 @@ const Timesheet = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const weekOffSetValue = useRef(0);
+  const [submitStatusAllKey, setSubmitStatusAllKey] = useState(0);
  
   const GetTimeSheet = async (weekOffset) => {
 
     const req = { staff_id: staffDetails.id ,weekOffset : weekOffset };
+    
     const res = await dispatch(getTimesheetData({ req, authToken: token })).unwrap();
+    setSubmitStatusAllKey(0)
+    setDeleteRows([])
     if (res.status) {
+      if(res.data.length > 0 && res.data[0].submit_status === "1" ){
+        setSubmitStatusAllKey(1)
+      }
       setTimeSheetRows(res.data)
       setTimeSheetRows((prevRows) =>
         prevRows.map((row) => {
@@ -27,6 +34,7 @@ const Timesheet = () => {
         
       );
     } else {
+      setSubmitStatusAllKey(0)
       setTimeSheetRows([])
     }
   }
@@ -89,12 +97,13 @@ const Timesheet = () => {
   };
 
 
+  const [submitStatus, setSubmitStatus] = useState(0);
   const [remarkText, setRemarkText] = useState(null);
   const [remarkModel, setRemarkModel] = useState(false);
   const [timeSheetRows, setTimeSheetRows] = useState([]);
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
-
+ 
 
   // Function to handle dropdown change
   const handleTabChange = (event) => {
@@ -135,6 +144,7 @@ const Timesheet = () => {
       remark: null,
       newRow: 1,
       editRow: 0,
+      submit_status: "0",
       customerData: [],     // Holds the data for customer dropdown
       clientData: [],       // Holds the data for client dropdown
       jobData: [],          // Holds the data for job dropdown
@@ -182,12 +192,23 @@ const Timesheet = () => {
 
   };
 
-  console.log("setTimeSheetRows", timeSheetRows)
+  // console.log("setTimeSheetRows", timeSheetRows)
+  // console.log("updateTimeSheetRows", updateTimeSheetRows)
 
-  console.log("updateTimeSheetRows", updateTimeSheetRows)
-
+  const [deleteRows, setDeleteRows] = useState([]);
   const handleDeleteRow = (index) => {
-    const newSheetRows = [...timeSheetRows];
+   const newSheetRows = [...timeSheetRows];
+   const id = newSheetRows[index].id;
+    if(id != null){
+      setDeleteRows((prevRows) => {
+        const existingIds = new Set(prevRows); 
+        if (!existingIds.has(id)) { 
+            return [...prevRows, id];
+        }
+        return prevRows;
+    });
+   }
+   
     newSheetRows.splice(index, 1);
     setTimeSheetRows(newSheetRows);
   };
@@ -396,10 +417,14 @@ const Timesheet = () => {
     
     const sum = (parseFloat(updatedRows[index].monday_hours) || 0) + (parseFloat(updatedRows[index].tuesday_hours) || 0) + (parseFloat(updatedRows[index].wednesday_hours) || 0) + (parseFloat(updatedRows[index].thursday_hours) || 0) + (parseFloat(updatedRows[index].friday_hours) || 0) + (parseFloat(updatedRows[index].saturday_hours) || 0) + (parseFloat(updatedRows[index].sunday_hours) || 0); 
     updatedRows[index].total_hours = sum;
+
+    // console.log("updatedRows[index] ",updatedRows[index])
+    // console.log("updatedRows[index] staffs_hourminute ",updatedRows[index].staffs_hourminute)
+    // console.log("updatedRows[index] staffs_hourminute parsfloat",parseFloat(convertTimeFormat(updatedRows[index].staffs_hourminute)))
     
     // warning total hours
-    if(updatedRows[index].job_total_time != null && updatedRows[index].job_total_time != undefined && e.target.value != ''){
-       if(updatedRows[index].total_hours > parseFloat(convertTimeFormat(updatedRows[index].job_total_time))){
+    if(updatedRows[index].staffs_hourminute != null && updatedRows[index].staffs_hourminute != undefined && e.target.value != ''){
+       if(updatedRows[index].total_hours > parseFloat(convertTimeFormat(updatedRows[index].staffs_hourminute))){
         sweatalert.fire({
           icon: 'warning',
           title: "Your total allotted time has exceeded.",
@@ -433,7 +458,6 @@ const Timesheet = () => {
     }
     setUpdateTimeSheetRows(updatedRows_update);
   }
-
   // update record Function
 
   const editRow = async (e, index) => {
@@ -459,7 +483,7 @@ const Timesheet = () => {
       }
     }
 
-    if (updateTimeSheetRows.length > 0) {
+    if (updateTimeSheetRows.length > 0 || deleteRows.length > 0) {
       const hasEditRow = timeSheetRows.some(item => item.editRow === 1);
       if (hasEditRow == true) {
         setRemarkModel(true);
@@ -470,7 +494,7 @@ const Timesheet = () => {
         return rest;
       });
 
-      const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows };
+      const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows ,deleteRows:deleteRows };
       const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
       if (res.status) {
         sweatalert.fire({
@@ -480,13 +504,69 @@ const Timesheet = () => {
           showConfirmButton: true,
           timer: 1500
         });
+        setSubmitStatus(0)
+        setSubmitStatusAllKey(0)
         GetTimeSheet(weekOffSetValue.current);
         setUpdateTimeSheetRows([])
       }
     }
   }
 
+  const submitData = async (e) => {
+
+    if (timeSheetRows.length > 0) {
+      const lastObject = timeSheetRows[timeSheetRows.length - 1];
+      if (lastObject.task_id == null) {
+        alert("Please select the Task")
+        return
+      }
+    }
+   
+     setSubmitStatus(1)
+     setRemarkModel(true);
+    
+  }
+  
   const saveTimeSheetRemark = async (e) => {
+
+   if(submitStatus == 1){
+    const updatedTimeSheetRows = timeSheetRows.map(item => {
+      return {
+        ...item,
+        submit_status: "1",
+        remark: item.editRow === 1 ? remarkText : null 
+      };
+    });
+
+    const updatedTimeSheetRows1 = updatedTimeSheetRows.map(row => {
+      const { customerData, clientData, jobData, taskData, ...rest } = row;
+      return rest;
+    });
+
+    const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows1 , deleteRows:deleteRows};
+    const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
+    if (res.status) {
+      setRemarkText(null)
+      setUpdateTimeSheetRows([])
+      setRemarkModel(false)
+      sweatalert.fire({
+        icon: 'success',
+        title: "Timesheet data submit successfully.",
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500
+      });
+      setSubmitStatus(0)
+      setSubmitStatusAllKey(0)
+      GetTimeSheet(weekOffSetValue.current);
+    }
+   return
+   }
+
+
+
+
+
     const updatedTimeSheetRows = timeSheetRows.map(item => {
       if (item.editRow === 1) {
         return {
@@ -503,7 +583,7 @@ const Timesheet = () => {
       return rest;
     });
 
-    const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows1 };
+    const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows1 ,deleteRows:deleteRows };
     const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
     if (res.status) {
       setRemarkText(null)
@@ -516,6 +596,8 @@ const Timesheet = () => {
         showConfirmButton: true,
         timer: 1500
       });
+      setSubmitStatus(0)
+      setSubmitStatusAllKey(0)
       GetTimeSheet(weekOffSetValue.current);
     }
   }
@@ -533,9 +615,8 @@ const Timesheet = () => {
           </div>
         </div>
         <div className="report-data mt-4">
-          <div className="col-md-4">
+          {/* <div className="col-md-4">
             <div className="form-group">
-              {/* <label htmlFor="tabSelect">Filter:</label> */}
               <select
                 className="form-select"
                 id="tabSelect"
@@ -555,7 +636,7 @@ const Timesheet = () => {
                 <option value="custom">Custom</option>
               </select>
             </div>
-          </div>
+          </div> */}
 
           {/* Tabs Content */}
           <div className="tab-content mt-5">
@@ -621,9 +702,12 @@ const Timesheet = () => {
                               {weekDays.sunday.replace(",", "")}
                             </th> */}
                             <th> <ChevronRight onClick={(e) => { e.preventDefault(); changeWeek(1); }}/></th>
-                            <th className="dropdwnCol5" data-field="phone">
-                              Action
-                            </th>
+                            {submitStatusAllKey === 0? 
+                             <th className="dropdwnCol5" data-field="phone">
+                             Action
+                           </th>
+                            :""}
+                           
                           </tr>
                         </thead>
 
@@ -770,7 +854,7 @@ const Timesheet = () => {
                                   
                                   onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday ,item)}
                                   value={item.monday_hours == null ? "0" : item.monday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday'?false:true : false : currentDay !== 'monday'}
+                                  disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday'?false:true : false : currentDay !== 'monday'}
                                 />
                                
                               </td>
@@ -784,7 +868,7 @@ const Timesheet = () => {
                                   name="tuesday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'tuesday_date', weekDays.tuesday,item)}
                                   value={item.tuesday_hours == null ? "0" : item.tuesday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false:true : false : currentDay !== 'tuesday'}
+                                  disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false:true : false : currentDay !== 'tuesday'}
                                 />
                      
 
@@ -798,7 +882,7 @@ const Timesheet = () => {
                                   name="wednesday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'wednesday_date', weekDays.wednesday,item)}
                                   value={item.wednesday_hours == null ? "0" : item.wednesday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false :true : false : currentDay !== 'wednesday'}
+                                  disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false :true : false : currentDay !== 'wednesday'}
                                 />
                               </td>
 
@@ -810,7 +894,7 @@ const Timesheet = () => {
                                   name="thursday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'thursday_date', weekDays.thursday , item)}
                                   value={item.thursday_hours == null ? "0" : item.thursday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ?currentDay === 'thursday' ?false: true : false : currentDay !== 'thursday'}
+                                  disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ?currentDay === 'thursday' ?false: true : false : currentDay !== 'thursday'}
                                 />
                               </td>
 
@@ -822,7 +906,7 @@ const Timesheet = () => {
                                   name="friday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'friday_date', weekDays.friday ,item )}
                                   value={item.friday_hours == null ? "0" : item.friday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ?false :true : false : currentDay !== 'friday'}
+                                  disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ? false :true : false : currentDay !== 'friday'}
                                 />
                               </td>
 
@@ -834,7 +918,7 @@ const Timesheet = () => {
                                   name="saturday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'saturday_date', weekDays.saturday ,item)}
                                   value={item.saturday_hours == null ? "0" : item.saturday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
+                                  disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
                                 />
                               </td>
                                 <td></td>
@@ -848,64 +932,71 @@ const Timesheet = () => {
                                   name="sunday_hours"
                                   onChange={(e) => handleHoursInput(e, index, 'sunday_date', weekDays.sunday ,item )}
                                   value={item.sunday_hours == null ? "0" : item.sunday_hours}
-                                  disabled={item.editRow == 1 ? new Date(weekDays.sunday) > new Date() ? currentDay === 'sunday' ? false: true : false : currentDay !== 'sunday'}
+                                  disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.sunday) > new Date() ? currentDay === 'sunday' ? false: true : false : currentDay !== 'sunday'}
                                 />
 
                               </td>
                               
                               */}
                              
+                              {submitStatusAllKey === 0?
+                               <td className="d-flex">
+                               {
+                                 item.submit_status === "0"?
 
-                              <td className="d-flex">
-                                {
-                                  item.editRow == 0 || item.editRow == undefined? 
-                                  <button
-                                  className="edit-icon"
-                                  onClick={(e) => {
-                                    editRow(e, index);
-                                  }}
-                                 >
-                                 <i className="fa fa-pencil text-primary  "></i>
-                                </button>
-                                  :
-
-                                  <button
-                                  className="edit-icon"
-                                  onClick={(e) => {
-                                    undoEditRow(e, index);
-                                  }}
-                                 >
-                                <i class="fa-solid fa-arrow-rotate-left"></i>
-                                </button>
-
-                                }
-                                
-                                <button
-                                  className="delete-icon"
-                                  onClick={() => handleDeleteRow(index)}
+                                 item.editRow == 0 || item.editRow == undefined?
+                                 <button
+                                 className="edit-icon"
+                                 onClick={(e) => {
+                                   editRow(e, index);
+                                 }}
                                 >
-                                  <i className="ti-trash text-danger  "></i>
-                                </button>
-                                {/* <Trash2 className="delete-icon" /> */}
-
-                              </td>
+                                <i className="fa fa-pencil text-primary  "></i>
+                               </button>
+                                 :
+                                 <button
+                                 className="edit-icon"
+                                 onClick={(e) => {
+                                   undoEditRow(e, index);
+                                 }}
+                                >
+                               <i class="fa-solid fa-arrow-rotate-left"></i>
+                               </button>
+                                 :""
+                               }
+                               {submitStatusAllKey === 0?
+                               <button
+                               className="delete-icon"
+                               onClick={() => handleDeleteRow(index)}
+                             >
+                               <i className="ti-trash text-danger  "></i>
+                               </button> 
+                               :""}
+                               {/* <Trash2 className="delete-icon" /> */}
+                             </td>
+                              :""}
+                             
                             </tr>
                           ))}
                           <tr className="tabel_new">
                             <td>
+                            {
+                              submitStatusAllKey === 0?
                               <button
-                                className="d-flex btn btn-info fw-normal px-2"
-                                onClick={handleAddNewSheet}
-                              >
-                                <i
-                                  style={{
-                                    display: "block",
-                                    fontSize: 18,
-                                    cursor: "pointer",
-                                  }}
-                                  className="ri-add-circle-fill"
-                                />
-                              </button>
+                              className="d-flex btn btn-info fw-normal px-2"
+                              onClick={handleAddNewSheet}
+                            >
+                              <i
+                                style={{
+                                  display: "block",
+                                  fontSize: 18,
+                                  cursor: "pointer",
+                                }}
+                                className="ri-add-circle-fill"
+                              />
+                            </button>
+                              :""
+                            }  
                             </td>
                             <td colSpan={12}></td>
                           </tr>
@@ -945,15 +1036,24 @@ const Timesheet = () => {
             {selectedTab === "custom" && <div>Custom content...</div>}
           </div>
           <div className="d-flex justify-content-end mt-3">
+            {submitStatusAllKey === 0 ? 
+            <>
             <button className="btn btn-info"
               onClick={(e) => {
                 saveData(e);
               }}>
               <i className="fa fa-check"></i> save
             </button>
-            <button className="btn btn-outline-success ms-3">
+             
+             <button className="btn btn-outline-success ms-3"
+            onClick={(e) => {
+              submitData(e);
+            }}>
               <i className="far fa-save"></i> submit
             </button>
+            </>
+            :""}
+        
           </div>
 
 
@@ -966,11 +1066,12 @@ const Timesheet = () => {
             size="lg"
             cancel_btn={false}
             btn_2="true"
-            btn_name="Save"
+            btn_name={submitStatus===1?"Submit":"Save"}
             title="Remark"
             hideBtn={false}
             handleClose={() => {
               setRemarkModel(false);
+              setSubmitStatus(0)
             }}
             Submit_Function={(e) => saveTimeSheetRemark(e)}
           >

@@ -1,7 +1,7 @@
 const pool = require("../config/database");
 
 const getTimesheet = async (Timesheet) => {
-const { staff_id , weekOffset } = Timesheet; 
+const { staff_id , weekOffset } = Timesheet;
 const currentDate = new Date();
 const currentWeekday = currentDate.getUTCDay(); 
 const startOfWeek = new Date(currentDate);
@@ -36,6 +36,7 @@ try {
       REPLACE(SUBSTRING_INDEX(timesheet.saturday_hours, ':', 2), ':', '.') AS saturday_hours,
       timesheet.remark AS remark,
       timesheet.status AS status,
+      timesheet.submit_status AS submit_status,
       timesheet.created_at AS created_at,
       timesheet.updated_at AS updated_at,
       internal.name AS internal_name,
@@ -53,9 +54,11 @@ try {
         SUBSTRING(jobs.job_id, 1, 15)
       ) AS job_name,
       task.name AS task_name,
-      jobs.total_time AS job_total_time
+      jobs.total_time AS job_total_time,
+      staffs.hourminute AS staffs_hourminute
     FROM 
       timesheet 
+      JOIN staffs ON staffs.id = timesheet.staff_id
       LEFT JOIN internal ON timesheet.job_id = internal.id AND timesheet.task_type = 1
       LEFT JOIN sub_internal ON timesheet.task_id = sub_internal.id AND timesheet.task_type = 1
       LEFT JOIN customers ON customers.id = timesheet.customer_id AND timesheet.task_type = 2
@@ -64,13 +67,14 @@ try {
       LEFT JOIN job_types ON jobs.job_type_id = job_types.id AND timesheet.task_type = 2
       LEFT JOIN task ON task.id = timesheet.task_id AND timesheet.task_type = 2
     WHERE 
-      timesheet.staff_id = ? AND
-      (timesheet.monday_date BETWEEN ? AND ?) OR
-      (timesheet.tuesday_date BETWEEN ? AND ?) OR
-      (timesheet.wednesday_date BETWEEN ? AND ?) OR
-      (timesheet.thursday_date BETWEEN ? AND ?) OR
-      (timesheet.friday_date BETWEEN ? AND ?) OR
-      (timesheet.saturday_date BETWEEN ? AND ?)
+      timesheet.staff_id = ? AND (
+        timesheet.monday_date BETWEEN ? AND ? OR
+        timesheet.tuesday_date BETWEEN ? AND ? OR
+        timesheet.wednesday_date BETWEEN ? AND ? OR
+        timesheet.thursday_date BETWEEN ? AND ? OR
+        timesheet.friday_date BETWEEN ? AND ? OR
+        timesheet.saturday_date BETWEEN ? AND ?
+    )
     ORDER BY
       timesheet.id ASC;
   `;
@@ -90,7 +94,7 @@ try {
     startOfWeekFormatted,
     endOfWeekFormatted
   ]);
-
+ 
   return { status: true, message: "success.", data: rows };
 } catch (err) {
   console.log(err);
@@ -346,18 +350,16 @@ LEFT JOIN
 
  const saveTimesheet = async (Timesheet) => {
   try {
-    const {staff_id , data} = Timesheet;
-  console.log("data ",data)
-
-    const formatTime = input => {
+    const {staff_id , data ,deleteRows} = Timesheet;
+     if(data.length > 0){
+     const formatTime = input => {
       if(input == null){
         return null 
       }
       const [hours, minutes = '00'] = input.toString().split('.');
       return `${hours}:${(minutes + '00').slice(0, 2)}`;
-    };
-
-    for (const row of data) {
+     };
+      for (const row of data) {
       const customer_id = row.customer_id == null ? 0 :row.customer_id;
       const client_id = row.client_id == null ? 0 :row.client_id;
       const remark = row.remark == "" ? null :row.remark;
@@ -395,17 +397,25 @@ LEFT JOIN
             task_type = ?, customer_id = ?, client_id = ?, job_id = ?, task_id = ?,
             monday_date = ?, monday_hours = ?, tuesday_date = ?, tuesday_hours = ?, wednesday_date = ?,
             wednesday_hours = ?, thursday_date = ?, thursday_hours = ?, friday_date = ?, friday_hours = ?,
-            saturday_date = ?, saturday_hours = ?, sunday_date = ?, sunday_hours = ?, remark = ?
+            saturday_date = ?, saturday_hours = ?, sunday_date = ?, sunday_hours = ?, remark = ? ,submit_status = ?
           WHERE id = ?`;
 
         const updateValues = [
           row.task_type, customer_id, client_id, row.job_id, row.task_id,
           row.monday_date, monday_hours, row.tuesday_date, tuesday_hours, row.wednesday_date,
           wednesday_hours, row.thursday_date, thursday_hours, row.friday_date, friday_hours,
-          row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, remark , row.id
+          row.saturday_date, saturday_hours, row.sunday_date, sunday_hours, remark ,row.submit_status , row.id
         ];
 
         await pool.query(updateQuery, updateValues);
+      }
+      }
+     }
+   
+    if(deleteRows.length > 0){
+      for (const id of deleteRows) {
+        const deleteQuery = `DELETE FROM timesheet WHERE id = ?`;
+        await pool.query(deleteQuery, [id]);
       }
     }
 
