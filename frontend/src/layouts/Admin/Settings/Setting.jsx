@@ -2197,7 +2197,6 @@ const Setting = () => {
               }
             />
           )} 
-          {console.log("viewData", viewData)}
           {showViewModal && (
             <CommonModal
               isOpen={showViewModal}
