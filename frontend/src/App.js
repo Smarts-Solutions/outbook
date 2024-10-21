@@ -18,7 +18,6 @@ const App = () => {
       .unwrap()
       .then((res) => {
         if (res.status) { 
-          console.log("Status", res.data[0].status);
           if (res?.data?.[0]?.status == '0') {
             localStorage.clear();
             navigate('/login');
@@ -51,7 +50,6 @@ const App = () => {
   useEffect(() => {
     const fetchIpData = async () => {
       const IP_Data = await GetIp();
-      console.log("IP_Data", IP_Data);
       if (IP_Data) {
         localStorage.setItem("IP_Data", JSON.stringify(IP_Data));
       }
