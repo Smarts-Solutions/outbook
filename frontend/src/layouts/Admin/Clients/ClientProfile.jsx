@@ -173,7 +173,7 @@ const ClientList = () => {
       cell: (row) => (
         <div>
           {
-            getAccessDataJob.view == 1 ? (
+            getAccessDataJob.view == 1  || role === "ADMIN" || role === "SUPERADMIN" ? (
               <a onClick={() => HandleJob(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
                 {row.job_code_id}
               </a>
