@@ -129,8 +129,7 @@ function Reportsnew() {
                                   <td>8</td>
                                   <td>4</td>
                                   <td>23</td>
-                                </tr>
-
+                                </tr> 
                                 {expandedRows[`teamMember${index + 1}`] && (
                                   <>
                                     <tr key="customer1">
