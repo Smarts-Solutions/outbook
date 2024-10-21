@@ -10,4 +10,5 @@ module.exports = function (app) {
     app.use(require("./job/jobRoutes"));
     app.use(require("./dashboard/dashboardRoutes"));
     app.use(require("./timeSheet/timeSheetRoutes"));
+    app.use(require("./report/reportRoutes"));
 };
