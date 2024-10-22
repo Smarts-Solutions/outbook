@@ -5,10 +5,8 @@ import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal'
 import TimesheetReport from './TimesheetReport';
 import JobStatusReport from './JobStatusPeport';
 import JobSummaryReport from './JobSummaryReport';
-
-
-
-
+import TeamMonthlyReport from './TeamMonthlyReports';
+import JobPendingReport from './JobPendingReports';
 
 
 const columns = [
@@ -35,13 +33,13 @@ const columns = [
 
 const tabs = [
   { name: 'Job Status Report', icon: 'fas fa-clipboard-list', value: 'jobStatusReport' },
-  { name: 'Timesheet Report', icon: 'fas fa-clock', value: 'timesheetReport' },
-  { name: 'Job Summary Report', icon: 'fas fa-chart-pie', value: 'jobSummaryReport' },
   { name: 'Jobs Received Sent Reports', icon: 'fas fa-inbox', value: 'jobsReceivedSentReports' },
+  { name: 'Job Summary Report', icon: 'fas fa-chart-pie', value: 'jobSummaryReport' },
   { name: 'Jobs Pending Report', icon: 'fas fa-tasks', value: 'jobsPendingReport' },
   { name: 'Due By Report', icon: 'fas fa-calendar-alt', value: 'dueByReport' },
   { name: 'Team Performance Report by Month', icon: 'fas fa-users', value: 'teamPerformanceReport' },
   { name: 'Average TAT Report', icon: 'fas fa-stopwatch', value: 'averageTATReport' },
+  { name: 'Timesheet Report', icon: 'fas fa-clock', value: 'timesheetReport' },
 ]
 
 function Reportsnew() {
@@ -55,22 +53,20 @@ function Reportsnew() {
 
   const getTabContent = () => {
     switch (activeTab) {
-      case 'timesheetReport':
-        return <div>
-          <TimesheetReport />
-        </div>;
       case 'jobStatusReport':
-        return <JobStatusReport/>
-      case 'jobSummaryReport':
-        return <JobSummaryReport/>
+        return <JobStatusReport /> 
       case 'jobsReceivedSentReports':
         return <div>Job Summary Report Content</div>;
+      case 'jobSummaryReport':
+        return <JobSummaryReport />
       case 'jobsPendingReport':
-        return <div>Jobs Pending Report Content</div>;
+        return <JobPendingReport />;
       case 'dueByReport':
         return <div>Due By Report Content</div>;
       case 'teamPerformanceReport':
-        return <div>Team Performance Report by Month Content</div>;
+        return <TeamMonthlyReport />;
+      case 'timesheetReport':
+        return <TimesheetReport />
       case 'averageTATReport':
         return <div>Average TAT Report Content</div>;
       default:

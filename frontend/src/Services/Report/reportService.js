@@ -30,4 +30,32 @@ export async function JOB_SUMMARY_REPORTS(data, token) {
     }
 }
 
+export async function TEAM_MONTHLY_REPORT(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}teamMonthlyReports`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+export async function JOB_PENDING_REPORT(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}jobPendingReports`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+
+
  
