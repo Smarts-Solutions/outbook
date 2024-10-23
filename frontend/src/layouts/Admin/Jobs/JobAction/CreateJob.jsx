@@ -740,6 +740,7 @@ const CreateJob = () => {
                                         placeholder="Client Job Code"
                                         name="Client"
                                         id="Client"
+                                        
                                         onChange={HandleChange}
                                         value={jobData.Client}
                                         disabled
@@ -763,6 +764,7 @@ const CreateJob = () => {
                                       placeholder="Client Job Code"
                                       name="ClientJobCode"
                                       id="ClientJobCode"
+                                      autoFocus={true}
                                       onChange={HandleChange}
                                       value={jobData.ClientJobCode}
                                     />

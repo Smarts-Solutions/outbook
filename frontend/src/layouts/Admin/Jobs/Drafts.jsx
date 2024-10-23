@@ -303,6 +303,7 @@ const Drafts = ({ getAccessDataJob }) => {
                   placeholder=""
                   name="draft_sent_on"
                   id="draft_sent_on"
+                  autoFocus
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.draft_sent_on}
                 />
@@ -477,6 +478,7 @@ const Drafts = ({ getAccessDataJob }) => {
                   placeholder=""
                   name="draft_sent_on"
                   id="draft_sent_on"
+                  autoFocus
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.draft_sent_on}
                 />

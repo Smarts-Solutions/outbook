@@ -1796,8 +1796,7 @@ const Setting = () => {
     { id: "10", label: "Internal Task", icon: "fas fa-lock" },
   ];
 
-
-  console.log("HourMinut",`${HourMinut.hours || "00"}:${HourMinut.minutes || "00"}`);
+ 
   return (
     <>
       <div>

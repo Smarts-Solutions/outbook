@@ -8,6 +8,7 @@ import {
   GET_CUSTOMER_DATA,
   Edit_Customer,
   ADD_SERVICES_CUSTOMERS,
+  getcustomerschecklistApi
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import MultiStepFormContext from "./MultiStepFormContext";
 import CommanModal from "../../../../Components/ExtraComponents/Modals/CommanModal";
@@ -43,6 +44,8 @@ const Service = () => {
     data: [],
   });
   const [uploadMessage, uploadSetMessage] = useState("");
+  const [tasksGet1, setTasksData1] = useState([]);
+  const [tasksGetRemove, setTasksDataRemove] = useState([]);
 
   useEffect(() => {
     JobTypeDataAPi(services, 2);
@@ -239,6 +242,20 @@ const Service = () => {
     }
   };
 
+  const handleDelete1 = (id) => {
+  
+    if(tasksGet1.length > 0){
+      tasksGet1.map((task) => {
+        if(task.id === id){
+          setTasksDataRemove( prev => [...prev, task]);
+        }
+      })
+          
+    }
+    setTasksData1((prev) => prev.filter((task) => task.id !== id));
+  };
+
+
   const JobTypeDataAPi = async (req, id) => {
     const fetchJobTypeData = async (service_id) => {
       const data = {
@@ -274,25 +291,26 @@ const Service = () => {
   };
 
   const getCheckListData = async (service_id, item) => {
-    const req = { service_id: service_id, job_type_id: item.id };
+    const req = { service_id: service_id, job_type_id: item.id , customer_id: address};
     const data = { req, authToken: token };
-    await dispatch(GETTASKDATA(data))
+    await dispatch(getcustomerschecklistApi(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
           if (response.data.length > 0) {
-            setTasks((prev) => {
+            console.log("response.data", response.data);
+            setTasksData1((prev) => {
               const mergedTasks = [...prev, ...response.data];
-
+  
               const uniqueTasks = mergedTasks.filter(
                 (task, index, self) =>
                   index === self.findIndex((t) => t.id === task.id)
               );
-
+  
               return uniqueTasks;
             });
           } else {
-            setTasks((prev) => [...prev, ...response.data]);
+            setTasksData1((prev) => [...prev, ...response.data]);
           }
         }
       })
@@ -424,18 +442,11 @@ const Service = () => {
     link.remove();
   };
 
-  const handleClearFile = () => {
-    setFileName("No file selected");
-
-    document.getElementById("uploadButton").value = null;
-    setTasksData([]);
-    uploadSetMessage("");
-  };
-
   const handleSearchChange = (e) => {
     setSearchValue(e.target.value);
   };
 
+  console.log("tasksGet1", tasksGet1);
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
       {({ handleSubmit }) => (
@@ -513,7 +524,7 @@ const Service = () => {
                                             .flatMap((data, subIndex) =>
                                               data.data.map((data1, jobIndex) => (
                                                 <div className="accordion-item" key={`${item.id}_${data1.id}_${jobIndex}`}>
-                                                  <h2 className="accordion-header" id={`sub-headingOne${item.id}_${data1.id}_${jobIndex}`}>
+                                                  <h2 className="accordion-header" id={`sub-headingOne${item.id}_${data1.id}_${jobIndex}`}   onClick={() =>getCheckListData(item.id, data1)}>
                                                     <button
                                                       className="accordion-button  collapsed"
                                                       type="button"
@@ -554,11 +565,9 @@ const Service = () => {
                                                           </div>
                                                         </div>
                                                         <div className="table-responsive">
-                                                          {tasksGet &&
-                                                            tasksGet
-                                                              .filter(
+                                                          {[...tasksGet1, ...tasksGet].filter(
                                                                 (TaskShow) =>
-                                                                  data1.id === TaskShow.JobTypeId && item.id === TaskShow.serviceId
+                                                                  data1.id === TaskShow.JobTypeId || TaskShow.job_type_id && item.id === TaskShow.serviceId || TaskShow.service_id
                                                               )
                                                               .length > 0 && (
                                                               <table className="table table-bordered mt-4">
@@ -570,7 +579,7 @@ const Service = () => {
                                                                         tasksGet.find(
                                                                           (TaskShow) =>
                                                                             data1.id === TaskShow.JobTypeId && item.id === TaskShow.serviceId
-                                                                        ).checklistName
+                                                                        )?.checklistName
                                                                       }
                                                                     </th>
                                                                   </tr>
@@ -582,9 +591,12 @@ const Service = () => {
                                                                 </thead>
                                                                 <tbody>
                                                                   {tasksGet.map((TaskShow) => {
+
+                                                                    
+
                                                                     if (
-                                                                      data1.id === TaskShow.JobTypeId &&
-                                                                      item.id === TaskShow.serviceId
+                                                                      data1.id == TaskShow.JobTypeId &&
+                                                                      item.id == TaskShow.serviceId
                                                                     ) {
                                                                       return (
                                                                         <tr key={TaskShow.id}>
@@ -640,6 +652,114 @@ const Service = () => {
                                                                     }
                                                                     return null;
                                                                   })}
+ {tasksGet1.map(
+                                                                    (
+                                                                      TaskShow
+                                                                    ) => {
+console.log("TaskShow", TaskShow);
+console.log("data1.id", data1.id);
+console.log("item.id", item.id);
+
+                                                                      if (
+                                                                        data1.id ===
+                                                                        TaskShow.JobTypeId &&
+                                                                        item.id ===
+                                                                        TaskShow.serviceId
+                                                                      ) {
+                                                                        return (
+                                                                          <tr
+                                                                            key={
+                                                                              TaskShow.id
+                                                                            }
+                                                                          >
+                                                                            <td>
+                                                                              {TaskShow.Task.map(
+                                                                                (
+                                                                                  TaskData
+                                                                                ) => (
+                                                                                  <div
+                                                                                    key={
+                                                                                      TaskData.id
+                                                                                    }
+                                                                                    className="mb-2"
+                                                                                  >
+                                                                                    <input
+                                                                                      type="text"
+                                                                                      className="form-control"
+                                                                                      value={
+                                                                                        TaskData.TaskName
+                                                                                      }
+                                                                                      disabled
+                                                                                    />
+                                                                                  </div>
+                                                                                )
+                                                                              )}
+                                                                            </td>
+                                                                            <td>
+                                                                              {TaskShow.Task.map(
+                                                                                (
+                                                                                  TaskData
+                                                                                ) => (
+                                                                                  <div
+                                                                                    key={
+                                                                                      TaskData.id
+                                                                                    }
+                                                                                    className="mb-2"
+                                                                                  >
+                                                                                    <div className="input-group">
+                                                                                      <div className="hours-div">
+                                                                                        <input
+                                                                                          type="text"
+                                                                                          className="form-control"
+                                                                                          value={
+                                                                                            TaskData.BudgetHour.split(
+                                                                                              ":"
+                                                                                            )[0]
+                                                                                          }
+                                                                                          disabled
+                                                                                        />
+                                                                                        <span className="input-group-text">
+                                                                                          H
+                                                                                        </span>
+                                                                                      </div>
+                                                                                      <div className="hours-div">
+                                                                                        <input
+                                                                                          type="text"
+                                                                                          className="form-control"
+                                                                                          value={
+                                                                                            TaskData.BudgetHour.split(
+                                                                                              ":"
+                                                                                            )[1]
+                                                                                          }
+                                                                                          disabled
+                                                                                        />
+                                                                                        <span className="input-group-text">
+                                                                                          M
+                                                                                        </span>
+                                                                                      </div>
+                                                                                    </div>
+                                                                                  </div>
+                                                                                )
+                                                                              )}
+                                                                            </td>
+                                                                            <td className="text-center">
+                                                                              <button
+                                                                                className="delete-icon"
+                                                                                onClick={() =>
+                                                                                  handleDelete1(
+                                                                                    TaskShow.id
+                                                                                  )
+                                                                                }
+                                                                              >
+                                                                                <i className=" ti-trash text-danger"></i>
+                                                                              </button>
+                                                                            </td>
+                                                                          </tr>
+                                                                        );
+                                                                      }
+                                                                      return null;
+                                                                    }
+                                                                  )}
                                                                 </tbody>
                                                               </table>
                                                             )}

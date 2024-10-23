@@ -11,6 +11,9 @@ const CommonModal = ({
 }) => {
   const columnClass = fields && fields.length === 1 ? "col-12" : "col-md-12";
 
+
+  console.log("fields" , fields);
+
   return (
     <div
       className={`modal ${modalId}`}
@@ -38,7 +41,20 @@ const CommonModal = ({
                 <label htmlFor={field.name} className="icon mb-1 mt-2">
                   {field.label}
                 </label>
-                {field.type === "hourminute" ? (
+                {field.type === "text" ? (
+                  <>
+                    <input
+                      type="text"
+                      name={field.name}
+                      className="filter-text form-control"
+                      placeholder={field.placeholder}
+                      value={field.value}
+                      autoFocus={index === 0}
+                      onChange={(e) => onChange(e, index)}
+                    />
+                  </>
+                ) :
+                field.type === "hourminute" ? (
                   <>
                     <div className="input-group">
                       <input
@@ -46,6 +62,7 @@ const CommonModal = ({
                         className="form-control"
                         placeholder="Hours"
                         name="hours"
+                      autoFocus={index === 0}
                         defaultValue={field.value?.split(":")[0] || "00"}
                         onChange={(e) => onChange(e, index)}
                       />
@@ -57,21 +74,12 @@ const CommonModal = ({
                         name="minutes"
                         min="0"
                         max="59"
+                      autoFocus={index === 0}
+                        
                         defaultValue={field.value?.split(":")[1] || "00"}
                         onChange={(e) => onChange(e, index)}
                       />
                     </div>
-                  </>
-                ) : field.type === "text" ? (
-                  <>
-                    <input
-                      type="text"
-                      name={field.name}
-                      className="filter-text form-control"
-                      placeholder={field.placeholder}
-                      value={field.value}
-                      onChange={(e) => onChange(e, index)}
-                    />
                   </>
                 ) : field.type === "email" ? (
                   <input
@@ -80,6 +88,8 @@ const CommonModal = ({
                     className="filter-text form-control"
                     placeholder={field.placeholder}
                     value={field.value}
+                    autoFocus={index === 0}
+                    
                     onChange={(e) => onChange(e, index)}
                   />
                 ) : field.type === "password" ? (
@@ -89,6 +99,8 @@ const CommonModal = ({
                     className="filter-text form-control"
                     placeholder={field.placeholder}
                     value={field.value}
+                    autoFocus={index === 0}
+                    
                     onChange={(e) => onChange(e, index)}
                   />
                 ) : field.type === "select" ? (
@@ -96,6 +108,8 @@ const CommonModal = ({
                     name={field.name}
                     className="filter-select form-select"
                     value={field.value}
+                    autoFocus={index === 0}
+                    
                     onChange={(e) => onChange(e, index)}
                   >
                     {field.options.map((option) => (

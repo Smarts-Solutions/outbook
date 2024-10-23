@@ -364,6 +364,7 @@ const Status = () => {
                   id="customername-field"
                   className="form-control"
                   placeholder="Enter Status Name"
+                  autoFocus 
                   required
                   name="statusname"
                   value={getStatsAdd.statusname}

@@ -932,6 +932,7 @@ const Information = ({ id, pageStatus }) => {
                             className="form-select "
                             onChange={(e) => setCustomerType(e.target.value)}
                             value={customerType}
+                           
                             disabled={true}
                           >
                             <option value="1">Sole Trader</option>
@@ -958,7 +959,7 @@ const Information = ({ id, pageStatus }) => {
                             as="select"
                             name="accountManager"
                             className={getAccountMangerIdErr ? "error-field form-select" : "form-select"}
-
+                            autoFocus={true}
                             onChange={(e) => handleChangeValue(e)}
                             value={ManagerType}
                             innerRef={managerSelectRef}
