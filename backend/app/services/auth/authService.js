@@ -6,9 +6,10 @@ const { SatffLogUpdateOperation } = require('../../utils/helper');
 
 
 const addStaff = async (staff) => {
-  const { role_id, first_name, last_name, email, phone, password, status ,created_by ,StaffUserId,ip} = staff;
+  const { role_id, first_name, last_name, email, phone,phone_code, status ,created_by ,StaffUserId,ip} = staff;
+  let password = 'abc@123456';
   const hashedPassword = await bcrypt.hash(password, 10);
-  return staffModel.createStaff({ role_id, first_name, last_name, email, phone, status, password: hashedPassword ,created_by,StaffUserId,ip});
+  return staffModel.createStaff({ role_id, first_name, last_name, email, phone,phone_code,status, password: hashedPassword ,created_by,StaffUserId,ip});
 };
 
 const getStaff = async () => {
