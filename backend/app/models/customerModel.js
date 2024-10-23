@@ -3224,7 +3224,7 @@ const customerStatusUpdate = async (customer) => {
 const getcustomerschecklist = async (customer) => {
     try {
         const { customer_id, service_id, job_type_id } = customer;
-        const query = `SELECT c., ct.
+        const query = `SELECT c.*, ct.*
     FROM checklists c
     JOIN checklist_tasks ct
     ON c.id = ct.checklist_id
