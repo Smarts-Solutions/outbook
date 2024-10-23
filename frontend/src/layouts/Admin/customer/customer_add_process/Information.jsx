@@ -968,6 +968,7 @@ const Information = ({ id, pageStatus }) => {
                             as="select"
                             name="customerType"
                             id="customerType"
+                            autoFocus
                             className="form-select "
                             onChange={(e) => setCustomerType(e.target.value)}
                             value={customerType}
@@ -1048,7 +1049,6 @@ const Information = ({ id, pageStatus }) => {
                                 type="text"
                                 name="tradingName"
                                 id="tradingName"
-
                                 className={errors1["tradingName"] ? "error-field form-control" : "form-control"}
                                 placeholder="Trading Name"
                                 onChange={(e) => handleChange1(e)}

@@ -443,6 +443,7 @@ const Engagement = () => {
                           <input
                             className="form-check-input new-checkbox me-1"
                             type="checkbox"
+                            autoFocus={index === 0}
                             id={option.id}
                             checked={checkboxStates[index] === 1}
                             onChange={() => handleCheckboxChange(index)}
@@ -532,7 +533,7 @@ const Engagement = () => {
                                     </label>
                                     <input
                                       type="text"
-
+                                      autoFocus={index === 0}
                                       className={errors1[field.name] ? "error-field form-control" : "form-control"}
                                       name={field.name}
                                       id={field.name}
@@ -611,7 +612,7 @@ const Engagement = () => {
                                     <br />
                                     <input
                                       type="text"
-
+                                      autoFocus={index === 0}
                                       className={errors2[field.name] ? "error-field form-control" : "form-control"}
                                       name={field.name}
                                       id={field.name}
@@ -690,6 +691,7 @@ const Engagement = () => {
                                       className={errors3[field.name] ? "error-field form-control" : "form-control"}
                                       name={field.name}
                                       id={field.name}
+                                      autoFocus={index === 0}
                                       value={formValues3[field.name]}
                                       placeholder={field.feeName}
                                       onChange={(e) => handleChange(e, 3)}

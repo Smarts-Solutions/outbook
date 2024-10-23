@@ -304,7 +304,7 @@ const MissingLogs = ({ getAccessDataJob }) => {
                 name="missing_log"
                 id="missing_log"
                 className={errors1["missing_log"] ? "error-field form-select mb-3 ismissinglog" : "form-select mb-3 ismissinglog"}
-
+                autoFocus
                 aria-label="Default select example"
                 style={{ color: "#8a8c8e !important" }}
                 onChange={(e) => handleChange(e)}
@@ -507,7 +507,7 @@ const MissingLogs = ({ getAccessDataJob }) => {
                 name="missing_log"
                 id="missing_log"
                 className={errors1["missing_log"] ? "error-field form-select mb-3 ismissinglog" : "form-select mb-3 ismissinglog"}
-
+                autoFocus
                 aria-label="Default select example"
                 style={{ color: "#8a8c8e !important" }}
                 onChange={(e) => handleChange(e)}

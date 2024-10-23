@@ -470,6 +470,7 @@ const TaskTimesheet = ({ getAccessDataJob }) => {
                     defaultValue=""
                     id="totalHours"
                     name="totalHours"
+                    autoFocus
                     onChange={(e) => handleChange(e)}
                     value={GetTimeSheetTotalHours.hours}
                   />

@@ -844,6 +844,7 @@ const EditJob = () => {
                                       placeholder="Client Job Code"
                                       name="ClientJobCode"
                                       id="ClientJobCode"
+                                      autoFocus={true}
                                       onChange={HandleChange}
                                       value={jobData.ClientJobCode}
                                       maxLength={30}

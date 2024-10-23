@@ -867,6 +867,7 @@ const ClientEdit = () => {
                                       <span style={{ color: "red" }}>*</span>
                                     </label>
                                     <select
+                                  
                                       className="form-select mb-3"
                                       value={selectClientType}
                                       disabled={true}
@@ -906,7 +907,7 @@ const ClientEdit = () => {
                                           </label>
                                           <select
                                             className={errors1["IndustryType"] ? "error-field form-select mb-3" : "form-select mb-3"}
-
+                                            autoFocus
                                             aria-label="Default select example"
                                             name="IndustryType"
                                             id="IndustryType"
@@ -1250,6 +1251,7 @@ const ClientEdit = () => {
                                                 className="form-control"
                                                 placeholder="Search Company"
                                                 name="SearchCompany"
+                                                autoFocus
                                                 id="SearchCompany"
                                                 onChange={(e) =>
                                                   setSearchItem(e.target.value)
@@ -2026,6 +2028,7 @@ const ClientEdit = () => {
                                           <select
                                             className="form-select mb-3"
                                             name="ClientIndustry"
+                                            autoFocus
                                             id="ClientIndustry"
                                             value={
                                               getPartnershipDetails.ClientIndustry
@@ -2709,6 +2712,7 @@ const ClientEdit = () => {
                                             type="text"
                                             name="TradingName"
                                             id="TradingName"
+                                            autoFocus
                                             className={errors4["TradingName"] ? "error-field form-control" : "form-control"}
 
                                             placeholder="Trading Name"

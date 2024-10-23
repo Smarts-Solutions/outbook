@@ -276,6 +276,7 @@ const Queries = ({getAccessDataJob}) => {
               aria-label="Default select example"
               name="QueriesRemaining"
               id="QueriesRemaining"
+              autoFocus
               style={{ color: "#8a8c8e !important" }}
               onChange={(e) => handleChange(e)}
               value={AllQueryInputdata.QueriesRemaining}
@@ -494,6 +495,7 @@ const Queries = ({getAccessDataJob}) => {
               aria-label="Default select example"
               name="QueriesRemaining"
               id="QueriesRemaining"
+              autoFocus
               style={{ color: "#8a8c8e !important" }}
               onChange={(e) => handleChange(e)}
               value={AllQueryInputdata.QueriesRemaining}

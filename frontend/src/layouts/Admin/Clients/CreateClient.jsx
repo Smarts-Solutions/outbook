@@ -966,6 +966,7 @@ const CreateClient = () => {
                                       <span style={{ color: "red" }}>*</span>
                                     </label>
                                     <select
+                                    autoFocus
                                       className="form-select "
                                       value={selectClientType}
                                       onChange={(e) =>
@@ -2831,14 +2832,7 @@ const CreateClient = () => {
                         </section>
                       </div>
                       <div className="hstack gap-2 justify-content-end">
-                        <button
-                          type="button"
-                          className="btn btn-secondary"
-                          data-bs-dismiss="modal"
-                        >
-                          <i className=" fa fa-times pe-1"></i>
-                          Cancel
-                        </button>
+                       
                         <button
                           className="btn btn-info text-white blue-btn"
                           onClick={handleSubmit}
