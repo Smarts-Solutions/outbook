@@ -88,6 +88,7 @@ const ReusableForm = ({
                         <select
                           className={formik.touched[field.name] && formik.errors[field.name] ? "default-select wide error-field form-select" : " default-select wide form-select"}
                           id={field.name}
+                          autoFocus={index === 0 ? true : false}  
                           style={{ background: field.disable ? "#eeeeee" : "" }}
                           {...formik.getFieldProps(field.name)}
                           disabled={field.disable}
@@ -249,6 +250,7 @@ const ReusableForm = ({
                       <div style={{ position: "relative" }}>
                         <input
                           id={field.name}
+                          autoFocus={index === 0 ? true : false}  
                           type={  passwordVisible[field.name] ? "text" : field.type }
                           placeholder={field.label}
                           {...formik.getFieldProps(field.name)}
@@ -299,6 +301,8 @@ const ReusableForm = ({
                             type={field.type}
                             name={field.name}
                             // className="form-control"
+                          autoFocus={index === 0 ? true : false}  
+
                             className={formik.touched[field.name] && formik.errors[field.name] ? "form-control error-field" : " form-control"}
                             id={field.name}
                             {...formik.getFieldProps(field.name)}
@@ -376,6 +380,8 @@ const ReusableForm = ({
                           placeholder={`Enter ${field.label}`}
                           {...formik.getFieldProps(field.name)}
                           defaultValue=""
+                          autoFocus={index === 0 ? true : false}  
+
                           readOnly={field.disable}
                           autoComplete="new-email"
                         />
@@ -412,6 +418,8 @@ const ReusableForm = ({
                           placeholder={`Enter ${field.label}`}
                           {...formik.getFieldProps(field.name)}
                           defaultValue=""
+                          autoFocus={index === 0 ? true : false}  
+
                           readOnly={field.disable}
                           autoComplete="new-email"
                         />
@@ -485,6 +493,8 @@ const ReusableForm = ({
                           placeholder={`Enter ${field.label}`}
                           {...formik.getFieldProps(field.name)}
                           defaultValue=""
+                          autoFocus={index === 0 ? true : false}  
+
                           readOnly={field.disable}
                           autoComplete="new-email"
                         />
