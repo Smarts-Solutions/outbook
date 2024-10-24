@@ -8,6 +8,7 @@ import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import { act } from "react";
 
 
 const ClientList = () => {
@@ -28,12 +29,24 @@ const ClientList = () => {
   const [activeTab, setActiveTab] = useState('');
   const role = JSON.parse(localStorage.getItem("role"));
 
- 
+
   useEffect(() => {
-    setActiveTab(
-      (getAccessDataClient && getAccessDataClient.client == 1) || role === "ADMIN" || role === "SUPERADMIN" ? "client" :
-        (getAccessDataJob && getAccessDataJob.job == 1) || role === "ADMIN" || role === "SUPERADMIN" ? "job" :
-          "documents")
+    const retrievedData = sessionStorage.getItem('activeTab');
+    const retrievedData1 = sessionStorage.getItem('activeTab1');
+    if (retrievedData && retrievedData !== "clear") {
+      setActiveTab(retrievedData);
+      sessionStorage.setItem('activeTab1', "clear");
+    }
+    else if (retrievedData1 == "clear") {
+      setActiveTab(retrievedData);
+    }
+    else {
+      console.log("activeTab", activeTab)
+      setActiveTab(
+        (getAccessDataClient && getAccessDataClient.client == 1) || role === "ADMIN" || role === "SUPERADMIN" ? "client" :
+          (getAccessDataJob && getAccessDataJob.job == 1) || role === "ADMIN" || role === "SUPERADMIN" ? "job" :
+            "documents")
+    }
   }, [getAccessDataJob, getAccessDataClient]);
 
 
@@ -43,7 +56,6 @@ const ClientList = () => {
     { id: "checklist", label: "Checklist", icon: "fa-solid fa-check-square" },
   ];
 
-  // Use state to manage tabs
   const [tabs, setTabs] = useState(initialTabs);
 
   const accessDataClient =
@@ -85,11 +97,20 @@ const ClientList = () => {
   };
 
   useEffect(() => {
-    getCheckListData();
-    GetAllClientData();
-    JobDetails();
     GetStatus();
-  }, []);
+    if (activeTab !== "") {
+      if (activeTab === "checklist") {
+        getCheckListData();
+      }
+      else if (activeTab === "client") {
+        GetAllClientData();
+      }
+      else if (activeTab === "job") {
+        JobDetails();
+      }
+    }
+
+  }, [activeTab]);
 
   useEffect(() => {
     if (getCheckList) {
@@ -104,20 +125,15 @@ const ClientList = () => {
     }
   }, [searchQuery]);
 
+
   useEffect(() => {
     let tabsData = [];
     if ((getAccessDataClient && getAccessDataClient.client == 1) || role === "ADMIN" || role === "SUPERADMIN") {
       tabsData.push({ id: "client", label: "Client", icon: "fa-solid fa-user" });
     }
     if ((getAccessDataJob && getAccessDataJob.job == 1) || role === "ADMIN" || role === "SUPERADMIN") {
-      tabsData.push(
-        ...(ClientData && ClientData.length > 0
-          ? [{ id: "job", label: "Job", icon: "fa-solid fa-briefcase" }]
-          : [])
-      );
+      tabsData.push({ id: "job", label: "Job", icon: "fa-solid fa-briefcase" })
     }
-
-    // Update the tabs state with new data
     setTabs([...tabsData, ...initialTabs]);
   }, [getAccessDataJob, getAccessDataClient, ClientData]);
 
@@ -177,7 +193,8 @@ const ClientList = () => {
         <div>
           {
             getAccessDataClient.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
-              <button className="edit-icon" onClick={() => handleEdit(row)}>
+              <button className="edit-icon" onClick={() =>
+                navigate("/admin/client/edit", { state: { row, id: location.state.id, activeTab: activeTab } })}>
                 <i className="ti-pencil" />
               </button>
             ) : null
@@ -208,6 +225,8 @@ const ClientList = () => {
     },
   ];
 
+  console.log("statusDataAll", statusDataAll);
+
   const JobColumns = [
     {
       name: "Job ID (CustName+ClientName+UniqueNo)",
@@ -227,7 +246,7 @@ const ClientList = () => {
 
     {
       name: "Job Type",
-    
+
       selector: (row) => row.job_type_name || "-",
       sortable: true,
     },
@@ -293,28 +312,21 @@ const ClientList = () => {
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
     },
-
-    // {
-    //   name: "Status",
-    //   selector: (row) =>
-    //     row.status == null || row.status == 0 ? "To Be Started - Not Yet Allocated Internally" : row.status,
-    //   sortable: true,
-    //   width: "325px"
-    // },
-
     {
       name: "Actions",
       cell: (row) => (
         <div>
           {
             getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
-              <button className="edit-icon" onClick={() => handleJobEdit(row)}>
+              <button className="edit-icon" onClick={() =>
+                navigate("/admin/job/edit", { state: { job_id: row.job_id, goto: "Customer" , activeTab: activeTab },
+                })}>
                 <i className="ti-pencil" />
               </button>
             ) : null
           }
           {
-            getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN"? (
+            getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
               <button className="delete-icon" onClick={() => handleDelete(row, "job")}>
                 <i className="ti-trash text-danger" />
               </button>
@@ -420,8 +432,8 @@ const ClientList = () => {
       cell: (row) => (
         <div>
           <a
-            onClick={() => HandleClientView(row)}
-            style={{ cursor: "pointer", color: "#26bdf0" }}
+          // onClick={() => HandleClientView(row)}
+          // style={{ cursor: "pointer", color: "#26bdf0" }}
           >
             {row.check_list_name}
           </a>
@@ -459,7 +471,10 @@ const ClientList = () => {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="edit-icon" onClick={() => EditChecklist(row)}>
+          <button className="edit-icon" onClick={() =>
+            navigate("/admin/edit/checklist", {
+              state: { id: location.state.id, checklist_id: row.checklists_id , activeTab: activeTab },
+            })}>
             {" "}
             <i className="ti-pencil" />
           </button>
@@ -665,7 +680,7 @@ const ClientList = () => {
         ...prevState,
         client: row
       };
-      navigate("/admin/client/profile", { state: { Client_id: row.id, data: updatedData } });
+      navigate("/admin/client/profile", { state: { Client_id: row.id, data: updatedData, activeTab: activeTab } });
       return updatedData;
     });
   };
@@ -676,33 +691,8 @@ const ClientList = () => {
         ...prevState,
         job: row
       };
-      navigate("/admin/job/logs", { state: { job_id: row.job_id, goto: "Customer", data: updatedData } });
+      navigate("/admin/job/logs", { state: { job_id: row.job_id, goto: "Customer", data: updatedData, activeTab: activeTab } });
       return updatedData;
-    });
-  };
-
-  const handleAddClient = () => {
-    navigate("/admin/addclient", { state: { id: location.state.id } });
-  };
-  const handleAddJob = () => {
-    navigate("/admin/createjob", {
-      state: { customer_id: location.state.id, goto: "Customer" },
-    });
-  };
-  function handleEdit(row) {
-    navigate("/admin/client/edit", { state: { row, id: location.state.id } });
-  }
-  function handleJobEdit(row) {
-    navigate("/admin/job/edit", {
-      state: { job_id: row.job_id, goto: "Customer" },
-    });
-  }
-  const handleClick = () => {
-    navigate("/admin/create/checklist", { state: { id: location.state.id, } });
-  };
-  const EditChecklist = (row) => {
-    navigate("/admin/edit/checklist", {
-      state: { id: location.state.id, checklist_id: row.checklists_id },
     });
   };
 
@@ -749,20 +739,27 @@ const ClientList = () => {
                     {
                       (getAccessDataClient.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") && activeTab === "client" ? (
                         <>
-                          <div className="btn btn-info text-white float-end blue-btn" onClick={handleAddClient} >
+                          <div className="btn btn-info text-white float-end blue-btn"
+                            onClick={() => navigate("/admin/addclient", { state: { id: location.state.id, activeTab: activeTab } })} >
                             <i className="fa fa-plus pe-1" /> Add Client
                           </div>
                         </>
                       ) : (getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN") && activeTab === "job" ? (
                         <>
-                          <div className="btn btn-info text-white float-end blue-btn" onClick={handleAddJob} >
+                          <div className="btn btn-info text-white float-end blue-btn" onClick={() =>
+                            navigate("/admin/createjob", {
+                              state: { customer_id: location.state.id, goto: "Customer", activeTab: activeTab },
+                            })
+                          } >
                             <i className="fa fa-plus pe-1" /> Create Job
 
                           </div>
                         </>
                       ) : activeTab === "checklist" ? (
                         <>
-                          <div className="btn btn-info text-white float-end blue-btn" onClick={handleClick} >
+                          <div className="btn btn-info text-white float-end blue-btn" onClick={() =>
+                            navigate("/admin/create/checklist", { state: { id: location.state.id, activeTab: activeTab } })
+                          } >
                             <i className="fa fa-plus pe-1" /> Add Checklist
                           </div>
                         </>
@@ -773,7 +770,9 @@ const ClientList = () => {
 
                     <div
                       className="btn btn-info text-white float-end blue-btn me-2"
-                      onClick={() => window.history.back()}
+                      onClick={() => {
+                        window.history.back();
+                      }}
                     >
                       <i className="fa fa-arrow-left pe-1" /> Back
                     </div>
@@ -785,7 +784,7 @@ const ClientList = () => {
         </div>
       </div>
 
-      <Hierarchy show={["Customer", activeTab]} active={1} data={hararchyData} NumberOfActive={activeTab == 'client' ? ClientData?.length : activeTab == 'job'? getJobDetails?.length : ""} />
+      <Hierarchy show={["Customer", activeTab]} active={1} data={hararchyData} NumberOfActive={activeTab == 'client' ? ClientData?.length : activeTab == 'job' ? getJobDetails?.length : ""} />
 
       <div className="tab-content" id="pills-tabContent">
         {tabs1.map((tab) => (
