@@ -158,6 +158,60 @@ const updateStaff = async (staff) => {
   }
 };
 
+const updateStaffwithLogin = async (staff) => {
+  const { id, ...fields } = staff;
+  // Create an array to hold the set clauses
+  const setClauses = [];
+  const values = [];
+  // Iterate over the fields and construct the set clauses dynamically
+  for (const [key, value] of Object.entries(fields)) {
+    if (key != "ip" && key != "StaffUserId") {
+      setClauses.push(`${key} = ?`);
+      values.push(value);
+    }
+  }
+  // Add the id to the values array for the WHERE clause
+  values.push(id);
+  // Construct the final SQL query
+  const query = `
+    UPDATE staffs
+    SET ${setClauses.join(", ")}
+    WHERE id = ?
+    `;
+  try {
+    const [[existStatus]] = await pool.execute(
+      `SELECT status FROM staffs WHERE id = ?`,
+      [id]
+    );
+
+    let status_change = "Deactivate";
+    if (staff.status == "1") {
+      status_change = "Activate";
+    }
+    let log_message =
+      existStatus.status === staff.status
+        ? `edited staff ${staff.first_name} ${staff.last_name}`
+        : `changes the staff status ${status_change} ${staff.first_name} ${staff.last_name}`;
+
+    const [rows] = await pool.execute(query, values);
+    if (rows.changedRows) {
+      const currentDate = new Date();
+      await SatffLogUpdateOperation({
+        staff_id: staff.StaffUserId,
+        ip: staff.ip,
+        date: currentDate.toISOString().split("T")[0],
+        module_name: "staff",
+        log_message: log_message,
+        permission_type: "updated",
+        module_id: staff.id,
+      });
+    }
+  } catch (err) {
+    console.log("Error updating staff:", err);
+    return 
+  }
+};
+
 const staffCompetency = async (staffCompetency) => {
   const { staff_id, action, service } = staffCompetency;
   if (action === "update") {
@@ -267,7 +321,6 @@ const managePortfolio = async (staff_id) => {
 const status = async (id) => {
   // console.log(id);
   const query = `SELECT status FROM staffs WHERE id = ?`;
-
   try {
     const [result] = await pool.execute(query, [id]);
     return result;
@@ -283,6 +336,7 @@ module.exports = {
   getManagerStaff,
   deleteStaff,
   updateStaff,
+  updateStaffwithLogin,
   staffCompetency,
   getStaffByEmail,
   getStaffById,

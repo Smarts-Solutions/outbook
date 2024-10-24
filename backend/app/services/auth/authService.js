@@ -70,7 +70,7 @@ const login = async (credentials) => {
     const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '10h' });
     const fieldsToUpdate = { login_auth_token: token };
     const id = user.id;
-    staffModel.updateStaff({ id, ...fieldsToUpdate });
+    staffModel.updateStaffwithLogin({ id, ...fieldsToUpdate });
     
     const currentDate = new Date();
     await SatffLogUpdateOperation(
@@ -102,7 +102,7 @@ const loginWithAzure = async (credentials) => {
     const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '10h' });
     const fieldsToUpdate = { login_auth_token: token };
     const id = user.id;
-    staffModel.updateStaff({ id, ...fieldsToUpdate });
+    staffModel.updateStaffwithLogin({ id, ...fieldsToUpdate });
 
     const currentDate = new Date();
     await SatffLogUpdateOperation(
