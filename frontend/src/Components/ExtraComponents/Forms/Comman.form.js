@@ -436,6 +436,41 @@ const ReusableForm = ({
                     </div>
                   </div>
                 </>
+              )  : field.type === "phone" ? (
+                <>
+                <div className={`col-lg-${title === "update_theme" ? 12 : field.col_size}`}  >
+                  <div className=" row">
+                    <label className={`col-lg-${field.label_size}`} htmlFor={field.name} >
+                      {field.label}
+                      <span className="text-danger">*</span>
+                    </label>
+                    <div className={`col-lg-${title === "addgroup" ? 12 : 12}`}  >
+                      <select
+                        className={formik.touched[field.name] && formik.errors[field.name] ? "default-select wide error-field form-select" : " default-select wide form-select"}
+                        id={field.name}
+                        autoFocus={index === 0 ? true : false}  
+                        style={{ background: field.disable ? "#eeeeee" : "" }}
+                        {...formik.getFieldProps(field.name)}
+                        disabled={field.disable}
+                      >
+                       
+                        
+                        {field.options.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      {formik.touched[field.name] &&
+                        formik.errors[field.name] && (
+                          <div className="error-text">
+                            {formik.errors[field.name]}
+                          </div>
+                        )}
+                    </div>
+                  </div>
+                </div>
+              </>
               ) : field.type === "number" ? (
                 <>
                   <div className={`col-lg-${field.col_size}`}>

@@ -2,18 +2,27 @@ const pool = require("../../app/config/database");
 const { SatffLogUpdateOperation } = require("../../app/utils/helper");
 
 const createStaff = async (staff) => {
+  console.log(staff);
   const {
     role_id,
     first_name,
     last_name,
     email,
     phone,
+    phone_code,
     password,
     status,
     created_by,
     StaffUserId,
     ip,
   } = staff;
+ 
+  const checkQuery = `SELECT 1 FROM staffs WHERE email = ?`;
+  const [check] = await pool.execute(checkQuery, [email]);
+ 
+  if (check.length > 0) {
+    return { status: false, message: 'Email Already Exists.' };
+  }
 
   const Role_query = `SELECT role ,hourminute FROM roles WHERE id = ?`;
   const [role] = await pool.execute(Role_query, [role_id]);
@@ -24,8 +33,8 @@ const createStaff = async (staff) => {
   }
 
   const query = `
-    INSERT INTO staffs (role_id, first_name, last_name, email, phone, password,hourminute, status ,created_by)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)
+    INSERT INTO staffs (role_id, first_name, last_name, email, phone_code,phone, password,hourminute, status ,created_by)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
   try {
@@ -34,6 +43,7 @@ const createStaff = async (staff) => {
       first_name,
       last_name,
       email,
+      phone_code,
       phone,
       password,
       hourminute,
@@ -51,23 +61,23 @@ const createStaff = async (staff) => {
       permission_type: "created",
       module_id: result.insertId,
     });
-    return result.insertId;
+    return { status: true, message: 'Staff created successfully.', data: result.insertId };
   } catch (err) {
-    console.error("Error inserting data:", err);
-    throw err;
+    console.error('Error creating data:', err);
+    return { status: false, message: 'Error Created Staff' };
   }
 };
 
 const getStaff = async () => {
   const [rows] = await pool.query(
-    "SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email , staffs.phone , staffs.status , staffs.created_at , staffs.hourminute , roles.role_name , roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id ORDER BY staffs.id DESC"
+    "SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email , staffs.phone_code ,staffs.phone , staffs.status , staffs.created_at , staffs.hourminute , roles.role_name , roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id ORDER BY staffs.id DESC"
   );
   return rows;
 };
 
 const getManagerStaff = async () => {
   const [rows] = await pool.query(
-    "SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email , staffs.phone , staffs.status , roles.role_name , roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id where staffs.role_id=4"
+    "SELECT staffs.id , staffs.role_id , staffs.first_name , staffs.last_name , staffs.email ,staffs.phone_code, staffs.phone , staffs.status , roles.role_name , roles.role FROM staffs JOIN roles ON staffs.role_id = roles.id where staffs.role_id=4"
   );
   return rows;
 };
@@ -86,6 +96,15 @@ const deleteStaff = async (staffId) => {
 
 const updateStaff = async (staff) => {
   const { id, ...fields } = staff;
+  let email = fields.email;
+ 
+
+  const checkQuery = `SELECT 1 FROM staffs WHERE email = ? AND id != ?`;
+  const [check] = await pool.execute(checkQuery, [email, id]);
+
+  if (check.length > 0) {
+    return { status: false, message: 'Email Already Exists.' };
+  }
   // Create an array to hold the set clauses
   const setClauses = [];
   const values = [];
@@ -132,9 +151,10 @@ const updateStaff = async (staff) => {
         module_id: staff.id,
       });
     }
+    return { status: true, message: 'staff updated successfully.', data: rows.affectedRows };
   } catch (err) {
-    console.error("Error updating data:", err);
-    throw err;
+    console.log("Error updating staff:", err);
+    return { status: false, message: 'Error updating staff' };
   }
 };
 

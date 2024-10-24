@@ -60,6 +60,7 @@ const StaffPage = () => {
   const [addStaff, setAddStaff] = useState(false);
   const [portfolio, setPortfolio] = useState(false);
   const [editStaff, setEditStaff] = useState(false);
+  const [editShowModel, setEditShowModel] = useState(false);
   const [editStaffData, setEditStaffData] = useState(false);
   const [addCompetancy, SetCompetancy] = useState(false);
   const [refresh, SetRefresh] = useState(false);
@@ -187,8 +188,8 @@ const StaffPage = () => {
     },
     {
       name: "Phone",
-      selector: (row) => row.phone,
-      sortable: true,
+      selector: (row) => row.phone && row.phone_code ? row.phone_code+"-" + row.phone : " - ",
+      sortable: true, 
       width: "150px",
     },
     {
@@ -230,6 +231,7 @@ const StaffPage = () => {
             <button
               className="edit-icon"
               onClick={(e) => {
+                setEditShowModel(true)
                 setEditStaff(true);
                 setEditStaffData(row);
               }}
@@ -283,7 +285,8 @@ const StaffPage = () => {
       last_name: "",
       email: "",
       phone: "",
-      password: "",
+      phone_code: "+44",
+      // password: "",
       role: "",
       status: "",
     },
@@ -293,14 +296,14 @@ const StaffPage = () => {
       email: Yup.string()
         .email(Validation_Message.EmailValidation)
         .required(Validation_Message.EmailIsRequire),
-      phone: Yup.string()
-        .matches(/^[0-9]+$/, Validation_Message.PhoneValidation)
-        .required(Validation_Message.PhoneIsRequire),
-      password: editStaff
-        ? Yup.string().min(8, Validation_Message.PasswordValidation)
-        : Yup.string()
-            .min(8, Validation_Message.PasswordValidation)
-            .required(Validation_Message.PasswordIsRequire),
+      // phone: Yup.string()
+      //   .matches(/^[0-9]+$/, Validation_Message.PhoneValidation)
+      //   .required(Validation_Message.PhoneIsRequire),
+      // password: editStaff
+      //   ? Yup.string().min(8, Validation_Message.PasswordValidation)
+      //   : Yup.string()
+      //       .min(8, Validation_Message.PasswordValidation)
+      //       .required(Validation_Message.PasswordIsRequire),
       role: Yup.string().required(Validation_Message.RoleValidation),
       status: Yup.string().required(Validation_Message.StatusValidation),
     }),
@@ -311,7 +314,8 @@ const StaffPage = () => {
         last_name: values.last_name,
         email: values.email,
         phone: values.phone,
-        password: values.password,
+        phone_code: values.phone_code,
+        // password: values.password,
         role_id: values.role,
         status: values.status,
         created_by: StaffUserId.id,
@@ -319,6 +323,8 @@ const StaffPage = () => {
           budgetedHours.minutes || "00"
         }`,
       };
+
+      console.log("ww", req);
 
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
@@ -333,20 +339,23 @@ const StaffPage = () => {
       )
         .unwrap()
         .then(async (response) => {
-          sweatalert
-            .fire({
-              icon: "success",
-              title: "Success",
-              text: response.message,
-              timer: 2000,
-            })
-            .then(() => {
+        
               if (response.status) {
+                sweatalert.fire({
+                  icon: "success",
+                  title: "Success",
+                  text: response.message,
+                  timer: 1500,
+                  timerProgressBar: true,
+                });
+                setTimeout(() => {
                 setAddStaff(false);
                 setEditStaff(false);
                 SetRefresh(!refresh);
-                formik.resetForm();
+                formik.resetForm(); 
                 window.location.reload();
+                }
+                , 1500);
               } else {
                 sweatalert.fire({
                   icon: "error",
@@ -354,14 +363,15 @@ const StaffPage = () => {
                   text: response.message,
                 });
               }
-            });
-        })
+            })
+        
         .catch((error) => {
           return;
         });
     },
   });
 
+ 
   const fields = [
     {
       type: "text",
@@ -381,6 +391,29 @@ const StaffPage = () => {
       disable: false,
       placeholder: "Enter Last Name",
     },
+  
+    {
+      type: "select",
+      name: "phone_code",
+      label: "Phone Code",
+      options: [
+        { label: "+44", value: "+44" },
+        { label: "+91", value: "+91" },
+      ],
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      placeholder: "Enter Phone Number",
+    },
+    {
+      type: "number",
+      name: "phone",
+      label: "Phone",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      placeholder: "Enter Phone Number",
+    },
     {
       type: "email",
       name: "email",
@@ -390,32 +423,23 @@ const StaffPage = () => {
       disable: false,
       placeholder: "Enter Email",
     },
-    {
-      type: "text",
-      name: "phone",
-      label: "Phone",
-      label_size: 12,
-      col_size: 6,
-      disable: false,
-      placeholder: "Enter Phone Number",
-    },
-    {
-      type: "password",
-      name: "password",
-      label: "Password",
-      label_size: 12,
-      col_size: 6,
-      disable: false,
-      placeholder: "Enter Password",
-      showWhen: (values) => !editStaff,
-    },
+    // {
+    //   type: "password",
+    //   name: "password",
+    //   label: "Password",
+    //   label_size: 12,
+    //   col_size: 6,
+    //   disable: false,
+    //   placeholder: "Enter Password",
+    //   showWhen: (values) => !editStaff,
+    // },
     {
       type: "select",
       name: "role",
       label: "Role",
       label_size: 12,
       col_size: 6,
-      disable: false,
+      disable: editShowModel==true ? true : false,
       options:
         roleDataAll &&
         roleDataAll.data.map((data) => {
@@ -533,8 +557,9 @@ const StaffPage = () => {
       formik.setFieldValue("phone", editStaffData.phone || "null");
       formik.setFieldValue("role", editStaffData.role_id || "null");
       formik.setFieldValue("status", editStaffData.status || "null");
+      formik.setFieldValue("phone_code", editStaffData.phone_code || "null");
 
-      console.log(editStaffData.hourminute);
+ 
       if (editStaffData.hourminute) {
         setBudgetedHours({
           hours: editStaffData.hourminute.split(":")[0],
@@ -583,7 +608,7 @@ const StaffPage = () => {
                         className="btn btn-info text-white float-end"
                         onClick={() => {
                           setAddStaff(true);
-
+                          setEditShowModel(false);
                           formik.resetForm();
                         }}
                       >
@@ -620,7 +645,7 @@ const StaffPage = () => {
       <CommanModal
         isOpen={addStaff}
         backdrop="static"
-        size="ms-5"
+        size="ms-7"
         title="Add Staff"
          
         hideBtn={true}

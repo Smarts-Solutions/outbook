@@ -2,14 +2,18 @@ const authService = require('../../services/auth/authService');
 
 const handleStaff = async (req, res) => {
   const { action, ...staff } = req.body;
-
   try {
     let result;
     switch (action) {
       case 'add':
-        result = await authService.addStaff(staff);
-        res.status(201).json({ status: true, userId: result, message: 'Staff created successfully' });
-        break;
+      
+          result = await authService.addStaff(staff);
+          if(!result.status){
+          return  res.status(200).json({ status: false, message: result.message });  
+          }else{
+          return  res.status(200).json({ status: true, message: result.message , data : result.data});
+          }
+      
       case 'get':
         result = await authService.getStaff();
         res.status(200).json({ status: true, data: result });
@@ -23,9 +27,14 @@ const handleStaff = async (req, res) => {
         res.status(200).json({ status: true, message: 'Staff deleted successfully' });
         break;
       case 'update':
-        await authService.modifyStaff(staff);
-        res.status(200).json({ status: true, message: 'Staff updated successfully' });
-        break;
+        result =await authService.modifyStaff(staff);
+        if (!result.status) {
+          res.status(200).json({ status: false, message: result.message });
+          break;
+      } else {
+          res.status(200).json({ status: true, message: result.message, userId: result.data });
+          break;
+      }
       case 'portfolio':
          result = await authService.managePortfolio(staff);
         res.status(200).json({ status: true, message: 'All Customer get successfully' , data: result });
