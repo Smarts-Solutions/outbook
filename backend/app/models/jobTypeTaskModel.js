@@ -649,12 +649,12 @@ JOIN
      checklist_tasks ON checklist_tasks.checklist_id = checklists.id
 JOIN
      task ON task.id = checklist_tasks.task_id     
-JOIN
+LEFT JOIN
      clients ON clients.id = ${clientId}
 WHERE checklists.service_id = ? 
 AND checklists.job_type_id = ?
 AND FIND_IN_SET(clients.client_type, checklists.client_type_id) > 0
-AND checklists.customer_id = ? OR
+OR checklists.customer_id = ? OR
     checklists.is_all_customer LIKE '%[${customer_id}]%' OR
     checklists.is_all_customer LIKE '[${customer_id},%' OR
     checklists.is_all_customer LIKE '%,${customer_id}]' OR
