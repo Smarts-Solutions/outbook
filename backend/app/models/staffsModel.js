@@ -96,7 +96,6 @@ const deleteStaff = async (staffId) => {
 
 const updateStaff = async (staff) => {
 
-  console.log("staff",staff);
   const { id, ...fields } = staff;
   let email = fields.email;
    
