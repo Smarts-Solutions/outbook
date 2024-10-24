@@ -406,8 +406,7 @@ const getCustomer = async (customer) => {
     staffs.id = ${staff_id}
   LIMIT 1
   `
-  const [rows] = await pool.execute(QueryRole);
-
+    const [rows] = await pool.execute(QueryRole);
     // Condition with Admin And SuperAdmin
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
         const query = `
@@ -450,8 +449,6 @@ ORDER BY
         const [result] = await pool.execute(query);
         return { status: true, message: 'Success..', data: result };
     }
-
-
     let result = []
     if (rows.length > 0) {
         // Allocated to

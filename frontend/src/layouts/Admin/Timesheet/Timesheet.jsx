@@ -261,6 +261,34 @@ const Timesheet = () => {
         if (res.data.length > 0) {
           updatedRows[index].customerData = res.data;
           updatedRows[index].customer_id = res.data[0].id;
+
+          const req = { staff_id: staffDetails.id, task_type: "3", customer_id: res.data[0].id };
+          const res1 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
+          if (res1.status) {
+            if (res1.data.length > 0) {
+              updatedRows[index].clientData = res1.data;
+              updatedRows[index].client_id = res1.data[0].id;
+              const req = { staff_id: staffDetails.id, task_type: "4", client_id 
+              : res1.data[0].id };
+              const res2 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
+              if (res2.status) {
+                if (res2.data.length > 0) {
+                  updatedRows[index].jobData = res2.data;
+                  updatedRows[index].job_id = res2.data[0].id;
+                  const req = { staff_id: staffDetails.id, task_type: "6", job_id: res2.data[0].id };
+                  const res3 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
+                  if (res3.status) {
+                    if (res3.data.length > 0) {
+                      updatedRows[index].taskData = res3.data;
+                      updatedRows[index].task_id = res3.data[0].id;
+                    }
+                  }
+                }
+              }
+              
+             }
+           }
+
         }
       }
     }
