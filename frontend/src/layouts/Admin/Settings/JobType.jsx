@@ -17,19 +17,19 @@ const Setting = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const location = useLocation();
   const navigate = useNavigate();
-  const dispatch = useDispatch(); 
+  const dispatch = useDispatch();
   const [jobTypeData, setJobTypeData] = useState({ loading: true, data: [] });
   const [modalData, setModalData] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showAddTask, setShowAddTask] = useState(false);
   const [viewtask, setViewtask] = useState(false);
-  const [getJobTypeId, setJobTypeId] = useState(""); 
+  const [getJobTypeId, setJobTypeId] = useState("");
   const [isEdit, setIsEdit] = useState(false);
   const [taskInput, setTaskInput] = useState("");
   const [tasks, setTasks] = useState([]);
   const [ViewTaskData, setViewTaskData] = useState([]);
- 
-  console.log("ViewTaskData", ViewTaskData);
+
+  console.log("location", location?.state?.settingTab);
 
   const JobTypeData = async (req) => {
     if (location.state.Id) {
@@ -76,23 +76,23 @@ const Setting = () => {
     fetchApiData();
   }, []);
 
-  const handleViewTask = async(row) => {
+  const handleViewTask = async (row) => {
     // const req = {service_id: location.state.Id, job_type_id: row.id};
-    const req = {service_id: 5, job_type_id: 3};
+    const req = { service_id: 5, job_type_id: 3 };
 
     const data = { req: req, authToken: token }
     await dispatch(GETTASKDATA(data))
-    .unwrap()
-    .then(async (response) => {
-      if (response.status) {
-        setViewTaskData(response.data);
-      } else {
-        setViewTaskData([]);
-      }
-    })
-    .catch((error) => {
-      return;
-    });
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setViewTaskData(response.data);
+        } else {
+          setViewTaskData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
   };
 
   const fetchApiData = () => {
@@ -334,7 +334,7 @@ const Setting = () => {
   const handleAddTask = () => {
     if (taskInput.trim() !== "") {
       setTasks([...tasks, taskInput]);
-      setTaskInput(""); 
+      setTaskInput("");
     }
   };
 
@@ -351,8 +351,8 @@ const Setting = () => {
 
       const extractedTasks = jsonData.map(
         (row) => row.Task || row.task || row["Task Name"]
-      ); 
-      setTasks([...tasks, ...extractedTasks]); 
+      );
+      setTasks([...tasks, ...extractedTasks]);
     };
 
     reader.readAsBinaryString(file);
@@ -397,7 +397,10 @@ const Setting = () => {
       <div className="container-fluid">
         <div className="card mt-4">
           <div className="card-header align-items-center step-header-blue d-flex">
-            <button type="button" className="btn p-0" onClick={(e)=>  window.history.back()}>
+            <button type="button" className="btn p-0" onClick={(e) => {
+              sessionStorage.setItem('settingTab', location?.state?.settingTab);
+              window.history.back()
+            }}>
               <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
             </button>
             <h4 className="card-title">Job Type</h4>
@@ -524,7 +527,7 @@ const Setting = () => {
               <thead className="table-light">
                 <tr>
                   <th className="">Task</th>
-                 
+
                   <th className="tabel_left" width="80">Action</th>
                 </tr>
               </thead>
@@ -532,16 +535,16 @@ const Setting = () => {
                 {tasks.map((task, index) => (
                   <tr className="tabel_new" key={index}>
                     <td>{task}</td>
-                    
+
                     <td className="tabel_left">
                       <div className="d-flex gap-2">
                         <div className="remove">
                           <button
-                            
+
                             className="delete-icon "
                           >
-                          
-                            <i className="ti-trash text-danger"/>
+
+                            <i className="ti-trash text-danger" />
                           </button>
                         </div>
                       </div>
@@ -629,10 +632,10 @@ const Setting = () => {
                   </tr>
                 ))}
                 <tr className="tabel_new" >
-                    <td className="text-center">Task not created</td>
+                  <td className="text-center">Task not created</td>
 
-                    
-                  </tr>
+
+                </tr>
               </tbody>
             </table>
           </div>
