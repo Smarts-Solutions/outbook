@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   DashboardData,
   ActivityLog,
@@ -7,6 +7,7 @@ import {
 import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
 
 const Dashboard = () => {
+  
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const token = JSON.parse(localStorage.getItem("token"));
   const dispatch = useDispatch();
