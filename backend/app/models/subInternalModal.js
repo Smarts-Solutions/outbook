@@ -2,7 +2,7 @@ const pool = require('../config/database');
 const { SatffLogUpdateOperation } = require("../utils/helper");
 
 const AddSubInternal = async (subInternal) => {
-    const { name, status , internal_id } = subInternal;
+    const { name , internal_id } = subInternal;
     // add internal
     const checkQuery = `SELECT 1 FROM sub_internal WHERE name = ?`;
     const query = `
@@ -14,7 +14,7 @@ const AddSubInternal = async (subInternal) => {
         if (check.length > 0) {
             return { status: false, message: 'Internal already exists.' };
         }
-        const [result] = await pool.execute(query, [name, status , internal_id]);
+        const [result] = await pool.execute(query, [name , internal_id]);
         return { status: true, message: 'Internal created successfully.', data: result.insertId };
     } catch (err) {
         console.error('Error inserting data:', err);
