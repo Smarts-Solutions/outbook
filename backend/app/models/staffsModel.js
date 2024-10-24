@@ -95,13 +95,13 @@ const deleteStaff = async (staffId) => {
 };
 
 const updateStaff = async (staff) => {
+
+  console.log("staff",staff);
   const { id, ...fields } = staff;
   let email = fields.email;
- 
-
+   
   const checkQuery = `SELECT 1 FROM staffs WHERE email = ? AND id != ?`;
   const [check] = await pool.execute(checkQuery, [email, id]);
-
   if (check.length > 0) {
     return { status: false, message: 'Email Already Exists.' };
   }
@@ -265,16 +265,19 @@ const managePortfolio = async (staff_id) => {
 };
 
 const status = async (id) => {
-  // console.log(id);
+ if(id != undefined){
   const query = `SELECT status FROM staffs WHERE id = ?`;
-
   try {
     const [result] = await pool.execute(query, [id]);
+    console.log("result",result);
     return result;
   } catch (err) {
     console.log("Error updating data:", err);
     throw err;
   }
+}else{
+  return 
+}
 };
 
 module.exports = {

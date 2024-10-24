@@ -54,6 +54,7 @@ const login = async (credentials) => {
     const { email, password } = credentials;
     const user = await staffModel.getStaffByEmail(email);
 
+    console.log("user,",user);
     if (!user) {
       return {status:false,message:"Please enter a valid Email"}
     }
