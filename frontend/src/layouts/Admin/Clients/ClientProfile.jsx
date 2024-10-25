@@ -10,7 +10,7 @@ import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlic
 
 const ClientList = () => {
   const navigate = useNavigate();
-  const location = useLocation(); 
+  const location = useLocation();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
@@ -30,7 +30,6 @@ const ClientList = () => {
     GetClientDetails();
     GetStatus();
   }, []);
-
 
   const accessDataJob =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
@@ -173,7 +172,7 @@ const ClientList = () => {
       cell: (row) => (
         <div>
           {
-            getAccessDataJob.view == 1  || role === "ADMIN" || role === "SUPERADMIN" ? (
+            getAccessDataJob.view == 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
               <a onClick={() => HandleJob(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
                 {row.job_code_id}
               </a>
@@ -242,15 +241,7 @@ const ClientList = () => {
           : "",
       sortable: true,
     },
-    // {
-    //   name: "Timesheet",
-    //   selector: (row) =>
-    //     row.total_hours_status == "1" && row.total_hours != null ?
-    //       row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
-    //       : "",
-    //   sortable: true,
-      // },
-      {
+    {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
@@ -357,6 +348,9 @@ const ClientList = () => {
     navigate("/admin/client/edit", { state: { row, id: row } });
   }
 
+
+  console.log("local", location.state.activeTab)
+
   return (
     <div className="container-fluid">
       <div className="col-sm-12">
@@ -402,7 +396,12 @@ const ClientList = () => {
                   <button
                     type="button"
                     className="btn btn-info text-white float-end blue-btn"
-                    onClick={() => window.history.back()}
+
+                    onClick={() => {
+                      sessionStorage.setItem('activeTab', location.state.activeTab);
+                      window.history.back()
+                    }
+                    }
                   >
                     <i className="fa fa-arrow-left pe-1" /> Back
                   </button>
@@ -415,7 +414,11 @@ const ClientList = () => {
                 <button
                   type="button"
                   className="btn btn-info text-white float-end blue-btn me-2"
-                  onClick={() => window.history.back()}
+                  onClick={() => {
+                    sessionStorage.setItem('activeTab', location.state.activeTab);
+                    window.history.back()
+                  }
+                  }
                 >
                   <i className="fa fa-arrow-left pe-1" /> Back
                 </button>
@@ -424,7 +427,7 @@ const ClientList = () => {
           </div>
         </div>
 
-        <Hierarchy show={["Customer", "Client", activeTab == 'NoOfJobs' ? 'No. Of Jobs' : activeTab]} active={2} data={hararchyData} NumberOfActive={customerData.length} />
+        <Hierarchy show={["Customer", "Client", activeTab == 'NoOfJobs' ? 'No. Of Jobs' : activeTab]} active={2} data={hararchyData} NumberOfActive={activeTab == 'NoOfJobs' ? customerData.length : ""} />
 
       </div>
 

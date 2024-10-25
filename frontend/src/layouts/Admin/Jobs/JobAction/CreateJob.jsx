@@ -455,6 +455,7 @@ const CreateJob = () => {
               timer: 1500,
             });
             setTimeout(() => {
+              sessionStorage.setItem('activeTab', location.state.activeTab);
               window.history.back();
             }, 1500);
           } else {
@@ -628,7 +629,10 @@ const CreateJob = () => {
                 <button
                   type="button "
                   className="btn p-0"
-                  onClick={() => window.history.back()}
+                  onClick={() =>{ 
+                    sessionStorage.setItem('activeTab', location.state.activeTab);
+                    window.history.back()
+                  }}
                 >
                   <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" />{" "}
                 </button>

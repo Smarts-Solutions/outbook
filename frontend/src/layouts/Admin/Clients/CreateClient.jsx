@@ -706,13 +706,7 @@ const CreateClient = () => {
     setSearchDetails(filterData);
   };
 
-  const HandleCancel = () => {
-    // navigate("/admin/Clientlist", { state: { id: location.state.id } });
-    window.history.back()
-  };
 
-
-  // common submit function for all type of customer
   const AddClientFun = async (req) => {
 
     const data = { req: req, authToken: token };
@@ -727,7 +721,7 @@ const CreateClient = () => {
             timer: 1500,
           });
           setTimeout(() => {
-            //navigate("/admin/Clientlist", { state: location.state });
+            sessionStorage.setItem('activeTab', location.state.activeTab);
             window.history.back();
           }, 1500);
         } else {
@@ -910,7 +904,7 @@ const CreateClient = () => {
               timer: 1500,
             });
             setTimeout(() => {
-              // navigate("/admin/Clientlist", { state: location.state });
+              sessionStorage.setItem('activeTab', location.state.activeTab);
               window.history.back();
             }, 1500);
           } else {
@@ -935,7 +929,10 @@ const CreateClient = () => {
                 <button
                   type="button"
                   className="btn p-0"
-                  onClick={HandleCancel}
+                  onClick={()=>{
+                    sessionStorage.setItem('activeTab', location.state.activeTab);
+                    window.history.back()
+                  }}
                 >
                   <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
                 </button>

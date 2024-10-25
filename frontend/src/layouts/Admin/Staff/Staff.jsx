@@ -11,7 +11,8 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { getDateRange } from "../../../Utils/Comman_function";
 import Validation_Message from "../../../Utils/Validation_Message";
-
+import Select from "react-select";
+import { FaBriefcase, FaPencilAlt, FaPlus, FaEye } from "react-icons/fa";
 const StaffPage = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -174,12 +175,6 @@ const StaffPage = () => {
       sortable: true,
       width: "150px",
     },
-    // {
-    //   name: "Last Name",
-    //   selector: (row) => row.last_name,
-    //   sortable: true,
-    //   width: "150px",
-    // },
     {
       name: "Email Address",
       selector: (row) => row.email,
@@ -215,68 +210,108 @@ const StaffPage = () => {
     },
     {
       name: "Actions",
-      cell: (row) => (
-        <div>
-          {/* <button className='edit-icon' onClick={() => setIsModalOpen(true)}> <i className="ti-user" /></button> */}
-          <button
-            className="secondary-icon"
-            onClick={() => {
-              setPortfolio(true);
-              GetAllCustomer();
-            }}
-          >
-            <i className="ti-briefcase" />
-          </button>
-          {showStaffUpdateTab && (
-            <button
-              className="edit-icon"
-              onClick={(e) => {
-                setEditShowModel(true)
-                setEditStaff(true);
-                setEditStaffData(row);
-              }}
-            >
-              {" "}
-              <i className="ti-pencil" />
-            </button>
-          )}
-          {showStaffInsertTab && (
-            <button
-              className="add-icon fs-6"
-              onClick={(e) => {
-                ServiceData(row);
-                SetCompetancy(true);
-              }}
-            >
-              <i className="fa fa-plus" /> Competency
-            </button>
-          )}
-
-          <button className="view-icon fs-6">
-            <i className="fa fa-eye" /> Logs
-          </button>
-
-          {/* {row.role === "ADMIN" || row.role === "SUPERADMIN"
-            ? showStaffDeleteTab && (
-                <button className="delete-icon" disabled>
-                  <i className="ti-trash text-danger" />
-                </button>
-              )
-            : showStaffDeleteTab && (
-                <button
-                  className="delete-icon"
-                  onClick={(e) => DeleteStaff(row)}
-                >
-                  <i className="ti-trash text-danger" />
-                </button>
-              )} */}
-        </div>
-      ),
+      cell: (row) => {
+        const options = [
+          { value: "portfolio", label: <><FaBriefcase /> Portfolio</>, action: () => { setPortfolio(true); GetAllCustomer(); } },
+          { value: "edit", label: <><FaPencilAlt /> Edit</>, action: () => { setEditShowModel(true); setEditStaff(true); setEditStaffData(row); }, visible: showStaffUpdateTab },
+          { value: "competency", label: <><FaPlus /> Competency</>, action: () => { ServiceData(row); SetCompetancy(true); }, visible: showStaffInsertTab },
+          { value: "logs", label: <><FaEye /> Logs</>, action: () => { /* Handle logs action */ } }
+        ].filter(option => option.visible !== false);  
+  
+        const handleSelectChange = (selectedOption) => {
+          selectedOption?.action();  
+        };
+  
+        const customStyles = {
+          control: (provided) => ({
+            ...provided,
+            width: '200px', // Set the width you desire
+          }),
+          menu: (provided) => ({
+            ...provided,
+            width: '200px', 
+          }),
+        };
+  
+        return (
+          <Select
+            options={options}
+            onChange={handleSelectChange}
+            placeholder="Select Action"
+            isClearable={false}
+            styles={customStyles} 
+          />
+        );
+      },
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      width: "400px",
+      width: "400px", 
     },
+    // {
+    //   name: "Actions",
+    //   cell: (row) => (
+    //     <div>
+    //       {/* <button className='edit-icon' onClick={() => setIsModalOpen(true)}> <i className="ti-user" /></button> */}
+    //       <button
+    //         className="secondary-icon"
+    //         onClick={() => {
+    //           setPortfolio(true);
+    //           GetAllCustomer();
+    //         }}
+    //       >
+    //         <i className="ti-briefcase" />
+    //       </button>
+    //       {showStaffUpdateTab && (
+    //         <button
+    //           className="edit-icon"
+    //           onClick={(e) => {
+    //             setEditShowModel(true)
+    //             setEditStaff(true);
+    //             setEditStaffData(row);
+    //           }}
+    //         >
+    //           {" "}
+    //           <i className="ti-pencil" />
+    //         </button>
+    //       )}
+    //       {showStaffInsertTab && (
+    //         <button
+    //           className="add-icon fs-6"
+    //           onClick={(e) => {
+    //             ServiceData(row);
+    //             SetCompetancy(true);
+    //           }}
+    //         >
+    //           <i className="fa fa-plus" /> Competency
+    //         </button>
+    //       )}
+
+    //       <button className="view-icon fs-6">
+    //         <i className="fa fa-eye" /> Logs
+    //       </button>
+
+    //       {/* {row.role === "ADMIN" || row.role === "SUPERADMIN"
+    //         ? showStaffDeleteTab && (
+    //             <button className="delete-icon" disabled>
+    //               <i className="ti-trash text-danger" />
+    //             </button>
+    //           )
+    //         : showStaffDeleteTab && (
+    //             <button
+    //               className="delete-icon"
+    //               onClick={(e) => DeleteStaff(row)}
+    //             >
+    //               <i className="ti-trash text-danger" />
+    //             </button>
+    //           )} */}
+    //     </div>
+    //   ),
+    //   ignoreRowClick: true,
+    //   allowOverflow: true,
+    //   button: true,
+    //   width: "400px",
+    // },
   ];
 
   const formik = useFormik({
@@ -296,14 +331,6 @@ const StaffPage = () => {
       email: Yup.string()
         .email(Validation_Message.EmailValidation)
         .required(Validation_Message.EmailIsRequire),
-      // phone: Yup.string()
-      //   .matches(/^[0-9]+$/, Validation_Message.PhoneValidation)
-      //   .required(Validation_Message.PhoneIsRequire),
-      // password: editStaff
-      //   ? Yup.string().min(8, Validation_Message.PasswordValidation)
-      //   : Yup.string()
-      //       .min(8, Validation_Message.PasswordValidation)
-      //       .required(Validation_Message.PasswordIsRequire),
       role: Yup.string().required(Validation_Message.RoleValidation),
       status: Yup.string().required(Validation_Message.StatusValidation),
     }),

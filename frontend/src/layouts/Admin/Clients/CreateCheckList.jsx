@@ -273,8 +273,8 @@ const CreateCheckList = () => {
       })),
     };
 
-     
-    
+
+
 
     const data = { req, authToken: token };
     await dispatch(addChecklists(data))
@@ -300,7 +300,8 @@ const CreateCheckList = () => {
           setTasks([{ task_id: "", task_name: "", budgeted_hour: "" }]);
 
           // Redirect to Clientlist
-         window.history.back()
+          sessionStorage.setItem('activeTab', location.state.activeTab);
+          window.history.back()
         }
       })
       .catch((error) => {
@@ -326,11 +327,10 @@ const CreateCheckList = () => {
           <button
             type="button"
             className="btn p-0"
-            onClick={() =>
-              // navigate("/admin/Clientlist", {
-              //   state: { id: location.state.id, route: "Checklist" },
-              // })
+            onClick={() => {
+              sessionStorage.setItem('activeTab', location.state.activeTab)
               window.history.back()
+            }
             }
           >
             <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
@@ -344,7 +344,7 @@ const CreateCheckList = () => {
                 <div className="col-lg-12">
                   <label className="form-label"> Select Service Type</label>
                   <select
-                     className={errors.service_id ? "error-field form-select" : "form-select"}
+                    className={errors.service_id ? "error-field form-select" : "form-select"}
                     name="service_id"
                     defaultValue={formData.service_id}
                     onChange={(e) => {
@@ -438,7 +438,7 @@ const CreateCheckList = () => {
                   <label className="form-label">Status</label>
 
                   <select
-                   className={errors.status ? "error-field form-select" : "form-select"}
+                    className={errors.status ? "error-field form-select" : "form-select"}
                     name="status"
                     defaultValue={formData.status}
                     onChange={handleInputChange}
@@ -483,45 +483,45 @@ const CreateCheckList = () => {
                 </div>
 
                 <div className="col-lg-5">
-                <label className="form-label">Budgeted Time</label>
-<div className="input-group">
-  {/* Hours Input */}
-  <div className="hours-div w-50">
-    <input
-      type="number"
-  
-      className={errors1[`budgeted_hour_${index}`] ? "error-field form-control" : "form-control"}
+                  <label className="form-label">Budgeted Time</label>
+                  <div className="input-group">
+                    {/* Hours Input */}
+                    <div className="hours-div w-50">
+                      <input
+                        type="number"
 
-      placeholder="Hours"
-      name="hours"
-      defaultValue={task.budgeted_hour?.hours || ""}
-      onChange={(e) => handleTaskChange(index, e)}
-    />
-    <span className="input-group-text">H</span>
-  </div>
+                        className={errors1[`budgeted_hour_${index}`] ? "error-field form-control" : "form-control"}
 
-  {/* Minutes Input */}
-  <div className="hours-div w-50">
-    <input
-      type="number"
-      className="form-control"
-      placeholder="Minutes"
-      name="minutes"
-      min="0"
-      max="59"
-      defaultValue={task.budgeted_hour?.minutes || ""}
-      onChange={(e) => handleTaskChange(index, e)}
-    />
-    <span className="input-group-text">M</span>
-  </div>
-</div>
+                        placeholder="Hours"
+                        name="hours"
+                        defaultValue={task.budgeted_hour?.hours || ""}
+                        onChange={(e) => handleTaskChange(index, e)}
+                      />
+                      <span className="input-group-text">H</span>
+                    </div>
 
-{/* Error Message */}
-{errors1[`budgeted_hour_${index}`] && (
-  <p className="error-text">
-    {errors1[`budgeted_hour_${index}`]}
-  </p>
-)}
+                    {/* Minutes Input */}
+                    <div className="hours-div w-50">
+                      <input
+                        type="number"
+                        className="form-control"
+                        placeholder="Minutes"
+                        name="minutes"
+                        min="0"
+                        max="59"
+                        defaultValue={task.budgeted_hour?.minutes || ""}
+                        onChange={(e) => handleTaskChange(index, e)}
+                      />
+                      <span className="input-group-text">M</span>
+                    </div>
+                  </div>
+
+                  {/* Error Message */}
+                  {errors1[`budgeted_hour_${index}`] && (
+                    <p className="error-text">
+                      {errors1[`budgeted_hour_${index}`]}
+                    </p>
+                  )}
                 </div>
                 <div className="col-lg-2">
                   <button className="delete-icon mt-4" onClick={() => removeTask(index)}>
@@ -535,18 +535,17 @@ const CreateCheckList = () => {
           <div className="col-lg-12 mt-4">
             <button
               className="btn btn-secondary "
-              onClick={(e) =>
-                // navigate("/admin/Clientlist", {
-                //   state: { id: location.state.id, route: "Checklist" },
-                // })
+              onClick={(e) =>{
+                sessionStorage.setItem('activeTab', location.state.activeTab);
                 window.history.back()
               }
+              }
             >
-               <i className="fa fa-times pe-1"></i>
+              <i className="fa fa-times pe-1"></i>
               Cancel
             </button>
             <button className="btn btn-outline-success ms-2" onClick={handleSubmit}>
-            <i className="far fa-save pe-1"></i>
+              <i className="far fa-save pe-1"></i>
               Submit
             </button>
           </div>

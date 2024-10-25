@@ -641,6 +641,8 @@ const ClientEdit = () => {
             timer: 1500,
           });
           setTimeout(() => {
+            sessionStorage.setItem('activeTab', location.state.activeTab);
+           
             window.history.back();
           }, 1500);
         } else {
@@ -836,7 +838,10 @@ const ClientEdit = () => {
                 <button
                   type="button"
                   className="btn p-0"
-                  onClick={HandleCancel}
+                  onClick={()=>{
+                    sessionStorage.setItem('activeTab', location.state.activeTab);
+                    window.history.back()
+                  }}
                 >
                   <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
                 </button>
@@ -2906,7 +2911,10 @@ const ClientEdit = () => {
                         <button
                           type="button"
                           className="btn btn-secondary"
-                          onClick={HandleCancel}
+                          onClick={()=>{
+                            sessionStorage.setItem('activeTab', location.state.activeTab);
+                            window.history.back()
+                          }}
                         >
                           <i className="fa fa-times pe-1"></i>
                           Cancel

@@ -165,7 +165,10 @@ const JobLogs = () => {
                 <div className="page-title-right">
                   <div
                     className="btn btn-info text-white float-end blue-btn"
-                    onClick={() => window.history.back()}
+                    onClick={() => {
+                      sessionStorage.setItem('activeTab', location.state.activeTab);
+                      window.history.back()
+                    }}
                   >
                     <i className="fa fa-arrow-left pe-1" /> Back
                   </div>

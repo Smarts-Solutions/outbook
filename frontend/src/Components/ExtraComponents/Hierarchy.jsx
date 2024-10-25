@@ -46,14 +46,14 @@ const Hierarchy = ({ show, active, data , NumberOfActive }) => {
                             <span className="breadcrumb__inner">
                                 <span className="breadcrumb__title">{show[1]}</span>
                                 <span className="breadcrumb__desc">{active>=2 && show[1]=="Job" ? data?.job?.job_code_id : active>=2 && show[1]=="Client" ?  data?.client?.client_name : "" }</span>
-                               {active==1 ?  <span>{NumberOfActive}</span> : ""  }
+                             {active==1 ?  <span>{NumberOfActive ? "(" +NumberOfActive+")" : ""}</span> : ""  }
                             </span>
                         </a>
                         {show.length >= 3 ? <a  className={`${active>=3 ? 'active' : ''} col-3`} onClick={(e)=>fun(3, active)}>
                             <span className="breadcrumb__inner">
                                 <span className="breadcrumb__title">{show[2]}</span>
                                 <span className="breadcrumb__desc">{active>=3 ? data?.job?.job_code_id : ""}</span>
-                                {active==2 ?  <span>{NumberOfActive}</span> : ""  }
+                                {active==2 ?  <span>{NumberOfActive ? "(" +NumberOfActive+")" : ""}</span> : ""  }
                             </span>
                         </a> : ''
                         }
@@ -61,7 +61,6 @@ const Hierarchy = ({ show, active, data , NumberOfActive }) => {
                             show.length == 4 ? <a  className={`${active>=4 ? 'active' : ''} col-3`} onClick={(e)=>fun(4 , active)}>
                                 <span className="breadcrumb__inner">
                                     <span className="breadcrumb__title">{show[3]}</span>
-                                    {active==3 ?  <span>{NumberOfActive}</span> : ""  }
                                      
                                 </span>
                             </a> : ''

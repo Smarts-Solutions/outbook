@@ -145,44 +145,44 @@ const CreateCheckList = () => {
   const handleTaskChange = (index, e) => {
     const { name, value } = e.target;
     const newTasks = [...tasks];
-  
+
 
     if (name === "hours" || name === "minutes") {
 
       const existingBudgetedHour = newTasks[index].budgeted_hour || "00:00";
       const [hours, minutes] = existingBudgetedHour.split(":");
-  
+
       if (name === "hours") {
         const numericValue = Number(value);
-  
-      
+
+
         if (!isNaN(numericValue) && numericValue >= 0) {
-          newTasks[index].budgeted_hour = 
+          newTasks[index].budgeted_hour =
             value === '' ? '' : numericValue.toString().padStart(2, "0") + ":" + minutes;
         }
       } else if (name === "minutes") {
         const numericValue = Number(value);
-  
-      
+
+
         if (value === '' || (numericValue >= 0 && numericValue <= 59)) {
-          newTasks[index].budgeted_hour = 
+          newTasks[index].budgeted_hour =
             hours + ":" + (value === '' ? '' : numericValue.toString().padStart(2, "0"));
         } else {
-          
+
           e.target.value = "59";
           newTasks[index].budgeted_hour = hours + ":59";
         }
       }
     } else {
-  
+
       newTasks[index][name] = value;
     }
-  
 
-  
+
+
     setTasks(newTasks);
   };
-  
+
 
 
   const addTask = () => {
@@ -281,9 +281,7 @@ const CreateCheckList = () => {
             status: "",
           });
           setTasks([{ task_id: "", task_name: "", budgeted_hour: "" }]);
-          // navigate("/admin/Clientlist", {
-          //   state: { id: location.state.id, route: "Checklist" },
-          // });
+          sessionStorage.setItem('activeTab', location.state.activeTab);
           window.history.back();
         }
       })
@@ -311,11 +309,10 @@ const CreateCheckList = () => {
           <button
             type="button"
             className="btn p-0"
-            onClick={() =>
-              // navigate("/admin/Clientlist", {
-              //   state: { id: location.state.id, route: "Checklist" },
-              // })
+            onClick={() => {
+              sessionStorage.setItem('activeTab', location.state.activeTab)
               window.history.back()
+            }
             }
           >
             <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" />
@@ -522,7 +519,7 @@ const CreateCheckList = () => {
                   className="btn btn-outline-success"
                   onClick={handleSubmit}
                 >
-                   <i className="far fa-save pe-1"></i>
+                  <i className="far fa-save pe-1"></i>
                   Submit
                 </button>
               </div>

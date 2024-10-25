@@ -253,7 +253,9 @@ const SubInternal = () => {
                         <button
                             type="button"
                             className="btn p-0"
-                            onClick={() => window.history.back()}
+                            onClick={() => {
+                                sessionStorage.setItem('settingTab', location?.state?.settingTab);
+                                window.history.back()}}
                         >
                             <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
                         </button>

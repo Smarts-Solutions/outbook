@@ -3,14 +3,11 @@ import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   JobType,
-  GetServicesByCustomers,
   GETTASKDATA,
   getList,
   addChecklists,
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
-
 import {Get_Service} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
-
 import sweatalert from "sweetalert2";
 import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
 
@@ -26,6 +23,8 @@ const CreateCheckList = () => {
   const [errors, setErrors] = useState({});
   const [errors1, setErrors1] = useState({});
 
+
+  console.log("location", location.state);
   const [formData, setFormData] = useState({
     customer_id: location.state?.id || "",
     service_id: "",
@@ -310,10 +309,7 @@ const CreateCheckList = () => {
           });
           setTasks([{ task_id: "", task_name: "", budgeted_hour: "" }]);
 
-          // Redirect to Clientlist
-          // navigate("/admin/Clientlist", {
-          //   state: { id: location.state.id, route: "Checklist" },
-          // });
+          sessionStorage.setItem('settingTab', location?.state?.settingTab);
           window.history.back();
         }
       })
@@ -340,7 +336,9 @@ const CreateCheckList = () => {
           <button
             type="button"
             className="btn p-0"
-            onClick={() =>window.history.back()}
+            onClick={() =>{
+              sessionStorage.setItem('settingTab', location?.state?.settingTab)
+              window.history.back()}}
           >
             <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
           </button>
@@ -353,7 +351,6 @@ const CreateCheckList = () => {
                 <div className="col-lg-12">
                   <label className="form-label"> Select Service Type</label>
                   <select
-                    
                     className={errors.service_id ? "error-field form-select" : "form-select"}
                     name="service_id"
                     defaultValue={formData.service_id}
@@ -579,11 +576,10 @@ const CreateCheckList = () => {
           <div className="col-lg-12 mt-4">
             <button
               className="btn btn-secondary "
-              onClick={(e) =>
-                // navigate("/admin/Clientlist", {
-                //   state: { id: location.state.id, route: "Checklist" },
-                // })
+              onClick={(e) =>{
+                sessionStorage.setItem('settingTab', location?.state?.settingTab)
                 window.history.back()
+              }
               }
             >
                <i className="fa fa-times pe-1"></i>
