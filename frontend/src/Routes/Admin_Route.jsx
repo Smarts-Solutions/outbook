@@ -15,7 +15,7 @@ import Addcustomer from "../layouts/Admin/customer/customer_add_process/Addcusto
 import Editcustomer from "../layouts/Admin/customer/customer_edit_process/Editcustomer";
 
 import Status from "../layouts/Admin/StatusPage/Status";
-import Reports from "../layouts/Admin/ReportsPage/Reports";
+// import Reports from "../layouts/Admin/ReportsPage/Reports";
 import Access from "../layouts/Admin/AccessPage/Access";
 import Setting from "../layouts/Admin/Settings/Setting";
 import Staff from "../layouts/Admin/Staff/Staff";
@@ -47,15 +47,14 @@ import Queries from "../layouts/Admin/Jobs/Queries";
 import Drafts from "../layouts/Admin/Jobs/Drafts";
 import Documents from "../layouts/Admin/Jobs/Documents";
 
+
 import CreateJob from "../layouts/Admin/Jobs/JobAction/CreateJob";
 import JobEdit from "../layouts/Admin/Jobs/JobAction/EditJob";
 import Timesheet from "../layouts/Admin/Timesheet/Timesheet";
 import TimesheetNew from "../layouts/Admin/Timesheet/TimesheetNew";
-import Reportsnew from "../layouts/Admin/ReportsNew/Reportsnew";
-
-import CustomerTable from "../layouts/Admin/ReportsNew/CustomerTable";
-
-import CPP from '../layouts/Admin/ReportsNew/New'
+import Reports from "../layouts/Admin/Reports/Reports";
+import CustomerTable from "../layouts/Admin/Reports/CustomerTable";
+import CPP from '../layouts/Admin/Reports/New'
 
 
 
@@ -241,7 +240,7 @@ const Admin_Route = () => {
               <Route path="/timesheet" element={<Timesheet />} />
               <Route path="/timesheetnew" element={<TimesheetNew />} />
               <Route path="/subinternal" element={<SubInternal />} />
-              <Route path="/reportsnew" element={<Reportsnew />} />
+              {/* <Route path="/reportsnew" element={<Reportsnew />} /> */}
               <Route path="report/customer" element={<CustomerTable />} />
               <Route path="cpp" element={<CPP />} />
 
