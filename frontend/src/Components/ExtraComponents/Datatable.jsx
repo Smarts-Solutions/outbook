@@ -28,26 +28,28 @@ const Datatable = ({ columns, data, filter }) => {
           <p className='fs-16'>There are no records to display</p>
         </div>
       ) : (
-        <DataTableExtensions
-          columns={columns}
-          data={data}
-          export={false}
-          print={false}
-          search={true}
-          filter={filter}
-        >
-          <DataTable
-            fixedHeader
-            fixedHeaderScrollHeight="700px"
-            noHeader
-            defaultSortField="JobId"
-            defaultSortAsc={false}
-            pagination
-            highlightOnHover
-            paginationRowsPerPageOptions={[10, 50, 100]}
-            paginationComponentOptions={{ selectAllRowsItem: true, selectAllRowsItemText: 'All' }}
-          />
-        </DataTableExtensions>
+        <div style={{ maxHeight: '500px', overflowY: 'auto' }}>  
+          <DataTableExtensions
+            columns={columns}
+            data={data}
+            export={false}
+            print={false}
+            search={true}
+            filter={filter}
+          >
+            <DataTable
+              fixedHeader
+              fixedHeaderScrollHeight="700px"
+              noHeader
+              defaultSortField="JobId"
+              defaultSortAsc={false}
+              pagination
+              highlightOnHover
+              paginationRowsPerPageOptions={[10, 50, 100]}
+              paginationComponentOptions={{ selectAllRowsItem: true, selectAllRowsItemText: 'All' }}
+            />
+          </DataTableExtensions>
+        </div>
       )}
     </div>
   );
