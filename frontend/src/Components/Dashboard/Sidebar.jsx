@@ -160,22 +160,22 @@ const Sidebar = () => {
                   )}
 
                   {
-                  // ((updatedShowTab && updatedShowTab.report) ||
-                  //   role === "ADMIN" ||
-                  //   role === "SUPERADMIN") && (
-                  //     <li className={activeLink === "/admin/reports" ? "active" : ""}>
-                  //       <Link
-                  //         to="/admin/reports"
-                  //         aria-expanded="false"
-                  //         onClick={(e) => handleLinkClick(e, "/admin/reports")}
-                  //       >
-                  //         <span className="sidebar-icons">
-                  //           <i className="fas fa-file-alt"></i> {/* Report icon */}
-                  //         </span>
-                  //         <span>Report</span>
-                  //       </Link>
-                  //     </li>
-                  //   )
+                  ((updatedShowTab && updatedShowTab.report) ||
+                    role === "ADMIN" ||
+                    role === "SUPERADMIN") && (
+                      <li className={activeLink === "/admin/reports" ? "active" : ""}>
+                        <Link
+                          to="/admin/reports"
+                          aria-expanded="false"
+                          onClick={(e) => handleLinkClick(e, "/admin/reports")}
+                        >
+                          <span className="sidebar-icons">
+                            <i className="fas fa-file-alt"></i> {/* Report icon */}
+                          </span>
+                          <span>Report</span>
+                        </Link>
+                      </li>
+                    )
                     }
 
                     {((updatedShowTab && updatedShowTab.timesheet) ||
