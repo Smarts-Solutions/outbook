@@ -43,9 +43,6 @@ const TimesheetReport = () => {
               </div>
               
             </div>
-
-
-
             <div className='datatable-wrapper mt-minus'>
               <Datatable
                 filter={true}
