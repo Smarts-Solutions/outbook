@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import DataTable from 'react-data-table-component';
 import DataTableExtensions from 'react-data-table-component-extensions';
-import CustomerTable from '../../layouts/Admin/ReportsNew/CustomerTable'
+import CustomerTable from '../../layouts/Admin/Reports/CustomerTable'
 
 
 const data = [
