@@ -41,13 +41,7 @@ const TimesheetReport = () => {
                   <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
                 </div>
               </div>
-              <div className='col-md-5'>
-                <div className='d-block float-end report-data py-2'>
-                  <div><b>Amatis Training ltd</b></div>
-                  <div><b>Timesheet: </b><a href="logs.html">Book-keeping Timesheet</a></div>
-                  <div><b>Subject:</b> Weekly Book-keeping Timesheet</div>
-                </div>
-              </div>
+              
             </div>
 
 
