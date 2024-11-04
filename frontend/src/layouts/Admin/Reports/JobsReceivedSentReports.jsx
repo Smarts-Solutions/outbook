@@ -1,52 +1,48 @@
-import React, { useState , useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { ReceivedSentReport } from "../../../ReduxStore/Slice/Report/ReportSlice";
 import { useDispatch } from "react-redux";
-
 
 const JobsReceivedSentReports = () => {
     const dispatch = useDispatch();
     const token = JSON.parse(localStorage.getItem("token"));
     const [receivedSentData, setReceivedSentData] = useState([]);
+    const [expandedRows, setExpandedRows] = useState({});
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;  
 
-
-   useEffect(() => {
+    useEffect(() => {
         ReceivedSentData();
     }, []);
 
-
-    const ReceivedSentData =async()=>{
-        const data = {req:{},authToken:token};
+    const ReceivedSentData = async () => {
+        const data = { req: {}, authToken: token };
         await dispatch(ReceivedSentReport(data))
-        .unwrap()
-        .then((res)=>{
-            if(res.status){
-                setReceivedSentData(res.data);
-            }else{
-                setReceivedSentData([]);
-            }
-        })
-        .catch((err)=>{
-            console.log(err);
-        });
+            .unwrap()
+            .then((res) => {
+                if (res.status) {
+                    setReceivedSentData(res.data);
+                } else {
+                    setReceivedSentData([]);
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    };
 
-
-    }
-
-    const [expandedRows, setExpandedRows] = useState({
-        teamMember1: false,
-        customer1: false,
-        client1: false,
-        teamMember2: false,
-        customer2: false,
-        client2: false,
-    });
-
-    const toggleRow = (rowKey) => {
+    const toggleRow = (index) => {
         setExpandedRows((prevState) => ({
             ...prevState,
-            [rowKey]: !prevState[rowKey],
+            [index]: !prevState[index],
         }));
     };
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const totalPages = Math.ceil(receivedSentData.length / itemsPerPage);
+    const paginatedData = receivedSentData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     return (
         <div>
@@ -66,203 +62,36 @@ const JobsReceivedSentReports = () => {
                                     <table className="table align-middle table-nowrap" id="customerTable">
                                         <thead className="table-light">
                                             <tr>
-                                                <th>Team Member Name</th>
-                                                <th>Task1</th>
-                                                <th>Task2</th>
-                                                <th>Task3</th>
-                                                <th>Total</th>
-                                                <th>Processor</th>
-                                                <th>Reviewer</th>
-                                                <th>Other</th>
-                                                <th>Total</th>
+                                                <th>Months</th>
+                                                <th>Jobs Received</th>
+                                                <th>Draft Sent</th>
                                             </tr>
                                         </thead>
                                         <tbody className="list form-check-all">
-                                            {/* Team Member 1 */}
-                                            <tr className="tabel_new">
-                                                <td className="d-flex">
-                                                    <i
-                                                        onClick={() => toggleRow('teamMember1')}
-                                                        className="exp_icon ri-add-circle-fill"
-                                                    />
-                                                    <span>Team Member 1</span>
-                                                </td>
-                                                <td>23</td>
-                                                <td>23</td>
-                                                <td>8</td>
-                                                <td>4 </td>
-                                                <td>3 </td>
-                                                <td>8</td>
-                                                <td>4 </td>
-                                                <td>23</td>
-                                            </tr>
-
-                                            {/* Customers of Team Member 1 */}
-                                            {expandedRows.teamMember1 && (
-                                                <>
-                                                    <tr>
-                                                        <td className="ml-2 d-flex">
-                                                            <i
-                                                                onClick={() => toggleRow('customer1')}
-                                                                className="exp_icon ri-add-circle-fill"
+                                            {paginatedData.map((data, index) => (
+                                                <React.Fragment key={index}>
+                                                    <tr className="tabel_new">
+                                                        <td className="d-flex">
+                                                            <i 
+                                                                onClick={() => toggleRow(index)}
+                                                                className={`exp_icon ${expandedRows[index] ? "ri-add-circle-fill" : "ri-add-circle-fill"}`}
                                                             />
-                                                            <span>Customer 1</span>
+                                                            <span>{data.month_name}</span>
                                                         </td>
-                                                        <td>23</td>
-                                                        <td>23</td>
-                                                        <td>8</td>
-                                                        <td>4</td>
-                                                        <td>3</td>
-                                                        <td>8</td>
-                                                        <td>4</td>
-                                                        <td>23</td>
+                                                        <td>{data.job_received}</td>
+                                                        <td>{data.draft_count}</td>
                                                     </tr>
-
-                                                    {/* Clients of Customer 1 */}
-                                                    {expandedRows.customer1 && (
-                                                        <>
-                                                            <tr>
-                                                                <td className="ml-4 d-flex">
-                                                                    <i
-                                                                        onClick={() => toggleRow('client1')}
-                                                                        className="exp_icon ri-add-circle-fill"
-                                                                    />
-                                                                    <span>Client 1</span>
-                                                                </td>
-                                                                <td>23</td>
-                                                                <td>23</td>
-                                                                <td>8</td>
-                                                                <td>4</td>
-                                                                <td>3</td>
-                                                                <td>8</td>
-                                                                <td>3</td>
-                                                                <td>23</td>
+                                                    {expandedRows[index] && (
+                                                        data.week.map((week, i) => (
+                                                            <tr key={i}>
+                                                                <td>Week {week.week_number}</td>
+                                                                <td>{week.job_received}</td>
+                                                                <td>{week.draft_count}</td>
                                                             </tr>
-
-                                                            {/* Jobs of Client 1 */}
-                                                            {expandedRows.client1 && (
-                                                                <>
-                                                                    <tr>
-                                                                        <td className="ml-6">Job 1</td>
-                                                                        <td>4</td>
-                                                                        <td>2</td>
-                                                                        <td>2</td>
-                                                                        <td>1</td>
-                                                                        <td>1</td>
-                                                                        <td>8</td>
-                                                                        <td>4</td>
-                                                                        <td>23</td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td className="ml-6">Job 2</td>
-                                                                        <td>3</td>
-                                                                        <td>2</td>
-                                                                        <td>8</td>
-                                                                        <td>4</td>
-                                                                        <td>3</td>
-                                                                        <td>8</td>
-                                                                        <td>4</td>
-                                                                        <td>23</td>
-                                                                    </tr>
-                                                                </>
-                                                            )}
-                                                        </>
+                                                        ))
                                                     )}
-                                                </>
-                                            )}
-
-                                            {/* Team Member 2 */}
-                                            <tr className="tabel_new">
-                                                <td className="d-flex">
-                                                    <i
-                                                        onClick={() => toggleRow('teamMember2')}
-                                                        className="exp_icon ri-add-circle-fill"
-                                                    />
-                                                    <span>Team Member 2</span>
-                                                </td>
-                                                <td>23</td>
-                                                <td>23</td>
-                                                <td>8</td>
-                                                <td>4</td>
-                                                <td>3</td>
-                                                <td>8</td>
-                                                <td>4</td>
-                                                <td>23</td>
-                                            </tr>
-
-                                            {/* Customers of Team Member 2 */}
-                                            {expandedRows.teamMember2 && (
-                                                <>
-                                                    <tr>
-                                                        <td className="ml-2 d-flex">
-                                                            <i
-                                                                onClick={() => toggleRow('customer2')}
-                                                                className="exp_icon ri-add-circle-fill"
-                                                            />
-                                                            <span>Customer 2</span>
-                                                        </td>
-                                                        <td>23</td>
-                                                        <td>23</td>
-                                                        <td>8</td>
-                                                        <td>4</td>
-                                                        <td>3</td>
-                                                        <td>8</td>
-                                                        <td>4</td>
-                                                        <td>23</td>
-                                                    </tr>
-
-                                                    {/* Clients of Customer 2 */}
-                                                    {expandedRows.customer2 && (
-                                                        <>
-                                                            <tr>
-                                                                <td className="ml-4 d-flex">
-                                                                    <i
-                                                                        onClick={() => toggleRow('client2')}
-                                                                        className="exp_icon ri-add-circle-fill"
-                                                                    />
-                                                                    <span>Client 2</span>
-                                                                </td>
-                                                                <td>23</td>
-                                                                <td>23</td>
-                                                                <td>8</td>
-                                                                <td>4</td>
-                                                                <td>3</td>
-                                                                <td>8</td>
-                                                                <td>3</td>
-                                                                <td>23</td>
-                                                            </tr>
-
-                                                            {/* Jobs of Client 2 */}
-                                                            {expandedRows.client2 && (
-                                                                <>
-                                                                    <tr>
-                                                                        <td className="ml-6">Job 1</td>
-                                                                        <td>4</td>
-                                                                        <td>2</td>
-                                                                        <td>2</td>
-                                                                        <td>1</td>
-                                                                        <td>1</td>
-                                                                        <td>8</td>
-                                                                        <td>4</td>
-                                                                        <td>23</td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td className="ml-6">Job 2</td>
-                                                                        <td>3</td>
-                                                                        <td>2</td>
-                                                                        <td>8</td>
-                                                                        <td>4</td>
-                                                                        <td>3</td>
-                                                                        <td>8</td>
-                                                                        <td>4</td>
-                                                                        <td>23</td>
-                                                                    </tr>
-                                                                </>
-                                                            )}
-                                                        </>
-                                                    )}
-                                                </>
-                                            )}
+                                                </React.Fragment>
+                                            ))}
                                         </tbody>
                                     </table>
                                 </div>
@@ -270,35 +99,27 @@ const JobsReceivedSentReports = () => {
                                 <div className="row align-items-center gy-2 text-center text-sm-start">
                                     <div className="col-sm">
                                         <div className="text-muted">
-                                            Showing <span className="fw-semibold">1-2</span> of{" "}
-                                            <span className="fw-semibold">13</span> Records
+                                            Showing <span className="fw-semibold">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="fw-semibold">{Math.min(currentPage * itemsPerPage, receivedSentData.length)}</span> of <span className="fw-semibold">{receivedSentData.length}</span> Records
                                         </div>
                                     </div>
                                     <div className="col-sm-auto">
                                         <ul className="pagination pagination-separated pagination-sm mb-0 justify-content-center justify-content-sm-start">
-                                            <li className="page-item disabled">
-                                                <a href="#" className="page-link">
-                                                    <b>
-                                                        <i className="fa fa-angle-left" />
-                                                    </b>
-                                                </a>
+                                            <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                                                <button onClick={() => handlePageChange(currentPage - 1)} className="page-link">
+                                                    <i className="fa fa-angle-left" />
+                                                </button>
                                             </li>
-                                            <li className="page-item active">
-                                                <a href="#" className="page-link">
-                                                    1
-                                                </a>
-                                            </li>
-                                            <li className="page-item">
-                                                <a href="#" className="page-link">
-                                                    2
-                                                </a>
-                                            </li>
-                                            <li className="page-item">
-                                                <a href="#" className="page-link">
-                                                    <b>
-                                                        <i className="mdi mdi-chevron-right" />
-                                                    </b>
-                                                </a>
+                                            {[...Array(totalPages)].map((_, i) => (
+                                                <li key={i} className={`page-item ${currentPage === i + 1 ? "active" : ""}`}>
+                                                    <button onClick={() => handlePageChange(i + 1)} className="page-link">
+                                                        {i + 1}
+                                                    </button>
+                                                </li>
+                                            ))}
+                                            <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                                                <button onClick={() => handlePageChange(currentPage + 1)} className="page-link">
+                                                    <i className="mdi mdi-chevron-right" />
+                                                </button>
                                             </li>
                                         </ul>
                                     </div>
@@ -308,8 +129,6 @@ const JobsReceivedSentReports = () => {
                     </div>
                 </div>
             </div>
-
-
         </div>
     );
 };

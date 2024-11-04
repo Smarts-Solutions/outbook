@@ -8,6 +8,7 @@ import JobSummaryReport from './JobSummaryReport';
 import TeamMonthlyReport from './TeamMonthlyReports';
 import JobPendingReport from './JobPendingReports';
 import JobsReceivedSentReports from './JobsReceivedSentReports';
+import DueByReport from './DueByReport';
 
 
 const columns = [
@@ -63,7 +64,7 @@ function Reportsnew() {
       case 'jobsPendingReport':
         return <JobPendingReport />;
       case 'dueByReport':
-        return <div>Due By Report Content</div>;
+        return <DueByReport />;
       case 'teamPerformanceReport':
         return <TeamMonthlyReport />;
       case 'timesheetReport':

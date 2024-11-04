@@ -70,6 +70,20 @@ export async function JOB_RECEIVED_SEND_REPORT(data, token) {
 }
 
 
+export async function DUE_BY_REPORT(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}dueByReport`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+
 
 
 
