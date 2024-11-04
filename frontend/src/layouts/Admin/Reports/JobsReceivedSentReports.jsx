@@ -1,6 +1,37 @@
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
+import { ReceivedSentReport } from "../../../ReduxStore/Slice/Report/ReportSlice";
+import { useDispatch } from "react-redux";
 
-const New = () => {
+
+const JobsReceivedSentReports = () => {
+    const dispatch = useDispatch();
+    const token = JSON.parse(localStorage.getItem("token"));
+    const [receivedSentData, setReceivedSentData] = useState([]);
+
+
+   useEffect(() => {
+        ReceivedSentData();
+    }, []);
+
+
+    const ReceivedSentData =async()=>{
+        const data = {req:{},authToken:token};
+        await dispatch(ReceivedSentReport(data))
+        .unwrap()
+        .then((res)=>{
+            if(res.status){
+                setReceivedSentData(res.data);
+            }else{
+                setReceivedSentData([]);
+            }
+        })
+        .catch((err)=>{
+            console.log(err);
+        });
+
+
+    }
+
     const [expandedRows, setExpandedRows] = useState({
         teamMember1: false,
         customer1: false,
@@ -283,4 +314,4 @@ const New = () => {
     );
 };
 
-export default New;
+export default JobsReceivedSentReports;
