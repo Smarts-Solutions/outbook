@@ -632,7 +632,7 @@ const StaffPage = () => {
                     {showStaffInsertTab && (
                       <button
                         type="button"
-                        className="btn btn-info text-white float-end"
+                        className="btn btn-info text-white ms-1"
                         onClick={() => {
                           setAddStaff(true);
                           setEditShowModel(false);
