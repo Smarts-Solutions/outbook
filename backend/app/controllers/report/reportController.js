@@ -16,6 +16,22 @@ const jobStatusReports = async (req, res) => {
     }
 }
 
+const JobReceivedSentReports = async (req, res) => {
+  try {
+    const { ...Report } = req.body;
+    const result = await reportService.JobReceivedSentReports(Report);
+    if(!result.status){
+      return  res.status(200).json({ status: false, message: result.message });  
+      }
+      else{
+      return  res.status(200).json({ status: true, message: result.message , data : result.data});
+      }
+  }
+  catch (error) {
+    res.status(500).json({ status:false, message: error.message});
+  }
+}
+
 const jobSummaryReports = async (req ,res) => {
   try {
     const { ...Report } = req.body;
@@ -61,6 +77,7 @@ const teamMonthlyReports = async (req ,res) => {
 
 module.exports = {
   jobStatusReports,
+  JobReceivedSentReports,
   jobSummaryReports,
   jobPendingReports,
   teamMonthlyReports

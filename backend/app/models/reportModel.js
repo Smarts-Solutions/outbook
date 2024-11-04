@@ -77,13 +77,128 @@ const jobStatusReports = async (Report) => {
 
 }
 
+const getCustomWeekNumber = (day) => {
+    if (day >= 1 && day <= 7) return 1;
+    if (day >= 8 && day <= 14) return 2;
+    if (day >= 15 && day <= 21) return 3;
+    if (day >= 22) return 4;
+    return 0; // This shouldn't happen if the day is valid
+};
+const JobReceivedSentReports = async (Report) => {
+    try {
+        // Query for monthly data
+        const monthlyQuery = `
+            SELECT 
+                DATE_FORMAT(jobs.created_at, '%M') AS month_name,
+                COUNT(jobs.id) AS job_received,
+                COUNT(drafts.job_id) AS draft_count,
+                GROUP_CONCAT(DISTINCT jobs.id) AS job_ids
+            FROM 
+                jobs
+            LEFT JOIN 
+                drafts ON drafts.job_id = jobs.id    
+            WHERE 
+                YEAR(jobs.created_at) = YEAR(CURDATE())
+            GROUP BY 
+                MONTH(jobs.created_at)
+            ORDER BY 
+                MONTH(jobs.created_at);
+        `;
+        
+        const [monthlyRows] = await pool.execute(monthlyQuery);
+
+        // Query for weekly data
+        const weeklyQuery = `
+            SELECT 
+                DATE_FORMAT(jobs.created_at, '%M') AS month_name,
+                DAY(jobs.created_at) AS day,
+                COUNT(jobs.id) AS job_received,
+                COUNT(drafts.job_id) AS draft_count,
+                GROUP_CONCAT(DISTINCT jobs.id) AS job_ids
+            FROM 
+                jobs
+            LEFT JOIN 
+                drafts ON drafts.job_id = jobs.id    
+            WHERE 
+                YEAR(jobs.created_at) = YEAR(CURDATE())
+            GROUP BY 
+                month_name, DAY(jobs.created_at)
+            ORDER BY 
+                MONTH(jobs.created_at), DAY(jobs.created_at);
+        `;
+        
+        const [weeklyRows] = await pool.execute(weeklyQuery);
+
+        // Create a mapping for each month
+        const monthlyData = {};
+
+        // Populate the monthlyData object with weekly data
+        weeklyRows.forEach(entry => {
+            const { month_name, day, job_received, draft_count, job_ids } = entry;
+            const week_number = getCustomWeekNumber(day);
+
+            // Initialize month entry if it doesn't exist
+            if (!monthlyData[month_name]) {
+                monthlyData[month_name] = {
+                    month_name,
+                    job_received: 0,
+                    draft_count: 0,
+                    job_ids: [],
+                    weeks: Array.from({ length: 4 }, (_, i) => ({
+                        week_number: i + 1,
+                        job_received: 0,
+                        draft_count: 0,
+                        job_ids: ""
+                    }))
+                };
+            }
+
+            // Accumulate monthly counts
+            monthlyData[month_name].job_received += job_received;
+            monthlyData[month_name].draft_count += draft_count;
+            monthlyData[month_name].job_ids.push(...job_ids.split(','));
+
+            // Add job counts to the corresponding week
+            const weekEntry = monthlyData[month_name].weeks[week_number - 1]; // week_number is 1-based
+            weekEntry.job_received += job_received;
+            weekEntry.draft_count += draft_count;
+            weekEntry.job_ids += weekEntry.job_ids ? ',' + job_ids : job_ids; // Concatenate job IDs
+        });
+
+        // Create the final result with unique job IDs
+        const result = Object.values(monthlyData).map(month => {
+            return {
+                month_name: month.month_name,
+                job_received: month.job_received,
+                draft_count: month.draft_count,
+                job_ids: [...new Set(month.job_ids)].join(','), // Unique job IDs
+                week: month.weeks.map(week => ({
+                    week_number: week.week_number,
+                    job_received: week.job_received,
+                    draft_count: week.draft_count,
+                    job_ids: week.job_ids
+                }))
+            };
+        });
+
+        return { status: true, message: 'Success.', data: result };
+    } catch (error) {
+        console.log("error ", error);
+        return { status: false, message: 'Error getting monthly and weekly job count.' };
+    }
+
+
+}
+
 const jobSummaryReports = async (Report) => {
     try {
-       
+
         const query = `
         SELECT 
     master_status.name AS job_status,
-    COUNT(jobs.status_type) AS number_of_job
+    master_status.name AS job_status,
+    COUNT(jobs.status_type) AS number_of_job,
+    GROUP_CONCAT(jobs.id) AS job_ids
     FROM 
         jobs
     LEFT JOIN 
@@ -99,14 +214,15 @@ const jobSummaryReports = async (Report) => {
     }
 }
 
-const jobPendingReports = async(Report) => {
+const jobPendingReports = async (Report) => {
     try {
-       
+
         const query = `
        SELECT 
     master_status.name AS job_status,
     job_types.type AS job_type_name,
-    COUNT(jobs.status_type) AS number_of_job
+    COUNT(jobs.status_type) AS number_of_job,
+    GROUP_CONCAT(jobs.id) AS job_ids
     FROM 
         jobs
     LEFT JOIN 
@@ -123,16 +239,17 @@ const jobPendingReports = async(Report) => {
     } catch (error) {
         console.log("error ", error);
         return { status: false, message: 'Error getting job status report.' };
-    } 
+    }
 }
 
-const teamMonthlyReports = async(Report) => {
+const teamMonthlyReports = async (Report) => {
     try {
-       
+
         const query = `
       SELECT 
     CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name,
-    COALESCE(SUM(CASE WHEN jobs.status_type = 6 THEN 1 ELSE 0 END), 0) AS number_of_job_completed
+    COALESCE(SUM(CASE WHEN jobs.status_type = 6 THEN 1 ELSE 0 END), 0) AS number_of_job_completed,
+    GROUP_CONCAT(jobs.id) AS job_ids
     FROM 
         staffs
     INNER JOIN 
@@ -143,19 +260,21 @@ const teamMonthlyReports = async(Report) => {
         staffs.id
          `;
 
-    //      WHERE 
-    // MONTH(jobs.created_at) = MONTH(CURRENT_DATE) AND 
-    // YEAR(jobs.created_at) = YEAR(CURRENT_DATE)
+        //      WHERE 
+        // MONTH(jobs.created_at) = MONTH(CURRENT_DATE) AND 
+        // YEAR(jobs.created_at) = YEAR(CURRENT_DATE)
         const [rows] = await pool.execute(query);
         return { status: true, message: 'Success.', data: rows };
     } catch (error) {
         console.log("error ", error);
         return { status: false, message: 'Error getting job status report.' };
-    } 
+    }
 }
+
 
 module.exports = {
     jobStatusReports,
+    JobReceivedSentReports,
     jobSummaryReports,
     jobPendingReports,
     teamMonthlyReports

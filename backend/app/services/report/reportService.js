@@ -4,6 +4,10 @@ const jobStatusReports = async (Report) => {
   return reportModel.jobStatusReports(Report);
 };
 
+const JobReceivedSentReports = async (Report) => {
+  return reportModel.JobReceivedSentReports(Report);
+}
+
 const jobSummaryReports = async(Report) => {
   return reportModel.jobSummaryReports(Report);
 }
@@ -17,6 +21,7 @@ const teamMonthlyReports = async (Report) => {
 }
 module.exports = {
   jobStatusReports,
+  JobReceivedSentReports,
   jobSummaryReports,
   jobPendingReports,
   teamMonthlyReports
