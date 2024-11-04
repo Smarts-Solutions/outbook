@@ -50,7 +50,7 @@ const JobsReceivedSentReports = () => {
                 <div className='row mb-5'>
                     <div className='col-lg-12'>
                         <div className='tab-title'>
-                            <h3>Job Status Report</h3>
+                            <h3>Jobs Received Sent Reports</h3>
                         </div>
                     </div>
                 </div>

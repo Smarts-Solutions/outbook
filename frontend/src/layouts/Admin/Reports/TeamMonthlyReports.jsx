@@ -44,7 +44,7 @@ const TeamMonthlyReport = () => {
             <div className='row'>
               <div className='col-md-7'>
                 <div className='tab-title'>
-                  <h3>Job Summary Report</h3>
+                  <h3>Team Performance Report by Month</h3>
                 </div>
                 <div className='job-filter-btn '>
                   <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
