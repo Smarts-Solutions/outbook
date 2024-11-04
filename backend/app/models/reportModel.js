@@ -82,7 +82,7 @@ const getCustomWeekNumber = (day) => {
     if (day >= 8 && day <= 14) return 2;
     if (day >= 15 && day <= 21) return 3;
     if (day >= 22) return 4;
-    return 0; 
+    return 0;
 };
 const jobReceivedSentReports = async (Report) => {
     try {
@@ -125,7 +125,7 @@ const jobReceivedSentReports = async (Report) => {
             ORDER BY 
                 MONTH(jobs.created_at), DAY(jobs.created_at);
         `;
-        
+
         const [weeklyRows] = await pool.execute(weeklyQuery);
 
         // Create a mapping for each month
@@ -272,29 +272,85 @@ const teamMonthlyReports = async (Report) => {
 
 const dueByReport = async (Report) => {
     try {
- const query = `
-      SELECT 
-    CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name,
-    COALESCE(SUM(CASE WHEN jobs.status_type = 6 THEN 1 ELSE 0 END), 0) AS number_of_job_completed,
-    GROUP_CONCAT(jobs.id) AS job_ids
-    FROM 
-        staffs
-    INNER JOIN 
-        jobs ON jobs.staff_created_id = staffs.id
-    WHERE 
-    MONTH(jobs.created_at) = MONTH(CURRENT_DATE)
-    GROUP BY 
-        staffs.id
+        const query = `
+        SELECT
+    customers.id AS customer_id,
+    customers.trading_name AS customer_name,
+    COUNT(
+        CASE
+            WHEN jobs.due_on BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 MONTH)  THEN 1
+        END
+    ) AS due_within_1_month,
+    COUNT(
+        CASE
+            WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 2 MONTH)  THEN 1
+        END
+    ) AS due_within_2_months,
+    COUNT(
+        CASE
+            WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 2 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 3 MONTH)  THEN 1
+        END
+    ) AS due_within_3_months,
+    COUNT(
+        CASE
+            WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 3 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 4 MONTH)  THEN 1
+        END
+    ) AS due_within_4_months,
+    COUNT(
+        CASE
+            WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 4 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 5 MONTH)  THEN 1
+        END
+    ) AS due_within_5_months,
+    COUNT(
+        CASE
+            WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 5 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 6 MONTH)  THEN 1
+        END
+    ) AS due_within_6_months,
+    COUNT(
+        CASE
+            WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 6 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 7 MONTH)  THEN 1
+        END
+    ) AS due_within_7_months,
+    COUNT(
+        CASE
+            WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 7 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 8 MONTH)  THEN 1
+        END
+    ) AS due_within_8_months,
+    COUNT(
+        CASE
+            WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 8 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 9 MONTH)  THEN 1
+        END
+    ) AS due_within_9_months,
+    COUNT(
+        CASE
+            WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 9 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 10 MONTH)  THEN 1
+        END
+    ) AS due_within_10_months,
+    COUNT(
+        CASE
+            WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 10 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 11 MONTH)  THEN 1
+        END
+    ) AS due_within_11_months,
+    COUNT(
+        CASE
+            WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 11 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 12 MONTH)  THEN 1
+        END
+    ) AS due_within_12_months,
+    COUNT(
+        CASE
+            WHEN jobs.due_on < CURDATE() THEN 1
+        END
+    ) AS due_passed
+FROM customers
+    LEFT JOIN jobs ON jobs.customer_id = customers.id
+GROUP BY
+    customers.id
          `;
-
-        //      WHERE 
-        // MONTH(jobs.created_at) = MONTH(CURRENT_DATE) AND 
-        // YEAR(jobs.created_at) = YEAR(CURRENT_DATE)
         const [rows] = await pool.execute(query);
         return { status: true, message: 'Success.', data: rows };
     } catch (error) {
         console.log("error ", error);
-        return { status: false, message: 'Error getting job status report.' };
+        return { status: false, message: 'Error getting job dueByReport.' };
     }
 }
 
