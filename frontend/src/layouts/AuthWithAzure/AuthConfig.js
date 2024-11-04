@@ -1,8 +1,15 @@
 const config = {
     auth: {
-        clientId: '611f720d-ef87-4438-a9a4-16a3da9e5855', // Replace with your Application (client) ID
-        authority: 'https://login.microsoftonline.com/consumers', // Replace with your Tenant ID
-        redirectUri: `${window.location.origin}`, // Replace with your Redirect URI
+       // clientId: '611f720d-ef87-4438-a9a4-16a3da9e5855', //  Application (client) ID
+        clientId: '376ee1a2-3c24-48ac-b7cc-9a09f66b9e21', //  Application (client) ID
+       // authority: 'https://login.microsoftonline.com/consumers', //personal account
+        //authority: 'https://login.microsoftonline.com/organizations', //Accounts in any organizational directory
+       // authority: 'https://login.microsoftonline.com/common', //Accounts in any organizational directory and personal Microsoft account
+
+        //authority: 'https://login.microsoftonline.com/f8cdef31-a31e-4b4a-93e4-5f571e91255a', //Tenant ID
+       // authority: 'https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad', //Tenant ID
+        authority: 'https://login.microsoftonline.com/332dcd89-cd37-40a0-bba2-a2b91abd434a', //Tenant ID
+        redirectUri: `${window.location.origin}`, //  Redirect URI
     },
     cache: {
         cacheLocation: 'sessionStorage', // Recommended to avoid page reload issues

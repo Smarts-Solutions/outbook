@@ -406,8 +406,7 @@ const getCustomer = async (customer) => {
     staffs.id = ${staff_id}
   LIMIT 1
   `
-  const [rows] = await pool.execute(QueryRole);
-
+    const [rows] = await pool.execute(QueryRole);
     // Condition with Admin And SuperAdmin
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
         const query = `
@@ -450,8 +449,6 @@ ORDER BY
         const [result] = await pool.execute(query);
         return { status: true, message: 'Success..', data: result };
     }
-
-
     let result = []
     if (rows.length > 0) {
         // Allocated to
@@ -786,6 +783,23 @@ const updateProcessCustomerServices = async (customerProcessData) => {
         let account_manager_id = serVal.account_manager_id;
         let customer_service_task = serVal.customer_service_task;
 
+        //checklist submit customer
+        const QueryCustomerAssign = `
+        UPDATE checklists 
+SET is_all_customer = 
+IF(
+    is_all_customer IS NULL, 
+    JSON_ARRAY(${customer_id}), 
+    IF(
+        JSON_CONTAINS(is_all_customer, JSON_ARRAY(${customer_id}), '$'), 
+        is_all_customer, 
+        JSON_ARRAY_APPEND(is_all_customer, '$', ${customer_id})
+    )
+) 
+WHERE service_id = ${service_id} AND customer_id = 0;
+        `
+        const [QueryCustomerAssignData] = await pool.execute(QueryCustomerAssign);
+
         try {
             // Process 1 table
             const checkQuery = `
@@ -897,6 +911,7 @@ const updateProcessCustomerServices = async (customerProcessData) => {
         }
     }
 
+
     if (Task.length > 0) {
         const checklistName = Task[0].checklistName;
         const JobTypeId = Task[0].JobTypeId;
@@ -964,79 +979,6 @@ const updateProcessCustomerServices = async (customerProcessData) => {
 
     }
 
-    // const resultTsk = {};
-    // if (Task.length > 0) {
-    //     Task.forEach((item) => {
-    //         const checklistName = item.checklistName;
-    //         if (!resultTsk[checklistName]) {
-    //             resultTsk[checklistName] = {
-    //                 checklistName,
-    //                 Task: [],
-    //                 JobTypeId: item.JobTypeId,
-    //                 serviceId: item.serviceId,
-    //             };
-    //         }
-    //         resultTsk[checklistName].Task.push(...item.Task);
-    //     });
-
-    //     const outputArray = Object.values(resultTsk);
-
-
-    //     if (outputArray.length > 0) {
-    //         for (const tsk of outputArray) {
-    //             const checklistName = tsk.checklistName;
-    //             const Task = tsk.Task;
-    //             const JobTypeId = tsk.JobTypeId;
-    //             const serviceId = tsk.serviceId;
-    //             const client_type_id = customer_type
-    //             const checkQueryChecklist = `
-    //             SELECT id FROM checklists WHERE customer_id = ? AND service_id = ? AND job_type_id = ? AND client_type_id = ? AND check_list_name = ?
-    //             `;
-    //             const [existingChecklist] = await pool.execute(checkQueryChecklist, [customer_id, serviceId, JobTypeId, client_type_id, checklistName]);
-    //             if (existingChecklist.length === 0) {
-    //                 const insertChecklistQuery = `
-    //                 INSERT INTO checklists (customer_id,service_id,job_type_id,client_type_id,check_list_name)
-    //                 VALUES (?, ?, ?, ?, ?)
-    //                 `;
-    //                 const [result] = await pool.execute(insertChecklistQuery, [customer_id, serviceId, JobTypeId, client_type_id, checklistName]);
-    //                 const checklist_id = result.insertId;
-
-    //                 if (Task.length > 0) {
-    //                     for (const tsk_name of Task) {
-    //                         const TaskName = tsk_name.TaskName;
-    //                         const BudgetHour = tsk_name.BudgetHour;
-    //                         const checkQuery = `SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?`;
-    //                         const [existing] = await pool.execute(checkQuery, [TaskName, serviceId, JobTypeId,
-    //                         ]);
-    //                         if (existing.length === 0) {
-    //                             const InsertTaskquery = `
-    //                           INSERT INTO task (name,service_id,job_type_id)
-    //                           VALUES (?, ?, ?)
-    //                           `;
-    //                             const [result] = await pool.execute(InsertTaskquery, [
-    //                                 TaskName,
-    //                                 serviceId,
-    //                                 JobTypeId,
-    //                             ]);
-    //                             const task_id = result.insertId;
-    //                             const checklistTasksQuery = `
-    //                           INSERT INTO checklist_tasks (checklist_id, task_id, task_name, budgeted_hour)
-    //                           VALUES (?, ?, ?, ?)
-    //                           `;
-    //                             const [result1] = await pool.execute(checklistTasksQuery, [
-    //                                 checklist_id,
-    //                                 task_id,
-    //                                 TaskName,
-    //                                 BudgetHour,
-    //                             ]);
-    //                         }
-
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
     // Update customer process page
     let pageStatus = "2";
     await pool.execute('UPDATE customers SET form_process = ? WHERE id = ?', [pageStatus, customer_id]);
@@ -2604,78 +2546,6 @@ WHERE service_id = ${service_id} AND customer_id = 0;
                 }
             }
 
-
-
-            // Task.forEach((item) => {
-
-            //     const checklistName = item.checklistName;
-            //     if (!resultTsk[checklistName]) {
-            //         resultTsk[checklistName] = {
-            //             checklistName,
-            //             Task: [],
-            //             JobTypeId: item.JobTypeId,
-            //             serviceId: item.serviceId,
-            //         };
-            //     }
-            //     resultTsk[checklistName].Task.push(...item.Task);
-            // });
-            // const outputArray = Object.values(resultTsk);
-            // if (outputArray.length > 0) {
-            //     for (const tsk of outputArray) {
-            //         const checklistName = tsk.checklistName;
-            //         const Task = tsk.Task;
-            //         const JobTypeId = tsk.JobTypeId;
-            //         const serviceId = tsk.serviceId;
-            //         const client_type_id = customer_type
-            //         const checkQueryChecklist = `
-            //     SELECT id FROM checklists WHERE customer_id = ? AND service_id = ? AND job_type_id = ? AND client_type_id = ? AND check_list_name = ?
-            //     `;
-            //         const [existingChecklist] = await pool.execute(checkQueryChecklist, [customer_id, serviceId, JobTypeId, client_type_id, checklistName]);
-            //         if (existingChecklist.length === 0) {
-            //             const insertChecklistQuery = `
-            //         INSERT INTO checklists (customer_id,service_id,job_type_id,client_type_id,check_list_name)
-            //         VALUES (?, ?, ?, ?, ?)
-            //         `;
-            //             const [result] = await pool.execute(insertChecklistQuery, [customer_id, serviceId, JobTypeId, client_type_id, checklistName]);
-            //             const checklist_id = result.insertId;
-
-            //             if (Task.length > 0) {
-            //                 for (const tsk_name of Task) {
-            //                     const TaskName = tsk_name.TaskName;
-            //                     const BudgetHour = tsk_name.BudgetHour;
-            //                     const checkQuery = `SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?`;
-            //                     const [existing] = await pool.execute(checkQuery, [TaskName, serviceId, JobTypeId,
-            //                     ]);
-            //                     if (existing.length === 0) {
-            //                         const InsertTaskquery = `
-            //                   INSERT INTO task (name,service_id,job_type_id)
-            //                   VALUES (?, ?, ?)
-            //                   `;
-            //                         const [result] = await pool.execute(InsertTaskquery, [
-            //                             TaskName,
-            //                             serviceId,
-            //                             JobTypeId,
-            //                         ]);
-            //                         const task_id = result.insertId;
-            //                         const checklistTasksQuery = `
-            //                   INSERT INTO checklist_tasks (checklist_id, task_id, task_name, budgeted_hour)
-            //                   VALUES (?, ?, ?, ?)
-            //                   `;
-            //                         const [result1] = await pool.execute(checklistTasksQuery, [
-            //                             checklist_id,
-            //                             task_id,
-            //                             TaskName,
-            //                             BudgetHour,
-            //                         ]);
-            //                     }
-
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
-
-
         }
 
         // Add log
@@ -3236,7 +3106,7 @@ const getcustomerschecklist = async (customer) => {
             job_type_id,
             customer_id,
         ]);
-      
+
         if (result.length === 0) {
             return [];
         }

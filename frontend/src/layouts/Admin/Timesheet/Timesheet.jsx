@@ -261,6 +261,34 @@ const Timesheet = () => {
         if (res.data.length > 0) {
           updatedRows[index].customerData = res.data;
           updatedRows[index].customer_id = res.data[0].id;
+
+          const req = { staff_id: staffDetails.id, task_type: "3", customer_id: res.data[0].id };
+          const res1 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
+          if (res1.status) {
+            if (res1.data.length > 0) {
+              updatedRows[index].clientData = res1.data;
+              updatedRows[index].client_id = res1.data[0].id;
+              const req = { staff_id: staffDetails.id, task_type: "4", client_id 
+              : res1.data[0].id };
+              const res2 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
+              if (res2.status) {
+                if (res2.data.length > 0) {
+                  updatedRows[index].jobData = res2.data;
+                  updatedRows[index].job_id = res2.data[0].id;
+                  const req = { staff_id: staffDetails.id, task_type: "6", job_id: res2.data[0].id };
+                  const res3 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
+                  if (res3.status) {
+                    if (res3.data.length > 0) {
+                      updatedRows[index].taskData = res3.data;
+                      updatedRows[index].task_id = res3.data[0].id;
+                    }
+                  }
+                }
+              }
+              
+             }
+           }
+
         }
       }
     }
@@ -602,6 +630,49 @@ const Timesheet = () => {
     }
   }
 
+// const dayMonthFormatDate = (dateString) => {
+//     const parts = dateString.split(', ')[1].split('/');
+//     const day = parts[0];
+//     const monthIndex = parts[1] - 1;
+//     const year = parts[2];
+//     const date = new Date(year, monthIndex, day);
+//     const options = { month: 'short' };
+//     const month = date.toLocaleDateString('en-US', options).toLowerCase();
+//     return `${day} ${month}`;
+// };
+
+// // Example usage
+// console.log("weekDays.monday ", weekDays);
+// if (weekDays.monday !== "") {
+//     console.log("dayMonthFormatDate ", dayMonthFormatDate(weekDays.monday));
+// }
+
+const dayMonthFormatDate = (dateString) => {
+     const parts = dateString.split(', ');
+    const dayOfWeek = parts[0]; // Get the day of the week
+    const dateParts = parts[1].split('/'); // Split date part
+
+    const day = dateParts[0];
+    const monthIndex = dateParts[1] - 1; // Month is 0-indexed
+    const year = dateParts[2];
+
+    // Create a Date object
+    const date = new Date(year, monthIndex, day);
+
+    // Get the short month
+    const options = { month: 'short' };
+    const month = date.toLocaleDateString('en-US', options).toLowerCase(); // Convert to lowercase
+
+    // Return formatted string
+    return `${dayOfWeek} ${day} ${month}`;
+};
+
+// Example usage
+console.log("weekDays.monday ", weekDays.monday);
+if (weekDays.monday !== "") {
+  console.log("dayMonthFormatDate ", dayMonthFormatDate(weekDays.monday));
+}
+
   return (
    
       <div className="container-fluid">
@@ -650,6 +721,7 @@ const Timesheet = () => {
                       <table
                         className="timesheetTable table align-middle table-nowrap"
                         id="customerTable"
+                        style={{width:"max-content"}}
                       >
                         <thead className="table-light table-head-blue">
                           <tr>
@@ -676,30 +748,31 @@ const Timesheet = () => {
                             </th>
                             <th
                               className="dropdwnCol5"
-                              data-field="customer_name"
+                              data-field="phone"
                             >
-                              {weekDays.monday.replace(",", "")}
+                              {/* {weekDays.monday.replace(",", "")} */}
+                              {weekDays.monday!=""?dayMonthFormatDate(weekDays.monday):""}
+                              
                             </th>
                             <th
-                              className="dropdwnCol5"
-                              data-field="customer_name"
+                              className="dropdwnCol5" data-field="customer_name"
                             >
-                              {weekDays.tuesday.replace(",", "")}
+                             {weekDays.tuesday!=""?dayMonthFormatDate(weekDays.tuesday): ""}
                             </th>
                             <th className="dropdwnCol5" data-field="phone">
-                              {weekDays.wednesday.replace(",", "")}
+                              {weekDays.wednesday!=""?dayMonthFormatDate(weekDays.wednesday): ""}
                             </th>
                             <th className="dropdwnCol5" data-field="phone">
-                              {weekDays.thursday.replace(",", "")}
+                              {weekDays.thursday!=""?dayMonthFormatDate(weekDays.thursday): ""}
                             </th>
                             <th className="dropdwnCol5" data-field="phone">
-                              {weekDays.friday.replace(",", "")}
+                              {weekDays.friday!=""?dayMonthFormatDate(weekDays.friday): ""}
                             </th>
                             <th className="dropdwnCol5" data-field="phone">
-                              {weekDays.saturday.replace(",", "")}
+                              {weekDays.saturday!=""?dayMonthFormatDate(weekDays.saturday): ""}
                             </th>
                             {/* <th className="dropdwnCol5" data-field="phone">
-                              {weekDays.sunday.replace(",", "")}
+                              {weekDays.sunday!=""?dayMonthFormatDate(weekDays.sunday): ""}
                             </th> */}
                             <th> <ChevronRight onClick={(e) => { e.preventDefault(); changeWeek(1); }}/></th>
                             {submitStatusAllKey === 0? 
@@ -850,6 +923,7 @@ const Timesheet = () => {
                               <input
                                   className="form-control cursor-pointer border-radius-end"
                                   type="text"
+                                  style={{ width: '80px' }}
                                   name="monday_hours"
                                   
                                   onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday ,item)}
@@ -863,6 +937,7 @@ const Timesheet = () => {
                               <td>
                               
                                 <input
+                                 style={{ width: '80px' }}
                                   className="form-control cursor-pointer"
                                   type="text"
                                   name="tuesday_hours"
@@ -877,6 +952,7 @@ const Timesheet = () => {
                               {/*Wednesday Input*/}
                               <td>
                                 <input
+                                 style={{ width: '80px' }}
                                   className="form-control cursor-pointer"
                                   type="text"
                                   name="wednesday_hours"
@@ -889,6 +965,7 @@ const Timesheet = () => {
                               {/*Thursday Input*/}
                               <td>
                                 <input
+                                 style={{ width: '80px' }}
                                   className="form-control cursor-pointer"
                                   type="text"
                                   name="thursday_hours"
@@ -901,6 +978,7 @@ const Timesheet = () => {
                               {/*Friday Input*/}
                               <td>
                                 <input
+                                 style={{ width: '80px' }}
                                   className="form-control cursor-pointer"
                                   type="text"
                                   name="friday_hours"
@@ -913,6 +991,7 @@ const Timesheet = () => {
                               {/*Saturday Input*/}
                               <td>
                                 <input
+                                 style={{ width: '80px' }}
                                   className="form-control cursor-pointer"
                                   type="text"
                                   name="saturday_hours"
