@@ -7,6 +7,7 @@ import JobStatusReport from './JobStatusPeport';
 import JobSummaryReport from './JobSummaryReport';
 import TeamMonthlyReport from './TeamMonthlyReports';
 import JobPendingReport from './JobPendingReports';
+import JobsReceivedSentReports from './JobsReceivedSentReports';
 
 
 const columns = [
@@ -46,7 +47,7 @@ function Reportsnew() {
 
   const [filter, setFilter] = useState(false);
   const [activeTab, setActiveTab] = useState(tabs[0].value);
-  
+
   const handleTabClick = (tabValue) => {
     setActiveTab(tabValue);
   };
@@ -54,9 +55,9 @@ function Reportsnew() {
   const getTabContent = () => {
     switch (activeTab) {
       case 'jobStatusReport':
-        return <JobStatusReport /> 
+        return <JobStatusReport />
       case 'jobsReceivedSentReports':
-        return <div>Job Summary Report Content</div>;
+        return <JobsReceivedSentReports />;
       case 'jobSummaryReport':
         return <JobSummaryReport />
       case 'jobsPendingReport':
