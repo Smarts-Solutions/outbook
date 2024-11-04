@@ -4410,3 +4410,17 @@ select#tabSelect {
     z-index: 9;
 	background-color: #fff;
 }
+.scrollable-week {
+	display: flex;
+	gap: 8px;
+	max-width: 300px; /* Set desired width here */
+	overflow-x: auto;
+	white-space: nowrap;
+	padding: 0 8px;
+	scrollbar-width: thin;
+	align-items: center;
+  }
+  
+  .scrollable-week span, .scrollable-week svg {
+	flex-shrink: 0;
+  }
