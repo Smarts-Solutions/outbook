@@ -82,30 +82,29 @@ const getCustomWeekNumber = (day) => {
     if (day >= 8 && day <= 14) return 2;
     if (day >= 15 && day <= 21) return 3;
     if (day >= 22) return 4;
-    return 0; // This shouldn't happen if the day is valid
+    return 0; 
 };
-const JobReceivedSentReports = async (Report) => {
+const jobReceivedSentReports = async (Report) => {
     try {
         // Query for monthly data
-        const monthlyQuery = `
-            SELECT 
-                DATE_FORMAT(jobs.created_at, '%M') AS month_name,
-                COUNT(jobs.id) AS job_received,
-                COUNT(drafts.job_id) AS draft_count,
-                GROUP_CONCAT(DISTINCT jobs.id) AS job_ids
-            FROM 
-                jobs
-            LEFT JOIN 
-                drafts ON drafts.job_id = jobs.id    
-            WHERE 
-                YEAR(jobs.created_at) = YEAR(CURDATE())
-            GROUP BY 
-                MONTH(jobs.created_at)
-            ORDER BY 
-                MONTH(jobs.created_at);
-        `;
-        
-        const [monthlyRows] = await pool.execute(monthlyQuery);
+        // const monthlyQuery = `
+        //     SELECT 
+        //         DATE_FORMAT(jobs.created_at, '%M') AS month_name,
+        //         COUNT(jobs.id) AS job_received,
+        //         COUNT(drafts.job_id) AS draft_count,
+        //         GROUP_CONCAT(DISTINCT jobs.id) AS job_ids
+        //     FROM 
+        //         jobs
+        //     LEFT JOIN 
+        //         drafts ON drafts.job_id = jobs.id    
+        //     WHERE 
+        //         YEAR(jobs.created_at) = YEAR(CURDATE())
+        //     GROUP BY 
+        //         MONTH(jobs.created_at)
+        //     ORDER BY 
+        //         MONTH(jobs.created_at);
+        // `;
+        // const [monthlyRows] = await pool.execute(monthlyQuery);
 
         // Query for weekly data
         const weeklyQuery = `
@@ -271,11 +270,40 @@ const teamMonthlyReports = async (Report) => {
     }
 }
 
+const dueByReport = async (Report) => {
+    try {
+ const query = `
+      SELECT 
+    CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name,
+    COALESCE(SUM(CASE WHEN jobs.status_type = 6 THEN 1 ELSE 0 END), 0) AS number_of_job_completed,
+    GROUP_CONCAT(jobs.id) AS job_ids
+    FROM 
+        staffs
+    INNER JOIN 
+        jobs ON jobs.staff_created_id = staffs.id
+    WHERE 
+    MONTH(jobs.created_at) = MONTH(CURRENT_DATE)
+    GROUP BY 
+        staffs.id
+         `;
+
+        //      WHERE 
+        // MONTH(jobs.created_at) = MONTH(CURRENT_DATE) AND 
+        // YEAR(jobs.created_at) = YEAR(CURRENT_DATE)
+        const [rows] = await pool.execute(query);
+        return { status: true, message: 'Success.', data: rows };
+    } catch (error) {
+        console.log("error ", error);
+        return { status: false, message: 'Error getting job status report.' };
+    }
+}
+
 
 module.exports = {
     jobStatusReports,
-    JobReceivedSentReports,
+    jobReceivedSentReports,
     jobSummaryReports,
     jobPendingReports,
-    teamMonthlyReports
+    teamMonthlyReports,
+    dueByReport
 };

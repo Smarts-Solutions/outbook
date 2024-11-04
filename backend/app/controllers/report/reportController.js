@@ -16,10 +16,10 @@ const jobStatusReports = async (req, res) => {
     }
 }
 
-const JobReceivedSentReports = async (req, res) => {
+const jobReceivedSentReports = async (req, res) => {
   try {
     const { ...Report } = req.body;
-    const result = await reportService.JobReceivedSentReports(Report);
+    const result = await reportService.jobReceivedSentReports(Report);
     if(!result.status){
       return  res.status(200).json({ status: false, message: result.message });  
       }
@@ -74,11 +74,26 @@ const teamMonthlyReports = async (req ,res) => {
   }
 }
 
+const dueByReport = async (req ,res) => {
+  try {
+    const { ...Report } = req.body;
+    const result = await reportService.dueByReport(Report);
+    if(!result.status){
+      return  res.status(200).json({ status: false, message: result.message });  
+      }else{
+      return  res.status(200).json({ status: true, message: result.message , data : result.data});
+      }
+  } catch (error) {
+    res.status(500).json({ status:false, message: error.message});
+  }
+}
+
 
 module.exports = {
   jobStatusReports,
-  JobReceivedSentReports,
+  jobReceivedSentReports,
   jobSummaryReports,
   jobPendingReports,
-  teamMonthlyReports
+  teamMonthlyReports,
+  dueByReport
 };
