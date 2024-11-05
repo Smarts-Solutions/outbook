@@ -33,7 +33,34 @@ const JobStatus = () => {
   
   const columns = [
     { name: 'Status', selector: row => row.job_status, sortable: true },
-    { name: 'No Of Jobs', selector: row => row.number_of_job, sortable: true },
+    { name: 'No Of Jobs', 
+      call : row => row.number_of_job,
+
+      // selector: row => row.number_of_job, 
+      sortable: true },
+
+      // {
+      //   name: "Actions",
+      //   cell: (row) => (
+      //     <div>
+      //       <button className="view-icon" onClick={() => { HandleMissionView(row); setViewmissinglogs(true) }}>
+      //         <i className="fa fa-eye fs-6 text-warning" />
+      //       </button>
+      //       {
+      //         row.status == 1 ? "" : (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
+      //           <button className="edit-icon" onClick={() => {
+      //             setShowEditMissinglogsModal(true);
+      //             setEditData(row)
+      //           }}>
+      //             <i className="ti-pencil" />
+      //           </button> : ""
+      //       }
+      //     </div>
+      //   ),
+      //   ignoreRowClick: true,
+      //   allowOverflow: true,
+      //   button: true,
+      // },
    
   ]
 

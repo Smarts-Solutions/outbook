@@ -8,7 +8,7 @@ const JobsReceivedSentReports = () => {
     const [receivedSentData, setReceivedSentData] = useState([]);
     const [expandedRows, setExpandedRows] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;  
+    const itemsPerPage = 10;
 
     useEffect(() => {
         ReceivedSentData();
@@ -41,6 +41,12 @@ const JobsReceivedSentReports = () => {
         setCurrentPage(pageNumber);
     };
 
+
+    const handleOnClick = (job_ids) => {
+        console.log(job_ids);
+    }
+
+
     const totalPages = Math.ceil(receivedSentData.length / itemsPerPage);
     const paginatedData = receivedSentData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
@@ -72,21 +78,28 @@ const JobsReceivedSentReports = () => {
                                                 <React.Fragment key={index}>
                                                     <tr className="tabel_new">
                                                         <td className="d-flex">
-                                                            <i 
+                                                            <i
                                                                 onClick={() => toggleRow(index)}
                                                                 className={`exp_icon ${expandedRows[index] ? "ri-add-circle-fill" : "ri-add-circle-fill"}`}
                                                             />
                                                             <span>{data.month_name}</span>
                                                         </td>
                                                         <td>{data.job_received}</td>
-                                                        <td>{data.draft_count}</td>
+                                                        <td>
+                                                            <a style={{ textDecoration: 'none', color: 'rgb(38, 189, 240)', cursor: 'pointer' }}
+                                                                onClick={() => handleOnClick(data.job_ids)}
+                                                            >
+                                                                {data.draft_count}
+                                                            </a>
+
+                                                        </td>
                                                     </tr>
                                                     {expandedRows[index] && (
                                                         data.week.map((week, i) => (
                                                             <tr key={i}>
                                                                 <td>Week {week.week_number}</td>
                                                                 <td>{week.job_received}</td>
-                                                                <td>{week.draft_count}</td>
+                                                                <td> {week.draft_count}</td>
                                                             </tr>
                                                         ))
                                                     )}
