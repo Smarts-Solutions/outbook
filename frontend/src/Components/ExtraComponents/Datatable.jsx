@@ -28,7 +28,7 @@ const Datatable = ({ columns, data, filter }) => {
           <p className='fs-16'>There are no records to display</p>
         </div>
       ) : (
-        <div style={{ maxHeight: '500px', overflowY: 'auto' }}>  
+        <div >  
           <DataTableExtensions
             columns={columns}
             data={data}
@@ -38,8 +38,8 @@ const Datatable = ({ columns, data, filter }) => {
             filter={filter}
           >
             <DataTable
-              fixedHeader
-              fixedHeaderScrollHeight="700px"
+              fixedHeader={true}
+              fixedHeaderScrollHeight="500px"
               noHeader
               defaultSortField="JobId"
               defaultSortAsc={false}

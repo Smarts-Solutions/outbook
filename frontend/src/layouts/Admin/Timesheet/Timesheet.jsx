@@ -725,26 +725,26 @@ if (weekDays.monday !== "") {
                       >
                         <thead className="table-light table-head-blue">
                           <tr>
-                            <th className="dropdwnCol2" data-field="phone"  style={{ width: '40px' }}>
+                            <th className="dropdwnCol2 pe-0" data-field="phone"  style={{ width: '10px' }}>
                               No
                             </th>
-                            <th className="" data-field="phone"  style={{ width: '120px' }}>
+                            <th className="ps-0" data-field="phone"  style={{ width: '100px' }}>
                               Task Type
                             </th>
-                            <th className="dropdwnCol7" data-field="phone"  style={{ width: '150px' }}>
+                            <th className="dropdwnCol7" data-field="phone"  style={{ width: '110px' }}>
                               Customer
                             </th>
-                            <th className="dropdwnCol6" data-field="phone"  style={{ width: '150px' }}>
+                            <th className="dropdwnCol6" data-field="phone"  style={{ width: '110px' }}>
                               Client
                             </th>
-                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '150px' }}>
+                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '110px' }}>
                               Job
                             </th>
                             <th className="dropdwnCol5" data-field="phone"  style={{ width: '100px' }}>
                               Task
                             </th>
                            
-                            <th colspan="7">
+                            <th colspan="7" className="ps-0">
           <div className="scrollable-week">
             <ChevronLeft onClick={(e) => { e.preventDefault(); changeWeek(-1); }} />
             <span>{weekDays.monday ? dayMonthFormatDate(weekDays.monday) : ""}</span>
@@ -775,9 +775,9 @@ if (weekDays.monday !== "") {
 
                              
                             <tr className="tabel_new">
-                              <td>{index + 1}</td>
+                              <td className="pe-0">{index + 1}</td>
                                
-                              <td>
+                              <td className="ps-0">
                                 {item.newRow === 1 ? (
                                   <select
                                     className="form-select form-control"
@@ -902,7 +902,7 @@ if (weekDays.monday !== "") {
                               </td>
                           
                               {/*Monday Input*/}
-                              <td colSpan="7">
+                              <td colSpan="7" className="ps-0">
                               <div className="scrollable-week">
                               <input
                                   className="form-control cursor-pointer border-radius-end"
@@ -963,7 +963,7 @@ if (weekDays.monday !== "") {
                               */}
                              
                               {submitStatusAllKey === 0?
-                               <td className="d-flex">
+                               <td className="d-flex ps-0">
                                {
                                  item.submit_status === "0"?
 
@@ -1065,14 +1065,14 @@ if (weekDays.monday !== "") {
               onClick={(e) => {
                 saveData(e);
               }}>
-              <i className="fa fa-check"></i> save
+              <i className="fa fa-check"></i> Save
             </button>
              
              <button className="btn btn-outline-success ms-3"
             onClick={(e) => {
               submitData(e);
             }}>
-              <i className="far fa-save"></i> submit
+              <i className="far fa-save"></i> Submit
             </button>
             </>
             :""}
