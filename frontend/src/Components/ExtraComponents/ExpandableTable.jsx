@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import DataTable from 'react-data-table-component';
 import DataTableExtensions from 'react-data-table-component-extensions';
-import CustomerTable from '../../layouts/Admin/Reports/CustomerTable'
 
 
 const data = [
@@ -24,12 +23,7 @@ const ExpandableTable = ({ columns, data, filter }) => {
   // First-level expandable component
   const ExpandedComponent = ({ data }) => (
     <div style={{ padding: '10px', backgroundColor: '#f9f9f9' }}>
-      <CustomerTable data={data} />
-      <CustomerTable data={data} />
-      <CustomerTable data={data} />
-      <CustomerTable data={data} />
-      <CustomerTable data={data} />
-      <CustomerTable data={data} />
+    
 
 
     </div>

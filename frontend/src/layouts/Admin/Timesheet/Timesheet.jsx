@@ -725,56 +725,41 @@ if (weekDays.monday !== "") {
                       >
                         <thead className="table-light table-head-blue">
                           <tr>
-                            <th className="dropdwnCol2" data-field="phone">
+                            <th className="dropdwnCol2 pe-0" data-field="phone"  style={{ width: '10px' }}>
                               No
                             </th>
-                            <th className="" data-field="phone" >
+                            <th className="ps-0" data-field="phone"  style={{ width: '100px' }}>
                               Task Type
                             </th>
-                            <th className="dropdwnCol7" data-field="phone">
+                            <th className="dropdwnCol7" data-field="phone"  style={{ width: '110px' }}>
                               Customer
                             </th>
-                            <th className="dropdwnCol6" data-field="phone">
+                            <th className="dropdwnCol6" data-field="phone"  style={{ width: '110px' }}>
                               Client
                             </th>
-                            <th className="dropdwnCol5" data-field="phone">
+                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '110px' }}>
                               Job
                             </th>
-                            <th className="dropdwnCol5" data-field="phone">
+                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '100px' }}>
                               Task
                             </th>
-                            <th>
-                            <ChevronLeft onClick={(e) => { e.preventDefault(); changeWeek(-1); }}/>
-                            </th>
-                            <th
-                              className="dropdwnCol5"
-                              data-field="phone"
-                            >
-                              {/* {weekDays.monday.replace(",", "")} */}
-                              {weekDays.monday!=""?dayMonthFormatDate(weekDays.monday):""}
-                              
-                            </th>
-                            <th
-                              className="dropdwnCol5" data-field="customer_name"
-                            >
-                             {weekDays.tuesday!=""?dayMonthFormatDate(weekDays.tuesday): ""}
-                            </th>
-                            <th className="dropdwnCol5" data-field="phone">
-                              {weekDays.wednesday!=""?dayMonthFormatDate(weekDays.wednesday): ""}
-                            </th>
-                            <th className="dropdwnCol5" data-field="phone">
-                              {weekDays.thursday!=""?dayMonthFormatDate(weekDays.thursday): ""}
-                            </th>
-                            <th className="dropdwnCol5" data-field="phone">
-                              {weekDays.friday!=""?dayMonthFormatDate(weekDays.friday): ""}
-                            </th>
-                            <th className="dropdwnCol5" data-field="phone">
-                              {weekDays.saturday!=""?dayMonthFormatDate(weekDays.saturday): ""}
-                            </th>
+                           
+                            <th colspan="7" className="ps-0">
+          <div className="scrollable-week">
+            <ChevronLeft onClick={(e) => { e.preventDefault(); changeWeek(-1); }} />
+            <span>{weekDays.monday ? dayMonthFormatDate(weekDays.monday) : ""}</span>
+            <span>{weekDays.tuesday ? dayMonthFormatDate(weekDays.tuesday) : ""}</span>
+            <span>{weekDays.wednesday ? dayMonthFormatDate(weekDays.wednesday) : ""}</span>
+            <span>{weekDays.thursday ? dayMonthFormatDate(weekDays.thursday) : ""}</span>
+            <span>{weekDays.friday ? dayMonthFormatDate(weekDays.friday) : ""}</span>
+            <span>{weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : ""}</span>
+            <ChevronRight onClick={(e) => { e.preventDefault(); changeWeek(1); }} />
+          </div>
+        </th>
                             {/* <th className="dropdwnCol5" data-field="phone">
                               {weekDays.sunday!=""?dayMonthFormatDate(weekDays.sunday): ""}
                             </th> */}
-                            <th> <ChevronRight onClick={(e) => { e.preventDefault(); changeWeek(1); }}/></th>
+                           
                             {submitStatusAllKey === 0? 
                              <th className="dropdwnCol5" data-field="phone">
                              Action
@@ -790,13 +775,13 @@ if (weekDays.monday !== "") {
 
                              
                             <tr className="tabel_new">
-                              <td>{index + 1}</td>
+                              <td className="pe-0">{index + 1}</td>
                                
-                              <td>
+                              <td className="ps-0">
                                 {item.newRow === 1 ? (
                                   <select
                                     className="form-select form-control"
-                                    style={{ width: '100px' }}
+                                    
                                     value={item.task_type}
                                     onChange={(e) => handleChangeTaskType(e, item, index)}
                                   >
@@ -806,7 +791,7 @@ if (weekDays.monday !== "") {
                                 ) : (
                                   <select
                                     className="form-select form-control"
-                                    style={{ width: '100px' }}
+                                    
                                     value={item.task_type}
                                     disabled
                                   >
@@ -821,7 +806,7 @@ if (weekDays.monday !== "") {
                                 {item.newRow === 1 && item.task_type === "2" ? (
                                   <select
                                     className="form-select"
-                                    style={{ width: '150px' }}
+                                   
                                     defaultValue={item.customer_id || ''}
                                     onChange={(e) => selectCustomerData(e, index)}
                                   >
@@ -834,7 +819,7 @@ if (weekDays.monday !== "") {
                                 ) : (
                                   <input
                                     className="form-control cursor-pointer"
-                                    style={{ width: '150px' }}
+                                   
                                     defaultValue={item.task_type === "1" ? "No Customer" : item.customer_name}
                                     disabled
                                   />
@@ -846,7 +831,7 @@ if (weekDays.monday !== "") {
                                 {item.newRow === 1 && item.task_type === "2" ? (
                                   <select
                                     className="form-select"
-                                    style={{ width: '150px' }}
+                                   
                                     defaultValue={item.client_id || ''}
                                     onChange={(e) => selectClientData(e, index)}
                                   >
@@ -859,7 +844,7 @@ if (weekDays.monday !== "") {
                                 ) : (
                                   <input
                                     className="form-control cursor-pointer"
-                                    style={{ width: '150px' }}
+                                   
                                     defaultValue={item.task_type === "1" ? "No Client" : item.client_name}
                                     disabled
                                   />
@@ -871,7 +856,7 @@ if (weekDays.monday !== "") {
                                 {item.newRow === 1 ? (
                                   <select
                                     className="form-select"
-                                    style={{ width: '150px' }}
+                                  
                                     defaultValue={item.job_id || ''}
                                     onChange={(e) => selectJobData(e, item.task_type, index)}
                                   >
@@ -884,7 +869,7 @@ if (weekDays.monday !== "") {
                                 ) : (
                                   <input
                                     className="form-control cursor-pointer"
-                                    style={{ width: '150px' }}
+                                   
                                     defaultValue={item.task_type === "1" ? item.internal_name : item.job_name}
                                     disabled
                                   />
@@ -896,7 +881,7 @@ if (weekDays.monday !== "") {
                                 {item.newRow === 1 ? (
                                   <select
                                     className="form-select"
-                                    style={{ width: '150px' }}
+                                   
                                     defaultValue={item.task_id || ''}
                                     onChange={(e) => selectTaskData(e, index)}
                                   >
@@ -909,17 +894,16 @@ if (weekDays.monday !== "") {
                                 ) : (
                                   <input
                                     className="form-control cursor-pointer"
-                                    style={{ width: '150px' }}
+                                   
                                     defaultValue={item.task_type === "1" ? item.sub_internal_name : item.task_name}
                                     disabled
                                   />
                                 )}
                               </td>
-                               <td>
-
-                               </td>
+                          
                               {/*Monday Input*/}
-                              <td >
+                              <td colSpan="7" className="ps-0">
+                              <div className="scrollable-week">
                               <input
                                   className="form-control cursor-pointer border-radius-end"
                                   type="text"
@@ -930,13 +914,7 @@ if (weekDays.monday !== "") {
                                   value={item.monday_hours == null ? "0" : item.monday_hours}
                                   disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday'?false:true : false : currentDay !== 'monday'}
                                 />
-                               
-                              </td>
-                             
-                              {/*Tuesday Input*/}
-                              <td>
-                              
-                                <input
+                                   <input
                                  style={{ width: '80px' }}
                                   className="form-control cursor-pointer"
                                   type="text"
@@ -945,13 +923,7 @@ if (weekDays.monday !== "") {
                                   value={item.tuesday_hours == null ? "0" : item.tuesday_hours}
                                   disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false:true : false : currentDay !== 'tuesday'}
                                 />
-                     
-
-                              </td>
-
-                              {/*Wednesday Input*/}
-                              <td>
-                                <input
+                                 <input
                                  style={{ width: '80px' }}
                                   className="form-control cursor-pointer"
                                   type="text"
@@ -960,11 +932,7 @@ if (weekDays.monday !== "") {
                                   value={item.wednesday_hours == null ? "0" : item.wednesday_hours}
                                   disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false :true : false : currentDay !== 'wednesday'}
                                 />
-                              </td>
-
-                              {/*Thursday Input*/}
-                              <td>
-                                <input
+                                  <input
                                  style={{ width: '80px' }}
                                   className="form-control cursor-pointer"
                                   type="text"
@@ -973,34 +941,10 @@ if (weekDays.monday !== "") {
                                   value={item.thursday_hours == null ? "0" : item.thursday_hours}
                                   disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ?currentDay === 'thursday' ?false: true : false : currentDay !== 'thursday'}
                                 />
+                               </div>
                               </td>
-
-                              {/*Friday Input*/}
-                              <td>
-                                <input
-                                 style={{ width: '80px' }}
-                                  className="form-control cursor-pointer"
-                                  type="text"
-                                  name="friday_hours"
-                                  onChange={(e) => handleHoursInput(e, index, 'friday_date', weekDays.friday ,item )}
-                                  value={item.friday_hours == null ? "0" : item.friday_hours}
-                                  disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ? false :true : false : currentDay !== 'friday'}
-                                />
-                              </td>
-
-                              {/*Saturday Input*/}
-                              <td>
-                                <input
-                                 style={{ width: '80px' }}
-                                  className="form-control cursor-pointer"
-                                  type="text"
-                                  name="saturday_hours"
-                                  onChange={(e) => handleHoursInput(e, index, 'saturday_date', weekDays.saturday ,item)}
-                                  value={item.saturday_hours == null ? "0" : item.saturday_hours}
-                                  disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
-                                />
-                              </td>
-                                <td></td>
+                             
+                             
 
                               {/*Sunday Input*/}
                               {/* 
@@ -1019,7 +963,7 @@ if (weekDays.monday !== "") {
                               */}
                              
                               {submitStatusAllKey === 0?
-                               <td className="d-flex">
+                               <td className="d-flex ps-0">
                                {
                                  item.submit_status === "0"?
 
@@ -1121,14 +1065,14 @@ if (weekDays.monday !== "") {
               onClick={(e) => {
                 saveData(e);
               }}>
-              <i className="fa fa-check"></i> save
+              <i className="fa fa-check"></i> Save
             </button>
              
              <button className="btn btn-outline-success ms-3"
             onClick={(e) => {
               submitData(e);
             }}>
-              <i className="far fa-save"></i> submit
+              <i className="far fa-save"></i> Submit
             </button>
             </>
             :""}

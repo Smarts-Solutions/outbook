@@ -83,6 +83,19 @@ export async function DUE_BY_REPORT(data, token) {
     }
 }
 
+export async function JOBS(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}reportCountJob`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
 
 
 

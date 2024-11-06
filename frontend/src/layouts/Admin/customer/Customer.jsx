@@ -430,7 +430,7 @@ const Customer = () => {
           <div className="page-title-box pt-0">
             <div className="row align-items-start justify-content-end">
               <div className="col-4">
-                <div className="form-group mb-2 mt-1">
+                <div className="form-group mb-2 mt-1 pe-3">
                   <select
                     className="form-select"
                     id="tabSelect"

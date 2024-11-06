@@ -1,13 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 import {
-    JOB_STATUS_REPORT,
-    JOB_SUMMARY_REPORTS,
-    TEAM_MONTHLY_REPORT,
-    JOB_PENDING_REPORT,
-    JOB_RECEIVED_SEND_REPORT,
-    DUE_BY_REPORT,
-  
+  JOB_STATUS_REPORT,
+  JOB_SUMMARY_REPORTS,
+  TEAM_MONTHLY_REPORT,
+  JOB_PENDING_REPORT,
+  JOB_RECEIVED_SEND_REPORT,
+  DUE_BY_REPORT,
+  JOBS
+
 } from "../../../Services/Report/reportService";
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
@@ -59,7 +60,7 @@ export const teamMonthlyReports = createAsyncThunk("teamMonthlyReports", async (
     return err;
   }
 });
- 
+
 export const jobPendingReports = createAsyncThunk("jobPendingReports", async (data) => {
   try {
     const { req, authToken } = data;
@@ -108,6 +109,22 @@ export const dueByReport = createAsyncThunk("dueByReport", async (data) => {
   }
 });
 
+export const Jobs = createAsyncThunk("reportCountJob", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await JOBS(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
+
 //Setting Slice
 const ReportSlice = createSlice({
   name: "ReportSlice",
@@ -115,12 +132,13 @@ const ReportSlice = createSlice({
     isLoading: false,
     isError: false,
     jobstatusreport: [],
-    jobsummaryreports : [],
-    teammonthlyreport : [],
-    jobpendingreport : [],
-    receivedsentreport : [],
-    duebyreport : []
-  
+    jobsummaryreports: [],
+    teammonthlyreport: [],
+    jobpendingreport: [],
+    receivedsentreport: [],
+    duebyreport: [],
+    job: [],
+
   },
 
   reducers: {},
@@ -191,10 +209,21 @@ const ReportSlice = createSlice({
       .addCase(dueByReport.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true
-      }
-      );
-     
-       
+      })
+      .addCase(Jobs.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(Jobs.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.job = action.payload;
+      })
+      .addCase(Jobs.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      });
+
+
+
   },
 });
 

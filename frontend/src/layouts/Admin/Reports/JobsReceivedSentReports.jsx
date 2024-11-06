@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { ReceivedSentReport } from "../../../ReduxStore/Slice/Report/ReportSlice";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const JobsReceivedSentReports = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const token = JSON.parse(localStorage.getItem("token"));
     const [receivedSentData, setReceivedSentData] = useState([]);
     const [expandedRows, setExpandedRows] = useState({});
@@ -43,7 +45,7 @@ const JobsReceivedSentReports = () => {
 
 
     const handleOnClick = (job_ids) => {
-        console.log(job_ids);
+        navigate(`/admin/report/jobs` , { state: { job_ids: job_ids } }); 
     }
 
 
