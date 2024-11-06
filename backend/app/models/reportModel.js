@@ -86,27 +86,7 @@ const getCustomWeekNumber = (day) => {
 };
 const jobReceivedSentReports = async (Report) => {
     try {
-        // Query for monthly data
-        // const monthlyQuery = `
-        //     SELECT 
-        //         DATE_FORMAT(jobs.created_at, '%M') AS month_name,
-        //         COUNT(jobs.id) AS job_received,
-        //         COUNT(drafts.job_id) AS draft_count,
-        //         GROUP_CONCAT(DISTINCT jobs.id) AS job_ids
-        //     FROM 
-        //         jobs
-        //     LEFT JOIN 
-        //         drafts ON drafts.job_id = jobs.id    
-        //     WHERE 
-        //         YEAR(jobs.created_at) = YEAR(CURDATE())
-        //     GROUP BY 
-        //         MONTH(jobs.created_at)
-        //     ORDER BY 
-        //         MONTH(jobs.created_at);
-        // `;
-        // const [monthlyRows] = await pool.execute(monthlyQuery);
-
-        // Query for weekly data
+        
         const weeklyQuery = `
             SELECT 
                 DATE_FORMAT(jobs.created_at, '%M') AS month_name,
