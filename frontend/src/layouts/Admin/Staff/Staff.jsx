@@ -609,10 +609,10 @@ const StaffPage = () => {
         <div className="col-sm-12">
           <div className="page-title-box pt-0">
             <div className="row align-items-start">
-              <div className="col-md-6">
+              <div className="col-md-5">
                 {/* Dropdown for selecting tabs */}
               </div>
-              <div className="col-md-6">
+              <div className="col-md-7">
                 <div className="d-flex justify-content-end">
                   <div className="form-group w-50">
                     <select
@@ -632,7 +632,7 @@ const StaffPage = () => {
                     {showStaffInsertTab && (
                       <button
                         type="button"
-                        className="btn btn-info text-white float-end"
+                        className="btn btn-info text-white ms-1"
                         onClick={() => {
                           setAddStaff(true);
                           setEditShowModel(false);
