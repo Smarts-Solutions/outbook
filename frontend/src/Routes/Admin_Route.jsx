@@ -52,7 +52,7 @@ import JobEdit from "../layouts/Admin/Jobs/JobAction/EditJob";
 import Timesheet from "../layouts/Admin/Timesheet/Timesheet";
 import TimesheetNew from "../layouts/Admin/Timesheet/TimesheetNew";
 import Reports from "../layouts/Admin/Reports/Reports";
-import CustomerTable from "../layouts/Admin/Reports/CustomerTable";
+import Jobs from '../layouts/Admin/Reports/Jobs'
 
 
 
@@ -237,7 +237,8 @@ const Admin_Route = () => {
               <Route path="/timesheet" element={<Timesheet />} />
               <Route path="/timesheetnew" element={<TimesheetNew />} />
               <Route path="/subinternal" element={<SubInternal />} />
-              <Route path="report/customer" element={<CustomerTable />} />
+              <Route path="/report/jobs" element={<Jobs />} />
+
             </Routes>
           </div>
         </div>

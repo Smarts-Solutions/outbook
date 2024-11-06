@@ -8,7 +8,6 @@ import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
-import { act } from "react";
 
 
 const ClientList = () => {
@@ -751,7 +750,6 @@ const ClientList = () => {
                             })
                           } >
                             <i className="fa fa-plus pe-1" /> Create Job
-
                           </div>
                         </>
                       ) : activeTab === "checklist" ? (
@@ -765,8 +763,6 @@ const ClientList = () => {
                       ) : (
                         null
                       )}
-
-
                     <div
                       className="btn btn-info text-white float-end blue-btn me-2"
                       onClick={() => {
