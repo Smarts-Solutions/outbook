@@ -224,8 +224,7 @@ const ClientList = () => {
       button: true,
     },
   ];
-
-  console.log("statusDataAll", statusDataAll);
+ 
 
   const JobColumns = [
     {
