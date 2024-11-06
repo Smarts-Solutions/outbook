@@ -88,6 +88,22 @@ const dueByReport = async (req ,res) => {
   }
 }
 
+const reportCountJob = async (req ,res) => {
+  try {
+    const { ...Report } = req.body;
+    const result = await reportService.reportCountJob(Report);
+    if(!result.status){
+      return  res.status(200).json({ status: false, message: result.message });  
+      }
+      else{
+      return  res.status(200).json({ status: true, message: result.message , data : result.data});
+      }
+  }
+  catch (error) {
+    res.status(500).json({ status:false, message: error.message});
+  }
+}
+
 
 module.exports = {
   jobStatusReports,
@@ -95,5 +111,6 @@ module.exports = {
   jobSummaryReports,
   jobPendingReports,
   teamMonthlyReports,
-  dueByReport
+  dueByReport,
+  reportCountJob
 };

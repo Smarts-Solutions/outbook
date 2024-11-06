@@ -22,11 +22,16 @@ const teamMonthlyReports = async (Report) => {
 const dueByReport = async (Report) => {
   return reportModel.dueByReport(Report);
 }
+
+const reportCountJob = async (Report) => {
+  return reportModel.reportCountJob(Report);
+}
 module.exports = {
   jobStatusReports,
   jobReceivedSentReports,
   jobSummaryReports,
   jobPendingReports,
   teamMonthlyReports,
-  dueByReport
+  dueByReport,
+  reportCountJob
 };
