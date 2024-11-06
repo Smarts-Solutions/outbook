@@ -3,8 +3,24 @@ const pool = require('../config/database');
 const { SatffLogUpdateOperation } = require('../utils/helper');
 
 const jobStatusReports = async (Report) => {
-
+    const {StaffUserId } = Report;
     try {
+
+        const QueryRole = `
+  SELECT
+    staffs.id AS id,
+    staffs.role_id AS role_id,
+    roles.role AS role_name
+  FROM
+    staffs
+  JOIN
+    roles ON roles.id = staffs.role_id
+  WHERE
+    staffs.id = ${StaffUserId}
+  LIMIT 1
+  `
+    const [rows] = await pool.execute(QueryRole);
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
         // const page = Report.page || 1; 
         // const pageSize = Report.pageSize || 10; 
         // const offset = (page - 1) * pageSize; 
@@ -68,8 +84,11 @@ const jobStatusReports = async (Report) => {
         //  drafts ON drafts.job_id = jobs.id
         //  LIMIT ? OFFSET ?
         // const [rows] = await pool.execute(query, [pageSize, offset]);
-        const [rows] = await pool.execute(query);
-        return { status: true, message: 'Success.', data: rows };
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success.', data: result };
+    } else {
+        return { status: true, message: 'Success.', data: [] };
+    }
     } catch (error) {
         console.log("error ", error);
         return { status: false, message: 'Error getting job status report.' };
@@ -85,7 +104,23 @@ const getCustomWeekNumber = (day) => {
     return 0;
 };
 const jobReceivedSentReports = async (Report) => {
+    const {StaffUserId } = Report;
     try {
+        const QueryRole = `
+  SELECT
+    staffs.id AS id,
+    staffs.role_id AS role_id,
+    roles.role AS role_name
+  FROM
+    staffs
+  JOIN
+    roles ON roles.id = staffs.role_id
+  WHERE
+    staffs.id = ${StaffUserId}
+  LIMIT 1
+  `
+    const [rows] = await pool.execute(QueryRole);
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
         
         const weeklyQuery = `
             SELECT 
@@ -161,6 +196,9 @@ const jobReceivedSentReports = async (Report) => {
         });
 
         return { status: true, message: 'Success.', data: result };
+    }else{
+        return { status: true, message: 'Success.', data: [] };
+        }
     } catch (error) {
         console.log("error ", error);
         return { status: false, message: 'Error getting monthly and weekly job count.' };
@@ -170,8 +208,24 @@ const jobReceivedSentReports = async (Report) => {
 }
 
 const jobSummaryReports = async (Report) => {
+    const {StaffUserId } = Report;
     try {
 
+        const QueryRole = `
+  SELECT
+    staffs.id AS id,
+    staffs.role_id AS role_id,
+    roles.role AS role_name
+  FROM
+    staffs
+  JOIN
+    roles ON roles.id = staffs.role_id
+  WHERE
+    staffs.id = ${StaffUserId}
+  LIMIT 1
+  `
+    const [rows] = await pool.execute(QueryRole);
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
         const query = `
         SELECT 
     master_status.name AS job_status,
@@ -185,8 +239,11 @@ const jobSummaryReports = async (Report) => {
     GROUP BY 
         master_status.name, jobs.status_type
          `;
-        const [rows] = await pool.execute(query);
-        return { status: true, message: 'Success.', data: rows };
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success.', data: result };
+    } else {
+        return { status: true, message: 'Success.', data: [] };
+    }
     } catch (error) {
         console.log("error ", error);
         return { status: false, message: 'Error getting job status report.' };
@@ -194,9 +251,26 @@ const jobSummaryReports = async (Report) => {
 }
 
 const jobPendingReports = async (Report) => {
+    const {StaffUserId } = Report;
     try {
 
-        const query = `
+        const QueryRole = `
+  SELECT
+    staffs.id AS id,
+    staffs.role_id AS role_id,
+    roles.role AS role_name
+  FROM
+    staffs
+  JOIN
+    roles ON roles.id = staffs.role_id
+  WHERE
+    staffs.id = ${StaffUserId}
+  LIMIT 1
+  `
+    const [rows] = await pool.execute(QueryRole);
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+       
+    const query = `
        SELECT 
     master_status.name AS job_status,
     job_types.type AS job_type_name,
@@ -213,8 +287,11 @@ const jobPendingReports = async (Report) => {
     GROUP BY 
         master_status.name, jobs.status_type
          `;
-        const [rows] = await pool.execute(query);
-        return { status: true, message: 'Success.', data: rows };
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success.', data: result };
+    } else {
+        return { status: true, message: 'Success.', data: [] };
+        }
     } catch (error) {
         console.log("error ", error);
         return { status: false, message: 'Error getting job status report.' };
@@ -222,7 +299,24 @@ const jobPendingReports = async (Report) => {
 }
 
 const teamMonthlyReports = async (Report) => {
+    const {StaffUserId } = Report;
     try {
+
+        const QueryRole = `
+  SELECT
+    staffs.id AS id,
+    staffs.role_id AS role_id,
+    roles.role AS role_name
+  FROM
+    staffs
+  JOIN
+    roles ON roles.id = staffs.role_id
+  WHERE
+    staffs.id = ${StaffUserId}
+  LIMIT 1
+  `
+    const [rows] = await pool.execute(QueryRole);
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
 
         const query = `
       SELECT 
@@ -242,8 +336,11 @@ const teamMonthlyReports = async (Report) => {
         //      WHERE 
         // MONTH(jobs.created_at) = MONTH(CURRENT_DATE) AND 
         // YEAR(jobs.created_at) = YEAR(CURRENT_DATE)
-        const [rows] = await pool.execute(query);
-        return { status: true, message: 'Success.', data: rows };
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success.', data: result };
+    } else {
+        return { status: true, message: 'Success.', data: [] };
+    }
     } catch (error) {
         console.log("error ", error);
         return { status: false, message: 'Error getting job status report.' };
@@ -251,7 +348,23 @@ const teamMonthlyReports = async (Report) => {
 }
 
 const dueByReport = async (Report) => {
+    const {StaffUserId } = Report;
     try {
+        const QueryRole = `
+  SELECT
+    staffs.id AS id,
+    staffs.role_id AS role_id,
+    roles.role AS role_name
+  FROM
+    staffs
+  JOIN
+    roles ON roles.id = staffs.role_id
+  WHERE
+    staffs.id = ${StaffUserId}
+  LIMIT 1
+  `
+    const [rows] = await pool.execute(QueryRole);
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
 
         const query = `SELECT
         customers.id AS customer_id,
@@ -340,8 +453,12 @@ const dueByReport = async (Report) => {
     GROUP BY customers.id;
 `;
 
-        const [rows] = await pool.execute(query);
-        return { status: true, message: 'Success.', data: rows };
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success.', data: result };
+    }else{
+        return { status: true, message: 'Success.', data: [] };
+    }
+
     } catch (error) {
         console.log("error ", error);
         return { status: false, message: 'Error getting job dueByReport.' };
@@ -349,10 +466,24 @@ const dueByReport = async (Report) => {
 }
 
 const reportCountJob = async (Report) => {
+    const {StaffUserId ,job_ids} = Report;
+    const cleaneJob_ids = job_ids.replace(/^,+|,+$/g, '');
     try {
-        const { job_ids } = Report;
-        const cleaneJob_ids = job_ids.replace(/^,+|,+$/g, '');
-
+     const QueryRole = `
+  SELECT
+    staffs.id AS id,
+    staffs.role_id AS role_id,
+    roles.role AS role_name
+  FROM
+    staffs
+  JOIN
+    roles ON roles.id = staffs.role_id
+  WHERE
+    staffs.id = ${StaffUserId}
+  LIMIT 1
+  `
+    const [rows] = await pool.execute(QueryRole);
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
         const query = `
         SELECT 
         jobs.id AS job_id,
@@ -411,14 +542,17 @@ const reportCountJob = async (Report) => {
         ORDER BY
         jobs.id DESC;
         `;            
-        const [rows] = await pool.execute(query);
-        return { status: true, message: 'Success.', data: rows };
+        const [result] = await pool.execute(query);
+        return { status: true, message: 'Success.', data: result };
+    }
+    else{
+        return { status: true, message: 'Success.', data: [] };
+        }
     } catch (error) {
         console.log("error ", error);
         return { status: false, message: 'Error getting job dueByReport.' };
     }
 }
-
 
 module.exports = {
     jobStatusReports,

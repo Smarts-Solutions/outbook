@@ -761,8 +761,7 @@ const getJobByClient = async (job) => {
     if (ExistStaff.length > 0) {
       // Allocated to
       if (ExistStaff[0].role_id == 3) {
-
-        const query = `
+       const query = `
      SELECT 
      jobs.id AS job_id,
      job_types.type AS job_type_name,
@@ -825,7 +824,6 @@ const getJobByClient = async (job) => {
      `;
         const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id , client_id]);
         result = rowsAllocated
-
       }
       // Account Manger
       else if (ExistStaff[0].role_id == 4) {
@@ -1106,9 +1104,7 @@ const getJobByClient = async (job) => {
         result = rows
       }
 
-
     }
-
     return { status: true, message: 'Success.', data: result };
   } catch (error) {
     console.log("err -", error)

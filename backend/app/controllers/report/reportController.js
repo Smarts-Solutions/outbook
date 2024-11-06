@@ -34,6 +34,7 @@ const jobReceivedSentReports = async (req, res) => {
 
 const jobSummaryReports = async (req ,res) => {
   try {
+    
     const { ...Report } = req.body;
     const result = await reportService.jobSummaryReports(Report);
     if(!result.status){
