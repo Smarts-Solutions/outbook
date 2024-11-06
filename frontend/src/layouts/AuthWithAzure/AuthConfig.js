@@ -15,8 +15,8 @@ const config = {
 
 
        // LIVE SETTINGS
-       //clientId: '376ee1a2-3c24-48ac-b7cc-9a09f66b9e21', //  Application (client) ID - - CCCCC
-       //authority: 'https://login.microsoftonline.com/common', //Accounts in any organizational directory and personal Microsoft account
+       // clientId: '376ee1a2-3c24-48ac-b7cc-9a09f66b9e21', //  Application (client) ID - - CCCCC
+       // authority: 'https://login.microsoftonline.com/common', //Accounts in any organizational directory and personal Microsoft account
        // redirectUri: 'https://outbooks.tradestreet.in/', //  Redirect URI
     },
     cache: {
