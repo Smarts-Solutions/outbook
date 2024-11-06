@@ -430,7 +430,7 @@ const reportCountJob = async (Report) => {
         WHERE jobs.id IN (`+ cleaneJob_ids + `) 
         ORDER BY
         jobs.id DESC;
-        `;             
+        `;            
         const [rows] = await pool.execute(query);
         return { status: true, message: 'Success.', data: rows };
     } catch (error) {
