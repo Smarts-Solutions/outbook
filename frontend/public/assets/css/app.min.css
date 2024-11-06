@@ -4405,3 +4405,8 @@ select#tabSelect {
 	width: 60px;
 }
 
+.rdt_TableBody {
+    position: relative;
+    z-index: 9;
+	background-color: #fff;
+}

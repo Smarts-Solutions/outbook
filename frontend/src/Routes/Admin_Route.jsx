@@ -15,7 +15,6 @@ import Addcustomer from "../layouts/Admin/customer/customer_add_process/Addcusto
 import Editcustomer from "../layouts/Admin/customer/customer_edit_process/Editcustomer";
 
 import Status from "../layouts/Admin/StatusPage/Status";
-// import Reports from "../layouts/Admin/ReportsPage/Reports";
 import Access from "../layouts/Admin/AccessPage/Access";
 import Setting from "../layouts/Admin/Settings/Setting";
 import Staff from "../layouts/Admin/Staff/Staff";
@@ -54,7 +53,6 @@ import Timesheet from "../layouts/Admin/Timesheet/Timesheet";
 import TimesheetNew from "../layouts/Admin/Timesheet/TimesheetNew";
 import Reports from "../layouts/Admin/Reports/Reports";
 import CustomerTable from "../layouts/Admin/Reports/CustomerTable";
-import CPP from '../layouts/Admin/Reports/New'
 
 
 
@@ -63,7 +61,6 @@ const Admin_Route = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [updatePermission, setUpdatePermission] = useState(false);
-
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const role = JSON.parse(localStorage.getItem("role"));
@@ -240,11 +237,7 @@ const Admin_Route = () => {
               <Route path="/timesheet" element={<Timesheet />} />
               <Route path="/timesheetnew" element={<TimesheetNew />} />
               <Route path="/subinternal" element={<SubInternal />} />
-              {/* <Route path="/reportsnew" element={<Reportsnew />} /> */}
               <Route path="report/customer" element={<CustomerTable />} />
-              <Route path="cpp" element={<CPP />} />
-
-
             </Routes>
           </div>
         </div>

@@ -19,7 +19,6 @@ const Main_Route = () => {
   const token = JSON.parse(localStorage.getItem("token"));
 
   useEffect(() => {
-    // Check if Staff details exist
     if (role == null || token == null || staffDetails == null) {
       navigate("/login");
       return;
@@ -39,8 +38,6 @@ const Main_Route = () => {
       navigate("/forget");
       return;
     }
-
-    // Redirect based on user role and route prefix
     switch (role) {
       case "ADMIN":
         if (

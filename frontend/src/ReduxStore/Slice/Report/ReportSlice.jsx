@@ -4,7 +4,9 @@ import {
     JOB_STATUS_REPORT,
     JOB_SUMMARY_REPORTS,
     TEAM_MONTHLY_REPORT,
-    JOB_PENDING_REPORT
+    JOB_PENDING_REPORT,
+    JOB_RECEIVED_SEND_REPORT,
+    DUE_BY_REPORT,
   
 } from "../../../Services/Report/reportService";
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
@@ -74,6 +76,38 @@ export const jobPendingReports = createAsyncThunk("jobPendingReports", async (da
   }
 });
 
+export const ReceivedSentReport = createAsyncThunk("jobReceivedSentReports", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await JOB_RECEIVED_SEND_REPORT(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
+
+export const dueByReport = createAsyncThunk("dueByReport", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await DUE_BY_REPORT(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
+
 //Setting Slice
 const ReportSlice = createSlice({
   name: "ReportSlice",
@@ -83,7 +117,9 @@ const ReportSlice = createSlice({
     jobstatusreport: [],
     jobsummaryreports : [],
     teammonthlyreport : [],
-    jobpendingreport : []
+    jobpendingreport : [],
+    receivedsentreport : [],
+    duebyreport : []
   
   },
 
@@ -131,6 +167,28 @@ const ReportSlice = createSlice({
         state.jobpendingreport = action.payload;
       })
       .addCase(jobPendingReports.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true
+      })
+      .addCase(ReceivedSentReport.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(ReceivedSentReport.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.receivedsentreport = action.payload;
+      })
+      .addCase(ReceivedSentReport.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true
+      })
+      .addCase(dueByReport.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(dueByReport.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.duebyreport = action.payload;
+      })
+      .addCase(dueByReport.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true
       }

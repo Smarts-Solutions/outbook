@@ -96,7 +96,6 @@ const Login = () => {
   const handleAzureLogin = async () => {
     const accounts = await azureLogin();
 
-    console.log("accounts Azure",accounts)
     if (accounts.length > 0) {
       const req = { email: accounts[0].username };
 
@@ -207,6 +206,13 @@ const Login = () => {
     }
   };
 
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSubmitLogin();
+    }
+}
+
   return (
     <div className="account-body accountbg">
       <div className="container">
@@ -246,14 +252,13 @@ const Login = () => {
                         <div className="input-group ">
                           <input
                             type="email"
-                          
                             className={errorEmail ? "error-field form-control" : "form-control"}
-
                             name="username"
                             id="username"
                             placeholder="Enter Email Id"
                             onChange={(e) => setEmail(e.target.value)}
                             value={Email}
+                            onKeyPress={handleKeyPress}
                           />
                         </div>
                         {errorEmail ? (
@@ -273,6 +278,7 @@ const Login = () => {
                             id="userpassword"
                             placeholder="Enter password"
                             onChange={(e) => setPassword(e.target.value)}
+                            onKeyPress={handleKeyPress}
                           />
                         </div>
                         {errorPassword ? (
@@ -296,6 +302,7 @@ const Login = () => {
                             className="w-100 btn btn-info fw-normal text-white "
                             type="button"
                             onClick={() => handleSubmitLogin()}
+                            onKeyPress={handleKeyPress}
                           >
                             Sign In <i className="fas fa-sign-in-alt ml-1" />
                           </button>

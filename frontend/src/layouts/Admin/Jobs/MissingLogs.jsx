@@ -151,9 +151,6 @@ const MissingLogs = ({ getAccessDataJob }) => {
   }
 
   const handleSubmit = async (e) => {
-    // if (!validateAllFields()) {
-    //   return;
-    // }
     const req = { action: "add", job_id: location.state.job_id, missionDetails: missionLogAllInputData }
     const data = { req: req, authToken: token }
     await dispatch(AddMissionLog(data))
