@@ -8,7 +8,7 @@ import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlic
 import sweatalert from 'sweetalert2';
 
 
-const TaskTimesheet = ({ getAccessDataJob }) => {
+const TaskTimesheet = ({ getAccessDataJob , goto }) => {
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const location = useLocation();
@@ -200,7 +200,7 @@ const TaskTimesheet = ({ getAccessDataJob }) => {
       cell: (row) => (
         <div>
           {
-            (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
+            goto!="report" && (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
               <button className="view-icon" onClick={() => { handleTimeSheetView(location.state.job_id); setRowData(row); setViewtimesheet(true) }}>
                 <i className="fa fa-eye fs-6 text-warning" />
               </button>)
@@ -374,7 +374,7 @@ const TaskTimesheet = ({ getAccessDataJob }) => {
           <div className="col-md-4">
             <div>
               {
-                (getAccessDataJob.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
+                goto!="report" && (getAccessDataJob.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
                   <button type="button"
                     onClick={() => { handleTimeSheetView(location.state.job_id); setAddjobtimesheet(true) }}
                     className="btn btn-info text-white float-end ms-2">

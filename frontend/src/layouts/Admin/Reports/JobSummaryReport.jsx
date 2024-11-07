@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import Datatable from '../../../Components/ExtraComponents/Datatable';
 import { jobSummaryReports } from '../../../ReduxStore/Slice/Report/ReportSlice'
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 const JobStatus = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const [jobSummaryReportData, setJobSummaryReportData] = useState([]);
 
-
   useEffect(() => {
     JobSummary();
   }, []);
+
 
   const JobSummary = async () => {
     const data = { req: {}, authToken: token };
@@ -31,7 +33,7 @@ const JobStatus = () => {
   }
 
   const handleOnClick = (row) => {
-    console.log("row : ", row);
+    navigate('/admin/report/jobs', { state: {job_ids :  row?.job_ids } });
   }
 
   const columns = [

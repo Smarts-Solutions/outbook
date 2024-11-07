@@ -8,7 +8,7 @@ import sweatalert from 'sweetalert2';
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 
 
-const JobInformationPage = ({ job_id , getAccessDataJob }) => {
+const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
     const navigate = useNavigate();
     const token = JSON.parse(localStorage.getItem("token"));
     const role = JSON.parse(localStorage.getItem("role"));
@@ -72,6 +72,8 @@ const JobInformationPage = ({ job_id , getAccessDataJob }) => {
 
     });
 
+    console.log("goto", goto != "report")
+
     useEffect(() => {
         JobDetails()
         GetStatus()
@@ -81,7 +83,7 @@ const JobInformationPage = ({ job_id , getAccessDataJob }) => {
         GetJobData()
     }, [JobInformationData]);
 
-  
+
 
 
     const JobDetails = async () => {
@@ -339,28 +341,42 @@ const JobInformationPage = ({ job_id , getAccessDataJob }) => {
                         <h3>Job Information </h3>
                     </div>
                 </div>
-                <div className='col-md-5 '>
+                <div className='col-md-5'>
                     <div className='d-flex w-100 justify-content-end'>
-                        {  (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") && <div className='w-auto'>
-                            <select className="form-select form-control" onChange={handleStatusChange} value={selectStatusIs}>
-                                {
-                                    statusDataAll.map((status) => (
-                                        <option value={status.id} key={status.id}>{status.name}</option>
-                                    ))
-                                }
-                            </select>
-                        </div>}
-                        {
-                            (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") && <button className='edit-icon' onClick={handleJobEdit}>  <i className="ti-pencil text-primary" /></button>
+                        {goto !== "report" && (
+                            <>
+                                {(getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
+                                    <div className='w-auto'>
+                                        <select
+                                            className="form-select form-control"
+                                            onChange={handleStatusChange}
+                                            value={selectStatusIs}
+                                        >
+                                            {statusDataAll.map((status) => (
+                                                <option value={status.id} key={status.id}>
+                                                    {status.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
 
-                        }
-                        {
-                            (getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN") && <button className='delete-icon' onClick={handleDelete}><i className="ti-trash text-danger"></i></button>
-                        }
+                                {(getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
+                                    <button className='edit-icon' onClick={handleJobEdit}>
+                                        <i className="ti-pencil text-primary" />
+                                    </button>
+                                )}
 
+                                {(getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
+                                    <button className='delete-icon' onClick={handleDelete}>
+                                        <i className="ti-trash text-danger" />
+                                    </button>
+                                )}
+                            </>
+                        )}
                     </div>
-
                 </div>
+
             </div>
             <div>
                 <div className="row">

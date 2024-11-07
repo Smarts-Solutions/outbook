@@ -17,6 +17,8 @@ const JobLogs = () => {
   const [selectedTab, setSelectedTab] = useState('job information');
   const [getAccessDataJob, setAccessDataJob] = useState({ insert: 0, update: 0, delete: 0, view: 0, });
 
+
+  console.log(location.state);
   const accessDataJob =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
       (item) => item.permission_name === "job"
@@ -166,7 +168,7 @@ const JobLogs = () => {
                   <div
                     className="btn btn-info text-white float-end blue-btn"
                     onClick={() => {
-                      sessionStorage.setItem('activeTab', location.state.activeTab);
+                      sessionStorage.setItem('activeTab', location.state.goto == "report" ? "client" : location.state.activeTab);
                       window.history.back()
                     }}
                   >
@@ -179,7 +181,11 @@ const JobLogs = () => {
         </div>
       </div>
 
-      <Hierarchy show={location.state.goto == "Customer" ? ["Customer", "Job", selectedTab] : ["Customer", "Client", "Job", selectedTab]} active={location.state.goto == "Customer" ? 2 : 3} data={location.state.data} />
+      {
+        location?.state?.goto == "report" ? "" :
+
+          <Hierarchy show={location?.state?.goto == "Customer" ? ["Customer", "Job", selectedTab] : ["Customer", "Client", "Job", selectedTab]} active={location.state.goto == "Customer" ? 2 : 3} data={location.state.data} />
+      }
 
       <div className="tab-content report-data mt-4" id="pills-tabContent">
 
@@ -189,7 +195,7 @@ const JobLogs = () => {
           role="tabpanel"
           aria-labelledby="job-information-tab"
         >
-          <JobInformation job_id={location.state.job_id} getAccessDataJob={getAccessDataJob} />
+          <JobInformation job_id={location?.state?.job_id} getAccessDataJob={getAccessDataJob} goto={location?.state?.goto} />
         </div>
 
         <div
@@ -198,7 +204,7 @@ const JobLogs = () => {
           role="tabpanel"
           aria-labelledby="job-timeline-tab"
         >
-          <JobTimeline getAccessDataJob={getAccessDataJob} />
+          <JobTimeline getAccessDataJob={getAccessDataJob} goto={location?.state?.goto} />
         </div>
         <div
           className="tab-pane fade"
@@ -206,7 +212,7 @@ const JobLogs = () => {
           role="tabpanel"
           aria-labelledby="task-timesheet-tab"
         >
-          <TaskTimesheet getAccessDataJob={getAccessDataJob} />
+          <TaskTimesheet getAccessDataJob={getAccessDataJob} goto={location?.state?.goto} />
         </div>
         <div
           className="tab-pane fade"
@@ -214,7 +220,7 @@ const JobLogs = () => {
           role="tabpanel"
           aria-labelledby="missing-logs-tab"
         >
-          <MissingLogs getAccessDataJob={getAccessDataJob} />
+          <MissingLogs getAccessDataJob={getAccessDataJob} goto={location?.state?.goto} />
         </div>
         <div
           className="tab-pane fade"
@@ -222,7 +228,7 @@ const JobLogs = () => {
           role="tabpanel"
           aria-labelledby="queries-tab"
         >
-          <Queries getAccessDataJob={getAccessDataJob} />
+          <Queries getAccessDataJob={getAccessDataJob} goto={location?.state?.goto} />
         </div>
         <div
           className="tab-pane fade"
@@ -230,7 +236,7 @@ const JobLogs = () => {
           role="tabpanel"
           aria-labelledby="drafts-tab"
         >
-          <Drafts getAccessDataJob={getAccessDataJob} />
+          <Drafts getAccessDataJob={getAccessDataJob} goto={location?.state?.goto} />
         </div>
         <div
           className="tab-pane fade"
@@ -238,7 +244,7 @@ const JobLogs = () => {
           role="tabpanel"
           aria-labelledby="documents-tab"
         >
-          <Documents getAccessDataJob={getAccessDataJob} />
+          <Documents getAccessDataJob={getAccessDataJob} goto={location?.state?.goto} />
         </div>
 
       </div>
