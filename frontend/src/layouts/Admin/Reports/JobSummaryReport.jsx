@@ -33,7 +33,7 @@ const JobStatus = () => {
   }
 
   const handleOnClick = (row) => {
-    navigate('/admin/report/jobs', { state: {job_ids :  row?.job_ids } });
+    navigate('/admin/report/jobs', { state: { job_ids: row?.job_ids } });
   }
 
   const columns = [
@@ -42,14 +42,21 @@ const JobStatus = () => {
     {
       name: 'No Of Jobs',
       cell: (row) => (
-        <div style={{ color: 'rgb(38, 189, 240)', cursor: 'pointer' }} onClick={()=>handleOnClick(row)}>
-          {row.number_of_job}
-        </div>
+        row.number_of_job > 0 ? (
+          <div 
+            style={{ color: 'rgb(38, 189, 240)', cursor: 'pointer' }} 
+            onClick={() => handleOnClick(row)}
+          >
+            {row.number_of_job}
+          </div>
+        ) : (
+          <div>{row.number_of_job}</div>
+        )
       ),
       sortable: true,
-
-      windth: '50%'
-    },
+      width: '50%'
+    }
+    
 
   ]
 
