@@ -11,9 +11,15 @@ const saveTimesheet = async(Timesheet) => {
   return timeSheetModel.saveTimesheet(Timesheet);
 }
 
+const getStaffHourMinute = async (Timesheet) => {
+  return timeSheetModel.getStaffHourMinute(Timesheet);
+}
+
+
 
 module.exports = {
   getTimesheet,
   getTimesheetTaskType,
-  saveTimesheet
+  saveTimesheet,
+  getStaffHourMinute
 };

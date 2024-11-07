@@ -814,8 +814,6 @@ const getTimesheetTaskType = async (Timesheet) => {
 
 };
 
-
-
 const saveTimesheet = async (Timesheet) => {
   try {
     const { staff_id, data, deleteRows } = Timesheet;
@@ -894,11 +892,26 @@ const saveTimesheet = async (Timesheet) => {
   }
 }
 
+const getStaffHourMinute = async (Timesheet) => {
+  const {staff_id} = Timesheet;
+  try {
+    const query = `
+    SELECT hourminute FROM staffs WHERE id = ?;
+   `;
+    const [rows] = await pool.query(query, [staff_id]);
+    return { status: true, message: "success.", data: rows };
+  } catch (err) {
+    console.log(err);
+    return { status: false, message: "Err getStaffHourMinute Data View Get", error: err.message };
+  }
+}
+
 
 
 
 module.exports = {
   getTimesheet,
   getTimesheetTaskType,
-  saveTimesheet
+  saveTimesheet,
+  getStaffHourMinute
 };

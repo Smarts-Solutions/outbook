@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { GET_TIMESHEET_TASK_TYPE ,GET_TIMESHEET ,SAVE_TIMESHEET } from "../../../Services/Timesheet/TimesheetService";
+import { GET_TIMESHEET_TASK_TYPE ,GET_TIMESHEET ,SAVE_TIMESHEET ,GET_STAFF_HOURSMINUTE} from "../../../Services/Timesheet/TimesheetService";
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
 export const getTimesheetTaskTypedData = createAsyncThunk("getTimesheetTaskType", async (data) => {
@@ -44,6 +44,22 @@ export const saveTimesheetData = createAsyncThunk("saveTimesheet", async (data) 
             StaffUserId: StaffUserId.id,
         };
         const res = await SAVE_TIMESHEET(updatedReq, authToken);
+        return res; 
+    } catch (err) {
+        throw err;
+    }
+});
+
+export const getStaffHourMinute = createAsyncThunk("getStaffHourMinute", async (data) => {
+    try {
+        const { req, authToken } = data;
+        var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+        const updatedReq = {
+            ...req,
+            ip: IP_Data,  
+            StaffUserId: StaffUserId.id,
+        };
+        const res = await GET_STAFF_HOURSMINUTE(updatedReq, authToken);
         return res; 
     } catch (err) {
         throw err;

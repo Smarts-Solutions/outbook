@@ -45,6 +45,22 @@ export async function SAVE_TIMESHEET(data) {
   }
 }
 
+export async function GET_STAFF_HOURSMINUTE(data) {
+  try {
+    const token = JSON.parse(localStorage.getItem("token"));
+
+    const res = await axios.post(`${Config.base_url}getStaffHourMinute`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+
+
 
 
 

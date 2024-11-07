@@ -3,7 +3,7 @@ import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal"
 import { Trash2 ,ChevronLeft ,ChevronRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getTimesheetData, getTimesheetTaskTypedData, saveTimesheetData } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
+import { getTimesheetData, getTimesheetTaskTypedData, saveTimesheetData ,getStaffHourMinute} from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
 import sweatalert from 'sweetalert2';
 
 const Timesheet = () => {
@@ -152,16 +152,20 @@ const Timesheet = () => {
     };
 
     // setTimeSheetRows((prevRows) => [...prevRows, newSheetRow]);
+    let req = { staff_id: staffDetails.id };
+    const resStaffTime = await dispatch(getStaffHourMinute({ req, authToken: token })).unwrap();
+    let staffs_hourminute = resStaffTime?.data?.[0]?.hourminute || null;
 
     setTimeSheetRows((prevRows) => {
       const updatedRows = [...prevRows, newSheetRow];
       const newIndex = updatedRows.length - 1; // Index of the newly added row
       updatedRows[newIndex].task_type = "1";
+      updatedRows[newIndex].staffs_hourminute = staffs_hourminute;
       setTimeSheetRows(updatedRows);
       return updatedRows;
     });
 
-    let req = { staff_id: staffDetails.id, task_type: "1" };
+    req = { staff_id: staffDetails.id, task_type: "1" };
     const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
 
     if (res.status) {
@@ -427,6 +431,17 @@ const Timesheet = () => {
       return;
     }
 
+    if (parseFloat(value) > 23.59) {
+      sweatalert.fire({
+        icon: 'warning',
+        title: 'The time cannot exceed 23.59.',
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 3000,
+      });
+      return;
+    }
+
     const [integerPart, fractionalPart] = value.split('.');
     if (fractionalPart && parseInt(fractionalPart) > 59) {
       return;
@@ -446,6 +461,7 @@ const Timesheet = () => {
     const sum = (parseFloat(updatedRows[index].monday_hours) || 0) + (parseFloat(updatedRows[index].tuesday_hours) || 0) + (parseFloat(updatedRows[index].wednesday_hours) || 0) + (parseFloat(updatedRows[index].thursday_hours) || 0) + (parseFloat(updatedRows[index].friday_hours) || 0) + (parseFloat(updatedRows[index].saturday_hours) || 0) + (parseFloat(updatedRows[index].sunday_hours) || 0); 
     updatedRows[index].total_hours = sum;
 
+    // console.log("updatedRows[index].total_hours ",updatedRows[index].total_hours)
     // console.log("updatedRows[index] ",updatedRows[index])
     // console.log("updatedRows[index] staffs_hourminute ",updatedRows[index].staffs_hourminute)
     // console.log("updatedRows[index] staffs_hourminute parsfloat",parseFloat(convertTimeFormat(updatedRows[index].staffs_hourminute)))
@@ -464,11 +480,9 @@ const Timesheet = () => {
       }
  
     setTimeSheetRows(updatedRows);
-  
     // update record only
     const rowId = updatedRows[index].id;
     updateRecordSheet(rowId, name, value);
-
   }
 
   // update record only Function
@@ -668,10 +682,6 @@ const dayMonthFormatDate = (dateString) => {
 };
 
 // Example usage
-console.log("weekDays.monday ", weekDays.monday);
-if (weekDays.monday !== "") {
-  console.log("dayMonthFormatDate ", dayMonthFormatDate(weekDays.monday));
-}
 
   return (
    
@@ -932,7 +942,7 @@ if (weekDays.monday !== "") {
                                   value={item.wednesday_hours == null ? "0" : item.wednesday_hours}
                                   disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false :true : false : currentDay !== 'wednesday'}
                                 />
-                                  <input
+                                <input
                                  style={{ width: '80px' }}
                                   className="form-control cursor-pointer"
                                   type="text"
@@ -941,6 +951,25 @@ if (weekDays.monday !== "") {
                                   value={item.thursday_hours == null ? "0" : item.thursday_hours}
                                   disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ?currentDay === 'thursday' ?false: true : false : currentDay !== 'thursday'}
                                 />
+                                <input
+                                 style={{ width: '80px' }}
+                                  className="form-control cursor-pointer"
+                                  type="text"
+                                  name="friday_hours"
+                                  onChange={(e) => handleHoursInput(e, index, 'friday_date', weekDays.friday , item)}
+                                  value={item.friday_hours == null ? "0" : item.friday_hours}
+                                  disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.friday) > new Date() ?currentDay === 'friday' ?false: true : false : currentDay !== 'friday'}
+                                />
+                                 <input
+                                 style={{ width: '80px' }}
+                                  className="form-control cursor-pointer"
+                                  type="text"
+                                  name="saturday_hours"
+                                  onChange={(e) => handleHoursInput(e, index, 'saturday_date', weekDays.saturday , item)}
+                                  value={item.saturday_hours == null ? "0" : item.saturday_hours}
+                                  disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ?currentDay === 'saturday' ?false: true : false : currentDay !== 'saturday'}
+                                />
+                                
                                </div>
                               </td>
                              
