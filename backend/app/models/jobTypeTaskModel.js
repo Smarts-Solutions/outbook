@@ -671,7 +671,6 @@ ORDER BY checklists.id DESC
       customer_id,
     ]);
 
-    console.log("result ",result)
 
     return {
       status: true,

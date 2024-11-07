@@ -322,7 +322,6 @@ const status = async (id) => {
   const query = `SELECT status FROM staffs WHERE id = ?`;
   try {
     const [result] = await pool.execute(query, [id]);
-    console.log("result",result);
     return result;
   } catch (err) {
     console.log("Error updating data:", err);
