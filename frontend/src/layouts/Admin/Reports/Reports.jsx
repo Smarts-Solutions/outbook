@@ -9,45 +9,12 @@ import TeamMonthlyReport from './TeamMonthlyReports';
 import JobPendingReport from './JobPendingReports';
 import JobsReceivedSentReports from './JobsReceivedSentReports';
 import DueByReport from './DueByReport';
-
-
-const columns = [
-
-  {
-    name: 'Trading Name',
-    cell: (row) => (
-      <div>
-        {/* <span onClick={(e) => console.log(e.target)} className="mx-3 pointer  Plas-center">
-          +
-        </span> */}
-        {row.TradingName}
-      </div>
-    ),
-    sortable: true
-  },
-
-  { name: 'Customer Code', selector: row => row.Code, sortable: true },
-  { name: 'Customer Name', selector: row => row.CustomerName, sortable: true },
-  { name: 'Company Number', selector: row => row.AccountManager, sortable: true },
-  { name: 'Service Type', selector: row => row.ServiceType, sortable: true },
-  { name: 'Account Manager', selector: row => row.JobType, sortable: true },
-]
-
-const tabs = [
-  { name: 'Job Status Report', icon: 'fas fa-clipboard-list', value: 'jobStatusReport' },
-  { name: 'Jobs Received Sent Reports', icon: 'fas fa-inbox', value: 'jobsReceivedSentReports' },
-  { name: 'Job Summary Report', icon: 'fas fa-chart-pie', value: 'jobSummaryReport' },
-  { name: 'Jobs Pending Report', icon: 'fas fa-tasks', value: 'jobsPendingReport' },
-  { name: 'Due By Report', icon: 'fas fa-calendar-alt', value: 'dueByReport' },
-  { name: 'Team Performance Report by Month', icon: 'fas fa-users', value: 'teamPerformanceReport' },
-  { name: 'Average TAT Report', icon: 'fas fa-stopwatch', value: 'averageTATReport' },
-  { name: 'Timesheet Report', icon: 'fas fa-clock', value: 'timesheetReport' },
-]
+ 
 
 function Reportsnew() {
 
   const [filter, setFilter] = useState(false);
-  const [activeTab, setActiveTab] = useState(tabs[0].value);
+  const [activeTab, setActiveTab] = useState("jobStatusReport");
 
   const handleTabClick = (tabValue) => {
     setActiveTab(tabValue);
@@ -81,10 +48,13 @@ function Reportsnew() {
       <div className="row ">
         <div className="col-sm-12">
           <div className="page-title-box">
-            <div className="row align-items-start">
-              <div className="col-md-9">
+            <div className="row">
+              <div>
+                <h5 className="mb-2" style={{ fontWeight: 600 }}>Reports</h5>
+              </div>
+              <div className="col-md-3">
                 <>
-                  <ul className="nav nav-pills rounded-tabs" role="tablist">
+                  {/* <ul className="nav nav-pills rounded-tabs" role="tablist">
                     {
                       tabs.map((tab, index) => (
                         <li className="nav-item" role="presentation" key={tab.value}>
@@ -105,7 +75,22 @@ function Reportsnew() {
                         </li>
                       ))
                     }
-                  </ul>
+                  </ul> */}
+
+                  <select className="form-select" id="tabSelect" 
+                   value={activeTab}
+                   onChange={(e)=>handleTabClick(e.target.value)}
+                   >
+                    <option >Select Options</option>
+                    <option value="jobStatusReport">Job Status Report</option>
+                    <option value="jobsReceivedSentReports">Jobs Received Sent Reports</option>
+                    <option value="jobSummaryReport">Job Summary Report</option>
+                    <option value="jobsPendingReport">Jobs Pending Report</option>
+                    <option value="dueByReport">Due By Report</option>
+                    <option value="teamPerformanceReport">Team Performance Report by Month</option>
+                    <option value="timesheetReport">Timesheet Report</option>
+
+                  </select>
                 </>
               </div>
             </div>

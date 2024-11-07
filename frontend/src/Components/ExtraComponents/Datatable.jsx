@@ -6,7 +6,6 @@ import 'react-data-table-component-extensions/dist/index.css';
 const Datatable = ({ columns, data, filter }) => {
   const noDataImage = '/assets/images/No-data-amico.png';
 
-  // Ref function to handle search input placeholder update
   const handleTableRef = (node) => {
     if (node) {
       const searchInput = node.querySelector('.data-table-extensions-filter input');
