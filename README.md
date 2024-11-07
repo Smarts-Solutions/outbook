@@ -17,9 +17,8 @@ Outbook is a comprehensive management application designed to streamline organiz
 
 ## 🚀 Installation Instructions
 
+## Live project
 
-Test1
-6
 
 
 1. **Clone the repository:**
