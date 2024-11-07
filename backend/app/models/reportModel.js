@@ -349,7 +349,7 @@ const teamMonthlyReports = async (Report) => {
 
 const dueByReport = async (Report) => {
     const {StaffUserId } = Report;
-
+    
     try {
         const QueryRole = `
   SELECT
@@ -455,13 +455,12 @@ const dueByReport = async (Report) => {
 `;
 
         const [result] = await pool.execute(query);
-        console.log("result ", result);
         return { status: true, message: 'Success.', data: result };
     }else{
         return { status: true, message: 'Success.', data: [] };
     }
 
-    } catch (error) {
+    } catch (error) {cd 
         console.log("error ", error);
         return { status: false, message: 'Error getting job dueByReport.' };
     }

@@ -8,7 +8,7 @@ import { getProfile } from '../../../ReduxStore/Slice/Staff/staffSlice';
 import sweatalert from 'sweetalert2';
 import { AddMissionLogErros } from '../../../Utils/Common_Message';
 
-const MissingLogs = ({ getAccessDataJob }) => {
+const MissingLogs = ({ getAccessDataJob, goto }) => {
   const location = useLocation();
   const fileInputRef = useRef(null);
   const role = JSON.parse(localStorage.getItem("role"));
@@ -235,7 +235,7 @@ const MissingLogs = ({ getAccessDataJob }) => {
             <i className="fa fa-eye fs-6 text-warning" />
           </button>
           {
-            row.status == 1 ? "" : (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
+            row.status == 1 ? "" : goto!="report" && (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
               <button className="edit-icon" onClick={() => {
                 setShowEditMissinglogsModal(true);
                 setEditData(row)
@@ -262,7 +262,7 @@ const MissingLogs = ({ getAccessDataJob }) => {
         <div className='col-md-4'>
           <div>
             {
-              draftStatus == 0 && (getAccessDataJob.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") ? <button type="button" className="btn btn-info text-white float-end" onClick={() => setAddmissinglogs(true)}>
+              draftStatus == 0 && goto!="report" && (getAccessDataJob.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") ? <button type="button" className="btn btn-info text-white float-end" onClick={() => setAddmissinglogs(true)}>
                 <i className="fa-regular fa-plus pe-1"></i> Add Missing Logs
               </button> : ""
             }

@@ -45,7 +45,7 @@ const JobsReceivedSentReports = () => {
 
 
     const handleOnClick = (job_ids) => {
-        navigate(`/admin/report/jobs` , { state: { job_ids: job_ids } }); 
+        navigate(`/admin/report/jobs`, { state: { job_ids: job_ids } });
     }
 
 
@@ -86,21 +86,31 @@ const JobsReceivedSentReports = () => {
                                                             />
                                                             <span>{data.month_name}</span>
                                                         </td>
-                                                        <td>{data.job_received}</td>
                                                         <td>
-                                                            <a style={{ textDecoration: 'none', color: 'rgb(38, 189, 240)', cursor: 'pointer' }}
-                                                                onClick={() => handleOnClick(data.job_ids)}
-                                                            >
-                                                                {data.draft_count}
-                                                            </a>
-
+                                                            {
+                                                                data.job_received > 0 ? <a style={{ textDecoration: 'none', color: 'rgb(38, 189, 240)', cursor: 'pointer' }}
+                                                                    onClick={() => handleOnClick(data.job_ids)}
+                                                                >
+                                                                    {data.job_received}
+                                                                </a> : data.job_received
+                                                            }
                                                         </td>
+                                                        <td>{data.draft_count} </td>
                                                     </tr>
                                                     {expandedRows[index] && (
                                                         data.week.map((week, i) => (
                                                             <tr key={i}>
                                                                 <td>Week {week.week_number}</td>
-                                                                <td>{week.job_received}</td>
+                                                                <td>
+                                                                    {
+                                                                        week.job_received > 0 ? <a style={{ textDecoration: 'none', color: 'rgb(38, 189, 240)', cursor: 'pointer' }}
+                                                                            onClick={() => handleOnClick(week.job_ids)}
+                                                                        >
+                                                                            {week.job_received}
+                                                                        </a> : week.job_received
+
+                                                                    }
+                                                                   </td>
                                                                 <td> {week.draft_count}</td>
                                                             </tr>
                                                         ))

@@ -115,8 +115,7 @@ const Dashboard = () => {
             <>
               <div className="row">
                 <div className="col-md-3">
-                  <div className="form-group">
-                    {/* <label htmlFor="tabSelect">Filter:</label> */}
+                  <div className="form-group"> 
                     <select
                       className="form-select"
                       id="tabSelect"
