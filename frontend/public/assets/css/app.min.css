@@ -4452,4 +4452,6 @@ select#tabSelect {
   .scrollable-week::-webkit-scrollbar-thumb:hover,.datatable-container .rdt_Table::-webkit-scrollbar-thumb:hover, .analytic-dash-activity::-webkit-scrollbar-thumb:hover {
 	background-color: #555; /* Hover color */
   }
-  
+  .custom-dropdown .dropdown-item:hover {
+    background: #dddddd !important;
+}

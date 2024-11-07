@@ -64,22 +64,7 @@ const JobStatus = () => {
       selector: (row) => row.job_type_name || "-",
       sortable: true,
     },
-    // {
-    //   name: "Status",
-    //   cell: (row) => (
-    //     <div>
-    //       <div>
-    //         <select
-    //           className="form-select form-control"
-    //           value={row.status_type}
-    //         >
-    //         </select>
-    //       </div>
-    //     </div>
-    //   ),
-    //   sortable: true,
-    //   width: "325px"
-    // },
+    
     {
       name: "Account Manager",
       selector: (row) =>

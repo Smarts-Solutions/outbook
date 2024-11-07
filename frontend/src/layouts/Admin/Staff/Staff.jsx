@@ -11,8 +11,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { getDateRange } from "../../../Utils/Comman_function";
 import Validation_Message from "../../../Utils/Validation_Message";
-import Select from "react-select";
-import { FaBriefcase, FaPencilAlt, FaPlus, FaEye } from "react-icons/fa";
+import { FaBriefcase, FaPencilAlt, FaPlus, FaEye } from 'react-icons/fa';
 const StaffPage = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -168,6 +167,8 @@ const StaffPage = () => {
     { id: "last-year", label: "Last year" },
   ];
 
+
+
   const columns = [
     {
       name: "Full Name",
@@ -183,8 +184,8 @@ const StaffPage = () => {
     },
     {
       name: "Phone",
-      selector: (row) => row.phone && row.phone_code ? row.phone_code+"-" + row.phone : " - ",
-      sortable: true, 
+      selector: (row) => row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - ",
+      sortable: true,
       width: "150px",
     },
     {
@@ -198,9 +199,8 @@ const StaffPage = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${
-              row.status === "1" ? "text-success" : "text-danger"
-            }`}
+            className={` ${row.status === "1" ? "text-success" : "text-danger"
+              }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
           </span>
@@ -211,108 +211,41 @@ const StaffPage = () => {
     {
       name: "Actions",
       cell: (row) => {
-        const options = [
-          { value: "portfolio", label: <><FaBriefcase /> Portfolio</>, action: () => { setPortfolio(true); GetAllCustomer(); } },
-          { value: "edit", label: <><FaPencilAlt /> Edit</>, action: () => { setEditShowModel(true); setEditStaff(true); setEditStaffData(row); }, visible: showStaffUpdateTab },
-          { value: "competency", label: <><FaPlus /> Competency</>, action: () => { ServiceData(row); SetCompetancy(true); }, visible: showStaffInsertTab },
-          { value: "logs", label: <><FaEye /> Logs</>, action: () => { /* Handle logs action */ } }
-        ].filter(option => option.visible !== false);  
-  
-        const handleSelectChange = (selectedOption) => {
-          selectedOption?.action();  
-        };
-  
-        const customStyles = {
-          control: (provided) => ({
-            ...provided,
-            width: '200px', // Set the width you desire
-          }),
-          menu: (provided) => ({
-            ...provided,
-            width: '200px', 
-          }),
-        };
-  
-        return (
-          <Select
-            options={options}
-            onChange={handleSelectChange}
-            placeholder="Select Action"
-            isClearable={false}
-            styles={customStyles} 
-          />
-        );
+
+        return <div className="dropdown">
+          <button
+            className="btn "
+            type="button"
+            id="dropdownMenuButton"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+          </button>
+          <div className="dropdown-menu custom-dropdown" aria-labelledby="dropdownMenuButton">
+            <a className="dropdown-item" onClick={() => { setPortfolio(true); GetAllCustomer() }} style={{ cursor: 'pointer' }}>
+              <FaPencilAlt />  Portfolio
+            </a>
+            <a className="dropdown-item" onClick={() => { setEditShowModel(true); setEditStaff(true); setEditStaffData(row) }} style={{ cursor: 'pointer' }}>
+              <FaBriefcase />  Edit
+            </a>
+            <a className="dropdown-item" onClick={() => { ServiceData(row); SetCompetancy(true) }} style={{ cursor: 'pointer' }} >
+              <FaPlus />  Competency
+            </a>
+            <a className="dropdown-item" style={{ cursor: 'pointer' }} >
+              <FaEye />  Logs
+            </a>
+          </div>
+        </div>
       },
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      width: "400px", 
-    },
-    // {
-    //   name: "Actions",
-    //   cell: (row) => (
-    //     <div>
-    //       {/* <button className='edit-icon' onClick={() => setIsModalOpen(true)}> <i className="ti-user" /></button> */}
-    //       <button
-    //         className="secondary-icon"
-    //         onClick={() => {
-    //           setPortfolio(true);
-    //           GetAllCustomer();
-    //         }}
-    //       >
-    //         <i className="ti-briefcase" />
-    //       </button>
-    //       {showStaffUpdateTab && (
-    //         <button
-    //           className="edit-icon"
-    //           onClick={(e) => {
-    //             setEditShowModel(true)
-    //             setEditStaff(true);
-    //             setEditStaffData(row);
-    //           }}
-    //         >
-    //           {" "}
-    //           <i className="ti-pencil" />
-    //         </button>
-    //       )}
-    //       {showStaffInsertTab && (
-    //         <button
-    //           className="add-icon fs-6"
-    //           onClick={(e) => {
-    //             ServiceData(row);
-    //             SetCompetancy(true);
-    //           }}
-    //         >
-    //           <i className="fa fa-plus" /> Competency
-    //         </button>
-    //       )}
+      width: "400px",
+    }
 
-    //       <button className="view-icon fs-6">
-    //         <i className="fa fa-eye" /> Logs
-    //       </button>
-
-    //       {/* {row.role === "ADMIN" || row.role === "SUPERADMIN"
-    //         ? showStaffDeleteTab && (
-    //             <button className="delete-icon" disabled>
-    //               <i className="ti-trash text-danger" />
-    //             </button>
-    //           )
-    //         : showStaffDeleteTab && (
-    //             <button
-    //               className="delete-icon"
-    //               onClick={(e) => DeleteStaff(row)}
-    //             >
-    //               <i className="ti-trash text-danger" />
-    //             </button>
-    //           )} */}
-    //     </div>
-    //   ),
-    //   ignoreRowClick: true,
-    //   allowOverflow: true,
-    //   button: true,
-    //   width: "400px",
-    // },
-  ];
+  ]
 
   const formik = useFormik({
     initialValues: {
@@ -346,9 +279,8 @@ const StaffPage = () => {
         role_id: values.role,
         status: values.status,
         created_by: StaffUserId.id,
-        hourminute: `${budgetedHours.hours || "00"}:${
-          budgetedHours.minutes || "00"
-        }`,
+        hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"
+          }`,
       };
 
       console.log("ww", req);
@@ -366,39 +298,39 @@ const StaffPage = () => {
       )
         .unwrap()
         .then(async (response) => {
-        
-              if (response.status) {
-                sweatalert.fire({
-                  icon: "success",
-                  title: "Success",
-                  text: response.message,
-                  timer: 1500,
-                  timerProgressBar: true,
-                });
-                setTimeout(() => {
-                setAddStaff(false);
-                setEditStaff(false);
-                SetRefresh(!refresh);
-                formik.resetForm(); 
-                window.location.reload();
-                }
-                , 1500);
-              } else {
-                sweatalert.fire({
-                  icon: "error",
-                  title: "Oops...",
-                  text: response.message,
-                });
-              }
-            })
-        
+
+          if (response.status) {
+            sweatalert.fire({
+              icon: "success",
+              title: "Success",
+              text: response.message,
+              timer: 1500,
+              timerProgressBar: true,
+            });
+            setTimeout(() => {
+              setAddStaff(false);
+              setEditStaff(false);
+              SetRefresh(!refresh);
+              formik.resetForm();
+              window.location.reload();
+            }
+              , 1500);
+          } else {
+            sweatalert.fire({
+              icon: "error",
+              title: "Oops...",
+              text: response.message,
+            });
+          }
+        })
+
         .catch((error) => {
           return;
         });
     },
   });
 
- 
+
   const fields = [
     {
       type: "text",
@@ -418,7 +350,7 @@ const StaffPage = () => {
       disable: false,
       placeholder: "Enter Last Name",
     },
-  
+
     {
       type: "select",
       name: "phone_code",
@@ -466,7 +398,7 @@ const StaffPage = () => {
       label: "Role",
       label_size: 12,
       col_size: 6,
-      disable: editShowModel==true ? true : false,
+      disable: editShowModel == true ? true : false,
       options:
         roleDataAll &&
         roleDataAll.data.map((data) => {
@@ -576,6 +508,7 @@ const StaffPage = () => {
     }
   };
 
+
   useEffect(() => {
     if (editStaffData && editStaffData) {
       formik.setFieldValue("first_name", editStaffData.first_name || "null");
@@ -586,7 +519,7 @@ const StaffPage = () => {
       formik.setFieldValue("status", editStaffData.status || "null");
       formik.setFieldValue("phone_code", editStaffData.phone_code || "null");
 
- 
+
       if (editStaffData.hourminute) {
         setBudgetedHours({
           hours: editStaffData.hourminute.split(":")[0],
@@ -610,7 +543,6 @@ const StaffPage = () => {
           <div className="page-title-box pt-0">
             <div className="row align-items-start">
               <div className="col-md-5">
-                {/* Dropdown for selecting tabs */}
               </div>
               <div className="col-md-7">
                 <div className="d-flex justify-content-end">
@@ -652,13 +584,11 @@ const StaffPage = () => {
           {tabs.map((tab) => (
             <div
               key={tab.id}
-              className={`tab-pane fade ${
-                activeTab === tab.id ? "show active" : ""
-              }`}
+              className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""
+                }`}
               id={tab.id}
               role="tabpanel"
-            >
-              {/* Your Datatable component */}
+            > 
               <Datatable
                 columns={columns}
                 data={staffDataAll.data}
@@ -667,14 +597,13 @@ const StaffPage = () => {
             </div>
           ))}
         </div>
-      </div>
-      {/* Add Staff */}
+      </div> 
       <CommanModal
         isOpen={addStaff}
         backdrop="static"
         size="ms-7"
         title="Add Staff"
-         
+
         hideBtn={true}
         handleClose={() => {
           setAddStaff(false);
@@ -690,9 +619,6 @@ const StaffPage = () => {
           closeBtn={(e) => setAddStaff(false)}
         />
       </CommanModal>
-      {/* CLOSE Add Staff */}
-
-      {/* Manage Portfolio */}
       <CommanModal
         isOpen={portfolio}
         cancel_btn="cancel"
@@ -768,22 +694,6 @@ const StaffPage = () => {
                         </td>
                       </tr>
                     ))}
-                  {/* <tr className="tabel_new">
-                    <td>Outbooks Outsourcing Pvt Ltd</td>
-
-                    <td className="tabel_left">
-                      <div className=" gap-2">
-                        <div className="remove">
-                          <a
-                            onclick="deleteRecordModalshow()"
-                            className="text-decoration-none remove-item-btn"
-                          >
-                            <i className="ti-trash text-danger fs-5"></i>
-                          </a>
-                        </div>
-                      </div>
-                    </td>
-                  </tr> */}
                 </tbody>
               </table>
               <div className="noresult" style={{ display: "none" }}>
@@ -805,9 +715,6 @@ const StaffPage = () => {
           </div>
         </div>
       </CommanModal>
-      {/* CLOSE Manage Portfolio */}
-
-      {/* Edit Staff */}
       <CommanModal
         isOpen={editStaff}
         backdrop="static"
@@ -816,7 +723,6 @@ const StaffPage = () => {
         hideBtn={true}
         handleClose={() => {
           setEditStaff(false);
-          // formik.resetForm();
         }}
       >
         <Formicform
@@ -854,8 +760,6 @@ const StaffPage = () => {
                         H
                       </span>
                     </div>
-
-                    {/* Minutes Input */}
                     <div className="hours-div">
                       <input
                         type="text"
@@ -892,9 +796,6 @@ const StaffPage = () => {
           }
         />
       </CommanModal>
-      {/* CLOSE Edit Staff */}
-
-      {/* Add Competancy */}
       <CommanModal
         isOpen={addCompetancy}
         backdrop="static"
@@ -934,13 +835,6 @@ const StaffPage = () => {
           </Button>
         </div>
       </CommanModal>
-      {/* CLOSE Add Competancy */}
-
-      {/* SET ACCESS */}
-      {/* {isModalOpen && (
-                <SetAccessModal isOpen={isModalOpen} onClose={closeModal} />
-            )} */}
-      {/* CLOSE SET ACCESS */}
     </div>
   );
 };
