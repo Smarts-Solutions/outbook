@@ -27,7 +27,9 @@ const Setting = () => {
   const [showSettingDeleteTab, setSettingDeleteTab] = useState(true);
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewData, setViewData] = useState({});
-  const accessData = useSelector((state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data);
+  const accessData = useSelector(
+    (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data
+  );
   const [HourMinut, setHourMinut] = useState({ hours: "00", minutes: "00" });
 
   useEffect(() => {
@@ -65,14 +67,29 @@ const Setting = () => {
 
   const token = JSON.parse(localStorage.getItem("token"));
   const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
-  const [personRoleDataAll, setPersonRoleDataAll] = useState({ loading: true, data: [], });
-  const [clientIndustryDataAll, setClientIndustryDataAll] = useState({ loading: true, data: [], });
-  const [countryDataAll, setCountryDataAll] = useState({ loading: true, data: [], });
+  const [personRoleDataAll, setPersonRoleDataAll] = useState({
+    loading: true,
+    data: [],
+  });
+  const [clientIndustryDataAll, setClientIndustryDataAll] = useState({
+    loading: true,
+    data: [],
+  });
+  const [countryDataAll, setCountryDataAll] = useState({
+    loading: true,
+    data: [],
+  });
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);
   const [customerSourceDataDataAll, setCustomerSourceDataAll] = useState([]);
   const [InternalAllData, setInternalAllData] = useState([]);
-  const [statusTypeDataAll, setStatusTypeDataAll] = useState({ loading: true, data: [] });
-  const [serviceDataAll, setServiceDataAll] = useState({ loading: true, data: [] });
+  const [statusTypeDataAll, setStatusTypeDataAll] = useState({
+    loading: true,
+    data: [],
+  });
+  const [serviceDataAll, setServiceDataAll] = useState({
+    loading: true,
+    data: [],
+  });
   const [modalData, setModalData] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [getShowTabId, setShowTabId] = useState("1");
@@ -80,16 +97,13 @@ const Setting = () => {
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
 
-
   useEffect(() => {
-    const retrievedData = sessionStorage.getItem('settingTab');
+    const retrievedData = sessionStorage.getItem("settingTab");
     if (retrievedData) {
       setShowTabId(retrievedData);
       tabStatus.current = retrievedData;
     }
-
-  },[])
-
+  }, []);
 
   const getCheckListData = async () => {
     const req = { action: "get", customer_id: 0 };
@@ -470,7 +484,7 @@ const Setting = () => {
       .catch((error) => {
         return;
       });
-  }
+  };
 
   useEffect(() => {
     fetchApiData(tabStatus.current);
@@ -546,8 +560,9 @@ const Setting = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${row.status === "1" ? "text-success" : "text-danger"
-              }`}
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
+            }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
           </span>
@@ -558,28 +573,27 @@ const Setting = () => {
 
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
-        {
-          name: "Actions",
-          cell: (row) => (
-            <div className="d-flex">
-              {showSettingUpdateTab && (
-                <button
-                  className="edit-icon"
-                  onClick={() => handleEdit(row, "1")}
-                >
-                  {" "}
-                  <i className="ti-pencil" />
-                </button>
-              )}
-
-            </div>
-          ),
-          ignoreRowClick: true,
-          allowOverflow: true,
-          button: true,
-          width: "10%",
-        },
-      ]
+          {
+            name: "Actions",
+            cell: (row) => (
+              <div className="d-flex">
+                {showSettingUpdateTab && (
+                  <button
+                    className="edit-icon"
+                    onClick={() => handleEdit(row, "1")}
+                  >
+                    {" "}
+                    <i className="ti-pencil" />
+                  </button>
+                )}
+              </div>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+            width: "10%",
+          },
+        ]
       : []),
   ];
 
@@ -590,8 +604,9 @@ const Setting = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${row.status === "1" ? "text-success" : "text-danger"
-              }`}
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
+            }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
           </span>
@@ -601,36 +616,36 @@ const Setting = () => {
     },
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
-        {
-          name: "Actions",
-          cell: (row) => (
-            <div>
-              {showSettingUpdateTab && (
-                <button
-                  className="edit-icon"
-                  onClick={() => handleEdit(row, "3")}
-                >
-                  {" "}
-                  <i className="ti-pencil" />
-                </button>
-              )}
-              {showSettingDeleteTab && (
-                <button
-                  className="delete-icon"
-                  onClick={() => handleDelete(row, "3")}
-                >
-                  {" "}
-                  <i className="ti-trash text-danger" />
-                </button>
-              )}
-            </div>
-          ),
-          ignoreRowClick: true,
-          allowOverflow: true,
-          button: true,
-          width: "20%",
-        },
-      ]
+          {
+            name: "Actions",
+            cell: (row) => (
+              <div>
+                {showSettingUpdateTab && (
+                  <button
+                    className="edit-icon"
+                    onClick={() => handleEdit(row, "3")}
+                  >
+                    {" "}
+                    <i className="ti-pencil" />
+                  </button>
+                )}
+                {showSettingDeleteTab && (
+                  <button
+                    className="delete-icon"
+                    onClick={() => handleDelete(row, "3")}
+                  >
+                    {" "}
+                    <i className="ti-trash text-danger" />
+                  </button>
+                )}
+              </div>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+            width: "20%",
+          },
+        ]
       : []),
   ];
 
@@ -646,8 +661,9 @@ const Setting = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${row.status === "1" ? "text-success" : "text-danger"
-              }`}
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
+            }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
           </span>
@@ -657,44 +673,44 @@ const Setting = () => {
 
     ...(showSettingUpdateTab || showSettingDeleteTab || showSettingInsertTab
       ? [
-        {
-          name: "Actions",
-          cell: (row) => (
-            <div className="">
-              {showSettingUpdateTab && (
-                <button
-                  className="edit-icon"
-                  onClick={() => handleEdit(row, "4")}
-                >
-                  {" "}
-                  <i className="ti-pencil" />
-                </button>
-              )}
-              {showSettingDeleteTab && (
-                <button
-                  className="delete-icon"
-                  onClick={() => handleDelete(row, "4")}
-                >
-                  {" "}
-                  <i className="ti-trash text-danger" />
-                </button>
-              )}
-              {showSettingInsertTab && (
-                <button
-                  className="btn btn-sm btn-info text-white ms-2"
-                  onClick={(e) => handleJobType(row)}
-                >
-                  <i className="fa fa-plus pe-1"></i>Add Job Type
-                </button>
-              )}
-            </div>
-          ),
-          ignoreRowClick: true,
-          allowOverflow: true,
-          button: true,
-          width: "30%",
-        },
-      ]
+          {
+            name: "Actions",
+            cell: (row) => (
+              <div className="">
+                {showSettingUpdateTab && (
+                  <button
+                    className="edit-icon"
+                    onClick={() => handleEdit(row, "4")}
+                  >
+                    {" "}
+                    <i className="ti-pencil" />
+                  </button>
+                )}
+                {showSettingDeleteTab && (
+                  <button
+                    className="delete-icon"
+                    onClick={() => handleDelete(row, "4")}
+                  >
+                    {" "}
+                    <i className="ti-trash text-danger" />
+                  </button>
+                )}
+                {showSettingInsertTab && (
+                  <button
+                    className="btn btn-sm btn-info text-white ms-2"
+                    onClick={(e) => handleJobType(row)}
+                  >
+                    <i className="fa fa-plus pe-1"></i>Add Job Type
+                  </button>
+                )}
+              </div>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+            width: "30%",
+          },
+        ]
       : []),
   ];
 
@@ -705,8 +721,9 @@ const Setting = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${row.status === "1" ? "text-success" : "text-danger"
-              }`}
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
+            }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
           </span>
@@ -716,36 +733,36 @@ const Setting = () => {
     },
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
-        {
-          name: "Actions",
-          cell: (row) => (
-            <div>
-              {showSettingUpdateTab && (
-                <button
-                  className="edit-icon"
-                  onClick={() => handleEdit(row, "2")}
-                >
-                  {" "}
-                  <i className="ti-pencil" />
-                </button>
-              )}
-              {showSettingDeleteTab && (
-                <button
-                  className="delete-icon"
-                  onClick={() => handleDelete(row, "2")}
-                >
-                  {" "}
-                  <i className="ti-trash text-danger" />
-                </button>
-              )}
-            </div>
-          ),
-          ignoreRowClick: true,
-          allowOverflow: true,
-          button: true,
-          width: "20%",
-        },
-      ]
+          {
+            name: "Actions",
+            cell: (row) => (
+              <div>
+                {showSettingUpdateTab && (
+                  <button
+                    className="edit-icon"
+                    onClick={() => handleEdit(row, "2")}
+                  >
+                    {" "}
+                    <i className="ti-pencil" />
+                  </button>
+                )}
+                {showSettingDeleteTab && (
+                  <button
+                    className="delete-icon"
+                    onClick={() => handleDelete(row, "2")}
+                  >
+                    {" "}
+                    <i className="ti-trash text-danger" />
+                  </button>
+                )}
+              </div>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+            width: "20%",
+          },
+        ]
       : []),
   ];
 
@@ -760,8 +777,9 @@ const Setting = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${row.status === "1" ? "text-success" : "text-danger"
-              }`}
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
+            }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
           </span>
@@ -771,36 +789,36 @@ const Setting = () => {
     },
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
-        {
-          name: "Actions",
-          cell: (row) => (
-            <div>
-              {showSettingUpdateTab && (
-                <button
-                  className="edit-icon"
-                  onClick={() => handleEdit(row, "5")}
-                >
-                  {" "}
-                  <i className="ti-pencil" />
-                </button>
-              )}
-              {showSettingDeleteTab && (
-                <button
-                  className="delete-icon"
-                  onClick={() => handleDelete(row, "5")}
-                >
-                  {" "}
-                  <i className="ti-trash text-danger" />
-                </button>
-              )}
-            </div>
-          ),
-          ignoreRowClick: true,
-          allowOverflow: true,
-          button: true,
-          width: "20%",
-        },
-      ]
+          {
+            name: "Actions",
+            cell: (row) => (
+              <div>
+                {showSettingUpdateTab && (
+                  <button
+                    className="edit-icon"
+                    onClick={() => handleEdit(row, "5")}
+                  >
+                    {" "}
+                    <i className="ti-pencil" />
+                  </button>
+                )}
+                {showSettingDeleteTab && (
+                  <button
+                    className="delete-icon"
+                    onClick={() => handleDelete(row, "5")}
+                  >
+                    {" "}
+                    <i className="ti-trash text-danger" />
+                  </button>
+                )}
+              </div>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+            width: "20%",
+          },
+        ]
       : []),
   ];
 
@@ -814,8 +832,9 @@ const Setting = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${row.status === "1" ? "text-success" : "text-danger"
-              }`}
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
+            }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
           </span>
@@ -825,36 +844,36 @@ const Setting = () => {
     },
     ...(showSettingUpdateTab || showSettingDeleteTab
       ? [
-        {
-          name: "Actions",
-          cell: (row) => (
-            <div>
-              {showSettingUpdateTab && (
-                <button
-                  className="edit-icon"
-                  onClick={() => handleEdit(row, "6")}
-                >
-                  {" "}
-                  <i className="ti-pencil" />
-                </button>
-              )}
-              {showSettingDeleteTab && (
-                <button
-                  className="delete-icon"
-                  onClick={() => handleDelete(row, "6")}
-                >
-                  {" "}
-                  <i className="ti-trash text-danger" />
-                </button>
-              )}
-            </div>
-          ),
-          ignoreRowClick: true,
-          allowOverflow: true,
-          button: true,
-          width: "20%",
-        },
-      ]
+          {
+            name: "Actions",
+            cell: (row) => (
+              <div>
+                {showSettingUpdateTab && (
+                  <button
+                    className="edit-icon"
+                    onClick={() => handleEdit(row, "6")}
+                  >
+                    {" "}
+                    <i className="ti-pencil" />
+                  </button>
+                )}
+                {showSettingDeleteTab && (
+                  <button
+                    className="delete-icon"
+                    onClick={() => handleDelete(row, "6")}
+                  >
+                    {" "}
+                    <i className="ti-trash text-danger" />
+                  </button>
+                )}
+              </div>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+            width: "20%",
+          },
+        ]
       : []),
   ];
 
@@ -870,8 +889,9 @@ const Setting = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${row.status === "1" ? "text-success" : "text-danger"
-              }`}
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
+            }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
           </span>
@@ -910,15 +930,16 @@ const Setting = () => {
       name: "Source Name",
       selector: (row) => row.name,
       sortable: true,
-      width: '60%'
+      width: "60%",
     },
     {
       name: "Status",
       cell: (row) => (
         <div>
           <span
-            className={` ${row.status === "1" ? "text-success" : "text-danger"
-              }`}
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
+            }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
           </span>
@@ -928,56 +949,52 @@ const Setting = () => {
 
     ...(showSettingUpdateTab || showSettingDeleteTab || showSettingInsertTab
       ? [
-        {
-          name: "Actions",
-          cell: (row) => (
-            <div className="d-flex">
-              {showSettingUpdateTab && (
-                <button
-                  className="edit-icon"
-                  onClick={() => handleEdit(row, "8")}
-                >
-                  {" "}
-                  <i className="ti-pencil" />
-                </button>
-              )}
-              {showSettingDeleteTab && (
-                <button
-                  className="delete-icon"
-                  onClick={() => handleDelete(row, "8")}
-                >
-                  {" "}
-                  <i className="ti-trash text-danger" />
-                </button>
-              )}
-              {showSettingInsertTab && (
-                <button
-                  className="btn btn-info btn-sm text-white ms-1"
-                  onClick={(e) => handleSubSource(row)}
-                >
-                  <i className="fa fa-plus pe-1" />
-                  Add Sub Source Type
-                </button>
-              )}
-            </div>
-          ),
-          ignoreRowClick: true,
-          allowOverflow: true,
-          button: true,
-          width: "30%",
-        },
-      ]
+          {
+            name: "Actions",
+            cell: (row) => (
+              <div className="d-flex">
+                {showSettingUpdateTab && (
+                  <button
+                    className="edit-icon"
+                    onClick={() => handleEdit(row, "8")}
+                  >
+                    {" "}
+                    <i className="ti-pencil" />
+                  </button>
+                )}
+                {showSettingDeleteTab && (
+                  <button
+                    className="delete-icon"
+                    onClick={() => handleDelete(row, "8")}
+                  >
+                    {" "}
+                    <i className="ti-trash text-danger" />
+                  </button>
+                )}
+                {showSettingInsertTab && (
+                  <button
+                    className="btn btn-info btn-sm text-white ms-1"
+                    onClick={(e) => handleSubSource(row)}
+                  >
+                    <i className="fa fa-plus pe-1" />
+                    Add Sub Source Type
+                  </button>
+                )}
+              </div>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+            width: "30%",
+          },
+        ]
       : []),
   ];
 
   const CheckListColumns = [
     {
       name: "Checklist Name",
-      cell: (row) => (
-        <div>
-          {row.check_list_name}
-        </div>
-      ),
+      cell: (row) => <div>{row.check_list_name}</div>,
       selector: (row) => row.trading_name,
       sortable: true,
     },
@@ -1002,8 +1019,9 @@ const Setting = () => {
       selector: (row) => (
         <div>
           <span
-            className={` ${row.status === "1" ? "text-success" : "text-danger"
-              }`}
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
+            }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
           </span>
@@ -1015,7 +1033,13 @@ const Setting = () => {
       name: "Task",
       cell: (row) => (
         <div>
-          <button className="view-icon" onClick={() => { setShowViewModal(true); getTaskData(row) }}>
+          <button
+            className="view-icon"
+            onClick={() => {
+              setShowViewModal(true);
+              getTaskData(row);
+            }}
+          >
             <i className="ti-eye" />
           </button>
         </div>
@@ -1038,8 +1062,9 @@ const Setting = () => {
       selector: (row) => (
         <div>
           <span
-            className={` ${row.status === "1" ? "text-success" : "text-danger"
-              }`}
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
+            }`}
           >
             {row.status === "1" ? "Active" : "Deactive"}
           </span>
@@ -1050,55 +1075,59 @@ const Setting = () => {
     },
     ...(showSettingUpdateTab || showSettingDeleteTab || showSettingInsertTab
       ? [
-        {
-          name: "Actions",
-          cell: (row) => (
-            <div className="d-flex">
-              {showSettingUpdateTab && (
-                <button
-                  className="edit-icon"
-                  onClick={() => handleEdit(row, "10")}
-                >
-                  {" "}
-                  <i className="ti-pencil" />{" "}
-                </button>
-              )}
-              {showSettingDeleteTab && (
-                <button
-                  className="delete-icon"
-                  onClick={() => handleDelete(row, "10")}
-                >
-                  <i className="ti-trash text-danger" />
-                </button>
-              )}
-              {showSettingInsertTab && (
-                <button
-                  className="btn btn-info btn-sm text-white ms-1"
-                  onClick={(e) => handleTaskAdd(row)}
-                >
-                  <i className="fa fa-plus pe-1" />
-                  Add Internal Task
-                </button>
-              )}
-            </div>
-          ),
-          ignoreRowClick: true,
-          allowOverflow: true,
-          button: true,
-          width: "30%",
-        },
-      ]
+          {
+            name: "Actions",
+            cell: (row) => (
+              <div className="d-flex">
+                {showSettingUpdateTab && (
+                  <button
+                    className="edit-icon"
+                    onClick={() => handleEdit(row, "10")}
+                  >
+                    {" "}
+                    <i className="ti-pencil" />{" "}
+                  </button>
+                )}
+                {showSettingDeleteTab && (
+                  <button
+                    className="delete-icon"
+                    onClick={() => handleDelete(row, "10")}
+                  >
+                    <i className="ti-trash text-danger" />
+                  </button>
+                )}
+                {showSettingInsertTab && (
+                  <button
+                    className="btn btn-info btn-sm text-white ms-1"
+                    onClick={(e) => handleTaskAdd(row)}
+                  >
+                    <i className="fa fa-plus pe-1" />
+                    Add Internal Task
+                  </button>
+                )}
+              </div>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+            width: "30%",
+          },
+        ]
       : []),
 
     ,
   ];
 
   const handleJobType = (row) => {
-    navigate("/admin/add/jobtype", { state: { Id: row.id , settingTab : tabStatus.current} });
+    navigate("/admin/add/jobtype", {
+      state: { Id: row.id, settingTab: tabStatus.current },
+    });
   };
 
   const handleSubSource = (row) => {
-    navigate("/admin/add/subSource", { state: { Id: row.id , settingTab : tabStatus.current } });
+    navigate("/admin/add/subSource", {
+      state: { Id: row.id, settingTab: tabStatus.current },
+    });
   };
 
   const handleModalChange = (e) => {
@@ -1107,7 +1136,6 @@ const Setting = () => {
     console.log(name, value);
 
     if (name === "hours" || name === "minutes") {
-
       if (name == "minutes" && value > 59) {
         e.target.value = 59;
       }
@@ -1120,8 +1148,10 @@ const Setting = () => {
       fields: prevModalData.fields.map((field) => {
         // Update hourminute value based on hours and minutes
         if (field.name === "hourminute") {
-          const updatedHours = name === "hours" ? e.target.value : HourMinut.hours || "00";
-          const updatedMinutes = name === "minutes" ? e.target.value : HourMinut.minutes || "00";
+          const updatedHours =
+            name === "hours" ? e.target.value : HourMinut.hours || "00";
+          const updatedMinutes =
+            name === "minutes" ? e.target.value : HourMinut.minutes || "00";
 
           return {
             ...field,
@@ -1139,7 +1169,9 @@ const Setting = () => {
   };
 
   const handleTaskAdd = (row) => {
-    navigate("/admin/subinternal", { state: { Id: row.id , settingTab : tabStatus.current } });
+    navigate("/admin/subinternal", {
+      state: { Id: row.id, settingTab: tabStatus.current },
+    });
   };
 
   const handleAdd = (e, tabStatus) => {
@@ -1241,7 +1273,6 @@ const Setting = () => {
             label: "Currency",
             placeholder: "Enter Currency",
           },
-           
         ],
         title: " Country",
         tabStatus: tabStatus,
@@ -1284,12 +1315,12 @@ const Setting = () => {
             label: "Job Name",
             placeholder: "Enter Job Name",
           },
-         ,
+          ,
         ],
         title: "Job",
         tabStatus: tabStatus,
       });
-    } 
+    }
     setIsEdit(false);
     setIsModalOpen(true);
   };
@@ -1312,7 +1343,6 @@ const Setting = () => {
             label: "Hour",
             placeholder: "Hour",
             value: data.hourminute,
-
           },
           {
             type: "select",
@@ -1582,8 +1612,6 @@ const Setting = () => {
     e.preventDefault();
     let err = [];
     modalData.fields.map((field) => {
-
-
       if (field.value == "" || field.value == undefined) {
         err.push("Please enter " + field.label);
       }
@@ -1649,8 +1677,8 @@ const Setting = () => {
       tabStatus == "1"
         ? data.role_name
         : tabStatus == "2"
-          ? data.type
-          : data.name;
+        ? data.type
+        : data.name;
 
     sweatalert
       .fire({
@@ -1710,7 +1738,9 @@ const Setting = () => {
   };
 
   const HandleAddCheckList = () => {
-    navigate("/admin/setting/checklist" , {state : {settingTab : tabStatus.current}});
+    navigate("/admin/setting/checklist", {
+      state: { settingTab: tabStatus.current },
+    });
   };
 
   const tabsArr = [
@@ -1725,7 +1755,6 @@ const Setting = () => {
     { id: "9", label: "Checklist", icon: "fas fa-check-square" },
     { id: "10", label: "Internal Task", icon: "fas fa-lock" },
   ];
-
 
   return (
     <>
@@ -1749,8 +1778,9 @@ const Setting = () => {
                             key={index}
                           >
                             <button
-                              className={`nav-link ${tabStatus.current === tab.id ? "active" : ""
-                                }`}
+                              className={`nav-link ${
+                                tabStatus.current === tab.id ? "active" : ""
+                              }`}
                               id={tab.id}
                               data-bs-toggle="pill"
                               type="button"
@@ -1773,8 +1803,9 @@ const Setting = () => {
 
           <div className="tab-content" id="pills-tabContent">
             <div
-              className={`tab-pane fade ${getShowTabId === "1" ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                getShowTabId === "1" ? "show active" : ""
+              }`}
             >
               <div className="report-data">
                 <div className="d-flex justify-content-between align-items-center">
@@ -1805,8 +1836,9 @@ const Setting = () => {
             </div>
 
             <div
-              className={`tab-pane fade ${getShowTabId === "2" ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                getShowTabId === "2" ? "show active" : ""
+              }`}
             >
               <div className="report-data">
                 <div className="d-flex justify-content-between align-items-center">
@@ -1837,8 +1869,9 @@ const Setting = () => {
             </div>
 
             <div
-              className={`tab-pane fade ${getShowTabId === "3" ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                getShowTabId === "3" ? "show active" : ""
+              }`}
             >
               <div className="report-data">
                 <div className="d-flex justify-content-between align-items-center">
@@ -1868,8 +1901,9 @@ const Setting = () => {
             </div>
 
             <div
-              className={`tab-pane fade ${getShowTabId === "4" ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                getShowTabId === "4" ? "show active" : ""
+              }`}
             >
               <div className="report-data">
                 <div className="d-flex justify-content-between align-items-center">
@@ -1899,8 +1933,9 @@ const Setting = () => {
             </div>
 
             <div
-              className={`tab-pane fade ${getShowTabId === "5" ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                getShowTabId === "5" ? "show active" : ""
+              }`}
             >
               <div className="report-data">
                 <div className="d-flex justify-content-between align-items-center">
@@ -1930,8 +1965,9 @@ const Setting = () => {
             </div>
 
             <div
-              className={`tab-pane fade ${getShowTabId === "6" ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                getShowTabId === "6" ? "show active" : ""
+              }`}
             >
               <div className="report-data">
                 <div className="d-flex justify-content-between align-items-center">
@@ -1961,8 +1997,9 @@ const Setting = () => {
             </div>
 
             <div
-              className={`tab-pane fade ${getShowTabId === "7" ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                getShowTabId === "7" ? "show active" : ""
+              }`}
             >
               <div className="report-data">
                 <div className="d-flex justify-content-between align-items-center">
@@ -1992,8 +2029,9 @@ const Setting = () => {
             </div>
 
             <div
-              className={`tab-pane fade ${getShowTabId === "8" ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                getShowTabId === "8" ? "show active" : ""
+              }`}
             >
               <div className="report-data">
                 <div className="d-flex justify-content-between align-items-center">
@@ -2023,8 +2061,9 @@ const Setting = () => {
             </div>
 
             <div
-              className={`tab-pane fade ${getShowTabId === "9" ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                getShowTabId === "9" ? "show active" : ""
+              }`}
             >
               <div className="report-data">
                 <div className="d-flex justify-content-between align-items-center">
@@ -2054,8 +2093,9 @@ const Setting = () => {
             </div>
 
             <div
-              className={`tab-pane fade ${getShowTabId === "10" ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                getShowTabId === "10" ? "show active" : ""
+              }`}
             >
               <div className="report-data">
                 <div className="d-flex justify-content-between align-items-center">
@@ -2130,23 +2170,35 @@ const Setting = () => {
               <div className="av">
                 <div className="">
                   <table className="table table-bordered ">
-                      <thead className="table-light table-head-blue">
-                        <tr>
-                          <th> Check List Name</th>
-                          <th>Task Name</th>
-                          <th>Task Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>{viewData && viewData?.check_list_name}</td>
-                          <td>{viewData && viewData.task?.map(task => task.task_name).join(',  ')}</td>
-                          <td className={viewData && viewData.status === 1 ? "text-success" : "text-danger"}>
-  {viewData && viewData.status === 1 ? "Active" : "Inactive"}
-</td>
-
-                        </tr>
-                      </tbody>
+                    <thead className="table-light">
+                      <tr>
+                        <th> Check List Name</th>
+                        <th>Task Name</th>
+                        <th>Task Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>{viewData && viewData?.check_list_name}</td>
+                        <td>
+                          {viewData &&
+                            viewData.task
+                              ?.map((task) => task.task_name)
+                              .join(",  ")}
+                        </td>
+                        <td
+                          className={
+                            viewData && viewData.status === 1
+                              ? "text-success"
+                              : "text-danger"
+                          }
+                        >
+                          {viewData && viewData.status === 1
+                            ? "Active"
+                            : "Inactive"}
+                        </td>
+                      </tr>
+                    </tbody>
                   </table>
                   {/* <div className="col-md-6">
                     <label htmlFor="customername-field" className="form-label">
@@ -2175,10 +2227,7 @@ const Setting = () => {
                     <span className="text-muted">{viewData && viewData?.status == 1 ? "Active" : "Inactvie"}</span>
                   </div> */}
                 </div>
-
               </div>
-
-
             </CommonModal>
           )}
         </>
