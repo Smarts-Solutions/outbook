@@ -639,7 +639,7 @@ const Setting = () => {
       name: "Service Name",
       selector: (row) => row.name,
       sortable: true,
-      width: "70%",
+      width: "50%",
     },
     {
       name: "Status",
@@ -660,7 +660,7 @@ const Setting = () => {
         {
           name: "Actions",
           cell: (row) => (
-            <div className="d-flex">
+            <div className="">
               {showSettingUpdateTab && (
                 <button
                   className="edit-icon"
@@ -684,7 +684,7 @@ const Setting = () => {
                   className="btn btn-sm btn-info text-white ms-2"
                   onClick={(e) => handleJobType(row)}
                 >
-                  Add Job Type
+                  <i className="fa fa-plus pe-1"></i>Add Job Type
                 </button>
               )}
             </div>
@@ -692,7 +692,7 @@ const Setting = () => {
           ignoreRowClick: true,
           allowOverflow: true,
           button: true,
-          width: "20%",
+          width: "30%",
         },
       ]
       : []),
@@ -2128,8 +2128,27 @@ const Setting = () => {
               Submit_Function={() => setShowViewModal(false)}
             >
               <div className="av">
-                <div className="row">
-                  <div className="col-md-6">
+                <div className="">
+                  <table className="table table-bordered ">
+                      <thead className="table-light table-head-blue">
+                        <tr>
+                          <th> Check List Name</th>
+                          <th>Task Name</th>
+                          <th>Task Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>{viewData && viewData?.check_list_name}</td>
+                          <td>{viewData && viewData.task?.map(task => task.task_name).join(',  ')}</td>
+                          <td className={viewData && viewData.status === 1 ? "text-success" : "text-danger"}>
+  {viewData && viewData.status === 1 ? "Active" : "Inactive"}
+</td>
+
+                        </tr>
+                      </tbody>
+                  </table>
+                  {/* <div className="col-md-6">
                     <label htmlFor="customername-field" className="form-label">
                       Check List Name
                     </label>
@@ -2137,6 +2156,7 @@ const Setting = () => {
                   <div className="col-md-6" style={{ fontWeight: 600 }}>
                     <span className="text-muted">{viewData && viewData?.check_list_name}</span>
                   </div>
+               
                   <div className="col-md-6">
                     <label htmlFor="customername-field" className="form-label">
                       Task Name
@@ -2145,6 +2165,7 @@ const Setting = () => {
                   <div className="col-md-6" style={{ fontWeight: 600 }}>
                     {viewData && viewData.task?.map(task => task.task_name).join(',  ')}
                   </div>
+                 
                   <div className="col-md-6">
                     <label htmlFor="customername-field" className="form-label">
                       status
@@ -2152,7 +2173,7 @@ const Setting = () => {
                   </div>
                   <div className="col-md-6" style={{ fontWeight: 600 }}>
                     <span className="text-muted">{viewData && viewData?.status == 1 ? "Active" : "Inactvie"}</span>
-                  </div>
+                  </div> */}
                 </div>
 
               </div>
