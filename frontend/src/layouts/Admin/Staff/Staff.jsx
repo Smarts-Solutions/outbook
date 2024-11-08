@@ -619,6 +619,7 @@ const StaffPage = () => {
           closeBtn={(e) => setAddStaff(false)}
         />
       </CommanModal>
+
       <CommanModal
         isOpen={portfolio}
         cancel_btn="cancel"
@@ -715,6 +716,7 @@ const StaffPage = () => {
           </div>
         </div>
       </CommanModal>
+
       <CommanModal
         isOpen={editStaff}
         backdrop="static"
@@ -796,6 +798,7 @@ const StaffPage = () => {
           }
         />
       </CommanModal>
+      
       <CommanModal
         isOpen={addCompetancy}
         backdrop="static"

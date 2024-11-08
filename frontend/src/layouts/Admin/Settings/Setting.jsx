@@ -1154,7 +1154,7 @@ const Setting = () => {
             placeholder: "Role Name",
           },
           {
-            type: "hourminute",
+            type: "hourminute1",
             name: "hourminute",
             label: "Hour",
             placeholder: "Hour",
@@ -1307,7 +1307,7 @@ const Setting = () => {
             value: data.role_name,
           },
           {
-            type: "hourminute",
+            type: "hourminute1",
             name: "hourminute",
             label: "Hour",
             placeholder: "Hour",
