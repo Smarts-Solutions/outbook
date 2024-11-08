@@ -12,7 +12,7 @@ const createCustomerSource = async (CustomerSource) => {
   try {
     const [check] = await pool.query(checkQuery, [name]);
     if (check.length > 0) {
-      return { status: false, message: "Customer Source In already exists." };
+      return { status: false, message: "Customer Source already exists." };
     }
     const [result] = await pool.query(query, [name]);
     const currentDate = new Date();

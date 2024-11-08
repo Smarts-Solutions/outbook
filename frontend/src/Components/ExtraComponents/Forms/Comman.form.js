@@ -67,7 +67,7 @@ const ReusableForm = ({
   return (
     <form onSubmit={formik.handleSubmit}>
       <div
-        className="row"
+        className=""
         style={{
           height: `${title === "addgroup" ? "65vh" : ""}`,
           overflowY: `${title === "addgroup" ? "scroll" : ""}`,

@@ -132,13 +132,13 @@ const Setting = () => {
             <i className="fa-regular fa-eye " />
           </button>
           <button
-            className="btn btn-info text-white"
+            className="btn btn-sm btn-info text-white"
             onClick={(e) => {
               setShowAddTask(true);
               setJobTypeId(row);
             }}
           >
-            Add Task
+           <i className="fa fa-plus pe-1"></i>  Add Task
           </button>
         </div>
       ),

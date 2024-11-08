@@ -177,7 +177,7 @@ const addTask = async (task) => {
       }
     );
 
-    return { status: true, message: "task add successfully.", data: [] };
+    return { status: true, message: "Task Add Successfully.", data: [] };
   } catch (err) {
     return { status: false, message: "Error adding task." };
   }

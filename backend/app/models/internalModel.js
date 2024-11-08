@@ -13,7 +13,7 @@ const AddInternal = async (Internal) => {
   try {
     const [check] = await pool.query(checkQuery, [name]);
     if (check.length > 0) {
-      return { status: false, message: 'Internal already exists.' };
+      return { status: false, message: 'Internal task already exists.' };
     }
     const [result] = await pool.execute(query, [name]);
     return { status: true, message: 'Internal created successfully.', data: result.insertId };
