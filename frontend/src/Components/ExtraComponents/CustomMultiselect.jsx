@@ -7,7 +7,10 @@ function CustomMultiSelect({ options, placeholder, onChange }) {
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
+   
 
+
+  
 
   const handleOptionClick = (e,option) => {
 
