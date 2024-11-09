@@ -54,9 +54,13 @@ const App = () => {
         localStorage.setItem("IP_Data", JSON.stringify(IP_Data));
       }
     };
-
+  
     fetchIpData();
   }, []);
+
+
+
+
 
   return (
     <Main_Route />

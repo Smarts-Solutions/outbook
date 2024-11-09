@@ -242,7 +242,7 @@ const StaffPage = () => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      width: "400px",
+     
     }
 
   ]
@@ -619,6 +619,7 @@ const StaffPage = () => {
           closeBtn={(e) => setAddStaff(false)}
         />
       </CommanModal>
+
       <CommanModal
         isOpen={portfolio}
         cancel_btn="cancel"
@@ -715,6 +716,7 @@ const StaffPage = () => {
           </div>
         </div>
       </CommanModal>
+
       <CommanModal
         isOpen={editStaff}
         backdrop="static"
@@ -733,13 +735,12 @@ const StaffPage = () => {
           btn_name="Update"
           closeBtn={(e) => setEditStaff(false)}
           additional_field={
-            <div className="row">
-              <div className="col-lg-8">
-                <div className="mb-3">
+            <div className="row mt-2">
+
                   <label className="form-label">Budgeted Time</label>
                   <div className="input-group">
                     {/* Hours Input */}
-                    <div className="hours-div">
+                    <div className="hours-div w-50">
                       <input
                         type="text"
                         className="form-control"
@@ -760,7 +761,7 @@ const StaffPage = () => {
                         H
                       </span>
                     </div>
-                    <div className="hours-div">
+                    <div className="hours-div w-50">
                       <input
                         type="text"
                         className="form-control"
@@ -791,11 +792,11 @@ const StaffPage = () => {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+             
           }
         />
       </CommanModal>
+      
       <CommanModal
         isOpen={addCompetancy}
         backdrop="static"

@@ -9,10 +9,10 @@ const CommonModal = ({
   onChange,
   buttonName,
 }) => {
-  const columnClass = fields && fields.length === 1 ? "col-12" : "col-md-12";
+  const columnClass = fields && fields.length === 1 ? "col-md-12" : "col-md-12";
 
 
-  console.log("fields" , fields);
+  console.log("fields", fields);
 
   return (
     <div
@@ -34,6 +34,7 @@ const CommonModal = ({
           </div>
           <div className="modal-body pb-4">
             {fields.map((field, index) => (
+              <div className="row">
               <div
                 className={`data-table-extensions-filter ${columnClass}`}
                 key={index}
@@ -53,8 +54,7 @@ const CommonModal = ({
                       onChange={(e) => onChange(e, index)}
                     />
                   </>
-                ) :
-                field.type === "hourminute" ? (
+                ) : field.type === "hourminute" ? (
                   <>
                     <div className="input-group">
                       <input
@@ -62,7 +62,7 @@ const CommonModal = ({
                         className="form-control"
                         placeholder="Hours"
                         name="hours"
-                      autoFocus={index === 0}
+                        autoFocus={index === 0}
                         defaultValue={field.value?.split(":")[0] || "00"}
                         onChange={(e) => onChange(e, index)}
                       />
@@ -74,51 +74,99 @@ const CommonModal = ({
                         name="minutes"
                         min="0"
                         max="59"
-                      autoFocus={index === 0}
-                        
+                        autoFocus={index === 0}
+
                         defaultValue={field.value?.split(":")[1] || "00"}
                         onChange={(e) => onChange(e, index)}
                       />
                     </div>
                   </>
-                ) : field.type === "email" ? (
-                  <input
-                    type="text"
-                    name={field.name}
-                    className="filter-text form-control"
-                    placeholder={field.placeholder}
-                    value={field.value}
-                    autoFocus={index === 0}
-                    
-                    onChange={(e) => onChange(e, index)}
-                  />
-                ) : field.type === "password" ? (
-                  <input
-                    type="text"
-                    name={field.name}
-                    className="filter-text form-control"
-                    placeholder={field.placeholder}
-                    value={field.value}
-                    autoFocus={index === 0}
-                    
-                    onChange={(e) => onChange(e, index)}
-                  />
-                ) : field.type === "select" ? (
-                  <select
-                    name={field.name}
-                    className="filter-select form-select"
-                    value={field.value}
-                    autoFocus={index === 0}
-                    
-                    onChange={(e) => onChange(e, index)}
-                  >
-                    {field.options.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                ) : null}
+                ) : field.type === "hourminute1" ? (
+                  <>
+                    <div className="input-group">
+                      <div className="col-md-6">
+                      <div className="hours-div">
+                        <input
+                          type="number"
+                          className="form-control"
+                          placeholder="Hours"
+                          name="hours"
+                          autoFocus={index === 0}
+                          defaultValue={field.value?.split(":")[0] || "00"}
+                          onChange={(e) => onChange(e, index)}
+                        />
+                        <span
+                          className="input-group-text"
+                          id="basic-addon2"
+                        >
+                          H
+                        </span>
+                      </div>
+                      </div>
+                      <div className="col-md-6">
+                      <div className="hours-div">
+                        <input
+                          type="number"
+                          className="form-control"
+                          placeholder="Minutes"
+                          name="minutes"
+                          min="0"
+                          max="59"
+                          autoFocus={index === 0}
+                          defaultValue={field.value?.split(":")[1] || "00"}
+                          onChange={(e) => onChange(e, index)}
+                        />
+                        <span
+                          className="input-group-text"
+                          id="basic-addon2"
+                        >
+                          M
+                        </span>
+                      </div>
+                      </div>
+                     
+                    </div>
+                  </>
+                )
+                  : field.type === "email" ? (
+                    <input
+                      type="text"
+                      name={field.name}
+                      className="filter-text form-control"
+                      placeholder={field.placeholder}
+                      value={field.value}
+                      autoFocus={index === 0}
+
+                      onChange={(e) => onChange(e, index)}
+                    />
+                  ) : field.type === "password" ? (
+                    <input
+                      type="text"
+                      name={field.name}
+                      className="filter-text form-control"
+                      placeholder={field.placeholder}
+                      value={field.value}
+                      autoFocus={index === 0}
+
+                      onChange={(e) => onChange(e, index)}
+                    />
+                  ) : field.type === "select" ? (
+                    <select
+                      name={field.name}
+                      className="filter-select form-select"
+                      value={field.value}
+                      autoFocus={index === 0}
+
+                      onChange={(e) => onChange(e, index)}
+                    >
+                      {field.options.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : null}
+              </div>
               </div>
             ))}
           </div>
