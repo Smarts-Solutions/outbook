@@ -16,6 +16,9 @@ const Header = () => {
     setIsMenuEnlarged((prevState) => !prevState);
   };
 
+
+
+
   useEffect(() => {
     isLoginAuthCheck();
     ClearSession();
@@ -97,15 +100,28 @@ const Header = () => {
   const ClearSession = async () => {
     var decoded = jwtDecode(token);
 
+    console.log("decoded", decoded.exp);
+
     if (decoded.exp * 1000 < new Date().getTime()) {
       localStorage.removeItem("user_role");
       localStorage.removeItem("user_details");
       localStorage.clear();
-      setTimeout(() => {
-        navigate("/");
-      }, 1000);
+      window.location.reload();
+      // setTimeout(() => {
+      //   navigate("/");
+      // }, 1000);
     }
   };
+
+
+  const clearSession = () => { 
+    var decoded = jwtDecode(token); 
+    if (decoded.exp * 1000 < new Date().getTime()) {
+        console.log("Token Expired");
+        localStorage.clear(); 
+        window.location.reload();
+    }
+};
 
   return (
     <div>

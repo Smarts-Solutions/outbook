@@ -7,6 +7,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import Login from "../layouts/Auth/Login";
+import { jwtDecode } from "jwt-decode";
 
 import Admin_Route from "./Admin_Route";
 import ForgetPassword from "../layouts/Auth/ForgetPassword";
@@ -60,6 +61,29 @@ const Main_Route = () => {
         break;
     }
   }, [navigate, location.pathname, role, staffDetails]);
+
+  const ClearSession = async () => {
+    console.log("ClearSession")
+        if(token){
+          var decoded = jwtDecode(token);
+          if (decoded.exp * 1000 < new Date().getTime()) {
+            localStorage.removeItem("user_role");
+            localStorage.removeItem("user_details");
+            localStorage.clear();
+            // window.location.reload();
+            setTimeout(() => {
+              navigate("/login");
+            }, 1000);
+          }
+        }
+    
+       
+      };
+
+  useEffect(() => {
+    ClearSession();
+  }, []);
+
 
   return (
     <div>

@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { RoleAccess } from "../../ReduxStore/Slice/Access/AccessSlice";
 
-const Sidebar = () => {
-  const dispatch = useDispatch();
+const Sidebar = () => { 
   const location = useLocation();
   const navigate = useNavigate();
   const menuRef = useRef(null);
@@ -46,6 +43,7 @@ const Sidebar = () => {
     });
   }, [activeLink]);
 
+  
   const handleLinkClick = (e, linkPathname) => {
     e.preventDefault();
     setActiveLink(linkPathname);
