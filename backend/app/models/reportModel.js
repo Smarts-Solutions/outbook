@@ -453,6 +453,42 @@ const dueByReport = async (Report) => {
     GROUP BY customers.id;
 `;
 
+
+// const query = `SELECT
+// customers.id AS customer_id,
+// customers.trading_name AS customer_name,
+
+// -- Due within 1 month
+// CAST(
+//     JSON_OBJECT(
+//         'count', COUNT(CASE WHEN jobs.due_on BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 MONTH) THEN 1 END),
+//         'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 MONTH) THEN jobs.id END)
+//     ) AS CHAR
+// ) AS due_within_1_month,
+
+// -- Due within 2 months
+// CAST(
+//     JSON_OBJECT(
+//         'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 2 MONTH) THEN 1 END),
+//         'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 2 MONTH) THEN jobs.id END)
+//     ) AS CHAR
+// ) AS due_within_2_months,
+
+// -- Repeat for other months...
+
+// -- Due passed
+// CAST(
+//     JSON_OBJECT(
+//         'count', COUNT(CASE WHEN jobs.due_on < CURDATE() THEN 1 END),
+//         'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on < CURDATE() THEN jobs.id END)
+//     ) AS CHAR
+// ) AS due_passed
+
+// FROM customers
+// LEFT JOIN jobs ON jobs.customer_id = customers.id
+// GROUP BY customers.id;
+// `
+
             const [result] = await pool.execute(query);
             return { status: true, message: 'Success.', data: result };
         } else {

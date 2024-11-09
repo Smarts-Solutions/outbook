@@ -94,7 +94,7 @@ const ClientList = () => {
   const SetTab = (e) => {
     setActiveTab(e);
   };
-
+console.log("activeTab", getCheckList)
   useEffect(() => {
     GetStatus();
     if (activeTab !== "") {
@@ -694,6 +694,8 @@ const ClientList = () => {
     });
   };
 
+  
+
   return (
     <div className="container-fluid">
       <div className="row ">
@@ -742,7 +744,7 @@ const ClientList = () => {
                             <i className="fa fa-plus pe-1" /> Add Client
                           </div>
                         </>
-                      ) : (getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN") && activeTab === "job" ? (
+                      ) : (ClientData?.length > 0 &&( getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN")) && activeTab === "job" ? (
                         <>
                           <div className="btn btn-info text-white float-end blue-btn" onClick={() =>
                             navigate("/admin/createjob", {
