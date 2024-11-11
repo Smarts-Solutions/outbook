@@ -5,6 +5,8 @@ import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal"
 import { DraftAction, AddDraft, EditDraft } from '../../../ReduxStore/Slice/Customer/CustomerSlice'
 import { useLocation } from "react-router-dom";
 import sweatalert from 'sweetalert2';
+import {convertDate } from '../../../Utils/Comman_function';
+
 
 const Drafts = ({ getAccessDataJob,  goto }) => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -216,8 +218,8 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
 
   const columns = [
     { name: 'Draft Title', selector: row => row.title, sortable: true },
-    { name: 'Draft Sent On', selector: row => row.draft_sent_on, sortable: true },
-    { name: 'Final Draft Sent On', selector: row => row.final_draft_sent_on, sortable: true },
+    { name: 'Draft Sent On', selector: row => convertDate(row.draft_sent_on), sortable: true },
+    { name: 'Final Draft Sent On', selector: row =>convertDate(row.final_draft_sent_on), sortable: true },
     { name: 'Feedback Received', selector: row => row.feedback_received == 1 ? "Yes" : "No", sortable: true },
     { name: 'Updated/Amendments', selector: row => row.updated_amendment == 1 ? "Amendment" : row.updated_amendment == 2 ? "Update" : row.updated_amendment == 3 ? "Both" : "None", sortable: true },
     { name: 'Was Draft Completed', selector: row => row.was_it_complete == 1 ? "Yes" : "No", sortable: true },
