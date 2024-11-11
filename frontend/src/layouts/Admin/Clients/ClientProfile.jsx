@@ -569,12 +569,12 @@ const ClientList = () => {
                       <ul className="list-unstyled personal-detail mb-0">
                         <li className="row">
                           <div className="col-md-12">
-                            <b>Trading Name : {informationData && informationData.trading_name || 'NA'}</b></div>
+                            <b>Trading Name :</b> {informationData && informationData.trading_name || 'NA'}</div>
 
                         </li>
                         <li className="mt-2 row">
                           <div className="col-md-12">
-                            <b>Trading Address :  {informationData && informationData.trading_address || 'NA'}</b>
+                            <b>Trading Address :</b>  {informationData && informationData.trading_address || 'NA'}
                           </div>
                         </li>
                       </ul>
