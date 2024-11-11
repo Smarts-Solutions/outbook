@@ -2043,7 +2043,7 @@ const CreateJob = () => {
                         </Modal.Header>
                         <Modal.Body>
                           <div className="tablelist-form">
-                            <div className="modal-body">
+                            <div className="">
                               <div className="row">
                                 <div
                                   className="col-md-12"
@@ -2077,7 +2077,7 @@ const CreateJob = () => {
                                   <div className="col-lg-6">
                                     <div className="col-sm-auto">
                                       <button
-                                        className="btn btn-info float-end "
+                                        className="btn btn-info float-end mb-3"
                                         // disabled={getChecklistId == ""}
                                         onClick={() => setShowAddJobModal(true)}
                                       >
