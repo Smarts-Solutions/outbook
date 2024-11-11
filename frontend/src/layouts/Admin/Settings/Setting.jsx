@@ -1102,7 +1102,7 @@ const Setting = () => {
                     onClick={(e) => handleTaskAdd(row)}
                   >
                     <i className="fa fa-plus pe-1" />
-                    Add Internal Task
+                    Add Task
                   </button>
                 )}
               </div>
@@ -1188,7 +1188,7 @@ const Setting = () => {
           {
             type: "hourminute1",
             name: "hourminute",
-            label: "Hour",
+            label: "Weekly Timesheet Hours",
             placeholder: "Hour",
           },
         ],
@@ -1340,7 +1340,7 @@ const Setting = () => {
           {
             type: "hourminute1",
             name: "hourminute",
-            label: "Hour",
+            label: "Weekly Timesheet Hours",
             placeholder: "Hour",
             value: data.hourminute,
           },

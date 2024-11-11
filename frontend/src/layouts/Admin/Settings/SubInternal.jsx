@@ -66,7 +66,7 @@ const SubInternal = () => {
 
     const columnSubInternal = [
         {
-            name: "Sub Internal",
+            name: "Task Name",
             selector: (row) => row.name,
             sortable: true,
             width: "70%",
@@ -269,7 +269,7 @@ const SubInternal = () => {
                                     className="btn btn-info text-white float-end"
                                     onClick={(e) => handleAdd(e, "1")}
                                 >
-                                    <i className="fa fa-plus" /> Add Internal Task
+                                    <i className="fa fa-plus" /> Add  Task
                                 </button>
                             </div>
                         </div>
