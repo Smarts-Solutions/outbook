@@ -1428,16 +1428,16 @@ const clientUpdate = async (client) => {
       }
       let model_name = [];
       if (information_client == true) {
-        model_name.push(`edited information`)
+        model_name.push(`edited ${cli_type} information`)
       }
       if (addedOfficer == true) {
-        model_name.push('added additional Officer information')
+        model_name.push(`added ${cli_type} additional Officer information`)
       }
       if (editOfficer == true) {
-        model_name.push('edited Officer information')
+        model_name.push(`edited ${cli_type} Officer information`)
       }
       if (removeOfficer == true) {
-        model_name.push('removed Officer information')
+        model_name.push(`removed ${cli_type} Officer information`)
       }
 
       if (model_name.length > 0) {
@@ -1452,7 +1452,7 @@ const clientUpdate = async (client) => {
             ip: client.ip,
             date: currentDate.toISOString().split('T')[0],
             module_name: 'client',
-            log_message: `${cli_type} ${msgLog}. client code :`,
+            log_message: `${msgLog}. client code :`,
             permission_type: 'updated',
             module_id: client_id,
           }

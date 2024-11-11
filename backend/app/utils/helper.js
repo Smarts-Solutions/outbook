@@ -48,10 +48,11 @@ const pool = require('../config/database');
             )
     
              WHEN staff_logs.module_name = 'job' THEN (
-              SELECT CONCAT(SUBSTRING(customers.trading_name, 1, 3),'_', SUBSTRING(clients.trading_name, 1, 3),'_',jobs.job_id)
+              SELECT CONCAT(SUBSTRING(customers.trading_name, 1, 3),'_', SUBSTRING(clients.trading_name, 1, 3),'_',SUBSTRING(job_types.type, 1, 4), '_',jobs.job_id)
               FROM jobs
               JOIN clients ON jobs.client_id = clients.id
               JOIN customers ON clients.customer_id = customers.id
+              LEFT JOIN job_types ON jobs.job_type_id = job_types.id
               WHERE jobs.id = staff_logs.module_id
             )
             ELSE ''
