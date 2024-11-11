@@ -32,18 +32,27 @@ const Setting = () => {
       .unwrap()
       .then(async (response) => {
         if (req.action == "add" || req.action == "update" || req.action == "delete") {
-          sweatalert.fire({
-            icon: "success",
-            title: "Success",
-            text: response.message,
-            timer: 2000,
-          });
-          customerSubSourceData({ action: "getAll" });
+          if (response.status) {
+            sweatalert.fire({
+              icon: "success",
+              title: "Success",
+              text: response.message,
+              timer: 2000,
+            });
+            customerSubSourceData({ action: "getAll" });
+          } else {
+            sweatalert.fire({
+              icon: "error",
+              title: "Error",
+              text: response.message,
+              timer: 2000,
+            });
+          }
         } else {
           if (response.status) {
             setSubSourceData({ loading: false, data: response.data });
           } else {
-            
+
             setSubSourceData({ loading: false, data: [] });
           }
         }
@@ -177,13 +186,13 @@ const Setting = () => {
 
   const handleSave = (e) => {
     e.preventDefault();
-    if (  modalData.fields[0].value == "" ||  modalData.fields[0].value == undefined ) {
+    if (modalData.fields[0].value == "" || modalData.fields[0].value == undefined) {
       sweatalert.fire({
         title: "Please enter " + modalData.fields[0].label,
         icon: "warning",
         timer: 2000,
       });
-      
+
       return;
     }
     const req = { action: isEdit ? "update" : "add" };
@@ -237,9 +246,10 @@ const Setting = () => {
             <button
               type="button"
               className="btn p-0"
-              onClick={() =>{
+              onClick={() => {
                 sessionStorage.setItem('settingTab', location?.state?.settingTab);
-                 window.history.back()}}
+                window.history.back()
+              }}
             >
               <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
             </button>
@@ -270,23 +280,23 @@ const Setting = () => {
       </div>
 
       {isModalOpen && (
-  <Modal
-    modalId="exampleModal3"
-    title={isEdit ? "Edit " + modalData.title : "Add " + modalData.title}
-    fields={modalData.fields}
-    onClose={() => {
-      setIsModalOpen(false);
-      setModalData({});
-    }}
-    onSave={handleSave}
-    onChange={handleModalChange}
-    buttonName={
-      <>
-        <i className={`fas ${isEdit ? 'fa-edit' : 'fa-save'}`}></i> {isEdit ? "Update" : "Save"}
-      </>
-    }
-  />
-)}
+        <Modal
+          modalId="exampleModal3"
+          title={isEdit ? "Edit " + modalData.title : "Add " + modalData.title}
+          fields={modalData.fields}
+          onClose={() => {
+            setIsModalOpen(false);
+            setModalData({});
+          }}
+          onSave={handleSave}
+          onChange={handleModalChange}
+          buttonName={
+            <>
+              <i className={`fas ${isEdit ? 'fa-edit' : 'fa-save'}`}></i> {isEdit ? "Update" : "Save"}
+            </>
+          }
+        />
+      )}
 
     </div>
   );

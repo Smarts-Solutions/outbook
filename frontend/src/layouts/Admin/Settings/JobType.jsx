@@ -29,7 +29,6 @@ const Setting = () => {
   const [tasks, setTasks] = useState([]);
   const [ViewTaskData, setViewTaskData] = useState([]);
 
-  console.log("location", location?.state?.settingTab);
 
   const JobTypeData = async (req) => {
     if (location.state.Id) {
@@ -481,6 +480,7 @@ const Setting = () => {
                     className="form-control"
                     placeholder="Enter Task"
                     id="firstNameinput"
+                    autoFocus
                     value={taskInput} // Bind input to state
                     onChange={handleInputChange} // Handle input change
                   />

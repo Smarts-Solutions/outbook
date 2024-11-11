@@ -12,10 +12,10 @@ const AddSubInternal = async (subInternal) => {
     try {
         const [check] = await pool.query(checkQuery, [name]);
         if (check.length > 0) {
-            return { status: false, message: 'Internal task already exists.' };
+            return { status: false, message: 'Sub Internal task already exists.' };
         }
         const [result] = await pool.execute(query, [name , internal_id]);
-        return { status: true, message: 'Internal created successfully.', data: result.insertId };
+        return { status: true, message: 'Sub Internal created successfully.', data: result.insertId };
     } catch (err) {
         console.error('Error inserting data:', err);
         throw err;
