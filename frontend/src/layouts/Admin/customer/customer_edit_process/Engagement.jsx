@@ -308,14 +308,10 @@ const Engagement = () => {
     let updatedJobEntry = { ...newJobEntries[index] };
     updatedJobEntry[name] = value;
     newJobEntries[index] = updatedJobEntry;
-  
+    validate5(name , value , index)
     setJobEntries(newJobEntries);
   };
-
-  useEffect(() => {
-    validate4();
-  }, [jobEntries]);
-  
+ 
   const handleAddJob = () => {
     setJobEntries([
       ...jobEntries,
@@ -399,6 +395,27 @@ const Engagement = () => {
     }
     setErrors3(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const validate5 = (name , value, index) => {
+    const newErrors = [];
+    const entryErrors = {};
+
+    if (!value) {
+      entryErrors[name] = "Please Enter " + name;
+    } else if (name === "minimum_number_of_jobs" && (value < 1 || value > 100)) {
+      entryErrors[name] = "Minimum number of Jobs must be between 1 and 100";
+    } else if (name === "cost_per_job" && (value < 20 || value > 500)) {
+      entryErrors[name] = "Cost Per Job must be between £20 and £500";
+    }
+
+    if (Object.keys(entryErrors).length !== 0) {
+
+      newErrors[index] = entryErrors;
+    }
+
+    setErrors4(newErrors);
+    return newErrors.length > 0 ? false : true;
   };
 
   const validate4 = () => {
@@ -988,7 +1005,7 @@ const Engagement = () => {
                                       <input
                                         type="text"
 
-                                        className={errors4[index] ? "error-field form-control" : "form-control"}
+                                        className={errors4[index]?.minimum_number_of_jobs ? "error-field form-control" : "form-control"}
 
                                         placeholder={
                                           "Please Enter Minimum number of Jobs"
@@ -998,7 +1015,7 @@ const Engagement = () => {
                                         value={job.minimum_number_of_jobs}
                                         onChange={(e) => handleChange4(index, e)}
                                       />
-                                      {errors4[index] && (
+                                      {errors4[index]?.minimum_number_of_jobs && (
                                         <div className="error-text">
                                           {
                                             errors4[index].minimum_number_of_jobs
@@ -1007,45 +1024,6 @@ const Engagement = () => {
                                       )}
                                     </div>
                                   </div>
-                                  {/* <div className="col-lg-4">
-                                    <div className="mb-3">
-                                      <label
-                                        htmlFor={`jobType_${index}`}
-                                        className="form-label"
-                                      >
-                                        Types Of Job
-                                      </label>
-                                      <select
-                                        id={`jobType_${index}`}
-                                        className="form-select"
-                                        name="job_type_id"
-                                        value={job.job_type_id}
-                                        onChange={(e) =>
-                                          handleChange4(index, e)
-                                        }
-                                      >
-                                        <option value="">
-                                          Select Job Type
-                                        </option>
-                                        <option value="1">demo</option>
-                                        {jobType &&
-                                          jobType.map((data) => (
-                                            <option
-                                              key={data.type}
-                                              value={data.id}
-                                            >
-                                              {data.type}
-                                            </option>
-                                          ))}
-                                      </select>
-                                      {errors4[index] && (
-                                        <div className="error-text">
-                                          {errors4[index].job_type_id}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div> */}
-
                                   <div className="col-lg-4">
                                     <div className="mb-3">
                                       <label
@@ -1056,7 +1034,7 @@ const Engagement = () => {
                                       </label>
                                       <select
                                         id={`service${index}`}
-                                        className={errors4[index] ? "error-field form-select" : "form-select"}
+                                        className={errors4[index]?.service_id ? "error-field form-select" : "form-select"}
 
 
                                         name="service_id"
@@ -1080,7 +1058,7 @@ const Engagement = () => {
                                             </option>
                                           ))}
                                       </select>
-                                      {errors4[index] && (
+                                      {errors4[index]?.service_id && (
                                         <div className="error-text">
                                           {errors4[index].service_id}
                                         </div>
@@ -1098,7 +1076,7 @@ const Engagement = () => {
                                       </label>
                                       <input
                                         type="text"
-                                        className={errors4[index] ? "error-field form-control" : "form-control"}
+                                        className={errors4[index]?.cost_per_job ? "error-field form-control" : "form-control"}
                                         name="cost_per_job"
                                         placeholder={
                                           "Please Enter Cost Per Job"
@@ -1109,9 +1087,9 @@ const Engagement = () => {
                                           handleChange4(index, e)
                                         }
                                       />
-                                      {errors4[index] && (
+                                      {errors4[index]?.cost_per_job && (
                                         <div className="error-text">
-                                          {errors4[index].cost_per_job}
+                                          {errors4[index]?.cost_per_job}
                                         </div>
                                       )}
                                     </div>
