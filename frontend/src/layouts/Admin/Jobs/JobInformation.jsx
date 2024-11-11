@@ -72,7 +72,6 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
 
     });
 
-    console.log("goto", goto != "report")
 
     useEffect(() => {
         JobDetails()

@@ -100,7 +100,6 @@ const Header = () => {
   const ClearSession = async () => {
     var decoded = jwtDecode(token);
 
-    console.log("decoded", decoded.exp);
 
     if (decoded.exp * 1000 < new Date().getTime()) {
       localStorage.removeItem("user_role");
