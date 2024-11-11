@@ -25,7 +25,7 @@ const TimesheetReport = () => {
     { name: 'WK 12/05 Bookkeeping Minute', selector: row => row.CustomerName, sortable: true },
     { name: 'WK 19/05 Bookkeeping Minute', selector: row => row.AccountManager, sortable: true },
     { name: 'WK 26/05 Bookkeeping Minute', selector: row => row.ServiceType, sortable: true },
-    { name: 'Bookkeeping Hourse', selector: row => row.JobType, sortable: true },
+    { name: 'Bookkeeping Hours', selector: row => row.JobType, sortable: true },
   ]
 
   return (

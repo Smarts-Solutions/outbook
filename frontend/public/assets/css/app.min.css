@@ -4457,3 +4457,10 @@ select#tabSelect {
   .custom-dropdown .dropdown-item:hover {
     background: #dddddd !important;
 }
+.week-data span {
+	font-size: 13px;
+	margin: 0px 4px;
+}
+body .week-data .btn-link{
+padding-left: 0px !important;
+}
