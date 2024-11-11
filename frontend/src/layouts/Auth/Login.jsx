@@ -84,7 +84,13 @@ const Login = () => {
           localStorage.removeItem("token");
           localStorage.removeItem("role");
           sessionStorage.clear();
-          setErrorPassword(response.message);
+          sweatalert.fire({
+            title: response.message,
+            icon: "error",
+            timer: 1000,
+            showConfirmButton: true,
+            timerProgressBar: true,
+          });
         }
         //continue....
       })
@@ -127,11 +133,19 @@ const Login = () => {
 
             navigate("/admin/dashboard");
           } else {
+            sweatalert.fire({
+              title: response.message,
+              icon: "error",
+              timer: 1000,
+              showConfirmButton: true,
+              timerProgressBar: true,
+            });
+
             localStorage.removeItem("staffDetails");
             localStorage.removeItem("token");
             localStorage.removeItem("role");
             sessionStorage.clear();
-            setErrorPassword(response.message);
+            
           }
         })
         .catch((error) => {
@@ -213,6 +227,9 @@ const Login = () => {
     }
 }
 
+
+console.log("errorPassword", errorPassword);
+console.log("errorEmail", errorEmail)
   return (
     <div className="account-body accountbg">
       <div className="container">
@@ -282,7 +299,7 @@ const Login = () => {
                           />
                         </div>
                         {errorPassword ? (
-                          <span className="error-text">{errorPassword}</span>
+                          <span className="error-text"> uuu {errorPassword}</span>
                         ) : (
                           ""
                         )}

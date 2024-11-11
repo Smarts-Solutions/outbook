@@ -574,7 +574,7 @@ const Service = () => {
                                                     </h2>
                                                     <div
                                                       id={`sub-collapseOne${data1.type}`}
-                                                      className="accordion-collapse collapse "
+                                                      className="accordion-collapse collapse"
                                                       aria-labelledby={`sub-headingOne${data1.type}`}
                                                       data-bs-parent="#sub-accordionExample"
                                                     >
