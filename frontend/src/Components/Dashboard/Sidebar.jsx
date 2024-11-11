@@ -53,7 +53,7 @@ const Sidebar = () => {
   
 
   return (
-    <div ref={menuRef}>
+    <div ref={menuRef} onClick={()=>sessionStorage.clear()}>
       <div className="left-sidenav">
         <div className="brand mt-4">
           <Link

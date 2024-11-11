@@ -170,9 +170,7 @@ console.log("activeTab", getCheckList)
         row.client_type_name == null ? "-" : row.client_type_name,
       sortable: true,
       width: "150px",
-    },
-    // { name: "Email Address", selector: (row) => row.email || "-", sortable: true, width: '250px' },
-    // { name: "Phone", selector: (row) => row.phone || "-", sortable: true, width: '130px' },
+    }, 
     {
       name: "Status",
       selector: (row) => (<div>
@@ -208,14 +206,7 @@ console.log("activeTab", getCheckList)
                 <i className="ti-trash text-danger" />
               </button>
             ) : null
-          }
-          {/* <button
-            className="delete-icon"
-            onClick={() => handleDelete(row, "client")}
-          >
-            {" "}
-            <i className="ti-trash text-danger" />
-          </button> */}
+          } 
         </div>
       ),
       ignoreRowClick: true,

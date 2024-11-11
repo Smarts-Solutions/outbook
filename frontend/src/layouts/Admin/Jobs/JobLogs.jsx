@@ -14,11 +14,12 @@ import Hierarchy from '../../../Components/ExtraComponents/Hierarchy';
 
 const JobLogs = () => {
   const location = useLocation();
-  const [selectedTab, setSelectedTab] = useState('job information');
+  const tab = sessionStorage.getItem('activeTab2')||'job information';
+  console.log(tab)
+  const [selectedTab, setSelectedTab] = useState(tab);
+  console.log("selectedTab", selectedTab)
   const [getAccessDataJob, setAccessDataJob] = useState({ insert: 0, update: 0, delete: 0, view: 0, });
 
-
-  console.log(location.state);
   const accessDataJob =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
       (item) => item.permission_name === "job"
@@ -37,7 +38,6 @@ const JobLogs = () => {
     setAccessDataJob(updatedAccess);
   }, []);
 
-
   return (
     <div className='container-fluid'>
       <div className="row ">
@@ -49,7 +49,7 @@ const JobLogs = () => {
                   <ul className="nav nav-pills rounded-tabs" role="tablist">
                     <li className="nav-item" role="presentation">
                       <button
-                        className="nav-link active"
+                        className={`nav-link ${selectedTab === 'job information' ? 'active' : ''}`}
                         id="job-information-tab"
                         data-bs-toggle="pill"
                         data-bs-target="#job-information"
@@ -57,7 +57,11 @@ const JobLogs = () => {
                         role="tab"
                         aria-controls="job-information"
                         aria-selected="true"
-                        onClick={() => setSelectedTab('job information')}
+                        onClick={() => {
+                          // setSelectedTab('job information')
+                          sessionStorage.setItem('activeTab2', 'job information');
+                        }
+                          }
                       >
                         <i className='fa-solid fa-info-circle' />
                         Job Information
@@ -65,7 +69,7 @@ const JobLogs = () => {
                     </li>
                     <li className="nav-item" role="presentation">
                       <button
-                        className="nav-link"
+                        className={"nav-link" + (selectedTab === 'task timesheet' ? ' active' : '')}
                         id="task-timesheet-tab"
                         data-bs-toggle="pill"
                         data-bs-target="#task-timesheet"
@@ -73,7 +77,9 @@ const JobLogs = () => {
                         role="tab"
                         aria-controls="task-timesheet"
                         aria-selected="false"
-                        onClick={() => setSelectedTab('task timesheet')}
+                        onClick={() => {
+                          // setSelectedTab('task timesheet'); 
+                          sessionStorage.setItem('activeTab2', 'task timesheet');}}
                       >
                         <i className='fa-solid fa-clock' />
                         Task Timesheet
@@ -81,7 +87,7 @@ const JobLogs = () => {
                     </li>
                     <li className="nav-item" role="presentation">
                       <button
-                        className="nav-link"
+                        className={"nav-link" + (selectedTab === 'job timeline' ? ' active' : '')}
                         id="job-timeline-tab"
                         data-bs-toggle="pill"
                         data-bs-target="#job-timeline"
@@ -89,7 +95,9 @@ const JobLogs = () => {
                         role="tab"
                         aria-controls="job-timeline"
                         aria-selected="false"
-                        onClick={() => setSelectedTab('job timeline')}
+                        onClick={() => {
+                          // setSelectedTab('job timeline'); 
+                          sessionStorage.setItem('activeTab2', 'job timeline');}}
                       >
                         <i className='fa-solid fa-table' />
                         Job Timeline
@@ -97,7 +105,7 @@ const JobLogs = () => {
                     </li>
                     <li className="nav-item" role="presentation">
                       <button
-                        className="nav-link"
+                        className={"nav-link" + (selectedTab === 'missing logs' ? ' active' : '')}
                         id="missing-logs-tab"
                         data-bs-toggle="pill"
                         data-bs-target="#missing-logs"
@@ -105,7 +113,9 @@ const JobLogs = () => {
                         role="tab"
                         aria-controls="missing-logs"
                         aria-selected="false"
-                        onClick={() => setSelectedTab('missing logs')}
+                        onClick={() => {
+                          // setSelectedTab('missing logs');
+                           sessionStorage.setItem('activeTab2', 'missing logs');}}
                       >
                         <i className='fa-solid fa-exclamation-triangle' />
                         Missing Logs
@@ -113,7 +123,7 @@ const JobLogs = () => {
                     </li>
                     <li className="nav-item" role="presentation">
                       <button
-                        className="nav-link"
+                        className={"nav-link" + (selectedTab === 'queries' ? ' active' : '')}
                         id="queries-tab"
                         data-bs-toggle="pill"
                         data-bs-target="#queries"
@@ -121,7 +131,9 @@ const JobLogs = () => {
                         role="tab"
                         aria-controls="queries"
                         aria-selected="false"
-                        onClick={() => setSelectedTab('queries')}
+                        onClick={() => {
+                          // setSelectedTab('queries');
+                           sessionStorage.setItem('activeTab2', 'queries');}}
                       >
                         <i className='fa-solid fa-question-circle' />
                         Queries
@@ -129,7 +141,7 @@ const JobLogs = () => {
                     </li>
                     <li className="nav-item" role="presentation">
                       <button
-                        className="nav-link"
+                        className={"nav-link" + (selectedTab === 'drafts' ? ' active' : '')}
                         id="drafts-tab"
                         data-bs-toggle="pill"
                         data-bs-target="#drafts"
@@ -137,7 +149,9 @@ const JobLogs = () => {
                         role="tab"
                         aria-controls="drafts"
                         aria-selected="false"
-                        onClick={() => setSelectedTab('drafts')}
+                        onClick={() => {
+                          // setSelectedTab('drafts'); 
+                          sessionStorage.setItem('activeTab2', 'drafts');}}
                       >
                         <i className='fa-solid fa-file-alt' />
                         Drafts
@@ -145,7 +159,7 @@ const JobLogs = () => {
                     </li>
                     <li className="nav-item" role="presentation">
                       <button
-                        className="nav-link"
+                        className={"nav-link" + (selectedTab === 'documents' ? ' active' : '')}
                         id="documents-tab"
                         data-bs-toggle="pill"
                         data-bs-target="#documents"
@@ -153,7 +167,9 @@ const JobLogs = () => {
                         role="tab"
                         aria-controls="documents"
                         aria-selected="false"
-                        onClick={() => setSelectedTab('documents')}
+                        onClick={() => {
+                          // setSelectedTab('documents');
+                           sessionStorage.setItem('activeTab2', 'documents');}}
                       >
                         <i className='fa-solid fa-folder' />
                         Documents
@@ -169,7 +185,8 @@ const JobLogs = () => {
                     className="btn btn-info text-white float-end blue-btn"
                     onClick={() => {
                       sessionStorage.setItem('activeTab', location.state.goto == "report" ? "client" : location.state.activeTab);
-                      window.history.back()
+                      window.history.back();
+                      sessionStorage.removeItem('activeTab2');
                     }}
                   >
                     <i className="fa fa-arrow-left pe-1" /> Back

@@ -7,11 +7,9 @@ import { useLocation } from "react-router-dom";
 import sweatalert from 'sweetalert2';
 import {convertDate } from '../../../Utils/Comman_function';
 
-
 const Drafts = ({ getAccessDataJob,  goto }) => {
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
-
   const location = useLocation()
   const dispatch = useDispatch();
   const [adddraft, setAdddraft] = useState(false);
@@ -216,7 +214,6 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
 
   }
 
-  
   const columns = [
     { name: 'Draft Title', selector: row => row.title, sortable: true },
     { name: 'Draft Sent On', selector: row => convertDate(row.draft_sent_on), sortable: true },
@@ -245,9 +242,6 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
       button: true,
     },
   ];
-
-
-
 
   return (
     <div className=''>

@@ -63,7 +63,6 @@ const Main_Route = () => {
   }, [navigate, location.pathname, role, staffDetails]);
 
   const ClearSession = async () => {
-    console.log("ClearSession")
         if(token){
           var decoded = jwtDecode(token);
           if (decoded.exp * 1000 < new Date().getTime()) {
