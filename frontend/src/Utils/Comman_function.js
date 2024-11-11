@@ -202,3 +202,14 @@ export async function GET_IP(data, token) {
   catch (err) {
   }
 }
+
+export const convertDate = (date) => {
+  if (date) {
+    let newDate = new Date(date);
+    let day = newDate.getDate();
+    let month = newDate.getMonth() + 1;
+    let year = newDate.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+  return "";
+}

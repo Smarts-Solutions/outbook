@@ -6,7 +6,7 @@ import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal"
 import { GetMissingLog, AddMissionLog, EditMissingLog } from '../../../ReduxStore/Slice/Customer/CustomerSlice';
 import { getProfile } from '../../../ReduxStore/Slice/Staff/staffSlice';
 import sweatalert from 'sweetalert2';
-import { AddMissionLogErros } from '../../../Utils/Common_Message';
+import {convertDate } from '../../../Utils/Comman_function';
 
 const MissingLogs = ({ getAccessDataJob, goto }) => {
   const location = useLocation();
@@ -62,7 +62,6 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
         missing_log_reviewed_date: getEditData.missing_log_reviewed_date,
         missing_log_document: getEditData.missing_log_document,
         status: getEditData.status,
-
         id: getEditData.id
       });
     }
@@ -152,6 +151,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
 
   const handleSubmit = async (e) => {
     const req = { action: "add", job_id: location.state.job_id, missionDetails: missionLogAllInputData }
+    console.log("req", req)
     const data = { req: req, authToken: token }
     await dispatch(AddMissionLog(data))
       .unwrap()
@@ -221,11 +221,13 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
       })
   }
 
+
+
   const columns = [
     { name: 'Missing Log Title', selector: row => row.title, sortable: true },
-    { name: 'Missing Log Sent On', selector: row => row.missing_log_sent_on, sortable: true },
-    { name: 'Missing Log Prepared Date', selector: row => row.missing_log_prepared_date, sortable: true },
-    { name: 'Missing Log Reviewed Date', selector: row => row.missing_log_reviewed_date, sortable: true },
+    { name: 'Missing Log Sent On', selector: row => convertDate(row.missing_log_sent_on), sortable: true },
+    { name: 'Missing Log Prepared Date', selector: row => convertDate(row.missing_log_prepared_date), sortable: true },
+    { name: 'Missing Log Reviewed Date', selector: row => convertDate(row.missing_log_reviewed_date), sortable: true },
     { name: 'status', selector: row => row.status == 1 ? "Completed" : "Incomplete", sortable: true },
     {
       name: "Actions",

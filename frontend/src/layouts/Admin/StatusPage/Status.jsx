@@ -8,6 +8,8 @@ import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 import { fa_time } from "../../../Utils/Date_formet";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
+import {convertDate } from '../../../Utils/Comman_function';
+
 
 const Status = () => {
   const dispatch = useDispatch();
@@ -83,12 +85,12 @@ const Status = () => {
     },
     {
       name: "Created Date",
-      selector: (row) => formatDate(row.created_at),
+      selector: (row) => convertDate(row.created_at),
       sortable: true,
     },
     {
       name: "Last Update On",
-      selector: (row) => formatDate(row.updated_at),
+      selector: (row) => convertDate(row.updated_at),
       sortable: true,
     },
     {

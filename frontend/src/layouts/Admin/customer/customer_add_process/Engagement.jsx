@@ -128,11 +128,34 @@ const Engagement = () => {
     return Object.keys(newErrors).length === 0;
   }
 
-  const validate4 = () => {
+  const validate4 = (name , value, index) => {
+    const newErrors = [];
+    const entryErrors = {};
+
+    if (!value) {
+      entryErrors[name] = "Please Enter " + name;
+    } else if (name === "minimum_number_of_jobs" && (value < 1 || value > 100)) {
+      entryErrors[name] = "Minimum number of Jobs must be between 1 and 100";
+    } else if (name === "cost_per_job" && (value < 20 || value > 500)) {
+      entryErrors[name] = "Cost Per Job must be between £20 and £500";
+    }
+
+    if (Object.keys(entryErrors).length !== 0) {
+
+      newErrors[index] = entryErrors;
+    }
+
+    setErrors4(newErrors);
+    return newErrors.length > 0 ? false : true;
+  };
+
+  const validate3 = () => {
     const newErrors = [];
 
     jobEntries.forEach((entry, index) => {
+
       const entryErrors = {};
+
 
       if (!entry.minimum_number_of_jobs) {
         entryErrors.minimum_number_of_jobs =
@@ -212,7 +235,7 @@ const Engagement = () => {
     }
     const newJobEntries = [...jobEntries];
     newJobEntries[index][name] = value;
-    validate4();
+    validate4(name, value, index);
     setJobEntries(newJobEntries);
   };
 
@@ -241,7 +264,7 @@ const Engagement = () => {
     }
 
     for (let i = 0; i < checkboxStates.length; i++) {
-      if (checkboxStates[i] === 1 && i == 3 && !validate4()) {
+      if (checkboxStates[i] === 1 && i == 3 && !validate3()) {
         ScrollToViewFirstError(ErrorArr[i]);
         return;
       }
@@ -250,8 +273,7 @@ const Engagement = () => {
         return;
       }
     }
-
-    console.log("formState1", formState1);
+ 
     let req = {
 
       customer_id: address,
@@ -736,7 +758,7 @@ const Engagement = () => {
                                       </label>
                                       <input
                                         type="text"
-                                        className={errors4[index] ? "error-field form-control" : "form-control"}
+                                        className={errors4[index]?.minimum_number_of_jobs ? "error-field form-control" : "form-control"}
                                         placeholder={
                                           "Please Enter Minimum number of Jobs"
                                         }
@@ -747,7 +769,7 @@ const Engagement = () => {
                                           handleChange4(index, e)
                                         }
                                       />
-                                      {errors4[index] && (
+                                      {errors4[index]?.minimum_number_of_jobs && (
                                         <div className="error-text">
                                           {
                                             errors4[index]
@@ -768,7 +790,7 @@ const Engagement = () => {
                                     <select
                                       id={`services_${index}`}
 
-                                      className={errors4[index] ? "error-field form-select" : "form-select"}
+                                      className={errors4[index]?.service_id ? "error-field form-select" : "form-select"}
                                       name="service_id"
                                       value={job.service_id}
                                       onChange={(e) => handleChange4(index, e)}
@@ -785,7 +807,7 @@ const Engagement = () => {
                                           </option>
                                         ))}
                                     </select>
-                                    {errors4[index] && (
+                                    {errors4[index]?.service_id && (
                                       <div className="error-text">
                                         {errors4[index].service_id}
                                       </div>
@@ -801,7 +823,7 @@ const Engagement = () => {
                                       </label>
                                       <input
                                         type="text"
-                                        className={errors4[index] ? "error-field form-control" : "form-control"}
+                                        className={errors4[index]?.cost_per_job ? "error-field form-control" : "form-control"}
                                         placeholder={
                                           "Please Enter Cost Per Job"
                                         }
@@ -812,7 +834,7 @@ const Engagement = () => {
                                           handleChange4(index, e)
                                         }
                                       />
-                                      {errors4[index] && (
+                                      {errors4[index]?.cost_per_job && (
                                         <div className="error-text">
                                           {errors4[index].cost_per_job}
                                         </div>

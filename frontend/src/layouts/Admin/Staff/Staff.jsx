@@ -735,12 +735,12 @@ const StaffPage = () => {
           btn_name="Update"
           closeBtn={(e) => setEditStaff(false)}
           additional_field={
-            <div className="row mt-2">
+            <div className="row mt-2 ">
 
                   <label className="form-label">Budgeted Time</label>
-                  <div className="input-group">
+                  <div className="input-group row">
                     {/* Hours Input */}
-                    <div className="hours-div w-50">
+                    <div className="hours-div col-6">
                       <input
                         type="text"
                         className="form-control"
@@ -761,7 +761,7 @@ const StaffPage = () => {
                         H
                       </span>
                     </div>
-                    <div className="hours-div w-50">
+                    <div className="hours-div col-6">
                       <input
                         type="text"
                         className="form-control"

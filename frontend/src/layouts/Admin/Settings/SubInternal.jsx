@@ -30,6 +30,7 @@ const SubInternal = () => {
             .unwrap()
             .then(async (response) => {
                 if (req.action == "add" || req.action == "update" || req.action == "delete") {
+                    if(response.status) {
                     sweatalert.fire({
                         title: response.message,
                         icon: "success",
@@ -38,7 +39,14 @@ const SubInternal = () => {
                     setTimeout(() => {
                         fetchApiData()
                     }, 1000);
-
+                    }
+                    else {
+                        sweatalert.fire({
+                            title: response.message,
+                            icon: "error",
+                            timer: 1000,
+                        });
+                    }
                 } else {
                     if (response.status) {
                         setSubInternalData(response.data || []);
