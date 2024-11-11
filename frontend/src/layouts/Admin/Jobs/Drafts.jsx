@@ -216,6 +216,7 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
 
   }
 
+  
   const columns = [
     { name: 'Draft Title', selector: row => row.title, sortable: true },
     { name: 'Draft Sent On', selector: row => convertDate(row.draft_sent_on), sortable: true },
