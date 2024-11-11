@@ -62,7 +62,6 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
         missing_log_reviewed_date: getEditData.missing_log_reviewed_date,
         missing_log_document: getEditData.missing_log_document,
         status: getEditData.status,
-
         id: getEditData.id
       });
     }
@@ -152,6 +151,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
 
   const handleSubmit = async (e) => {
     const req = { action: "add", job_id: location.state.job_id, missionDetails: missionLogAllInputData }
+    console.log("req", req)
     const data = { req: req, authToken: token }
     await dispatch(AddMissionLog(data))
       .unwrap()

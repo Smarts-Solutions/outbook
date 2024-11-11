@@ -754,6 +754,7 @@ const CreateClient = () => {
         client_code: location.state.id,
         phone_code: getSoleTraderDetails.phone_code,
       };
+
       await AddClientFun(req);
     }
     if (selectClientType == 2 && validateAllFields(2)) {
