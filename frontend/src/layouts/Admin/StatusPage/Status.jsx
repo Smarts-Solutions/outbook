@@ -71,7 +71,7 @@ const Status = () => {
 
   const columns = [
     {
-      name: "Status Name",
+      name: "Detailed Status",
       
       cell: (row) => (
         <div
