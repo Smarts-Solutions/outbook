@@ -643,6 +643,12 @@ const Engagement = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    console.log(name, value);
+    if(name == 'customerJoiningDate'){
+      const date = new Date(value);
+      const today = new Date().getDate;
+      
+    }
 
     setFormState1({
       ...formState1,
