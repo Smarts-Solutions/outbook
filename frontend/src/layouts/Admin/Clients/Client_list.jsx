@@ -29,6 +29,9 @@ const ClientList = () => {
   const role = JSON.parse(localStorage.getItem("role"));
 
 
+
+
+
   useEffect(() => {
     const retrievedData = sessionStorage.getItem('activeTab');
     const retrievedData1 = sessionStorage.getItem('activeTab1');
@@ -233,6 +236,12 @@ console.log("activeTab", getCheckList)
       sortable: true,
     },
 
+    {
+      name: "Client Name",
+
+      selector: (row) => row.client_trading_name || "-",
+      sortable: true,
+    },
     {
       name: "Job Type",
 

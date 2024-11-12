@@ -54,41 +54,17 @@ function Reportsnew() {
               </div>
               <div className="col-md-3">
                 <>
-                  {/* <ul className="nav nav-pills rounded-tabs" role="tablist">
-                    {
-                      tabs.map((tab, index) => (
-                        <li className="nav-item" role="presentation" key={tab.value}>
-                          <button
-                            className={`nav-link ${activeTab === tab.value ? 'active' : ''}`}
-                            id={tab.value}
-                            data-bs-toggle="pill"
-                            data-bs-target={`#${tab.value}`}
-                            type="button"
-                            role="tab"
-                            aria-controls={tab.value}
-                            aria-selected={activeTab === tab.value ? 'true' : 'false'}
-                            onClick={() => handleTabClick(tab.value)}
-                          >
-                            <i className={tab.icon}></i>
-                            {tab.name}
-                          </button>
-                        </li>
-                      ))
-                    }
-                  </ul> */}
-
                   <select className="form-select" id="tabSelect" 
                    value={activeTab}
                    onChange={(e)=>handleTabClick(e.target.value)}
                    >
-                   
                     <option value="jobStatusReport">Job Status Report</option>
                     <option value="jobsReceivedSentReports">Jobs Received Sent Reports</option>
                     <option value="jobSummaryReport">Job Summary Report</option>
                     <option value="jobsPendingReport">Jobs Pending Report</option>
                     <option value="dueByReport">Due By Report</option>
                     <option value="teamPerformanceReport">Team Performance Report by Month</option>
-                    <option value="timesheetReport">Timesheet Report</option>
+                    {/* <option value="timesheetReport">Timesheet Report</option> */}
 
                   </select>
                 </>
