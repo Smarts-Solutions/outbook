@@ -737,6 +737,7 @@ const dayMonthFormatDate = (dateString) => {
                         style={{width:"max-content"}}
                       >
                         <thead className="table-light table-head-blue">
+                          
                           <tr>
                             <th className="dropdwnCol2 pe-0" data-field="phone"  style={{ width: '10px' }}>
                               No
