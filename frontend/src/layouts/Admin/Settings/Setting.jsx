@@ -157,6 +157,9 @@ const Setting = () => {
 
   const roleData = async (req) => {
     const data = { req: req, authToken: token };
+
+    console.log('data', data);
+    return 
     await dispatch(Role(data))
       .unwrap()
       .then(async (response) => {

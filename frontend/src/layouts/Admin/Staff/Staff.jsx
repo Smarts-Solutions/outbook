@@ -167,8 +167,6 @@ const StaffPage = () => {
     { id: "last-year", label: "Last year" },
   ];
 
-
-
   const columns = [
     {
       name: "Full Name",
