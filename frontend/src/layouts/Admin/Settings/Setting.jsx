@@ -157,9 +157,6 @@ const Setting = () => {
 
   const roleData = async (req) => {
     const data = { req: req, authToken: token };
-
-    console.log('data', data);
-    return 
     await dispatch(Role(data))
       .unwrap()
       .then(async (response) => {
@@ -583,7 +580,13 @@ const Setting = () => {
                 {showSettingUpdateTab && (
                   <button
                     className="edit-icon"
-                    onClick={() => handleEdit(row, "1")}
+                    onClick={() => {
+                      handleEdit(row, "1")
+                      setHourMinut({
+                        hours: row.hourminute?.split(":")[0],
+                        minutes: row.hourminute?.split(":")[1],
+                      });
+                    }}
                   >
                     {" "}
                     <i className="ti-pencil" />
