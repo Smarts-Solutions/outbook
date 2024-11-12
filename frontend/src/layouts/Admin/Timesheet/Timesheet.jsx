@@ -934,6 +934,72 @@ const dayMonthFormatDate = (dateString) => {
                                 )}
                               </td>
                           
+<<<<<<< HEAD
+                              {/*Monday Input*/}
+                              <td colSpan="7" className="ps-0">
+                              <div className="scrollable-week">
+                              <input
+                                  className="form-control cursor-pointer border-radius-end"
+                                  type="text"
+                                  style={{ width: '80px' }}
+                                  name="monday_hours"
+                                  
+                                  onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday ,item)}
+                                  value={item.monday_hours == null ? "0" : item.monday_hours}
+                                  disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday'?false:true : false : currentDay !== 'monday'}
+                                />
+                                   <input
+                                 style={{ width: '80px' }}
+                                  className="form-control cursor-pointer"
+                                  type="text"
+                                  name="tuesday_hours"
+                                  onChange={(e) => handleHoursInput(e, index, 'tuesday_date', weekDays.tuesday,item)}
+                                  value={item.tuesday_hours == null ? "0" : item.tuesday_hours}
+                                  disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false:true : false : currentDay !== 'tuesday'}
+                                />
+                                 <input
+                                 style={{ width: '80px' }}
+                                  className="form-control cursor-pointer"
+                                  type="text"
+                                  name="wednesday_hours"
+                                  onChange={(e) => handleHoursInput(e, index, 'wednesday_date', weekDays.wednesday,item)}
+                                  value={item.wednesday_hours == null ? "0" : item.wednesday_hours}
+                                  disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false :true : false : currentDay !== 'wednesday'}
+                                />
+                                <input
+                                 style={{ width: '80px' }}
+                                  className="form-control cursor-pointer"
+                                  type="text"
+                                  name="thursday_hours"
+                                  onChange={(e) => handleHoursInput(e, index, 'thursday_date', weekDays.thursday , item)}
+                                  value={item.thursday_hours == null ? "0" : item.thursday_hours}
+                                  disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ?currentDay === 'thursday' ?false: true : false : currentDay !== 'thursday'}
+                                />
+                                <input
+                                 style={{ width: '80px' }}
+                                  className="form-control cursor-pointer"
+                                  type="text"
+                                  name="friday_hours"
+                                  onChange={(e) => handleHoursInput(e, index, 'friday_date', weekDays.friday , item)}
+                                  value={item.friday_hours == null ? "0" : item.friday_hours}
+                                  disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.friday) > new Date() ?currentDay === 'friday' ?false: true : false : currentDay !== 'friday'}
+                                />
+                                 <input
+                                 style={{ width: '80px' }}
+                                  className="form-control cursor-pointer"
+                                  type="text"
+                                  name="saturday_hours"
+                                  onChange={(e) => handleHoursInput(e, index, 'saturday_date', weekDays.saturday , item)}
+                                  value={item.saturday_hours == null ? "0" : item.saturday_hours}
+                                  disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ?currentDay === 'saturday' ?false: true : false : currentDay !== 'saturday'}
+                                />
+                                
+                               </div>
+                              </td>
+                             
+                             
+=======
+>>>>>>> 41e86625ac4e2de45c8f70d844c4e8626d6b134a
 
     <td colspan="8" >
       <div  >
