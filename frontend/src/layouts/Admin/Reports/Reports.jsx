@@ -81,7 +81,7 @@ function Reportsnew() {
                    value={activeTab}
                    onChange={(e)=>handleTabClick(e.target.value)}
                    >
-                    <option >Select Options</option>
+                   
                     <option value="jobStatusReport">Job Status Report</option>
                     <option value="jobsReceivedSentReports">Jobs Received Sent Reports</option>
                     <option value="jobSummaryReport">Job Summary Report</option>

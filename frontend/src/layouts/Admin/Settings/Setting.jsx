@@ -157,6 +157,9 @@ const Setting = () => {
 
   const roleData = async (req) => {
     const data = { req: req, authToken: token };
+
+    console.log('data', data);
+    return 
     await dispatch(Role(data))
       .unwrap()
       .then(async (response) => {
@@ -1102,7 +1105,7 @@ const Setting = () => {
                     onClick={(e) => handleTaskAdd(row)}
                   >
                     <i className="fa fa-plus pe-1" />
-                    Add Internal Task
+                    Add Task
                   </button>
                 )}
               </div>
@@ -1188,7 +1191,7 @@ const Setting = () => {
           {
             type: "hourminute1",
             name: "hourminute",
-            label: "Hour",
+            label: "Weekly Timesheet Hours",
             placeholder: "Hour",
           },
         ],
@@ -1340,7 +1343,7 @@ const Setting = () => {
           {
             type: "hourminute1",
             name: "hourminute",
-            label: "Hour",
+            label: "Weekly Timesheet Hours",
             placeholder: "Hour",
             value: data.hourminute,
           },

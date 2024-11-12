@@ -12,7 +12,7 @@ const createIncorporation = async (Incorporation) => {
   try {
     const [check] = await pool.query(checkQuery, [Incorporation.Incorporation]);
     if (check.length > 0) {
-      return { status: false, message: "Incorporation In already exists." };
+      return { status: false, message: "Incorporation I already exists." };
     }
     const [result] = await pool.query(query, [Incorporation.Incorporation]);
   
@@ -30,7 +30,7 @@ const createIncorporation = async (Incorporation) => {
     );
     return {
       status: true,
-      message: "Incorporation In created successfully.",
+      message: "Incorporation  created successfully.",
       data: result.insertId,
     };
   } catch (err) {
@@ -79,7 +79,7 @@ const deleteIncorporation = async (IncorporationId) => {
         ip: IncorporationId.ip,
         date: currentDate.toISOString().split("T")[0],
         module_name: "incorporation in",
-        log_message: `deleted incorporation in ${existName.name}`,
+        log_message: `deleted incorporation  ${existName.name}`,
         permission_type: "deleted",
         module_id: IncorporationId.id,
       }
@@ -124,7 +124,7 @@ const updateIncorporation = async (Incorporation) => {
   try {
     const [check] = await pool.execute(checkQuery, [name, id]);
     if (check.length > 0) {
-      return { status: false, message: "Incorporation In already exists." };
+      return { status: false, message: "Incorporation  already exists." };
     }
 
     const [[existStatus]] = await pool.execute(`SELECT status FROM incorporation_in WHERE id = ?`, [id]);
@@ -153,7 +153,7 @@ const updateIncorporation = async (Incorporation) => {
     }
     return {
       status: true,
-      message: "Incorporation In updated successfully.",
+      message: "Incorporation  updated successfully.",
       data: result.affectedRows,
     };
   } catch (err) {

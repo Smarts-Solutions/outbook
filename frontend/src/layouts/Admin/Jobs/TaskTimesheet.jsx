@@ -460,7 +460,7 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
           </div>
           <div className="col-lg-12">
             <div className="mb-3">
-              <label className="form-label">Tolal Hours</label>
+              <label className="form-label">Total Hours</label>
               <div className="input-group">
                 <div className="hours-div w-100">
                   <input

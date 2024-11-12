@@ -397,7 +397,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
         }
       }
     }
-    return { status: true, message: 'job add successfully.', data: result.insertId };
+    return { status: true, message: 'Job created successfully.', data: result.insertId };
   } catch (err) {
     console.log("err -", err)
     return { status: false, message: 'Error adding job.' };

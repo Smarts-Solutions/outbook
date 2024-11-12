@@ -70,7 +70,7 @@ const JobStatus = () => {
             </div>
             <div className='job-filter-btn '>
               <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
-              <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
+              <button className='xl-sheet btn btn-info text-white fw-normal ms-2'><i className="fas fa-file-excel"></i></button>
             </div>
           </div>
         </div>
