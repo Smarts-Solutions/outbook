@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Trash2 ,ChevronLeft ,ChevronRight } from "lucide-react";
+import { Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getTimesheetData, getTimesheetTaskTypedData, saveTimesheetData ,getStaffHourMinute} from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
+import { getTimesheetData, getTimesheetTaskTypedData, saveTimesheetData, getStaffHourMinute } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
 import sweatalert from 'sweetalert2';
 
 const Timesheet = () => {
@@ -13,14 +13,14 @@ const Timesheet = () => {
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const weekOffSetValue = useRef(0);
   const [submitStatusAllKey, setSubmitStatusAllKey] = useState(0);
- 
+
 
   const [expandedRows, setExpandedRows] = useState([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const toggleAllRowsView = () => {
     setIsExpanded(prevState => !prevState);
   };
-  
+
   const toggleRowView = (index) => {
     setExpandedRows((prev) =>
       prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
@@ -28,22 +28,22 @@ const Timesheet = () => {
   };
   const GetTimeSheet = async (weekOffset) => {
 
-    const req = { staff_id: staffDetails.id ,weekOffset : weekOffset };
-    
+    const req = { staff_id: staffDetails.id, weekOffset: weekOffset };
+
     const res = await dispatch(getTimesheetData({ req, authToken: token })).unwrap();
     setSubmitStatusAllKey(0)
     setDeleteRows([])
     if (res.status) {
-      if(res.data.length > 0 && res.data[0].submit_status === "1" ){
+      if (res.data.length > 0 && res.data[0].submit_status === "1") {
         setSubmitStatusAllKey(1)
       }
       setTimeSheetRows(res.data)
       setTimeSheetRows((prevRows) =>
         prevRows.map((row) => {
-          const sum = (parseFloat(row.monday_hours) || 0) + (parseFloat(row.tuesday_hours) || 0) + (parseFloat(row.wednesday_hours) || 0) + (parseFloat(row.thursday_hours) || 0) + (parseFloat(row.friday_hours) || 0) + (parseFloat(row.saturday_hours) || 0) + (parseFloat(row.sunday_hours) || 0); 
+          const sum = (parseFloat(row.monday_hours) || 0) + (parseFloat(row.tuesday_hours) || 0) + (parseFloat(row.wednesday_hours) || 0) + (parseFloat(row.thursday_hours) || 0) + (parseFloat(row.friday_hours) || 0) + (parseFloat(row.saturday_hours) || 0) + (parseFloat(row.sunday_hours) || 0);
           return { ...row, total_hours: parseFloat(sum).toFixed(2) };
         })
-        
+
       );
     } else {
       setSubmitStatusAllKey(0)
@@ -83,7 +83,7 @@ const Timesheet = () => {
   });
 
 
-  
+
 
   useEffect(() => {
     const today = new Date();
@@ -118,7 +118,7 @@ const Timesheet = () => {
   const [timeSheetRows, setTimeSheetRows] = useState([]);
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
- 
+
 
   // Function to handle dropdown change
   const handleTabChange = (event) => {
@@ -141,7 +141,7 @@ const Timesheet = () => {
       client_id: null,
       job_id: null,
       task_id: null,
-      job_total_time:null,
+      job_total_time: null,
       monday_date: null,
       monday_hours: null,
       tuesday_date: null,
@@ -216,18 +216,18 @@ const Timesheet = () => {
 
   const [deleteRows, setDeleteRows] = useState([]);
   const handleDeleteRow = (index) => {
-   const newSheetRows = [...timeSheetRows];
-   const id = newSheetRows[index].id;
-    if(id != null){
+    const newSheetRows = [...timeSheetRows];
+    const id = newSheetRows[index].id;
+    if (id != null) {
       setDeleteRows((prevRows) => {
-        const existingIds = new Set(prevRows); 
-        if (!existingIds.has(id)) { 
-            return [...prevRows, id];
+        const existingIds = new Set(prevRows);
+        if (!existingIds.has(id)) {
+          return [...prevRows, id];
         }
         return prevRows;
-    });
-   }
-   
+      });
+    }
+
     newSheetRows.splice(index, 1);
     setTimeSheetRows(newSheetRows);
   };
@@ -287,8 +287,10 @@ const Timesheet = () => {
             if (res1.data.length > 0) {
               updatedRows[index].clientData = res1.data;
               updatedRows[index].client_id = res1.data[0].id;
-              const req = { staff_id: staffDetails.id, task_type: "4", client_id 
-              : res1.data[0].id };
+              const req = {
+                staff_id: staffDetails.id, task_type: "4", client_id
+                  : res1.data[0].id
+              };
               const res2 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
               if (res2.status) {
                 if (res2.data.length > 0) {
@@ -304,9 +306,9 @@ const Timesheet = () => {
                   }
                 }
               }
-              
-             }
-           }
+
+            }
+          }
 
         }
       }
@@ -343,7 +345,7 @@ const Timesheet = () => {
   };
 
   function convertTimeFormat(timeString) {
-    if(timeString == null){
+    if (timeString == null) {
       return null;
     }
     const [hours, minutes] = timeString.split(':');
@@ -403,10 +405,10 @@ const Timesheet = () => {
       const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
       if (res.status) {
         if (res.data.length > 0) {
-          let job_total_time =  updatedRows[index].jobData.find(item => item.id === parseInt(e.target.value));
+          let job_total_time = updatedRows[index].jobData.find(item => item.id === parseInt(e.target.value));
           updatedRows[index].job_id = e.target.value;
-          updatedRows[index].job_total_time = job_total_time.job_total_time==undefined?null:convertTimeFormat(job_total_time.job_total_time);
-          
+          updatedRows[index].job_total_time = job_total_time.job_total_time == undefined ? null : convertTimeFormat(job_total_time.job_total_time);
+
           updatedRows[index].taskData = res.data;
           updatedRows[index].task_id = res.data[0].id;
         }
@@ -430,8 +432,8 @@ const Timesheet = () => {
 
   }
 
-  const handleHoursInput = async (e, index, day_name, date_value ,item) => {
-   
+  const handleHoursInput = async (e, index, day_name, date_value, item) => {
+
     let value = e.target.value;
     let name = e.target.name;
     const updatedRows = [...timeSheetRows]
@@ -472,18 +474,18 @@ const Timesheet = () => {
     updatedRows[index][day_name] = date_final_value;
     updatedRows[index][name] = value;
 
-    
-    const sum = (parseFloat(updatedRows[index].monday_hours) || 0) + (parseFloat(updatedRows[index].tuesday_hours) || 0) + (parseFloat(updatedRows[index].wednesday_hours) || 0) + (parseFloat(updatedRows[index].thursday_hours) || 0) + (parseFloat(updatedRows[index].friday_hours) || 0) + (parseFloat(updatedRows[index].saturday_hours) || 0) + (parseFloat(updatedRows[index].sunday_hours) || 0); 
+
+    const sum = (parseFloat(updatedRows[index].monday_hours) || 0) + (parseFloat(updatedRows[index].tuesday_hours) || 0) + (parseFloat(updatedRows[index].wednesday_hours) || 0) + (parseFloat(updatedRows[index].thursday_hours) || 0) + (parseFloat(updatedRows[index].friday_hours) || 0) + (parseFloat(updatedRows[index].saturday_hours) || 0) + (parseFloat(updatedRows[index].sunday_hours) || 0);
     updatedRows[index].total_hours = sum;
 
     // console.log("updatedRows[index].total_hours ",updatedRows[index].total_hours)
     // console.log("updatedRows[index] ",updatedRows[index])
     // console.log("updatedRows[index] staffs_hourminute ",updatedRows[index].staffs_hourminute)
     // console.log("updatedRows[index] staffs_hourminute parsfloat",parseFloat(convertTimeFormat(updatedRows[index].staffs_hourminute)))
-    
+
     // warning total hours
-    if(updatedRows[index].staffs_hourminute != null && updatedRows[index].staffs_hourminute != undefined && e.target.value != ''){
-       if(updatedRows[index].total_hours > parseFloat(convertTimeFormat(updatedRows[index].staffs_hourminute))){
+    if (updatedRows[index].staffs_hourminute != null && updatedRows[index].staffs_hourminute != undefined && e.target.value != '') {
+      if (updatedRows[index].total_hours > parseFloat(convertTimeFormat(updatedRows[index].staffs_hourminute))) {
         sweatalert.fire({
           icon: 'warning',
           title: "Your total allotted time has exceeded.",
@@ -491,9 +493,9 @@ const Timesheet = () => {
           showConfirmButton: true,
           timer: 3000
         })
-       }
       }
- 
+    }
+
     setTimeSheetRows(updatedRows);
     // update record only
     const rowId = updatedRows[index].id;
@@ -551,7 +553,7 @@ const Timesheet = () => {
         return rest;
       });
 
-      const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows ,deleteRows:deleteRows };
+      const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows, deleteRows: deleteRows };
       const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
       if (res.status) {
         sweatalert.fire({
@@ -578,47 +580,47 @@ const Timesheet = () => {
         return
       }
     }
-   
-     setSubmitStatus(1)
-     setRemarkModel(true);
-    
+
+    setSubmitStatus(1)
+    setRemarkModel(true);
+
   }
-  
+
   const saveTimeSheetRemark = async (e) => {
 
-   if(submitStatus == 1){
-    const updatedTimeSheetRows = timeSheetRows.map(item => {
-      return {
-        ...item,
-        submit_status: "1",
-        remark: item.editRow === 1 ? remarkText : null 
-      };
-    });
-
-    const updatedTimeSheetRows1 = updatedTimeSheetRows.map(row => {
-      const { customerData, clientData, jobData, taskData, ...rest } = row;
-      return rest;
-    });
-
-    const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows1 , deleteRows:deleteRows};
-    const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
-    if (res.status) {
-      setRemarkText(null)
-      setUpdateTimeSheetRows([])
-      setRemarkModel(false)
-      sweatalert.fire({
-        icon: 'success',
-        title: "Timesheet data submit successfully.",
-        timerProgressBar: true,
-        showConfirmButton: true,
-        timer: 1500
+    if (submitStatus == 1) {
+      const updatedTimeSheetRows = timeSheetRows.map(item => {
+        return {
+          ...item,
+          submit_status: "1",
+          remark: item.editRow === 1 ? remarkText : null
+        };
       });
-      setSubmitStatus(0)
-      setSubmitStatusAllKey(0)
-      GetTimeSheet(weekOffSetValue.current);
+
+      const updatedTimeSheetRows1 = updatedTimeSheetRows.map(row => {
+        const { customerData, clientData, jobData, taskData, ...rest } = row;
+        return rest;
+      });
+
+      const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows1, deleteRows: deleteRows };
+      const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
+      if (res.status) {
+        setRemarkText(null)
+        setUpdateTimeSheetRows([])
+        setRemarkModel(false)
+        sweatalert.fire({
+          icon: 'success',
+          title: "Timesheet data submit successfully.",
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 1500
+        });
+        setSubmitStatus(0)
+        setSubmitStatusAllKey(0)
+        GetTimeSheet(weekOffSetValue.current);
+      }
+      return
     }
-   return
-   }
 
 
 
@@ -640,7 +642,7 @@ const Timesheet = () => {
       return rest;
     });
 
-    const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows1 ,deleteRows:deleteRows };
+    const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows1, deleteRows: deleteRows };
     const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
     if (res.status) {
       setRemarkText(null)
@@ -659,25 +661,25 @@ const Timesheet = () => {
     }
   }
 
-// const dayMonthFormatDate = (dateString) => {
-//     const parts = dateString.split(', ')[1].split('/');
-//     const day = parts[0];
-//     const monthIndex = parts[1] - 1;
-//     const year = parts[2];
-//     const date = new Date(year, monthIndex, day);
-//     const options = { month: 'short' };
-//     const month = date.toLocaleDateString('en-US', options).toLowerCase();
-//     return `${day} ${month}`;
-// };
+  // const dayMonthFormatDate = (dateString) => {
+  //     const parts = dateString.split(', ')[1].split('/');
+  //     const day = parts[0];
+  //     const monthIndex = parts[1] - 1;
+  //     const year = parts[2];
+  //     const date = new Date(year, monthIndex, day);
+  //     const options = { month: 'short' };
+  //     const month = date.toLocaleDateString('en-US', options).toLowerCase();
+  //     return `${day} ${month}`;
+  // };
 
-// // Example usage
-// console.log("weekDays.monday ", weekDays);
-// if (weekDays.monday !== "") {
-//     console.log("dayMonthFormatDate ", dayMonthFormatDate(weekDays.monday));
-// }
+  // // Example usage
+  // console.log("weekDays.monday ", weekDays);
+  // if (weekDays.monday !== "") {
+  //     console.log("dayMonthFormatDate ", dayMonthFormatDate(weekDays.monday));
+  // }
 
-const dayMonthFormatDate = (dateString) => {
-     const parts = dateString.split(', ');
+  const dayMonthFormatDate = (dateString) => {
+    const parts = dateString.split(', ');
     const dayOfWeek = parts[0]; // Get the day of the week
     const dateParts = parts[1].split('/'); // Split date part
 
@@ -694,24 +696,24 @@ const dayMonthFormatDate = (dateString) => {
 
     // Return formatted string
     return `${dayOfWeek} ${day} ${month}`;
-};
+  };
 
-// Example usage
+  // Example usage
 
   return (
-   
-      <div className="container-fluid">
-        <div className="content-title">
-          <div className="row">
-            <div className="col-md-8">
-              <div className="tab-title">
-                <h3 className="mt-0">Timesheet</h3>
-              </div>
+
+    <div className="container-fluid">
+      <div className="content-title">
+        <div className="row">
+          <div className="col-md-8">
+            <div className="tab-title">
+              <h3 className="mt-0">Timesheet</h3>
             </div>
           </div>
         </div>
-        <div className="report-data mt-4">
-          {/* <div className="col-md-4">
+      </div>
+      <div className="report-data mt-4">
+        {/* <div className="col-md-4">
             <div className="form-group">
               <select
                 className="form-select"
@@ -734,300 +736,300 @@ const dayMonthFormatDate = (dateString) => {
             </div>
           </div> */}
 
-          {/* Tabs Content */}
-          <div className="tab-content mt-5">
-            {/* Render content based on selected tab */}
-            {selectedTab === "this-week" && (
-              <div className="tab-pane show active">
-                <div id="customerList">
-                  <div className="row">
+        {/* Tabs Content */}
+        <div className="tab-content mt-5">
+          {/* Render content based on selected tab */}
+          {selectedTab === "this-week" && (
+            <div className="tab-pane show active">
+              <div id="customerList">
+                <div className="row">
 
-                    <div className="table-responsive table-card  mb-1">
-                      <table
-                        className="timesheetTable table align-middle table-nowrap"
-                        id="customerTable"
-                        style={{width:"max-content"}}
-                      >
-                        <thead className="table-light table-head-blue">
-                          
-                          <tr>
-                            <th className="dropdwnCol2 pe-0" data-field="phone"  style={{ width: '10px' }}>
-                              No
-                            </th>
-                            <th className="ps-0" data-field="phone"  style={{ width: '130px' }}>
-                              Task Type
-                            </th>
-                            <th className="dropdwnCol7" data-field="phone"  style={{ width: '160px' }}>
-                              Customer
-                            </th>
-                            <th className="dropdwnCol6" data-field="phone"  style={{ width: '160px' }}>
-                              Client
-                            </th>
-                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '160px' }}>
-                              Job
-                            </th>
-                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '130px' }}>
-                              Task
-                            </th>
-                           
-                            <th colSpan="8" className="pe-0 week-data">
-                           
-                           <div className="d-flex align-items-center">
-                           <ChevronLeft onClick={(e) => { e.preventDefault(); changeWeek(-1); }} />
-                           <span className="pt-1 me-0">{weekDays.monday ? dayMonthFormatDate(weekDays.monday) : ""}</span>
-         {/* Conditionally render weekdays when expanded */}
-         {isExpanded && (
-           <div style={{width:'70%'}}>
-           
-           <span>{weekDays.tuesday ? dayMonthFormatDate(weekDays.tuesday) : ""}</span>
-           <span>{weekDays.wednesday ? dayMonthFormatDate(weekDays.wednesday) : ""}</span>
-           <span>{weekDays.thursday ? dayMonthFormatDate(weekDays.thursday) : ""}</span>
-           <span>{weekDays.friday ? dayMonthFormatDate(weekDays.friday) : ""}</span>
-           <span>{weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : ""}</span>
-           <span>{weekDays.sunday ? dayMonthFormatDate(weekDays.sunday) : ""}</span>
-           </div>
-         )}
-             <button  onClick={toggleAllRowsView} className=" px-0 btn btn-sm btn-link text-decoration-none">
-             {isExpanded ? "Collapse All" : "Expand All"}
-           </button>
-           <ChevronRight onClick={(e) => { e.preventDefault(); changeWeek(1); }} />
-         </div>
-        
-       </th>
-                            {/* <th className="dropdwnCol5" data-field="phone">
+                  <div className="table-responsive table-card  mb-1">
+                    <table
+                      className="timesheetTable table align-middle table-nowrap"
+                      id="customerTable"
+                      style={{ width: "max-content" }}
+                    >
+                      <thead className="table-light table-head-blue">
+
+                        <tr>
+                          <th className="dropdwnCol2 pe-0" data-field="phone" style={{ width: '10px' }}>
+                            No
+                          </th>
+                          <th className="ps-0" data-field="phone" style={{ width: '130px' }}>
+                            Task Type
+                          </th>
+                          <th className="dropdwnCol7" data-field="phone" style={{ width: '160px' }}>
+                            Customer
+                          </th>
+                          <th className="dropdwnCol6" data-field="phone" style={{ width: '160px' }}>
+                            Client
+                          </th>
+                          <th className="dropdwnCol5" data-field="phone" style={{ width: '160px' }}>
+                            Job
+                          </th>
+                          <th className="dropdwnCol5" data-field="phone" style={{ width: '130px' }}>
+                            Task
+                          </th>
+
+                          <th colSpan="8" className="pe-0 week-data">
+
+                            <div className="d-flex align-items-center">
+                              <ChevronLeft onClick={(e) => { e.preventDefault(); changeWeek(-1); }} />
+                              <span className="pt-1 me-0">{weekDays.monday ? dayMonthFormatDate(weekDays.monday) : ""}</span>
+                              {/* Conditionally render weekdays when expanded */}
+                              {isExpanded && (
+                                <div style={{ width: '70%' }}>
+
+                                  <span>{weekDays.tuesday ? dayMonthFormatDate(weekDays.tuesday) : ""}</span>
+                                  <span>{weekDays.wednesday ? dayMonthFormatDate(weekDays.wednesday) : ""}</span>
+                                  <span>{weekDays.thursday ? dayMonthFormatDate(weekDays.thursday) : ""}</span>
+                                  <span>{weekDays.friday ? dayMonthFormatDate(weekDays.friday) : ""}</span>
+                                  <span>{weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : ""}</span>
+                                  <span>{weekDays.sunday ? dayMonthFormatDate(weekDays.sunday) : ""}</span>
+                                </div>
+                              )}
+                              <button onClick={toggleAllRowsView} className=" px-0 btn btn-sm btn-link text-decoration-none">
+                                {isExpanded ? "Collapse All" : "Expand All"}
+                              </button>
+                              <ChevronRight onClick={(e) => { e.preventDefault(); changeWeek(1); }} />
+                            </div>
+
+                          </th>
+                          {/* <th className="dropdwnCol5" data-field="phone">
                               {weekDays.sunday!=""?dayMonthFormatDate(weekDays.sunday): ""}
                             </th> */}
-                           
-                            {submitStatusAllKey === 0? 
-                             <th className="dropdwnCol5" data-field="phone">
-                             Action
-                           </th>
-                            :""}
-                           
-                          </tr>
-                        </thead>
 
-                        <tbody className="list form-check-all">
-                          {timeSheetRows?.map((item, index) => (
-                            
+                          {submitStatusAllKey === 0 ?
+                            <th className="dropdwnCol5" data-field="phone">
+                              Action
+                            </th>
+                            : ""}
 
-                             
-                            <tr className="tabel_new">
-                              <td className="pe-0">{index + 1}</td>
-                               
-                              <td className="ps-0">
-                                {item.newRow === 1 ? (
-                                  <select
-                                    className="form-select form-control"
-                                    
-                                    value={item.task_type}
-                                    onChange={(e) => handleChangeTaskType(e, item, index)}
-                                  >
-                                    <option value="1">Internal</option>
-                                    <option value="2">External</option>
-                                  </select>
-                                ) : (
-                                  <select
-                                    className="form-select form-control"
-                                    
-                                    value={item.task_type}
-                                    disabled
-                                  >
-                                    <option value="1">Internal</option>
-                                    <option value="2">External</option>
-                                  </select>
-                                )}
-                              </td>
+                        </tr>
+                      </thead>
 
-                              {/* Customer Selection */}
-                              <td>
-                                {item.newRow === 1 && item.task_type === "2" ? (
-                                  <select
-                                    className="form-select"
-                                   
-                                    defaultValue={item.customer_id || ''}
-                                    onChange={(e) => selectCustomerData(e, index)}
-                                  >
-                                    {item.customerData?.map((customer) => (
-                                      <option key={customer.id} value={customer.id}>
-                                        {customer.trading_name}
-                                      </option>
-                                    ))}
-                                  </select>
-                                ) : (
-                                  <input
-                                    className="form-control cursor-pointer"
-                                   
-                                    defaultValue={item.task_type === "1" ? "No Customer" : item.customer_name}
-                                    disabled
+                      <tbody className="list form-check-all">
+                        {timeSheetRows?.map((item, index) => (
+
+
+
+                          <tr className="tabel_new">
+                            <td className="pe-0">{index + 1}</td>
+
+                            <td className="ps-0">
+                              {item.newRow === 1 ? (
+                                <select
+                                  className="form-select form-control"
+
+                                  value={item.task_type}
+                                  onChange={(e) => handleChangeTaskType(e, item, index)}
+                                >
+                                  <option value="1">Internal</option>
+                                  <option value="2">External</option>
+                                </select>
+                              ) : (
+                                <select
+                                  className="form-select form-control"
+
+                                  value={item.task_type}
+                                  disabled
+                                >
+                                  <option value="1">Internal</option>
+                                  <option value="2">External</option>
+                                </select>
+                              )}
+                            </td>
+
+                            {/* Customer Selection */}
+                            <td>
+                              {item.newRow === 1 && item.task_type === "2" ? (
+                                <select
+                                  className="form-select"
+
+                                  defaultValue={item.customer_id || ''}
+                                  onChange={(e) => selectCustomerData(e, index)}
+                                >
+                                  {item.customerData?.map((customer) => (
+                                    <option key={customer.id} value={customer.id}>
+                                      {customer.trading_name}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <input
+                                  className="form-control cursor-pointer"
+
+                                  defaultValue={item.task_type === "1" ? "No Customer" : item.customer_name}
+                                  disabled
+                                />
+                              )}
+                            </td>
+
+                            {/* Client Selection */}
+                            <td>
+                              {item.newRow === 1 && item.task_type === "2" ? (
+                                <select
+                                  className="form-select"
+
+                                  defaultValue={item.client_id || ''}
+                                  onChange={(e) => selectClientData(e, index)}
+                                >
+                                  {item.clientData?.map((client) => (
+                                    <option key={client.id} value={client.id}>
+                                      {client.trading_name}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <input
+                                  className="form-control cursor-pointer"
+
+                                  defaultValue={item.task_type === "1" ? "No Client" : item.client_name}
+                                  disabled
+                                />
+                              )}
+                            </td>
+
+                            {/* Job Selection */}
+                            <td>
+                              {item.newRow === 1 ? (
+                                <select
+                                  className="form-select"
+
+                                  defaultValue={item.job_id || ''}
+                                  onChange={(e) => selectJobData(e, item.task_type, index)}
+                                >
+                                  {item.jobData?.map((job) => (
+                                    <option key={job.id} value={job.id}>
+                                      {job.name}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <input
+                                  className="form-control cursor-pointer"
+
+                                  defaultValue={item.task_type === "1" ? item.internal_name : item.job_name}
+                                  disabled
+                                />
+                              )}
+                            </td>
+
+                            {/* Task Selection */}
+                            <td>
+                              {item.newRow === 1 ? (
+                                <select
+                                  className="form-select"
+
+                                  defaultValue={item.task_id || ''}
+                                  onChange={(e) => selectTaskData(e, index)}
+                                >
+                                  {item.taskData?.map((task) => (
+                                    <option key={task.id} value={task.id}>
+                                      {task.name}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <input
+                                  className="form-control cursor-pointer"
+
+                                  defaultValue={item.task_type === "1" ? item.sub_internal_name : item.task_name}
+                                  disabled
+                                />
+                              )}
+                            </td>
+
+                            {/*Monday Input*/}
+                            <td colspan="8" >
+                              <div className="ms-2" >
+                                {isExpanded ? (
+                                  <div className="d-flex justify-content-between ms-3" style={{ width: '88%' }}><input
+                                    className="form-control cursor-pointer border-radius-end"
+                                    type="text"
+                                    style={{ width: '76px' }}
+                                    name="monday_hours"
+
+                                    onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday, item)}
+                                    value={item.monday_hours == null ? "0" : item.monday_hours}
+                                    disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false : currentDay !== 'monday'}
                                   />
-                                )}
-                              </td>
+                                    <input
+                                      style={{ width: '80px' }}
+                                      className="form-control cursor-pointer"
+                                      type="text"
+                                      name="tuesday_hours"
+                                      onChange={(e) => handleHoursInput(e, index, 'tuesday_date', weekDays.tuesday, item)}
+                                      value={item.tuesday_hours == null ? "0" : item.tuesday_hours}
+                                      disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false : true : false : currentDay !== 'tuesday'}
+                                    />
+                                    <input
+                                      style={{ width: '80px' }}
+                                      className="form-control cursor-pointer"
+                                      type="text"
+                                      name="wednesday_hours"
+                                      onChange={(e) => handleHoursInput(e, index, 'wednesday_date', weekDays.wednesday, item)}
+                                      value={item.wednesday_hours == null ? "0" : item.wednesday_hours}
+                                      disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false : true : false : currentDay !== 'wednesday'}
+                                    />
+                                    <input
+                                      style={{ width: '80px' }}
+                                      className="form-control cursor-pointer"
+                                      type="text"
+                                      name="thursday_hours"
+                                      onChange={(e) => handleHoursInput(e, index, 'thursday_date', weekDays.thursday, item)}
+                                      value={item.thursday_hours == null ? "0" : item.thursday_hours}
+                                      disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ? currentDay === 'thursday' ? false : true : false : currentDay !== 'thursday'}
+                                    />
+                                    <input
+                                      style={{ width: '80px' }}
+                                      className="form-control cursor-pointer"
+                                      type="text"
+                                      name="friday_hours"
+                                      onChange={(e) => handleHoursInput(e, index, 'friday_date', weekDays.friday, item)}
+                                      value={item.friday_hours == null ? "0" : item.friday_hours}
+                                      disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ? false : true : false : currentDay !== 'friday'}
+                                    />
+                                    <input
+                                      style={{ width: '80px' }}
+                                      className="form-control cursor-pointer"
+                                      type="text"
+                                      name="saturday_hours"
+                                      onChange={(e) => handleHoursInput(e, index, 'saturday_date', weekDays.saturday, item)}
+                                      value={item.saturday_hours == null ? "0" : item.saturday_hours}
+                                      disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
+                                    />
+                                    <input
+                                      style={{ width: '80px' }}
+                                      className="form-control cursor-pointer"
+                                      type="text"
+                                      name="sunday_hours"
+                                      onChange={(e) => handleHoursInput(e, index, 'sunday_date', weekDays.sunday, item)}
+                                      value={item.sunday_hours == null ? "0" : item.sunday_hours}
+                                      disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.sunday) > new Date() ? currentDay === 'sunday' ? false : true : false : currentDay !== 'sunday'}
+                                    />
+                                  </div>
 
-                              {/* Client Selection */}
-                              <td>
-                                {item.newRow === 1 && item.task_type === "2" ? (
-                                  <select
-                                    className="form-select"
-                                   
-                                    defaultValue={item.client_id || ''}
-                                    onChange={(e) => selectClientData(e, index)}
-                                  >
-                                    {item.clientData?.map((client) => (
-                                      <option key={client.id} value={client.id}>
-                                        {client.trading_name}
-                                      </option>
-                                    ))}
-                                  </select>
                                 ) : (
-                                  <input
-                                    className="form-control cursor-pointer"
-                                   
-                                    defaultValue={item.task_type === "1" ? "No Client" : item.client_name}
-                                    disabled
-                                  />
-                                )}
-                              </td>
 
-                              {/* Job Selection */}
-                              <td>
-                                {item.newRow === 1 ? (
-                                  <select
-                                    className="form-select"
-                                  
-                                    defaultValue={item.job_id || ''}
-                                    onChange={(e) => selectJobData(e, item.task_type, index)}
-                                  >
-                                    {item.jobData?.map((job) => (
-                                      <option key={job.id} value={job.id}>
-                                        {job.name}
-                                      </option>
-                                    ))}
-                                  </select>
-                                ) : (
-                                  <input
-                                    className="form-control cursor-pointer"
-                                   
-                                    defaultValue={item.task_type === "1" ? item.internal_name : item.job_name}
-                                    disabled
-                                  />
-                                )}
-                              </td>
+                                  <div className="ms-3"> <input
+                                    className="form-control cursor-pointer border-radius-end"
+                                    type="text"
+                                    style={{ width: '80px' }}
+                                    name="monday_hours"
 
-                              {/* Task Selection */}
-                              <td>
-                                {item.newRow === 1 ? (
-                                  <select
-                                    className="form-select"
-                                   
-                                    defaultValue={item.task_id || ''}
-                                    onChange={(e) => selectTaskData(e, index)}
-                                  >
-                                    {item.taskData?.map((task) => (
-                                      <option key={task.id} value={task.id}>
-                                        {task.name}
-                                      </option>
-                                    ))}
-                                  </select>
-                                ) : (
-                                  <input
-                                    className="form-control cursor-pointer"
-                                   
-                                    defaultValue={item.task_type === "1" ? item.sub_internal_name : item.task_name}
-                                    disabled
-                                  />
+                                    onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday, item)}
+                                    value={item.monday_hours == null ? "0" : item.monday_hours}
+                                    disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false : currentDay !== 'monday'}
+                                  /></div>
                                 )}
-                              </td>
-                          
-                              {/*Monday Input*/}
-                              <td colspan="8" >
-      <div className="ms-2" >
-            {isExpanded ? (
-                <div className="d-flex justify-content-between ms-3" style={{width:'88%'}}><input
-                className="form-control cursor-pointer border-radius-end"
-                type="text"
-                style={{ width: '76px' }}
-                name="monday_hours"
-                
-                onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday ,item)}
-                value={item.monday_hours == null ? "0" : item.monday_hours}
-                disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday'?false:true : false : currentDay !== 'monday'}
-              />
-                 <input
-               style={{ width: '80px' }}
-                className="form-control cursor-pointer"
-                type="text"
-                name="tuesday_hours"
-                onChange={(e) => handleHoursInput(e, index, 'tuesday_date', weekDays.tuesday,item)}
-                value={item.tuesday_hours == null ? "0" : item.tuesday_hours}
-                disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false:true : false : currentDay !== 'tuesday'}
-              />
-               <input
-               style={{ width: '80px' }}
-                className="form-control cursor-pointer"
-                type="text"
-                name="wednesday_hours"
-                onChange={(e) => handleHoursInput(e, index, 'wednesday_date', weekDays.wednesday,item)}
-                value={item.wednesday_hours == null ? "0" : item.wednesday_hours}
-                disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false :true : false : currentDay !== 'wednesday'}
-              />
-                <input
-               style={{ width: '80px' }}
-                className="form-control cursor-pointer"
-                type="text"
-                name="thursday_hours"
-                onChange={(e) => handleHoursInput(e, index, 'thursday_date', weekDays.thursday , item)}
-                value={item.thursday_hours == null ? "0" : item.thursday_hours}
-                disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ?currentDay === 'thursday' ?false: true : false : currentDay !== 'thursday'}
-              />
-               <input
-               style={{ width: '80px' }}
-                className="form-control cursor-pointer"
-                type="text"
-                name="friday_hours"
-                onChange={(e) => handleHoursInput(e, index, 'friday_date', weekDays.friday , item)}
-                value={item.friday_hours == null ? "0" : item.friday_hours}
-                disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.friday) > new Date() ?currentDay === 'friday' ?false: true : false : currentDay !== 'friday'}
-              />
-               <input
-               style={{ width: '80px' }}
-                className="form-control cursor-pointer"
-                type="text"
-                name="saturday_hours"
-                onChange={(e) => handleHoursInput(e, index, 'saturday_date', weekDays.saturday , item)}
-                value={item.saturday_hours == null ? "0" : item.saturday_hours}
-                disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ?currentDay === 'saturday' ?false: true : false : currentDay !== 'saturday'}
-              />
-               <input
-               style={{ width: '80px' }}
-                className="form-control cursor-pointer"
-                type="text"
-                name="sunday_hours"
-                onChange={(e) => handleHoursInput(e, index, 'sunday_date', weekDays.sunday , item)}
-                value={item.sunday_hours == null ? "0" : item.sunday_hours}
-                disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.sunday) > new Date() ?currentDay === 'sunday' ?false: true : false : currentDay !== 'sunday'}
-              />
-              </div>
-  
-            ) : (
-            
-            <div className="ms-3"> <input
-              className="form-control cursor-pointer border-radius-end"
-              type="text"
-              style={{ width: '80px' }}
-              name="monday_hours"
-              
-              onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday ,item)}
-              value={item.monday_hours == null ? "0" : item.monday_hours}
-              disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday'?false:true : false : currentDay !== 'monday'}
-            /></div>
-            )}
-            </div>
-          </td>
-                             
+                              </div>
+                            </td>
 
-                              {/*Sunday Input*/}
-                              {/* 
+
+                            {/*Sunday Input*/}
+                            {/* 
                                <td>
                                 <input
                                   className="form-control cursor-pointer"
@@ -1041,166 +1043,166 @@ const dayMonthFormatDate = (dateString) => {
                               </td>
                               
                               */}
-                             
-                              {submitStatusAllKey === 0?
-                               <td className="d-flex ps-0">
-                               {
-                                 item.submit_status === "0"?
 
-                                 item.editRow == 0 || item.editRow == undefined?
-                                 <button
-                                 className="edit-icon"
-                                 onClick={(e) => {
-                                   editRow(e, index);
-                                 }}
-                                >
-                                <i className="fa fa-pencil text-primary  "></i>
-                               </button>
-                                 :
-                                 <button
-                                 className="edit-icon"
-                                 onClick={(e) => {
-                                   undoEditRow(e, index);
-                                 }}
-                                >
-                               <i class="fa-solid fa-arrow-rotate-left"></i>
-                               </button>
-                                 :""
-                               }
-                               {submitStatusAllKey === 0?
-                               <button
-                               className="delete-icon"
-                               onClick={() => handleDeleteRow(index)}
-                             >
-                               <i className="ti-trash text-danger  "></i>
-                               </button> 
-                               :""}
-                               {/* <Trash2 className="delete-icon" /> */}
-                             </td>
-                              :""}
-                             
-                            </tr>
-                          ))}
-                          <tr className="tabel_new">
-                            <td>
-                            {
-                              submitStatusAllKey === 0?
-                              <button
-                              className="d-flex btn btn-info fw-normal px-2"
-                              onClick={handleAddNewSheet}
-                            >
-                              <i
-                                style={{
-                                  display: "block",
-                                  fontSize: 18,
-                                  cursor: "pointer",
-                                }}
-                                className="ri-add-circle-fill"
-                              />
-                            </button>
-                              :""
-                            }  
-                            </td>
-                            <td colSpan={12}></td>
+                            {submitStatusAllKey === 0 ?
+                              <td className="d-flex ps-0">
+                                {
+                                  item.submit_status === "0" ?
+
+                                    item.editRow == 0 || item.editRow == undefined ?
+                                      <button
+                                        className="edit-icon"
+                                        onClick={(e) => {
+                                          editRow(e, index);
+                                        }}
+                                      >
+                                        <i className="fa fa-pencil text-primary  "></i>
+                                      </button>
+                                      :
+                                      <button
+                                        className="edit-icon"
+                                        onClick={(e) => {
+                                          undoEditRow(e, index);
+                                        }}
+                                      >
+                                        <i class="fa-solid fa-arrow-rotate-left"></i>
+                                      </button>
+                                    : ""
+                                }
+                                {submitStatusAllKey === 0 ?
+                                  <button
+                                    className="delete-icon"
+                                    onClick={() => handleDeleteRow(index)}
+                                  >
+                                    <i className="ti-trash text-danger  "></i>
+                                  </button>
+                                  : ""}
+                                {/* <Trash2 className="delete-icon" /> */}
+                              </td>
+                              : ""}
+
                           </tr>
-                        </tbody>
-                      </table>
-                    </div>
+                        ))}
+                        <tr className="tabel_new">
+                          <td>
+                            {
+                              submitStatusAllKey === 0 ?
+                                <button
+                                  className="d-flex btn btn-info fw-normal px-2"
+                                  onClick={handleAddNewSheet}
+                                >
+                                  <i
+                                    style={{
+                                      display: "block",
+                                      fontSize: 18,
+                                      cursor: "pointer",
+                                    }}
+                                    className="ri-add-circle-fill"
+                                  />
+                                </button>
+                                : ""
+                            }
+                          </td>
+                          <td colSpan={12}></td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {selectedTab === "last-week" && (
-              <div>This Last week content...</div>
-            )}
+          {selectedTab === "last-week" && (
+            <div>This Last week content...</div>
+          )}
 
-            {selectedTab === "this-month" && (
-              <div>This month's content...</div>
-            )}
-            {selectedTab === "last-month" && (
-              <div>Last month's content...</div>
-            )}
-            {selectedTab === "last-quarter" && (
-              <div>Last quarter's content...</div>
-            )}
-            {selectedTab === "this-6-months" && (
-              <div>This 6 months' content...</div>
-            )}
-            {selectedTab === "last-6-months" && (
-              <div>Last 6 months' content...</div>
-            )}
-            {selectedTab === "this-year" && (
-              <div>This year's content...</div>
-            )}
-            {selectedTab === "last-year" && (
-              <div>Last year's content...</div>
-            )}
-            {selectedTab === "custom" && <div>Custom content...</div>}
-          </div>
-          <div className="d-flex justify-content-end mt-3">
-            {submitStatusAllKey === 0 ? 
+          {selectedTab === "this-month" && (
+            <div>This month's content...</div>
+          )}
+          {selectedTab === "last-month" && (
+            <div>Last month's content...</div>
+          )}
+          {selectedTab === "last-quarter" && (
+            <div>Last quarter's content...</div>
+          )}
+          {selectedTab === "this-6-months" && (
+            <div>This 6 months' content...</div>
+          )}
+          {selectedTab === "last-6-months" && (
+            <div>Last 6 months' content...</div>
+          )}
+          {selectedTab === "this-year" && (
+            <div>This year's content...</div>
+          )}
+          {selectedTab === "last-year" && (
+            <div>Last year's content...</div>
+          )}
+          {selectedTab === "custom" && <div>Custom content...</div>}
+        </div>
+        <div className="d-flex justify-content-end mt-3">
+          {submitStatusAllKey === 0 ?
             <>
-            <button className="btn btn-info"
-              onClick={(e) => {
-                saveData(e);
-              }}>
-              <i className="fa fa-check"></i> Save
-            </button>
-             
-             <button className="btn btn-outline-success ms-3"
-            onClick={(e) => {
-              submitData(e);
-            }}>
-              <i className="far fa-save"></i> Submit
-            </button>
+              <button className="btn btn-info"
+                onClick={(e) => {
+                  saveData(e);
+                }}>
+                <i className="fa fa-check"></i> Save
+              </button>
+
+              <button className="btn btn-outline-success ms-3"
+                onClick={(e) => {
+                  submitData(e);
+                }}>
+                <i className="far fa-save"></i> Submit
+              </button>
             </>
-            :""}
-        
-          </div>
+            : ""}
+
+        </div>
 
 
 
 
 
-          <CommonModal
-            isOpen={remarkModel}
-            backdrop="static"
-            size="lg"
-            cancel_btn={false}
-            btn_2="true"
-            btn_name={submitStatus===1?"Submit":"Save"}
-            title="Remark"
-            hideBtn={false}
-            handleClose={() => {
-              setRemarkModel(false);
-              setSubmitStatus(0)
-            }}
-            Submit_Function={(e) => saveTimeSheetRemark(e)}
-          >
-            <div className="modal-body">
-              <div className="row">
+        <CommonModal
+          isOpen={remarkModel}
+          backdrop="static"
+          size="lg"
+          cancel_btn={false}
+          btn_2="true"
+          btn_name={submitStatus === 1 ? "Submit" : "Save"}
+          title="Remark"
+          hideBtn={false}
+          handleClose={() => {
+            setRemarkModel(false);
+            setSubmitStatus(0)
+          }}
+          Submit_Function={(e) => saveTimeSheetRemark(e)}
+        >
+          <div className="modal-body">
+            <div className="row">
 
 
-                <div className="col-lg-12">
-                  <label htmlFor="customername-field" className="form-label">
-                    Remark
-                  </label>
-                  <textarea
-                    type="text"
-                    className="form-control cursor-pointer"
-                    placeholder="Enter Remark"
-                    defaultValue=""
-                    onChange={(e) => setRemarkText(e.target.value)}
-                    value={remarkText}
-                  />
-                </div>
+              <div className="col-lg-12">
+                <label htmlFor="customername-field" className="form-label">
+                  Remark
+                </label>
+                <textarea
+                  type="text"
+                  className="form-control cursor-pointer"
+                  placeholder="Enter Remark"
+                  defaultValue=""
+                  onChange={(e) => setRemarkText(e.target.value)}
+                  value={remarkText}
+                />
               </div>
             </div>
-          </CommonModal>
-        </div>
+          </div>
+        </CommonModal>
       </div>
-    
+    </div>
+
   );
 };
 

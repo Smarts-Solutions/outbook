@@ -15,9 +15,7 @@ import Hierarchy from '../../../Components/ExtraComponents/Hierarchy';
 const JobLogs = () => {
   const location = useLocation();
   const tab = sessionStorage.getItem('activeTab2')||'job information';
-  console.log(tab)
   const [selectedTab, setSelectedTab] = useState(tab);
-  console.log("selectedTab", selectedTab)
   const [getAccessDataJob, setAccessDataJob] = useState({ insert: 0, update: 0, delete: 0, view: 0, });
 
   const accessDataJob =
@@ -37,6 +35,9 @@ const JobLogs = () => {
     });
     setAccessDataJob(updatedAccess);
   }, []);
+
+
+  console.log("selectedTab", selectedTab);
 
   return (
     <div className='container-fluid'>
@@ -59,6 +60,7 @@ const JobLogs = () => {
                         aria-selected="true"
                         onClick={() => {
                           // setSelectedTab('job information')
+                          console.log("1");
                           sessionStorage.setItem('activeTab2', 'job information');
                         }
                           }
@@ -207,7 +209,7 @@ const JobLogs = () => {
       <div className="tab-content report-data mt-4" id="pills-tabContent">
 
         <div
-          className="tab-pane fade show active"
+          className={"tab-pane fade" + (selectedTab === 'job information' ? ' show active' : '')}
           id="job-information"
           role="tabpanel"
           aria-labelledby="job-information-tab"
@@ -216,7 +218,7 @@ const JobLogs = () => {
         </div>
 
         <div
-          className="tab-pane fade"
+          className={"tab-pane fade" + (selectedTab === 'job timeline' ? ' show active' : '')}
           id="job-timeline"
           role="tabpanel"
           aria-labelledby="job-timeline-tab"
@@ -224,7 +226,7 @@ const JobLogs = () => {
           <JobTimeline getAccessDataJob={getAccessDataJob} goto={location?.state?.goto} />
         </div>
         <div
-          className="tab-pane fade"
+          className={"tab-pane fade" + (selectedTab === 'task timesheet' ? ' show active' : '')}
           id="task-timesheet"
           role="tabpanel"
           aria-labelledby="task-timesheet-tab"
@@ -232,7 +234,7 @@ const JobLogs = () => {
           <TaskTimesheet getAccessDataJob={getAccessDataJob} goto={location?.state?.goto} />
         </div>
         <div
-          className="tab-pane fade"
+          className={"tab-pane fade" + (selectedTab === 'missing logs' ? ' show active' : '')}
           id="missing-logs"
           role="tabpanel"
           aria-labelledby="missing-logs-tab"
@@ -240,7 +242,7 @@ const JobLogs = () => {
           <MissingLogs getAccessDataJob={getAccessDataJob} goto={location?.state?.goto} />
         </div>
         <div
-          className="tab-pane fade"
+          className={"tab-pane fade" + (selectedTab === 'queries' ? ' show active' : '')}
           id="queries"
           role="tabpanel"
           aria-labelledby="queries-tab"
@@ -248,7 +250,7 @@ const JobLogs = () => {
           <Queries getAccessDataJob={getAccessDataJob} goto={location?.state?.goto} />
         </div>
         <div
-          className="tab-pane fade"
+          className={"tab-pane fade" + (selectedTab === 'drafts' ? ' show active' : '')}
           id="drafts"
           role="tabpanel"
           aria-labelledby="drafts-tab"
@@ -256,7 +258,7 @@ const JobLogs = () => {
           <Drafts getAccessDataJob={getAccessDataJob} goto={location?.state?.goto} />
         </div>
         <div
-          className="tab-pane fade"
+          className={"tab-pane fade" + (selectedTab === 'documents' ? ' show active' : '')}
           id="documents"
           role="tabpanel"
           aria-labelledby="documents-tab"
