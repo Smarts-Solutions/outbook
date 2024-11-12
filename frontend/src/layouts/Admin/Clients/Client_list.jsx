@@ -29,6 +29,9 @@ const ClientList = () => {
   const role = JSON.parse(localStorage.getItem("role"));
 
 
+
+
+
   useEffect(() => {
     const retrievedData = sessionStorage.getItem('activeTab');
     const retrievedData1 = sessionStorage.getItem('activeTab1');
