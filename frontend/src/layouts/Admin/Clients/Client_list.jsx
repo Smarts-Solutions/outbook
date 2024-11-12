@@ -234,6 +234,12 @@ const ClientList = () => {
     },
 
     {
+      name: "Client Name",
+
+      selector: (row) => row.client_trading_name || "-",
+      sortable: true,
+    },
+    {
       name: "Job Type",
 
       selector: (row) => row.job_type_name || "-",

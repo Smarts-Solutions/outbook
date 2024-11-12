@@ -1882,7 +1882,7 @@ const Setting = () => {
               <div className="report-data">
                 <div className="d-flex justify-content-between align-items-center">
                   <div className="tab-title">
-                    <h3 className="mt-0">Status Type</h3>
+                    <h3 className="mt-0">Job Status Name</h3>
                   </div>
                   {!showSettingInsertTab ? null : (
                     <div>
