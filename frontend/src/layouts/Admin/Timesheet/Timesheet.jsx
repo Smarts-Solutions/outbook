@@ -14,19 +14,6 @@ const Timesheet = () => {
   const weekOffSetValue = useRef(0);
   const [submitStatusAllKey, setSubmitStatusAllKey] = useState(0);
  
-  const [expandedRows, setExpandedRows] = useState([]);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const toggleAllRowsView = () => {
-    setIsExpanded(prevState => !prevState);
-  };
-  
-  const toggleRowView = (index) => {
-    setExpandedRows((prev) =>
-      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
-    );
-  };
-  
-
   const GetTimeSheet = async (weekOffset) => {
 
     const req = { staff_id: staffDetails.id ,weekOffset : weekOffset };
@@ -751,44 +738,32 @@ const dayMonthFormatDate = (dateString) => {
                             <th className="dropdwnCol2 pe-0" data-field="phone"  style={{ width: '10px' }}>
                               No
                             </th>
-                            <th className="ps-0" data-field="phone"  style={{ width: '150px' }}>
+                            <th className="ps-0" data-field="phone"  style={{ width: '100px' }}>
                               Task Type
                             </th>
-                            <th className="dropdwnCol7" data-field="phone"  style={{ width: '180px' }}>
+                            <th className="dropdwnCol7" data-field="phone"  style={{ width: '110px' }}>
                               Customer
                             </th>
-                            <th className="dropdwnCol6" data-field="phone"  style={{ width: '180px' }}>
+                            <th className="dropdwnCol6" data-field="phone"  style={{ width: '110px' }}>
                               Client
                             </th>
-                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '180px' }}>
+                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '110px' }}>
                               Job
                             </th>
-                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '150px' }}>
+                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '100px' }}>
                               Task
                             </th>
                            
-                            <th colSpan="8" className="pe-0 week-data">
-                            <div className="d-flex align-items-center">
-                        
-          <span>
-           Monday
-            
-          </span>
-          {/* Conditionally render weekdays when expanded */}
-          {isExpanded && (
-            <div style={{width:'90%'}}>
-            
-              <span>Tuesday</span>
-              <span>Wednesday</span>
-              <span>Thursday</span>
-              <span>Friday</span>
-              <span>Saturday</span>
-              <span>Sunday</span>
-            </div>
-          )}
-              <button  onClick={toggleAllRowsView} className=" px-0 btn btn-sm btn-link text-decoration-none">
-              {isExpanded ? "Collapse All" : "Expand All"}
-            </button>
+                            <th colspan="7" className="ps-0">
+          <div className="scrollable-week">
+            <ChevronLeft onClick={(e) => { e.preventDefault(); changeWeek(-1); }} />
+            <span>{weekDays.monday ? dayMonthFormatDate(weekDays.monday) : ""}</span>
+            <span>{weekDays.tuesday ? dayMonthFormatDate(weekDays.tuesday) : ""}</span>
+            <span>{weekDays.wednesday ? dayMonthFormatDate(weekDays.wednesday) : ""}</span>
+            <span>{weekDays.thursday ? dayMonthFormatDate(weekDays.thursday) : ""}</span>
+            <span>{weekDays.friday ? dayMonthFormatDate(weekDays.friday) : ""}</span>
+            <span>{weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : ""}</span>
+            <ChevronRight onClick={(e) => { e.preventDefault(); changeWeek(1); }} />
           </div>
         </th>
                             {/* <th className="dropdwnCol5" data-field="phone">
@@ -805,10 +780,12 @@ const dayMonthFormatDate = (dateString) => {
                         </thead>
 
                         <tbody className="list form-check-all">
-                        {timeSheetRows?.map((item, index) => (
-  <tr key={index} className="tabel_new">
-    {/* Display Row Index */}
-    <td className="pe-0">{index + 1}</td>
+                          {timeSheetRows?.map((item, index) => (
+                            
+
+                             
+                            <tr className="tabel_new">
+                              <td className="pe-0">{index + 1}</td>
                                
                               <td className="ps-0">
                                 {item.newRow === 1 ? (
@@ -934,7 +911,6 @@ const dayMonthFormatDate = (dateString) => {
                                 )}
                               </td>
                           
-<<<<<<< HEAD
                               {/*Monday Input*/}
                               <td colSpan="7" className="ps-0">
                               <div className="scrollable-week">
@@ -998,94 +974,24 @@ const dayMonthFormatDate = (dateString) => {
                               </td>
                              
                              
-=======
->>>>>>> 41e86625ac4e2de45c8f70d844c4e8626d6b134a
 
-    <td colspan="8" >
-      <div  >
-            {isExpanded ? (
-                <div className="d-flex justify-content-between" style={{width:'88%'}}><input
-                className="form-control cursor-pointer border-radius-end"
-                type="text"
-                style={{ width: '60px' }}
-                name="monday_hours"
-                
-                onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday ,item)}
-                value={item.monday_hours == null ? "0" : item.monday_hours}
-                disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday'?false:true : false : currentDay !== 'monday'}
-              />
-                 <input
-               style={{ width: '60px' }}
-                className="form-control cursor-pointer"
-                type="text"
-                name="tuesday_hours"
-                onChange={(e) => handleHoursInput(e, index, 'tuesday_date', weekDays.tuesday,item)}
-                value={item.tuesday_hours == null ? "0" : item.tuesday_hours}
-                disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false:true : false : currentDay !== 'tuesday'}
-              />
-               <input
-               style={{ width: '60px' }}
-                className="form-control cursor-pointer"
-                type="text"
-                name="wednesday_hours"
-                onChange={(e) => handleHoursInput(e, index, 'wednesday_date', weekDays.wednesday,item)}
-                value={item.wednesday_hours == null ? "0" : item.wednesday_hours}
-                disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false :true : false : currentDay !== 'wednesday'}
-              />
-                <input
-               style={{ width: '60px' }}
-                className="form-control cursor-pointer"
-                type="text"
-                name="thursday_hours"
-                onChange={(e) => handleHoursInput(e, index, 'thursday_date', weekDays.thursday , item)}
-                value={item.thursday_hours == null ? "0" : item.thursday_hours}
-                disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ?currentDay === 'thursday' ?false: true : false : currentDay !== 'thursday'}
-              />
-               <input
-               style={{ width: '60px' }}
-                className="form-control cursor-pointer"
-                type="text"
-                name="friday_hours"
-                onChange={(e) => handleHoursInput(e, index, 'friday_date', weekDays.friday , item)}
-                value={item.friday_hours == null ? "0" : item.friday_hours}
-                disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.friday) > new Date() ?currentDay === 'friday' ?false: true : false : currentDay !== 'friday'}
-              />
-               <input
-               style={{ width: '60px' }}
-                className="form-control cursor-pointer"
-                type="text"
-                name="saturday_hours"
-                onChange={(e) => handleHoursInput(e, index, 'saturday_date', weekDays.saturday , item)}
-                value={item.saturday_hours == null ? "0" : item.saturday_hours}
-                disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ?currentDay === 'saturday' ?false: true : false : currentDay !== 'saturday'}
-              />
-               <input
-               style={{ width: '60px' }}
-                className="form-control cursor-pointer"
-                type="text"
-                name="sunday_hours"
-                onChange={(e) => handleHoursInput(e, index, 'sunday_date', weekDays.sunday , item)}
-                value={item.sunday_hours == null ? "0" : item.sunday_hours}
-                disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.sunday) > new Date() ?currentDay === 'sunday' ?false: true : false : currentDay !== 'sunday'}
-              />
-              </div>
-  
-            ) : (
-            
-            <div > <input
-              className="form-control cursor-pointer border-radius-end"
-              type="text"
-              style={{ width: '60px' }}
-              name="monday_hours"
-              
-              onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday ,item)}
-              value={item.monday_hours == null ? "0" : item.monday_hours}
-              disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday'?false:true : false : currentDay !== 'monday'}
-            /></div>
-            )}
-            </div>
-          </td>
-          {submitStatusAllKey === 0?
+                              {/*Sunday Input*/}
+                              {/* 
+                               <td>
+                                <input
+                                  className="form-control cursor-pointer"
+                                  type="text"
+                                  name="sunday_hours"
+                                  onChange={(e) => handleHoursInput(e, index, 'sunday_date', weekDays.sunday ,item )}
+                                  value={item.sunday_hours == null ? "0" : item.sunday_hours}
+                                  disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.sunday) > new Date() ? currentDay === 'sunday' ? false: true : false : currentDay !== 'sunday'}
+                                />
+
+                              </td>
+                              
+                              */}
+                             
+                              {submitStatusAllKey === 0?
                                <td className="d-flex ps-0">
                                {
                                  item.submit_status === "0"?
@@ -1121,10 +1027,9 @@ const dayMonthFormatDate = (dateString) => {
                                {/* <Trash2 className="delete-icon" /> */}
                              </td>
                               :""}
-    
-  </tr>
-))}
-
+                             
+                            </tr>
+                          ))}
                           <tr className="tabel_new">
                             <td>
                             {
