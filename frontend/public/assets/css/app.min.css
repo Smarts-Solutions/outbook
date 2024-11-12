@@ -4458,9 +4458,14 @@ select#tabSelect {
     background: #dddddd !important;
 }
 .week-data span {
-	font-size: 13px;
-	margin: 0px 4px;
+    font-size: 13px;
+    margin: 0px 4px;
+    width: 88px;
 }
-body .week-data .btn-link{
-padding-left: 0px !important;
+body .week-data .btn-link {
+    padding-left: 0px !important;
+    width: 90px;
+}
+.week-data span:first-child {
+    margin: 0;
 }

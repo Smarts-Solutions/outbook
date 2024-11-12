@@ -741,45 +741,45 @@ if (weekDays.monday !== "") {
                             <th className="dropdwnCol2 pe-0" data-field="phone"  style={{ width: '10px' }}>
                               No
                             </th>
-                            <th className="ps-0" data-field="phone"  style={{ width: '150px' }}>
+                            <th className="ps-0" data-field="phone"  style={{ width: '140px' }}>
                               Task Type
                             </th>
-                            <th className="dropdwnCol7" data-field="phone"  style={{ width: '180px' }}>
+                            <th className="dropdwnCol7" data-field="phone"  style={{ width: '170px' }}>
                               Customer
                             </th>
-                            <th className="dropdwnCol6" data-field="phone"  style={{ width: '180px' }}>
+                            <th className="dropdwnCol6" data-field="phone"  style={{ width: '170px' }}>
                               Client
                             </th>
-                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '180px' }}>
+                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '170px' }}>
                               Job
                             </th>
-                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '150px' }}>
+                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '140px' }}>
                               Task
                             </th>
                            
                             <th colSpan="8" className="pe-0 week-data">
+                           
                             <div className="d-flex align-items-center">
-                        
-          <span>
-           Monday
-            
-          </span>
+                            <ChevronLeft onClick={(e) => { e.preventDefault(); changeWeek(-1); }} />
+                            <span>{weekDays.monday ? dayMonthFormatDate(weekDays.monday) : ""}</span>
           {/* Conditionally render weekdays when expanded */}
           {isExpanded && (
-            <div style={{width:'90%'}}>
+            <div style={{width:'70%'}}>
             
-              <span>Tuesday</span>
-              <span>Wednesday</span>
-              <span>Thursday</span>
-              <span>Friday</span>
-              <span>Saturday</span>
-              <span>Sunday</span>
+            <span>{weekDays.tuesday ? dayMonthFormatDate(weekDays.tuesday) : ""}</span>
+            <span>{weekDays.wednesday ? dayMonthFormatDate(weekDays.wednesday) : ""}</span>
+            <span>{weekDays.thursday ? dayMonthFormatDate(weekDays.thursday) : ""}</span>
+            <span>{weekDays.friday ? dayMonthFormatDate(weekDays.friday) : ""}</span>
+            <span>{weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : ""}</span>
+            <span>{weekDays.sunday ? dayMonthFormatDate(weekDays.sunday) : ""}</span>
             </div>
           )}
               <button  onClick={toggleAllRowsView} className=" px-0 btn btn-sm btn-link text-decoration-none">
               {isExpanded ? "Collapse All" : "Expand All"}
             </button>
+            <ChevronRight onClick={(e) => { e.preventDefault(); changeWeek(1); }} />
           </div>
+         
         </th>
                             {/* <th className="dropdwnCol5" data-field="phone">
                               {weekDays.sunday!=""?dayMonthFormatDate(weekDays.sunday): ""}
@@ -928,10 +928,10 @@ if (weekDays.monday !== "") {
     <td colspan="8" >
       <div  >
             {isExpanded ? (
-                <div className="d-flex justify-content-between" style={{width:'88%'}}><input
+                <div className="d-flex justify-content-between ms-3" style={{width:'84%'}}><input
                 className="form-control cursor-pointer border-radius-end"
                 type="text"
-                style={{ width: '60px' }}
+                style={{ width: '76px' }}
                 name="monday_hours"
                 
                 onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday ,item)}
@@ -939,7 +939,7 @@ if (weekDays.monday !== "") {
                 disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday'?false:true : false : currentDay !== 'monday'}
               />
                  <input
-               style={{ width: '60px' }}
+               style={{ width: '80px' }}
                 className="form-control cursor-pointer"
                 type="text"
                 name="tuesday_hours"
@@ -948,7 +948,7 @@ if (weekDays.monday !== "") {
                 disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false:true : false : currentDay !== 'tuesday'}
               />
                <input
-               style={{ width: '60px' }}
+               style={{ width: '80px' }}
                 className="form-control cursor-pointer"
                 type="text"
                 name="wednesday_hours"
@@ -957,7 +957,7 @@ if (weekDays.monday !== "") {
                 disabled={item.submit_status === "1"?true: item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false :true : false : currentDay !== 'wednesday'}
               />
                 <input
-               style={{ width: '60px' }}
+               style={{ width: '80px' }}
                 className="form-control cursor-pointer"
                 type="text"
                 name="thursday_hours"
@@ -966,7 +966,7 @@ if (weekDays.monday !== "") {
                 disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ?currentDay === 'thursday' ?false: true : false : currentDay !== 'thursday'}
               />
                <input
-               style={{ width: '60px' }}
+               style={{ width: '80px' }}
                 className="form-control cursor-pointer"
                 type="text"
                 name="friday_hours"
@@ -975,7 +975,7 @@ if (weekDays.monday !== "") {
                 disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.friday) > new Date() ?currentDay === 'friday' ?false: true : false : currentDay !== 'friday'}
               />
                <input
-               style={{ width: '60px' }}
+               style={{ width: '80px' }}
                 className="form-control cursor-pointer"
                 type="text"
                 name="saturday_hours"
@@ -984,7 +984,7 @@ if (weekDays.monday !== "") {
                 disabled={item.submit_status === "1"?true:item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ?currentDay === 'saturday' ?false: true : false : currentDay !== 'saturday'}
               />
                <input
-               style={{ width: '60px' }}
+               style={{ width: '80px' }}
                 className="form-control cursor-pointer"
                 type="text"
                 name="sunday_hours"
@@ -996,10 +996,10 @@ if (weekDays.monday !== "") {
   
             ) : (
             
-            <div > <input
+            <div className="ms-3"> <input
               className="form-control cursor-pointer border-radius-end"
               type="text"
-              style={{ width: '60px' }}
+              style={{ width: '80px' }}
               name="monday_hours"
               
               onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday ,item)}
