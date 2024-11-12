@@ -741,19 +741,19 @@ if (weekDays.monday !== "") {
                             <th className="dropdwnCol2 pe-0" data-field="phone"  style={{ width: '10px' }}>
                               No
                             </th>
-                            <th className="ps-0" data-field="phone"  style={{ width: '100px' }}>
+                            <th className="ps-0" data-field="phone"  style={{ width: '150px' }}>
                               Task Type
                             </th>
-                            <th className="dropdwnCol7" data-field="phone"  style={{ width: '110px' }}>
+                            <th className="dropdwnCol7" data-field="phone"  style={{ width: '180px' }}>
                               Customer
                             </th>
-                            <th className="dropdwnCol6" data-field="phone"  style={{ width: '110px' }}>
+                            <th className="dropdwnCol6" data-field="phone"  style={{ width: '180px' }}>
                               Client
                             </th>
-                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '110px' }}>
+                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '180px' }}>
                               Job
                             </th>
-                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '100px' }}>
+                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '150px' }}>
                               Task
                             </th>
                            
