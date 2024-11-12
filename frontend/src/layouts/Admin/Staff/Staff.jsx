@@ -735,7 +735,7 @@ const StaffPage = () => {
           additional_field={
             <div className="row mt-2 ">
 
-                  <label className="form-label">Budgeted Time</label>
+                  <label className="form-label">Weekly Timesheet Hours</label>
                   <div className="input-group row">
                     {/* Hours Input */}
                     <div className="hours-div col-6">
