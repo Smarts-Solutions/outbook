@@ -643,17 +643,31 @@ const Engagement = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(name, value);
+ 
     if(name == 'customerJoiningDate'){
-      const date = new Date(value);
-      const today = new Date().getDate;
-      
+      let date = new Date(value);
+
+      let month = date.getMonth() + 1;
+      let day = date.getDate();
+      let year = date.getFullYear();
+      let newDate = `${year}-${month < 10 ? `0${month}` : `${month}`}-${
+        day < 10 ? `0${day}` : `${day}`
+      }`;
+
+      console.log(newDate);
+      setFormState1({
+        ...formState1,
+        [name]: newDate,
+      })
+     
+    }
+    else {
+      setFormState1({
+        ...formState1,
+        [name]: value,
+      })
     }
 
-    setFormState1({
-      ...formState1,
-      [name]: value,
-    });
 
     setFormErrors((prevErrors) => ({
       ...prevErrors,
