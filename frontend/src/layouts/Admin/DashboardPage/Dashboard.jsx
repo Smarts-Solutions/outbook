@@ -14,6 +14,7 @@ const Dashboard = () => {
   const [dashboard, setDashboard] = useState([]);
   const [getActiviyLog, setActivityLog] = useState([]);
 
+  console.log("dashboard - ", dashboard.customer && dashboard.customer.count);
   const currentDate = new Date();
 
   // State to store the selected tab
@@ -57,6 +58,7 @@ const Dashboard = () => {
     await dispatch(DashboardData(data))
       .unwrap()
       .then((res) => {
+        console.log("res - ",res);
         if (res.status) {
           setDashboard(res.data);
         } else {
@@ -182,7 +184,7 @@ const Dashboard = () => {
                                 </p>
                               </div>
                               <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">{dashboard.customer}</h3>
+                                <h3 className="my-4">{dashboard.customer && dashboard.customer.count}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/users.png"
@@ -207,7 +209,7 @@ const Dashboard = () => {
                                 {/* <h3 className="mt-5">543</h3> */}
                               </div>
                               <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">{dashboard.client}</h3>
+                                <h3 className="my-4">{dashboard.client && dashboard.client.count}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/teamwork.png"
@@ -231,7 +233,7 @@ const Dashboard = () => {
                                 </p>
                               </div>
                               <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">{dashboard.staff}</h3>
+                                <h3 className="my-4">{dashboard.staff && dashboard.staff.count}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/handshake.png"
@@ -253,7 +255,7 @@ const Dashboard = () => {
                                 {/* <h3 className="mt-5">45</h3> */}
                               </div>
                               <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">{dashboard.job}</h3>
+                                <h3 className="my-4">{dashboard.job && dashboard.job.count}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/suitcase.png"
@@ -278,7 +280,7 @@ const Dashboard = () => {
                                 {/* <h3 className="mt-5">233</h3> */}
                               </div>
                               <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">{dashboard.pending_job}</h3>
+                                <h3 className="my-4">{dashboard.pending_job && dashboard.pending_job.count}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/pending.png"
@@ -303,7 +305,7 @@ const Dashboard = () => {
                                 {/* <h3 className="mt-5">870</h3> */}
                               </div>
                               <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">{dashboard.completed_job}</h3>
+                                <h3 className="my-4">{dashboard.completed_job && dashboard.completed_job.count}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/time-management.png"
@@ -333,7 +335,7 @@ const Dashboard = () => {
                                 </p>
                               </div>
                               <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">{dashboard.customer}</h3>
+                                <h3 className="my-4">{dashboard.customer && dashboard.customer.count}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/users.png"
@@ -357,7 +359,7 @@ const Dashboard = () => {
                                 </p>
                               </div>
                               <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">{dashboard.client}</h3>
+                                <h3 className="my-4">{dashboard.client && dashboard.client.count}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/teamwork.png"
@@ -378,7 +380,7 @@ const Dashboard = () => {
                                 </p>
                               </div>
                               <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">{dashboard.staff}</h3>
+                                <h3 className="my-4">{dashboard.staff && dashboard.staff.count}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/handshake.png"
@@ -397,7 +399,7 @@ const Dashboard = () => {
                                 {/* <h3 className="mt-5">45</h3> */}
                               </div>
                               <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">{dashboard.job}</h3>
+                                <h3 className="my-4">{dashboard.job && dashboard.job.count}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/suitcase.png"
@@ -418,7 +420,7 @@ const Dashboard = () => {
                                 </p>
                               </div>
                               <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">0</h3>
+                                <h3 className="my-4">{dashboard.pending_job && dashboard.pending_job.count}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/pending.png"
@@ -439,7 +441,7 @@ const Dashboard = () => {
                                 {/* <h3 className="mt-5">870</h3> */}
                               </div>
                               <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">0</h3>
+                                <h3 className="my-4">{dashboard.completed_job && dashboard.completed_job.count}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/time-management.png"

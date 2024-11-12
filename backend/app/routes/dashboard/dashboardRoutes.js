@@ -9,6 +9,7 @@ const router = express.Router();
 
 router.post('/getDashboardData',verifyToken, dashboardController.getDashboardData);
 router.post('/getDashboardActivityLog',verifyToken, dashboardController.getDashboardActivityLog);
+router.post('/getCountLinkData',verifyToken, dashboardController.getCountLinkData);
 
 
 
