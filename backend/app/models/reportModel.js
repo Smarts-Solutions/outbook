@@ -600,64 +600,10 @@ function getWeekNumber(date) {
 }
 
 const taxWeeklyStatusReport = async (Report) => {
-    // const currentYear = new Date().getFullYear();
-    // const startDate = new Date(currentYear, 0, 1);
-    // const endDate = new Date(currentYear, 11, 31);
-    // let weeks = []
-    // let currentDate = new Date(startDate);
-    // while (currentDate <= endDate) {
-    //     const weekNum = getWeekNumber(currentDate);
-    //     const yearWeek = `${currentDate.getFullYear()}${String(weekNum).padStart(2, '0')}`;
-    //     weeks.push(`COUNT(CASE WHEN YEARWEEK(jobs.created_at, 1) = ${yearWeek} THEN jobs.id END) AS WE_${weekNum}_${currentDate.getFullYear()}`);
-    //     currentDate.setDate(currentDate.getDate() + 7);
-    // }
-    // const weeks_sql = weeks.join(",\n    ");
-    // try {
-    //     const { StaffUserId } = Report;
-    //     const QueryRole = `
-    // SELECT
-    //     staffs.id AS id,
-    //     staffs.role_id AS role_id,
-    //     roles.role AS role_name
-    //     FROM staffs
-    //     LEFT JOIN roles ON staffs.role_id = roles.id
-    //     WHERE staffs.id = ${StaffUserId}
-    //     LIMIT 1
-    //     `
-    //     const [rows] = await pool.execute(QueryRole);
-    //     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
-    //         const query = `
-    //         SELECT
-    //             master_status.name AS job_status,
-    //             job_types.type AS job_type_name,
-    //             customers.trading_name AS customer_name,
-    //             ${weeks_sql},
-    //             GROUP_CONCAT(jobs.id) AS job_ids,
-    //             COUNT(jobs.id) AS Grand_Total
-    //         FROM 
-    //             customers
-    //         LEFT JOIN 
-    //             jobs ON jobs.customer_id = customers.id AND jobs.status_type = 6  -- Filter for jobs with status_type = 6
-    //         LEFT JOIN 
-    //             master_status ON master_status.id = jobs.status_type
-    //         LEFT JOIN 
-    //             job_types ON jobs.job_type_id = job_types.id
-    //         GROUP BY 
-    //             master_status.name, 
-    //             job_types.type, 
-    //             customers.trading_name
-    //         ORDER BY 
-    //             customers.id ASC`
-    //         const [result] = await pool.execute(query);
-    //         return { status: true, message: 'Success.', data: result };
-    //     } else {
-    //         return { status: true, message: 'Success.', data: [] };
-    //     }
-    // }
-    // catch (error) {
-    //     console.log("error ", error);
-    //     return { status: false, message: 'Error getting tax status weekly report.' };
-    // }
+    
+try {
+    const { StaffUserId } = Report;
+
     const currentYear = new Date().getFullYear();
 const startDate = new Date(currentYear, 0, 1);
 const endDate = new Date(currentYear, 11, 31);
@@ -671,8 +617,7 @@ while (currentDate <= endDate) {
     currentDate.setDate(currentDate.getDate() + 7);
 }
 const weeks_sql = weeks.join(",\n    ");
-try {
-    const { StaffUserId } = Report;
+
     const QueryRole = `
     SELECT
         staffs.id AS id,
@@ -688,9 +633,9 @@ try {
         const query = `
         SELECT
             master_status.name AS job_status,
-            job_types.type AS job_type_name,
             customers.trading_name AS customer_name,
             ${weeks_sql},
+            GROUP_CONCAT(jobs.id) AS job_ids,
             COUNT(jobs.id) AS Grand_Total
         FROM 
             customers
@@ -698,11 +643,8 @@ try {
             jobs ON jobs.customer_id = customers.id AND jobs.status_type = 6  -- Filter for jobs with status_type = 6
         LEFT JOIN 
             master_status ON master_status.id = jobs.status_type
-        LEFT JOIN 
-            job_types ON jobs.job_type_id = job_types.id
         GROUP BY 
             master_status.name, 
-            job_types.type, 
             customers.trading_name
         ORDER BY 
             customers.id ASC`;
@@ -714,7 +656,7 @@ try {
             for (let i = 1; i <= 53; i++) { // Assuming a maximum of 53 weeks
                 weeksData[`WE_${i}_${currentYear}`] = {
                     count: row[`WE_${i}_${currentYear}`] || 0,
-                    job_ids: row[`job_ids_${i}_${currentYear}`] ? row[`job_ids_${i}_${currentYear}`].split(',') : []
+                    job_ids: row[`job_ids_${i}_${currentYear}`] ? row[`job_ids_${i}_${currentYear}`]: ""
                 };
             }
             return {
@@ -724,7 +666,7 @@ try {
                 ...weeksData,
                 Grand_Total: {
                     count: row.Grand_Total,
-                    job_ids: [] // You can handle Grand_Total job_ids if needed
+                    job_ids: row.job_ids // You can handle Grand_Total job_ids if needed
                 }
             };
         });
