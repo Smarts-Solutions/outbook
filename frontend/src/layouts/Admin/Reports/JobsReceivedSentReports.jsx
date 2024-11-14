@@ -68,7 +68,8 @@ const JobsReceivedSentReports = () => {
                             <div className="row">
                                 <div className="table-responsive table-card mt-3 mb-1">
                                     <table className="table align-middle table-nowrap" id="customerTable">
-                                        <thead className="table-light">
+                                        <thead className="table-light table-head-blue
+">
                                             <tr>
                                                 <th>Months</th>
                                                 <th>Jobs Received</th>
@@ -82,7 +83,7 @@ const JobsReceivedSentReports = () => {
                                                         <td className="d-flex">
                                                             <i
                                                                 onClick={() => toggleRow(index)}
-                                                                className={`exp_icon ${expandedRows[index] ? "ri-add-circle-fill" : "ri-add-circle-fill"}`}
+                                                                className={`exp_icon ${expandedRows[index] ? "fa-solid fa-circle-plus " : " fa-solid fa-circle-plus"}`}
                                                             />
                                                             <span>{data.month_name}</span>
                                                         </td>

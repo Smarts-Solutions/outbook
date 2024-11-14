@@ -97,7 +97,6 @@ const ClientList = () => {
   const SetTab = (e) => {
     setActiveTab(e);
   };
-console.log("activeTab", getCheckList)
   useEffect(() => {
     GetStatus();
     if (activeTab !== "") {

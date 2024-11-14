@@ -3331,11 +3331,12 @@ button.btn.btn-info,
 	z-index: 1;
 }
 
-.btn-secondary:hover {
-	background: #ff3e39ff !important;
-	color: #fff !important;
-}
 
+.btn-secondary:hover {
+    background: #ff3e39ff !important;
+    color: #fff !important;
+    border: 3px solid #ff3e39ff !important;
+}
 .btn-danger {
 	background-color: #dc3545;
 	border: 1px solid !important;
@@ -4181,7 +4182,8 @@ li::marker {
 }
 
 .tooltip--multiline ul {
-	padding-left: 20px;
+    padding-left: 20px;
+    text-align: left;
 }
 
 .text-danger {
@@ -4265,6 +4267,14 @@ a.nav-link.dropdown-toggle.arrow-none.waves-light.waves-effect img {
 
 }
 
+/* .hours-div .input-group-text {
+    position: absolute;
+    background: #d5d5d5;
+    top: 0;
+    height: 36px;
+    border-radius: 0 21px 20px 0px;
+    border: 2px solid #878484;
+} */
 .hours-div .input-group-text {
     position: absolute;
     /* right: 0.5px; */
@@ -4272,7 +4282,7 @@ a.nav-link.dropdown-toggle.arrow-none.waves-light.waves-effect img {
     top: 0;
     height: 36px;
     border-radius: 0 21px 20px 0px;
-    border: 2px solid #878484;
+    border: 1px solid #c3c3c3;
 }
 .swal2-popup .swal2-styled:focus {
 	box-shadow: none !important;
@@ -4468,4 +4478,15 @@ body .week-data .btn-link {
 }
 .week-data span:first-child {
     margin: 0;
+}
+.rdt_TableHead
+{	
+	z-index: 12 !important;		
+	
+}
+i.exp_icon {
+    color: #00AFEF;
+    margin-top: 3px;
+    margin-right: 4px;
+    font-size: 15px;
 }

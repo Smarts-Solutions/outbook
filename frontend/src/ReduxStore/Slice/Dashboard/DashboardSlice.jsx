@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { DASHBOARD, ACTIVITYLOG } from "../../../Services/Dashboard/DashboardService";
+import { DASHBOARD, ACTIVITYLOG , LINKDATA } from "../../../Services/Dashboard/DashboardService";
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
 export const DashboardData = createAsyncThunk("getDashboardData", async (data) => {
@@ -37,6 +37,24 @@ export const ActivityLog = createAsyncThunk("getDashboardActivityLog", async (da
     }
 });
 
+export const linkedData = createAsyncThunk("getCountLinkData", async (data) => {
+    try {
+        const { req, authToken } = data;
+        var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+
+        const updatedReq = {
+            ...req,
+            ip: IP_Data,  
+            StaffUserId: StaffUserId.id, 
+        };
+
+        const res = await LINKDATA(updatedReq, authToken);
+        return res; 
+    } catch (err) {
+        throw err;
+    }
+});
+
 const DashboardSlice = createSlice({
     name: "DashboardSlice",
     initialState: {
@@ -44,6 +62,7 @@ const DashboardSlice = createSlice({
         isError: false,
         dashboard: [],
         activity: [],
+        linkeddata: [],
     },
     reducers: {},
     extraReducers: (builder) => {
@@ -67,6 +86,17 @@ const DashboardSlice = createSlice({
                 state.activity = action.payload;
             })
             .addCase(ActivityLog.rejected, (state) => {
+                state.isLoading = false;
+                state.isError = true;
+            })
+            .addCase(linkedData.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(linkedData.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.linkeddata = action.payload;
+            })
+            .addCase(linkedData.rejected, (state) => {
                 state.isLoading = false;
                 state.isError = true;
             });

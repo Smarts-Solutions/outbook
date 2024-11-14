@@ -25,7 +25,7 @@ const handleStatusType = async (req, res) => {
                 break;    
             case 'delete':
                 await statusTypeService.removeStatusType(StatusType);
-                res.status(200).json({ status: true, message: 'StatusType deleted successfully' });
+                res.status(200).json({ status: true, message: 'Status type deleted successfully' });
                 break;
             case 'update':
                 result = await statusTypeService.modifyStatusType(StatusType);

@@ -111,21 +111,25 @@ const JobStatus = () => {
 
 
   return (
-    <div>
+    <div className='container-fluid mt-5'>
       <div className='report-data'>
         <div className='row'>
           <div className='col-md-12'>
             <div className='row'>
-              <div className='tab-title col-lg-10'>
-                <h3>Job</h3>
+              <div className='tab-title d-flex'>
+
+              <button
+                  type="button"
+                  className="btn p-0"
+                  onClick={() => {
+                    window.history.back();
+                  }}
+                >
+                  <i className="pe-3 fa-regular fa-arrow-left-long  fs-4"></i>
+                </button>
+                <h3 className='mt-0'>Job</h3>
               </div>
-              <div className="btn btn-info text-white float-end blue-btn me-2 col-lg-1"
-                onClick={() => {
-                  window.history.back();
-                }}
-              >
-                <i className="fa fa-arrow-left pe-1" /> Back
-              </div>
+            
             </div>
             <div className='job-filter-btn '>
               <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
