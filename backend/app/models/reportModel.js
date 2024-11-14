@@ -837,7 +837,7 @@ const averageTatReport = async (Report) => {
   `
         const [rows] = await pool.execute(QueryRole);
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
-    //         const query = `
+    // const query = `
     //     SELECT 
     // master_status.name AS job_status,
     // AVG(DATEDIFF(jobs.completed_at, jobs.created_at)) AS average_tat
@@ -856,14 +856,14 @@ const averageTatReport = async (Report) => {
     END AS month,
     AVG(DATEDIFF(jobs.updated_at, jobs.created_at)) AS average_tat,
     jobs.id AS job_id
-FROM
-    jobs
-WHERE
-    jobs.status_type = 6
-GROUP BY
-    YEAR(jobs.created_at),
-    MONTH(jobs.created_at)
-WITH ROLLUP
+    FROM
+        jobs
+    WHERE
+        jobs.status_type = 6
+    GROUP BY
+        YEAR(jobs.created_at),
+        MONTH(jobs.created_at)
+    WITH ROLLUP
      `;
             const [result] = await pool.execute(query);
             return { status: true, message: 'Success.', data: result };
