@@ -121,6 +121,38 @@ const taxWeeklyStatusReport = async (req ,res) => {
   }
 }
 
+const taxWeeklyStatusReportFilterKey = async (req ,res) => {
+  try {
+    const { ...Report } = req.body;
+    const result = await reportService.taxWeeklyStatusReportFilterKey(Report);
+    if(!result.status){
+      return  res.status(200).json({ status: false, message: result.message });
+    }
+    else{
+      return  res.status(200).json({ status: true, message: result.message , data : result.data});
+    }
+    }
+    catch (error) {
+      res.status(500).json({ status:false, message: error.message});
+    }
+}
+
+const averageTatReport = async (req ,res) => {
+  try {
+    const { ...Report } = req.body;
+    const result = await reportService.averageTatReport(Report);
+    if(!result.status){
+      return  res.status(200).json({ status: false, message: result.message });
+    }
+    else{
+      return  res.status(200).json({ status: true, message: result.message , data : result.data});
+    }
+    }
+    catch (error) {
+      res.status(500).json({ status:false, message: error.message});
+    }
+  }
+
 
 
 
@@ -132,5 +164,7 @@ module.exports = {
   teamMonthlyReports,
   dueByReport,
   reportCountJob,
-  taxWeeklyStatusReport
+  taxWeeklyStatusReport,
+  taxWeeklyStatusReportFilterKey,
+  averageTatReport
 };

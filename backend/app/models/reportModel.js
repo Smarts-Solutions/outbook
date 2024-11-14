@@ -102,7 +102,8 @@ const getCustomWeekNumber = (day) => {
     if (day >= 15 && day <= 21) return 3;
     if (day >= 22) return 4;
     return 0;
-};
+}
+
 const jobReceivedSentReports = async (Report) => {
     const { StaffUserId } = Report;
     try {
@@ -602,7 +603,7 @@ function getWeekNumber(date) {
 const taxWeeklyStatusReport = async (Report) => {
 
     try {
-        const { StaffUserId, customer_id , job_status_type , processor_id , reviewer_id} = Report;
+        const { StaffUserId, customer_id , job_status_type_id , processor_id , reviewer_id} = Report;
         const currentYear = new Date().getFullYear();
         const startDate = new Date(currentYear, 0, 1);
         const endDate = new Date(currentYear, 11, 31);
@@ -642,10 +643,10 @@ const taxWeeklyStatusReport = async (Report) => {
              `;
 
             
-            if (job_status_type != undefined && job_status_type != "") {
+            if (job_status_type_id != undefined && job_status_type_id != "") {
                 query += `
                 LEFT JOIN 
-                jobs ON jobs.customer_id = customers.id AND jobs.status_type = ${job_status_type}
+                jobs ON jobs.customer_id = customers.id AND jobs.status_type = ${job_status_type_id}
                 LEFT JOIN 
                 master_status ON master_status.id = jobs.status_type`;
             } else {
@@ -714,6 +715,167 @@ const taxWeeklyStatusReport = async (Report) => {
     }
 }
 
+const taxWeeklyStatusReportFilterKey = async (Report) => {
+    try {
+        
+       // job Reviewer
+       const queryCustomer = `
+        SELECT  
+            customers.id AS customer_id,
+            customers.trading_name AS customer_name
+        FROM 
+            customers   
+        ORDER BY 
+        customers.id DESC;
+     `;
+      const [rows] = await pool.execute(queryCustomer);
+      let customer = []
+      if (rows.length > 0) {
+        customer = rows.map(row => ({
+          customer_id: row.customer_id,
+          customer_name: row.customer_name}));
+      }
+
+
+    
+
+        // job Reviewer
+        const queryReviewer = `
+         SELECT  
+             staffs.id AS reviewer_id,
+             staffs.first_name AS reviewer_first_name,
+             staffs.last_name AS reviewer_last_name
+        FROM 
+             staffs
+        JOIN 
+             roles ON staffs.role_id = roles.id
+        WHERE  
+         staffs.role_id = 6   
+        ORDER BY 
+         staffs.id DESC;
+       `;
+    
+        const [rows1] = await pool.execute(queryReviewer);
+        let reviewer = []
+        if (rows1.length > 0) {
+          reviewer = rows1.map(row => ({
+            reviewer_id: row.reviewer_id,
+            reviewer_name: row.reviewer_first_name + " " + row.reviewer_last_name
+          }));
+        }
+
+    
+        // Allocated
+        const queryProcessor = `
+         SELECT  
+             staffs.id AS staff_id,
+             staffs.first_name AS staff_first_name,
+             staffs.last_name AS staff_last_name
+        FROM 
+             staffs
+        JOIN 
+             roles ON staffs.role_id = roles.id
+        WHERE  
+         staffs.role_id = 3   
+        ORDER BY 
+         staffs.id DESC;
+       `;
+        const [rows2] = await pool.execute(queryProcessor);
+        let processor = []
+        if (rows2.length > 0) {
+          processor = rows2.map(row => ({
+            processor_id: row.staff_id,
+            processor_name: row.staff_first_name + " " + row.staff_last_name
+          }));
+        }
+
+       
+
+       // JobStatusType
+       const queryJobStatusType = `
+       SELECT  
+           master_status.id AS job_status_type_id,
+           master_status.name AS job_status_type_name
+      FROM 
+          master_status
+      ORDER BY 
+       master_status.id DESC;
+     `;
+      const [rows3] = await pool.execute(queryJobStatusType);
+      let job_status_type = []
+      if (rows3.length > 0) {
+         job_status_type = rows3.map(row => ({
+          job_status_type_id: row.job_status_type_id,
+          job_status_type_name: row.job_status_type_name
+        }));
+      }
+    
+    
+        return { status: true, message: 'success.', data: { customer: customer, reviewer: reviewer, processor: processor ,job_status_type:job_status_type} };
+    
+      } catch (err) {
+        return { status: false, message: 'Err Customer Get' };
+      }
+
+}
+
+const averageTatReport = async (Report) => {
+    const { StaffUserId } = Report;
+    try {
+        const QueryRole = `
+  SELECT
+    staffs.id AS id,
+    staffs.role_id AS role_id,
+    roles.role AS role_name
+  FROM
+    staffs
+  JOIN
+    roles ON roles.id = staffs.role_id
+  WHERE
+    staffs.id = ${StaffUserId}
+  LIMIT 1
+  `
+        const [rows] = await pool.execute(QueryRole);
+        if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+    //         const query = `
+    //     SELECT 
+    // master_status.name AS job_status,
+    // AVG(DATEDIFF(jobs.completed_at, jobs.created_at)) AS average_tat
+    // FROM 
+    //     jobs
+    // LEFT JOIN 
+    //     master_status ON master_status.id = jobs.status_type
+    // GROUP BY 
+    //     master_status.name, jobs.status_type
+    //      `;
+    const query = `
+    SELECT
+    CASE 
+        WHEN MONTH(jobs.created_at) = MONTH(CURDATE()) AND YEAR(jobs.created_at) = YEAR(CURDATE()) THEN 'Current'
+        ELSE DATE_FORMAT(jobs.created_at, '%b %Y')
+    END AS month,
+    AVG(DATEDIFF(jobs.updated_at, jobs.created_at)) AS average_tat,
+    jobs.id AS job_id
+FROM
+    jobs
+WHERE
+    jobs.status_type = 6
+GROUP BY
+    YEAR(jobs.created_at),
+    MONTH(jobs.created_at)
+WITH ROLLUP
+     `;
+            const [result] = await pool.execute(query);
+            return { status: true, message: 'Success.', data: result };
+        } else {
+            return { status: true, message: 'Success.', data: [] };
+        }
+    } catch (error) {
+        console.log("error ", error);
+        return { status: false, message: 'Error getting job status report.' };
+    }
+}
+
 module.exports = {
     jobStatusReports,
     jobReceivedSentReports,
@@ -722,5 +884,7 @@ module.exports = {
     teamMonthlyReports,
     dueByReport,
     reportCountJob,
-    taxWeeklyStatusReport
+    taxWeeklyStatusReport,
+    taxWeeklyStatusReportFilterKey,
+    averageTatReport
 };

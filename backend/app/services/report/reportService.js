@@ -30,6 +30,15 @@ const reportCountJob = async (Report) => {
 const taxWeeklyStatusReport = async (Report) => {
   return reportModel.taxWeeklyStatusReport(Report);
 }
+
+const taxWeeklyStatusReportFilterKey = async (Report) => {
+  return reportModel.taxWeeklyStatusReportFilterKey(Report);
+}
+
+const averageTatReport = async (Report) => {
+  return reportModel.averageTatReport(Report);
+}
+
 module.exports = {
   jobStatusReports,
   jobReceivedSentReports,
@@ -38,5 +47,7 @@ module.exports = {
   teamMonthlyReports,
   dueByReport,
   reportCountJob,
-  taxWeeklyStatusReport
+  taxWeeklyStatusReport,
+  taxWeeklyStatusReportFilterKey,
+  averageTatReport
 };
