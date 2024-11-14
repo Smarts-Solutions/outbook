@@ -18,9 +18,14 @@ const JobStatus = () => {
     GetLinkedData();
   }, []);
 
-
   const GetLinkedData = async () => {
-    const data = { req: { job_ids: location?.state?.job_ids }, authToken: token };
+    const data = {
+      req: {
+        staff_id: location?.state?.req?.staff_id,
+        key: location?.state?.req?.key,
+        ids: location?.state?.req?.ids
+      }, authToken: token
+    };
     await dispatch(linkedData(data))
       .unwrap()
       .then((res) => {
@@ -41,13 +46,16 @@ const JobStatus = () => {
     navigate("/admin/job/logs", { state: { job_id: row.job_id, goto: "report", } });
   }
 
-  const columns = [
+
+  console.log("allLinkedData", allLinkedData)
+
+  const JobColumns = [
     {
       name: "Job ID (CustName+ClientName+UniqueNo)",
       cell: (row) => (
         <div>
           <a
-            onClick={() => HandleJobView(row)}
+            // onClick={() => HandleJobView(row)}
             style={{ cursor: "pointer", color: "#26bdf0" }}
           >
             {row.job_code_id}
@@ -59,12 +67,17 @@ const JobStatus = () => {
     },
 
     {
+      name: "Client Name",
+
+      selector: (row) => row.client_trading_name || "-",
+      sortable: true,
+    },
+    {
       name: "Job Type",
 
       selector: (row) => row.job_type_name || "-",
       sortable: true,
     },
-    
     {
       name: "Account Manager",
       selector: (row) =>
@@ -105,38 +118,197 @@ const JobStatus = () => {
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
     },
+   
+  ];
+
+  const columnsCustomer = [
+    {
+      name: "Trading Name",
+      cell: (row) => (
+        <div style={{
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+        >
+          {(
+            <a
+              // onClick={() => HandleClientView(row)}
+              style={{ cursor: "pointer", color: "#26bdf0" }}
+              title={row.trading_name}
+            >
+              {row.trading_name}
+            </a>
+          )}
+        </div>
+      ),
+      selector: (row) => row.trading_name,
+      sortable: true,
+    },
+    {
+      name: "Customer Code",
+      cell: (row) => (
+        <div
+          title={row.customer_code}
+        >
+          {row.customer_code}
+        </div>
+      ),
+      sortable: true,
+
+    },
+
+    {
+      name: "Type",
+      selector: (row) =>
+        row.customer_type === '1'
+          ? "Sole Trader"
+          : row.customer_type === '2'
+            ? "Company"
+            : row.customer_type === '3'
+              ? "Partnership"
+              : "-",
+      sortable: true,
+
+    },
+    {
+      name: "Account Manager",
+      selector: (row) => row.account_manager_firstname + " " + row.account_manager_lastname,
+      sortable: true,
+      cell: row => (
+        <div
+          title={row.account_manager_firstname + " " + row.account_manager_lastname}
+          className="data-table-cell"
+          data-fulltext={row.account_manager_firstname + " " + row.account_manager_lastname}
+          style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+        >
+          {row.account_manager_firstname + " " + row.account_manager_lastname}
+        </div>
+      ),
+    },
 
   ];
 
+  const ClientListColumns = [
+    {
+      name: "Client Name",
+      cell: (row) => (
+        <div>
+          {
+            role === "ADMIN" || role === "SUPERADMIN" ? (
+              <a
+                // onClick={() => HandleClientView(row)}
+                style={{ cursor: "pointer", color: "#26bdf0" }}
+              >
+                {row.client_name}
+              </a>
+            ) : row.client_name
+          }
 
+        </div>
+      ),
+      selector: (row) => row.trading_name,
+      sortable: true,
+    },
+
+    {
+      name: "Client Code",
+      selector: (row) => row.client_code || "-",
+      sortable: true,
+    },
+    {
+      name: "Client Type",
+      selector: (row) =>
+        row.client_type_name == null ? "-" : row.client_type_name,
+      sortable: true,
+      width: "150px",
+    }, 
+    {
+      name: "Status",
+      selector: (row) => (<div>
+        <span
+          className={` ${row.status === "1" ? "text-success" : "text-danger"
+            }`}
+        >
+          {row.status === "1" ? "Active" : "Deactive"}
+        </span>
+      </div>),
+      sortable: true,
+      width: '130px'
+    },
+  
+  ];
+
+  const columnsStaff = [
+    {
+      name: "Full Name",
+      selector: (row) => row.first_name + " " + row.last_name,
+      sortable: true,
+      // width: "250px",
+    },
+    {
+      name: "Email Address",
+      selector: (row) => row.email,
+      sortable: true,
+      // width: "250px",
+    },
+    {
+      name: "Phone",
+      selector: (row) => row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - ",
+      sortable: true,
+      // width: "250px",
+    },
+    {
+      name: "Role",
+      selector: (row) => row.role_name,
+      sortable: true,
+      // width: "250px",
+    },
+    {
+      name: "Status",
+      cell: (row) => (
+        <div>
+          <span
+            className={` ${row.status === "1" ? "text-success" : "text-danger"
+              }`}
+          >
+            {row.status === "1" ? "Active" : "Deactive"}
+          </span>
+        </div>
+      ),
+      // width: "250px",
+    },
+   
+
+  ]
 
   return (
     <div>
-      <div className='report-data'>
-        <div className='row'>
+      <div className='report-data mt-5'>
+        <div className='row '>
           <div className='col-md-12'>
-            <div className='row'>
-              <div className='tab-title col-lg-10'>
-                <h3>Job</h3>
+            <div className='row' >
+              <div className='d-flex justify-content-between mb-5'>
+                <div className='tab-title'>
+                  <h3>{location?.state?.req?.heading}</h3>
+                </div>
+                <div className="btn btn-info text-white float-end blue-btn"
+                  onClick={() => { window.history.back() }}
+                >
+                  <i className="fa fa-arrow-left pe-1" /> Back
+                </div>
               </div>
-              <div className="btn btn-info text-white float-end blue-btn me-2 col-lg-1"
-                onClick={() => {
-                  window.history.back();
-                }}
-              >
-                <i className="fa fa-arrow-left pe-1" /> Back
-              </div>
-            </div>
-            <div className='job-filter-btn '>
-              <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
-              <button className='xl-sheet btn btn-info text-white fw-normal ms-2'><i className="fas fa-file-excel"></i></button>
             </div>
           </div>
         </div>
         <div className='datatable-wrapper mt-minus'>
           <Datatable
             filter={true}
-            columns={columns} data={jobsData && jobsData} />
+            columns={location?.state?.req?.key=="client" ? ClientListColumns :
+              location?.state?.req?.key == "customer" ? columnsCustomer : 
+              location?.state?.req?.key == "staff" ? columnsStaff :
+              JobColumns
+            } data={allLinkedData && allLinkedData} />
         </div>
       </div>
     </div>

@@ -5,16 +5,17 @@ import {
   ActivityLog,
 } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
 import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+  const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
   const dispatch = useDispatch();
   const [dashboard, setDashboard] = useState([]);
   const [getActiviyLog, setActivityLog] = useState([]);
 
-  console.log("dashboard - ", dashboard.customer && dashboard.customer.count);
   const currentDate = new Date();
 
   // State to store the selected tab
@@ -25,17 +26,6 @@ const Dashboard = () => {
     setSelectedTab(event.target.value);
   };
 
-  const options = {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  };
-  const optiondata = [
-    { key: "1", label: "Sole Trader" },
-    { key: "2", label: "Company" },
-    { key: "3", label: "Partnership" },
-    { key: "4", label: "Individual" },
-  ];
   const hours = currentDate.getHours();
 
   let greeting;
@@ -96,6 +86,12 @@ const Dashboard = () => {
     return `${monthDay} (${time.toUpperCase()})`;
   };
 
+
+  const handleClick = async(type , data , heading) => {
+    const req  = {staff_id : staffDetails.id , key : type , ids : data.ids, heading : heading}
+    navigate("/admin/dashboard/data", { state: { req: req } });
+  }
+
   return (
     <div>
       <div className="container-fluid">
@@ -138,39 +134,9 @@ const Dashboard = () => {
                     </select>
                   </div>
                 </div>
-                {/* <div className="col-md-3">
-                  <div className="custom-multiselect">
-                    <DropdownMultiselect
-                      options={optiondata}
-                      name="client_type_id"
-                      className=""
-                    />
-                  </div>
-                </div>
-                <div className="col-md-3">
-                  <div className="custom-multiselect">
-                    <DropdownMultiselect
-                      options={optiondata}
-                      name="client_type_id"
-                      className=""
-                    />
-                  </div>
-                </div>
-                <div className="col-md-3">
-                  <div className="custom-multiselect">
-                    <DropdownMultiselect
-                      options={optiondata}
-                      name="client_type_id"
-                      className=""
-                    />
-                  </div>
-                </div> */}
+               
               </div>
-              {/* Dropdown to select a tab */}
-
-              {/* Tabs Content */}
               <div className="tab-content mt-5">
-                {/* Render content based on selected tab */}
                 {selectedTab === "this-week" && (
                   <div className="tab-pane show active">
                     <div className="row justify-content-center">
@@ -183,16 +149,14 @@ const Dashboard = () => {
                                   NO OF CUSTOMERS
                                 </p>
                               </div>
-                              <div className="col-12 d-flex align-items-center justify-content-between">
+                              <div className="col-12 d-flex align-items-center justify-content-between" 
+                              onClick={()=>handleClick("customer" , dashboard.customer , "Customers")}
+                              >
                                 <h3 className="my-4">{dashboard.customer && dashboard.customer.count}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/users.png"
                                 />
-
-                                {/* <div className="report-main-icon bg-light-alt">
-                                <i className="ti-user"></i>
-                              </div> */}
                               </div>
                             </div>
                           </div>
@@ -206,17 +170,16 @@ const Dashboard = () => {
                                 <p className="text-dark mb-1 font-weight-semibold">
                                   NO OF CLIENTS
                                 </p>
-                                {/* <h3 className="mt-5">543</h3> */}
                               </div>
-                              <div className="col-12 d-flex align-items-center justify-content-between">
+                              <div className="col-12 d-flex align-items-center justify-content-between"
+                               onClick={()=>handleClick("client" , dashboard.client , "Clients")}
+                              
+                              >
                                 <h3 className="my-4">{dashboard.client && dashboard.client.count}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/teamwork.png"
                                 />
-                                {/* <div className="report-main-icon bg-light-alt">
-                                <i className="ti-user"></i>
-                              </div> */}
                               </div>
                             </div>
                           </div>
@@ -232,15 +195,14 @@ const Dashboard = () => {
                                   NO OF STAFF
                                 </p>
                               </div>
-                              <div className="col-12 d-flex align-items-center justify-content-between">
+                              <div className="col-12 d-flex align-items-center justify-content-between"
+                                onClick={()=>handleClick("staff" , dashboard.staff , "Staff")}
+                              >
                                 <h3 className="my-4">{dashboard.staff && dashboard.staff.count}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/handshake.png"
                                 />
-                                {/* <div className="report-main-icon bg-light-alt">
-                                <i className="ti-user"></i>
-                              </div> */}
                               </div>
                             </div>
                           </div>
@@ -252,17 +214,15 @@ const Dashboard = () => {
                             <div className="row d-flex justify-content-center">
                               <div className="col-12">
                                 <p className=" mb-1">NO OF JOBS</p>
-                                {/* <h3 className="mt-5">45</h3> */}
                               </div>
-                              <div className="col-12 d-flex align-items-center justify-content-between">
+                              <div className="col-12 d-flex align-items-center justify-content-between"
+                                onClick={()=>handleClick("job" , dashboard.job , "Jobs")}
+                              >
                                 <h3 className="my-4">{dashboard.job && dashboard.job.count}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/suitcase.png"
                                 />
-                                {/* <div className="report-main-icon bg-light-alt">
-                                <i className="ti-user"></i>
-                              </div> */}
                               </div>
                             </div>
                           </div>
@@ -277,18 +237,15 @@ const Dashboard = () => {
                                 <p className="text-dark mb-1 font-weight-semibold">
                                   PENDING JOBS
                                 </p>
-                                {/* <h3 className="mt-5">233</h3> */}
                               </div>
-                              <div className="col-12 d-flex align-items-center justify-content-between">
+                              <div className="col-12 d-flex align-items-center justify-content-between"
+                                onClick={()=>handleClick("pending_job" , dashboard.pending_job , "Pending Jobs")}
+                              >
                                 <h3 className="my-4">{dashboard.pending_job && dashboard.pending_job.count}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/pending.png"
                                 />
-                                {/* <div className="report-main-icon bg-light-alt">
-                             
-                                <i className="ti-user"></i>
-                              </div> */}
                               </div>
                             </div>
                           </div>
@@ -302,17 +259,16 @@ const Dashboard = () => {
                                 <p className="text-dark mb-1 font-weight-semibold">
                                   COMPLETED JOBS
                                 </p>
-                                {/* <h3 className="mt-5">870</h3> */}
                               </div>
-                              <div className="col-12 d-flex align-items-center justify-content-between">
+                              <div className="col-12 d-flex align-items-center justify-content-between" 
+                                onClick={()=>handleClick("completed_job" , dashboard.completed_job , "Completed Jobs")}
+                              
+                              >
                                 <h3 className="my-4">{dashboard.completed_job && dashboard.completed_job.count}</h3>
                                 <img
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/time-management.png"
                                 />
-                                {/* <div className="report-main-icon bg-light-alt">
-                                <i className="ti-user"></i>
-                              </div> */}
                               </div>
                             </div>
                           </div>
@@ -340,10 +296,6 @@ const Dashboard = () => {
                                   className="dashboad-img"
                                   src="/assets/images/dashboards/users.png"
                                 />
-
-                                {/* <div className="report-main-icon bg-light-alt">
-                                <i className="ti-user"></i>
-                              </div> */}
                               </div>
                             </div>
                           </div>
@@ -396,7 +348,6 @@ const Dashboard = () => {
                             <div className="row d-flex justify-content-center">
                               <div className="col-12">
                                 <p className=" mb-1">NO OF JOBS</p>
-                                {/* <h3 className="mt-5">45</h3> */}
                               </div>
                               <div className="col-12 d-flex align-items-center justify-content-between">
                                 <h3 className="my-4">{dashboard.job && dashboard.job.count}</h3>
@@ -438,7 +389,6 @@ const Dashboard = () => {
                                 <p className="text-dark mb-1 font-weight-semibold">
                                   COMPLETED JOBS
                                 </p>
-                                {/* <h3 className="mt-5">870</h3> */}
                               </div>
                               <div className="col-12 d-flex align-items-center justify-content-between">
                                 <h3 className="my-4">{dashboard.completed_job && dashboard.completed_job.count}</h3>
@@ -516,9 +466,8 @@ const Dashboard = () => {
                             })
                           ) : (
                             <div className="no-data-found">
-                              {/* Image for "No Data Found" */}
                               <img
-                                src="/assets/images/No-data-amico.png" // Replace with your image path
+                                src="/assets/images/No-data-amico.png" 
                                 alt="No data found"
                                 style={{ maxWidth: "100%", height: "auto" }}
                               />
@@ -528,7 +477,6 @@ const Dashboard = () => {
                             </div>
                           )}
                         </div>
-                        {/*end activity*/}
                       </div>
                     </div>
                   </div>
@@ -538,7 +486,6 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      {/* container */}
     </div>
   );
 };

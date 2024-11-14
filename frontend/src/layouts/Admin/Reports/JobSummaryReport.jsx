@@ -68,7 +68,6 @@ const JobStatus = () => {
             <div className='tab-title'>
               <h3>Job Summary Report</h3>
             </div>
-           
           </div>
         </div>
         <div className='datatable-wrapper mt-minus'>

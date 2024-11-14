@@ -30,6 +30,20 @@ export async function ACTIVITYLOG(data) {
   }
 }
 
+export async function LINKDATA(data) {
+  try {
+    const token = JSON.parse(localStorage.getItem("token"));
+    const res = await axios.post(`${Config.base_url}getCountLinkData`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+
 
 
 
