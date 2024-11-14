@@ -37,6 +37,24 @@ export const ActivityLog = createAsyncThunk("getDashboardActivityLog", async (da
     }
 });
 
+export const linkedData = createAsyncThunk("getCountLinkData", async (data) => {
+    try {
+        const { req, authToken } = data;
+        var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+
+        const updatedReq = {
+            ...req,
+            ip: IP_Data,  
+            StaffUserId: StaffUserId.id, 
+        };
+
+        const res = await ACTIVITYLOG(updatedReq, authToken);
+        return res; 
+    } catch (err) {
+        throw err;
+    }
+});
+
 const DashboardSlice = createSlice({
     name: "DashboardSlice",
     initialState: {

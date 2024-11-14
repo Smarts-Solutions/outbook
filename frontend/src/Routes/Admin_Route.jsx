@@ -7,6 +7,7 @@ import Header from "../Components/Dashboard/Header";
 import Profile from "../Components/Dashboard/Profile";
 
 import Dashboard from "../layouts/Admin/DashboardPage/Dashboard";
+import DashboardLinkData from "../layouts/Admin/DashboardPage/DashboardLinkData";
 
 import Service from "../layouts/Admin/customer/customer_add_process/Service";
 import Customer from "../layouts/Admin/customer/Customer";
@@ -238,6 +239,11 @@ const Admin_Route = () => {
               <Route path="/timesheetnew" element={<TimesheetNew />} />
               <Route path="/subinternal" element={<SubInternal />} />
               <Route path="/report/jobs" element={<Jobs />} />
+              <Route path="/dashboard/data" element={<DashboardLinkData />} />
+
+
+
+
 
             </Routes>
           </div>
