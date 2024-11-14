@@ -649,7 +649,7 @@ const weeks_sql = weeks.join(",\n    ");
         ORDER BY 
             customers.id ASC`;
         const [result] = await pool.execute(query);
-        
+
         const formattedResult = result.map(row => {
             const weeksData = {};
             for (let i = 1; i <= 53; i++) { 
@@ -665,7 +665,7 @@ const weeks_sql = weeks.join(",\n    ");
                 ...weeksData,
                 Grand_Total: {
                     count: row.Grand_Total,
-                    job_ids: row.job_ids // You can handle Grand_Total job_ids if needed
+                    job_ids: row.job_ids
                 }
             };
         });
