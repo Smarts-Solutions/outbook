@@ -277,7 +277,7 @@ const ClientList = () => {
         ...prevState,
         job: row
       };
-      navigate("/admin/job/logs", { state: { job_id: row.job_id, data: updatedData, goto: "client" } });
+      navigate("/admin/job/logs", { state: { job_id: row?.job_id, data: updatedData, goto: "client" , activeTab : location?.state?.activeTab  } });
       return updatedData;
     });
   };
@@ -335,21 +335,13 @@ const ClientList = () => {
       });
   };
 
-  const handleAddClient = (row) => {
+  const handleCreateJob = (row) => {
     if (getClientDetails?.data?.client?.customer_id) {
       navigate("/admin/createjob", {
-        state: { customer_id: getClientDetails?.data?.client?.customer_id, clientName: location?.state?.data?.client, goto: "client" },
+        state: { customer_id: getClientDetails?.data?.client?.customer_id, clientName: location?.state?.data?.client, goto: "client" , activeTab : location?.state?.activeTab },
       });
     }
   };
-
-  function ClientEdit(row) {
-
-    navigate("/admin/client/edit", { state: { row, id: row } });
-  }
-
-
-  console.log("local", location.state.activeTab)
 
   return (
     <div className="container-fluid">
@@ -388,7 +380,7 @@ const ClientList = () => {
                 <div className="col-md-4 col-auto">
                   {
                     (getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN") && (
-                      <div className="btn btn-info text-white float-end blue-btn ms-2" onClick={handleAddClient}   >
+                      <div className="btn btn-info text-white float-end blue-btn ms-2" onClick={handleCreateJob}   >
                         <i className="fa fa-plus pe-1" /> Create Job
                       </div>
                     )

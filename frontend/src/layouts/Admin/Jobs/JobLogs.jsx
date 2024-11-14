@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from 'react'
-import Datatable from '../../../Components/ExtraComponents/Datatable';
+import React, { useEffect, useState } from 'react' 
 import TaskTimesheet from './TaskTimesheet';
 import MissingLogs from './MissingLogs';
 import Queries from './Queries';
 import Drafts from './Drafts';
 import Documents from './Documents';
 import JobTimeline from './JobTimeline'
-import JobInformation from './JobInformation';
-import CommonModal from '../../../Components/ExtraComponents/Modals/Modal';
+import JobInformation from './JobInformation'; 
 import { useLocation } from 'react-router-dom';
 import Hierarchy from '../../../Components/ExtraComponents/Hierarchy';
 
@@ -37,7 +35,6 @@ const JobLogs = () => {
   }, []);
 
 
-  console.log("selectedTab", selectedTab);
 
   return (
     <div className='container-fluid'>
@@ -59,8 +56,7 @@ const JobLogs = () => {
                         aria-controls="job-information"
                         aria-selected="true"
                         onClick={() => {
-                          // setSelectedTab('job information')
-                          console.log("1");
+                          // setSelectedTab('job information') 
                           sessionStorage.setItem('activeTab2', 'job information');
                         }
                           }
