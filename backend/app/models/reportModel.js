@@ -643,7 +643,7 @@ const taxWeeklyStatusReport = async (Report) => {
                 jobs ON jobs.customer_id = customers.id AND jobs.status_type = 6  -- Filter for jobs with status_type = 6
             LEFT JOIN 
                 master_status ON master_status.id = jobs.status_type
-        `;
+           `;
 
             let conditions = [];
 
