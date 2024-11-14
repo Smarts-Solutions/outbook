@@ -4469,3 +4469,14 @@ body .week-data .btn-link {
 .week-data span:first-child {
     margin: 0;
 }
+.rdt_TableHead
+{	
+	z-index: 12 !important;		
+	
+}
+i.exp_icon {
+    color: #00AFEF;
+    margin-top: 3px;
+    margin-right: 4px;
+    font-size: 15px;
+}
