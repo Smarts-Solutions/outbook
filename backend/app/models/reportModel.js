@@ -667,8 +667,7 @@ const taxWeeklyStatusReport = async (Report) => {
                 customers.trading_name
             ORDER BY 
                 customers.id ASC
-        `;
-
+            `;
 
             const [result] = await pool.execute(query);
 
