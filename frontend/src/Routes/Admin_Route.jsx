@@ -53,6 +53,7 @@ import Timesheet from "../layouts/Admin/Timesheet/Timesheet";
 import TimesheetNew from "../layouts/Admin/Timesheet/TimesheetNew";
 import Reports from "../layouts/Admin/Reports/Reports";
 import Jobs from '../layouts/Admin/Reports/Jobs'
+import SlidingTable from "../layouts/Admin/Reports/SlidingTable";
 
 
 
@@ -238,6 +239,7 @@ const Admin_Route = () => {
               <Route path="/timesheetnew" element={<TimesheetNew />} />
               <Route path="/subinternal" element={<SubInternal />} />
               <Route path="/report/jobs" element={<Jobs />} />
+              <Route path="/slidingTable" element={<SlidingTable />} />
 
             </Routes>
           </div>
