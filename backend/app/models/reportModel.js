@@ -600,25 +600,24 @@ function getWeekNumber(date) {
 }
 
 const taxWeeklyStatusReport = async (Report) => {
-    
-try {
-    const { StaffUserId } = Report;
 
-    const currentYear = new Date().getFullYear();
-const startDate = new Date(currentYear, 0, 1);
-const endDate = new Date(currentYear, 11, 31);
-let weeks = [];
-let currentDate = new Date(startDate);
-while (currentDate <= endDate) {
-    const weekNum = getWeekNumber(currentDate);
-    const yearWeek = `${currentDate.getFullYear()}${String(weekNum).padStart(2, '0')}`;
-    weeks.push(`COUNT(CASE WHEN YEARWEEK(jobs.created_at, 1) = ${yearWeek} THEN jobs.id END) AS WE_${weekNum}_${currentDate.getFullYear()}`);
-    weeks.push(`GROUP_CONCAT(CASE WHEN YEARWEEK(jobs.created_at, 1) = ${yearWeek} THEN jobs.id END) AS job_ids_${weekNum}_${currentDate.getFullYear()}`);
-    currentDate.setDate(currentDate.getDate() + 7);
-}
-const weeks_sql = weeks.join(",\n    ");
+    try {
+        const { StaffUserId, customer_id , job_status_type } = Report;
+        const currentYear = new Date().getFullYear();
+        const startDate = new Date(currentYear, 0, 1);
+        const endDate = new Date(currentYear, 11, 31);
+        let weeks = [];
+        let currentDate = new Date(startDate);
+        while (currentDate <= endDate) {
+            const weekNum = getWeekNumber(currentDate);
+            const yearWeek = `${currentDate.getFullYear()}${String(weekNum).padStart(2, '0')}`;
+            weeks.push(`COUNT(CASE WHEN YEARWEEK(jobs.created_at, 1) = ${yearWeek} THEN jobs.id END) AS WE_${weekNum}_${currentDate.getFullYear()}`);
+            weeks.push(`GROUP_CONCAT(CASE WHEN YEARWEEK(jobs.created_at, 1) = ${yearWeek} THEN jobs.id END) AS job_ids_${weekNum}_${currentDate.getFullYear()}`);
+            currentDate.setDate(currentDate.getDate() + 7);
+        }
+        const weeks_sql = weeks.join(",\n    ");
 
-    const QueryRole = `
+        const QueryRole = `
     SELECT
         staffs.id AS id,
         staffs.role_id AS role_id,
@@ -628,56 +627,79 @@ const weeks_sql = weeks.join(",\n    ");
     WHERE staffs.id = ${StaffUserId}
     LIMIT 1
     `;
-    const [rows] = await pool.execute(QueryRole);
-    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
-        const query = `
-        SELECT
-            master_status.name AS job_status,
-            customers.trading_name AS customer_name,
-            ${weeks_sql},
-            GROUP_CONCAT(jobs.id) AS job_ids,
-            COUNT(jobs.id) AS Grand_Total
-        FROM 
-            customers
-        LEFT JOIN 
-            jobs ON jobs.customer_id = customers.id AND jobs.status_type = 6  -- Filter for jobs with status_type = 6
-        LEFT JOIN 
-            master_status ON master_status.id = jobs.status_type
-        GROUP BY 
-            master_status.name, 
-            customers.trading_name
-        ORDER BY 
-            customers.id ASC`;
-        const [result] = await pool.execute(query);
+        const [rows] = await pool.execute(QueryRole);
+        if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
 
-        const formattedResult = result.map(row => {
-            const weeksData = {};
-            for (let i = 1; i <= 53; i++) { 
-                weeksData[`WE_${i}_${currentYear}`] = {
-                    count: row[`WE_${i}_${currentYear}`] || 0,
-                    job_ids: row[`job_ids_${i}_${currentYear}`] ? row[`job_ids_${i}_${currentYear}`]: ""
-                };
+            let query = `
+            SELECT
+                master_status.name AS job_status,
+                customers.trading_name AS customer_name,
+                ${weeks_sql},
+                GROUP_CONCAT(jobs.id) AS job_ids,
+                COUNT(jobs.id) AS Grand_Total
+            FROM 
+                customers
+            LEFT JOIN 
+                jobs ON jobs.customer_id = customers.id AND jobs.status_type = 6  -- Filter for jobs with status_type = 6
+            LEFT JOIN 
+                master_status ON master_status.id = jobs.status_type
+        `;
+
+            let conditions = [];
+
+            if (customer_id != undefined && customer_id != "") {
+                conditions.push(`customers.id = ${customer_id}`);
             }
-            return {
-                job_status: row.job_status,
-                job_type_name: row.job_type_name,
-                customer_name: row.customer_name,
-                ...weeksData,
-                Grand_Total: {
-                    count: row.Grand_Total,
-                    job_ids: row.job_ids
-                }
-            };
-        });
 
-        return { status: true, message: 'Success.', data: formattedResult };
-    } else {
-        return { status: true, message: 'Success.', data: [] };
+            if (job_status_type != undefined && job_status_type != "") {
+                conditions.push(`jobs.status_type = ${job_status_type}`);
+            } else {
+                conditions.push(`jobs.status_type = 6`);
+            }
+
+            if (conditions.length > 0) {
+                query += ` WHERE ${conditions.join(" AND ")}`;
+            }
+
+            query += `
+            GROUP BY 
+                master_status.name, 
+                customers.trading_name
+            ORDER BY 
+                customers.id ASC
+        `;
+
+
+            const [result] = await pool.execute(query);
+
+            const formattedResult = result.map(row => {
+                const weeksData = {};
+                for (let i = 1; i <= 53; i++) {
+                    weeksData[`WE_${i}_${currentYear}`] = {
+                        count: row[`WE_${i}_${currentYear}`] || 0,
+                        job_ids: row[`job_ids_${i}_${currentYear}`] ? row[`job_ids_${i}_${currentYear}`] : ""
+                    };
+                }
+                return {
+                    job_status: row.job_status,
+                    job_type_name: row.job_type_name,
+                    customer_name: row.customer_name,
+                    ...weeksData,
+                    Grand_Total: {
+                        count: row.Grand_Total,
+                        job_ids: row.job_ids
+                    }
+                };
+            });
+
+            return { status: true, message: 'Success.', data: formattedResult };
+        } else {
+            return { status: true, message: 'Success.', data: [] };
+        }
+    } catch (error) {
+        console.log("error ", error);
+        return { status: false, message: 'Error getting tax status weekly report.' };
     }
-} catch (error) {
-    console.log("error ", error);
-    return { status: false, message: 'Error getting tax status weekly report.' };
-}
 }
 
 module.exports = {
