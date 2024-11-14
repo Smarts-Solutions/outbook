@@ -1197,7 +1197,10 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                             <div className="col-lg-4">
                                                 <div className="mb-3">
                                                     <label className="form-label" >Invoice </label>
+                                               
+                                                    
                                                     <div className="input-group">
+                                                    <div className='hours-div'>
                                                         <input
                                                             type="text"
                                                             className="form-control"
@@ -1215,6 +1218,11 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                             }}
                                                             value={invoiceTime.hours}
                                                         />
+                                                        <span className="input-group-text" id="basic-addon2">
+                                                        H
+                                                    </span>
+                                                        </div>
+                                                         <div className='hours-div'>
                                                         <input
                                                             type="text"
                                                             className="form-control"
@@ -1232,6 +1240,10 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                             }}
                                                             value={invoiceTime.minutes}
                                                         />
+                                                         <span className="input-group-text" id="basic-addon2">
+                                                        M
+                                                    </span>
+                                                    </div>
                                                     </div>
 
                                                 </div>

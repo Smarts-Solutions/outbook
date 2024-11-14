@@ -744,59 +744,59 @@ const Timesheet = () => {
               <div id="customerList">
                 <div className="row">
 
-                  <div className="table-responsive table-card  mb-1">
-                    <table
-                      className="timesheetTable table align-middle table-nowrap"
-                      id="customerTable"
-                      style={{ width: "max-content" }}
-                    >
-                      <thead className="table-light table-head-blue">
-
-                        <tr>
-                          <th className="dropdwnCol2 pe-0" data-field="phone" style={{ width: '10px' }}>
-                            No
-                          </th>
-                          <th className="ps-0" data-field="phone" style={{ width: '130px' }}>
-                            Task Type
-                          </th>
-                          <th className="dropdwnCol7" data-field="phone" style={{ width: '160px' }}>
-                            Customer
-                          </th>
-                          <th className="dropdwnCol6" data-field="phone" style={{ width: '160px' }}>
-                            Client
-                          </th>
-                          <th className="dropdwnCol5" data-field="phone" style={{ width: '160px' }}>
-                            Job
-                          </th>
-                          <th className="dropdwnCol5" data-field="phone" style={{ width: '130px' }}>
-                            Task
-                          </th>
-
-                          <th colSpan="8" className="pe-0 week-data">
-
-                            <div className="d-flex align-items-center">
-                              <ChevronLeft onClick={(e) => { e.preventDefault(); changeWeek(-1); }} />
-                              <span className="pt-1 me-0">{weekDays.monday ? dayMonthFormatDate(weekDays.monday) : ""}</span>
-                              {/* Conditionally render weekdays when expanded */}
-                              {isExpanded && (
-                                <div style={{ width: '70%' }}>
-
-                                  <span>{weekDays.tuesday ? dayMonthFormatDate(weekDays.tuesday) : ""}</span>
-                                  <span>{weekDays.wednesday ? dayMonthFormatDate(weekDays.wednesday) : ""}</span>
-                                  <span>{weekDays.thursday ? dayMonthFormatDate(weekDays.thursday) : ""}</span>
-                                  <span>{weekDays.friday ? dayMonthFormatDate(weekDays.friday) : ""}</span>
-                                  <span>{weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : ""}</span>
-                                  <span>{weekDays.sunday ? dayMonthFormatDate(weekDays.sunday) : ""}</span>
-                                </div>
-                              )}
-                              <button onClick={toggleAllRowsView} className=" px-0 btn btn-sm btn-link text-decoration-none">
-                                {isExpanded ? "Collapse All" : "Expand All"}
-                              </button>
-                              <ChevronRight onClick={(e) => { e.preventDefault(); changeWeek(1); }} />
-                            </div>
-
-                          </th>
-                          {/* <th className="dropdwnCol5" data-field="phone">
+                    <div className="table-responsive table-card  mb-1">
+                      <table
+                        className="timesheetTable table align-middle table-nowrap"
+                        id="customerTable"
+                        
+                      >
+                        <thead className="table-light table-head-blue">
+                          
+                          <tr>
+                            <th className="dropdwnCol2 pe-0" data-field="phone"  style={{ width: '10px' }}>
+                              No
+                            </th>
+                            <th className="ps-0" data-field="phone"  >
+                              Task Type
+                            </th>
+                            <th className="dropdwnCol7" data-field="phone"  >
+                              Customer
+                            </th>
+                            <th className="dropdwnCol6" data-field="phone"  >
+                              Client
+                            </th>
+                            <th className="dropdwnCol5" data-field="phone"  >
+                              Job
+                            </th>
+                            <th className="dropdwnCol5" data-field="phone" >
+                              Task
+                            </th>
+                           
+                            <th colSpan="8" className="pe-0 week-data">
+                           
+                           <div className="d-flex align-items-center">
+                           <ChevronLeft onClick={(e) => { e.preventDefault(); changeWeek(-1); }} />
+                           <span className="pt-1 me-0">{weekDays.monday ? dayMonthFormatDate(weekDays.monday) : ""}</span>
+         {/* Conditionally render weekdays when expanded */}
+         {isExpanded && (
+           <div style={{width:'70%'}}>
+           
+           <span>{weekDays.tuesday ? dayMonthFormatDate(weekDays.tuesday) : ""}</span>
+           <span>{weekDays.wednesday ? dayMonthFormatDate(weekDays.wednesday) : ""}</span>
+           <span>{weekDays.thursday ? dayMonthFormatDate(weekDays.thursday) : ""}</span>
+           <span>{weekDays.friday ? dayMonthFormatDate(weekDays.friday) : ""}</span>
+           <span>{weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : ""}</span>
+           <span>{weekDays.sunday ? dayMonthFormatDate(weekDays.sunday) : ""}</span>
+           </div>
+         )}
+             <button  onClick={toggleAllRowsView} className=" px-0 btn btn-sm btn-link text-decoration-none">
+             {isExpanded ? "Collapse All" : "Expand All"}
+           </button>
+           <ChevronRight onClick={(e) => { e.preventDefault(); changeWeek(1); }} />
+         </div>
+        
+       </th>
+                            {/* <th className="dropdwnCol5" data-field="phone">
                               {weekDays.sunday!=""?dayMonthFormatDate(weekDays.sunday): ""}
                             </th> */}
 

@@ -24,7 +24,7 @@ const handleJobType = async (req, res) => {
         await jobTypeTaskService.removeJobType(JobType);
         res
           .status(200)
-          .json({ status: true, message: "JobType deleted successfully" });
+          .json({ status: true, message: "Job type deleted successfully" });
         break;
       case "update":
         result = await jobTypeTaskService.modifyJobType(JobType);
