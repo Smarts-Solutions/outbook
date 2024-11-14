@@ -193,7 +193,7 @@ const jobReceivedSentReports = async (Report) => {
                     }))
                 };
             });
-            
+
             return { status: true, message: 'Success.', data: result };
         } else {
             return { status: true, message: 'Success.', data: [] };
@@ -454,40 +454,40 @@ const dueByReport = async (Report) => {
 `;
 
 
-// const query = `SELECT
-// customers.id AS customer_id,
-// customers.trading_name AS customer_name,
+            // const query = `SELECT
+            // customers.id AS customer_id,
+            // customers.trading_name AS customer_name,
 
-// -- Due within 1 month
-// CAST(
-//     JSON_OBJECT(
-//         'count', COUNT(CASE WHEN jobs.due_on BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 MONTH) THEN 1 END),
-//         'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 MONTH) THEN jobs.id END)
-//     ) AS CHAR
-// ) AS due_within_1_month,
+            // -- Due within 1 month
+            // CAST(
+            //     JSON_OBJECT(
+            //         'count', COUNT(CASE WHEN jobs.due_on BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 MONTH) THEN 1 END),
+            //         'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 MONTH) THEN jobs.id END)
+            //     ) AS CHAR
+            // ) AS due_within_1_month,
 
-// -- Due within 2 months
-// CAST(
-//     JSON_OBJECT(
-//         'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 2 MONTH) THEN 1 END),
-//         'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 2 MONTH) THEN jobs.id END)
-//     ) AS CHAR
-// ) AS due_within_2_months,
+            // -- Due within 2 months
+            // CAST(
+            //     JSON_OBJECT(
+            //         'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 2 MONTH) THEN 1 END),
+            //         'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 2 MONTH) THEN jobs.id END)
+            //     ) AS CHAR
+            // ) AS due_within_2_months,
 
-// -- Repeat for other months...
+            // -- Repeat for other months...
 
-// -- Due passed
-// CAST(
-//     JSON_OBJECT(
-//         'count', COUNT(CASE WHEN jobs.due_on < CURDATE() THEN 1 END),
-//         'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on < CURDATE() THEN jobs.id END)
-//     ) AS CHAR
-// ) AS due_passed
+            // -- Due passed
+            // CAST(
+            //     JSON_OBJECT(
+            //         'count', COUNT(CASE WHEN jobs.due_on < CURDATE() THEN 1 END),
+            //         'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on < CURDATE() THEN jobs.id END)
+            //     ) AS CHAR
+            // ) AS due_passed
 
-// FROM customers
-// LEFT JOIN jobs ON jobs.customer_id = customers.id
-// GROUP BY customers.id;
-// `
+            // FROM customers
+            // LEFT JOIN jobs ON jobs.customer_id = customers.id
+            // GROUP BY customers.id;
+            // `
 
             const [result] = await pool.execute(query);
             return { status: true, message: 'Success.', data: result };
@@ -591,6 +591,154 @@ const reportCountJob = async (Report) => {
     }
 }
 
+function getWeekNumber(date) {
+    const start = new Date(date.getFullYear(), 0, 1);
+    const diff = date - start;
+    const oneDay = 1000 * 60 * 60 * 24;
+    const dayOfYear = Math.floor(diff / oneDay);
+    return Math.ceil((dayOfYear + 1) / 7);
+}
+
+const taxWeeklyStatusReport = async (Report) => {
+    // const currentYear = new Date().getFullYear();
+    // const startDate = new Date(currentYear, 0, 1);
+    // const endDate = new Date(currentYear, 11, 31);
+    // let weeks = []
+    // let currentDate = new Date(startDate);
+    // while (currentDate <= endDate) {
+    //     const weekNum = getWeekNumber(currentDate);
+    //     const yearWeek = `${currentDate.getFullYear()}${String(weekNum).padStart(2, '0')}`;
+    //     weeks.push(`COUNT(CASE WHEN YEARWEEK(jobs.created_at, 1) = ${yearWeek} THEN jobs.id END) AS WE_${weekNum}_${currentDate.getFullYear()}`);
+    //     currentDate.setDate(currentDate.getDate() + 7);
+    // }
+    // const weeks_sql = weeks.join(",\n    ");
+    // try {
+    //     const { StaffUserId } = Report;
+    //     const QueryRole = `
+    // SELECT
+    //     staffs.id AS id,
+    //     staffs.role_id AS role_id,
+    //     roles.role AS role_name
+    //     FROM staffs
+    //     LEFT JOIN roles ON staffs.role_id = roles.id
+    //     WHERE staffs.id = ${StaffUserId}
+    //     LIMIT 1
+    //     `
+    //     const [rows] = await pool.execute(QueryRole);
+    //     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+    //         const query = `
+    //         SELECT
+    //             master_status.name AS job_status,
+    //             job_types.type AS job_type_name,
+    //             customers.trading_name AS customer_name,
+    //             ${weeks_sql},
+    //             GROUP_CONCAT(jobs.id) AS job_ids,
+    //             COUNT(jobs.id) AS Grand_Total
+    //         FROM 
+    //             customers
+    //         LEFT JOIN 
+    //             jobs ON jobs.customer_id = customers.id AND jobs.status_type = 6  -- Filter for jobs with status_type = 6
+    //         LEFT JOIN 
+    //             master_status ON master_status.id = jobs.status_type
+    //         LEFT JOIN 
+    //             job_types ON jobs.job_type_id = job_types.id
+    //         GROUP BY 
+    //             master_status.name, 
+    //             job_types.type, 
+    //             customers.trading_name
+    //         ORDER BY 
+    //             customers.id ASC`
+    //         const [result] = await pool.execute(query);
+    //         return { status: true, message: 'Success.', data: result };
+    //     } else {
+    //         return { status: true, message: 'Success.', data: [] };
+    //     }
+    // }
+    // catch (error) {
+    //     console.log("error ", error);
+    //     return { status: false, message: 'Error getting tax status weekly report.' };
+    // }
+    const currentYear = new Date().getFullYear();
+const startDate = new Date(currentYear, 0, 1);
+const endDate = new Date(currentYear, 11, 31);
+let weeks = [];
+let currentDate = new Date(startDate);
+while (currentDate <= endDate) {
+    const weekNum = getWeekNumber(currentDate);
+    const yearWeek = `${currentDate.getFullYear()}${String(weekNum).padStart(2, '0')}`;
+    weeks.push(`COUNT(CASE WHEN YEARWEEK(jobs.created_at, 1) = ${yearWeek} THEN jobs.id END) AS WE_${weekNum}_${currentDate.getFullYear()}`);
+    weeks.push(`GROUP_CONCAT(CASE WHEN YEARWEEK(jobs.created_at, 1) = ${yearWeek} THEN jobs.id END) AS job_ids_${weekNum}_${currentDate.getFullYear()}`);
+    currentDate.setDate(currentDate.getDate() + 7);
+}
+const weeks_sql = weeks.join(",\n    ");
+try {
+    const { StaffUserId } = Report;
+    const QueryRole = `
+    SELECT
+        staffs.id AS id,
+        staffs.role_id AS role_id,
+        roles.role AS role_name
+    FROM staffs
+    LEFT JOIN roles ON staffs.role_id = roles.id
+    WHERE staffs.id = ${StaffUserId}
+    LIMIT 1
+    `;
+    const [rows] = await pool.execute(QueryRole);
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+        const query = `
+        SELECT
+            master_status.name AS job_status,
+            job_types.type AS job_type_name,
+            customers.trading_name AS customer_name,
+            ${weeks_sql},
+            COUNT(jobs.id) AS Grand_Total
+        FROM 
+            customers
+        LEFT JOIN 
+            jobs ON jobs.customer_id = customers.id AND jobs.status_type = 6  -- Filter for jobs with status_type = 6
+        LEFT JOIN 
+            master_status ON master_status.id = jobs.status_type
+        LEFT JOIN 
+            job_types ON jobs.job_type_id = job_types.id
+        GROUP BY 
+            master_status.name, 
+            job_types.type, 
+            customers.trading_name
+        ORDER BY 
+            customers.id ASC`;
+        const [result] = await pool.execute(query);
+        
+        // Process the result to match the desired output format
+        const formattedResult = result.map(row => {
+            const weeksData = {};
+            for (let i = 1; i <= 53; i++) { // Assuming a maximum of 53 weeks
+                weeksData[`WE_${i}_${currentYear}`] = {
+                    count: row[`WE_${i}_${currentYear}`] || 0,
+                    job_ids: row[`job_ids_${i}_${currentYear}`] ? row[`job_ids_${i}_${currentYear}`].split(',') : []
+                };
+            }
+            return {
+                job_status: row.job_status,
+                job_type_name: row.job_type_name,
+                customer_name: row.customer_name,
+                ...weeksData,
+                Grand_Total: {
+                    count: row.Grand_Total,
+                    job_ids: [] // You can handle Grand_Total job_ids if needed
+                }
+            };
+        });
+
+        return { status: true, message: 'Success.', data: formattedResult };
+    } else {
+        return { status: true, message: 'Success.', data: [] };
+    }
+} catch (error) {
+    console.log("error ", error);
+    return { status: false, message: 'Error getting tax status weekly report.' };
+}
+}
+
 module.exports = {
     jobStatusReports,
     jobReceivedSentReports,
@@ -598,5 +746,6 @@ module.exports = {
     jobPendingReports,
     teamMonthlyReports,
     dueByReport,
-    reportCountJob
+    reportCountJob,
+    taxWeeklyStatusReport
 };

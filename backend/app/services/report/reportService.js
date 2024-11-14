@@ -26,6 +26,10 @@ const dueByReport = async (Report) => {
 const reportCountJob = async (Report) => {
   return reportModel.reportCountJob(Report);
 }
+
+const taxWeeklyStatusReport = async (Report) => {
+  return reportModel.taxWeeklyStatusReport(Report);
+}
 module.exports = {
   jobStatusReports,
   jobReceivedSentReports,
@@ -33,5 +37,6 @@ module.exports = {
   jobPendingReports,
   teamMonthlyReports,
   dueByReport,
-  reportCountJob
+  reportCountJob,
+  taxWeeklyStatusReport
 };

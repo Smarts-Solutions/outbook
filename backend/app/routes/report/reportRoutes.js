@@ -12,6 +12,8 @@ router.post('/jobPendingReports',verifyToken, reportController.jobPendingReports
 router.post('/teamMonthlyReports',verifyToken, reportController.teamMonthlyReports);
 router.post('/dueByReport',verifyToken, reportController.dueByReport);
 router.post('/reportCountJob',verifyToken, reportController.reportCountJob);
+router.post('/taxWeeklyStatusReport',verifyToken, reportController.taxWeeklyStatusReport);
+
 
 
 module.exports = router;
