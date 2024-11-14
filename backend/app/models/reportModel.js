@@ -602,7 +602,7 @@ function getWeekNumber(date) {
 const taxWeeklyStatusReport = async (Report) => {
 
     try {
-        const { StaffUserId, customer_id , job_status_type } = Report;
+        const { StaffUserId, customer_id , job_status_type , processor_id , reviewer_id} = Report;
         const currentYear = new Date().getFullYear();
         const startDate = new Date(currentYear, 0, 1);
         const endDate = new Date(currentYear, 11, 31);
@@ -639,11 +639,22 @@ const taxWeeklyStatusReport = async (Report) => {
                 COUNT(jobs.id) AS Grand_Total
             FROM 
                 customers
-            LEFT JOIN 
-                jobs ON jobs.customer_id = customers.id AND jobs.status_type = 6  -- Filter for jobs with status_type = 6
-            LEFT JOIN 
-                master_status ON master_status.id = jobs.status_type
-           `;
+             `;
+
+            
+            if (job_status_type != undefined && job_status_type != "") {
+                query += `
+                LEFT JOIN 
+                jobs ON jobs.customer_id = customers.id AND jobs.status_type = ${job_status_type}
+                LEFT JOIN 
+                master_status ON master_status.id = jobs.status_type`;
+            } else {
+                query += `
+                LEFT JOIN 
+                jobs ON jobs.customer_id = customers.id AND jobs.status_type = 6
+                LEFT JOIN 
+                master_status ON master_status.id = jobs.status_type`;
+            }
 
             let conditions = [];
 
@@ -651,10 +662,12 @@ const taxWeeklyStatusReport = async (Report) => {
                 conditions.push(`customers.id = ${customer_id}`);
             }
 
-            if (job_status_type != undefined && job_status_type != "") {
-                conditions.push(`jobs.status_type = ${job_status_type}`);
-            } else {
-                conditions.push(`jobs.status_type = 6`);
+            if (processor_id != undefined && processor_id != "") {
+                conditions.push(`jobs.allocated_to = ${processor_id}`);
+            }
+
+            if (reviewer_id != undefined && reviewer_id != "") {
+                conditions.push(`jobs.reviewer = ${reviewer_id}`);
             }
 
             if (conditions.length > 0) {
