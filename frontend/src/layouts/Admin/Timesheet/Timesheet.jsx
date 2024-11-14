@@ -746,7 +746,7 @@ const dayMonthFormatDate = (dateString) => {
                       <table
                         className="timesheetTable table align-middle table-nowrap"
                         id="customerTable"
-                        style={{width:"max-content"}}
+                        
                       >
                         <thead className="table-light table-head-blue">
                           
@@ -754,19 +754,19 @@ const dayMonthFormatDate = (dateString) => {
                             <th className="dropdwnCol2 pe-0" data-field="phone"  style={{ width: '10px' }}>
                               No
                             </th>
-                            <th className="ps-0" data-field="phone"  style={{ width: '130px' }}>
+                            <th className="ps-0" data-field="phone"  >
                               Task Type
                             </th>
-                            <th className="dropdwnCol7" data-field="phone"  style={{ width: '160px' }}>
+                            <th className="dropdwnCol7" data-field="phone"  >
                               Customer
                             </th>
-                            <th className="dropdwnCol6" data-field="phone"  style={{ width: '160px' }}>
+                            <th className="dropdwnCol6" data-field="phone"  >
                               Client
                             </th>
-                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '160px' }}>
+                            <th className="dropdwnCol5" data-field="phone"  >
                               Job
                             </th>
-                            <th className="dropdwnCol5" data-field="phone"  style={{ width: '130px' }}>
+                            <th className="dropdwnCol5" data-field="phone" >
                               Task
                             </th>
                            
