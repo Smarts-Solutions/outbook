@@ -650,10 +650,9 @@ const weeks_sql = weeks.join(",\n    ");
             customers.id ASC`;
         const [result] = await pool.execute(query);
         
-        // Process the result to match the desired output format
         const formattedResult = result.map(row => {
             const weeksData = {};
-            for (let i = 1; i <= 53; i++) { // Assuming a maximum of 53 weeks
+            for (let i = 1; i <= 53; i++) { 
                 weeksData[`WE_${i}_${currentYear}`] = {
                     count: row[`WE_${i}_${currentYear}`] || 0,
                     job_ids: row[`job_ids_${i}_${currentYear}`] ? row[`job_ids_${i}_${currentYear}`]: ""
