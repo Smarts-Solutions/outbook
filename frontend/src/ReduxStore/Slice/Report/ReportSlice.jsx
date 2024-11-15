@@ -8,7 +8,8 @@ import {
   JOB_RECEIVED_SEND_REPORT,
   DUE_BY_REPORT,
   JOBS, 
-  TextWeeklyStatusReport
+  TextWeeklyStatusReport,
+  AVERAGE_TAT_REPORT
 
 } from "../../../Services/Report/reportService";
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
@@ -142,6 +143,22 @@ export const getWeeklyReport = createAsyncThunk("taxWeeklyStatusReport", async (
   }
 });
 
+export const averageTatReport = createAsyncThunk("averageTatReport", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await AVERAGE_TAT_REPORT(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
+
 //Setting Slice
 const ReportSlice = createSlice({
   name: "ReportSlice",
@@ -156,6 +173,7 @@ const ReportSlice = createSlice({
     duebyreport: [],
     job: [],
     textweeklystatusreport: [],
+    averagetatreport : []
     
 
   },
@@ -248,6 +266,17 @@ const ReportSlice = createSlice({
         state.textweeklystatusreport = action.payload;
       })
       .addCase(getWeeklyReport.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(averageTatReport.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(averageTatReport.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.averagetatreport = action.payload;
+      })
+      .addCase(averageTatReport.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
       });

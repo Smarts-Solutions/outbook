@@ -223,7 +223,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
         : {};
 
     const handleJobEdit = () => {
-        navigate('/admin/job/edit', { state: { job_id: location.state.job_id } })
+        navigate('/admin/job/edit', { state: { job_id: location.state.job_id ,activeTab: location.state.activeTab } })
     }
 
     const handleDelete = async (row, type) => {
@@ -242,7 +242,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                         timer: 1500,
                     });
                     setTimeout(() => {
-                        window.history.back()
+                        window.history.back() 
                     }, 1500);
 
                 } else {

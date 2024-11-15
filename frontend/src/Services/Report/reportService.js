@@ -109,6 +109,20 @@ export async function TextWeeklyStatusReport(data, token) {
     }
 }
 
+export async function AVERAGE_TAT_REPORT(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}averageTatReport`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+
 
 
 
