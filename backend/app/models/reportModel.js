@@ -367,137 +367,174 @@ const dueByReport = async (Report) => {
         const [rows] = await pool.execute(QueryRole);
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
 
-            const query = `SELECT
+//             const query = `SELECT
+//         customers.id AS customer_id,
+//         customers.trading_name AS customer_name,
+
+//         -- Due within 1 month
+//         JSON_OBJECT(
+//             'count', COUNT(CASE WHEN jobs.due_on BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 MONTH) THEN 1 END),
+//             'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 MONTH) THEN jobs.id END)
+//         ) AS due_within_1_month,
+
+//         -- Due within 1 month
+//         JSON_OBJECT(
+//             'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 2 MONTH) THEN 1 END),
+//             'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 2 MONTH) THEN jobs.id END)
+//         ) AS due_within_2_months,
+
+//         -- Due within 1 month
+//         JSON_OBJECT(
+//             'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 2 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 3 MONTH) THEN 1 END),
+//             'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 2 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 3 MONTH) THEN jobs.id END)
+//         ) AS due_within_3_months,
+
+//         -- Due within 1 month
+//         JSON_OBJECT(
+//             'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 3 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 4 MONTH) THEN 1 END),
+//             'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 3 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 4 MONTH) THEN jobs.id END)
+//         ) AS due_within_4_months,
+
+//         -- Due within 1 month
+//         JSON_OBJECT(
+//             'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 4 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 5 MONTH) THEN 1 END),
+//             'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 4 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 5 MONTH) THEN jobs.id END)
+//         ) AS due_within_5_months,
+
+//         -- Due within 1 month
+//         JSON_OBJECT(
+//             'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 5 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 6 MONTH) THEN 1 END),
+//             'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 5 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 6 MONTH) THEN jobs.id END)
+//         ) AS due_within_6_months,
+
+//         -- Due within 1 month
+//         JSON_OBJECT(
+//             'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 6 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 7 MONTH) THEN 1 END),
+//             'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 6 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 7 MONTH) THEN jobs.id END)
+//         ) AS due_within_7_months,
+
+//         -- Due within 1 month
+//         JSON_OBJECT(
+//             'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 7 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 8 MONTH) THEN 1 END),
+//             'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 7 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 8 MONTH) THEN jobs.id END)
+//         ) AS due_within_8_months,
+
+//         -- Due within 1 month
+//         JSON_OBJECT(
+//             'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 8 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 9 MONTH) THEN 1 END),
+//             'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 8 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 9 MONTH) THEN jobs.id END)
+//         ) AS due_within_9_months,
+
+//         -- Due within 1 month
+//         JSON_OBJECT(
+//             'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 9 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 10 MONTH) THEN 1 END),
+//             'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 9 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 10 MONTH) THEN jobs.id END)
+//         ) AS due_within_10_months,
+
+//         -- Due within 1 month
+//         JSON_OBJECT(
+//             'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 10 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 11 MONTH) THEN 1 END),
+//             'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 10 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 11 MONTH) THEN jobs.id END)
+//         ) AS due_within_11_months,
+
+//         -- Due within 12 months
+//         JSON_OBJECT(
+//             'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 11 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 12 MONTH) THEN 1 END),
+//             'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 11 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 12 MONTH) THEN jobs.id END)
+//         ) AS due_within_12_months,
+
+//         -- Due passed (combined count and job_ids as JSON object)
+//         JSON_OBJECT(
+//             'count', COUNT(CASE WHEN jobs.due_on < CURDATE() THEN 1 END),
+//             'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on < CURDATE() THEN jobs.id END)
+//         ) AS due_passed
+
+//     FROM customers
+//     LEFT JOIN jobs ON jobs.customer_id = customers.id
+//     GROUP BY customers.id;
+// `;
+
+const monthsRange = 12;
+
+// Start building the query
+let query = `
+    SELECT
         customers.id AS customer_id,
         customers.trading_name AS customer_name,
+`;
 
-        -- Due within 1 month
+// Dynamically create the time period logic for due dates
+let dueConditions = [];
+for (let i = 1; i <= monthsRange; i++) {
+    dueConditions.push(`
         JSON_OBJECT(
-            'count', COUNT(CASE WHEN jobs.due_on BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 MONTH) THEN 1 END),
-            'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 MONTH) THEN jobs.id END)
-        ) AS due_within_1_month,
+            'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL ${i - 1} MONTH) AND DATE_ADD(CURDATE(), INTERVAL ${i} MONTH) THEN 1 END),
+            'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL ${i - 1} MONTH) AND DATE_ADD(CURDATE(), INTERVAL ${i} MONTH) THEN jobs.id END)
+        ) AS due_within_${i}_months
+    `);
+}
 
-        -- Due within 1 month
-        JSON_OBJECT(
-            'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 2 MONTH) THEN 1 END),
-            'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 2 MONTH) THEN jobs.id END)
-        ) AS due_within_2_months,
+// Add the "due passed" condition for jobs that are past due
+dueConditions.push(`
+    JSON_OBJECT(
+        'count', COUNT(CASE WHEN jobs.due_on < CURDATE() THEN 1 END),
+        'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on < CURDATE() THEN jobs.id END)
+    ) AS due_passed
+`);
 
-        -- Due within 1 month
-        JSON_OBJECT(
-            'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 2 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 3 MONTH) THEN 1 END),
-            'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 2 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 3 MONTH) THEN jobs.id END)
-        ) AS due_within_3_months,
+// Add the dynamically generated due conditions to the query
+query += dueConditions.join(",\n");
 
-        -- Due within 1 month
-        JSON_OBJECT(
-            'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 3 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 4 MONTH) THEN 1 END),
-            'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 3 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 4 MONTH) THEN jobs.id END)
-        ) AS due_within_4_months,
-
-        -- Due within 1 month
-        JSON_OBJECT(
-            'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 4 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 5 MONTH) THEN 1 END),
-            'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 4 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 5 MONTH) THEN jobs.id END)
-        ) AS due_within_5_months,
-
-        -- Due within 1 month
-        JSON_OBJECT(
-            'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 5 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 6 MONTH) THEN 1 END),
-            'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 5 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 6 MONTH) THEN jobs.id END)
-        ) AS due_within_6_months,
-
-        -- Due within 1 month
-        JSON_OBJECT(
-            'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 6 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 7 MONTH) THEN 1 END),
-            'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 6 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 7 MONTH) THEN jobs.id END)
-        ) AS due_within_7_months,
-
-        -- Due within 1 month
-        JSON_OBJECT(
-            'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 7 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 8 MONTH) THEN 1 END),
-            'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 7 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 8 MONTH) THEN jobs.id END)
-        ) AS due_within_8_months,
-
-        -- Due within 1 month
-        JSON_OBJECT(
-            'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 8 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 9 MONTH) THEN 1 END),
-            'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 8 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 9 MONTH) THEN jobs.id END)
-        ) AS due_within_9_months,
-
-        -- Due within 1 month
-        JSON_OBJECT(
-            'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 9 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 10 MONTH) THEN 1 END),
-            'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 9 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 10 MONTH) THEN jobs.id END)
-        ) AS due_within_10_months,
-
-        -- Due within 1 month
-        JSON_OBJECT(
-            'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 10 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 11 MONTH) THEN 1 END),
-            'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 10 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 11 MONTH) THEN jobs.id END)
-        ) AS due_within_11_months,
-
-        -- Due within 12 months
-        JSON_OBJECT(
-            'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 11 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 12 MONTH) THEN 1 END),
-            'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 11 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 12 MONTH) THEN jobs.id END)
-        ) AS due_within_12_months,
-
-        -- Due passed (combined count and job_ids as JSON object)
-        JSON_OBJECT(
-            'count', COUNT(CASE WHEN jobs.due_on < CURDATE() THEN 1 END),
-            'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on < CURDATE() THEN jobs.id END)
-        ) AS due_passed
-
+// Continue the query with the FROM and JOIN clauses
+query += `
     FROM customers
     LEFT JOIN jobs ON jobs.customer_id = customers.id
-    GROUP BY customers.id;
 `;
 
 
-            // const query = `SELECT
-            // customers.id AS customer_id,
-            // customers.trading_name AS customer_name,
+// Final GROUP BY and ORDER BY clauses
+query += `
+    GROUP BY customers.id
+    ORDER BY customers.id ASC;
+`;
 
-            // -- Due within 1 month
-            // CAST(
-            //     JSON_OBJECT(
-            //         'count', COUNT(CASE WHEN jobs.due_on BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 MONTH) THEN 1 END),
-            //         'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 MONTH) THEN jobs.id END)
-            //     ) AS CHAR
-            // ) AS due_within_1_month,
+// Now you can execute the query using your database connection
+const [result] = await pool.execute(query);
 
-            // -- Due within 2 months
-            // CAST(
-            //     JSON_OBJECT(
-            //         'count', COUNT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 2 MONTH) THEN 1 END),
-            //         'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 MONTH) AND DATE_ADD(CURDATE(), INTERVAL 2 MONTH) THEN jobs.id END)
-            //     ) AS CHAR
-            // ) AS due_within_2_months,
+// Format the result into a structured format
+const formattedResult = result.map(row => {
+    const weeksData = {};
+    for (let i = 1; i <= monthsRange; i++) {
+        weeksData[`due_within_${i}_months`] = 
+        row[`due_within_${i}_months`] || 0
+        // {
+        //     count: row[`due_within_${i}_months`] || 0,
+        //     job_ids: row[`job_ids_${i}_months`] ? row[`job_ids_${i}_months`] : ""
+        // };
+    }
 
-            // -- Repeat for other months...
+    return {
+        customer_id: row.customer_id,
+        customer_name: row.customer_name,
+        ...weeksData,
+        due_passed: {
+            count: row.due_passed ? row.due_passed.count : 0,
+            job_ids: row.due_passed ? row.due_passed.job_ids : ""
+        }
+    };
+});
 
-            // -- Due passed
-            // CAST(
-            //     JSON_OBJECT(
-            //         'count', COUNT(CASE WHEN jobs.due_on < CURDATE() THEN 1 END),
-            //         'job_ids', GROUP_CONCAT(CASE WHEN jobs.due_on < CURDATE() THEN jobs.id END)
-            //     ) AS CHAR
-            // ) AS due_passed
+return { status: true, message: 'Success.', data: formattedResult };
+           
 
-            // FROM customers
-            // LEFT JOIN jobs ON jobs.customer_id = customers.id
-            // GROUP BY customers.id;
-            // `
-
-            const [result] = await pool.execute(query);
+            //const [result] = await pool.execute(query);
             return { status: true, message: 'Success.', data: result };
         } else {
             return { status: true, message: 'Success.', data: [] };
         }
 
     } catch (error) {
-        cd
+     
         console.log("error ", error);
         return { status: false, message: 'Error getting job dueByReport.' };
     }
