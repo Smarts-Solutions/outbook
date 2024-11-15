@@ -601,7 +601,6 @@ function getWeekNumber(date) {
 }
 
 const taxWeeklyStatusReport = async (Report) => {
-
     try {
         const { StaffUserId, customer_id , job_status_type_id , processor_id , reviewer_id} = Report;
         const currentYear = new Date().getFullYear();
