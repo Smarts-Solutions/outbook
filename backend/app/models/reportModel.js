@@ -684,7 +684,7 @@ const taxWeeklyStatusReport = async (Report) => {
             `;
 
             const [result] = await pool.execute(query);
-
+            let weekArray = [];
             const formattedResult = result.map(row => {
                 const weeksData = {};
                 for (let i = 1; i <= 53; i++) {
@@ -693,15 +693,17 @@ const taxWeeklyStatusReport = async (Report) => {
                         job_ids: row[`job_ids_${i}_${currentYear}`] ? row[`job_ids_${i}_${currentYear}`] : ""
                     };
                 }
+                weekArray.push(weeksData);
                 return {
                     job_status: row.job_status,
                     job_type_name: row.job_type_name,
                     customer_name: row.customer_name,
-                    ...weeksData,
+                    weeks: weekArray,
                     Grand_Total: {
                         count: row.Grand_Total,
                         job_ids: row.job_ids
                     }
+
                 };
             });
 
@@ -837,34 +839,54 @@ const averageTatReport = async (Report) => {
   `
         const [rows] = await pool.execute(QueryRole);
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
-    // const query = `
-    //     SELECT 
-    // master_status.name AS job_status,
-    // AVG(DATEDIFF(jobs.completed_at, jobs.created_at)) AS average_tat
-    // FROM 
-    //     jobs
-    // LEFT JOIN 
-    //     master_status ON master_status.id = jobs.status_type
-    // GROUP BY 
-    //     master_status.name, jobs.status_type
-    //      `;
+
     const query = `
     SELECT
     CASE 
         WHEN MONTH(jobs.created_at) = MONTH(CURDATE()) AND YEAR(jobs.created_at) = YEAR(CURDATE()) THEN 'Current'
         ELSE DATE_FORMAT(jobs.created_at, '%b %Y')
     END AS month,
-    AVG(DATEDIFF(jobs.updated_at, jobs.created_at)) AS average_tat,
-    jobs.id AS job_id
-    FROM
-        jobs
-    WHERE
-        jobs.status_type = 6
-    GROUP BY
-        YEAR(jobs.created_at),
-        MONTH(jobs.created_at)
-    WITH ROLLUP
+    AVG(DATEDIFF(jobs.updated_at, jobs.created_at)) / DAY(LAST_DAY(jobs.created_at)) AS average_tat_per_day,
+    GROUP_CONCAT(jobs.id ORDER BY jobs.created_at) AS job_ids
+FROM
+    jobs
+WHERE
+    jobs.status_type = 6
+GROUP BY
+    YEAR(jobs.created_at),
+    MONTH(jobs.created_at)
+    ORDER BY
+    jobs.created_at DESC
      `;
+//      const query = `
+//      SELECT
+//      CASE 
+//          WHEN MONTH(jobs.created_at) = MONTH(CURDATE()) AND YEAR(jobs.created_at) = YEAR(CURDATE()) THEN 'Current'
+//          ELSE DATE_FORMAT(jobs.created_at, '%b %Y')
+//      END AS month,
+     
+//      -- Calculate the total count of jobs for the month
+//      COUNT(jobs.id) AS job_count,
+     
+//      -- Calculate the number of days in the current month (for averaging)
+//      DAY(LAST_DAY(jobs.created_at)) AS days_in_month,
+     
+//      -- Calculate the average turnaround time (TAT) per day
+//      AVG(DATEDIFF(jobs.updated_at, jobs.created_at)) / DAY(LAST_DAY(jobs.created_at)) AS average_tat_per_day,
+     
+//      -- Concatenate job IDs for each month
+//      GROUP_CONCAT(jobs.id ORDER BY jobs.created_at) AS job_ids
+ 
+//  FROM
+//      jobs
+//  WHERE
+//      jobs.status_type = 6
+//  GROUP BY
+//      YEAR(jobs.created_at),
+//      MONTH(jobs.created_at)
+//      ORDER BY
+//      jobs.created_at DESC
+//       `;
             const [result] = await pool.execute(query);
             return { status: true, message: 'Success.', data: result };
         } else {
