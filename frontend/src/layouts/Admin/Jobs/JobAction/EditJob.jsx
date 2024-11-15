@@ -704,6 +704,8 @@ const EditJob = () => {
 
 
 
+  console.log("location.state.activeTab", location.state);
+
   return (
     <div>
       <div className="container-fluid">

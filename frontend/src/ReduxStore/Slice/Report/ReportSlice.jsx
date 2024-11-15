@@ -7,7 +7,10 @@ import {
   JOB_PENDING_REPORT,
   JOB_RECEIVED_SEND_REPORT,
   DUE_BY_REPORT,
-  JOBS
+  JOBS, 
+  TextWeeklyStatusReport,
+  AVERAGE_TAT_REPORT,
+  WEEKLY_REPORT_FILTER
 
 } from "../../../Services/Report/reportService";
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
@@ -125,6 +128,54 @@ export const Jobs = createAsyncThunk("reportCountJob", async (data) => {
   }
 });
 
+export const getWeeklyReport = createAsyncThunk("taxWeeklyStatusReport", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await TextWeeklyStatusReport(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
+
+export const averageTatReport = createAsyncThunk("averageTatReport", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await AVERAGE_TAT_REPORT(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
+
+export const weeklyReportFilter = createAsyncThunk("taxWeeklyStatusReportFilterKey", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await WEEKLY_REPORT_FILTER(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
+
 //Setting Slice
 const ReportSlice = createSlice({
   name: "ReportSlice",
@@ -138,6 +189,10 @@ const ReportSlice = createSlice({
     receivedsentreport: [],
     duebyreport: [],
     job: [],
+    textweeklystatusreport: [],
+    averagetatreport : [],
+    weeklyreportfilter : []
+    
 
   },
 
@@ -220,7 +275,40 @@ const ReportSlice = createSlice({
       .addCase(Jobs.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-      });
+      })
+      .addCase(getWeeklyReport.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(getWeeklyReport.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.textweeklystatusreport = action.payload;
+      })
+      .addCase(getWeeklyReport.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(averageTatReport.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(averageTatReport.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.averagetatreport = action.payload;
+      })
+      .addCase(averageTatReport.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(weeklyReportFilter.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(weeklyReportFilter.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.weeklyreportfilter = action.payload;
+      })
+      .addCase(weeklyReportFilter.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
 
 
 

@@ -9,6 +9,8 @@ import TeamMonthlyReport from './TeamMonthlyReports';
 import JobPendingReport from './JobPendingReports';
 import JobsReceivedSentReports from './JobsReceivedSentReports';
 import DueByReport from './DueByReport';
+import TextWeelyReport from './TextWeelyReport';
+import AverageTatReport from './AverageTatReport';
  
 
 function Reportsnew() {
@@ -37,7 +39,9 @@ function Reportsnew() {
       case 'timesheetReport':
         return <TimesheetReport />
       case 'averageTATReport':
-        return <div>Average TAT Report Content</div>;
+        return <AverageTatReport />;
+      case 'taxWeeklyStatusReport':
+        return <TextWeelyReport />;
       default:
         return null;
     }
@@ -64,8 +68,8 @@ function Reportsnew() {
                     <option value="jobsPendingReport">Jobs Pending Report</option>
                     <option value="dueByReport">Due By Report</option>
                     <option value="teamPerformanceReport">Team Performance Report by Month</option>
-                    {/* <option value="timesheetReport">Timesheet Report</option> */}
-
+                    <option value="taxWeeklyStatusReport">Tax Weekly Status Report</option>
+                    <option value="averageTATReport">Average TAT Report</option>
                   </select>
                 </>
               </div>

@@ -96,6 +96,46 @@ export async function JOBS(data, token) {
     }
 }
 
+export async function TextWeeklyStatusReport(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}taxWeeklyStatusReport`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+export async function AVERAGE_TAT_REPORT(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}averageTatReport`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+export async function WEEKLY_REPORT_FILTER(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}taxWeeklyStatusReportFilterKey`, data, {
+            headers: header(token),
+            data: {}
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+
 
 
 

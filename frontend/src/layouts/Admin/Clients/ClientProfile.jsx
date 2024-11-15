@@ -289,7 +289,7 @@ const ClientList = () => {
   };
 
   function handleEdit(row) {
-    navigate("/admin/job/edit", { state: { job_id: row.job_id, goto: "client" } });
+    navigate("/admin/job/edit", { state: { job_id: row.job_id, goto: "client" , activeTab : location?.state?.activeTab  } });
   }
 
   const handleDelete = async (row, type) => {

@@ -54,7 +54,7 @@ import Timesheet from "../layouts/Admin/Timesheet/Timesheet";
 import TimesheetNew from "../layouts/Admin/Timesheet/TimesheetNew";
 import Reports from "../layouts/Admin/Reports/Reports";
 import Jobs from '../layouts/Admin/Reports/Jobs'
-import SlidingTable from "../layouts/Admin/Reports/SlidingTable";
+import TextWeeklyReport from "../layouts/Admin/Reports/TextWeelyReport"
 
 
 
@@ -241,7 +241,7 @@ const Admin_Route = () => {
               <Route path="/subinternal" element={<SubInternal />} />
               <Route path="/report/jobs" element={<Jobs />} />
               <Route path="/dashboard/data" element={<DashboardLinkData />} />
-              <Route path="/slidingTable" element={<SlidingTable />} />
+              <Route path="/testweeklyreport" element={<TextWeeklyReport />} />
             </Routes>
           </div>
         </div>

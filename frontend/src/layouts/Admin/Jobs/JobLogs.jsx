@@ -182,7 +182,7 @@ const JobLogs = () => {
                   <div
                     className="btn btn-info text-white float-end blue-btn"
                     onClick={() => {
-                      sessionStorage.setItem('activeTab', location.state.goto == "report" ? "client" : location.state.activeTab);
+                      sessionStorage.setItem('activeTab', location.state.goto == "report" ? "client" : location.state.activeTab || "client" );
                       window.history.back();
                       sessionStorage.removeItem('activeTab2');
                     }}
