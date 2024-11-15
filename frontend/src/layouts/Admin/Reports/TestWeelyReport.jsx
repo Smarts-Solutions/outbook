@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 
 const SlidingTable = () => {
-  const [columns] = useState(generateColumns(52));  // Generate 52 columns
-  const [visibleColumns, setVisibleColumns] = useState(columns.slice(0, 6));  // Initially show 10 columns
-  const [currentIndex, setCurrentIndex] = useState(0);  // Keep track of the visible columns' index
+  const [columns] = useState(generateColumns(52));  
+  const [visibleColumns, setVisibleColumns] = useState(columns.slice(0, 6)); 
+  const [currentIndex, setCurrentIndex] = useState(0);  
 
-  // Generate columns for the table
+  const getAllWeeklyReports = () => {
+    const req = {
+      
+    }
+  };
+
   function generateColumns(num) {
     const cols = [];
     for (let i = 1; i <= num; i++) {
@@ -14,7 +19,6 @@ const SlidingTable = () => {
     return cols;
   }
 
-  // Function to show the next set of columns
   const slideNext = () => {
     if (currentIndex + 6 < columns.length) {
       const newIndex = currentIndex + 6;
@@ -23,7 +27,6 @@ const SlidingTable = () => {
     }
   };
 
-  // Function to show the previous set of columns
   const slidePrev = () => {
     if (currentIndex - 6 >= 0) {
       const newIndex = currentIndex - 6;
