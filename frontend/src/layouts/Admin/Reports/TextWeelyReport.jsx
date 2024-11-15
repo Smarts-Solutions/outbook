@@ -169,9 +169,7 @@ const SlidingTable = () => {
                   <option key={index} value={data.reviewer_id}>{data.reviewer_name}</option>
                 ))}
               </select>
-
             </div>
-
           </div>
           <div>
             <button className="btn btn-info " onClick={() => setMultipleFilter({
@@ -183,7 +181,6 @@ const SlidingTable = () => {
               Reset
             </button>
           </div>
-
           <div>
             <button className="btn btn-info " onClick={slidePrev} disabled={currentIndex === 0}>
               Prev
