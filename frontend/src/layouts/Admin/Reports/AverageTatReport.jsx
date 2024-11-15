@@ -38,38 +38,33 @@ const AverageTatReport = () => {
 
   const columns = [
     {
-      name: 'Job Status',
-      selector: row => row.job_status,
+      name: 'Month',
+      selector: row => row.month,
       sortable: true
     },
-    {
-      name: 'Job Type Name',
-      selector: row => row.job_type_name,
-      sortable: true
-    },
-
-    {
-      name: 'No Of Jobs',
-      cell: (row) => (
-        row.number_of_job > 0 ? (
-          <div 
-            style={{ color: 'rgb(38, 189, 240)', cursor: 'pointer' }} 
-            onClick={() => handleOnClick(row)}
-          >
-            {row.number_of_job}
-          </div>
-        ) : (
-          <div>{row.number_of_job}</div>
-        )
-      ),
-      sortable: true,
-    },
-
     // {
-    //   name: 'Number of Job',
-    //   selector: row => row.number_of_job,
-    //   sortable: true
+    //   name: 'Average TAT Per Day',
+    //   cell: (row) => (
+    //     row.job_ids!="" ? (
+    //       <div 
+    //         style={{ color: 'rgb(38, 189, 240)', cursor: 'pointer' }} 
+    //         onClick={() => handleOnClick(row)}
+    //       >
+    //         {row.average_tat_per_day}
+    //       </div>
+    //     ) : (
+    //       <div>{row.average_tat_per_day}</div>
+    //     )
+    //   ),
+    //   sortable: true,
     // },
+
+    {
+        name: 'Average TAT Per Day',
+        selector: row => (row.average_tat_per_day ?  parseFloat(row.average_tat_per_day).toFixed(2) : '0.00'),
+        sortable: true
+      },
+      
 
 
   ]
