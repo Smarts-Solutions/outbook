@@ -7,7 +7,8 @@ import {
   JOB_PENDING_REPORT,
   JOB_RECEIVED_SEND_REPORT,
   DUE_BY_REPORT,
-  JOBS
+  JOBS, 
+  TextWeeklyStatusReport
 
 } from "../../../Services/Report/reportService";
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
@@ -125,6 +126,22 @@ export const Jobs = createAsyncThunk("reportCountJob", async (data) => {
   }
 });
 
+export const getWeeklyReport = createAsyncThunk("taxWeeklyStatusReport", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await TextWeeklyStatusReport(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
+
 //Setting Slice
 const ReportSlice = createSlice({
   name: "ReportSlice",
@@ -138,6 +155,8 @@ const ReportSlice = createSlice({
     receivedsentreport: [],
     duebyreport: [],
     job: [],
+    textweeklystatusreport: [],
+    
 
   },
 
@@ -218,6 +237,17 @@ const ReportSlice = createSlice({
         state.job = action.payload;
       })
       .addCase(Jobs.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(getWeeklyReport.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(getWeeklyReport.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.textweeklystatusreport = action.payload;
+      })
+      .addCase(getWeeklyReport.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
       });
