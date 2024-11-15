@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { getWeeklyReport } from '../../../ReduxStore/Slice/Report/ReportSlice';
+import { getWeeklyReport, weeklyReportFilter } from '../../../ReduxStore/Slice/Report/ReportSlice';
 
 const SlidingTable = () => {
   const StaffUserId = JSON.parse(localStorage.getItem('staffDetails'))?.id;
@@ -10,6 +10,17 @@ const SlidingTable = () => {
   const [visibleColumns, setVisibleColumns] = useState(columns.slice(0, 10));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [weeklyReportData, setWeeklyReportData] = useState([]);
+  const [filterData, setFilterData] = useState([]);
+  const [multipleFilter, setMultipleFilter] = useState({
+    customer_id: "",
+    job_status_type_id: "",
+    processor_id: "",
+    reviewer_id: ""
+  });
+
+
+
+  
 
   useEffect(() => {
     var CurrentWeek = getCurrentWeekNumber();
@@ -17,15 +28,16 @@ const SlidingTable = () => {
     setVisibleColumns(columns.slice(CurrentWeek - 1, CurrentWeek + 9));
 
     getAllWeeklyReports();
-  }, []);
+    getFilterData()
+  }, [multipleFilter]);
 
   const getAllWeeklyReports = async () => {
     const req = {
       StaffUserId: StaffUserId,
-      customer_id: "",
-      job_status_type_id: "",
-      processor_id: "",
-      reviewer_id: ""
+      customer_id: multipleFilter.customer_id,
+      job_status_type_id: multipleFilter.job_status_type_id,
+      processor_id: multipleFilter.processor_id,
+      reviewer_id: multipleFilter.reviewer_id
     }
     const data = { req: req, authToken: token };
     await dispatch(getWeeklyReport(data)).unwrap()
@@ -41,6 +53,27 @@ const SlidingTable = () => {
         console.log("err", err);
       })
   };
+
+  const getFilterData = async (data) => {
+    const req = {
+      StaffUserId: StaffUserId,
+    }
+    const data1 = { req: req, authToken: token };
+    await dispatch(weeklyReportFilter(data1)).unwrap()
+
+      .then((res) => {
+        if (res.status) {
+          setFilterData(res.data)
+        }
+        else {
+          setFilterData([])
+        }
+      })
+      .catch((err) => {
+        console.log("err", err);
+      })
+  };
+
 
   function generateColumns(num) {
     const cols = [];
@@ -79,8 +112,68 @@ const SlidingTable = () => {
   return (
     <div className='containr-fluid mt-5'>
       <div className='report-data'>
-        <div className='mb-2 d-flex justify-content-end'>
-         
+        <div className='mb-2 d-flex justify-content-between'>
+
+          <div className="row">
+
+            <div className='col-md-3'>
+              <select className="form-select" id="tabSelect"
+                value={multipleFilter.customer_id}
+                onChange={(e)=>setMultipleFilter({...multipleFilter, customer_id: e.target.value})}
+                
+              >
+                <option value="">Select Customer</option>
+                {filterData && filterData?.customer?.map((data, index) => (
+                  <option key={index} value={data.customer_id}>{data.customer_name}</option>
+                ))}
+
+              </select>
+
+            </div>
+
+            <div className='col-md-3'>
+              <select className="form-select" id="tabSelect"
+                value={multipleFilter.job_status_type_id}
+                onChange={(e)=>setMultipleFilter({...multipleFilter, job_status_type_id: e.target.value})}
+              >
+                <option value="">Select Job Status</option>
+                {filterData && filterData?.job_status_type?.map((data, index) => (
+                  <option key={index} value={data.job_status_type_id}>{data.job_status_type_name}</option>
+                ))}
+              </select>
+
+            </div>
+
+
+            <div className='col-md-3'>
+              <select className="form-select" id="tabSelect"
+                value={multipleFilter.processor_id}
+                onChange={(e)=>setMultipleFilter({...multipleFilter, processor_id: e.target.value})}
+              >
+                <option value="">Select Processor</option>
+                {filterData && filterData?.processor?.map((data, index) => (
+                  <option key={index} value={data.processor_id}>{data.processor_name}</option>
+                ))}
+
+              </select>
+
+            </div>
+
+            <div className='col-md-3'>
+              <select className="form-select" id="tabSelect"
+                value={multipleFilter.reviewer_id}
+                onChange={(e)=>setMultipleFilter({...multipleFilter, reviewer_id: e.target.value})}
+              >
+                <option value="">Select Reviewer</option>
+                {filterData && filterData?.reviewer?.map((data, index) => (
+                  <option key={index} value={data.reviewer_id}>{data.reviewer_name}</option>
+                ))}
+              </select>
+
+            </div>
+
+          </div>
+
           <div>
             <button className="btn btn-info " onClick={slidePrev} disabled={currentIndex === 0}>
               Prev
