@@ -20,7 +20,7 @@ const SlidingTable = () => {
 
 
 
-  
+
 
   useEffect(() => {
     var CurrentWeek = getCurrentWeekNumber();
@@ -119,8 +119,8 @@ const SlidingTable = () => {
             <div className='col-md-3'>
               <select className="form-select" id="tabSelect"
                 value={multipleFilter.customer_id}
-                onChange={(e)=>setMultipleFilter({...multipleFilter, customer_id: e.target.value})}
-                
+                onChange={(e) => setMultipleFilter({ ...multipleFilter, customer_id: e.target.value })}
+
               >
                 <option value="">Select Customer</option>
                 {filterData && filterData?.customer?.map((data, index) => (
@@ -134,7 +134,7 @@ const SlidingTable = () => {
             <div className='col-md-3'>
               <select className="form-select" id="tabSelect"
                 value={multipleFilter.job_status_type_id}
-                onChange={(e)=>setMultipleFilter({...multipleFilter, job_status_type_id: e.target.value})}
+                onChange={(e) => setMultipleFilter({ ...multipleFilter, job_status_type_id: e.target.value })}
               >
                 <option value="">Select Job Status</option>
                 {filterData && filterData?.job_status_type?.map((data, index) => (
@@ -148,7 +148,7 @@ const SlidingTable = () => {
             <div className='col-md-3'>
               <select className="form-select" id="tabSelect"
                 value={multipleFilter.processor_id}
-                onChange={(e)=>setMultipleFilter({...multipleFilter, processor_id: e.target.value})}
+                onChange={(e) => setMultipleFilter({ ...multipleFilter, processor_id: e.target.value })}
               >
                 <option value="">Select Processor</option>
                 {filterData && filterData?.processor?.map((data, index) => (
@@ -162,7 +162,7 @@ const SlidingTable = () => {
             <div className='col-md-3'>
               <select className="form-select" id="tabSelect"
                 value={multipleFilter.reviewer_id}
-                onChange={(e)=>setMultipleFilter({...multipleFilter, reviewer_id: e.target.value})}
+                onChange={(e) => setMultipleFilter({ ...multipleFilter, reviewer_id: e.target.value })}
               >
                 <option value="">Select Reviewer</option>
                 {filterData && filterData?.reviewer?.map((data, index) => (
@@ -172,6 +172,16 @@ const SlidingTable = () => {
 
             </div>
 
+          </div>
+          <div>
+            <button className="btn btn-info " onClick={() => setMultipleFilter({
+              customer_id: "",
+              job_status_type_id: "",
+              processor_id: "",
+              reviewer_id: ""
+            })} disabled={currentIndex === 0}>
+              Reset
+            </button>
           </div>
 
           <div>
