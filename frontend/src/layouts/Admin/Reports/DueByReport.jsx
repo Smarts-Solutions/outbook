@@ -272,13 +272,13 @@ console.log(jsonObject);
             <div className='report-data'>
                 <div className='row'>
                     <div className='col-md-7'>
-                        <div className='tab-title'>
+                        <div className='tab-title mb-5'>
                             <h3>Due By Report</h3>
                         </div>
-                        <div className='job-filter-btn '>
+                        {/* <div className='job-filter-btn '>
                             <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
                             <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
                 <div className='datatable-wrapper mt-minus'>
