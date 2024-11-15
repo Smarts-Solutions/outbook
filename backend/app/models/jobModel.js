@@ -244,9 +244,7 @@ const getAddJobData = async (job) => {
     return { status: true, message: 'success.', data: { customer: customer, client: client, customer_account_manager: customer_account_manager, services: services, job_type: job_type, reviewer: reviewer, allocated: allocated, engagement_model: engagement_model, currency: rows8, Manager: AccountManagerArr } };
 
   } catch (err) {
-
     return { status: false, message: 'Err Customer Get' };
-
   }
 
 

@@ -817,13 +817,20 @@ const getTimesheetTaskType = async (Timesheet) => {
 const saveTimesheet = async (Timesheet) => {
   try {
     const { staff_id, data, deleteRows } = Timesheet;
+   
+
+    
+
+
+
     if (data.length > 0) {
       const formatTime = input => {
         if (input == null) {
-          return null
+          return null;
         }
-        const [hours, minutes = '00'] = input.toString().split('.');
-        return `${hours}:${(minutes + '00').slice(0, 2)}`;
+        const [hours, minutes = '0'] = input.toString().split('.');
+        const formattedMinutes = minutes.length === 1 ? `0${minutes}` : minutes; 
+        return `${hours}:${formattedMinutes}`;
       };
       for (const row of data) {
         const customer_id = row.customer_id == null ? 0 : row.customer_id;
@@ -837,7 +844,6 @@ const saveTimesheet = async (Timesheet) => {
         const friday_hours = formatTime(row.friday_hours);
         const saturday_hours = formatTime(row.saturday_hours);
         const sunday_hours = formatTime(row.sunday_hours);
-
 
         if (row.id === null) {
           const insertQuery = `
