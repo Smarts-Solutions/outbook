@@ -454,13 +454,20 @@ const Timesheet = () => {
         title: 'The time cannot exceed 23.59.',
         timerProgressBar: true,
         showConfirmButton: true,
-        timer: 3000,
+        timer: 1500,
       });
       return;
     }
 
     const [integerPart, fractionalPart] = value.split('.');
     if (fractionalPart && parseInt(fractionalPart) > 59) {
+      sweatalert.fire({
+        icon: 'warning',
+        title: 'Minutes cannot exceed 59 ',
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500,
+      });
       return;
     }
 
