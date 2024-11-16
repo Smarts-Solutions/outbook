@@ -748,7 +748,7 @@ const Timesheet = () => {
                       <table
                         className="timesheetTable table align-middle table-nowrap"
                         id="customerTable"
-                        
+                        style={{ width: "max-content" }}
                       >
                         <thead className="table-light table-head-blue">
                           
@@ -756,19 +756,19 @@ const Timesheet = () => {
                             <th className="dropdwnCol2 pe-0" data-field="phone"  style={{ width: '10px' }}>
                               No
                             </th>
-                            <th className="ps-0" data-field="phone"  >
+                            <th className="ps-0" data-field="phone" style={{ width: '130px' }} >
                               Task Type
                             </th>
-                            <th className="dropdwnCol7" data-field="phone"  >
+                            <th className="dropdwnCol7" data-field="phone"  style={{ width: '130px' }}>
                               Customer
                             </th>
-                            <th className="dropdwnCol6" data-field="phone"  >
+                            <th className="dropdwnCol6" data-field="phone"  style={{ width: '130px' }}>
                               Client
                             </th>
-                            <th className="dropdwnCol5" data-field="phone"  >
+                            <th className="dropdwnCol5" data-field="phone" style={{ width: '130px' }} >
                               Job
                             </th>
-                            <th className="dropdwnCol5" data-field="phone" >
+                            <th className="dropdwnCol5" data-field="phone" style={{ width: '130px' }}>
                               Task
                             </th>
                            
