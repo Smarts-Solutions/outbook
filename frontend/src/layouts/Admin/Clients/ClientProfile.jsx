@@ -617,20 +617,21 @@ const ClientList = () => {
                     <div className="col-lg-6">
                       <ul className="list-unstyled faq-qa">
                         <li className="mb-4">
-                          <h6 className="">Trading Name : {informationData.trading_name || 'NA'}</h6>
+                        <b>Trading Name :</b> {informationData.trading_name || 'NA'}
+                       
                           {/* <p className="font-14  ml-3">
                             {informationData.trading_name}
                           </p> */}
                         </li>
                         <li className="mb-4">
-                          <h6 className="">VAT Registered : {informationData.vat_registered == 0 ? "Yes" : "No"}</h6>
+                          <b className="">VAT Registered : </b>{informationData.vat_registered == 0 ? "Yes" : "No"}
                           {/* <p className="font-14  ml-3">
                             {" "}
                             
                           </p> */}
                         </li>
                         <li className="mb-4">
-                          <h6 className="">Website : {informationData.website || 'NA'}</h6>
+                          <b className="">Website : </b>{informationData.website || 'NA'}
                           {/* <p className="font-14  ml-3">
                             
                           </p> */}
@@ -640,14 +641,14 @@ const ClientList = () => {
                     <div className="col-lg-6">
                       <ul className="list-unstyled faq-qa">
                         <li className="mb-4">
-                          <h6 className="">Trading Address : {informationData.trading_address || 'NA'}</h6>
+                          <b className="">Trading Address :</b> {informationData.trading_address || 'NA'}
                           {/* <p className="font-14  ml-3">
                             {" "}
                             {informationData.trading_address}
                           </p> */}
                         </li>
                         <li className="mb-4">
-                          <h6 className="">VAT Number :  {informationData.vat_number || 'NA'}</h6>
+                          <b className="">VAT Number :</b>  {informationData.vat_number || 'NA'}
                           {/* <p className="font-14  ml-3">
                             {" "}
                             {informationData.vat_number}
@@ -663,15 +664,15 @@ const ClientList = () => {
                     <div className="col-lg-6">
                       <ul className="list-unstyled faq-qa">
                         <li className="mb-4">
-                          <h6 className="">Company Name :  {companyDetails.company_name}</h6>
+                          <b className="">Company Name :</b>  {companyDetails.company_name}
 
                         </li>
                         <li className="mb-4">
-                          <h6 className="">Company Status :  {companyDetails.company_status}</h6>
+                          <b className="">Company Status : </b> {companyDetails.company_status}
 
                         </li>
                         <li className="mb-4">
-                          <h6 className="">Registered Office Address :  {companyDetails.registered_office_address}</h6>
+                          <b className="">Registered Office Address : </b> {companyDetails.registered_office_address}
 
                         </li>
                       </ul>
