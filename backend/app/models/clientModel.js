@@ -570,7 +570,7 @@ FROM
     clients
 JOIN 
     customers ON customers.id = clients.customer_id    
-JOIN 
+LEFT JOIN 
     client_contact_details ON clients.id = client_contact_details.client_id
 LEFT JOIN 
     customer_contact_person_role ON customer_contact_person_role.id = client_contact_details.role 
@@ -651,11 +651,11 @@ FROM
     clients
 JOIN 
     customers ON clients.customer_id = customers.id
-JOIN 
+LEFT JOIN 
     client_contact_details ON clients.id = client_contact_details.client_id
 LEFT JOIN 
     customer_contact_person_role ON customer_contact_person_role.id = client_contact_details.role 
-JOIN 
+LEFT JOIN 
    client_company_information ON clients.id = client_company_information.client_id
 WHERE 
     clients.id = ?
@@ -746,7 +746,7 @@ FROM
     clients
 JOIN
     customers ON clients.customer_id = customers.id
-JOIN 
+LEFT JOIN 
     client_contact_details ON clients.id = client_contact_details.client_id
 LEFT JOIN 
     customer_contact_person_role ON customer_contact_person_role.id = client_contact_details.role 
@@ -824,7 +824,7 @@ FROM
     clients
 JOIN
     customers ON clients.customer_id = customers.id    
-JOIN 
+LEFT JOIN 
     client_contact_details ON clients.id = client_contact_details.client_id
 LEFT JOIN 
     customer_contact_person_role ON customer_contact_person_role.id = client_contact_details.role 
