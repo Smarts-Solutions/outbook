@@ -1,6 +1,9 @@
 const pool = require("../config/database");
 
 const getTimesheet = async (Timesheet) => {
+
+ 
+
   const { staff_id, weekOffset } = Timesheet;
   const currentDate = new Date();
   const currentWeekday = currentDate.getUTCDay();
@@ -95,6 +98,7 @@ const getTimesheet = async (Timesheet) => {
       endOfWeekFormatted
     ]);
 
+    
     return { status: true, message: "success.", data: rows };
   } catch (err) {
     console.log(err);
