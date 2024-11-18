@@ -65,6 +65,8 @@ const Setting = () => {
     }
   }, [accessData]);
 
+
+  console.log("viewData", viewData);
   const token = JSON.parse(localStorage.getItem("token"));
   const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
   const [personRoleDataAll, setPersonRoleDataAll] = useState({
@@ -1758,6 +1760,8 @@ const Setting = () => {
     { id: "10", label: "Internal Task", icon: "fas fa-lock" },
   ];
 
+
+
   return (
     <>
       <div>
@@ -2190,44 +2194,18 @@ const Setting = () => {
                         </td>
                         <td
                           className={
-                            viewData && viewData.status === 1
+                            viewData && viewData?.status == 1
                               ? "text-success"
                               : "text-danger"
                           }
                         >
-                          {viewData && viewData.status === 1
+                          {viewData && viewData?.status == 1
                             ? "Active"
                             : "Inactive"}
                         </td>
                       </tr>
                     </tbody>
                   </table>
-                  {/* <div className="col-md-6">
-                    <label htmlFor="customername-field" className="form-label">
-                      Check List Name
-                    </label>
-                  </div>
-                  <div className="col-md-6" style={{ fontWeight: 600 }}>
-                    <span className="text-muted">{viewData && viewData?.check_list_name}</span>
-                  </div>
-               
-                  <div className="col-md-6">
-                    <label htmlFor="customername-field" className="form-label">
-                      Task Name
-                    </label>
-                  </div>
-                  <div className="col-md-6" style={{ fontWeight: 600 }}>
-                    {viewData && viewData.task?.map(task => task.task_name).join(',  ')}
-                  </div>
-                 
-                  <div className="col-md-6">
-                    <label htmlFor="customername-field" className="form-label">
-                      status
-                    </label>
-                  </div>
-                  <div className="col-md-6" style={{ fontWeight: 600 }}>
-                    <span className="text-muted">{viewData && viewData?.status == 1 ? "Active" : "Inactvie"}</span>
-                  </div> */}
                 </div>
               </div>
             </CommonModal>
