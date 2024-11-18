@@ -899,7 +899,7 @@ const ClientEdit = () => {
                                 <div className="card card_shadow ">
                                   <div className="card-header card-header-light-blue align-items-center d-flex">
                                     <h4 className="card-title fs-16 mb-0 fs-16">
-                                      Sole Trader
+                                      Sole Trader Information
                                     </h4>
                                   </div>
                                   {/* end card header */}
@@ -1684,7 +1684,7 @@ const ClientEdit = () => {
                                   </div>
                                 </div>
                               </div>
-                              <div className="row">
+                             
                                 <div className="col-lg-12">
                                   <div className="card card_shadow">
                                     <div className="card-header card-header-light-blue align-items-center d-flex">
@@ -1701,7 +1701,7 @@ const ClientEdit = () => {
                                                 className="col-xl-12 col-lg-12 mt-3"
                                                 key={index}
                                               >
-                                                <div className="card pricing-box p-4 m-2 mt-0">
+                                                <div className="card pricing-box p-3 m-2 mt-0">
                                                   <div className="row">
                                                     {index !== 0 && (
                                                       <div className="col-lg-12">
@@ -2012,7 +2012,7 @@ const ClientEdit = () => {
                                 </div>{" "}
                                 {/* end col */}
                               </div>
-                            </div>
+                           
                           ) : selectClientType == 3 ? (
                             <div className="row ">
                               <div className="col-lg-12">
@@ -2205,12 +2205,12 @@ const ClientEdit = () => {
                                   </div>
                                 </div>
                               </div>
-                              <div className="row">
+                              
                                 <div className="col-lg-12">
                                   <div className="card card_shadow">
                                     <div className="card-header card-header-light-blue align-items-center d-flex">
                                       <h4 className="card-title fs-16 mb-0 flex-grow-1">
-                                        Contact Details
+                                       Partner Details
                                       </h4>
                                     </div>
                                     <div className="card-body">
@@ -2221,11 +2221,11 @@ const ClientEdit = () => {
                                               className="col-xxl-12 col-lg-12"
                                               key={contact.contact_id}
                                             >
-                                              <div className="card pricing-box p-4 m-2 mt-0">
+                                              <div className="card pricing-box p-3 m-2 mt-0">
                                                 <div className="row">
                                                   <div className="col-lg-12">
                                                     <div
-                                                      className="form-check form-switch form-switch-md mb-3 d-flex justify-content-end"
+                                                      className=" form-switch  d-flex justify-content-end"
                                                       dir="ltr"
                                                     >
                                                       {/* <div>
@@ -2554,7 +2554,7 @@ const ClientEdit = () => {
                                                           <input
                                                             type="number"
                                                             className="form-control"
-                                                            placeholder="Alternate Phone"
+                                                            placeholder="Alternate Phone Number"
                                                             name="alternate_phone"
                                                             id={`alternate_phone-${index}`}
                                                             value={
@@ -2692,7 +2692,7 @@ const ClientEdit = () => {
                                     </div>
                                   </div>
                                 </div>
-                              </div>
+                              
                             </div>
                           ) : selectClientType == 4 ? (
                             getIndivisualDetails && (

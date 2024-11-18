@@ -74,7 +74,7 @@ const SubInternal = () => {
 
     const columnSubInternal = [
         {
-            name: "Task Name",
+            name: "Internal Task Name",
             selector: (row) => row.name,
             sortable: true,
             width: "70%",
@@ -151,8 +151,8 @@ const SubInternal = () => {
                 {
                     type: "text",
                     name: "name",
-                    label: "Sub Internal",
-                    placeholder: "Enter Sub Internal",
+                    label: " Internal Task",
+                    placeholder: "Enter Internal Task",
                 },
                 // {
                 //     type: "select",
@@ -165,7 +165,7 @@ const SubInternal = () => {
                 //     ],
                 // },
             ],
-            title: "Sub Internal",
+            title: " Internal Task",
 
         });
 
@@ -180,8 +180,8 @@ const SubInternal = () => {
                 {
                     type: "text",
                     name: "name",
-                    label: "Sub Internal",
-                    placeholder: "Enter Sub Internal",
+                    label: "Internal Task",
+                    placeholder: "Enter Internal Task",
                     value: data.name,
                 },
                 {
@@ -196,7 +196,7 @@ const SubInternal = () => {
                     ],
                 },
             ],
-            title: "Sub Internal",
+            title: " Internal Task",
             id: data?.id,
             internal_id: data.internal_id,
         });
@@ -277,7 +277,7 @@ const SubInternal = () => {
                                     className="btn btn-info text-white float-end"
                                     onClick={(e) => handleAdd(e, "1")}
                                 >
-                                    <i className="fa fa-plus" /> Add  Task
+                                    <i className="fa fa-plus" /> Add Internal Task
                                 </button>
                             </div>
                         </div>

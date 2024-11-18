@@ -557,7 +557,7 @@ const ClientList = () => {
                         </li>
                         <li className="mt-2">
                           <i className="fa-regular fa-envelope text-secondary font-22 align-middle me-2"></i>
-                          <b>Email : </b>:{" "}
+                          <b>Email : </b>{" "}
                           {clientInformationData && clientInformationData.email || 'NA'}
                         </li>
                       </ul>

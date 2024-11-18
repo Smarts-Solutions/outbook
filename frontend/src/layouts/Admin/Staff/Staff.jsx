@@ -168,9 +168,16 @@ const StaffPage = () => {
   ];
 
   const columns = [
+
+    
     {
       name: "Full Name",
-      selector: (row) => row.first_name + " " + row.last_name,
+      cell: (row) => (
+        <div title={row.first_name + " " + row.last_name}>
+          {row.first_name + " " + row.last_name}
+        </div>
+      ),
+      selector: (row) =>  row.first_name + " " + row.last_name,
       sortable: true,
       width: "150px",
     },

@@ -935,9 +935,7 @@ p {
 	border-bottom: 1px solid #b7b6b6;
 }
 
-.card .card-header:first-child {
-	border-radius: calc(0.5rem - 1px) calc(0.5rem - 1px) 0 0;
-}
+
 
 .card .card-footer {
 	background-color: #fff;
