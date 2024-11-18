@@ -15,7 +15,19 @@ const AddSubInternal = async (subInternal) => {
             return { status: false, message: 'Sub Internal task already exists.' };
         }
         const [result] = await pool.execute(query, [name , internal_id]);
-        return { status: true, message: 'Sub Internal created successfully.', data: result.insertId };
+        const currentDate = new Date();
+        await SatffLogUpdateOperation(
+            {
+              staff_id: subInternal.StaffUserId,
+              ip: subInternal.ip,
+              date: currentDate.toISOString().split("T")[0],
+              module_name: "Internal",
+              log_message: `created Internal Task in ${name}`,
+              permission_type: "created",
+              module_id: result.insertId,
+            }
+          );
+        return { status: true, message: 'Internal Task created successfully', data: result.insertId };
     } catch (err) {
         console.error('Error inserting data:', err);
         throw err;
@@ -63,7 +75,7 @@ const removeSubInternal = async (sub_internal) => {
                 ip: sub_internal.ip,
                 date: currentDate.toISOString().split('T')[0],
                 module_name: "Sub Internal",
-                log_message: `deleted Sub Internal ${existName.name}`,
+                log_message: `deleted Internal Task ${existName.name}`,
                 permission_type: "deleted",
                 module_id: id
             }
@@ -93,8 +105,8 @@ const modifySubInternal = async (sub_internal) => {
             status_change = "Activate"
         }
         let log_message = existStatus.status === status ?
-            `edited Sub Internal ${name}` :
-            `changes the Sub Internal status ${status_change} ${name}`
+            `edited Internal Task ${name}` :
+            `changes the Internal Task status ${status_change} ${name}`
 
         const [result] = await pool.query(query, [name, status, id]);
         if(result.changedRows > 0){
@@ -111,7 +123,7 @@ const modifySubInternal = async (sub_internal) => {
                 }
             );
         }
-        return { status: true, message: 'sub internal updated successfully.', data: result.insertId };
+        return { status: true, message: 'Internal Task updated successfully', data: result.insertId };
     }
     catch (err) {
         console.error('Error updating data:', err);
