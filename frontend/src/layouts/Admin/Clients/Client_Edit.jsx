@@ -1026,9 +1026,7 @@ const ClientEdit = () => {
                                         <div className="mb-3">
                                           <label className="form-label">
                                             VAT Number
-                                            <span style={{ color: "red" }}>
-                                              *
-                                            </span>
+                                            
                                           </label>
                                           <input
                                             type="text"
@@ -1048,9 +1046,7 @@ const ClientEdit = () => {
                                         <div className="mb-3">
                                           <label className="form-label">
                                             Website
-                                            <span style={{ color: "red" }}>
-                                              *
-                                            </span>
+                                          
                                           </label>
                                           <input
                                             type="text"
@@ -1181,9 +1177,7 @@ const ClientEdit = () => {
                                       <div className="mb-3">
                                         <label className="form-label">
                                           Email
-                                          <span style={{ color: "red" }}>
-                                            *
-                                          </span>
+                                          
                                         </label>
                                         <input
                                           type="text"
@@ -1206,9 +1200,7 @@ const ClientEdit = () => {
                                       <div className="mb-3">
                                         <label className="form-label">
                                           Residential Address
-                                          <span style={{ color: "red" }}>
-                                            *
-                                          </span>
+                                         
                                         </label>
                                         <input
                                           type="text"
@@ -1412,6 +1404,7 @@ const ClientEdit = () => {
                                           <div className="mb-3">
                                             <label className="form-label">
                                               Incorporation Date
+                                              <span style={{ color: "red" }}>*</span>
                                             </label>
                                             <input
                                               type="text"
@@ -1821,13 +1814,7 @@ const ClientEdit = () => {
                                                           className="form-label"
                                                         >
                                                           Role
-                                                          <span
-                                                            style={{
-                                                              color: "red",
-                                                            }}
-                                                          >
-                                                            *
-                                                          </span>
+                                                          
                                                         </label>
                                                         <select
                                                           className="form-select"
@@ -1957,13 +1944,7 @@ const ClientEdit = () => {
                                                           className="form-label"
                                                         >
                                                           Email
-                                                          <span
-                                                            style={{
-                                                              color: "red",
-                                                            }}
-                                                          >
-                                                            *
-                                                          </span>
+                                                          
                                                         </label>
                                                         <input
                                                           type="text"
@@ -2019,7 +2000,7 @@ const ClientEdit = () => {
                                 <div className="card card_shadow ">
                                   <div className="card-header card-header-light-blue align-items-center d-flex">
                                     <h4 className="card-title fs-16 mb-0 flex-grow-1">
-                                      Partnership
+                                      Partnership Information
                                     </h4>
                                   </div>
                                   {/* end card header */}
@@ -2380,13 +2361,7 @@ const ClientEdit = () => {
                                                     <div className="mb-3">
                                                       <label className="form-label">
                                                         Role
-                                                        <span
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          *
-                                                        </span>
+                                                        
                                                       </label>
                                                       <select
                                                         className="form-select"
@@ -2513,7 +2488,7 @@ const ClientEdit = () => {
                                                   <div className="col-lg-4">
                                                     <div className="mb-3">
                                                       <label className="form-label">
-                                                        Alternate Phone
+                                                        Alternate Phone Number
                                                       </label>
                                                       <div className="row">
                                                         <div className="col-md-4 pe-0">
@@ -2594,13 +2569,7 @@ const ClientEdit = () => {
                                                     <div className="mb-3">
                                                       <label className="form-label">
                                                         Email
-                                                        <span
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          *
-                                                        </span>
+                                                      
                                                       </label>
                                                       <input
                                                         type="text"
@@ -2634,13 +2603,7 @@ const ClientEdit = () => {
                                                     <div className="mb-3">
                                                       <label className="form-label">
                                                         Alternate Email
-                                                        <span
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          *
-                                                        </span>
+                                                        
                                                       </label>
                                                       <input
                                                         type="text"
@@ -2795,7 +2758,7 @@ const ClientEdit = () => {
                                       <div className="col-lg-4">
                                         <div className="mb-3">
                                           <label className="form-label">
-                                            Phone
+                                            Phone Number
                                           </label>
                                           <div className="row">
                                             <div className="col-md-4 pe-0">
@@ -2849,9 +2812,7 @@ const ClientEdit = () => {
                                         <div className="mb-3">
                                           <label className="form-label">
                                             Email
-                                            <span style={{ color: "red" }}>
-                                              *
-                                            </span>
+                                            
                                           </label>
                                           <input
                                             type="text"
@@ -2875,9 +2836,7 @@ const ClientEdit = () => {
                                         <div className="mb-3">
                                           <label className="form-label">
                                             Residential Address
-                                            <span style={{ color: "red" }}>
-                                              *
-                                            </span>
+                                            
                                           </label>
                                           <input
                                             type="text"

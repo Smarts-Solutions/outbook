@@ -680,11 +680,11 @@ const ClientList = () => {
                     <div className="col-lg-6">
                       <ul className="list-unstyled faq-qa">
                         <li className="mb-4">
-                          <h6 className="">Entity Type : {companyDetails.entity_type}</h6>
+                          <b className="">Entity Type : </b>{companyDetails.entity_type}
 
                         </li>
                         <li className="mb-4">
-                          <h6 className="">Company Number : {companyDetails.company_number}</h6>
+                          <b className="">Company Number :</b> {companyDetails.company_number}
 
                         </li>
                       </ul>
@@ -697,20 +697,20 @@ const ClientList = () => {
                     <div className="col-lg-6">
                       <ul className="list-unstyled faq-qa">
                         <li className="mb-4">
-                          <h6 className="">Trading Name : {informationData && informationData.trading_name}</h6>
+                          <b className="">Trading Name :</b> {informationData && informationData.trading_name}
                           <p className="font-14  ml-3">
 
                           </p>
                         </li>
                         <li className="mb-4">
-                          <h6 className="">VAT Registered : {informationData &&
+                          <b className="">VAT Registered :</b> {informationData &&
                             informationData.vat_registered == "0"
                             ? "No"
-                            : "Yes"}</h6>
+                            : "Yes"}
 
                         </li>
                         <li className="mb-4">
-                          <h6 className="">Website : {informationData && informationData.website}</h6>
+                          <b className="">Website : </b>{informationData && informationData.website}
 
                         </li>
                       </ul>
@@ -718,11 +718,11 @@ const ClientList = () => {
                     <div className="col-lg-6">
                       <ul className="list-unstyled faq-qa">
                         <li className="mb-4">
-                          <h6 className="">Trading Address : {informationData && informationData.trading_address}</h6>
+                          <b className="">Trading Address : </b>{informationData && informationData.trading_address}
 
                         </li>
                         <li className="mb-4">
-                          <h6 className="">VAT Number : {informationData && informationData.vat_number}</h6>
+                          <b className="">VAT Number :</b> {informationData && informationData.vat_number}
 
                         </li>
                       </ul>

@@ -996,7 +996,7 @@ const Information = ({ id, pageStatus }) => {
                     <div className="card card_shadow ">
                       <div className="card-header card-header-light-blue step-card-header  align-items-center d-flex">
                         <h4 className="card-title mb-0 flex-grow-1">
-                          Sole Trader
+                          Sole Trader Information
                         </h4>
                       </div>
                       <div className="card-body">
@@ -1619,7 +1619,7 @@ const Information = ({ id, pageStatus }) => {
                       </div>
                     </div>
                   </div>
-                  <div className="row">
+                 
                     <div className="col-lg-12">
                       <div className="card card_shadow">
                         <div className="card-header step-card-header card-header-light-blue   align-items-center d-flex">
@@ -1898,7 +1898,7 @@ const Information = ({ id, pageStatus }) => {
                       </div>
                     </div>{" "}
                     {/* end col */}
-                  </div>
+                 
                 </div>
               ) : customerType == 3 ? (
                 <div className="row mt-3">
@@ -1906,7 +1906,7 @@ const Information = ({ id, pageStatus }) => {
                     <div className="card card_shadow ">
                       <div className=" card-header card-header-light-blue step-card-header align-items-center d-flex">
                         <h4 className="card-title mb-0 flex-grow-1">
-                          Partnership
+                          Partnership Information
                         </h4>
                       </div>
                       <div className="card-body">
@@ -2038,12 +2038,12 @@ const Information = ({ id, pageStatus }) => {
                       </div>
                     </div>
                   </div>
-                  <div className="row">
+                 
                     <div className="col-lg-12">
                       <div className="card card_shadow">
                         <div className=" card-header card-header-light-blue step-card-header align-items-center d-flex">
                           <h4 className="card-title mb-0 flex-grow-1">
-                            Contact Details
+                          Partner Details
                           </h4>
                         </div>
                         <div className="card-body">
@@ -2322,7 +2322,7 @@ const Information = ({ id, pageStatus }) => {
                       </div>
                     </div>
                   </div>
-                </div>
+               
               ) : (
                 ""
               )}
