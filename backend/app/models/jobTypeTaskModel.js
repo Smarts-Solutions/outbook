@@ -590,6 +590,8 @@ const getClientTypeChecklist = async (checklist) => {
 
 const getByServiceWithJobType = async (checklist) => {
   const { customer_id, service_id, job_type_id, clientId } = checklist;
+ console.log("clientId",clientId)
+ console.log("checklist",checklist)
 
 //   const query = `
 //     SELECT 
@@ -653,7 +655,7 @@ LEFT JOIN
      clients ON clients.id = ${clientId}
 WHERE checklists.service_id = ? 
 AND checklists.job_type_id = ?
-AND FIND_IN_SET(clients.client_type, checklists.client_type_id) > 0
+AND FIND_IN_SET(checklists.client_type_id,clients.client_type) > 0
 OR checklists.customer_id = ? OR
     checklists.is_all_customer LIKE '%[${customer_id}]%' OR
     checklists.is_all_customer LIKE '[${customer_id},%' OR

@@ -7,7 +7,7 @@ import {
   getList,
   addChecklists,
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
-import {Get_Service} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { Get_Service } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
 
@@ -18,8 +18,10 @@ const CreateCheckList = () => {
   const navigate = useNavigate();
   const [selectedClientType, setSelectedClientType] = useState([]);
   const [tasks, setTasks] = useState([
-    { task_id: "", task_name: "", budgeted_hour: "" },
+    { task_id: "", task_name: "", budgeted_hour: "" }
   ]);
+
+  console.log("tasks", tasks);
   const [errors, setErrors] = useState({});
   const [errors1, setErrors1] = useState({});
 
@@ -67,22 +69,22 @@ const CreateCheckList = () => {
 
   useEffect(() => {
     getAllServices();
-    }, []);
-    
+  }, []);
+
   const getAllServices = async () => {
     const req = { action: "get" };
     const data = { req, authToken: token };
     await dispatch(Get_Service(data))
-        .unwrap()
-        .then((response) => {
-            if (response.status) {
-                setFormData((data) => ({ ...data, service_id: response.data }));
-            }
-        })
-        .catch((error) => {
-            return;
-        });
-    };
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          setFormData((data) => ({ ...data, service_id: response.data }));
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
 
   const fieldErrors = {
     service_id: "Please Select Service Type",
@@ -191,9 +193,11 @@ const CreateCheckList = () => {
     setTasks([...tasks, { task_name: "", budgeted_hour: "", task_id: null }]);
   };
 
-  const removeTask = (index) => {
-    const newTasks = tasks.filter((_, i) => i !== index);
-    setTasks(newTasks);
+  const removeTask = (tsk ,index) => {
+    setTasks((prevTasks) => {
+      const newTasks = prevTasks.filter((item) => item.task_id !== tsk.task_id);
+      return newTasks;
+    });
   };
 
   const getJobTypeData = async (service_id) => {
@@ -201,7 +205,7 @@ const CreateCheckList = () => {
 
     const req = { service_id, action: "get" };
     const data = { req, authToken: token };
- 
+
     await dispatch(JobType(data))
       .unwrap()
       .then((response) => {
@@ -282,8 +286,8 @@ const CreateCheckList = () => {
       })),
     };
 
-      
-    
+
+
     const data = { req, authToken: token };
     await dispatch(addChecklists(data))
       .unwrap()
@@ -295,7 +299,7 @@ const CreateCheckList = () => {
             icon: "success",
             confirmButtonText: "Ok",
             timer: 1000,
-            timerProgressBar:true
+            timerProgressBar: true
           });
 
           // Reset form and tasks after successful submission
@@ -336,9 +340,10 @@ const CreateCheckList = () => {
           <button
             type="button"
             className="btn p-0"
-            onClick={() =>{
+            onClick={() => {
               sessionStorage.setItem('settingTab', location?.state?.settingTab)
-              window.history.back()}}
+              window.history.back()
+            }}
           >
             <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
           </button>
@@ -381,7 +386,7 @@ const CreateCheckList = () => {
                 <div className="col-lg-12">
                   <label className="form-label"> Select Job Typ</label>
                   <select
-                   className={errors.job_type_id ? "error-field form-select" : "form-select"}
+                    className={errors.job_type_id ? "error-field form-select" : "form-select"}
                     // className="default-select wide form-select"
                     name="job_type_id"
                     defaultValue={formData.job_type_id}
@@ -428,7 +433,7 @@ const CreateCheckList = () => {
                   <label className="form-label">Check List Name</label>
                   <input
                     type="text"
-                    
+
                     className={errors.check_list_name ? "error-field form-control" : "form-control"}
                     placeholder="Check List Name"
                     name="check_list_name"
@@ -469,8 +474,8 @@ const CreateCheckList = () => {
           </button>
 
           <div className="mt-4">
-            {tasks.map((task, index) => (
-              <div key={index} className="row  mt-4 ">
+          {tasks.map((task, index) => (
+              <div key={task.task_id} className="row  mt-4 ">
                 <div className="col-lg-5">
                   <div>
                     <label className="form-label">Task Name</label>
@@ -524,48 +529,48 @@ const CreateCheckList = () => {
                     </p>
                   )} */}
                   <label className="form-label">Budgeted Time</label>
-<div className="input-group">
-  {/* Hours Input */}
-  <div className="hours-div w-50">
-    <input
-      type="number"
-  
-      className={errors1[`budgeted_hour_${index}`] ? "error-field form-control" : "form-control"}
+                  <div className="input-group">
+                    {/* Hours Input */}
+                    <div className="hours-div w-50">
+                      <input
+                        type="number"
 
-      placeholder="Hours"
-      name="hours"
-      defaultValue={task.budgeted_hour?.hours || ""}
-      onChange={(e) => handleTaskChange(index, e)}
-    />
-    <span className="input-group-text">H</span>
-  </div>
+                        className={errors1[`budgeted_hour_${index}`] ? "error-field form-control" : "form-control"}
 
-  {/* Minutes Input */}
-  <div className="hours-div w-50">
-    <input
-      type="number"
-      className="form-control"
-      placeholder="Minutes"
-      name="minutes"
-      min="0"
-      max="59"
-      defaultValue={task.budgeted_hour?.minutes || ""}
-      onChange={(e) => handleTaskChange(index, e)}
-    />
-    <span className="input-group-text">M</span>
-  </div>
-</div>
+                        placeholder="Hours"
+                        name="hours"
+                        defaultValue={task.budgeted_hour?.hours || ""}
+                        onChange={(e) => handleTaskChange(index, e)}
+                      />
+                      <span className="input-group-text">H</span>
+                    </div>
 
-{/* Error Message */}
-{errors1[`budgeted_hour_${index}`] && (
-  <p className="error-text">
-    {errors1[`budgeted_hour_${index}`]}
-  </p>
-)}
+                    {/* Minutes Input */}
+                    <div className="hours-div w-50">
+                      <input
+                        type="number"
+                        className="form-control"
+                        placeholder="Minutes"
+                        name="minutes"
+                        min="0"
+                        max="59"
+                        defaultValue={task.budgeted_hour?.minutes || ""}
+                        onChange={(e) => handleTaskChange(index, e)}
+                      />
+                      <span className="input-group-text">M</span>
+                    </div>
+                  </div>
+
+                  {/* Error Message */}
+                  {errors1[`budgeted_hour_${index}`] && (
+                    <p className="error-text">
+                      {errors1[`budgeted_hour_${index}`]}
+                    </p>
+                  )}
 
                 </div>
                 <div className="col-lg-2">
-                  <button className="delete-icon mt-4" onClick={() => removeTask(index)}>
+                  <button className="delete-icon mt-4" onClick={(e) => removeTask(task, index)}>
                     <i className="ti-trash text-danger "></i>
                   </button>
                 </div>
@@ -576,17 +581,17 @@ const CreateCheckList = () => {
           <div className="col-lg-12 mt-4">
             <button
               className="btn btn-secondary "
-              onClick={(e) =>{
+              onClick={(e) => {
                 sessionStorage.setItem('settingTab', location?.state?.settingTab)
                 window.history.back()
               }
               }
             >
-               <i className="fa fa-times pe-1"></i>
-               Cancel
+              <i className="fa fa-times pe-1"></i>
+              Cancel
             </button>
             <button className="btn btn-outline-success ms-2" onClick={handleSubmit}>
-             <i className="far fa-save pe-1"></i> Submit
+              <i className="far fa-save pe-1"></i> Submit
             </button>
           </div>
         </div>

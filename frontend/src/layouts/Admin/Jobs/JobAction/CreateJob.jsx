@@ -154,12 +154,11 @@ const CreateJob = () => {
         job_type_id: jobData.JobType,
         clientId: AllJobData?.data?.client[0]?.client_id,
       };
-
+  
       const data = { req: req, authToken: token };
       await dispatch(GET_ALL_CHECKLIST(data))
         .unwrap()
         .then(async (response) => {
-          console.log("response -",response)
           // if (response.status) {
           //   setAllChecklist({
           //     loading: true,
@@ -173,10 +172,26 @@ const CreateJob = () => {
           // }
 
           if (response.status) {
-            setAllChecklistData({
-              loading: true,
-              data: response.data
-            });
+            if(response.data.length > 0) {
+              const isIncluded = response.data[0].client_type_id.split(',').includes(response.data[0].client_type);
+              if(isIncluded == true) {
+                setAllChecklistData({
+                  loading: true,
+                  data: response.data
+                });
+              }else{
+                setAllChecklistData({
+                  loading: true,
+                  data: []
+                });
+              }
+            }else{
+              setAllChecklistData({
+                loading: true,
+                data: [],
+              });
+            }
+            
           } else {
             setAllChecklistData({
               loading: true,
