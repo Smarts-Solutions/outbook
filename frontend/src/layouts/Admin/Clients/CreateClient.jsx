@@ -1475,7 +1475,7 @@ const CreateClient = () => {
                                         <div className="col-lg-4">
                                           <div className="mb-3">
                                             <label className="form-label">
-                                              Company Status
+                                              Company Number
                                               <span style={{ color: "red" }}>
                                                 *
                                               </span>
