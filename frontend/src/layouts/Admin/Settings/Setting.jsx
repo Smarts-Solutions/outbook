@@ -1734,11 +1734,7 @@ const Setting = () => {
             default:
               break;
           }
-          sweatalert.fire({
-            title: "Deleted!",
-            text: "Your file has been deleted.",
-            icon: "success",
-          });
+        
         }
       });
   };

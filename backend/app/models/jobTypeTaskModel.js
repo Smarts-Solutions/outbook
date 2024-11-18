@@ -130,7 +130,7 @@ const updateJobType = async (JobType) => {
       }
     );
   }
-  return {status: true ,message: 'job types updated successfully.' , data : result.affectedRows};
+  return {status: true ,message: 'Job Type updated successfully.' , data : result.affectedRows};
   } catch (err) {
     console.log("Error updating data:", err);
     throw err;
@@ -185,6 +185,7 @@ const addTask = async (task) => {
 
 const getTask = async (task) => {
   const { service_id, job_type_id } = task;
+
   const query = `
     SELECT id,name,service_id,job_type_id,status FROM task WHERE service_id = ? AND job_type_id = ?
     ORDER BY id DESC
