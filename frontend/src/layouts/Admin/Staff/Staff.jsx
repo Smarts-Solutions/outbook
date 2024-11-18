@@ -182,6 +182,11 @@ const StaffPage = () => {
       width: "150px",
     },
     {
+      cell: (row) => (
+        <div title={row.email}>
+          {row.email}
+        </div>
+      ),
       name: "Email Address",
       selector: (row) => row.email,
       sortable: true,
@@ -189,6 +194,11 @@ const StaffPage = () => {
     },
     {
       name: "Phone",
+      cell: (row) => (
+        <div title={ row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - "}>
+          { row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - "}
+        </div>
+      ),
       selector: (row) => row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - ",
       sortable: true,
       width: "150px",

@@ -682,7 +682,7 @@ const Setting = () => {
           {
             name: "Actions",
             cell: (row) => (
-              <div className="">
+              <div className="d-flex">
                 {showSettingUpdateTab && (
                   <button
                     className="edit-icon"
@@ -1011,16 +1011,31 @@ const Setting = () => {
     
 
     {
+      cell: (row) => (
+        <div title={row.service_name}>
+          {row.service_name}
+        </div>
+      ),
       name: "Service Type",
       selector: (row) => row.service_name,
       sortable: true,
     },
     {
+      cell: (row) => (
+        <div title={row.job_type_type}>
+          {row.job_type_type}
+        </div>
+      ),
       name: "Job Type",
       selector: (row) => row.job_type_type,
       sortable: true,
     },
     {
+      cell: (row) => (
+        <div title={row.client_type_type}>
+          {row.client_type_type}
+        </div>
+      ),
       name: "Client Type",
       selector: (row) => row.client_type_type,
       sortable: true,

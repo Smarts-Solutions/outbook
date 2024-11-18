@@ -103,6 +103,7 @@ const Setting = () => {
 
   const columnJobType = [
     {
+      
       name: "Job Type",
       selector: (row) => row.type,
       sortable: true,
@@ -111,7 +112,7 @@ const Setting = () => {
     {
       name: "Actions",
       cell: (row) => (
-        <div>
+        <div className="d-flex">
           <button className="edit-icon" onClick={() => handleEdit(row)}>
             {" "}
             <i className="ti-pencil" />
@@ -450,7 +451,7 @@ const Setting = () => {
         isOpen={showAddTask}
         backdrop="static"
         size="ms-5"
-        title="Task"
+        title=" Add Task"
         hideBtn={true}
         handleClose={() => {
           setShowAddTask(false);
@@ -476,9 +477,9 @@ const Setting = () => {
                 <div className="mb-3">
                   <input
                     type="text"
-                    style={{ height: "2rem" }}
+                    
                     className="form-control"
-                    placeholder="Enter Task"
+                    placeholder="Enter Task Name"
                     id="firstNameinput"
                     autoFocus
                     value={taskInput} // Bind input to state
@@ -526,7 +527,7 @@ const Setting = () => {
             >
               <thead className="table-light">
                 <tr>
-                  <th className="">Task</th>
+                  <th className="">Task Name</th>
 
                   <th className="tabel_left" width="80">Action</th>
                 </tr>
