@@ -721,7 +721,7 @@ const Setting = () => {
   ];
 
   const columnPersonRole = [
-    { name: "Service Name", selector: (row) => row.name, sortable: true },
+    { name: "Role Name", selector: (row) => row.name, sortable: true },
     {
       name: "Status",
       cell: (row) => (
