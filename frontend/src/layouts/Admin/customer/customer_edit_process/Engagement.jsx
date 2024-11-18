@@ -32,6 +32,9 @@ const Engagement = () => {
   const [coustomerSubSource, setCoustomerSubSource] = useState([]);
   const [formState1, setFormState1] = useState({});
 
+
+
+
   const [customerDetails, setCustomerDetails] = useState({
     loading: true,
     data: [],
@@ -298,7 +301,7 @@ const Engagement = () => {
       setFormValues3({ ...formValues3, [name]: value });
     }
   };
- 
+
 
   const handleChange4 = (index, e) => {
     const { name, value } = e.target;
@@ -308,10 +311,10 @@ const Engagement = () => {
     let updatedJobEntry = { ...newJobEntries[index] };
     updatedJobEntry[name] = value;
     newJobEntries[index] = updatedJobEntry;
-    validate5(name , value , index)
+    validate5(name, value, index)
     setJobEntries(newJobEntries);
   };
- 
+
   const handleAddJob = () => {
     setJobEntries([
       ...jobEntries,
@@ -336,8 +339,9 @@ const Engagement = () => {
   const validate1 = (name, value, isSubmitting = false) => {
     const newErrors = { ...errors1 };
     if (isSubmitting) {
+
       for (const key in FTEDedicatedErrorMessages) {
-        if (!formValues1[key]) {
+        if (!formValues1[key] || formValues1[key] == 0) {
           newErrors[key] = FTEDedicatedErrorMessages[key];
         }
       }
@@ -351,8 +355,18 @@ const Engagement = () => {
       }
     }
 
+
     setErrors1(newErrors);
-    return Object.keys(newErrors).length === 0;
+    if (Object.keys(newErrors).length == 10) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please fill at least one field in FTE/Dedicated Staffing.",
+        timer: 2000,
+        showConfirmButton: true,
+      });
+      return false
+    }
+    return true;
   };
 
   const validate2 = (name, value, isSubmitting = false) => {
@@ -373,7 +387,18 @@ const Engagement = () => {
       }
     }
     setErrors2(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    if (Object.keys(newErrors).length == 6) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please fill at least one field in Percentage Model between 0% and 100%.",
+        timer: 2000,
+        showConfirmButton: true,
+      });
+      return false
+    }
+
+    return true;
   };
 
   const validate3 = (name, value, isSubmitting = false) => {
@@ -394,10 +419,22 @@ const Engagement = () => {
       }
     }
     setErrors3(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    if (Object.keys(newErrors).length == 5) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please fill at least one field in Adhoc/PAYG/Hourly between £7 and £25.",
+        timer: 2000,
+        showConfirmButton: true,
+      });
+      return false
+    }
+
+
+    return true;
   };
 
-  const validate5 = (name , value, index) => {
+  const validate5 = (name, value, index) => {
     const newErrors = [];
     const entryErrors = {};
 
@@ -410,10 +447,8 @@ const Engagement = () => {
     }
 
     if (Object.keys(entryErrors).length !== 0) {
-
       newErrors[index] = entryErrors;
     }
-
     setErrors4(newErrors);
     return newErrors.length > 0 ? false : true;
   };
@@ -461,6 +496,7 @@ const Engagement = () => {
         isValid = false;
       }
     }
+
     return isValid;
   };
 
@@ -543,15 +579,19 @@ const Engagement = () => {
     }
   };
 
-  const handleSubmit = async () => {
 
+
+  const handleSubmit = async () => {
     if (!checkboxStates.some((state) => state === 1)) {
       Swal.fire({
-        icon: "error",
+        icon: "warning",
         title: "Please select at least one option.",
+        timer: 2000,
+        showConfirmButton: true,
       });
       return;
     }
+
     const validations = [
       validateAllFields1,
       validateAllFields2,
@@ -559,13 +599,13 @@ const Engagement = () => {
       validate4,
     ];
 
+
+
     for (let i = 0; i < checkboxStates.length; i++) {
       if (checkboxStates[i] == 1 && !validations[i]()) {
-        scrollToFirstError(i);
-        return;
-      }
+          return;
+        }
     }
-
 
     let req = {
       customer_id: address,
@@ -576,6 +616,7 @@ const Engagement = () => {
       customised_pricing: checkboxStates[3].toString(),
       ...formState1,
     };
+
 
     if (checkboxStates[0] === 1) {
       req = {
@@ -623,9 +664,11 @@ const Engagement = () => {
       };
     }
 
+
     if (!validateForm()) {
       return;
     }
+
 
     const data = { req: req, authToken: token };
     await dispatch(Edit_Customer(data))
@@ -641,25 +684,24 @@ const Engagement = () => {
       });
   };
 
+
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
- 
-    if(name == 'customerJoiningDate'){
+
+    if (name == 'customerJoiningDate') {
       let date = new Date(value);
 
       let month = date.getMonth() + 1;
       let day = date.getDate();
       let year = date.getFullYear();
-      let newDate = `${year}-${month < 10 ? `0${month}` : `${month}`}-${
-        day < 10 ? `0${day}` : `${day}`
-      }`;
+      let newDate = `${year}-${month < 10 ? `0${month}` : `${month}`}-${day < 10 ? `0${day}` : `${day}`
+        }`;
 
-      console.log(newDate);
       setFormState1({
         ...formState1,
         [name]: newDate,
       })
-     
     }
     else {
       setFormState1({
@@ -667,7 +709,6 @@ const Engagement = () => {
         [name]: value,
       })
     }
-
 
     setFormErrors((prevErrors) => ({
       ...prevErrors,
@@ -813,20 +854,19 @@ const Engagement = () => {
                                   </label> */}
                                   <input
                                     type="text"
-                                    className={errors1[field.name] ? "error-field form-control" : "form-control"}
-
-
+                                    // className={errors1[field.name] ? "error-field form-control" : "form-control"}
+                                    className={"form-control"}
                                     name={field.name}
                                     id={field.name}
                                     placeholder={field.feeName}
                                     value={formValues1[field.name]}
                                     onChange={(e) => handleChange1(e)}
                                   />
-                                  {errors1[field.name] && (
+                                  {/* {errors1[field.name] && (
                                     <div className="error-text">
                                       {errors1[field.name]}
                                     </div>
-                                  )}
+                                  )} */}
                                 </div>
                               </div>
                             ))}
@@ -899,7 +939,9 @@ const Engagement = () => {
                                   <input
                                     type="text"
 
-                                    className={errors2[field.name] ? "error-field form-control" : "form-control"}
+                                    // className={errors2[field.name] ? "error-field form-control" : "form-control"}
+                                    className={"form-control"}
+
 
                                     name={field.name}
                                     id={field.name}
@@ -907,11 +949,11 @@ const Engagement = () => {
                                     placeholder={field.feeName}
                                     onChange={handleChange2}
                                   />
-                                  {errors2[field.name] && (
+                                  {/* {errors2[field.name] && (
                                     <div className="error-text">
                                       {errors2[field.name]}
                                     </div>
-                                  )}
+                                  )} */}
                                 </div>
                               </div>
                             ))}
@@ -978,18 +1020,20 @@ const Engagement = () => {
                                   </label> */}
                                   <input
                                     type="text"
-                                    className={errors3[field.name] ? "error-field form-control" : "form-control"}
+                                    // className={errors3[field.name] ? "error-field form-control" : "form-control"}
+                                    className={"form-control"}
+
                                     name={field.name}
                                     id={field.name}
                                     value={formValues3[field.name]}
                                     placeholder={field.feeName}
                                     onChange={handleChange3}
                                   />
-                                  {errors3[field.name] && (
+                                  {/* {errors3[field.name] && (
                                     <div className="error-text">
                                       {errors3[field.name]}
                                     </div>
-                                  )}
+                                  )} */}
                                 </div>
                               </div>
                             ))}
