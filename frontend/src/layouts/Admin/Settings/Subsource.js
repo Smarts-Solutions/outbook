@@ -35,7 +35,7 @@ const Setting = () => {
           if(response.status){
           sweatalert.fire({
             icon: "success",
-            title: "Success hhh",
+            title: "Success",
             text: response.message,
             timer: 2000,
           });
@@ -162,17 +162,17 @@ const Setting = () => {
           placeholder: "Enter Sub Source Type",
           value: data.name,
         },
-        {
-          type: "select",
-          name: "status",
-          label: "Status",
-          placeholder: "Select Status",
-          value: data.status === "1" ? "1" : "0",
-          options: [
-            { label: "Active", value: "1" },
-            { label: "Deactive", value: "0" },
-          ],
-        },
+        // {
+        //   type: "select",
+        //   name: "status",
+        //   label: "Status",
+        //   placeholder: "Select Status",
+        //   value: data.status === "1" ? "1" : "0",
+        //   options: [
+        //     { label: "Active", value: "1" },
+        //     { label: "Deactive", value: "0" },
+        //   ],
+        // },
       ],
       title: "Sub Source Type",
 
@@ -229,11 +229,11 @@ const Setting = () => {
             id: data.id,
           };
           customerSubSourceData(req);
-          sweatalert.fire({
-            title: "Deleted!",
-            text: "Sub-source delete successfully",
-            icon: "success",
-          });
+          // sweatalert.fire({
+          //   title: "Deleted!",
+          //   text: "Sub-source delete successfully",
+          //   icon: "success",
+          // });
         }
       });
   };

@@ -364,7 +364,7 @@ const Setting = () => {
       job_type_id: getJobTypeId.id,
       service_id: location.state.Id,
     };
-    
+
     if(tasks.length == 0){
       sweatalert.fire({
         title: "Please at least one task",
