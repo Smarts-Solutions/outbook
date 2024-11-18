@@ -299,32 +299,84 @@ const Setting = () => {
     setIsModalOpen(false);
   };
 
+  // const handleDelete = (data) => {
+  //   sweatalert
+  //     .fire({
+  //       title: "Are you sure?",
+  //       text: "You won't be able to revert this!",
+  //       icon: "warning",
+  //       showCancelButton: true,
+  //       confirmButtonColor: "#3085d6",
+  //       cancelButtonColor: "#d33",
+  //       confirmButtonText: "Yes, delete it!",
+  //     })
+  //     .then((result) => {
+  //       if (result.isConfirmed) {
+  //         const req = {
+  //           action: "delete",
+  //           id: data.id,
+  //         };
+  //         JobTypeData(req);
+  //         sweatalert.fire({
+  //           title: "Deleted!",
+  //           text: "Your file has been deleted.",
+  //           icon: "success",
+  //         });
+  //       }
+  //     });
+  // };
+
   const handleDelete = (data) => {
+
     sweatalert
-      .fire({
-        title: "Are you sure?",
-        text: "You won't be able to revert this!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it!",
-      })
-      .then((result) => {
-        if (result.isConfirmed) {
-          const req = {
-            action: "delete",
-            id: data.id,
-          };
-          JobTypeData(req);
-          sweatalert.fire({
-            title: "Deleted!",
-            text: "Your file has been deleted.",
-            icon: "success",
-          });
-        }
-      });
-  };
+    
+    .fire({
+    
+    title: "Are you sure?",
+    
+    text: "You won't be able to revert this!",
+    
+    icon: "warning",
+    
+    showCancelButton: true,
+    
+    confirmButtonColor: "#3085d6",
+    
+    cancelButtonColor: "#d33",
+    
+    confirmButtonText: "Yes, delete it!",
+    
+    })
+    
+    .then((result) => {
+    
+    if (result.isConfirmed) {
+    
+    const req = {
+    
+    action: "delete",
+    
+    id: data.id,
+    
+    };
+    
+    JobTypeData(req);
+    
+    sweatalert.fire({
+    
+    title: "Deleted!",
+    
+    text: "Your file has been deleted.",
+    
+    icon: "success",
+    
+    });
+    
+    }
+    
+    });
+    
+    };
 
   const handleInputChange = (e) => {
     setTaskInput(e.target.value);

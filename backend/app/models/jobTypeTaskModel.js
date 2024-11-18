@@ -59,7 +59,31 @@ const getJobType = async (JobType) => {
 };
 
 const deleteJobType = async (JobTypeId) => {
+
   const [[existType]] = await pool.execute(`SELECT type FROM job_types WHERE id = ?`, [JobTypeId.id]);
+  
+  
+  if (parseInt(JobTypeId.id) > 0) {
+
+    const [assignedChecklist] = await pool.execute(
+      `SELECT COUNT(*) AS count FROM checklists WHERE job_type_id = ?`,
+      [JobTypeId.id]
+    );
+    if (assignedChecklist[0].count > 0) { 
+      return { status: false, message: `Job Type ${existType.type} is assigned to existing checklists.` ,key : "warning" };
+    }
+
+
+    const [assignedJobs] = await pool.execute(
+      `SELECT COUNT(*) AS count FROM jobs WHERE job_type_id = ?`,
+      [JobTypeId.id]
+    );
+    if (assignedJobs[0].count > 0) { 
+      return { status: false, message: `Job Type ${existType.type} is assigned to existing jobs.` ,key : "warning" };
+    }
+  }
+  
+  
   if(parseInt(JobTypeId.id) > 0){
     const currentDate = new Date();
     await SatffLogUpdateOperation(
@@ -79,10 +103,10 @@ const deleteJobType = async (JobTypeId) => {
     `;
   try {
     await pool.execute(query, [JobTypeId.id]);
-    
+    return { status: true, message: "Job type deleted successfully" };
   } catch (err) {
     console.log("Error deleting data:", err);
-    throw err;
+    return { status: false, message: "failed" ,key : "" };
   }
 };
 
