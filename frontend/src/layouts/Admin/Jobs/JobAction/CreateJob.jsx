@@ -16,34 +16,20 @@ const CreateJob = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const role = JSON.parse(localStorage.getItem("role"));
+ 
   const token = JSON.parse(localStorage.getItem("token"));
   const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
   const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] });
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [PreparationTimne, setPreparationTimne] = useState({
-    hours: "",
-    minutes: "",
-  });
-  const [FeedbackIncorporationTime, setFeedbackIncorporationTime] = useState({
-    hours: "",
-    minutes: "",
-  });
+  const [PreparationTimne, setPreparationTimne] = useState({ hours: "", minutes: "", });
+  const [FeedbackIncorporationTime, setFeedbackIncorporationTime] = useState({ hours: "", minutes: "", });
   const [reviewTime, setReviewTime] = useState({ hours: "", minutes: "" });
-  const [budgetedHours, setBudgetedHours] = useState({
-    hours: "",
-    minutes: "",
-  });
+  const [budgetedHours, setBudgetedHours] = useState({ hours: "", minutes: "", });
   const [invoiceTime, setInvoiceTime] = useState({ hours: "", minutes: "" });
-  const [AllChecklist, setAllChecklist] = useState({
-    loading: false,
-    data: [],
-  });
-  const [AllChecklistData, setAllChecklistData] = useState({
-    loading: false,
-    data: [],
-  });
+  const [AllChecklistData, setAllChecklistData] = useState({ loading: false, data: [], });
   const [getChecklistId, setChecklistId] = useState("");
   const [AddTaskArr, setAddTaskArr] = useState([]);
   const [showAddJobModal, setShowAddJobModal] = useState(false);
@@ -54,7 +40,6 @@ const CreateJob = () => {
   const [BudgetedHoureError, setBudgetedHourError] = useState("");
   const [BudgetedMinuteError, setBudgetedMinuteError] = useState("");
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" });
-
   const [jobData, setJobData] = useState({
     AccountManager: "",
     Customer: "",
@@ -154,44 +139,33 @@ const CreateJob = () => {
         job_type_id: jobData.JobType,
         clientId: AllJobData?.data?.client[0]?.client_id,
       };
-  
+
       const data = { req: req, authToken: token };
       await dispatch(GET_ALL_CHECKLIST(data))
         .unwrap()
         .then(async (response) => {
-          // if (response.status) {
-          //   setAllChecklist({
-          //     loading: true,
-          //     data: response.data,
-          //   });
-          // } else {
-          //   setAllChecklist({
-          //     loading: true,
-          //     data: [],
-          //   });
-          // }
 
           if (response.status) {
-            if(response.data.length > 0) {
+            if (response.data.length > 0) {
               const isIncluded = response.data[0].client_type_id.split(',').includes(response.data[0].client_type);
-              if(isIncluded == true) {
+              if (isIncluded == true) {
                 setAllChecklistData({
                   loading: true,
                   data: response.data
                 });
-              }else{
+              } else {
                 setAllChecklistData({
                   loading: true,
                   data: []
                 });
               }
-            }else{
+            } else {
               setAllChecklistData({
                 loading: true,
                 data: [],
               });
             }
-            
+
           } else {
             setAllChecklistData({
               loading: true,
@@ -643,7 +617,7 @@ const CreateJob = () => {
                 <button
                   type="button "
                   className="btn p-0"
-                  onClick={() =>{ 
+                  onClick={() => {
                     sessionStorage.setItem('activeTab', location.state.activeTab);
                     window.history.back()
                   }}
@@ -758,7 +732,7 @@ const CreateJob = () => {
                                         placeholder="Client Job Code"
                                         name="Client"
                                         id="Client"
-                                        
+
                                         onChange={HandleChange}
                                         value={jobData.Client}
                                         disabled
@@ -913,7 +887,7 @@ const CreateJob = () => {
                                             placeholder="Hours"
                                             onChange={(e) => {
                                               const value = e.target.value;
-                                              console.log('value', value);
+                                        
 
                                               // Only allow non-negative numbers for hours
                                               if (value === "" || Number(value) >= 0) {
@@ -997,6 +971,8 @@ const CreateJob = () => {
                                       name="AllocatedTo"
                                       onChange={HandleChange}
                                       value={jobData.AllocatedTo}
+                                      disabled={role === "ADMIN" || role === "SUPERADMIN" ? false : true}
+
                                     >
                                       <option value=""> Select Staff</option>
                                       {(AllJobData?.data?.allocated || []).map(

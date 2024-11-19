@@ -298,7 +298,7 @@ const Service = () => {
       .then((response) => {
         if (response.status) {
           if (response.data.length > 0) {
-            console.log("response.data", response.data);
+           
             setTasksData1((prev) => {
               const mergedTasks = [...prev, ...response.data];
   
@@ -446,7 +446,7 @@ const Service = () => {
     setSearchValue(e.target.value);
   };
 
-  console.log("tasksGet1", tasksGet1);
+  
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
       {({ handleSubmit }) => (
@@ -656,9 +656,6 @@ const Service = () => {
                                                                     (
                                                                       TaskShow
                                                                     ) => {
-console.log("TaskShow", TaskShow);
-console.log("data1.id", data1.id);
-console.log("item.id", item.id);
 
                                                                       if (
                                                                         data1.id ===

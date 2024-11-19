@@ -22,7 +22,6 @@ const DueByReport = () => {
                 if (res.status) {
                     setDueByReport(res.data);
                     
-                    console.log(res.data[0].due_within_1_months);
                     
                     const jsonString = res.data[0].due_within_1_months.toString();
 
@@ -30,7 +29,7 @@ const DueByReport = () => {
 const jsonObject = JSON.parse(jsonString);
 
 // Now you can access the properties of the parsed JSON object
-// console.log(jsonObject);
+
                 }
                 else {
                     setDueByReport([]);

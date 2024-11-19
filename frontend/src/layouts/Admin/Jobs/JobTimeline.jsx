@@ -69,7 +69,7 @@ const JobTimeline = () => {
                 <div className="itemBar" key={index} style={{ textAlign: rowIndex % 2 === 0 ? 'left' : 'right' }}>
                   <div className="box">
                     <div className="tooltip--multiline report-data">
-                      {console.log()}
+                     
                       {item?.allContain?.map((item, index) => (
                         <div key={index}>
                           <ul>

@@ -47,19 +47,17 @@ const JobStatus = () => {
   }
 
 
-  console.log("allLinkedData", allLinkedData)
-
   const JobColumns = [
     {
       name: "Job ID (CustName+ClientName+UniqueNo)",
       cell: (row) => (
         <div>
-          <a
-            // onClick={() => HandleJobView(row)}
+          {/* <a
+            onClick={() => HandleJobView(row)}
             style={{ cursor: "pointer", color: "#26bdf0" }}
-          >
-            {row.job_code_id}
-          </a>
+          > */}
+          {row.job_code_id}
+          {/* </a> */}
         </div>
       ),
       selector: (row) => row.trading_name,
@@ -118,39 +116,25 @@ const JobStatus = () => {
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
     },
-   
+
   ];
 
   const columnsCustomer = [
+   
     {
       name: "Trading Name",
       cell: (row) => (
-        <div style={{
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-        }}
-        >
-          {(
-            <a
-              // onClick={() => HandleClientView(row)}
-              style={{ cursor: "pointer", color: "#26bdf0" }}
-              title={row.trading_name}
-            >
-              {row.trading_name}
-            </a>
-          )}
+        <div title={row.trading_name}  >
+          {row.trading_name}
         </div>
       ),
-      selector: (row) => row.trading_name,
       sortable: true,
+
     },
     {
       name: "Customer Code",
       cell: (row) => (
-        <div
-          title={row.customer_code}
-        >
+        <div title={row.customer_code}  >
           {row.customer_code}
         </div>
       ),
@@ -190,24 +174,29 @@ const JobStatus = () => {
   ];
 
   const ClientListColumns = [
+    // {
+    //   name: "Client Name",
+    //   cell: (row) => (
+    //     <div>
+    //       {
+    //         role === "ADMIN" || role === "SUPERADMIN" ? (
+    //           <a
+    //             // onClick={() => HandleClientView(row)}
+    //             style={{ cursor: "pointer", color: "#26bdf0" }}
+    //           >
+    //             {row.client_name}
+    //           </a>
+    //         ) : row.client_name
+    //       }
+
+    //     </div>
+    //   ),
+    //   selector: (row) => row.trading_name,
+    //   sortable: true,
+    // },
     {
       name: "Client Name",
-      cell: (row) => (
-        <div>
-          {
-            role === "ADMIN" || role === "SUPERADMIN" ? (
-              <a
-                // onClick={() => HandleClientView(row)}
-                style={{ cursor: "pointer", color: "#26bdf0" }}
-              >
-                {row.client_name}
-              </a>
-            ) : row.client_name
-          }
-
-        </div>
-      ),
-      selector: (row) => row.trading_name,
+      selector: (row) => row.client_name || "-",
       sortable: true,
     },
 
@@ -222,7 +211,7 @@ const JobStatus = () => {
         row.client_type_name == null ? "-" : row.client_type_name,
       sortable: true,
       width: "150px",
-    }, 
+    },
     {
       name: "Status",
       selector: (row) => (<div>
@@ -236,7 +225,7 @@ const JobStatus = () => {
       sortable: true,
       width: '130px'
     },
-  
+
   ];
 
   const columnsStaff = [
@@ -278,7 +267,7 @@ const JobStatus = () => {
       ),
       // width: "250px",
     },
-   
+
 
   ]
 
@@ -304,10 +293,10 @@ const JobStatus = () => {
         <div className='datatable-wrapper mt-minus'>
           <Datatable
             filter={true}
-            columns={location?.state?.req?.key=="client" ? ClientListColumns :
-              location?.state?.req?.key == "customer" ? columnsCustomer : 
-              location?.state?.req?.key == "staff" ? columnsStaff :
-              JobColumns
+            columns={location?.state?.req?.key == "client" ? ClientListColumns :
+              location?.state?.req?.key == "customer" ? columnsCustomer :
+                location?.state?.req?.key == "staff" ? columnsStaff :
+                  JobColumns
             } data={allLinkedData && allLinkedData} />
         </div>
       </div>
