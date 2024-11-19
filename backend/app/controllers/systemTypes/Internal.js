@@ -25,7 +25,7 @@ const handleInternal = async (req, res) => {
                 break;
             case 'delete':
                 await InternalService.removeInternal(Internal);
-                res.status(200).json({ status: true, message: 'Internal deleted successfully' });
+                res.status(200).json({ status: true, message: 'Internal Job/Project deleted successfully' });
                 break;
             case 'update':
                 result = await InternalService.modifyInternal(Internal);

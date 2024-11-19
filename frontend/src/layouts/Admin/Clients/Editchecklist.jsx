@@ -235,7 +235,7 @@ const CreateCheckList = () => {
         validationErrors[`task_name_${index}`] = "Task Name is required";
       if (!task.budgeted_hour)
         validationErrors[`budgeted_hour_${index}`] =
-          "Budgeted Hour is required";
+          "Budgeted Time is required";
     });
 
     if (Object.keys(validationErrors).length > 0) {
@@ -451,7 +451,7 @@ const CreateCheckList = () => {
               </div>
             </div>
             {tasks.map((task, index) => (
-              <div key={index} className="row mt-4 align-items-end">
+              <div key={task.task_id} className="row mt-4 align-items-end">
                 <div className="col-lg-5">
                   <label className="form-label">Task Name</label>
                   <input
