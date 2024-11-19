@@ -31,6 +31,8 @@ const Hierarchy = ({ show, active, data , NumberOfActive }) => {
   
     }
 
+
+    
     return (
         <div>
             <div className="row">
