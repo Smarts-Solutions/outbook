@@ -113,5 +113,85 @@ const pool = require('../config/database');
         return newCode
       }
   }
+
+  const getDateRange = async (filter) => {
+    const today = new Date();
+    let startDate = '';
+    let endDate = '';
   
-  module.exports = { SatffLogUpdateOperation ,generateNextUniqueCode ,generateNextUniqueCodeJobLogTitle };
+    if (filter === 'this_week') {
+      const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1));
+      const lastDayOfWeek = new Date(today.setDate(firstDayOfWeek.getDate() + 6)); 
+      startDate = firstDayOfWeek.toISOString().split('T')[0]; 
+      endDate = lastDayOfWeek.toISOString().split('T')[0]; 
+    } else if (filter === 'last_week') {
+      const lastWeekStart = new Date(today.setDate(today.getDate() - today.getDay() - 6)); 
+      const lastWeekEnd = new Date(today.setDate(lastWeekStart.getDate() + 6)); 
+      startDate = lastWeekStart.toISOString().split('T')[0];
+      endDate = lastWeekEnd.toISOString().split('T')[0];
+    }
+    else if (filter === 'this_month') {
+      startDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+      endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0]; 
+    } else if(filter === 'last_month') {
+      const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1
+      ).toISOString().split('T')[0];
+      const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0).toISOString().split
+      ('T')[0];
+      startDate = lastMonthStart;
+      endDate = lastMonthEnd;
+      }
+    else if (filter === 'this_quarter') {
+      const quarterStart = new Date(today.getFullYear(), today.getMonth() - (today.getMonth() %
+      3), 1).toISOString().split('T')[0];
+      const quarterEnd = new Date(today.getFullYear(), today.getMonth() + 3 - (today.getMonth() %
+      3), 0).toISOString().split('T')[0];
+      startDate = quarterStart;
+      endDate = quarterEnd;
+      }
+      else if (filter === 'last_quarter') {
+        const lastQuarterStart = new Date(today.getFullYear(), today.getMonth() - (today.getMonth() %
+        3) - 3, 1).toISOString().split('T')[0];
+        const lastQuarterEnd = new Date(today.getFullYear(), today.getMonth() - 3, 0
+        ).toISOString().split('T')[0];
+        startDate = lastQuarterStart;
+        endDate = lastQuarterEnd;
+        }
+      else if (filter === 'this_six_month') {
+        const sixMonthStart = new Date(today.getFullYear(), today.getMonth() - 6, 1
+        ).toISOString().split('T')[0];
+        const sixMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0).toISOString().split
+        ('T')[0];
+        startDate = sixMonthStart;
+        endDate = sixMonthEnd;
+        }
+      else if (filter === 'last_six_month') {
+        const lastSixMonthStart = new Date(today.getFullYear(), today.getMonth() - 6 -
+        6, 1).toISOString().split('T')[0];
+        const lastSixMonthEnd = new Date(today.getFullYear(), today.getMonth() - 6,
+        0).toISOString().split('T')[0];
+        startDate = lastSixMonthStart;
+        endDate = lastSixMonthEnd;
+        }
+      else if (filter === 'this_year') {
+        startDate = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[
+        0];
+        endDate = new Date(today.getFullYear(), 12, 0).toISOString().split('T')[0];
+      }
+      else if (filter === 'last_year') {
+        const lastYearStart = new Date(today.getFullYear() - 1, 0, 1
+        ).toISOString().split('T')[0];
+        const lastYearEnd = new Date(today.getFullYear(), 0, 0).toISOString().split('T')[0];
+        startDate = lastYearStart;
+        endDate = lastYearEnd;
+        }
+      else if (filter === 'all') {
+        startDate = '1970-01-01';
+        endDate = today.toISOString().split('T')[0];
+      }
+  
+  
+    return { startDate, endDate };
+  };
+  
+  module.exports = { SatffLogUpdateOperation ,generateNextUniqueCode ,generateNextUniqueCodeJobLogTitle ,getDateRange };

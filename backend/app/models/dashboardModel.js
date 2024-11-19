@@ -1,10 +1,14 @@
 const pool = require("../config/database");
 const deleteUploadFile = require("../middlewares/deleteUploadFile");
-const { SatffLogUpdateOperation, generateNextUniqueCode } = require('../utils/helper');
+const { SatffLogUpdateOperation, generateNextUniqueCode, getDateRange } = require('../utils/helper');
+
 
 const getDashboardData = async (dashboard) => {
-  const { staff_id } = dashboard;
- 
+  const { staff_id, date_filter } = dashboard;
+  const { startDate, endDate } = await getDateRange(date_filter);
+  console.log("dashboard ", dashboard)
+
+
   try {
     const QueryRole = `
     SELECT
@@ -21,37 +25,37 @@ const getDashboardData = async (dashboard) => {
     `
     const [rowRoles] = await pool.execute(QueryRole);
     if (rowRoles.length > 0 && (rowRoles[0].role_name == "SUPERADMIN" || rowRoles[0].role_name == "ADMIN")) {
-
-      const QueryAllCount = `
+      const query = `
     SELECT
-    (SELECT COUNT(*) FROM customers) AS customer,
-    (SELECT GROUP_CONCAT(id) FROM customers) AS customer_ids,
-    (SELECT COUNT(*) FROM clients) AS client,
-    (SELECT GROUP_CONCAT(id) FROM clients) AS client_ids,
-    (SELECT COUNT(*) FROM staffs) AS staff,
-    (SELECT GROUP_CONCAT(id) FROM staffs) AS staff_ids,
-    (SELECT COUNT(*) FROM jobs) AS job,
-    (SELECT GROUP_CONCAT(id) FROM jobs) AS job_ids,
-    (SELECT COUNT(*) FROM jobs WHERE status_type != '6') AS pending_job,
-    (SELECT GROUP_CONCAT(id) FROM jobs WHERE status_type != '6') AS pending_job_ids,
-    (SELECT COUNT(*) FROM jobs WHERE status_type = '6') AS completed_job,
-    (SELECT GROUP_CONCAT(id) FROM jobs WHERE status_type = '6') AS completed_job_ids
-    `
-      const [rowAllCounts] = await pool.execute(QueryAllCount);
-      // const result = {
-      //   customer: rowAllCounts[0].customer,
-      //   customer_ids: rowAllCounts[0].customer_ids,
-      //   client: rowAllCounts[0].client,
-      //   client_ids: rowAllCounts[0].client_ids,
-      //   job: rowAllCounts[0].job,
-      //   job_ids: rowAllCounts[0].job_ids,
-      //   staff : rowAllCounts[0].staff,
-      //   staff_ids: rowAllCounts[0].staff_ids,
-      //   pending_job : rowAllCounts[0].pending_job,
-      //   pending_job_ids: rowAllCounts[0].pending_job_ids,
-      //   completed_job : rowAllCounts[0].completed_job,
-      //   completed_job_ids: rowAllCounts[0].completed_job_ids
-      // };
+      (SELECT COUNT(*) FROM customers WHERE created_at BETWEEN ? AND ?) AS customer,
+      (SELECT GROUP_CONCAT(id) FROM customers WHERE created_at BETWEEN ? AND ?) AS customer_ids,
+      (SELECT COUNT(*) FROM clients WHERE created_at BETWEEN ? AND ?) AS client,
+      (SELECT GROUP_CONCAT(id) FROM clients WHERE created_at BETWEEN ? AND ?) AS client_ids,
+      (SELECT COUNT(*) FROM staffs WHERE created_at BETWEEN ? AND ?) AS staff,
+      (SELECT GROUP_CONCAT(id) FROM staffs WHERE created_at BETWEEN ? AND ?) AS staff_ids,
+      (SELECT COUNT(*) FROM jobs WHERE created_at BETWEEN ? AND ?) AS job,
+      (SELECT GROUP_CONCAT(id) FROM jobs WHERE created_at BETWEEN ? AND ?) AS job_ids,
+      (SELECT COUNT(*) FROM jobs WHERE status_type != '6' AND created_at BETWEEN ? AND ?) AS pending_job,
+      (SELECT GROUP_CONCAT(id) FROM jobs WHERE status_type != '6' AND created_at BETWEEN ? AND ?) AS pending_job_ids,
+      (SELECT COUNT(*) FROM jobs WHERE status_type = '6' AND created_at BETWEEN ? AND ?) AS completed_job,
+      (SELECT GROUP_CONCAT(id) FROM jobs WHERE status_type = '6' AND created_at BETWEEN ? AND ?) AS completed_job_ids
+  `;
+      // console.log("query ", query)
+      const [rowAllCounts] = await pool.execute(query, [
+        // Pass the dynamic date range for each query
+        // For customer
+        startDate, endDate, startDate, endDate,
+        // For client
+        startDate, endDate, startDate, endDate,
+        // For staff
+        startDate, endDate, startDate, endDate,
+        // For jobs
+        startDate, endDate, startDate, endDate,
+        // For pending jobs
+        startDate, endDate, startDate, endDate,
+        // For completed jobs
+        startDate, endDate, startDate, endDate
+      ]);
 
       const result = {
         customer: {
@@ -79,42 +83,18 @@ const getDashboardData = async (dashboard) => {
           ids: rowAllCounts[0].completed_job_ids
         }
       };
-      console.log("result ", result)
+      // console.log("result ", result)
+
       return { status: true, message: "success.", data: result };
+
     }
     else {
+
       const checkViewQuery = `
   SELECT table_name 
   FROM information_schema.views 
   WHERE table_name = 'dashboard_data_view'
 `;
-      //   const createViewQuery = `
-      //   CREATE  VIEW dashboard_data_view AS
-      // SELECT  
-      //     customers.id AS customer_id,
-      //     customers.customer_type AS customer_type,
-      //     customers.staff_id AS staff_id,
-      //     customers.account_manager_id AS account_manager_id,
-      //     jobs.allocated_to AS allocated_to,
-      //     jobs.reviewer AS reviewer,
-      //     jobs.id AS job_id,
-      //     clients.id AS client_id
-      // FROM 
-      //     customers
-      // LEFT JOIN 
-      //     jobs ON jobs.customer_id = customers.id  
-      // LEFT JOIN 
-      //     clients ON clients.id = jobs.client_id     
-      // JOIN 
-      //     staffs AS staff1 ON customers.staff_id = staff1.id
-      // JOIN 
-      //     staffs AS staff2 ON customers.account_manager_id = staff2.id
-      // LEFT JOIN 
-      //     customer_company_information ON customers.id = customer_company_information.customer_id
-      //   ;
-      // `;
-
-
       const createViewQuery = `
   CREATE  VIEW dashboard_data_view AS
 SELECT  
@@ -126,13 +106,17 @@ SELECT
     jobs.allocated_to AS allocated_to,
     jobs.reviewer AS reviewer,
     jobs.id AS job_id,
-    clients.id AS client_id
+    jobs.status_type AS status_type,
+    clients.id AS client_id,
+    clients.created_at AS client_created_at,
+    jobs.created_at AS job_created_at,
+    customers.created_at AS customer_created_at
 FROM 
     customers
 LEFT JOIN 
-    jobs ON jobs.customer_id = customers.id    
+    clients ON clients.customer_id = customers.id
 LEFT JOIN 
-    clients ON clients.id = jobs.client_id     
+    jobs ON jobs.client_id = clients.id        
 JOIN 
     staffs AS staff1 ON customers.staff_id = staff1.id
 JOIN 
@@ -149,7 +133,8 @@ LEFT JOIN
       if (checkViewResult.length === 0) {
         await pool.execute(createViewQuery);
       }
-
+      console.log("staff_id ", staff_id, "date_filter", date_filter);
+      console.log("startDate ", startDate, "endDate", endDate);
       const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + staff_id + '" LIMIT 1');
 
       if (rows.length === 0) {
@@ -158,115 +143,122 @@ LEFT JOIN
 
       const [staffCount] = await pool.execute('SELECT COUNT(*) AS count FROM `staffs` WHERE `created_by` = ' + staff_id);
 
+
+
       let query = `SELECT * FROM dashboard_data_view WHERE 1=1 `;
+      //       let query = `SELECT  
+      //     customers.id AS customer_id,
+      //     customers.customer_type AS customer_type,
+      //     customers.staff_id AS staff_id,
+      //     customers.account_manager_id AS account_manager_id,
+      //     customer_service_account_managers.account_manager_id AS a_account_manager_id,
+      //     jobs.allocated_to AS allocated_to,
+      //     jobs.reviewer AS reviewer,
+      //     jobs.id AS job_id,
+      //     clients.id AS client_id
+      // FROM 
+      //     customers
+      // LEFT JOIN 
+      //     jobs ON jobs.customer_id = customers.id    
+      // LEFT JOIN 
+      //     clients ON clients.id = jobs.client_id     
+      // JOIN 
+      //     staffs AS staff1 ON customers.staff_id = staff1.id
+      // JOIN 
+      //     staffs AS staff2 ON customers.account_manager_id = staff2.id
+      // LEFT JOIN 
+      //     customer_services ON customer_services.customer_id = customers.id
+      // LEFT JOIN 
+      //     customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id    
+      // LEFT JOIN 
+      //     customer_company_information ON customers.id = customer_company_information.customer_id
+      //     WHERE 1=1`;
       let params = [];
+      // let params = [startDate, endDate, startDate, endDate, startDate, endDate];
 
 
       // Allocated Staff Role
       if (rows[0].role_id == 3) {
-        query += ' AND allocated_to = ? ';
-        params.push(staff_id);
+        query += ' AND allocated_to = ? OR staff_id = ?';
+        params.push(staff_id, staff_id);
+        // query += ' AND customer_created_at BETWEEN ? AND ?'; 
+        // query += ' AND job_created_at BETWEEN ? AND ?'; 
+        // query += ' AND client_created_at BETWEEN ? AND ?';
+
+        //  params.push(startDate, endDate, startDate, endDate, startDate, endDate);
       }
       // Account Manager Role
       else if (rows[0].role_id == 4) {
-        console.log("staff_id  ", staff_id)
-        query += ' AND account_manager_id = ? OR a_account_manager_id = ?';
-        params.push(staff_id, staff_id);
+        query += ' AND account_manager_id = ? OR a_account_manager_id = ?  OR staff_id = ?';
+        params.push(staff_id, staff_id, staff_id);
       }
       // Reviewer Role
       else if (rows[0].role_id == 6) {
-        query += ' AND reviewer = ? ';
-        params.push(staff_id);
+        query += ' AND reviewer = ? OR staff_id = ?';
+        params.push(staff_id, staff_id);
       }
 
+
+      
+
+      console.log("query",query)
+
       const [viewResult] = await pool.execute(query, params);
-      // const uniqueCustomers = [...new Set(viewResult.map(item => item.customer_id))].length;
-
-      // const uniqueClients = [...new Set(
-      //   viewResult
-      //     .filter(item => item.client_id !== null) 
-      //     .map(item => item.client_id)
-      // )].length;
-
-
-      // const uniqueJobIds = [...new Set(
-      //   viewResult
-      //     .filter(item => item.job_id !== null)  
-      //     .map(item => item.job_id)
-      // )].length;
-
-      // const uniqueJobIdss = [...new Set(
-      //   viewResult
-      //     .filter(item => item.job_id !== null)  
-      //     .map(item => item.job_id)
-      // )]
-
-      // const [jobStatus] = await pool.execute(`SELECT 
-      // SUM(CASE WHEN status_type != 6 THEN 1 ELSE 0 END) AS pending_job,
-      // SUM(CASE WHEN status_type = 6 THEN 1 ELSE 0 END) AS completed_job
-      // FROM jobs
-      // WHERE id IN (${uniqueJobIdss})`);
-
-      // const result = {
-      //   customer: uniqueCustomers,
-      //   client: uniqueClients,
-      //   job: uniqueJobIds,
-      //   staff : staffCount[0].count,
-      //   pending_job : jobStatus[0].pending_job,
-      //   completed_job : jobStatus[0].completed_job
-      // };
-      // Collect unique customer, client, job IDs
+      console.log("viewResult ", viewResult);
       const uniqueCustomerIds = [...new Set(viewResult.map(item => item.customer_id))];
       const uniqueClientIds = [...new Set(viewResult.filter(item => item.client_id !== null).map(item => item.client_id))];
       const uniqueJobIds = [...new Set(viewResult.filter(item => item.job_id !== null).map(item => item.job_id))];
       const uniqueJobIdss = [...new Set(viewResult.filter(item => item.job_id !== null).map(item => item.job_id))];
 
-      // Collect unique staff IDs (from allocated_to and reviewer)
+
       const uniqueStaffIds = [...new Set([
         ...viewResult.map(item => item.allocated_to),
         ...viewResult.map(item => item.reviewer)
-      ])].filter(id => id !== null); // Exclude null values
+      ])].filter(id => id !== null);
 
-      // Get job statuses for the unique jobs (pending/completed)
+
       const [jobStatus] = await pool.execute(`
-     SELECT 
-       SUM(CASE WHEN status_type != 6 THEN 1 ELSE 0 END) AS pending_job,
-       SUM(CASE WHEN status_type = 6 THEN 1 ELSE 0 END) AS completed_job
-     FROM jobs
-     WHERE id IN (${uniqueJobIdss})
-     `);
+          SELECT 
+            SUM(CASE WHEN status_type != 6 THEN 1 ELSE 0 END) AS pending_job_count,
+            GROUP_CONCAT(CASE WHEN status_type != 6 THEN id ELSE NULL END) AS pending_job_ids,
+            SUM(CASE WHEN status_type = 6 THEN 1 ELSE 0 END) AS completed_job_count,
+            GROUP_CONCAT(CASE WHEN status_type = 6 THEN id ELSE NULL END) AS completed_job_ids
+          FROM jobs
+          WHERE id IN (${uniqueJobIdss})
+        `);
 
-      // Return count and IDs for customers, clients, jobs, staff, pending/completed jobs
+      //  console.log("jobStatus ", jobStatus)
       const result = {
         customer: {
           count: uniqueCustomerIds.length,
-          ids: uniqueCustomerIds
+          ids: uniqueCustomerIds.join(',')
         },
         client: {
           count: uniqueClientIds.length,
-          ids: uniqueClientIds
+          ids: uniqueClientIds.join(',')
         },
         job: {
           count: uniqueJobIds.length,
-          ids: uniqueJobIds
+          ids: uniqueJobIds.join(',')
         },
         staff: {
           count: staffCount[0].count,
-          ids: uniqueStaffIds
+          ids: uniqueStaffIds.join(',')
         },
         pending_job: {
-          count: jobStatus[0].pending_job,
-          ids: uniqueJobIdss.filter(jobId => viewResult.some(item => item.job_id === jobId && item.status_type !== '6'))
+          count: jobStatus[0].pending_job_count,
+          ids: jobStatus[0].pending_job_ids
         },
         completed_job: {
-          count: jobStatus[0].completed_job,
-          ids: uniqueJobIdss.filter(jobId => viewResult.some(item => item.job_id === jobId && item.status_type === '6'))
+          count: jobStatus[0].completed_job_count,
+          ids: jobStatus[0].completed_job_ids
         }
       };
       return { status: true, message: "success.", data: result };
     }
 
   } catch (err) {
+    console.error("eeee", err);
     return { status: false, message: "Err Dashboard Data View Get", error: err.message };
   }
 
