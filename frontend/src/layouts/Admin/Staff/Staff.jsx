@@ -182,7 +182,7 @@ const StaffPage = () => {
     },
     {
       name: "Phone",
-      selector: (row) => row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - ",
+      selector: (row) => row.phone!='null' ? row.phone_code ? row.phone_code + "-" + row.phone : "-" : "-",
       sortable: true,
       width: "150px",
     },
