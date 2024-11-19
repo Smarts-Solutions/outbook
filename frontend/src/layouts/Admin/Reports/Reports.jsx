@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Datatable from '../../../Components/ExtraComponents/Datatable';
-import ExpandableTable from '../../../Components/ExtraComponents/ExpandableTable';
 import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
 import TimesheetReport from './TimesheetReport';
 import JobStatusReport from './JobStatusPeport';
@@ -16,9 +14,11 @@ import AverageTatReport from './AverageTatReport';
 function Reportsnew() {
 
   const [filter, setFilter] = useState(false);
-  const [activeTab, setActiveTab] = useState("jobStatusReport");
+  const getActiveTab = sessionStorage.getItem('activeReport');
+  const [activeTab, setActiveTab] = useState(getActiveTab || "jobStatusReport");
 
   const handleTabClick = (tabValue) => {
+    sessionStorage.setItem('activeReport', tabValue);
     setActiveTab(tabValue);
   };
 
