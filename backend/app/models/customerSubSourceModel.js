@@ -29,7 +29,7 @@ const createCustomerSubSource = async (CustomerSubSource) => {
     );
     return {
       status: true,
-      message: "Customer Sub-source updated successfully ",
+      message: "Customer Sub-source added successfully ",
       data: result.insertId,
     };
   } catch (err) {
@@ -125,7 +125,7 @@ const updateCustomerSubSource = async (CustomerSubSource) => {
   try {
     const [check] = await pool.execute(checkQuery, [name, id]);
     if (check.length > 0) {
-      return { status: false, message: "CustomerSubSource In already exists." };
+      return { status: false, message: "Customer Sub Source already exists." };
     }
 
 
@@ -155,7 +155,7 @@ const updateCustomerSubSource = async (CustomerSubSource) => {
     }
     return {
       status: true,
-      message: "CustomerSubSource In updated successfully.",
+      message: "Customer Sub Source updated successfully.",
       data: result.affectedRows,
     };
   } catch (err) {

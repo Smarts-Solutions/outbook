@@ -29,7 +29,7 @@ const createCustomerSource = async (CustomerSource) => {
     );
     return {
       status: true,
-      message: "Customer source updated successfully.",
+      message: "Customer source added successfully.",
       data: result.insertId,
     };
   } catch (err) {

@@ -454,10 +454,10 @@ const ClientList = () => {
                         aria-selected="true"
                         tabIndex={-1}
                       >
-                        All Jobs
+                        Assigned Jobs
                       </button>
                     </li>
-                    <li className="nav-item" role="presentation">
+                    {/* <li className="nav-item" role="presentation">
                       <button
                         className="nav-link"
                         id="alljob-tab"
@@ -471,7 +471,7 @@ const ClientList = () => {
                       >
                         Assigned Jobs
                       </button>
-                    </li>
+                    </li> */}
                   </ul>
 
                   {/* <div className="search-input">

@@ -65,6 +65,7 @@ const addTask = async (req, res) => {
 };
 
 const getTask = async (req, res) => {
+
   try {
     const { ...task } = req.body;
 

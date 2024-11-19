@@ -97,6 +97,7 @@ const ClientList = () => {
   const SetTab = (e) => {
     setActiveTab(e);
   };
+
   useEffect(() => {
     GetStatus();
     if (activeTab !== "") {
@@ -126,7 +127,6 @@ const ClientList = () => {
     }
   }, [searchQuery]);
 
-
   useEffect(() => {
     let tabsData = [];
     if ((getAccessDataClient && getAccessDataClient.client == 1) || role === "ADMIN" || role === "SUPERADMIN") {
@@ -137,7 +137,6 @@ const ClientList = () => {
     }
     setTabs([...tabsData, ...initialTabs]);
   }, [getAccessDataJob, getAccessDataClient, ClientData]);
-
 
   const ClientListColumns = [
     {
@@ -172,7 +171,7 @@ const ClientList = () => {
         row.client_type_name == null ? "-" : row.client_type_name,
       sortable: true,
       width: "150px",
-    }, 
+    },
     {
       name: "Status",
       selector: (row) => (<div>
@@ -208,7 +207,7 @@ const ClientList = () => {
                 <i className="ti-trash text-danger" />
               </button>
             ) : null
-          } 
+          }
         </div>
       ),
       ignoreRowClick: true,
@@ -216,7 +215,6 @@ const ClientList = () => {
       button: true,
     },
   ];
- 
 
   const JobColumns = [
     {
@@ -316,7 +314,8 @@ const ClientList = () => {
           {
             getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
               <button className="edit-icon" onClick={() =>
-                navigate("/admin/job/edit", { state: { job_id: row.job_id, goto: "Customer" , activeTab: activeTab },
+                navigate("/admin/job/edit", {
+                  state: { job_id: row.job_id, goto: "Customer", activeTab: activeTab },
                 })}>
                 <i className="ti-pencil" />
               </button>
@@ -422,7 +421,6 @@ const ClientList = () => {
       });
   };
 
-
   const CheckListColumns = [
     {
       name: "Checklist Name",
@@ -470,7 +468,7 @@ const ClientList = () => {
         <div>
           <button className="edit-icon" onClick={() =>
             navigate("/admin/edit/checklist", {
-              state: { id: location.state.id, checklist_id: row.checklists_id , activeTab: activeTab },
+              state: { id: location.state.id, checklist_id: row.checklists_id, activeTab: activeTab },
             })}>
             {" "}
             <i className="ti-pencil" />
@@ -638,37 +636,56 @@ const ClientList = () => {
   };
 
   const handleDelete = async (row, type) => {
-    const req = {
-      action: "delete",
-      ...(type === "job" ? { job_id: row.job_id } : { client_id: row.id }),
-    };
-    const data = { req: req, authToken: token };
-    await dispatch(type == "job" ? JobAction(data) : ClientAction(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          sweatalert.fire({
-            title: "Deleted",
-            icon: "success",
-            showCancelButton: false,
-            showConfirmButton: false,
-            timer: 1500,
+    sweatalert.fire({
+      title: "Are you sure?",
+      text: "Do you want to delete this " + type + "?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "No, cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const req = {
+          action: "delete",
+          ...(type === "job" ? { job_id: row.job_id } : { client_id: row.id }),
+        };
+        const data = { req: req, authToken: token };
+        await dispatch(type == "job" ? JobAction(data) : ClientAction(data))
+          .unwrap()
+          .then(async (response) => {
+            if (response.status) {
+              sweatalert.fire({
+                title: type + " deleted successfully",
+                icon: "success",
+                showCancelButton: false,
+                showConfirmButton: false,
+                timer: 1500,
+              });
+              type === "job" ? JobDetails() : GetAllClientData();
+            } else {
+              sweatalert.fire({
+                title: "Failed",
+                icon: "error",
+                showCancelButton: false,
+                showConfirmButton: false,
+                timer: 1500,
+              });
+            }
+          })
+          .catch((error) => {
+            return;
           });
-
-          type === "job" ? JobDetails() : GetAllClientData();
-        } else {
-          sweatalert.fire({
-            title: "Failed",
-            icon: "error",
-            showCancelButton: false,
-            showConfirmButton: false,
-            timer: 1500,
-          });
-        }
-      })
-      .catch((error) => {
-        return;
-      });
+      } else if (result.dismiss === sweatalert.DismissReason.cancel) {
+        sweatalert.fire({
+          title: "Cancelled",
+          text: type + " was not deleted",
+          icon: "error",
+          confirmButtonText: "Ok",
+          timer: 1000,
+          timerProgressBar: true,
+        });
+      }
+    });
   };
 
   const HandleClientView = (row) => {
@@ -692,8 +709,6 @@ const ClientList = () => {
       return updatedData;
     });
   };
-
-  
 
   return (
     <div className="container-fluid">
@@ -743,8 +758,9 @@ const ClientList = () => {
                             <i className="fa fa-plus pe-1" /> Add Client
                           </div>
                         </>
-                      ) : (ClientData?.length > 0 &&( getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN")) && activeTab === "job" ? (
+                      ) : (ClientData?.length > 0 && (getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN")) && activeTab === "job" ? (
                         <>
+                        {console.log("ClientData", ClientData)}
                           <div className="btn btn-info text-white float-end blue-btn" onClick={() =>
                             navigate("/admin/createjob", {
                               state: { customer_id: location.state.id, goto: "Customer", activeTab: activeTab },
