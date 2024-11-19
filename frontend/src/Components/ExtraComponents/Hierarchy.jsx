@@ -2,6 +2,12 @@ import React from 'react'
 import {useNavigate} from 'react-router-dom'
 
 const Hierarchy = ({ show, active, data , NumberOfActive }) => {
+
+    console.log("data", data)
+    console.log("show", show)
+    console.log("active", active)
+    console.log("NumberOfActive", NumberOfActive)
+    
    
   
     const navigate = useNavigate()

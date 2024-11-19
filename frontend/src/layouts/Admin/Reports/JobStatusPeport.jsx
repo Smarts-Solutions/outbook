@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Datatable from '../../../Components/ExtraComponents/Datatable';
 import {JobStatusReport} from '../../../ReduxStore/Slice/Report/ReportSlice'
 import { useDispatch } from 'react-redux';
+import {convertDate } from '../../../Utils/Comman_function';
 
 const JobStatus = () => {
     const dispatch = useDispatch();
@@ -40,13 +41,13 @@ const JobStatus = () => {
     { name: 'Status', selector: row => row.status, sortable: true },
     { name: 'Allocated To', selector: row => row.allocated_name, sortable: true },
     { name: 'Received On', selector: row => row.reviewer_name, sortable: true },
-    { name: 'Companies House Due Date', selector: row => row.filing_Companies_date, sortable: true },
-    { name: 'Internal Deadline', selector: row => row.internal_deadline_date, sortable: true },
-    { name: 'Customer Deadline', selector: row => row.customer_deadline_date, sortable: true },
-    { name: 'Initial Query Sent Date', selector: row => row.query_sent_date, sortable: true },
-    { name: 'Final Query Response Received Date', selector: row => row.final_query_response_received_date, sortable: true },
-    { name: 'First Draft Sent', selector: row => row.draft_sent_on, sortable: true },
-    { name: 'Final Draft Sent', selector: row => row.final_draft_sent_on, sortable: true },
+    { name: 'Companies House Due Date', selector: row => convertDate(row.filing_Companies_date), sortable: true },
+    { name: 'Internal Deadline', selector: row => convertDate(row.internal_deadline_date), sortable: true },
+    { name: 'Customer Deadline', selector: row => convertDate(row.customer_deadline_date), sortable: true },
+    { name: 'Initial Query Sent Date', selector: row => convertDate(row.query_sent_date), sortable: true },
+    { name: 'Final Query Response Received Date', selector: row => convertDate(row.final_query_response_received_date), sortable: true },
+    { name: 'First Draft Sent', selector: row => convertDate(row.draft_sent_on), sortable: true },
+    { name: 'Final Draft Sent', selector: row => convertDate(row.final_draft_sent_on), sortable: true },
   ]
 
   return (

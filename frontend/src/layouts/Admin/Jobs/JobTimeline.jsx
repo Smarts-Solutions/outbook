@@ -63,7 +63,7 @@ const JobTimeline = () => {
       </div>
       <div className="mapWrapper">
         <div>
-          {chunkedSpouseArray.map((row, rowIndex) => (
+          {chunkedSpouseArray?.map((row, rowIndex) => (
             <div className="row" key={rowIndex} style={{ justifyContent: rowIndex % 2 === 0 ? 'flex-start' : 'flex-end' }}>
               {row.map((item, index) => (
                 <div className="itemBar" key={index} style={{ textAlign: rowIndex % 2 === 0 ? 'left' : 'right' }}>
