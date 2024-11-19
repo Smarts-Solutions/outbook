@@ -62,11 +62,19 @@ const Setting = () => {
               JobTypeData({ action: "get" });
             }, 2000);
           } else {
+            if(response.key == "warning"){
+              sweatalert.fire({
+                title: response.message,
+                icon: "warning",
+                timer: 2000,
+              });
+            }else{
             sweatalert.fire({
               title: response.message,
               icon: "error",
               timer: 2000,
             });
+            }
           }
         }
       })
@@ -330,56 +338,36 @@ const Setting = () => {
   // };
 
   const handleDelete = (data) => {
-
     sweatalert
-    
-    .fire({
-    
-    title: "Are you sure?",
-    
-    text: "You won't be able to revert this!",
-    
-    icon: "warning",
-    
-    showCancelButton: true,
-    
-    confirmButtonColor: "#3085d6",
-    
-    cancelButtonColor: "#d33",
-    
-    confirmButtonText: "Yes, delete it!",
-    
-    })
-    
-    .then((result) => {
-    
-    if (result.isConfirmed) {
-    
-    const req = {
-    
-    action: "delete",
-    
-    id: data.id,
-    
-    };
-    
-    JobTypeData(req);
-    
-    sweatalert.fire({
-    
-    title: "Deleted!",
-    
-    text: "Your file has been deleted.",
-    
-    icon: "success",
-    
-    });
-    
-    }
-    
-    });
-    
-    };
+      .fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+      })
+
+      .then((result) => {
+        if (result.isConfirmed) {
+          const req = {
+            action: "delete",
+            id: data.id,
+          };
+          JobTypeData(req);
+          sweatalert.fire({
+            title: "Deleted!",
+            text: "Your file has been deleted.",
+            icon: "success",
+
+          });
+
+        }
+
+      });
+
+  };
 
   const handleInputChange = (e) => {
     setTaskInput(e.target.value);
@@ -419,7 +407,7 @@ const Setting = () => {
       service_id: location.state.Id,
     };
 
-    if(tasks.length == 0){
+    if (tasks.length == 0) {
       sweatalert.fire({
         title: "Please at least one task",
         icon: "warning",
@@ -612,7 +600,7 @@ const Setting = () => {
                     <td className="tabel_left">
                       <div className="d-flex gap-2">
                         <div className="remove">
-                          <button className="delete-icon" onClick={(e)=>handleDeleteTask(e)}>
+                          <button className="delete-icon" onClick={(e) => handleDeleteTask(e)}>
                             <i className="ti-trash text-danger" />
                           </button>
                         </div>
@@ -645,7 +633,7 @@ const Setting = () => {
         hideBtn={true}
         handleClose={() => {
           setViewtask(false);
-         
+
         }}
       >
         <div className="">
