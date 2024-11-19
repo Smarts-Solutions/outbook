@@ -107,9 +107,7 @@ const JobStatus = () => {
     },
 
   ];
-
-
-
+  
   return (
     <div className='container-fluid mt-5'>
       <div className='report-data'>
