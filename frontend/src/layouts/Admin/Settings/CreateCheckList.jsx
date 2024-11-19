@@ -249,6 +249,11 @@ const CreateCheckList = () => {
       return;
     }
 
+    if(selectedClientType.length==0){
+      setErrors({ ...errors, client_type_id: "Please Select Client Type" });
+      return;
+    }
+
     tasks.forEach((task, index) => {
       if (!task.task_name) {
         validationErrors[`task_name_${index}`] = "Task Name is required";
