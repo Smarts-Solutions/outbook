@@ -66,7 +66,6 @@ const StaffPage = () => {
   const [addCompetancy, SetCompetancy] = useState(false);
   const [staffViewLog, SetStaffViewLog] = useState(false);
   const [getActiviyLog, setActivityLog] = useState([]);
-  console.log("getActiviyLog", getActiviyLog);
   const [refresh, SetRefresh] = useState(false);
   const [activeTab, setActiveTab] = useState("this-year");
   const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });

@@ -232,7 +232,7 @@ const Service = () => {
       if (response.status) {
         next(response.data);
       }else{
-        console.log(response);
+       
         Swal.fire({
           icon: "error",
           title: "Oops...",

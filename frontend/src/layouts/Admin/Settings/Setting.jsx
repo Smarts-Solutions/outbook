@@ -66,7 +66,6 @@ const Setting = () => {
   }, [accessData]);
 
 
-  console.log("viewData", viewData);
   const token = JSON.parse(localStorage.getItem("token"));
   const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
   const [personRoleDataAll, setPersonRoleDataAll] = useState({
@@ -1141,7 +1140,6 @@ const Setting = () => {
   const handleModalChange = (e) => {
     const { name, value } = e.target;
 
-    console.log(name, value);
 
     if (name === "hours" || name === "minutes") {
       if (name == "minutes" && value > 59) {

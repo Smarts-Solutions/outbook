@@ -39,7 +39,6 @@ const JobLogs = () => {
   }, [tab]);
 
 
-  console.log("tab", tab);
   return (
     <div className='container-fluid'>
       <div className="row ">

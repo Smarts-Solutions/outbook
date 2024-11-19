@@ -151,7 +151,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
 
   const handleSubmit = async (e) => {
     const req = { action: "add", job_id: location.state.job_id, missionDetails: missionLogAllInputData }
-    console.log("req", req)
+
     const data = { req: req, authToken: token }
     await dispatch(AddMissionLog(data))
       .unwrap()

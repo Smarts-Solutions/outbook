@@ -117,9 +117,7 @@ const Engagement = () => {
       RemoveErrorFromErrors(name, setErrors);
     }
 
-    // ScrollToViewFirstError(newErrors);
-
-    console.log("SSS", newErrors, type, Object.keys(newErrors).length);
+   
 
     if (Object.keys(newErrors).length !== 0) {
       setErrors((prevErrors) => ({

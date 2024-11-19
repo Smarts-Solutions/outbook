@@ -21,12 +21,10 @@ const CreateCheckList = () => {
     { task_id: "", task_name: "", budgeted_hour: "" }
   ]);
 
-  console.log("tasks", tasks);
   const [errors, setErrors] = useState({});
   const [errors1, setErrors1] = useState({});
 
 
-  console.log("location", location.state);
   const [formData, setFormData] = useState({
     customer_id: location.state?.id || "",
     service_id: "",

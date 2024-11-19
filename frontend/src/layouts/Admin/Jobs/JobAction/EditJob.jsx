@@ -690,10 +690,10 @@ const EditJob = () => {
   }
 
   // useEffect(() => {
-  //   console.log("budgeted_hour_totalTime", budgeted_hour_totalTime);
+
 
   //   if(budgeted_hour_totalTime.hours && budgeted_hour_totalTime.minutes){
-  //   console.log("AddTaskArr", AddTaskArr);
+
 
   //   setBudgetedHours({
   //     hours: budgeted_hour_totalTime.hours || '0',
@@ -704,7 +704,6 @@ const EditJob = () => {
 
 
 
-  console.log("location.state.activeTab", location.state);
 
   return (
     <div>

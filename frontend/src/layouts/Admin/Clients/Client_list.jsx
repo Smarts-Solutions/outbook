@@ -43,7 +43,6 @@ const ClientList = () => {
       setActiveTab(retrievedData);
     }
     else {
-      console.log("activeTab", activeTab)
       setActiveTab(
         (getAccessDataClient && getAccessDataClient.client == 1) || role === "ADMIN" || role === "SUPERADMIN" ? "client" :
           (getAccessDataJob && getAccessDataJob.job == 1) || role === "ADMIN" || role === "SUPERADMIN" ? "job" :
@@ -713,7 +712,6 @@ const ClientList = () => {
   };
 
 
-  { console.log("ClientData", ClientData) }
   return (
     <div className="container-fluid">
       <div className="row ">

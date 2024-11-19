@@ -9,7 +9,6 @@ const TeamMonthlyReport = () => {
     const [getMonthlyReport, setMonthlyReport] = useState([]);
 
 
-    console.log(getMonthlyReport);
     useEffect(() => {
         MonthlyReport();
       }, []);

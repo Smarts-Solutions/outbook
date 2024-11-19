@@ -12,7 +12,7 @@ const CommonModal = ({
   const columnClass = fields && fields.length === 1 ? "col-md-12" : "col-md-12";
 
 
-  console.log("fields", fields);
+
 
   return (
     <div
