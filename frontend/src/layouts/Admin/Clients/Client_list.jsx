@@ -28,8 +28,30 @@ const ClientList = () => {
   const [activeTab, setActiveTab] = useState('');
   const role = JSON.parse(localStorage.getItem("role"));
 
+  const [getAccessDataCustomer, setAccessDataCustomer] = useState({
+    insert: 0,
+    update: 0,
+    delete: 0,
+    view: 0,
+  });
+
+  const accessDataCustomer =
+  JSON.parse(localStorage.getItem("accessData") || "[]").find(
+    (item) => item.permission_name === "customer"
+  )?.items || [];
 
 
+  useEffect(() => {
+    if (accessDataCustomer.length === 0) return;
+    const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0 };
+    accessDataCustomer.forEach((item) => {
+      if (item.type === "insert") updatedAccess.insert = item.is_assigned;
+      if (item.type === "update") updatedAccess.update = item.is_assigned;
+      if (item.type === "delete") updatedAccess.delete = item.is_assigned;
+      if (item.type === "view") updatedAccess.view = item.is_assigned;
+    });
+    setAccessDataCustomer(updatedAccess);
+  }, []);
 
 
   useEffect(() => {
@@ -466,17 +488,21 @@ const ClientList = () => {
       name: "Actions",
       cell: (row) => (
         <div>
-          <button className="edit-icon" onClick={() =>
-            navigate("/admin/edit/checklist", {
-              state: { id: location.state.id, checklist_id: row.checklists_id, activeTab: activeTab },
-            })}>
-            {" "}
-            <i className="ti-pencil" />
-          </button>
-          <button className="delete-icon" onClick={() => ChecklistDelete(row)}>
-            {" "}
-            <i className="ti-trash text-danger" />
-          </button>
+          {
+            (getAccessDataCustomer.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
+              <button className="edit-icon" onClick={() =>
+                navigate("/admin/edit/checklist", {
+                  state: { id: location.state.id, checklist_id: row.checklists_id, activeTab: activeTab },
+                })}>
+                <i className="ti-pencil" />
+              </button> : null
+          }
+          {
+            (getAccessDataCustomer.delete === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
+              <button className="delete-icon" onClick={() => ChecklistDelete(row)}>
+                <i className="ti-trash text-danger" />
+              </button> : null
+          }
         </div>
       ),
       ignoreRowClick: true,
@@ -541,7 +567,7 @@ const ClientList = () => {
   };
 
   const GetAllClientData = async () => {
-    const req = { action: "get", customer_id: location?.state?.id};
+    const req = { action: "get", customer_id: location?.state?.id };
     const data = { req: req, authToken: token };
     await dispatch(ClientAction(data))
       .unwrap()
@@ -771,7 +797,7 @@ const ClientList = () => {
                             <i className="fa fa-plus pe-1" /> Create Job
                           </div>
                         </>
-                      ) : activeTab === "checklist" ? (
+                      ) : (getAccessDataCustomer.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") && activeTab === "checklist" ? (
                         <>
                           <div className="btn btn-info text-white float-end blue-btn" onClick={() =>
                             navigate("/admin/create/checklist", { state: { id: location.state.id, activeTab: activeTab } })
