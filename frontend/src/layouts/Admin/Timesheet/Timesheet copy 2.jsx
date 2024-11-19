@@ -90,7 +90,6 @@ const Timesheet = () => {
     setTimeSheetRows((prevRows) => [...prevRows, newSheetRow]);
   };
 
-  console.log("setTimeSheetRows", timeSheetRows)
 
   const handleDeleteRow = (index) => {
     const newSheetRows = [...timeSheetRows];
@@ -224,7 +223,7 @@ const Timesheet = () => {
 
     if (req.staff_id != undefined) {
       const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
-      console.log("res", res)
+ 
       if (res.status) {
         setTaskData(res.data)
       } else {
