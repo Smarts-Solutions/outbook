@@ -755,7 +755,7 @@ const Timesheet = () => {
                       <table
                         className="timesheetTable table align-middle table-nowrap"
                         id="customerTable"
-                        style={{ width: "max-content" }}
+                        
                       >
                         <thead className="table-light table-head-blue">
                           
@@ -763,19 +763,19 @@ const Timesheet = () => {
                             <th className="dropdwnCol2 pe-0" data-field="phone"  style={{ width: '10px' }}>
                               No
                             </th>
-                            <th className="ps-0" data-field="phone" style={{ width: '130px' }} >
+                            <th className="ps-0" data-field="phone"  >
                               Task Type
                             </th>
-                            <th className="dropdwnCol7" data-field="phone"  style={{ width: '130px' }}>
+                            <th className="dropdwnCol7" data-field="phone"  >
                               Customer
                             </th>
-                            <th className="dropdwnCol6" data-field="phone"  style={{ width: '130px' }}>
+                            <th className="dropdwnCol6" data-field="phone"  >
                               Client
                             </th>
-                            <th className="dropdwnCol5" data-field="phone" style={{ width: '130px' }} >
+                            <th className="dropdwnCol5" data-field="phone"  >
                               Job
                             </th>
-                            <th className="dropdwnCol5" data-field="phone" style={{ width: '130px' }}>
+                            <th className="dropdwnCol5" data-field="phone" >
                               Task
                             </th>
                            
@@ -960,8 +960,7 @@ const Timesheet = () => {
 
                                     onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday, item)}
                                     value={item.monday_hours == null ? "0" : item.monday_hours}
-                                    // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false :false}
-                                    disabled={item.submit_status === "1" ? true : false}
+                                    disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false : currentDay !== 'monday'}
                                   />
                                     <input
                                       style={{ width: '80px' }}
@@ -970,8 +969,7 @@ const Timesheet = () => {
                                       name="tuesday_hours"
                                       onChange={(e) => handleHoursInput(e, index, 'tuesday_date', weekDays.tuesday, item)}
                                       value={item.tuesday_hours == null ? "0" : item.tuesday_hours}
-                                      // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false : true : false : currentDay !== 'tuesday'}
-                                      disabled={item.submit_status === "1" ? true : false}
+                                      disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false : true : false : currentDay !== 'tuesday'}
                                     />
                                     <input
                                       style={{ width: '80px' }}
@@ -980,8 +978,7 @@ const Timesheet = () => {
                                       name="wednesday_hours"
                                       onChange={(e) => handleHoursInput(e, index, 'wednesday_date', weekDays.wednesday, item)}
                                       value={item.wednesday_hours == null ? "0" : item.wednesday_hours}
-                                      // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false : true : false : currentDay !== 'wednesday'}
-                                      disabled={item.submit_status === "1" ? true : false}
+                                      disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false : true : false : currentDay !== 'wednesday'}
                                     />
                                     <input
                                       style={{ width: '80px' }}
@@ -990,8 +987,7 @@ const Timesheet = () => {
                                       name="thursday_hours"
                                       onChange={(e) => handleHoursInput(e, index, 'thursday_date', weekDays.thursday, item)}
                                       value={item.thursday_hours == null ? "0" : item.thursday_hours}
-                                      // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ? currentDay === 'thursday' ? false : true : false : currentDay !== 'thursday'}
-                                      disabled={item.submit_status === "1" ? true : false}
+                                      disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ? currentDay === 'thursday' ? false : true : false : currentDay !== 'thursday'}
                                     />
                                     <input
                                       style={{ width: '80px' }}
@@ -1000,8 +996,7 @@ const Timesheet = () => {
                                       name="friday_hours"
                                       onChange={(e) => handleHoursInput(e, index, 'friday_date', weekDays.friday, item)}
                                       value={item.friday_hours == null ? "0" : item.friday_hours}
-                                      // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ? false : true : false : currentDay !== 'friday'}
-                                      disabled={item.submit_status === "1" ? true : false}
+                                      disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ? false : true : false : currentDay !== 'friday'}
                                     />
                                     <input
                                       style={{ width: '80px' }}
@@ -1010,8 +1005,7 @@ const Timesheet = () => {
                                       name="saturday_hours"
                                       onChange={(e) => handleHoursInput(e, index, 'saturday_date', weekDays.saturday, item)}
                                       value={item.saturday_hours == null ? "0" : item.saturday_hours}
-                                      // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
-                                      disabled={item.submit_status === "1" ? true : false}
+                                      disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
                                     />
                                     <input
                                       style={{ width: '80px' }}
@@ -1020,8 +1014,7 @@ const Timesheet = () => {
                                       name="sunday_hours"
                                       onChange={(e) => handleHoursInput(e, index, 'sunday_date', weekDays.sunday, item)}
                                       value={item.sunday_hours == null ? "0" : item.sunday_hours}
-                                      // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.sunday) > new Date() ? currentDay === 'sunday' ? false : true : false : currentDay !== 'sunday'}
-                                      disabled={item.submit_status === "1" ? true : false}
+                                      disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.sunday) > new Date() ? currentDay === 'sunday' ? false : true : false : currentDay !== 'sunday'}
                                     />
                                   </div>
 
@@ -1035,8 +1028,7 @@ const Timesheet = () => {
 
                                     onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday, item)}
                                     value={item.monday_hours == null ? "0" : item.monday_hours}
-                                    // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false : currentDay !== 'monday'}
-                                    disabled={item.submit_status === "1" ? true : false}
+                                    disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false : currentDay !== 'monday'}
                                   /></div>
                                 )}
                               </div>
@@ -1061,7 +1053,7 @@ const Timesheet = () => {
 
                             {submitStatusAllKey === 0 ?
                               <td className="d-flex ps-0">
-                                {/* {
+                                {
                                   item.submit_status === "0" ?
 
                                     item.editRow == 0 || item.editRow == undefined ?
@@ -1083,7 +1075,7 @@ const Timesheet = () => {
                                         <i class="fa-solid fa-arrow-rotate-left"></i>
                                       </button>
                                     : ""
-                                } */}
+                                }
                                 {submitStatusAllKey === 0 ?
                                   <button
                                     className="delete-icon"

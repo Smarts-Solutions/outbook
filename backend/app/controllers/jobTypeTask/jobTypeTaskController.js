@@ -21,11 +21,15 @@ const handleJobType = async (req, res) => {
         res.status(200).json({ status: true, data: result });
         break;
       case "delete":
-        await jobTypeTaskService.removeJobType(JobType);
-        res
-          .status(200)
-          .json({ status: true, message: "Job type deleted successfully" });
-        break;
+        result = await jobTypeTaskService.removeJobType(JobType);
+        if(!result.status){
+          res.status(200).json({ status: false, message: result.message , key : result.key});
+          break;
+       }else{
+          res.status(200).json({ status: true, message: result.message , key : result.key});
+          break;
+       }
+
       case "update":
         result = await jobTypeTaskService.modifyJobType(JobType);
         if(!result.status){
@@ -61,6 +65,7 @@ const addTask = async (req, res) => {
 };
 
 const getTask = async (req, res) => {
+
   try {
     const { ...task } = req.body;
 

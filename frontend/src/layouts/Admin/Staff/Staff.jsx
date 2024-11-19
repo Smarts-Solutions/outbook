@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Staff, Competency } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import { Role } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import { ActivityLog } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
 import { FormGroup, Label, Input, Row, Col, Button } from "reactstrap";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
@@ -63,6 +64,8 @@ const StaffPage = () => {
   const [editShowModel, setEditShowModel] = useState(false);
   const [editStaffData, setEditStaffData] = useState(false);
   const [addCompetancy, SetCompetancy] = useState(false);
+  const [staffViewLog, SetStaffViewLog] = useState(false);
+  const [getActiviyLog, setActivityLog] = useState([]);
   const [refresh, SetRefresh] = useState(false);
   const [activeTab, setActiveTab] = useState("this-year");
   const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
@@ -135,6 +138,27 @@ const StaffPage = () => {
       } else {
         setServiceDataAll({ loading: false, data: [], staff_id: row.id });
       }
+    } catch (error) {
+      return;
+    }
+  };
+
+  const ViewLogs = async (row) => {
+    try {
+      const req = { staff_id: row.id };
+      const data = { req: req, authToken: token };
+      await dispatch(ActivityLog(data))
+        .unwrap()
+        .then((res) => {
+          if (res.status) {
+            setActivityLog(res.data);
+          } else {
+            setActivityLog([]);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     } catch (error) {
       return;
     }
@@ -248,7 +272,7 @@ const StaffPage = () => {
             <a className="dropdown-item" onClick={() => { ServiceData(row); SetCompetancy(true) }} style={{ cursor: 'pointer' }} >
               <FaPlus />  Competency
             </a>
-            <a className="dropdown-item" style={{ cursor: 'pointer' }} >
+            <a className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => { ViewLogs(row); SetStaffViewLog(true) }} >
               <FaEye />  Logs
             </a>
           </div>
@@ -257,7 +281,7 @@ const StaffPage = () => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-     
+
     }
 
   ]
@@ -298,7 +322,6 @@ const StaffPage = () => {
           }`,
       };
 
-      console.log("ww", req);
 
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
@@ -544,6 +567,15 @@ const StaffPage = () => {
     }
   }, [editStaffData]);
 
+  const formatDate = (isoString) => {
+    const date = new Date(isoString);
+    const options = { month: "short", day: "numeric" };
+    const monthDay = date.toLocaleDateString("en-US", options);
+    const timeOptions = { hour: "numeric", minute: "numeric", hour12: true };
+    const time = date.toLocaleTimeString("en-US", timeOptions);
+    return `${monthDay} (${time.toUpperCase()})`;
+  };
+
   return (
     <div>
       <div className="container-fluid">
@@ -603,7 +635,7 @@ const StaffPage = () => {
                 }`}
               id={tab.id}
               role="tabpanel"
-            > 
+            >
               <Datatable
                 columns={columns}
                 data={staffDataAll.data}
@@ -612,7 +644,7 @@ const StaffPage = () => {
             </div>
           ))}
         </div>
-      </div> 
+      </div>
       <CommanModal
         isOpen={addStaff}
         backdrop="static"
@@ -752,66 +784,66 @@ const StaffPage = () => {
           additional_field={
             <div className="row mt-2 ">
 
-                  <label className="form-label">Weekly Timesheet Hours</label>
-                  <div className="input-group row">
-                    {/* Hours Input */}
-                    <div className="hours-div col-6">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Hours"
-                        onChange={(e) => {
-                          const value = e.target.value;
+              <label className="form-label">Weekly Timesheet Hours</label>
+              <div className="input-group row">
+                {/* Hours Input */}
+                <div className="hours-div col-6">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Hours"
+                    onChange={(e) => {
+                      const value = e.target.value;
 
-                          if (value === "" || Number(value) >= 0) {
-                            setBudgetedHours({
-                              ...budgetedHours,
-                              hours: value,
-                            });
-                          }
-                        }}
-                        value={budgetedHours?.hours || ""}
-                      />
-                      <span className="input-group-text" id="basic-addon2">
-                        H
-                      </span>
-                    </div>
-                    <div className="hours-div col-6">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Minutes"
-                        onChange={(e) => {
-                          const value = e.target.value;
-
-                          if (
-                            value === "" ||
-                            (Number(value) >= 0 && Number(value) <= 59)
-                          ) {
-                            setBudgetedHours({
-                              ...budgetedHours,
-                              minutes: value,
-                            });
-                          } else {
-                            setBudgetedHours({
-                              ...budgetedHours,
-                              minutes: "59",
-                            });
-                          }
-                        }}
-                        value={budgetedHours?.minutes || ""}
-                      />
-                      <span className="input-group-text" id="basic-addon2">
-                        M
-                      </span>
-                    </div>
-                  </div>
+                      if (value === "" || Number(value) >= 0) {
+                        setBudgetedHours({
+                          ...budgetedHours,
+                          hours: value,
+                        });
+                      }
+                    }}
+                    value={budgetedHours?.hours || ""}
+                  />
+                  <span className="input-group-text" id="basic-addon2">
+                    H
+                  </span>
                 </div>
-             
+                <div className="hours-div col-6">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Minutes"
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      if (
+                        value === "" ||
+                        (Number(value) >= 0 && Number(value) <= 59)
+                      ) {
+                        setBudgetedHours({
+                          ...budgetedHours,
+                          minutes: value,
+                        });
+                      } else {
+                        setBudgetedHours({
+                          ...budgetedHours,
+                          minutes: "59",
+                        });
+                      }
+                    }}
+                    value={budgetedHours?.minutes || ""}
+                  />
+                  <span className="input-group-text" id="basic-addon2">
+                    M
+                  </span>
+                </div>
+              </div>
+            </div>
+
           }
         />
       </CommanModal>
-      
+
       <CommanModal
         isOpen={addCompetancy}
         backdrop="static"
@@ -850,6 +882,58 @@ const StaffPage = () => {
             Update
           </Button>
         </div>
+      </CommanModal>
+
+      <CommanModal
+        isOpen={staffViewLog}
+        backdrop="static"
+        size="ms-5"
+        title="View Logs"
+        hideBtn={true}
+        handleClose={() => SetStaffViewLog(false)}
+      >
+        <FormGroup>
+          <Row>
+          <div className="card-body">
+                <div className="analytic-dash-activity" data-simplebar="init">
+                  <div className="simplebar-mask1">
+                    <div className="">
+                      <div className="simplebar-content" style={{ padding: 0 }}>
+                        <div className="activity">
+                          {/* Conditional Rendering */}
+                          {getActiviyLog && getActiviyLog.length > 0 ? (
+                            getActiviyLog.map((item, index) => {
+                              return (
+                                <div className="activity-info" key={index}>
+                                  <div className="icon-info-activity">
+                                    <i className="fa-solid fa-circle"></i>
+                                  </div>
+                                  <div className="activity-info-text">
+                                    <div className="">
+                                      <small className="">
+                                        {formatDate(item?.created_at)}
+                                      </small>
+                                      <p className="">{item?.log_message}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <div className="no-data-found">
+                              <p className="text-center">
+                                No Activity Logs Found
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </Row>
+        </FormGroup>
       </CommanModal>
     </div>
   );

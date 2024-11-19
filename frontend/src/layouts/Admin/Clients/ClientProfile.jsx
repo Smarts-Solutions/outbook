@@ -77,7 +77,7 @@ const ClientList = () => {
 
   const tabs = [
     { id: "NoOfJobs", label: "No. Of Jobs", icon: "fa-solid fa-briefcase" },
-    { id: "viewclient", label: "View Client", icon: "fa-solid fa-user" },
+    { id: "view client", label: "View Client", icon: "fa-solid fa-user" },
     { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
   ];
 
@@ -407,7 +407,7 @@ const ClientList = () => {
               </>
             )}
 
-            {activeTab === "viewclient" && (
+            {activeTab === "view client" && (
               <div className="col-md-4 col-auto">
                 <button
                   type="button"
@@ -454,10 +454,10 @@ const ClientList = () => {
                         aria-selected="true"
                         tabIndex={-1}
                       >
-                        All Jobs
+                        Assigned Jobs
                       </button>
                     </li>
-                    <li className="nav-item" role="presentation">
+                    {/* <li className="nav-item" role="presentation">
                       <button
                         className="nav-link"
                         id="alljob-tab"
@@ -471,7 +471,7 @@ const ClientList = () => {
                       >
                         Assigned Jobs
                       </button>
-                    </li>
+                    </li> */}
                   </ul>
 
                   {/* <div className="search-input">
@@ -518,7 +518,7 @@ const ClientList = () => {
           </div>
         )}
 
-        {activeTab == "viewclient" && clientInformationData && (
+        {activeTab == "view client" && clientInformationData && (
           <div className="tab-content" id="pills-tabContent">
             <div className="report-data">
               <div className="card-body">

@@ -50,8 +50,6 @@ const Sidebar = () => {
     navigate(linkPathname);
   };
 
-  
-
   return (
     <div ref={menuRef} onClick={()=>sessionStorage.clear()}>
       <div className="left-sidenav">

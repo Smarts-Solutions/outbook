@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { GET_ALL_CUSTOMERS } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { Update_Customer_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
@@ -275,7 +275,7 @@ const Customer = () => {
               timer: 1000,
               showConfirmButton: false,
             });
-            GetAllCustomerData(); // Fetch updated customer data after success
+            GetAllCustomerData(); 
           } else {
             Swal.fire({
               title: "Error",
@@ -330,8 +330,8 @@ const Customer = () => {
   };
 
   const GetAllCustomerData = async () => {
-    const req = { action: 'get', staff_id: staffDetails.id }; // Replace staffDetails.id with actual staff ID
-    const data = { req, authToken: token }; // Make sure `token` is defined
+    const req = { action: 'get', staff_id: staffDetails.id }; 
+    const data = { req, authToken: token };
 
     try {
       const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
@@ -339,13 +339,13 @@ const Customer = () => {
       if (response.status) {
         const filteredData = response.data.filter((item) => {
           const itemDate = new Date(item.created_at);
-          const { startDate, endDate } = getDateRange(selectedTab); // Get date range based on selected tab
+          const { startDate, endDate } = getDateRange(selectedTab); 
           return itemDate >= startDate && itemDate <= endDate;
         });
 
-        setFilteredData(filteredData); // Set the filtered data
+        setFilteredData(filteredData); 
       } else {
-        setFilteredData([]); // Set to empty if no valid response
+        setFilteredData([]); 
       }
     } catch (error) {
       console.error('Error fetching customer data:', error);
@@ -386,10 +386,6 @@ const Customer = () => {
 
   const handleEdit = (row) => {
     navigate("/admin/editcustomer", { state: row });
-  };
-
-  const handleDelete = (row) => {
-    // Implement delete functionality
   };
 
   return (

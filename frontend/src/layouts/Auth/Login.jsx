@@ -156,7 +156,6 @@ const Login = () => {
 
   const accessDataFetch = async (data, token) => {
     try {
-      console.log("data", data);
       const response = await dispatch(
         RoleAccess({
           req: { role_id: data.role_id, StaffUserId: data.id, action: "get" },
@@ -227,9 +226,6 @@ const Login = () => {
     }
 }
 
-
-console.log("errorPassword", errorPassword);
-console.log("errorEmail", errorEmail)
   return (
     <div className="account-body accountbg">
       <div className="container">

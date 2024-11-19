@@ -190,7 +190,7 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
           }, 3000);
         }
         else {
-          console.log(response)
+        
           response.data == "W" ?
             sweatalert.fire({
               icon: 'warning',

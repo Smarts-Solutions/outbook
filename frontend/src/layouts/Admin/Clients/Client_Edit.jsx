@@ -569,7 +569,7 @@ const ClientEdit = () => {
   const validateField = (index, field, value, Type) => {
     const errors = ErrorsArr[Type - 1];
     const newErrors = [...errors];
- 
+
     switch (field) {
       case "first_name":
       case "last_name":
@@ -642,7 +642,7 @@ const ClientEdit = () => {
           });
           setTimeout(() => {
             sessionStorage.setItem('activeTab', location.state.activeTab);
-           
+
             window.history.back();
           }, 1500);
         } else {
@@ -838,7 +838,7 @@ const ClientEdit = () => {
                 <button
                   type="button"
                   className="btn p-0"
-                  onClick={()=>{
+                  onClick={() => {
                     sessionStorage.setItem('activeTab', location.state.activeTab);
                     window.history.back()
                   }}
@@ -872,7 +872,7 @@ const ClientEdit = () => {
                                       <span style={{ color: "red" }}>*</span>
                                     </label>
                                     <select
-                                  
+
                                       className="form-select mb-3"
                                       value={selectClientType}
                                       disabled={true}
@@ -2870,7 +2870,7 @@ const ClientEdit = () => {
                         <button
                           type="button"
                           className="btn btn-secondary"
-                          onClick={()=>{
+                          onClick={() => {
                             sessionStorage.setItem('activeTab', location.state.activeTab);
                             window.history.back()
                           }}

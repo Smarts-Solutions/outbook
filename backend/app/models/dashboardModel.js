@@ -4,7 +4,7 @@ const { SatffLogUpdateOperation, generateNextUniqueCode } = require('../utils/he
 
 const getDashboardData = async (dashboard) => {
   const { staff_id } = dashboard;
-  console.log("staff_id ", staff_id)
+ 
   try {
     const QueryRole = `
     SELECT

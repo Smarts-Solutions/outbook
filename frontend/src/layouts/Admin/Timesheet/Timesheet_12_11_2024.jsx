@@ -434,7 +434,7 @@ const Timesheet = () => {
     if (parseFloat(value) > 23.59) {
       sweatalert.fire({
         icon: 'warning',
-        title: 'The time cannot exceed 23.59.',
+        title: 'Total hours in a day cannot exceed 24',
         timerProgressBar: true,
         showConfirmButton: true,
         timer: 3000,

@@ -71,6 +71,12 @@ const Status = () => {
 
   const columns = [
     {
+      name : "S.No",
+      cell: (row, index) => <div>{index + 1}</div>,
+      width:"100px",
+      sortable: true,
+    },
+    {
       name: "Detailed Status",
       
       cell: (row) => (

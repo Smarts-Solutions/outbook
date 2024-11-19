@@ -62,10 +62,10 @@ const Access = () => {
         try {
             const req = { "action": "get", "role_id": val.id };
             const data = { req, authToken: token };
-            console.log("data", data);
+         
             const response = await dispatch(GetAccess(data)).unwrap();
             if (response.status) {
-                console.log("response", response.data);
+               
                 const assignedItems = response.data.filter((item) => {
                     item.items.forEach((data) => {
                         if (data.is_assigned === 1) {
@@ -167,7 +167,7 @@ const Access = () => {
     }, []);
     
   
-    console.log("roleDataAll" , accessData.data);
+ 
 
     return (
 

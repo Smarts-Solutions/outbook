@@ -13,10 +13,22 @@ const AddInternal = async (Internal) => {
   try {
     const [check] = await pool.query(checkQuery, [name]);
     if (check.length > 0) {
-      return { status: false, message: 'Internal task already exists.' };
+      return { status: false, message: 'Internal Job/Project already exists' };
     }
     const [result] = await pool.execute(query, [name]);
-    return { status: true, message: 'Internal created successfully.', data: result.insertId };
+    const currentDate = new Date();
+    await SatffLogUpdateOperation(
+      {
+        staff_id: Internal.StaffUserId,
+        ip: Internal.ip,
+        date: currentDate.toISOString().split("T")[0],
+        module_name: "Internal",
+        log_message: `created Internal Job/Project in ${Internal.name}`,
+        permission_type: "created",
+        module_id: result.insertId,
+      }
+    );
+    return { status: true, message: 'Internal Job/Project created successfully', data: result.insertId };
   } catch (err) {
     console.error('Error inserting data:', err);
     throw err;
@@ -66,7 +78,7 @@ const removeInternal = async (Internal) => {
             ip: ip,
             date: currentDate.toISOString().split('T')[0],
             module_name: "Internal",
-            log_message: `Deleted Internal ${existName.name}`,
+            log_message: `Deleted Internal Job/Project ${existName.name}`,
             permission_type: "deleted",
             module_id:id
         }
@@ -96,8 +108,8 @@ const modifyInternal = async (Internal) => {
       status_change = "Activate"
     }
     let log_message = existStatus.status === status ?
-        `edited internal ${name}`:
-        `changes the internal status ${status_change} ${name}`
+        `edited Internal Job/Project ${name}`:
+        `changes the Internal Job/Project status ${status_change} ${name}`
 
     const [result] = await pool.query(query, [name,status, id]);
     if(result.changedRows > 0){
@@ -115,7 +127,7 @@ const modifyInternal = async (Internal) => {
       );
     }
 
-    return { status: true, message: 'Internal updated successfully.', data: result.insertId };
+    return { status: true, message: 'Internal Job/Project updated successfully', data: result.insertId };
   }
   catch (err) {
     console.error('Error updating data:', err);

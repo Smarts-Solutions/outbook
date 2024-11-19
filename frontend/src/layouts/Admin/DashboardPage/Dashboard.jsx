@@ -15,12 +15,9 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const [dashboard, setDashboard] = useState([]);
   const [getActiviyLog, setActivityLog] = useState([]);
-
   const currentDate = new Date();
-
   // State to store the selected tab
   const [selectedTab, setSelectedTab] = useState("this-week");
-
   // Function to handle dropdown change
   const handleTabChange = (event) => {
     setSelectedTab(event.target.value);
@@ -48,7 +45,6 @@ const Dashboard = () => {
     await dispatch(DashboardData(data))
       .unwrap()
       .then((res) => {
-        console.log("res - ",res);
         if (res.status) {
           setDashboard(res.data);
         } else {

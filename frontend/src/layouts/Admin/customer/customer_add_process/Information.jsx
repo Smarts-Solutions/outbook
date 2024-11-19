@@ -938,7 +938,7 @@ const Information = ({ id, pageStatus }) => {
   //       console.error("Error sending data to API:", error);
   //     });
   // };
-  // console.log("getCompanyDetails", getCompanyDetails)
+
 
 
   return (

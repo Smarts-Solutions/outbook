@@ -34,6 +34,9 @@ const JobLogs = () => {
     setAccessDataJob(updatedAccess);
   }, []);
 
+  useEffect(() => {
+    
+  }, [tab]);
 
 
   return (
@@ -56,7 +59,7 @@ const JobLogs = () => {
                         aria-controls="job-information"
                         aria-selected="true"
                         onClick={() => {
-                          // setSelectedTab('job information') 
+                          setSelectedTab('job information');
                           sessionStorage.setItem('activeTab2', 'job information');
                         }
                           }
@@ -76,7 +79,7 @@ const JobLogs = () => {
                         aria-controls="task-timesheet"
                         aria-selected="false"
                         onClick={() => {
-                          // setSelectedTab('task timesheet'); 
+                          setSelectedTab('task timesheet'); 
                           sessionStorage.setItem('activeTab2', 'task timesheet');}}
                       >
                         <i className='fa-solid fa-clock' />
@@ -94,7 +97,7 @@ const JobLogs = () => {
                         aria-controls="job-timeline"
                         aria-selected="false"
                         onClick={() => {
-                          // setSelectedTab('job timeline'); 
+                          setSelectedTab('job timeline');
                           sessionStorage.setItem('activeTab2', 'job timeline');}}
                       >
                         <i className='fa-solid fa-table' />
@@ -112,7 +115,7 @@ const JobLogs = () => {
                         aria-controls="missing-logs"
                         aria-selected="false"
                         onClick={() => {
-                          // setSelectedTab('missing logs');
+                          setSelectedTab('missing logs');
                            sessionStorage.setItem('activeTab2', 'missing logs');}}
                       >
                         <i className='fa-solid fa-exclamation-triangle' />
@@ -130,7 +133,7 @@ const JobLogs = () => {
                         aria-controls="queries"
                         aria-selected="false"
                         onClick={() => {
-                          // setSelectedTab('queries');
+                          setSelectedTab('queries');
                            sessionStorage.setItem('activeTab2', 'queries');}}
                       >
                         <i className='fa-solid fa-question-circle' />
@@ -148,7 +151,7 @@ const JobLogs = () => {
                         aria-controls="drafts"
                         aria-selected="false"
                         onClick={() => {
-                          // setSelectedTab('drafts'); 
+                          setSelectedTab('drafts'); 
                           sessionStorage.setItem('activeTab2', 'drafts');}}
                       >
                         <i className='fa-solid fa-file-alt' />
@@ -166,7 +169,7 @@ const JobLogs = () => {
                         aria-controls="documents"
                         aria-selected="false"
                         onClick={() => {
-                          // setSelectedTab('documents');
+                          setSelectedTab('documents');
                            sessionStorage.setItem('activeTab2', 'documents');}}
                       >
                         <i className='fa-solid fa-folder' />
@@ -195,10 +198,10 @@ const JobLogs = () => {
           </div>
         </div>
       </div>
+    
 
       {
         location?.state?.goto == "report" ? "" :
-
           <Hierarchy show={location?.state?.goto == "Customer" ? ["Customer", "Job", selectedTab] : ["Customer", "Client", "Job", selectedTab]} active={location.state.goto == "Customer" ? 2 : 3} data={location.state.data} />
       }
 

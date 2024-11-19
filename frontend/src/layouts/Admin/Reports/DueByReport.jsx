@@ -22,15 +22,14 @@ const DueByReport = () => {
                 if (res.status) {
                     setDueByReport(res.data);
                     
-                    console.log(res.data[0].due_within_1_month);
                     
-                    const jsonString = res.data[0].due_within_1_month.toString();
+                    const jsonString = res.data[0].due_within_1_months.toString();
 
 // Parse the string into a JSON object
 const jsonObject = JSON.parse(jsonString);
 
 // Now you can access the properties of the parsed JSON object
-console.log(jsonObject);
+
                 }
                 else {
                     setDueByReport([]);
@@ -52,15 +51,15 @@ console.log(jsonObject);
             
         { name: 'Due Date Within 1 Month(s)', 
             cell: (row) => (
-                row.due_within_1_month.count > 0 ? (
+                row.due_within_1_months.count > 0 ? (
                   <div 
                     style={{ color: 'rgb(38, 189, 240)', cursor: 'pointer' }} 
-                    onClick={() => handleOnClick(row.due_within_1_month.job_ids)}
+                    onClick={() => handleOnClick(row.due_within_1_months.job_ids)}
                   >
-                    {JSON.parse(row.due_within_1_month.count)}
+                    {JSON.parse(row.due_within_1_months.count)}
                   </div>
                 ) : (
-                  <div>{row.due_within_1_month.count}</div>
+                  <div>{row.due_within_1_months.count}</div>
                 )
               ),
              sortable: true,

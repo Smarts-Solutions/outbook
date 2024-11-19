@@ -65,6 +65,7 @@ const Setting = () => {
     }
   }, [accessData]);
 
+
   const token = JSON.parse(localStorage.getItem("token"));
   const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
   const [personRoleDataAll, setPersonRoleDataAll] = useState({
@@ -721,7 +722,7 @@ const Setting = () => {
   ];
 
   const columnPersonRole = [
-    { name: "Service Name", selector: (row) => row.name, sortable: true },
+    { name: "Role Name", selector: (row) => row.name, sortable: true },
     {
       name: "Status",
       cell: (row) => (
@@ -1159,7 +1160,6 @@ const Setting = () => {
   const handleModalChange = (e) => {
     const { name, value } = e.target;
 
-    console.log(name, value);
 
     if (name === "hours" || name === "minutes") {
       if (name == "minutes" && value > 59) {
@@ -1754,11 +1754,7 @@ const Setting = () => {
             default:
               break;
           }
-          sweatalert.fire({
-            title: "Deleted!",
-            text: "Your file has been deleted.",
-            icon: "success",
-          });
+        
         }
       });
   };
@@ -1781,6 +1777,8 @@ const Setting = () => {
     { id: "9", label: "Checklist", icon: "fas fa-check-square" },
     { id: "10", label: "Internal Job/Project", icon: "fas fa-lock" },
   ];
+
+
 
   return (
     <>
@@ -2214,44 +2212,18 @@ const Setting = () => {
                         </td>
                         <td
                           className={
-                            viewData && viewData.status === 1
+                            viewData && viewData?.status == 1
                               ? "text-success"
                               : "text-danger"
                           }
                         >
-                          {viewData && viewData.status === 1
+                          {viewData && viewData?.status == 1
                             ? "Active"
                             : "Inactive"}
                         </td>
                       </tr>
                     </tbody>
                   </table>
-                  {/* <div className="col-md-6">
-                    <label htmlFor="customername-field" className="form-label">
-                      Check List Name
-                    </label>
-                  </div>
-                  <div className="col-md-6" style={{ fontWeight: 600 }}>
-                    <span className="text-muted">{viewData && viewData?.check_list_name}</span>
-                  </div>
-               
-                  <div className="col-md-6">
-                    <label htmlFor="customername-field" className="form-label">
-                      Task Name
-                    </label>
-                  </div>
-                  <div className="col-md-6" style={{ fontWeight: 600 }}>
-                    {viewData && viewData.task?.map(task => task.task_name).join(',  ')}
-                  </div>
-                 
-                  <div className="col-md-6">
-                    <label htmlFor="customername-field" className="form-label">
-                      status
-                    </label>
-                  </div>
-                  <div className="col-md-6" style={{ fontWeight: 600 }}>
-                    <span className="text-muted">{viewData && viewData?.status == 1 ? "Active" : "Inactvie"}</span>
-                  </div> */}
                 </div>
               </div>
             </CommonModal>

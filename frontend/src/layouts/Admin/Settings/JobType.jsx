@@ -13,6 +13,8 @@ import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal"
 import { useFormik } from "formik";
 import * as XLSX from "xlsx";
 
+
+
 const Setting = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const location = useLocation();
@@ -28,8 +30,7 @@ const Setting = () => {
   const [taskInput, setTaskInput] = useState("");
   const [tasks, setTasks] = useState([]);
   const [ViewTaskData, setViewTaskData] = useState([]);
-
-
+  
   const JobTypeData = async (req) => {
     if (location.state.Id) {
       req = {
@@ -58,11 +59,19 @@ const Setting = () => {
               JobTypeData({ action: "get" });
             }, 2000);
           } else {
+            if(response.key == "warning"){
+              sweatalert.fire({
+                title: response.message,
+                icon: "warning",
+                timer: 2000,
+              });
+            }else{
             sweatalert.fire({
               title: response.message,
               icon: "error",
               timer: 2000,
             });
+            }
           }
         }
       })
@@ -76,8 +85,7 @@ const Setting = () => {
   }, []);
 
   const handleViewTask = async (row) => {
-    // const req = {service_id: location.state.Id, job_type_id: row.id};
-    const req = { service_id: 5, job_type_id: 3 };
+    const req = { service_id: location?.state?.Id, job_type_id: row?.id };
 
     const data = { req: req, authToken: token }
     await dispatch(GETTASKDATA(data))
@@ -138,7 +146,7 @@ const Setting = () => {
               setJobTypeId(row);
             }}
           >
-           <i className="fa fa-plus pe-1"></i>  Add Task
+            <i className="fa fa-plus pe-1"></i>  Add Task
           </button>
         </div>
       ),
@@ -249,17 +257,17 @@ const Setting = () => {
           placeholder: "Enter Job Type",
           value: data.type,
         },
-        {
-          type: "select",
-          name: "status",
-          label: "Status",
-          placeholder: "Select Status",
-          value: data.status === "1" ? "1" : "0",
-          options: [
-            { label: "Active", value: "1" },
-            { label: "Deactive", value: "0" },
-          ],
-        },
+        // {
+        //   type: "select",
+        //   name: "status",
+        //   label: "Status",
+        //   placeholder: "Select Status",
+        //   value: data.status === "1" ? "1" : "0",
+        //   options: [
+        //     { label: "Active", value: "1" },
+        //     { label: "Deactive", value: "0" },
+        //   ],
+        // },
       ],
       title: "Job Type",
 
@@ -300,6 +308,33 @@ const Setting = () => {
     setIsModalOpen(false);
   };
 
+  // const handleDelete = (data) => {
+  //   sweatalert
+  //     .fire({
+  //       title: "Are you sure?",
+  //       text: "You won't be able to revert this!",
+  //       icon: "warning",
+  //       showCancelButton: true,
+  //       confirmButtonColor: "#3085d6",
+  //       cancelButtonColor: "#d33",
+  //       confirmButtonText: "Yes, delete it!",
+  //     })
+  //     .then((result) => {
+  //       if (result.isConfirmed) {
+  //         const req = {
+  //           action: "delete",
+  //           id: data.id,
+  //         };
+  //         JobTypeData(req);
+  //         sweatalert.fire({
+  //           title: "Deleted!",
+  //           text: "Your file has been deleted.",
+  //           icon: "success",
+  //         });
+  //       }
+  //     });
+  // };
+
   const handleDelete = (data) => {
     sweatalert
       .fire({
@@ -311,6 +346,7 @@ const Setting = () => {
         cancelButtonColor: "#d33",
         confirmButtonText: "Yes, delete it!",
       })
+
       .then((result) => {
         if (result.isConfirmed) {
           const req = {
@@ -322,9 +358,13 @@ const Setting = () => {
             title: "Deleted!",
             text: "Your file has been deleted.",
             icon: "success",
+
           });
+
         }
+
       });
+
   };
 
   const handleInputChange = (e) => {
@@ -338,25 +378,25 @@ const Setting = () => {
     }
   };
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
+  // const handleFileUpload = (e) => {
+  //   const file = e.target.files[0];
+  //   const reader = new FileReader();
 
-    reader.onload = (event) => {
-      const data = event.target.result;
-      const workbook = XLSX.read(data, { type: "binary" });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+  //   reader.onload = (event) => {
+  //     const data = event.target.result;
+  //     const workbook = XLSX.read(data, { type: "binary" });
+  //     const sheetName = workbook.SheetNames[0];
+  //     const worksheet = workbook.Sheets[sheetName];
+  //     const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-      const extractedTasks = jsonData.map(
-        (row) => row.Task || row.task || row["Task Name"]
-      );
-      setTasks([...tasks, ...extractedTasks]);
-    };
+  //     const extractedTasks = jsonData.map(
+  //       (row) => row.Task || row.task || row["Task Name"]
+  //     );
+  //     setTasks([...tasks, ...extractedTasks]);
+  //   };
 
-    reader.readAsBinaryString(file);
-  };
+  //   reader.readAsBinaryString(file);
+  // };
 
   const handleSaveTask = async () => {
     let req = {
@@ -364,6 +404,15 @@ const Setting = () => {
       job_type_id: getJobTypeId.id,
       service_id: location.state.Id,
     };
+
+    if (tasks.length == 0) {
+      sweatalert.fire({
+        title: "Please at least one task",
+        icon: "warning",
+        timer: 2000,
+      });
+      return;
+    }
 
     await dispatch(AddTask({ req, authToken: token }))
       .unwrap()
@@ -390,6 +439,14 @@ const Setting = () => {
       .catch((error) => {
         return;
       });
+  };
+
+
+  const handleDeleteTask = (e) => {
+    const index = e.target.parentNode.parentNode.parentNode.rowIndex;
+    let temp = [...tasks];
+    temp.splice(index - 1, 1);
+    setTasks(temp);
   };
 
   return (
@@ -456,6 +513,8 @@ const Setting = () => {
         handleClose={() => {
           setShowAddTask(false);
           formik.resetForm();
+          setTaskInput("");
+          setTasks([]);
         }}
       >
         <div className="">
@@ -482,8 +541,8 @@ const Setting = () => {
                     placeholder="Enter Task Name"
                     id="firstNameinput"
                     autoFocus
-                    value={taskInput} // Bind input to state
-                    onChange={handleInputChange} // Handle input change
+                    value={taskInput}
+                    onChange={handleInputChange}
                   />
                 </div>
               </div>
@@ -491,7 +550,7 @@ const Setting = () => {
                 <div className="remove">
                   <button
                     className="btn  btn-info"
-                    onClick={handleAddTask} // Call handleAddTask when clicked
+                    onClick={handleAddTask}
                   >
                     <i className="fa fa-plus pe-2"> </i>
                     Add
@@ -499,7 +558,7 @@ const Setting = () => {
                 </div>
               </div>
             </div>
-            <h6 className="or text-center">OR</h6>
+            {/* <h6 className="or text-center">OR</h6>
             <div className="row align-items-center">
               <div className="mb-3 col-lg-12">
                 <label htmlFor="firstNameinput" className="form-label">
@@ -511,10 +570,10 @@ const Setting = () => {
                   placeholder="Job Name"
                   id="firstNameinput"
                   accept=".xlsx, .xls, .csv"
-                  onChange={handleFileUpload} // Handle file upload
+                  onChange={handleFileUpload} 
                 />
               </div>
-            </div>
+            </div> */}
           </div>
           <br />
           <div
@@ -536,15 +595,10 @@ const Setting = () => {
                 {tasks.map((task, index) => (
                   <tr className="tabel_new" key={index}>
                     <td>{task}</td>
-
                     <td className="tabel_left">
                       <div className="d-flex gap-2">
                         <div className="remove">
-                          <button
-
-                            className="delete-icon "
-                          >
-
+                          <button className="delete-icon" onClick={(e) => handleDeleteTask(e)}>
                             <i className="ti-trash text-danger" />
                           </button>
                         </div>
@@ -577,25 +631,13 @@ const Setting = () => {
         hideBtn={true}
         handleClose={() => {
           setViewtask(false);
+
         }}
       >
-        <div className="modal-body">
-          <div className="mb-3" id="modal-id" style={{ display: "none" }}>
-            <label htmlFor="id-field" className="form-label">
-              ID
-            </label>
-            <input
-              type="text"
-              id="id-field"
-              className="form-control"
-              placeholder="ID"
-              readOnly
-            />
-          </div>
-
+        <div className="">
           <div
-            style={{ border: "2px hidden black", margin: "5px" }}
-            className="table-responsive table-card mt-3 mb-1"
+            style={{ border: "2px hidden black" }}
+            className="table-responsive table-card mb-1"
           >
             <table
               className="table align-middle table-nowrap"
@@ -603,53 +645,21 @@ const Setting = () => {
             >
               <thead className="table-light">
                 <tr>
-                  <th className="">Task</th>
-
-                  {/* <th className="tabel_left">Status</th> */}
+                  <th className="">SR. No</th>
+                  <th className="tabel_left">Task</th>
                 </tr>
               </thead>
               <tbody className="list form-check-all">
-                {tasks.map((task, index) => (
+                {ViewTaskData?.map((task, index) => (
                   <tr className="tabel_new" key={index}>
-                    <td>{task}</td>
-
-                    {/* <td className="tabel_left">
-                      <div className="d-flex gap-2">
-                        <div className="remove">
-                          <a
-                            style={{
-                              backgroundColor: "rgb(75, 175, 75)",
-                              color: "white",
-                              width: "60px",
-                              fontSize: "12px",
-                            }}
-                            className="btn btn-sm "
-                          >
-                            Enable
-                          </a>
-                        </div>
-                      </div>
-                    </td> */}
+                    <td>{index + 1}</td>
+                    <td>{task.name}</td>
                   </tr>
                 ))}
-                <tr className="tabel_new" >
-                  <td className="text-center">Task not created</td>
 
-
-                </tr>
               </tbody>
             </table>
           </div>
-          {/* <div className="col-lg-12">
-            <div className="remove" style={{ float: "right" }}>
-              <button
-                className="btn btn-info text-white "
-                onClick={(e) => handleSaveTask()}
-              >
-                Submit
-              </button>
-            </div>
-          </div> */}
         </div>
       </CommanModal>
     </div>

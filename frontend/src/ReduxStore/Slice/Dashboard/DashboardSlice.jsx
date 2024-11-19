@@ -21,9 +21,8 @@ export const DashboardData = createAsyncThunk("getDashboardData", async (data) =
 export const ActivityLog = createAsyncThunk("getDashboardActivityLog", async (data) => {
     try {
         const { req, authToken } = data;
-        
         var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-
+      
         const updatedReq = {
             ...req,
             ip: IP_Data,  

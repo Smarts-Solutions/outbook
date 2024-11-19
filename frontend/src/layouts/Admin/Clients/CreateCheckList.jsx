@@ -15,7 +15,6 @@ const CreateCheckList = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
-  const navigate = useNavigate();
   const [selectedClientType, setSelectedClientType] = useState([]);
   const [tasks, setTasks] = useState([
     { task_id: "", task_name: "", budgeted_hour: "" },
@@ -130,8 +129,6 @@ const CreateCheckList = () => {
   const handleTaskChange = (index, e) => {
     const { name, value } = e.target;
     const newTasks = [...tasks];
-
-    // If the name is hours or minutes, handle them separately
     if (name === "hours" || name === "minutes") {
       const hours = newTasks[index].budgeted_hour?.hours || "";
       const minutes = newTasks[index].budgeted_hour?.minutes || "";
@@ -172,11 +169,11 @@ const CreateCheckList = () => {
 
   const formatBudgetedHours = () => {
     return tasks.map((task) => {
-      const hours = task.budgeted_hour?.hours || ""; // Fallback to "00" if empty
-      const minutes = task.budgeted_hour?.minutes || ""; // Fallback to "00" if empty
+      const hours = task.budgeted_hour?.hours || ""; 
+      const minutes = task.budgeted_hour?.minutes || ""; 
       return {
         ...task,
-        budgeted_hour: `${hours}:${minutes}`, // Combine into HH:MM format
+        budgeted_hour: `${hours}:${minutes}`, 
       };
     });
   };
@@ -238,6 +235,11 @@ const CreateCheckList = () => {
       return;
     }
 
+    if(selectedClientType.length==0){
+      setErrors({ ...errors, client_type_id: "Please Select Client Type" });
+      return;
+    }
+
     tasks.forEach((task, index) => {
       if (!task.task_name) {
         validationErrors[`task_name_${index}`] = "Task Name is required";
@@ -249,7 +251,7 @@ const CreateCheckList = () => {
         task.budgeted_hour.minutes === ""
       ) {
         validationErrors[`budgeted_hour_${index}`] =
-          "Budgeted Hour is required";
+          "Budgeted Time is required";
       }
     });
 
@@ -273,9 +275,7 @@ const CreateCheckList = () => {
       })),
     };
 
-
-
-
+    
     const data = { req, authToken: token };
     await dispatch(addChecklists(data))
       .unwrap()
@@ -409,6 +409,7 @@ const CreateCheckList = () => {
                     />
                   </div>
                   {errors.client_type_id && (
+                    
                     <p className="error-text">{errors.client_type_id}</p>
                   )}
                 </div>
@@ -461,7 +462,7 @@ const CreateCheckList = () => {
 
           <div className="mt-4">
             {tasks.map((task, index) => (
-              <div key={index} className="row  mt-4 ">
+              <div key={task.task_id} className="row  mt-4 ">
                 <div className="col-lg-5">
                   <div>
                     <label className="form-label">Task Name</label>
