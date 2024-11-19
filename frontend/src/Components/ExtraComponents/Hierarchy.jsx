@@ -2,7 +2,7 @@ import React from 'react'
 import {useNavigate} from 'react-router-dom'
 
 const Hierarchy = ({ show, active, data , NumberOfActive }) => {
-   
+
   
     const navigate = useNavigate()
     const fun = (navigateTo , active) => {
@@ -30,6 +30,7 @@ const Hierarchy = ({ show, active, data , NumberOfActive }) => {
         }
   
     }
+
     return (
         <div>
             <div className="row">
@@ -39,7 +40,6 @@ const Hierarchy = ({ show, active, data , NumberOfActive }) => {
                             <span className="breadcrumb__inner">
                                 <span className="breadcrumb__title">{show[0]}</span>
                                 <span className="breadcrumb__desc">{ data?.customer?.trading_name}</span>
-                                {/* {active==1 ?  <span>{NumberOfActive}</span> : ""  } */}
                             </span>
                         </a>
                         <a  className={`${active>=2 ? 'active' : ''} col-lg-3`}  onClick={(e)=>fun(2 , active)}>
@@ -61,7 +61,6 @@ const Hierarchy = ({ show, active, data , NumberOfActive }) => {
                             show.length == 4 ? <a  className={`${active>=4 ? 'active' : ''} col-3`} onClick={(e)=>fun(4 , active)}>
                                 <span className="breadcrumb__inner">
                                     <span className="breadcrumb__title">{show[3]}</span>
-                                     
                                 </span>
                             </a> : ''
                         }

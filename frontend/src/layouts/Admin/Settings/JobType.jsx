@@ -30,10 +30,7 @@ const Setting = () => {
   const [taskInput, setTaskInput] = useState("");
   const [tasks, setTasks] = useState([]);
   const [ViewTaskData, setViewTaskData] = useState([]);
-
-  console.log("ViewTaskData", ViewTaskData);
-
-
+  
   const JobTypeData = async (req) => {
     if (location.state.Id) {
       req = {

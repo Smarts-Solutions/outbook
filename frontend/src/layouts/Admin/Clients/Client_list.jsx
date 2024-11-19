@@ -108,6 +108,7 @@ const ClientList = () => {
         GetAllClientData();
       }
       else if (activeTab === "job") {
+        GetAllClientData();
         JobDetails();
       }
     }
@@ -541,7 +542,7 @@ const ClientList = () => {
   };
 
   const GetAllClientData = async () => {
-    const req = { action: "get", customer_id: location.state.id };
+    const req = { action: "get", customer_id: location?.state?.id};
     const data = { req: req, authToken: token };
     await dispatch(ClientAction(data))
       .unwrap()
@@ -661,7 +662,8 @@ const ClientList = () => {
                 showConfirmButton: false,
                 timer: 1500,
               });
-              type === "job" ? JobDetails() : GetAllClientData();
+              JobDetails()
+              GetAllClientData();
             } else {
               sweatalert.fire({
                 title: "Failed",
@@ -710,6 +712,8 @@ const ClientList = () => {
     });
   };
 
+
+  { console.log("ClientData", ClientData) }
   return (
     <div className="container-fluid">
       <div className="row ">
@@ -760,7 +764,7 @@ const ClientList = () => {
                         </>
                       ) : (ClientData?.length > 0 && (getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN")) && activeTab === "job" ? (
                         <>
-                        {console.log("ClientData", ClientData)}
+
                           <div className="btn btn-info text-white float-end blue-btn" onClick={() =>
                             navigate("/admin/createjob", {
                               state: { customer_id: location.state.id, goto: "Customer", activeTab: activeTab },

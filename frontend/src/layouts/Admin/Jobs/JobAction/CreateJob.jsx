@@ -632,7 +632,6 @@ const CreateJob = () => {
     jobModalSetStatus(false);
   };
 
-  console.log("budgetedHours", budgetedHours);
 
   return (
     <div>

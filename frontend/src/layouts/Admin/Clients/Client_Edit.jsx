@@ -569,7 +569,7 @@ const ClientEdit = () => {
   const validateField = (index, field, value, Type) => {
     const errors = ErrorsArr[Type - 1];
     const newErrors = [...errors];
- 
+
     switch (field) {
       case "first_name":
       case "last_name":
@@ -642,7 +642,7 @@ const ClientEdit = () => {
           });
           setTimeout(() => {
             sessionStorage.setItem('activeTab', location.state.activeTab);
-           
+
             window.history.back();
           }, 1500);
         } else {
@@ -838,7 +838,7 @@ const ClientEdit = () => {
                 <button
                   type="button"
                   className="btn p-0"
-                  onClick={()=>{
+                  onClick={() => {
                     sessionStorage.setItem('activeTab', location.state.activeTab);
                     window.history.back()
                   }}
@@ -872,7 +872,7 @@ const ClientEdit = () => {
                                       <span style={{ color: "red" }}>*</span>
                                     </label>
                                     <select
-                                  
+
                                       className="form-select mb-3"
                                       value={selectClientType}
                                       disabled={true}
@@ -2224,42 +2224,9 @@ const ClientEdit = () => {
                                               <div className="card pricing-box p-4 m-2 mt-0">
                                                 <div className="row">
                                                   <div className="col-lg-12">
-                                                    <div
-                                                      className="form-check form-switch form-switch-md mb-3 d-flex justify-content-end"
-                                                      dir="ltr"
-                                                    >
-                                                      {/* <div>
-                                                        <input
-                                                          type="checkbox"
-                                                          className="form-check-input"
-                                                          id={`customSwitchsizemd-${index}`}
-                                                          checked={
-                                                            contact.authorised_signatory_status
-                                                          }
-                                                          onChange={(e) =>
-                                                            handleContactInputChange(
-                                                              index,
-                                                              "authorised_signatory_status",
-                                                              e.target.checked,
-                                                              2
-                                                            )
-                                                          }
-                                                          defaultChecked={
-                                                            index === 0 ||
-                                                            index === 1
-                                                          }
-                                                          disabled={
-                                                            partnershipContacts.length ===
-                                                              2
-                                                              ? index === 0 ||
-                                                              index === 1
-                                                              : false
-                                                          }
-                                                        />
-                                                        <label className="form-check-label">
-                                                          Authorised Signatory
-                                                        </label>
-                                                      </div> */}
+                                                      <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
+                                                    <div className="form-check form-switch form-switch-md mb-3 d-flex justify-content-end" dir="ltr"  >
+
                                                       {index !== 0 &&
                                                         index !== 1 && (
                                                           <div>
@@ -2911,7 +2878,7 @@ const ClientEdit = () => {
                         <button
                           type="button"
                           className="btn btn-secondary"
-                          onClick={()=>{
+                          onClick={() => {
                             sessionStorage.setItem('activeTab', location.state.activeTab);
                             window.history.back()
                           }}

@@ -306,7 +306,6 @@ const StaffPage = () => {
           }`,
       };
 
-      console.log("ww", req);
 
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;

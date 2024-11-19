@@ -34,7 +34,7 @@ const JobLogs = () => {
     setAccessDataJob(updatedAccess);
   }, []);
 
-
+  console.log("selectedTab", selectedTab)
 
   return (
     <div className='container-fluid'>
@@ -56,7 +56,6 @@ const JobLogs = () => {
                         aria-controls="job-information"
                         aria-selected="true"
                         onClick={() => {
-                          // setSelectedTab('job information') 
                           sessionStorage.setItem('activeTab2', 'job information');
                         }
                           }
@@ -195,6 +194,7 @@ const JobLogs = () => {
           </div>
         </div>
       </div>
+    
 
       {
         location?.state?.goto == "report" ? "" :
