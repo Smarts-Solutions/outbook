@@ -248,7 +248,7 @@ const accessRolePermissions = async (data) => {
 
          const AddPermissionString = addPermission.length>0 ? 'Add Permission ('+addPermission.join(', ') +')' : '';
 
-        const DeletePermissionString = deletePermission.length>0 ? 'Delete Permission ('+deletePermission.join(', ') +')' : '';
+        const DeletePermissionString = deletePermission.length>0 ? 'Remove Permission ('+deletePermission.join(', ') +')' : '';
 
             if(AddPermissionString || DeletePermissionString){
                 const currentDate = new Date();

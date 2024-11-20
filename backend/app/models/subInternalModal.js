@@ -22,7 +22,7 @@ const AddSubInternal = async (subInternal) => {
               ip: subInternal.ip,
               date: currentDate.toISOString().split("T")[0],
               module_name: "Internal",
-              log_message: `created Internal Task in ${name}`,
+              log_message: `created Internal Task ${name}`,
               permission_type: "created",
               module_id: result.insertId,
             }

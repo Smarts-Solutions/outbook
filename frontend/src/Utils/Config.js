@@ -6,6 +6,8 @@ export const base_url = `http://localhost:2222/`;
 // export const base_url = `https://outbooks.tradestreet.in/backend/`;
 //  export const base_url = `${window.location.origin}/backend/`
 
+
+
  
 
  
