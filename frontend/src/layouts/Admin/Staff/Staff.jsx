@@ -600,21 +600,8 @@ const StaffPage = () => {
               <div className="col-md-5">
               </div>
               <div className="col-md-7">
-                <div className="d-flex justify-content-end">
-                  <div className="form-group w-50">
-                    <select
-                      className="form-control"
-                      id="tabSelect"
-                      value={activeTab}
-                      onChange={(e) => setActiveTab(e.target.value)}
-                    >
-                      {tabs.map((tab) => (
-                        <option key={tab.id} value={tab.id}>
-                          {tab.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                <div className="d-flex justify-content-end mb-4">
+                  
                   <div className="w-25">
                     {showStaffInsertTab && (
                       <button
