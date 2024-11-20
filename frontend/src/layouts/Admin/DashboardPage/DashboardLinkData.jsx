@@ -16,12 +16,9 @@ const JobStatus = () => {
   const role = JSON.parse(localStorage.getItem("role"));
   const [allLinkedData, setAllLinkedData] = useState([]);
 
-
   useEffect(() => {
     GetLinkedData();
   }, []);
-
-
 
   const [getAccessData, setAccessData] = useState({
     insert: 0,
@@ -29,9 +26,6 @@ const JobStatus = () => {
     delete: 0,
     client: 0,
   });
-
-
-
 
   const accessData =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
@@ -122,7 +116,7 @@ const JobStatus = () => {
               timer: 1000,
               showConfirmButton: false,
             });
-            GetLinkedData(); 
+            GetLinkedData();
           } else {
             Swal.fire({
               title: "Error",
@@ -224,7 +218,7 @@ const JobStatus = () => {
 
 
 
-  const columnsCustomer = [ 
+  const columnsCustomer = [
     {
       name: "Trading Name",
       cell: (row) => (
@@ -232,10 +226,10 @@ const JobStatus = () => {
           style={{
             overflow: "hidden",
             textOverflow: "ellipsis",
-            whiteSpace: "nowrap", 
+            whiteSpace: "nowrap",
           }}
         >
-          {(role === "ADMIN" || role === "SUPERADMIN") && row.status==1 ? (
+          {(role === "ADMIN" || role === "SUPERADMIN") && row.status == 1 ? (
             <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -244,7 +238,7 @@ const JobStatus = () => {
               {row.trading_name}
             </a>
           ) : (
-            getAccessData.client == 1 && row.status==1 ? <a
+            getAccessData.client == 1 && row.status == 1 ? <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
               title={row.trading_name}
@@ -256,7 +250,7 @@ const JobStatus = () => {
       ),
       selector: (row) => row.trading_name,
       sortable: true,
-      
+
     },
     {
       name: "Customer Code",
@@ -302,25 +296,25 @@ const JobStatus = () => {
       cell: (row) => (
         <div>
           <div>
-          {row.form_process === "4" ? 
-           <select
-           className="form-select form-control"
-           value={row.status}
-           onChange={(e) => handleChangeStatus(e, row)}
-         >
-            <option value="0" className="text-danger">Deactive</option>
-            <option value="1" className="text-success">Active</option>
-         </select>
-          : (
-            <span className="text-warning">Inprogress</span>
-          )}
+            {row.form_process === "4" ?
+              <select
+                className="form-select form-control"
+                value={row.status}
+                onChange={(e) => handleChangeStatus(e, row)}
+              >
+                <option value="0" className="text-danger">Deactive</option>
+                <option value="1" className="text-success">Active</option>
+              </select>
+              : (
+                <span className="text-warning">Inprogress</span>
+              )}
 
-           
+
           </div>
         </div>
       ),
       sortable: true,
-     
+
     },
 
   ];
@@ -433,40 +427,39 @@ const JobStatus = () => {
                 <div className='tab-title col-lg-8'>
                   <h3>{location?.state?.req?.heading}</h3>
                 </div>
-                <div className='col-lg-4'>
-
-                <div className="btn btn-info text-white float-end blue-btn"
-                  onClick={() => { window.history.back() }}
-                >
-                  <i className="fa fa-arrow-left pe-1" /> Back
+                <div className='col-lg-4 d-flex justify-content-end'>
+                  <div className="btn btn-info text-white blue-btn"
+                    onClick={() => { window.history.back() }}
+                  >
+                    <i className="fa fa-arrow-left pe-1" /> Back
+                  </div>
+                  {role === "ADMIN" || role === "SUPERADMIN" ? (
+                    <div className="col-md-6">
+                      <Link
+                        to="/admin/addcustomer"
+                        className="btn btn-outline-info  fw-bold float-end border-3"
+                      >
+                        <i className="fa fa-plus" /> Add Customer
+                      </Link>
+                    </div>
+                  ) : (
+                    getAccessData.insert === 1 && (
+                      <div className="col-md-6">
+                        <Link
+                          to="/admin/addcustomer"
+                          className="btn btn-outline-info fw-bold float-end border-3"
+                        >
+                          <i className="fa fa-plus" /> Add Customer
+                        </Link>
+                      </div>
+                    )
+                  )}
                 </div>
-                {role === "ADMIN" || role === "SUPERADMIN" ? (
-            <div className="col-md-4">
-              <Link
-                to="/admin/addcustomer"
-                className="btn btn-outline-info  fw-bold float-end border-3"
-              >
-                <i className="fa fa-plus" /> Add Customer
-              </Link>
-            </div>
-          ) : (
-            getAccessData.insert === 1 && (
-              <div className="col-md-4">
-                <Link
-                  to="/admin/addcustomer"
-                  className="btn btn-outline-info fw-bold float-end border-3"
-                >
-                  <i className="fa fa-plus" /> Add Customer
-                </Link>
-              </div>
-            )
-          )}
-                </div>
-                
+
               </div>
             </div>
 
-            
+
           </div>
         </div>
         <div className='datatable-wrapper mt-minus'>
