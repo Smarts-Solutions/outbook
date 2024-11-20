@@ -203,7 +203,8 @@ const StaffPage = () => {
       ),
       selector: (row) =>  row.first_name + " " + row.last_name,
       sortable: true,
-      width: "150px",
+      width: "180px",
+      reorder: false,
     },
     {
       cell: (row) => (
@@ -214,7 +215,8 @@ const StaffPage = () => {
       name: "Email Address",
       selector: (row) => row.email,
       sortable: true,
-      width: "auto",
+  
+      reorder: false,
     },
     {
       name: "Phone",
@@ -226,12 +228,14 @@ const StaffPage = () => {
       selector: (row) => row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - ",
       sortable: true,
       width: "150px",
+      reorder: false,
     },
     {
       name: "Role",
       selector: (row) => row.role_name,
       sortable: true,
       width: "200px",
+      reorder: false,
     },
     {
       name: "Status",
@@ -246,6 +250,7 @@ const StaffPage = () => {
         </div>
       ),
       width: "80px",
+      reorder: false,
     },
     {
       name: "Actions",
@@ -281,6 +286,7 @@ const StaffPage = () => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
+      reorder: false,
 
     }
 

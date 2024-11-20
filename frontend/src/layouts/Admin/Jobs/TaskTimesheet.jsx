@@ -174,26 +174,31 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
       name: "Task Name",
       selector: (row) => row.task_name || '-',
       sortable: true,
+      reorder: false,
     },
     {
       name: "Service Type",
       selector: (row) => row.service_name || '-',
+      reorder: false,
       sortable: true
     },
     {
       name: "Job Type",
       selector: (row) => row.job_type_type || '-',
+      reorder: false,
       sortable: true,
     },
     {
       name: "Task Status",
       selector: (row) => row.task_status_name || '-',
+      reorder: false,
       sortable: true,
     },
     {
       name: "Time",
       selector: (row) => row.time ? row.time.split(":")[0] + "h " + row.time.split(":")[1] + "m" : '-',
       sortable: true,
+      reorder: false,
     },
     {
       name: "Actions",
@@ -211,6 +216,7 @@ const TaskTimesheet = ({ getAccessDataJob , goto }) => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
+      reorder: false,
     },
   ];
 

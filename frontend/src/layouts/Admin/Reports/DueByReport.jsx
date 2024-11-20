@@ -46,6 +46,7 @@ const jsonObject = JSON.parse(jsonString);
     const columns = [
          { name: 'Count Of Customer', 
             selector: row => row.customer_name, 
+            reorder: false,
             sortable: true },
 
             
@@ -63,6 +64,7 @@ const jsonObject = JSON.parse(jsonString);
                 )
               ),
              sortable: true,
+             reorder: false,
            
         },
 
@@ -80,6 +82,7 @@ const jsonObject = JSON.parse(jsonString);
                 )
               ),
              sortable: true,
+             reorder: false,
            
         },
 
@@ -98,6 +101,7 @@ const jsonObject = JSON.parse(jsonString);
                 )
             ),
             sortable: true,
+            reorder: false,
         },
 
         { name: 'Due Date Within 4 Month(s)',
@@ -115,6 +119,7 @@ const jsonObject = JSON.parse(jsonString);
                 )
             ),
             sortable: true,
+            reorder: false,
         },
 
         { name: 'Due Date Within 5 Month(s)',
@@ -132,6 +137,7 @@ const jsonObject = JSON.parse(jsonString);
                 )
             ),
             sortable: true,
+            reorder: false,
         },
 
         { name: 'Due Date Within 6 Month(s)',
@@ -149,6 +155,7 @@ const jsonObject = JSON.parse(jsonString);
                 )
             ),
             sortable: true,
+            reorder: false,
         },
 
         { name: 'Due Date Within 7 Month(s)',
@@ -166,6 +173,7 @@ const jsonObject = JSON.parse(jsonString);
                 )
             ),
             sortable: true,
+            reorder: false,
         },
 
         { name: 'Due Date Within 8 Month(s)',
@@ -182,6 +190,7 @@ const jsonObject = JSON.parse(jsonString);
                 )
             ),
             sortable: true,
+            reorder: false,
         },
 
         { name: 'Due Date Within 9 Month(s)',
@@ -198,6 +207,7 @@ const jsonObject = JSON.parse(jsonString);
                 )
             ),
             sortable: true,
+            reorder: false,
         },
 
         { name: 'Due Date Within 10 Month(s)',
@@ -214,6 +224,7 @@ const jsonObject = JSON.parse(jsonString);
                 )
             ),
             sortable: true,
+            reorder: false,
         },
 
         { name: 'Due Date Within 11 Month(s)',
@@ -230,6 +241,7 @@ const jsonObject = JSON.parse(jsonString);
                 )
             ),
             sortable: true,
+            reorder: false,
         },
 
         { name: 'Due Date Within 12 Month(s)',
@@ -246,6 +258,7 @@ const jsonObject = JSON.parse(jsonString);
                 )
             ),
             sortable: true,
+            reorder: false,
         },
 
         { name: 'Due Date Passed',
@@ -262,6 +275,7 @@ const jsonObject = JSON.parse(jsonString);
                 )
             ),
             sortable: true,
+            reorder: false,
         },
 
     ]

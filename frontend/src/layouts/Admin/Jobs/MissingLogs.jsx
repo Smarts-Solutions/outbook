@@ -225,10 +225,10 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
 
   const columns = [
     { name: 'Missing Log Title', selector: row => row.title, sortable: true },
-    { name: 'Missing Log Sent On', selector: row => convertDate(row.missing_log_sent_on), sortable: true },
-    { name: 'Missing Log Prepared Date', selector: row => convertDate(row.missing_log_prepared_date), sortable: true },
-    { name: 'Missing Log Reviewed Date', selector: row => convertDate(row.missing_log_reviewed_date), sortable: true },
-    { name: 'status', selector: row => row.status == 1 ? "Completed" : "Incomplete", sortable: true },
+    { name: 'Missing Log Sent On', selector: row => convertDate(row.missing_log_sent_on),reorder: false, sortable: true },
+    { name: 'Missing Log Prepared Date', selector: row => convertDate(row.missing_log_prepared_date),reorder: false, sortable: true },
+    { name: 'Missing Log Reviewed Date', selector: row => convertDate(row.missing_log_reviewed_date),reorder: false, sortable: true },
+    { name: 'status', selector: row => row.status == 1 ? "Completed" : "Incomplete",reorder: false, sortable: true },
     {
       name: "Actions",
       cell: (row) => (
@@ -250,6 +250,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
+      reorder: false,
     },
   ];
 

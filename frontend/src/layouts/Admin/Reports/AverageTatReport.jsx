@@ -40,7 +40,8 @@ const AverageTatReport = () => {
     {
       name: 'Month',
       selector: row => row.month,
-      sortable: true
+      sortable: true,
+      reorder: false,
     },
     // {
     //   name: 'Average TAT Per Day',
@@ -62,7 +63,8 @@ const AverageTatReport = () => {
     {
         name: 'Average TAT Per Day',
         selector: row => (row.average_tat_per_day ?  parseFloat(row.average_tat_per_day).toFixed(2) : '0.00'),
-        sortable: true
+        sortable: true,
+        reorder: false,
       },
       
 

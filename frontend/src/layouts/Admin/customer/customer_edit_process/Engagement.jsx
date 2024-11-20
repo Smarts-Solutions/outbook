@@ -610,10 +610,10 @@ const Engagement = () => {
     let req = {
       customer_id: address,
       pageStatus: "3",
-      fte_dedicated_staffing: checkboxStates[0].toString(),
-      percentage_model: checkboxStates[1].toString(),
-      adhoc_payg_hourly: checkboxStates[2].toString(),
-      customised_pricing: checkboxStates[3].toString(),
+      fte_dedicated_staffing: checkboxStates[0].toString() || 0,
+      percentage_model: checkboxStates[1].toString() || 0,
+      adhoc_payg_hourly: checkboxStates[2].toString() || 0,
+      customised_pricing: checkboxStates[3].toString() || 0,
       ...formState1,
     };
 
@@ -621,39 +621,39 @@ const Engagement = () => {
     if (checkboxStates[0] === 1) {
       req = {
         ...req,
-        number_of_accountants: formValues1.accountants,
-        fee_per_accountant: formValues1.feePerAccountant,
-        number_of_bookkeepers: formValues1.bookkeepers,
-        fee_per_bookkeeper: formValues1.feePerBookkeeper,
-        number_of_payroll_experts: formValues1.payrollExperts,
-        fee_per_payroll_expert: formValues1.feePerPayrollExpert,
-        number_of_tax_experts: formValues1.taxExperts,
-        fee_per_tax_expert: formValues1.feePerTaxExpert,
-        number_of_admin_staff: formValues1.numberOfAdmin,
-        fee_per_admin_staff: formValues1.feePerAdmin,
+        number_of_accountants: formValues1.accountants || 0,
+        fee_per_accountant: formValues1.feePerAccountant || 0,
+        number_of_bookkeepers: formValues1.bookkeepers || 0,
+        fee_per_bookkeeper: formValues1.feePerBookkeeper  || 0,
+        number_of_payroll_experts: formValues1.payrollExperts || 0,
+        fee_per_payroll_expert: formValues1.feePerPayrollExpert || 0,
+        number_of_tax_experts: formValues1.taxExperts || 0,
+        fee_per_tax_expert: formValues1.feePerTaxExpert || 0,
+        number_of_admin_staff: formValues1.numberOfAdmin || 0,
+        fee_per_admin_staff: formValues1.feePerAdmin || 0,
       };
     }
 
     if (checkboxStates[1] === 1) {
       req = {
         ...req,
-        total_outsourcing: formValues2.total_outsourcing,
-        accountants: formValues2.accountants,
-        bookkeepers: formValues2.bookkeepers,
-        payroll_experts: formValues2.payroll_experts,
-        tax_experts: formValues2.tax_experts,
-        admin_staff: formValues2.admin_staff,
+        total_outsourcing: formValues2.total_outsourcing || 0,
+        accountants: formValues2.accountants || 0,
+        bookkeepers: formValues2.bookkeepers || 0,
+        payroll_experts: formValues2.payroll_experts || 0,
+        tax_experts: formValues2.tax_experts || 0,
+        admin_staff: formValues2.admin_staff || 0,
       };
     }
 
     if (checkboxStates[2] === 1) {
       req = {
         ...req,
-        adhoc_accountants: formValues3.adhoc_accountants,
-        adhoc_bookkeepers: formValues3.adhoc_bookkeepers,
-        adhoc_payroll_experts: formValues3.adhoc_payroll_experts,
-        adhoc_tax_experts: formValues3.adhoc_tax_experts,
-        adhoc_admin_staff: formValues3.adhoc_admin_staff,
+        adhoc_accountants: formValues3.adhoc_accountants || 0,
+        adhoc_bookkeepers: formValues3.adhoc_bookkeepers || 0,
+        adhoc_payroll_experts: formValues3.adhoc_payroll_experts || 0,
+        adhoc_tax_experts: formValues3.adhoc_tax_experts || 0,
+        adhoc_admin_staff: formValues3.adhoc_admin_staff || 0,
       };
     }
 
