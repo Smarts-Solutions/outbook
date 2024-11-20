@@ -192,13 +192,25 @@ const StaffPage = () => {
   ];
 
   const columns = [
+
+    
     {
       name: "Full Name",
-      selector: (row) => row.first_name + " " + row.last_name,
+      cell: (row) => (
+        <div title={row.first_name + " " + row.last_name}>
+          {row.first_name + " " + row.last_name}
+        </div>
+      ),
+      selector: (row) =>  row.first_name + " " + row.last_name,
       sortable: true,
       width: "150px",
     },
     {
+      cell: (row) => (
+        <div title={row.email}>
+          {row.email}
+        </div>
+      ),
       name: "Email Address",
       selector: (row) => row.email,
       sortable: true,
@@ -206,7 +218,12 @@ const StaffPage = () => {
     },
     {
       name: "Phone",
-      selector: (row) => row.phone != 'null' ? row.phone_code ? row.phone_code + "-" + row.phone : "-" : "-",
+      cell: (row) => (
+        <div title={ row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - "}>
+          { row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - "}
+        </div>
+      ),
+      selector: (row) => row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - ",
       sortable: true,
       width: "150px",
     },
