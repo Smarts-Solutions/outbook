@@ -991,7 +991,7 @@ const CreateClient = () => {
                                 <div className="card card_shadow ">
                                   <div className="card-header card-header-light-blue align-items-center d-flex">
                                     <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                      Sole Trader
+                                      Sole Trader Information
                                     </h4>
                                   </div>
                                   {/* end card header */}
@@ -1272,9 +1272,7 @@ const CreateClient = () => {
                                       <div className="mb-3">
                                         <label className="form-label">
                                           Email
-                                          <span style={{ color: "red" }}>
-                                            *
-                                          </span>
+                                          
                                         </label>
                                         <input
                                           type="text"
@@ -1505,6 +1503,9 @@ const CreateClient = () => {
                                           <div className="mb-3">
                                             <label className="form-label">
                                               Incorporation Date
+                                              <span style={{ color: "red" }}>
+                                                *
+                                              </span>
                                             </label>
                                             <input
                                               type="text"
@@ -1668,6 +1669,11 @@ const CreateClient = () => {
                               <div className="col-lg-12">
                                 <div className="card card_shadow ">
                                   {/* end card header */}
+                                  <div className="card-header card-header-light-blue align-items-center d-flex">
+                                    <h4 className="card-title fs-16 mb-0 flex-grow-1">
+                                      Trading Details
+                                    </h4>
+                                  </div>
                                   <div className="card-body">
                                     <div className="row">
                                       <div className="col-lg-4">
@@ -1766,7 +1772,7 @@ const CreateClient = () => {
                                   </div>
                                 </div>
                               </div>
-                              <div className="row">
+                             
                                 <div className="col-lg-12">
                                   <div className="card card_shadow">
                                     <div className="card-header card-header-light-blue align-items-center d-flex">
@@ -1782,7 +1788,7 @@ const CreateClient = () => {
                                               className="col-xl-12 col-lg-12 mt-3"
                                               key={index}
                                             >
-                                              <div className="card pricing-box p-4 m-2 mt-0">
+                                              <div className="card pricing-box p-3 m-2 mt-0">
                                                 <div className="row">
                                                   {index !== 0 && (
                                                     <div className="col-lg-12">
@@ -2029,14 +2035,14 @@ const CreateClient = () => {
                                 </div>{" "}
                                 {/* end col */}
                               </div>
-                            </div>
+                            
                           ) : selectClientType == 3 ? (
                             <div className="row ">
                               <div className="col-lg-12">
                                 <div className="card card_shadow ">
                                   <div className="card-header  card-header-light-blue align-items-center d-flex">
                                     <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                      Partnership
+                                      Partnership Information
                                     </h4>
                                   </div>
                                   {/* end card header */}
@@ -2214,19 +2220,19 @@ const CreateClient = () => {
                                   </div>
                                 </div>
                               </div>
-                              <div className="row">
+                            
                                 <div className="col-lg-12">
                                   <div className="card card_shadow">
                                     <div className="card-header card-header-light-blue align-items-center d-flex">
                                       <h4 className="card-title mb-0 flex-grow-1 fs-16">
-                                        Contact Details
+                                        Partner Details
                                       </h4>
                                     </div>
                                     <div className="card-body">
                                       <div className="row">
                                         {contacts1.map((contact, index) => (
                                           <div className="col-xxl-12 col-lg-12">
-                                            <div className="card pricing-box p-4 m-2 mt-0">
+                                            <div className="card pricing-box p-3 m-2 mt-0">
                                               <div className="row">
                                                 <div className="col-lg-12">
                                                   <div>
@@ -2346,11 +2352,7 @@ const CreateClient = () => {
                                                   <div className="mb-3">
                                                     <label className="form-label">
                                                       Role
-                                                      <span
-                                                        style={{ color: "red" }}
-                                                      >
-                                                        *
-                                                      </span>
+                                                      
                                                     </label>
 
                                                     <select
@@ -2500,7 +2502,7 @@ const CreateClient = () => {
                                                         <input
                                                           type="number"
                                                           className="form-control"
-                                                          placeholder=" Alternate Phone"
+                                                          placeholder=" Alternate Phone Number"
                                                           name="alternate_phone"
                                                           id={`alternate_phone-${index}`}
                                                           value={
@@ -2532,11 +2534,7 @@ const CreateClient = () => {
                                                   <div className="mb-3">
                                                     <label className="form-label">
                                                       Email
-                                                      <span
-                                                        style={{ color: "red" }}
-                                                      >
-                                                        *
-                                                      </span>
+                                                      
                                                     </label>
                                                     <input
                                                       type="text"
@@ -2569,11 +2567,7 @@ const CreateClient = () => {
                                                     <label className="form-label">
                                                       {" "}
                                                       Alternate Email
-                                                      <span
-                                                        style={{ color: "red" }}
-                                                      >
-                                                        *
-                                                      </span>
+                                                      
                                                     </label>
                                                     <input
                                                       type="text"
@@ -2626,7 +2620,7 @@ const CreateClient = () => {
                                   </div>
                                 </div>
                               </div>
-                            </div>
+                           
                           ) : selectClientType == 4 ? (
                             <div className="row">
                               <div className="col-lg-12">
@@ -2723,7 +2717,7 @@ const CreateClient = () => {
                                     <div className="col-lg-4">
                                       <div className="mb-3">
                                         <label className="form-label">
-                                          Phone
+                                          Phone Number
                                         </label>
                                         <div className="row">
                                           <div className="col-md-4 pe-0">
@@ -2774,9 +2768,7 @@ const CreateClient = () => {
                                       <div className="mb-3">
                                         <label className="form-label">
                                           Email
-                                          <span style={{ color: "red" }}>
-                                            *
-                                          </span>
+                                          
                                         </label>
                                         <input
                                           type="text"
@@ -2799,9 +2791,7 @@ const CreateClient = () => {
                                       <div className="mb-3">
                                         <label className="form-label">
                                           Residential Address
-                                          <span style={{ color: "red" }}>
-                                            *
-                                          </span>
+                                         
                                         </label>
                                         <input
                                           type="text"

@@ -683,7 +683,7 @@ const Setting = () => {
           {
             name: "Actions",
             cell: (row) => (
-              <div className="">
+              <div className="d-flex">
                 {showSettingUpdateTab && (
                   <button
                     className="edit-icon"
@@ -775,7 +775,7 @@ const Setting = () => {
 
   const columnClientIndustry = [
     {
-      name: "Client Industry",
+      name: "Client Industry Name",
       selector: (row) => row.business_type,
       sortable: true,
     },
@@ -1001,22 +1001,42 @@ const Setting = () => {
   const CheckListColumns = [
     {
       name: "Checklist Name",
-      cell: (row) => <div>{row.check_list_name}</div>,
+      cell: (row) => (
+        <div title={row.check_list_name}>
+          {row.check_list_name}
+        </div>
+      ),
       selector: (row) => row.trading_name,
       sortable: true,
     },
+    
 
     {
+      cell: (row) => (
+        <div title={row.service_name}>
+          {row.service_name}
+        </div>
+      ),
       name: "Service Type",
       selector: (row) => row.service_name,
       sortable: true,
     },
     {
+      cell: (row) => (
+        <div title={row.job_type_type}>
+          {row.job_type_type}
+        </div>
+      ),
       name: "Job Type",
       selector: (row) => row.job_type_type,
       sortable: true,
     },
     {
+      cell: (row) => (
+        <div title={row.client_type_type}>
+          {row.client_type_type}
+        </div>
+      ),
       name: "Client Type",
       selector: (row) => row.client_type_type,
       sortable: true,
@@ -1059,7 +1079,7 @@ const Setting = () => {
 
   const InternalColumns = [
     {
-      name: "Name",
+      name: "Internal Job/Project Name",
       cell: (row) => <div> {row.name}</div>,
       selector: (row) => row.trading_name,
       sortable: true,
@@ -1109,7 +1129,7 @@ const Setting = () => {
                     onClick={(e) => handleTaskAdd(row)}
                   >
                     <i className="fa fa-plus pe-1" />
-                    Add Task
+                    Add Internal Task
                   </button>
                 )}
               </div>
@@ -1755,7 +1775,7 @@ const Setting = () => {
     { id: "7", label: "Incorporation", icon: "fas fa-file-alt" },
     { id: "8", label: "Source", icon: "fas fa-external-link-alt" },
     { id: "9", label: "Checklist", icon: "fas fa-check-square" },
-    { id: "10", label: "Internal Task", icon: "fas fa-lock" },
+    { id: "10", label: "Internal Job/Project", icon: "fas fa-lock" },
   ];
 
 
@@ -2104,7 +2124,7 @@ const Setting = () => {
               <div className="report-data">
                 <div className="d-flex justify-content-between align-items-center">
                   <div className="tab-title">
-                    <h3 className="mt-0">Internal Task</h3>
+                    <h3 className="mt-0">Internal Job/Project</h3>
                   </div>
                   {!showSettingInsertTab ? null : (
                     <div>
@@ -2113,7 +2133,7 @@ const Setting = () => {
                         className="btn btn-info text-white float-end"
                         onClick={(e) => handleAdd(e, "10")}
                       >
-                        <i className="fa fa-plus" /> Add Job/Project
+                        <i className="fa fa-plus" /> Add Internal Job/Project
                       </button>
                     </div>
                   )}

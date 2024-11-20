@@ -935,9 +935,7 @@ p {
 	border-bottom: 1px solid #b7b6b6;
 }
 
-.card .card-header:first-child {
-	border-radius: calc(0.5rem - 1px) calc(0.5rem - 1px) 0 0;
-}
+
 
 .card .card-footer {
 	background-color: #fff;
@@ -4288,6 +4286,17 @@ a.nav-link.dropdown-toggle.arrow-none.waves-light.waves-effect img {
 	box-shadow: none !important;
 }
 
+select.error-field.form-select {
+    --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+   
+    -webkit-appearance: auto !important;
+    -moz-appearance: none ;
+    appearance: auto !important;
+    background-color: var(--bs-body-bg);
+    background-image: var(--bs-form-select-bg-img),var(--bs-form-select-bg-icon,none) !important;
+
+   
+}
 select.error-field.form-select,
 input.error-field.form-control {
 	background: #fff !important;

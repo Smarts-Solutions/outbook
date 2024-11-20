@@ -899,7 +899,7 @@ const ClientEdit = () => {
                                 <div className="card card_shadow ">
                                   <div className="card-header card-header-light-blue align-items-center d-flex">
                                     <h4 className="card-title fs-16 mb-0 fs-16">
-                                      Sole Trader
+                                      Sole Trader Information
                                     </h4>
                                   </div>
                                   {/* end card header */}
@@ -1026,9 +1026,7 @@ const ClientEdit = () => {
                                         <div className="mb-3">
                                           <label className="form-label">
                                             VAT Number
-                                            <span style={{ color: "red" }}>
-                                              *
-                                            </span>
+                                            
                                           </label>
                                           <input
                                             type="text"
@@ -1048,9 +1046,7 @@ const ClientEdit = () => {
                                         <div className="mb-3">
                                           <label className="form-label">
                                             Website
-                                            <span style={{ color: "red" }}>
-                                              *
-                                            </span>
+                                          
                                           </label>
                                           <input
                                             type="text"
@@ -1181,9 +1177,7 @@ const ClientEdit = () => {
                                       <div className="mb-3">
                                         <label className="form-label">
                                           Email
-                                          <span style={{ color: "red" }}>
-                                            *
-                                          </span>
+                                          
                                         </label>
                                         <input
                                           type="text"
@@ -1206,9 +1200,7 @@ const ClientEdit = () => {
                                       <div className="mb-3">
                                         <label className="form-label">
                                           Residential Address
-                                          <span style={{ color: "red" }}>
-                                            *
-                                          </span>
+                                         
                                         </label>
                                         <input
                                           type="text"
@@ -1412,6 +1404,7 @@ const ClientEdit = () => {
                                           <div className="mb-3">
                                             <label className="form-label">
                                               Incorporation Date
+                                              <span style={{ color: "red" }}>*</span>
                                             </label>
                                             <input
                                               type="text"
@@ -1684,7 +1677,7 @@ const ClientEdit = () => {
                                   </div>
                                 </div>
                               </div>
-                              <div className="row">
+                             
                                 <div className="col-lg-12">
                                   <div className="card card_shadow">
                                     <div className="card-header card-header-light-blue align-items-center d-flex">
@@ -1701,7 +1694,7 @@ const ClientEdit = () => {
                                                 className="col-xl-12 col-lg-12 mt-3"
                                                 key={index}
                                               >
-                                                <div className="card pricing-box p-4 m-2 mt-0">
+                                                <div className="card pricing-box p-3 m-2 mt-0">
                                                   <div className="row">
                                                     {index !== 0 && (
                                                       <div className="col-lg-12">
@@ -1821,13 +1814,7 @@ const ClientEdit = () => {
                                                           className="form-label"
                                                         >
                                                           Role
-                                                          <span
-                                                            style={{
-                                                              color: "red",
-                                                            }}
-                                                          >
-                                                            *
-                                                          </span>
+                                                          
                                                         </label>
                                                         <select
                                                           className="form-select"
@@ -1957,13 +1944,7 @@ const ClientEdit = () => {
                                                           className="form-label"
                                                         >
                                                           Email
-                                                          <span
-                                                            style={{
-                                                              color: "red",
-                                                            }}
-                                                          >
-                                                            *
-                                                          </span>
+                                                          
                                                         </label>
                                                         <input
                                                           type="text"
@@ -2012,14 +1993,14 @@ const ClientEdit = () => {
                                 </div>{" "}
                                 {/* end col */}
                               </div>
-                            </div>
+                           
                           ) : selectClientType == 3 ? (
                             <div className="row ">
                               <div className="col-lg-12">
                                 <div className="card card_shadow ">
                                   <div className="card-header card-header-light-blue align-items-center d-flex">
                                     <h4 className="card-title fs-16 mb-0 flex-grow-1">
-                                      Partnership
+                                      Partnership Information
                                     </h4>
                                   </div>
                                   {/* end card header */}
@@ -2205,12 +2186,12 @@ const ClientEdit = () => {
                                   </div>
                                 </div>
                               </div>
-                              <div className="row">
+                              
                                 <div className="col-lg-12">
                                   <div className="card card_shadow">
                                     <div className="card-header card-header-light-blue align-items-center d-flex">
                                       <h4 className="card-title fs-16 mb-0 flex-grow-1">
-                                        Contact Details
+                                       Partner Details
                                       </h4>
                                     </div>
                                     <div className="card-body">
@@ -2221,7 +2202,7 @@ const ClientEdit = () => {
                                               className="col-xxl-12 col-lg-12"
                                               key={contact.contact_id}
                                             >
-                                              <div className="card pricing-box p-4 m-2 mt-0">
+                                              <div className="card pricing-box p-3 m-2 mt-0">
                                                 <div className="row">
                                                   <div className="col-lg-12">
                                                       <h4 className="flex-grow-1 fs-16" style={{ fontWeight: '600' }}>Partner {index + 1}</h4>
@@ -2347,13 +2328,7 @@ const ClientEdit = () => {
                                                     <div className="mb-3">
                                                       <label className="form-label">
                                                         Role
-                                                        <span
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          *
-                                                        </span>
+                                                        
                                                       </label>
                                                       <select
                                                         className="form-select"
@@ -2480,7 +2455,7 @@ const ClientEdit = () => {
                                                   <div className="col-lg-4">
                                                     <div className="mb-3">
                                                       <label className="form-label">
-                                                        Alternate Phone
+                                                        Alternate Phone Number
                                                       </label>
                                                       <div className="row">
                                                         <div className="col-md-4 pe-0">
@@ -2521,7 +2496,7 @@ const ClientEdit = () => {
                                                           <input
                                                             type="number"
                                                             className="form-control"
-                                                            placeholder="Alternate Phone"
+                                                            placeholder="Alternate Phone Number"
                                                             name="alternate_phone"
                                                             id={`alternate_phone-${index}`}
                                                             value={
@@ -2561,13 +2536,7 @@ const ClientEdit = () => {
                                                     <div className="mb-3">
                                                       <label className="form-label">
                                                         Email
-                                                        <span
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          *
-                                                        </span>
+                                                      
                                                       </label>
                                                       <input
                                                         type="text"
@@ -2601,13 +2570,7 @@ const ClientEdit = () => {
                                                     <div className="mb-3">
                                                       <label className="form-label">
                                                         Alternate Email
-                                                        <span
-                                                          style={{
-                                                            color: "red",
-                                                          }}
-                                                        >
-                                                          *
-                                                        </span>
+                                                        
                                                       </label>
                                                       <input
                                                         type="text"
@@ -2659,7 +2622,7 @@ const ClientEdit = () => {
                                     </div>
                                   </div>
                                 </div>
-                              </div>
+                              
                             </div>
                           ) : selectClientType == 4 ? (
                             getIndivisualDetails && (
@@ -2762,7 +2725,7 @@ const ClientEdit = () => {
                                       <div className="col-lg-4">
                                         <div className="mb-3">
                                           <label className="form-label">
-                                            Phone
+                                            Phone Number
                                           </label>
                                           <div className="row">
                                             <div className="col-md-4 pe-0">
@@ -2816,9 +2779,7 @@ const ClientEdit = () => {
                                         <div className="mb-3">
                                           <label className="form-label">
                                             Email
-                                            <span style={{ color: "red" }}>
-                                              *
-                                            </span>
+                                            
                                           </label>
                                           <input
                                             type="text"
@@ -2842,9 +2803,7 @@ const ClientEdit = () => {
                                         <div className="mb-3">
                                           <label className="form-label">
                                             Residential Address
-                                            <span style={{ color: "red" }}>
-                                              *
-                                            </span>
+                                            
                                           </label>
                                           <input
                                             type="text"
