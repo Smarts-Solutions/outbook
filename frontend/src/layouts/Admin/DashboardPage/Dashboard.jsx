@@ -15,9 +15,12 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const [dashboard, setDashboard] = useState([]);
   const [getActiviyLog, setActivityLog] = useState([]);
+
   const currentDate = new Date();
+
   // State to store the selected tab
-  const [selectedTab, setSelectedTab] = useState("this-week");
+  const [selectedTab, setSelectedTab] = useState("this_week");
+
   // Function to handle dropdown change
   const handleTabChange = (event) => {
     setSelectedTab(event.target.value);
@@ -36,11 +39,14 @@ const Dashboard = () => {
 
   useEffect(() => {
     GetDashboardData();
+  }, [selectedTab]);
+
+  useEffect(() => {
     ActivityLogData();
   }, []);
 
   const GetDashboardData = async () => {
-    const req = { staff_id: staffDetails.id };
+    const req = { staff_id: staffDetails.id ,date_filter:selectedTab};
     const data = { req: req, authToken: token };
     await dispatch(DashboardData(data))
       .unwrap()
@@ -114,29 +120,28 @@ const Dashboard = () => {
                       className="form-select"
                       id="tabSelect"
                       value={selectedTab}
-                      onChange={handleTabChange}
+                      onChange={(e)=>handleTabChange(e)}
                     >
-                      <option >Select Options</option>
-                      <option value="this-week">This Week</option>
-                      <option value="last-week">Last Week</option>
-                      <option value="this-month">This Month</option>
-                      <option value="last-month">Last Month</option>
-                      <option value="last-quarter">Last Quarter</option>
-                      <option value="this-6-months">This 6 Months</option>
-                      <option value="last-6-months">Last 6 Months</option>
-                      <option value="this-year">This Year</option>
-                      <option value="last-year">Last Year</option>
-                      <option value="custom">Custom</option>
+                      <option value="this_week">This Week</option>
+                      <option value="last_week">Last Week</option>
+                      <option value="this_month">This Month</option>
+                      <option value="last_month">Last Month</option>
+                      <option value="this_quarter">This Quarter</option>
+                      <option value="last_quarter">Last Quarter</option>
+                      <option value="this_six_month">This 6 Months</option>
+                      <option value="last_six_month">Last 6 Months</option>
+                      <option value="this_year">This Year</option>
+                      <option value="last_year">Last Year</option>
                     </select>
                   </div>
                 </div>
                
               </div>
               <div className="tab-content mt-5">
-                {selectedTab === "this-week" && (
-                  <div className="tab-pane show active">
+             
+                   <div className="tab-pane show active">
                     <div className="row justify-content-center">
-                      <div className="col-md-6 col-lg-4">
+                      <div className="col-md-6 col-lg-4" style={{cursor: 'pointer'}}>
                         <div className="card report-card dashboard-card">
                           <div className="card-body">
                             <div className="row d-flex justify-content-center">
@@ -158,7 +163,7 @@ const Dashboard = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="col-md-6 col-lg-4">
+                      <div className="col-md-6 col-lg-4" style={{cursor: 'pointer'}}>
                         <div className="card report-card dashboard-card">
                           <div className="card-body">
                             <div className="row d-flex justify-content-center">
@@ -180,9 +185,8 @@ const Dashboard = () => {
                             </div>
                           </div>
                         </div>
-                      </div>
-
-                      <div className="col-md-6 col-lg-4 ">
+                      </div> 
+                      <div className="col-md-6 col-lg-4" style={{cursor: 'pointer'}}>
                         <div className="card report-card dashboard-card ">
                           <div className="card-body">
                             <div className="row d-flex justify-content-center">
@@ -204,7 +208,7 @@ const Dashboard = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="col-md-6 col-lg-4">
+                      <div className="col-md-6 col-lg-4" style={{cursor: 'pointer'}}>
                         <div className="card report-card dashboard-card">
                           <div className="card-body">
                             <div className="row d-flex justify-content-center">
@@ -223,9 +227,8 @@ const Dashboard = () => {
                             </div>
                           </div>
                         </div>
-                      </div>
-
-                      <div className="col-md-6 col-lg-4">
+                      </div> 
+                      <div className="col-md-6 col-lg-4" style={{cursor: 'pointer'}}>
                         <div className="card report-card dashboard-card">
                           <div className="card-body">
                             <div className="row d-flex justify-content-center">
@@ -247,7 +250,7 @@ const Dashboard = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="col-md-6 col-lg-4">
+                      <div className="col-md-6 col-lg-4" style={{cursor: 'pointer'}}>
                         <div className="card report-card dashboard-card">
                           <div className="card-body">
                             <div className="row d-flex justify-content-center">
@@ -272,157 +275,6 @@ const Dashboard = () => {
                       </div>
                     </div>
                   </div>
-                )}
-
-                {selectedTab === "last-week" && (
-                  <div className="tab-pane show active">
-                    <div className="row justify-content-center">
-                      <div className="col-md-6 col-lg-4">
-                        <div className="card report-card dashboard-card">
-                          <div className="card-body">
-                            <div className="row d-flex justify-content-center">
-                              <div className="col-12">
-                                <p className="text-dark mb-1 font-weight-semibold">
-                                  NO OF CUSTOMERS
-                                </p>
-                              </div>
-                              <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">{dashboard.customer && dashboard.customer.count}</h3>
-                                <img
-                                  className="dashboad-img"
-                                  src="/assets/images/dashboards/users.png"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-md-6 col-lg-4">
-                        <div className="card report-card dashboard-card">
-                          <div className="card-body">
-                            <div className="row d-flex justify-content-center">
-                              <div className="col-12">
-                                <p className="text-dark mb-1 font-weight-semibold">
-                                  NO OF CLIENTS
-                                </p>
-                              </div>
-                              <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">{dashboard.client && dashboard.client.count}</h3>
-                                <img
-                                  className="dashboad-img"
-                                  src="/assets/images/dashboards/teamwork.png"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="col-md-6 col-lg-4 ">
-                        <div className="card report-card dashboard-card ">
-                          <div className="card-body">
-                            <div className="row d-flex justify-content-center">
-                              <div className="col">
-                                <p className="text-dark mb-1 font-weight-semibold">
-                                  NO OF STAFF
-                                </p>
-                              </div>
-                              <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">{dashboard.staff && dashboard.staff.count}</h3>
-                                <img
-                                  className="dashboad-img"
-                                  src="/assets/images/dashboards/handshake.png"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-md-6 col-lg-4">
-                        <div className="card report-card dashboard-card">
-                          <div className="card-body">
-                            <div className="row d-flex justify-content-center">
-                              <div className="col-12">
-                                <p className=" mb-1">NO OF JOBS</p>
-                              </div>
-                              <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">{dashboard.job && dashboard.job.count}</h3>
-                                <img
-                                  className="dashboad-img"
-                                  src="/assets/images/dashboards/suitcase.png"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="col-md-6 col-lg-4">
-                        <div className="card report-card dashboard-card">
-                          <div className="card-body">
-                            <div className="row d-flex justify-content-center">
-                              <div className="col-12">
-                                <p className="text-dark mb-1 font-weight-semibold">
-                                  PENDING JOBS
-                                </p>
-                              </div>
-                              <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">{dashboard.pending_job && dashboard.pending_job.count}</h3>
-                                <img
-                                  className="dashboad-img"
-                                  src="/assets/images/dashboards/pending.png"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-md-6 col-lg-4">
-                        <div className="card report-card dashboard-card">
-                          <div className="card-body">
-                            <div className="row d-flex justify-content-center">
-                              <div className="col-12">
-                                <p className="text-dark mb-1 font-weight-semibold">
-                                  COMPLETED JOBS
-                                </p>
-                              </div>
-                              <div className="col-12 d-flex align-items-center justify-content-between">
-                                <h3 className="my-4">{dashboard.completed_job && dashboard.completed_job.count}</h3>
-                                <img
-                                  className="dashboad-img"
-                                  src="/assets/images/dashboards/time-management.png"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {selectedTab === "this-month" && (
-                  <div>This month's content...</div>
-                )}
-                {selectedTab === "last-month" && (
-                  <div>Last month's content...</div>
-                )}
-                {selectedTab === "last-quarter" && (
-                  <div>Last quarter's content...</div>
-                )}
-                {selectedTab === "this-6-months" && (
-                  <div>This 6 months' content...</div>
-                )}
-                {selectedTab === "last-6-months" && (
-                  <div>Last 6 months' content...</div>
-                )}
-                {selectedTab === "this-year" && (
-                  <div>This year's content...</div>
-                )}
-                {selectedTab === "last-year" && (
-                  <div>Last year's content...</div>
-                )}
-                {selectedTab === "custom" && <div>Custom content...</div>}
               </div>
             </>
           </div>

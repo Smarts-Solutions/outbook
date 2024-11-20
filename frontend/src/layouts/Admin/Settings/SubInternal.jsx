@@ -34,7 +34,7 @@ const SubInternal = () => {
                     sweatalert.fire({
                         title: response.message,
                         icon: "success",
-                        timer: 1000,
+                        timer: 10000,
                     });
                     setTimeout(() => {
                         fetchApiData()
@@ -44,7 +44,7 @@ const SubInternal = () => {
                         sweatalert.fire({
                             title: response.message,
                             icon: "error",
-                            timer: 1000,
+                            timer: 10000,
                         });
                     }
                 } else {

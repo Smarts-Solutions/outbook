@@ -9,7 +9,7 @@ import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { ADD_SERVICES_CUSTOMERS, Get_Service } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 
-import { FTEDedicatedErrorMessages, PercentageModelErrorMessages, AdhocPAYGHourlyErrorMessages, } from "../../../../Utils/Common_Message";
+
 
 
 const Engagement = () => {
@@ -42,8 +42,8 @@ const Engagement = () => {
   });
   const [formValues2, setFormValues2] = useState({
     total_outsourcing: "",
-    accountants: "",
-    bookkeepers: "",
+    accountants1: "",
+    bookkeepers1: "",
     payroll_experts: "",
     tax_experts: "",
     admin_staff: "",
@@ -77,6 +77,11 @@ const Engagement = () => {
     Array(checkboxOptions.length).fill(0)
   );
 
+  const ErrorArr = [errors1, errors2, errors3, errors4];
+  const setErrorsArr = [setErrors1, setErrors2, setErrors3, setErrors4];
+  const InputsArr = [formValues1, formValues2, formValues3, jobEntries];
+  const setInputArr = [setFormValues1, setFormValues2, setFormValues3, setJobEntries];
+
   useEffect(() => {
     customerSourceData();
     GetJobTypeApi();
@@ -91,175 +96,75 @@ const Engagement = () => {
     });
   };
 
+  const RemoveErrorFromErrors = (name, setErrors) => {
+    setErrors((prevErrors) => {
+      const updatedErrors = { ...prevErrors };
+      delete updatedErrors[name];
+      return updatedErrors;
+    });
+  }
 
-  const handleAddJob = () => {
-    setJobEntries([
-      ...jobEntries,
-      { minimum_number_of_jobs: "", job_type_id: "", service_id: "", cost_per_job: "" },
-    ]);
-  };
+  const validate = (name, value, errors, setErrors, type) => {
 
-  const handleRemoveJob = (id) => {
-    if (jobEntries.length === 1) {
-      return;
+    const newErrors = { ...errors };
+    if (!value && EngagementErrorMsg[name]) {
+      newErrors[name] = EngagementErrorMsg[name];
     }
-    const newJobEntries = jobEntries.filter((entry, index) => index !== id);
-    setJobEntries(newJobEntries);
-  };
-
-  const handleChange4 = (index, e) => {
-    const { name, value } = e.target;
-    if (!/^[0-9+]*$/.test(value)) { return }
-
-    let newJobEntries = [...jobEntries];
-    let updatedJobEntry = { ...newJobEntries[index] };
-    updatedJobEntry[name] = value;
-    newJobEntries[index] = updatedJobEntry;
-    validate5(name, value, index)
-    setJobEntries(newJobEntries);
-  };
-
-
- 
-
-  const GetJobTypeApi = async () => {
-    const req = { action: "get" };
-    const data = { req: req, authToken: token };
-    await dispatch(JobType(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          setJobType(response.data);
-        }
-      })
-      .catch((error) => {
-        return;
-      });
-  };
-
-  const handleChange1 = (e) => {
-    const { name, value } = e.target;
-    if (value === "" || /^\d*\.?\d*$/.test(value)) {
-      validate1(name, value);
-      setFormValues1({ ...formValues1, [name]: value });
-    }
-  };
-
-  const handleChange2 = (e) => {
-    const { name, value } = e.target;
-    if (value === "" || (/^\d*\.?\d*$/.test(value) && value <= 100)) {
-      validate2(name, value);
-      setFormValues2({ ...formValues2, [name]: value });
-    }
-  };
-
-  const handleChange3 = (e) => {
-    const { name, value } = e.target;
-    if (value === "" || (/^\d*\.?\d*$/.test(value) && value <= 100)) {
-      validate3(name, value);
-      setFormValues3({ ...formValues3, [name]: value });
-    }
-  };
-
-  const validate1 = (name, value, isSubmitting = false) => {
-    const newErrors = { ...errors1 };
-    if (isSubmitting) {
-
-      for (const key in FTEDedicatedErrorMessages) {
-        if (!formValues1[key] || formValues1[key] == 0) {
-          newErrors[key] = FTEDedicatedErrorMessages[key];
-        }
-      }
-    } else {
-      if (!value) {
-        if (FTEDedicatedErrorMessages[name]) {
-          newErrors[name] = FTEDedicatedErrorMessages[name];
-        }
-      } else {
-        delete newErrors[name];
+    else if ((!value || value < 7 || value > 25) && (name === "adhoc_accountants" || name === "adhoc_bookkeepers" || name === "adhoc_payroll_experts" || name === "adhoc_tax_experts" || name === "adhoc_admin_staff")) {
+      if (EngagementErrorMsg[name]) {
+        newErrors[name] = EngagementErrorMsg[name];
       }
     }
+    else {
+      delete newErrors[name];
+      RemoveErrorFromErrors(name, setErrors);
+    }
+
+    if (Object.keys(newErrors).length !== 0) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        ...newErrors,
+      }));
+    }
 
 
-    setErrors1(newErrors);
-    if (Object.keys(newErrors).length == 10) {
+    console.log("newErrors", Object.keys(newErrors).length);
+    if (type == 1 && Object.keys(newErrors).length == 10) {
       Swal.fire({
         icon: "warning",
         title: "Please fill at least one field in FTE/Dedicated Staffing.",
         timer: 2000,
         showConfirmButton: true,
       });
-      return false
+      return false;
     }
-    return true;
-  };
 
-  const validate2 = (name, value, isSubmitting = false) => {
-    const newErrors = { ...errors2 };
-    if (isSubmitting) {
-      for (const key in PercentageModelErrorMessages) {
-        if (!formValues2[key]) {
-          newErrors[key] = PercentageModelErrorMessages[key];
-        }
-      }
-    } else {
-      if (!value) {
-        if (PercentageModelErrorMessages[name]) {
-          newErrors[name] = PercentageModelErrorMessages[name];
-        }
-      } else {
-        delete newErrors[name];
-      }
-    }
-    setErrors2(newErrors);
-
-    if (Object.keys(newErrors).length == 6) {
+    if (type == 2 && Object.keys(newErrors).length == 6) {
+      console.log("newErrors");
       Swal.fire({
         icon: "warning",
         title: "Please fill at least one field in Percentage Model between 0% and 100%.",
         timer: 2000,
         showConfirmButton: true,
       });
-      return false
+      return false;
     }
-
-    return true;
-  };
-
-  const validate3 = (name, value, isSubmitting = false) => {
-    const newErrors = { ...errors3 };
-    if (isSubmitting) {
-      for (const key in AdhocPAYGHourlyErrorMessages) {
-        if (!formValues3[key]) {
-          newErrors[key] = AdhocPAYGHourlyErrorMessages[key];
-        }
-      }
-    } else {
-      if (!value || value < 7 || value > 25) {
-        if (AdhocPAYGHourlyErrorMessages[name]) {
-          newErrors[name] = AdhocPAYGHourlyErrorMessages[name];
-        }
-      } else {
-        delete newErrors[name];
-      }
-    }
-    setErrors3(newErrors);
-
-    if (Object.keys(newErrors).length == 5) {
+    if (type == 3 && Object.keys(newErrors).length == 5) {
       Swal.fire({
         icon: "warning",
         title: "Please fill at least one field in Adhoc/PAYG/Hourly between £7 and £25.",
         timer: 2000,
         showConfirmButton: true,
       });
-      return false
+      return false;
     }
-
-
+    if (type === 4 && Object.keys(newErrors).length != 0) {
+      return false;
+    }
     return true;
-  };
+  }
 
-  const validate5 = (name, value, index) => {
+  const validate4 = (name, value, index) => {
     const newErrors = [];
     const entryErrors = {};
 
@@ -272,18 +177,19 @@ const Engagement = () => {
     }
 
     if (Object.keys(entryErrors).length !== 0) {
+
       newErrors[index] = entryErrors;
     }
+
     setErrors4(newErrors);
     return newErrors.length > 0 ? false : true;
   };
 
-  const validate4 = () => {
+  const validate3 = () => {
+    console.log("jobEntries");
     const newErrors = [];
-
     jobEntries.forEach((entry, index) => {
       const entryErrors = {};
-
       if (!entry.minimum_number_of_jobs) {
         entryErrors.minimum_number_of_jobs =
           "Please Enter Minimum number of Jobs";
@@ -310,42 +216,80 @@ const Engagement = () => {
       }
     });
 
+    console.log("newErrors", newErrors);
     setErrors4(newErrors);
     return newErrors.length > 0 ? false : true;
   };
 
 
-  const validateAllFields1 = () => {
+  // console.log("errors2", errors2);
+
+  const handleChange = (e, type) => {
+    const { name, value } = e.target;
+    if (type == 1) {
+      if (value === "" || /^\d*\.?\d*$/.test(value)) {
+        validate(name, value, ErrorArr[type - 1], setErrorsArr[type - 1], type);
+        setInputArr[type - 1]({ ...InputsArr[type - 1], [name]: value });
+      }
+    }
+    else {
+      if (value === "" || (/^\d*\.?\d*$/.test(value) && value <= 100)) {
+        validate(name, value, ErrorArr[type - 1], setErrorsArr[type - 1], type);
+        setInputArr[type - 1]({ ...InputsArr[type - 1], [name]: value });
+      }
+    }
+  };
+
+  const validateAllFields = (type) => {
     let isValid = true;
-    for (const key in formValues1) {
-      if (!validate1(key, formValues1[key], true)) {
+    for (const key in InputsArr[type - 1]) {
+      if (!validate(key, InputsArr[type - 1][key], ErrorArr[type - 1], setErrorsArr[type - 1], type)) {
         isValid = false;
       }
     }
-
     return isValid;
   };
 
-  const validateAllFields2 = () => {
-    let isValid = true;
-    for (const key in formValues2) {
-      if (!validate2(key, formValues2[key], true)) {
-        isValid = false;
-      }
+  const handleAddJob = () => {
+    setJobEntries([
+      ...jobEntries,
+      { minimum_number_of_jobs: "", job_type_id: "", service_id: "", cost_per_job: "" },
+    ]);
+  };
+
+  const handleRemoveJob = (id) => {
+    if (jobEntries.length === 1) {
+      return;
     }
-    return isValid;
+    const newJobEntries = jobEntries.filter((entry, index) => index !== id);
+    setJobEntries(newJobEntries);
   };
 
-  const validateAllFields3 = () => {
-    let isValid = true;
-    for (const key in formValues3) {
-      if (!validate3(key, formValues3[key], true)) {
-        isValid = false;
-      }
+  const handleChange4 = (index, e) => {
+    const { name, value } = e.target;
+    if (!/^[0-9+]*$/.test(value)) {
+      return;
     }
-    return isValid;
+    const newJobEntries = [...jobEntries];
+    newJobEntries[index][name] = value;
+    validate4(name, value, index);
+    setJobEntries(newJobEntries);
   };
 
+  const GetJobTypeApi = async () => {
+    const req = { action: "get" };
+    const data = { req: req, authToken: token };
+    await dispatch(JobType(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setJobType(response.data);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
 
   const handleSubmit = async () => {
     if (!checkboxStates.some((state) => state === 1)) {
@@ -355,94 +299,120 @@ const Engagement = () => {
       });
       return;
     }
-
-    const validations = [
-      validateAllFields1,
-      validateAllFields2,
-      validateAllFields3,
-      validate4,
-    ];
-
-
+    let isValid = true;
     for (let i = 0; i < checkboxStates.length; i++) {
-      if (checkboxStates[i] == 1 && !validations[i]()) {
+      if (checkboxStates[i] === 1 && i == 3 && !validate3()) {
+        isValid = false;
+        ScrollToViewFirstError(ErrorArr[i]);
         return;
       }
-    }
-
-    let req = {
-      customer_id: address,
-      pageStatus: "3",
-      fte_dedicated_staffing: checkboxStates[0].toString() || 0,
-      percentage_model: checkboxStates[1].toString() || 0,
-      adhoc_payg_hourly: checkboxStates[2].toString() || 0,
-      customised_pricing: checkboxStates[3].toString() || 0,
-      ...formState1,
-    };
-
-    if (checkboxStates[0] === 1) {
-      req = {
-        ...req,
-        number_of_accountants: formValues1.accountants || 0,
-        fee_per_accountant: formValues1.feePerAccountant || 0,
-        number_of_bookkeepers: formValues1.bookkeepers || 0,
-        fee_per_bookkeeper: formValues1.feePerBookkeeper || 0,
-        number_of_payroll_experts: formValues1.payrollExperts || 0,
-        fee_per_payroll_expert: formValues1.feePerPayrollExpert || 0,
-        number_of_tax_experts: formValues1.taxExperts || 0,
-        fee_per_tax_expert: formValues1.feePerTaxExpert || 0,
-        number_of_admin_staff: formValues1.numberOfAdmin || 0,
-        fee_per_admin_staff: formValues1.feePerAdmin || 0,
-      };
-    }
-    if (checkboxStates[1] === 1) {
-      req = {
-        ...req,
-        total_outsourcing: formValues2.total_outsourcing || 0,
-        accountants: formValues2.accountants || 0,
-        bookkeepers: formValues2.bookkeepers || 0,
-        payroll_experts: formValues2.payroll_experts || 0,
-        tax_experts: formValues2.tax_experts || 0,
-        admin_staff: formValues2.admin_staff || 0,
-      };
-    }
-
-    if (checkboxStates[2] === 1) {
-      req = {
-        ...req,
-        adhoc_accountants: formValues3.adhoc_accountants || 0,
-        adhoc_bookkeepers: formValues3.adhoc_bookkeepers || 0,
-        adhoc_payroll_experts: formValues3.adhoc_payroll_experts || 0,
-        adhoc_tax_experts: formValues3.adhoc_tax_experts || 0,
-        adhoc_admin_staff: formValues3.adhoc_admin_staff || 0,
-      };
-    }
-    if (checkboxStates[3] === 1) {
-      req = {
-        ...req,
-        customised_pricing_data: jobEntries,
-      };
-    }
-
-
-    if (!validateForm()) {
-      return;
-    }
-
-    const data = { req: req, authToken: token };
-    await dispatch(ADD_SERVICES_CUSTOMERS(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          next(response.data);
-        } else {
+      else if (checkboxStates[i] == 1 && !validateAllFields(i + 1)) {
+        if (i == 0 && Object.keys(ErrorArr[0]).length == 10) {
+          Swal.fire({
+            icon: "warning",
+            title: "Please fill at least one field in FTE/Dedicated Staffing.",
+            timer: 2000,
+            showConfirmButton: true,
+          });
+          return;
         }
-      })
-      .catch((error) => {
-        return;
-      });
-  };
+        if (i == 1 && Object.keys(ErrorArr[1]).length == 6) {
+          Swal.fire({
+            icon: "warning",
+            title: "Please fill at least one field in Percentage Model between 0% and 100%.",
+            timer: 2000,
+            showConfirmButton: true,
+          });
+          return;
+        }
+        if (i == 2 && Object.keys(ErrorArr[2]).length == 5) {
+          Swal.fire({
+            icon: "warning",
+            title: "Please fill at least one field in Adhoc/PAYG/Hourly between £7 and £25.",
+            timer: 2000,
+            showConfirmButton: true,
+          });
+          return;
+        }
+      }
 
+      
+
+      let req = {
+        customer_id: address,
+        pageStatus: "3",
+        fte_dedicated_staffing: checkboxStates[0].toString(),
+        percentage_model: checkboxStates[1].toString(),
+        adhoc_payg_hourly: checkboxStates[2].toString(),
+        customised_pricing: checkboxStates[3].toString(),
+        ...formState1,
+      };
+
+      if (checkboxStates[0] === 1) {
+        req = {
+          ...req,
+          number_of_accountants: formValues1.accountants,
+          fee_per_accountant: formValues1.feePerAccountant,
+          number_of_bookkeepers: formValues1.bookkeepers,
+          fee_per_bookkeeper: formValues1.feePerBookkeeper,
+          number_of_payroll_experts: formValues1.payrollExperts,
+          fee_per_payroll_expert: formValues1.feePerPayrollExpert,
+          number_of_tax_experts: formValues1.taxExperts,
+          fee_per_tax_expert: formValues1.feePerTaxExpert,
+          number_of_admin_staff: formValues1.numberOfAdmin,
+          fee_per_admin_staff: formValues1.feePerAdmin,
+        };
+      }
+      if (checkboxStates[1] === 1) {
+        req = {
+          ...req,
+          total_outsourcing: formValues2.total_outsourcing,
+          accountants: formValues2.accountants1,
+          bookkeepers: formValues2.bookkeepers1,
+          payroll_experts: formValues2.payroll_experts,
+          tax_experts: formValues2.tax_experts,
+          admin_staff: formValues2.admin_staff,
+        };
+      }
+
+      if (checkboxStates[2] === 1) {
+        req = {
+          ...req,
+          adhoc_accountants: formValues3.adhoc_accountants,
+          adhoc_bookkeepers: formValues3.adhoc_bookkeepers,
+          adhoc_payroll_experts: formValues3.adhoc_payroll_experts,
+          adhoc_tax_experts: formValues3.adhoc_tax_experts,
+          adhoc_admin_staff: formValues3.adhoc_admin_staff,
+        };
+      }
+      if (checkboxStates[3] === 1) {
+        req = {
+          ...req,
+          customised_pricing_data: jobEntries,
+        };
+      }
+
+      console.log("CPPP", isValid);
+
+      if (!validateForm() || !isValid) {
+        console.log("!isValid", isValid);
+        return;
+      }
+
+      const data = { req: req, authToken: token };
+      await dispatch(ADD_SERVICES_CUSTOMERS(data))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            next(response.data);
+          } else {
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+    };
+  }
 
   const GetAllServicesApi = async () => {
     dispatch(Get_Service({ req: { action: "get" }, authToken: token }))
@@ -657,7 +627,7 @@ const Engagement = () => {
                                       id={field.name}
                                       placeholder={field.feeName}
                                       value={formValues1[field.name]}
-                                      onChange={(e) => handleChange1(e)}
+                                      onChange={(e) => handleChange(e, 1)}
                                     />
                                     {/* {errors1[field.name] && (
                                       <div className="error-text">
@@ -698,12 +668,12 @@ const Engagement = () => {
                                 },
                                 {
                                   label: "Accountants",
-                                  name: "accountants",
+                                  name: "accountants1",
                                   feeName: "Fee Percentage",
                                 },
                                 {
                                   label: "Bookkeepers",
-                                  name: "bookkeepers",
+                                  name: "bookkeepers1",
                                   feeName: "Fee Percentage",
                                 },
                                 {
@@ -736,13 +706,8 @@ const Engagement = () => {
                                       id={field.name}
                                       value={formValues2[field.name]}
                                       placeholder={field.feeName}
-                                      onChange={handleChange2}
+                                      onChange={(e) => handleChange(e, 2)}
                                     />
-                                    {/* {errors2[field.name] && (
-                                      <div className="error-text">
-                                        {errors2[field.name]}
-                                      </div>
-                                    )} */}
 
                                   </div>
                                 </div>
@@ -813,7 +778,7 @@ const Engagement = () => {
                                       autoFocus={index === 0}
                                       value={formValues3[field.name]}
                                       placeholder={field.feeName}
-                                      onChange={handleChange3}
+                                      onChange={(e) => handleChange(e, 3)}
                                     />
                                     {/* {errors3[field.name] && (
                                       <div className="error-text">

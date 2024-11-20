@@ -12,7 +12,7 @@ const AddSubInternal = async (subInternal) => {
     try {
         const [check] = await pool.query(checkQuery, [name]);
         if (check.length > 0) {
-            return { status: false, message: 'Sub Internal task already exists.' };
+            return { status: false, message: 'Internal task already exists.' };
         }
         const [result] = await pool.execute(query, [name , internal_id]);
         const currentDate = new Date();
@@ -22,7 +22,7 @@ const AddSubInternal = async (subInternal) => {
               ip: subInternal.ip,
               date: currentDate.toISOString().split("T")[0],
               module_name: "Internal",
-              log_message: `created Internal Task in ${name}`,
+              log_message: `created Internal Task ${name}`,
               permission_type: "created",
               module_id: result.insertId,
             }
@@ -96,9 +96,14 @@ const removeSubInternal = async (sub_internal) => {
 const modifySubInternal = async (sub_internal) => {
     const { name, status, id } = sub_internal;
 
-    // update internal
-    const query = `UPDATE sub_internal SET name = ?, status = ? WHERE id = ?`;
+    // check for duplicate name
+    const checkQuery = `SELECT 1 FROM sub_internal WHERE name = ? AND id != ?`;
+    const updateQuery = `UPDATE sub_internal SET name = ?, status = ? WHERE id = ?`;
     try {
+        const [check] = await pool.query(checkQuery, [name, id]);
+        if (check.length > 0) {
+            return { status: false, message: 'Internal task already exists.' };
+        }
         const [[existStatus]] = await pool.execute(`SELECT status FROM sub_internal WHERE id = ?`, [id]);
         let status_change = "Deactivate"
         if (status == "1") {
