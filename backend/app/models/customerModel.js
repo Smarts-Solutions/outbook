@@ -1016,6 +1016,7 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
         const checkQuery1 = `SELECT id FROM customer_engagement_fte WHERE customer_engagement_model_id  = ?`;
         const [exist1] = await pool.execute(checkQuery1, [customer_engagement_model_id]);
         let fte_dedicated_staffing_id;
+        
 
         if (exist1.length === 0) {
             // INSER
