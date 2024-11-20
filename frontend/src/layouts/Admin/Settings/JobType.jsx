@@ -406,7 +406,7 @@ const Setting = () => {
 
     if (tasks.length == 0) {
       sweatalert.fire({
-        title: "Please at least one task",
+        title: "Please enter the task name",
         icon: "warning",
         timer: 2000,
       });

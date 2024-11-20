@@ -12,7 +12,7 @@ const createIncorporation = async (Incorporation) => {
   try {
     const [check] = await pool.query(checkQuery, [Incorporation.Incorporation]);
     if (check.length > 0) {
-      return { status: false, message: "Incorporation I already exists." };
+      return { status: false, message: "Incorporation already exists." };
     }
     const [result] = await pool.query(query, [Incorporation.Incorporation]);
   

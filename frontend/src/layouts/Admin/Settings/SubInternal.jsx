@@ -34,7 +34,7 @@ const SubInternal = () => {
                     sweatalert.fire({
                         title: response.message,
                         icon: "success",
-                        timer: 1000,
+                        timer: 10000,
                     });
                     setTimeout(() => {
                         fetchApiData()
@@ -44,7 +44,7 @@ const SubInternal = () => {
                         sweatalert.fire({
                             title: response.message,
                             icon: "error",
-                            timer: 1000,
+                            timer: 10000,
                         });
                     }
                 } else {
@@ -151,8 +151,8 @@ const SubInternal = () => {
                 {
                     type: "text",
                     name: "name",
-                    label: "Sub Internal",
-                    placeholder: "Enter Sub Internal",
+                    label: "Internal",
+                    placeholder: "Enter Internal",
                 },
                 // {
                 //     type: "select",
@@ -165,7 +165,7 @@ const SubInternal = () => {
                 //     ],
                 // },
             ],
-            title: "Sub Internal",
+            title: "Internal",
 
         });
 
@@ -180,8 +180,8 @@ const SubInternal = () => {
                 {
                     type: "text",
                     name: "name",
-                    label: "Sub Internal",
-                    placeholder: "Enter Sub Internal",
+                    label: "Internal",
+                    placeholder: "Enter Internal",
                     value: data.name,
                 },
                 {
@@ -196,7 +196,7 @@ const SubInternal = () => {
                     ],
                 },
             ],
-            title: "Sub Internal",
+            title: "Internal",
             id: data?.id,
             internal_id: data.internal_id,
         });
