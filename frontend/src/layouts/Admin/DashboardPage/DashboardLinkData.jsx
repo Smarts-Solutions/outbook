@@ -6,10 +6,12 @@ import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { Update_Customer_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
+import { Link } from 'react-router-dom';
 const JobStatus = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
+
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const [allLinkedData, setAllLinkedData] = useState([]);
@@ -426,18 +428,45 @@ const JobStatus = () => {
       <div className='report-data mt-5'>
         <div className='row '>
           <div className='col-md-12'>
-            <div className='row' >
-              <div className='d-flex justify-content-between mb-5'>
-                <div className='tab-title'>
+            <div className='' >
+              <div className=' row mb-5'>
+                <div className='tab-title col-lg-8'>
                   <h3>{location?.state?.req?.heading}</h3>
                 </div>
+                <div className='col-lg-4'>
+
                 <div className="btn btn-info text-white float-end blue-btn"
                   onClick={() => { window.history.back() }}
                 >
                   <i className="fa fa-arrow-left pe-1" /> Back
                 </div>
+                {role === "ADMIN" || role === "SUPERADMIN" ? (
+            <div className="col-md-4">
+              <Link
+                to="/admin/addcustomer"
+                className="btn btn-outline-info  fw-bold float-end border-3"
+              >
+                <i className="fa fa-plus" /> Add Customer
+              </Link>
+            </div>
+          ) : (
+            getAccessData.insert === 1 && (
+              <div className="col-md-4">
+                <Link
+                  to="/admin/addcustomer"
+                  className="btn btn-outline-info fw-bold float-end border-3"
+                >
+                  <i className="fa fa-plus" /> Add Customer
+                </Link>
+              </div>
+            )
+          )}
+                </div>
+                
               </div>
             </div>
+
+            
           </div>
         </div>
         <div className='datatable-wrapper mt-minus'>

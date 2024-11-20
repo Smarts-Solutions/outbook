@@ -1013,6 +1013,8 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
 
         const { customer_id, fte_dedicated_staffing, number_of_accountants, fee_per_accountant, number_of_bookkeepers, fee_per_bookkeeper, number_of_payroll_experts, fee_per_payroll_expert, number_of_tax_experts, fee_per_tax_expert, number_of_admin_staff, fee_per_admin_staff } = customerProcessData;
 
+        console.log("fee_per_accountant",fee_per_accountant);
+
         const checkQuery1 = `SELECT id FROM customer_engagement_fte WHERE customer_engagement_model_id  = ?`;
         const [exist1] = await pool.execute(checkQuery1, [customer_engagement_model_id]);
         let fte_dedicated_staffing_id;
