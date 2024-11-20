@@ -952,10 +952,10 @@ const Timesheet = () => {
                             <td colspan="8" >
                               <div className="ms-2" >
                                 {isExpanded ? (
-                                  <div className="d-flex justify-content-between ms-3" style={{ width: '88%' }}><input
+                                  <div className="d-flex  ms-3" style={{ width: '88%' }}><input
                                     className="form-control cursor-pointer border-radius-end"
                                     type="text"
-                                    style={{ width: '76px' }}
+                                    style={{ width: '70px' }}
                                     name="monday_hours"
 
                                     onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday, item)}
@@ -964,8 +964,8 @@ const Timesheet = () => {
                                     disabled={item.submit_status === "1" ? true : false}
                                   />
                                     <input
-                                      style={{ width: '80px' }}
-                                      className="form-control cursor-pointer"
+                                      style={{ width: '70px' }}
+                                      className="form-control cursor-pointer ms-2"
                                       type="text"
                                       name="tuesday_hours"
                                       onChange={(e) => handleHoursInput(e, index, 'tuesday_date', weekDays.tuesday, item)}
@@ -974,8 +974,8 @@ const Timesheet = () => {
                                       disabled={item.submit_status === "1" ? true : false}
                                     />
                                     <input
-                                      style={{ width: '80px' }}
-                                      className="form-control cursor-pointer"
+                                      style={{ width: '70px' }}
+                                      className="form-control cursor-pointer ms-2"
                                       type="text"
                                       name="wednesday_hours"
                                       onChange={(e) => handleHoursInput(e, index, 'wednesday_date', weekDays.wednesday, item)}
@@ -984,8 +984,8 @@ const Timesheet = () => {
                                       disabled={item.submit_status === "1" ? true : false}
                                     />
                                     <input
-                                      style={{ width: '80px' }}
-                                      className="form-control cursor-pointer"
+                                      style={{ width: '70px' }}
+                                      className="form-control cursor-pointer ms-2"
                                       type="text"
                                       name="thursday_hours"
                                       onChange={(e) => handleHoursInput(e, index, 'thursday_date', weekDays.thursday, item)}
@@ -994,8 +994,8 @@ const Timesheet = () => {
                                       disabled={item.submit_status === "1" ? true : false}
                                     />
                                     <input
-                                      style={{ width: '80px' }}
-                                      className="form-control cursor-pointer"
+                                      style={{ width: '70px' }}
+                                      className="form-control cursor-pointer ms-2"
                                       type="text"
                                       name="friday_hours"
                                       onChange={(e) => handleHoursInput(e, index, 'friday_date', weekDays.friday, item)}
@@ -1004,8 +1004,8 @@ const Timesheet = () => {
                                       disabled={item.submit_status === "1" ? true : false}
                                     />
                                     <input
-                                      style={{ width: '80px' }}
-                                      className="form-control cursor-pointer"
+                                      style={{ width: '70px' }}
+                                      className="form-control cursor-pointer ms-2"
                                       type="text"
                                       name="saturday_hours"
                                       onChange={(e) => handleHoursInput(e, index, 'saturday_date', weekDays.saturday, item)}
@@ -1014,8 +1014,8 @@ const Timesheet = () => {
                                       disabled={item.submit_status === "1" ? true : false}
                                     />
                                     <input
-                                      style={{ width: '80px' }}
-                                      className="form-control cursor-pointer"
+                                      style={{ width: '70px' }}
+                                      className="form-control cursor-pointer ms-2"
                                       type="text"
                                       name="sunday_hours"
                                       onChange={(e) => handleHoursInput(e, index, 'sunday_date', weekDays.sunday, item)}
@@ -1030,7 +1030,7 @@ const Timesheet = () => {
                                   <div className="ms-3"> <input
                                     className="form-control cursor-pointer border-radius-end"
                                     type="text"
-                                    style={{ width: '80px' }}
+                                    style={{ width: '70px' }}
                                     name="monday_hours"
 
                                     onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday, item)}

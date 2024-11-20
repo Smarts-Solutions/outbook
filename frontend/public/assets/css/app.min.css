@@ -4478,16 +4478,14 @@ select#tabSelect {
 }
 .week-data span {
     font-size: 13px;
-    margin: 0px 4px;
+    margin-right:  4px;
     width: 88px;
 }
 body .week-data .btn-link {
     padding-left: 0px !important;
     width: 90px;
 }
-.week-data span:first-child {
-    margin: 0;
-}
+
 .rdt_TableHead
 {	
 	z-index: 12 !important;		
