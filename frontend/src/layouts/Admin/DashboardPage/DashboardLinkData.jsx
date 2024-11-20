@@ -52,8 +52,6 @@ const JobStatus = () => {
     setAccessData(updatedAccess);
   }, []);
 
-
-
   const GetLinkedData = async () => {
     const data = {
       req: {
@@ -215,8 +213,6 @@ const JobStatus = () => {
     },
 
   ];
-
-
 
   const columnsCustomer = [
     {
