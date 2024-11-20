@@ -13,7 +13,9 @@ import * as Yup from "yup";
 import { getDateRange } from "../../../Utils/Comman_function";
 import Validation_Message from "../../../Utils/Validation_Message";
 import { FaBriefcase, FaPencilAlt, FaPlus, FaEye } from 'react-icons/fa';
+import { useNavigate } from "react-router-dom";
 const StaffPage = () => {
+  const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
   const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
   const role = JSON.parse(localStorage.getItem("role"));
@@ -192,8 +194,6 @@ const StaffPage = () => {
   ];
 
   const columns = [
-
-    
     {
       name: "Full Name",
       cell: (row) => (
@@ -201,7 +201,7 @@ const StaffPage = () => {
           {row.first_name + " " + row.last_name}
         </div>
       ),
-      selector: (row) =>  row.first_name + " " + row.last_name,
+      selector: (row) => row.first_name + " " + row.last_name,
       sortable: true,
       width: "180px",
       reorder: false,
@@ -215,14 +215,14 @@ const StaffPage = () => {
       name: "Email Address",
       selector: (row) => row.email,
       sortable: true,
-  
+
       reorder: false,
     },
     {
       name: "Phone",
       cell: (row) => (
-        <div title={ row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - "}>
-          { row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - "}
+        <div title={row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - "}>
+          {row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - "}
         </div>
       ),
       selector: (row) => row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - ",
@@ -277,7 +277,11 @@ const StaffPage = () => {
             <a className="dropdown-item" onClick={() => { ServiceData(row); SetCompetancy(true) }} style={{ cursor: 'pointer' }} >
               <FaPlus />  Competency
             </a>
-            <a className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => { ViewLogs(row); SetStaffViewLog(true) }} >
+            {/* <a className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => { ViewLogs(row); SetStaffViewLog(true) }} > */}
+            <a className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() =>
+              navigate(`/admin/staff/viewlogs`, { state: { row: row } })
+              } >
+
               <FaEye />  Logs
             </a>
           </div>
@@ -562,8 +566,6 @@ const StaffPage = () => {
       formik.setFieldValue("role", editStaffData.role_id || "null");
       formik.setFieldValue("status", editStaffData.status || "null");
       formik.setFieldValue("phone_code", editStaffData.phone_code || "null");
-
-
       if (editStaffData.hourminute) {
         setBudgetedHours({
           hours: editStaffData.hourminute.split(":")[0],
@@ -900,44 +902,44 @@ const StaffPage = () => {
       >
         <FormGroup>
           <Row>
-          <div className="card-body">
-                <div className="analytic-dash-activity" data-simplebar="init">
-                  <div className="simplebar-mask1">
-                    <div className="">
-                      <div className="simplebar-content" style={{ padding: 0 }}>
-                        <div className="activity">
-                          {/* Conditional Rendering */}
-                          {getActiviyLog && getActiviyLog.length > 0 ? (
-                            getActiviyLog.map((item, index) => {
-                              return (
-                                <div className="activity-info" key={index}>
-                                  <div className="icon-info-activity">
-                                    <i className="fa-solid fa-circle"></i>
-                                  </div>
-                                  <div className="activity-info-text">
-                                    <div className="">
-                                      <small className="">
-                                        {formatDate(item?.created_at)}
-                                      </small>
-                                      <p className="">{item?.log_message}</p>
-                                    </div>
+            <div className="card-body">
+              <div className="analytic-dash-activity" data-simplebar="init">
+                <div className="simplebar-mask1">
+                  <div className="">
+                    <div className="simplebar-content" style={{ padding: 0 }}>
+                      <div className="activity">
+                        {/* Conditional Rendering */}
+                        {getActiviyLog && getActiviyLog.length > 0 ? (
+                          getActiviyLog.map((item, index) => {
+                            return (
+                              <div className="activity-info" key={index}>
+                                <div className="icon-info-activity">
+                                  <i className="fa-solid fa-circle"></i>
+                                </div>
+                                <div className="activity-info-text">
+                                  <div className="">
+                                    <small className="">
+                                      {formatDate(item?.created_at)}
+                                    </small>
+                                    <p className="">{item?.log_message}</p>
                                   </div>
                                 </div>
-                              );
-                            })
-                          ) : (
-                            <div className="no-data-found">
-                              <p className="text-center">
-                                No Activity Logs Found
-                              </p>
-                            </div>
-                          )}
-                        </div>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <div className="no-data-found">
+                            <p className="text-center">
+                              No Activity Logs Found
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
           </Row>
         </FormGroup>
       </CommanModal>

@@ -207,7 +207,7 @@ const Admin_Route = () => {
               <Route path="/profile" element={<Profile />} />
               <Route path="/status" element={<Status />} />
               <Route path="/staff" element={<Staff />} />
-              <Route path="/viewlogs" element={<ViewLogs />} />
+              <Route path="/staff/viewlogs" element={<ViewLogs />} />
               <Route path="/access" element={<Access />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/add/jobtype" element={<JobType />} />
