@@ -4,7 +4,8 @@ import { linkedData } from '../../../ReduxStore/Slice/Dashboard/DashboardSlice'
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-
+import { Update_Customer_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import Swal from "sweetalert2";
 const JobStatus = () => {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -17,6 +18,45 @@ const JobStatus = () => {
   useEffect(() => {
     GetLinkedData();
   }, []);
+
+
+
+  const [getAccessData, setAccessData] = useState({
+    insert: 0,
+    update: 0,
+    delete: 0,
+    client: 0,
+  });
+
+
+
+
+  const accessData =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "customer"
+    )?.items || [];
+
+  const accessData1 =
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "client"
+    )?.items || [];
+
+  useEffect(() => {
+    if (accessData.length === 0) return;
+    const updatedAccess = { insert: 0, update: 0, delete: 0, client: 0 };
+    accessData.forEach((item) => {
+      if (item.type === "insert") updatedAccess.insert = item.is_assigned;
+      if (item.type === "update") updatedAccess.update = item.is_assigned;
+      if (item.type === "delete") updatedAccess.delete = item.is_assigned;
+    });
+    accessData1.forEach((item) => {
+      if (item.type === "view") updatedAccess.client = item.is_assigned;
+    });
+
+    setAccessData(updatedAccess);
+  }, []);
+
+
 
   const GetLinkedData = async () => {
     const data = {
@@ -42,10 +82,71 @@ const JobStatus = () => {
   }
 
 
-  const HandleJobView = (row) => {
-    navigate("/admin/job/logs", { state: { job_id: row.job_id, goto: "report", } });
-  }
+  const HandleClientView = (row) => {
+    if (row.form_process == "4") {
+      navigate("/admin/Clientlist", { state: row });
+    } else {
+      Swal.fire({
+        title: "Form not completed",
+        text: "Please complete the form",
+        icon: "error",
+        confirmButtonText: "Ok",
+      });
+    }
+  };
 
+
+  const handleChangeStatus = async (e, row) => {
+    const newStatus = e.target.value;
+
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to change the status?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, change it!",
+      cancelButtonText: "No, cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const req = { customer_id: row.id, status: newStatus };
+          const res = await dispatch(Update_Customer_Status({ req, authToken: token })).unwrap();
+
+          if (res.status) {
+            Swal.fire({
+              title: "Success",
+              text: res.message,
+              icon: "success",
+              timer: 1000,
+              showConfirmButton: false,
+            });
+            GetLinkedData(); 
+          } else {
+            Swal.fire({
+              title: "Error",
+              text: res.message,
+              icon: "error",
+              confirmButtonText: "Ok",
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            title: "Error",
+            text: "An error occurred while updating the status.",
+            icon: "error",
+            confirmButtonText: "Ok",
+          });
+        }
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire({
+          title: "Cancelled",
+          text: "Status change was not performed",
+          icon: "error",
+          confirmButtonText: "Ok",
+        });
+      }
+    });
+  };
 
   const JobColumns = [
     {
@@ -119,17 +220,41 @@ const JobStatus = () => {
 
   ];
 
-  const columnsCustomer = [
-   
+
+
+  const columnsCustomer = [ 
     {
       name: "Trading Name",
       cell: (row) => (
-        <div title={row.trading_name}  >
-          {row.trading_name}
+        <div
+          style={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap", 
+          }}
+        >
+          {(role === "ADMIN" || role === "SUPERADMIN") && row.status==1 ? (
+            <a
+              onClick={() => HandleClientView(row)}
+              style={{ cursor: "pointer", color: "#26bdf0" }}
+              title={row.trading_name}
+            >
+              {row.trading_name}
+            </a>
+          ) : (
+            getAccessData.client == 1 && row.status==1 ? <a
+              onClick={() => HandleClientView(row)}
+              style={{ cursor: "pointer", color: "#26bdf0" }}
+              title={row.trading_name}
+            >
+              {row.trading_name}
+            </a> : row.trading_name
+          )}
         </div>
       ),
+      selector: (row) => row.trading_name,
       sortable: true,
-
+      
     },
     {
       name: "Customer Code",
@@ -169,6 +294,31 @@ const JobStatus = () => {
           {row.account_manager_firstname + " " + row.account_manager_lastname}
         </div>
       ),
+    },
+    {
+      name: "Status",
+      cell: (row) => (
+        <div>
+          <div>
+          {row.form_process === "4" ? 
+           <select
+           className="form-select form-control"
+           value={row.status}
+           onChange={(e) => handleChangeStatus(e, row)}
+         >
+            <option value="0" className="text-danger">Deactive</option>
+            <option value="1" className="text-success">Active</option>
+         </select>
+          : (
+            <span className="text-warning">Inprogress</span>
+          )}
+
+           
+          </div>
+        </div>
+      ),
+      sortable: true,
+     
     },
 
   ];
