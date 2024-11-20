@@ -23,7 +23,7 @@ const AddInternal = async (Internal) => {
         ip: Internal.ip,
         date: currentDate.toISOString().split("T")[0],
         module_name: "Internal",
-        log_message: `created Internal Job/Project in ${Internal.name}`,
+        log_message: `created Internal Job/Project ${Internal.name}`,
         permission_type: "created",
         module_id: result.insertId,
       }
