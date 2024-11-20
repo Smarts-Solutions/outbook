@@ -186,6 +186,7 @@ const ClientList = () => {
       name: "Client Code",
       selector: (row) => row.client_code || "-",
       sortable: true,
+      reorder: false,
     },
     {
       name: "Client Type",
@@ -193,6 +194,7 @@ const ClientList = () => {
         row.client_type_name == null ? "-" : row.client_type_name,
       sortable: true,
       width: "150px",
+      reorder: false,
     },
     {
       name: "Status",
@@ -205,7 +207,8 @@ const ClientList = () => {
         </span>
       </div>),
       sortable: true,
-      width: '130px'
+      width: '130px',
+      reorder: false,
     },
     {
       name: "Actions",
@@ -235,6 +238,7 @@ const ClientList = () => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
+      reorder: false,
     },
   ];
 
@@ -253,6 +257,7 @@ const ClientList = () => {
       ),
       selector: (row) => row.trading_name,
       sortable: true,
+      reorder: false,
     },
 
     {

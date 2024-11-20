@@ -41,9 +41,9 @@ const Documents = ({ getAccessDataJob }) => {
   }
 
   const columns = [
-    { name: 'File Name', selector: row => row.file_name, sortable: true },
-    { name: 'File Type', selector: row => row.file_type, sortable: true },
-    { name: 'Size', selector: row => convertKBToMb(row.file_size) + "MB", sortable: true },
+    { name: 'File Name', selector: row => row.file_name, reorder: false,sortable: true },
+    { name: 'File Type', selector: row => row.file_type, reorder: false,sortable: true },
+    { name: 'Size', selector: row => convertKBToMb(row.file_size) + "MB",reorder: false, sortable: true },
     {
       name: "Actions",
       cell: (row) => (

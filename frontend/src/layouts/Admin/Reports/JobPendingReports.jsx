@@ -40,12 +40,14 @@ const JobPendingReport = () => {
     {
       name: 'Job Status',
       selector: row => row.job_status,
-      sortable: true
+      sortable: true,
+      reorder: false,
     },
     {
       name: 'Job Type Name',
       selector: row => row.job_type_name,
-      sortable: true
+      sortable: true,
+      reorder: false,
     },
 
     {
@@ -63,6 +65,7 @@ const JobPendingReport = () => {
         )
       ),
       sortable: true,
+      reorder: false,
     },
 
     // {

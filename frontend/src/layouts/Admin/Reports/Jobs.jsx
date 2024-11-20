@@ -56,6 +56,7 @@ const JobStatus = () => {
       ),
       selector: (row) => row.trading_name,
       sortable: true,
+      reorder: false,
     },
 
     {
@@ -63,6 +64,7 @@ const JobStatus = () => {
 
       selector: (row) => row.job_type_name || "-",
       sortable: true,
+      reorder: false,
     },
     
     {
@@ -72,11 +74,13 @@ const JobStatus = () => {
         " " +
         row.account_manager_officer_last_name || "-",
       sortable: true,
+      reorder: false,
     },
     {
       name: "Client Job Code",
       selector: (row) => row.client_job_code || "-",
       sortable: true,
+      reorder: false,
     },
     {
       name: "Outbook Account Manager",
@@ -85,12 +89,14 @@ const JobStatus = () => {
         " " +
         row.outbooks_acount_manager_last_name || "-",
       sortable: true,
+      reorder: false,
     },
     {
       name: "Allocated To",
       selector: (row) =>
         row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name,
       sortable: true,
+      reorder: false,
     },
     {
       name: "Timesheet",
@@ -99,11 +105,13 @@ const JobStatus = () => {
           row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
           : "-",
       sortable: true,
+      reorder: false,
     },
     {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
+      reorder: false,
     },
 
   ];

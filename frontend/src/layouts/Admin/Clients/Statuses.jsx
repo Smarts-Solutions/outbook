@@ -52,19 +52,22 @@ const Statuses = () => {
       name: "Trading Name",
       selector: (row) => row.TradingName,
       sortable: true,
+      reorder: false,
     },
     { name: "Customer Code", selector: (row) => row.Code, sortable: true },
     {
       name: "Customer Name",
       selector: (row) => row.CustomerName,
       sortable: true,
+      reorder: false,
     },
     {
       name: "Service Type",
       selector: (row) => row.ServiceType,
       sortable: true,
+      reorder: false,
     },
-    { name: "Account Manager", selector: (row) => row.JobType, sortable: true },
+    { name: "Account Manager", selector: (row) => row.JobType, sortable: true,reorder: false, },
   ];
 
   return (
