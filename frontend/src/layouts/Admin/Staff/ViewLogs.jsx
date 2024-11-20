@@ -1,321 +1,192 @@
-import React from 'react'
-import { Link } from 'react-router-dom';
-import Datatable from '../../../Components/ExtraComponents/Datatable';
-
+import React from "react";
+import { Link } from "react-router-dom";
+import Datatable from "../../../Components/ExtraComponents/Datatable";
 
 const data = [
-  { ModuleName: 'job',LogMessage: 'Account Manager Vikas Patel added a new client on 24/09/2024 at 14:09. Client Code: cli_THE_Win_00007',  SysytemIp: 'The Black T', PermissionType: 'Insert' }, 
-  { ModuleName: 'job',LogMessage: 'Account Manager Vikas Patel edited the client information on 24/09/2024 at 14:09. Client Code: cli_THE_Win_00007.',  SysytemIp: 'The Black T', PermissionType: 'Update' }, 
-  
-  
+  {
+    ModuleName: "job",
+    LogMessage:
+      "Account Manager Vikas Patel added a new client on 24/09/2024 at 14:09. Client Code: cli_THE_Win_00007",
+    SysytemIp: "The Black T",
+    PermissionType: "Insert",
+  },
+  {
+    ModuleName: "job",
+    LogMessage:
+      "Account Manager Vikas Patel edited the client information on 24/09/2024 at 14:09. Client Code: cli_THE_Win_00007.",
+    SysytemIp: "The Black T",
+    PermissionType: "Update",
+  },
 ];
 
-
 const columns = [
-  { name: 'Module Name', selector: row => row.ModuleName , sortable: true,width:'150px' },
-  { name: 'Log Message', selector: row => row.LogMessage, sortable: true },
-  { name: 'System Ip', selector: row => row.SysytemIp, sortable: true,width:'250px' },
-  { name: 'Permission Type', selector: row => row.PermissionType, sortable: true},
- 
-]
-
+  {
+    name: "Module Name",
+    selector: (row) => row.ModuleName,
+    sortable: true,
+    width: "150px",
+  },
+  { name: "Log Message", selector: (row) => row.LogMessage, sortable: true },
+  {
+    name: "System Ip",
+    selector: (row) => row.SysytemIp,
+    sortable: true,
+    width: "250px",
+  },
+  {
+    name: "Permission Type",
+    selector: (row) => row.PermissionType,
+    sortable: true,
+  },
+];
 
 const ViewLogs = () => {
   return (
-    <div className='container-fluid'>
-        
-    <div className="row ">
-     <div className="col-sm-12">
-  <div className="page-title-box">
-    <div className="row align-items-start">
-      <div className="col-md-8">
-      <>
-    <ul className="nav nav-pills rounded-tabs"  role="tablist">
-      <li className="nav-item" role="presentation">
-        <button
-          className="nav-link active"
-          id="this-week-tab"
-          data-bs-toggle="pill"
-          data-bs-target="#this-week"
-          type="button"
-          role="tab"
-          aria-controls="this-week"
-          aria-selected="true"
-        >
-          This week
-        </button>
-      </li>
-      <li className="nav-item" role="presentation">
-        <button
-          className="nav-link"
-          id="last-week-tab"
-          data-bs-toggle="pill"
-          data-bs-target="#last-week"
-          type="button"
-          role="tab"
-          aria-controls="last-week"
-          aria-selected="false"
-        >
-          Last week
-        </button>
-      </li>
-      <li className="nav-item" role="presentation">
-        <button
-          className="nav-link"
-          id="this-month-tab"
-          data-bs-toggle="pill"
-          data-bs-target="#this-month"
-          type="button"
-          role="tab"
-          aria-controls="this-month"
-          aria-selected="false"
-        >
-          This month
-        </button>
-      </li>
-      <li className="nav-item" role="presentation">
-        <button
-          className="nav-link"
-          id="last-month-tab"
-          data-bs-toggle="pill"
-          data-bs-target="#last-month"
-          type="button"
-          role="tab"
-          aria-controls="last-month"
-          aria-selected="false"
-        >
-          Last month
-        </button>
-      </li>
-      <li className="nav-item" role="presentation">
-        <button
-          className="nav-link"
-          id="last-quarter-tab"
-          data-bs-toggle="pill"
-          data-bs-target="#last-quarter"
-          type="button"
-          role="tab"
-          aria-controls="last-quarter"
-          aria-selected="false"
-        >
-          Last quarter
-        </button>
-      </li>
-      <li className="nav-item" role="presentation">
-        <button
-          className="nav-link"
-          id="this-6-months-tab"
-          data-bs-toggle="pill"
-          data-bs-target="#this-6-months"
-          type="button"
-          role="tab"
-          aria-controls="this-6-months"
-          aria-selected="false"
-        >
-          This 6 months
-        </button>
-      </li>
-      <li className="nav-item" role="presentation">
-        <button
-          className="nav-link"
-          id="last-6-months-tab"
-          data-bs-toggle="pill"
-          data-bs-target="#last-6-months"
-          type="button"
-          role="tab"
-          aria-controls="last-6-months"
-          aria-selected="false"
-        >
-          Last 6 months
-        </button>
-      </li>
-      <li className="nav-item" role="presentation">
-        <button
-          className="nav-link"
-          id="this-year-tab"
-          data-bs-toggle="pill"
-          data-bs-target="#this-year"
-          type="button"
-          role="tab"
-          aria-controls="this-year"
-          aria-selected="false"
-        >
-          This year
-        </button>
-      </li>
-      <li className="nav-item" role="presentation">
-        <button
-          className="nav-link"
-          id="last-year-tab"
-          data-bs-toggle="pill"
-          data-bs-target="#last-year"
-          type="button"
-          role="tab"
-          aria-controls="last-year"
-          aria-selected="false"
-        >
-          Last year
-        </button>
-      </li>
-      <li className="nav-item" role="presentation">
-        <button
-          className="nav-link"
-          id="custom-tab"
-          data-bs-toggle="pill"
-          data-bs-target="#custom"
-          type="button"
-          role="tab"
-          aria-controls="custom"
-          aria-selected="false"
-        >
-          Custom
-        </button>
-      </li>
-    </ul>
-   
-  </>
-
+    <div className="container-fluid">
+      <div className="content-title">
+        <div className="tab-title">
+          <h3 className="mt-0">View Logs</h3>
+        </div>
       </div>
-{/* 
-      <div className='col-md-4 '>
-                <ul className="list-unstyled personal-detail mb-0 report-data">
-                <li className="">
-    <b>Staff Name </b>: mannat
-  </li>
-  <li className="">
-    <b>phone </b>: +91 23456 78910
-  </li>
-  <li className="">
-    <b>Email </b>: mannat.theme@gmail.com
-  </li>
- 
-</ul>
+      <div className="row report-data mt-5">
+        <div className="col-md-12">
+          <div className="mapWrapper">
+            <div className="row">
+              <div className="itemBar">
+                <div className="box">
+                  <div className="tooltip--multiline report-data">
+                    <div>
+                      <ul>
+                        <li>
+                          <b>11:30:51 AM</b>
+                        </li>
+                        <p>
+                          Admin Amit Amit sent the missing logs for job code:
+                          QQQ_QQQ_000023
+                        </p>
+                      </ul>
+                    </div>
+                    <div>
+                      <ul>
+                        <li>
+                          <b>11:13:50 AM</b>
+                        </li>
+                        <p>
+                          Admin Amit Amit sent the queries for job code:
+                          QQQ_QQQ_000023
+                        </p>
+                      </ul>
+                    </div>
+                    <div>
+                      <ul>
+                        <li>
+                          <b>11:08:55 AM</b>
+                        </li>
+                        <p>Admin Amit Amit created job code: QQQ_QQQ_000023</p>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
 
-                </div> */}
-
-    </div>
-
-  </div>
-
-</div>
-
-</div>
-<div className="tab-content" id="pills-tabContent">
-      <div
-        className="tab-pane fade show active"
-        id="this-week"
-        role="tabpanel"
-        aria-labelledby="this-week-tab"
-      >
-        <div className='report-data'>
-            <div className='row'>
-              <div className='col-md-8'>
-              <div className='tab-title'>
-          <h3>Activity Log</h3>
-          </div>
-          <div className='job-filter-btn' style={{marginTop:'30px'}}>
-          <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
-          <button className='xl-sheet btn btn-info text-white fw-normal'><i className="fas fa-file-excel"></i></button>
-          </div>
+                <div className="itemInfo">
+                  <span>
+                    <i className="fa-solid fa-circle-info pe-1" />
+                  </span>
+                </div>
+                {/*
+                 */}
+                <div className="itemDate">4/15/1997</div>
+                {/*
+                 */}
               </div>
-              <div className='col-md-4'>
-              
-                <ul className="list-unstyled personal-detail mb-0 report-data">
-                <li className="">
-    <b>Staff Name </b>: mannat
-  </li>
-  <li className="">
-    <b>phone </b>: +91 23456 78910
-  </li>
-  <li className="">
-    <b>Email </b>: mannat.theme@gmail.com
-  </li>
- 
-</ul>
 
-               
+              <div className="itemBar">
+                <div className="itemInfo">
+                  <span>
+                    <i className="fa-solid fa-circle-info pe-1" />
+                  </span>
+                </div>
+
+                <div className="itemDate">2004</div>
+              </div>
+
+              <div className="itemBar">
+                <div className="itemInfo">
+                  <span>
+                    <i className="fa-solid fa-circle-info pe-1" />
+                  </span>
+                </div>
+
+                <div className="itemDate">2010</div>
               </div>
             </div>
-            
-                
-       
-          <div className='datatable-wrapper mt-minus'>
-           
-       <Datatable 
-       filter={true}
-       columns={columns} data={data} />
-       </div>
-       </div>
-      </div>
-      <div
-        className="tab-pane fade"
-        id="last-week"
-        role="tabpanel"
-        aria-labelledby="last-week-tab"
-      >
-        <Datatable columns={columns} data={data} />
-      </div>
-      <div
-        className="tab-pane fade"
-        id="last-month"
-        role="tabpanel"
-        aria-labelledby="last-month-tab"
-      >
-        Last month's content...
-      </div>
-      <div
-        className="tab-pane fade"
-        id="last-quarter"
-        role="tabpanel"
-        aria-labelledby="last-quarter-tab"
-      >
-        Last quarter's content...
-      </div>
-      <div
-        className="tab-pane fade"
-        id="this-6-months"
-        role="tabpanel"
-        aria-labelledby="this-6-months-tab"
-      >
-        This 6 months' content...
-      </div>
-      <div
-        className="tab-pane fade"
-        id="last-6-months"
-        role="tabpanel"
-        aria-labelledby="last-6-months-tab"
-      >
-        Last 6 months' content...
-      </div>
-      <div
-        className="tab-pane fade"
-        id="this-year"
-        role="tabpanel"
-        aria-labelledby="this-year-tab"
-      >
-        This year's content...
-      </div>
-      <div
-        className="tab-pane fade"
-        id="last-year"
-        role="tabpanel"
-        aria-labelledby="last-year-tab"
-      >
-        Last year's content...
-      </div>
-      <div
-        className="tab-pane fade"
-        id="custom"
-        role="tabpanel"
-        aria-labelledby="custom-tab"
-      >
-        Custom content...
+            <div className="row">
+              <div className="itemBar">
+                <div className="itemInfo">
+                  <span>
+                    <i className="fa-solid fa-circle-info pe-1" />
+                  </span>
+                </div>
+
+                <div className="itemDate">2019</div>
+              </div>
+
+              <div className="itemBar">
+                <div className="itemInfo">
+                  <span>
+                    <i className="fa-solid fa-circle-info pe-1" />
+                  </span>
+                </div>
+
+                <div className="itemDate">2014</div>
+              </div>
+
+              <div className="itemBar">
+                <div className="itemInfo">
+                  <span>
+                    <i className="fa-solid fa-circle-info pe-1" />
+                  </span>
+                </div>
+
+                <div className="itemDate">2012</div>
+              </div>
+            </div>
+            <div className="row">
+              <div className="itemBar">
+                <div className="itemInfo">
+                  <span>
+                    <i className="fa-solid fa-circle-info pe-1" />
+                  </span>
+                </div>
+
+                <div className="itemDate">2019</div>
+              </div>
+
+              <div className="itemBar">
+                <div className="itemInfo">
+                  <span>
+                    <i className="fa-solid fa-circle-info pe-1" />
+                  </span>
+                </div>
+
+                <div className="itemDate">2019</div>
+              </div>
+
+              <div className="itemBar">
+                <div className="itemInfo">
+                  <span>
+                    <i className="fa-solid fa-circle-info pe-1" />
+                  </span>
+                </div>
+
+                <div className="itemDate">Nov 2019</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    </div>
+  );
+};
 
-                   
-  )
-}
-
-export default ViewLogs
+export default ViewLogs;
