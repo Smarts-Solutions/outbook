@@ -186,6 +186,7 @@ const ClientList = () => {
       name: "Client Code",
       selector: (row) => row.client_code || "-",
       sortable: true,
+      reorder: false,
     },
     {
       name: "Client Type",
@@ -193,6 +194,7 @@ const ClientList = () => {
         row.client_type_name == null ? "-" : row.client_type_name,
       sortable: true,
       width: "150px",
+      reorder: false,
     },
     {
       name: "Status",
@@ -205,7 +207,8 @@ const ClientList = () => {
         </span>
       </div>),
       sortable: true,
-      width: '130px'
+      width: '130px',
+      reorder: false,
     },
     {
       name: "Actions",
@@ -235,6 +238,7 @@ const ClientList = () => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
+      reorder: false,
     },
   ];
 
@@ -253,6 +257,7 @@ const ClientList = () => {
       ),
       selector: (row) => row.trading_name,
       sortable: true,
+      reorder: false,
     },
 
     {
@@ -260,12 +265,14 @@ const ClientList = () => {
 
       selector: (row) => row.client_trading_name || "-",
       sortable: true,
+      reorder: false,
     },
     {
       name: "Job Type",
 
       selector: (row) => row.job_type_name || "-",
       sortable: true,
+      reorder: false,
     },
     {
       name: "Status",
@@ -287,7 +294,8 @@ const ClientList = () => {
         </div>
       ),
       sortable: true,
-      width: "325px"
+      width: "325px",
+      reorder: false,
     },
     {
       name: "Account Manager",
@@ -296,11 +304,13 @@ const ClientList = () => {
         " " +
         row.account_manager_officer_last_name || "-",
       sortable: true,
+      reorder: false,
     },
     {
       name: "Client Job Code",
       selector: (row) => row.client_job_code || "-",
       sortable: true,
+      reorder: false,
     },
     {
       name: "Outbook Account Manager",
@@ -309,12 +319,14 @@ const ClientList = () => {
         " " +
         row.outbooks_acount_manager_last_name || "-",
       sortable: true,
+      reorder: false,
     },
     {
       name: "Allocated To",
       selector: (row) =>
         row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name,
       sortable: true,
+      reorder: false,
     },
     {
       name: "Timesheet",
@@ -323,11 +335,13 @@ const ClientList = () => {
           row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
           : "-",
       sortable: true,
+      reorder: false,
     },
     {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
+      reorder: false,
     },
     {
       name: "Actions",
@@ -356,6 +370,7 @@ const ClientList = () => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
+      reorder: false,
     },
   ];
 

@@ -194,11 +194,11 @@ const Queries = ({getAccessDataJob , goto}) => {
   };
 
   const columns = [
-    { name: 'Query Title', selector: row => row.title, sortable: true },
-    { name: 'Query Sent Date', selector: row => convertDate(row.query_sent_date), sortable: true },
-    { name: 'Missing Queries Prepared Date', selector: row => convertDate(row.missing_queries_prepared_date), sortable: true },
-    { name: 'Final Query Response Received Date', selector: row => convertDate(row.final_query_response_received_date), sortable: true },
-    { name: 'Status', selector: row => row.status == 1 ? "Complete" : "Incomplete", sortable: true },
+    { name: 'Query Title', selector: row => row.title, reorder: false,sortable: true },
+    { name: 'Query Sent Date', selector: row => convertDate(row.query_sent_date),reorder: false, sortable: true },
+    { name: 'Missing Queries Prepared Date', selector: row => convertDate(row.missing_queries_prepared_date),reorder: false, sortable: true },
+    { name: 'Final Query Response Received Date', selector: row => convertDate(row.final_query_response_received_date), reorder: false,sortable: true },
+    { name: 'Status', selector: row => row.status == 1 ? "Complete" : "Incomplete",reorder: false, sortable: true },
     {
       name: "Actions",
       cell: (row) => (
@@ -218,6 +218,7 @@ const Queries = ({getAccessDataJob , goto}) => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
+      reorder: false,
     },
   ];
 

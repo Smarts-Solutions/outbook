@@ -645,7 +645,7 @@ const Setting = () => {
             >
               <thead className="table-light">
                 <tr>
-                  <th className="">SR. No</th>
+                  <th className="">Sr. No</th>
                   <th className="tabel_left">Task</th>
                 </tr>
               </thead>
