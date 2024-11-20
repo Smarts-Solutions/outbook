@@ -719,11 +719,9 @@ const ClientList = () => {
                       <ul className="list-unstyled faq-qa">
                         <li className="mb-4">
                           <h6 className="">Trading Address : {informationData && informationData.trading_address || "NA"}</h6>
-
                         </li>
                         <li className="mb-4">
                           <h6 className="">VAT Number : {informationData && informationData.vat_number || "NA"}</h6>
-
                         </li>
                       </ul>
                     </div>
