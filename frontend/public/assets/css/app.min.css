@@ -4146,7 +4146,8 @@ span.breadcrumb__desc {
 }
 
 .itemBar:hover .tooltip--multiline {
-	display: block;
+    display: block;
+    overflow-x: hidden;
 }
 
 .tooltip--multiline {
