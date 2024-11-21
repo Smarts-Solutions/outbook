@@ -3194,15 +3194,14 @@ span.sidebar-icons {
 	box-shadow: 2px 2px 1px #333547;
 }
 
-.datatable-container .rdt_TableCol,
-.datatable-container .rdt_TableCell {
-	font-size: 14px;
-	color: #4B4B4B;
-	font-weight: 600;
-	text-transform: none;
-	padding: 10px 15px;
+.datatable-container .rdt_TableCol, .datatable-container .rdt_TableCell {
+    font-size: 14px;
+    color: #4B4B4B;
+    font-weight: 600;
+    text-transform: none;
+    padding: 10px 15px;
+    white-space: normal;
 }
-
 .datatable-container .rdt_TableCol {
 	color: #000;
 	font-size: 16px;
