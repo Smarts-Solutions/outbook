@@ -99,6 +99,32 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
       var fileArray;
       if (files && typeof files[Symbol.iterator] === "function") {
         fileArray = Array.from(files);
+
+        
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "image/png",
+      "image/jpg",
+      "image/jpeg",
+    ];
+
+    const validFiles = fileArray.filter((file) =>
+      allowedTypes.includes(file.type)
+    );
+
+    if (validFiles.length !== fileArray.length) {
+     
+      sweatalert.fire({
+        icon: "warning",
+        title: "warning",
+        text: "Only PDFs, DOCS, PNG, JPG, and JPEG are allowed.",
+      });
+      e.target.value = ""; 
+      return;
+    }
+
         setMissionAllInputLogData({ ...missionLogAllInputData, missing_log_document: fileArray });
       }
     }
@@ -106,9 +132,6 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
       setMissionAllInputLogData({ ...missionLogAllInputData, [name]: value });
     }
   };
-
-
-
 
 
   const GetMissingLogDetails = async () => {
@@ -424,7 +447,6 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                 id="missing_log_document"
                 name="missing_log_document"
                 onChange={(event) => { handleChange(event) }}
-                // className="custom-file-input form-control"
                 className={errors1["missing_log_document"] ? "error-field custom-file-input form-control" : "custom-file-input form-control"}
               />
               {errors1["missing_log_document"] && (

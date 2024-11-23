@@ -107,31 +107,6 @@ const Documents = ({ getAccessDataJob }) => {
           columns={columns} data={jobDocumentListData && jobDocumentListData} />
       </div>
 
-
-
-      {/* <div id="MissingLog8" className="col-lg-6">
-            <div className="mb-3">
-              <label htmlFor="firstNameinput" className="form-label">
-                Missing Log Document
-              </label>
-              <input
-                type="file"
-                ref={fileInputRef}
-                multiple
-                id="missing_log_document"
-                name="missing_log_document"
-                onChange={(event) => { handleChange(event) }}
-                className="custom-file-input form-control"
-              />
-              {errors1["missing_log_document"] && (
-                <div className="error-text">
-                  {errors1["missing_log_document"]}
-                </div>
-              )}
-            </div>
-          </div> */}
-
-
       <CommonModal
         isOpen={uploadfiles}
         backdrop="static"
