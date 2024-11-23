@@ -324,11 +324,11 @@ const getClient = async (client) => {
             FROM client_contact_details cd
             WHERE cd.client_id = clients.id
         )
-    WHERE clients.customer_id = ? OR clients.staff_created_id = ?
+    WHERE clients.customer_id = ?
  ORDER BY 
     clients.id DESC;
     `;
-      const [result] = await pool.execute(query, [customer_id, StaffUserId]);
+      const [result] = await pool.execute(query, [customer_id]);
       return { status: true, message: "success.", data: result };
     }
 
@@ -417,13 +417,22 @@ const getClient = async (client) => {
         clients.id DESC
             `;
           const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId,StaffUserId]);
+          if(resultAllocated.length == 0){
+            return { status: true, message: "success.", data: resultAllocated };
+          }
+          const uniqueData = resultAllocated.filter((value, index, self) =>
+            index === self.findIndex((t) => t.id === value.id)
+          );
           return { status: true, message: "success.", data: resultAllocated };
 
         }
         // Account Manger
         else if (rows[0].role_id == 4) {
+
+          console.log("Account Manger");
           const query = `
            SELECT  
+          clients.customer_id AS customer_id,
           clients.id AS id,
           clients.trading_name AS client_name,
           clients.status AS status,
@@ -458,7 +467,7 @@ const getClient = async (client) => {
         LEFT JOIN 
           customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id    
         WHERE 
-          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? AND jobs.client_id = clients.id) OR clients.staff_created_id = ?
+          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? AND jobs.client_id = clients.id) OR clients.staff_created_id = ? 
         GROUP BY 
         CASE 
             WHEN jobs.account_manager_id = ? THEN jobs.client_id
@@ -467,8 +476,18 @@ const getClient = async (client) => {
         ORDER BY 
         clients.id DESC
             `;
-          const [resultAccounrManage] = await pool.execute(query, [StaffUserId,StaffUserId ,customer_id, StaffUserId,StaffUserId]);
-          return { status: true, message: "success.", data: resultAccounrManage };
+          const [resultAccounrManage] = await pool.execute(query, [StaffUserId,StaffUserId ,customer_id,StaffUserId,StaffUserId]);
+          console.log("resultAccounrManage ",resultAccounrManage);
+          if(resultAccounrManage.length == 0){
+            return { status: true, message: "success.", data: resultAccounrManage };
+          }
+
+          const filteredData = resultAccounrManage.filter(item => item.customer_id === customer_id);
+
+          const uniqueData = filteredData.filter((value, index, self) =>
+            index === self.findIndex((t) => t.id === value.id)
+          );
+          return { status: true, message: "success.", data: uniqueData };
 
         }
         // Reviewer
@@ -508,16 +527,22 @@ const getClient = async (client) => {
           (jobs.reviewer = ? AND clients.customer_id = ? ) OR clients.staff_created_id = ?
         GROUP BY 
         CASE 
-            WHEN jobs.reviewer = ? THEN jobs.client_id
+            WHEN jobs.reviewer = ? THEN jobs.client_id 
             ELSE clients.id
         END
         ORDER BY 
         clients.id DESC
             `;
-          const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id,StaffUserId, StaffUserId]);
 
-          console.log("resultReviewer", resultReviewer);
-          return { status: true, message: "success.", data: resultReviewer };
+
+            const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id,StaffUserId, StaffUserId]);
+            if(resultReviewer.length == 0){
+              return { status: true, message: "success.", data: resultReviewer };
+            }
+            const uniqueData = resultReviewer.filter((value, index, self) =>
+              index === self.findIndex((t) => t.id === value.id)
+            );
+          return { status: true, message: "success.", data: uniqueData };
 
         }
 

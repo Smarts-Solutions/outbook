@@ -495,7 +495,7 @@ const Timesheet = () => {
       if (updatedRows[index].total_hours > parseFloat(convertTimeFormat(updatedRows[index].staffs_hourminute))) {
         sweatalert.fire({
           icon: 'warning',
-          title: "Your total allotted time has exceeded.",
+          title: "Your total allocated time has been exceeded",
           timerProgressBar: true,
           showConfirmButton: true,
           timer: 3000
