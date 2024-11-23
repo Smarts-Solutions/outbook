@@ -13,7 +13,7 @@ const Filter = (req, file, cb) => {
     if (allowedMimeTypes.includes(file.mimetype)) {
         cb(null, true);
     } else {
-        cb(new Error("Invalid file type. Only PDFs, DOCS, PNG, JPG, and JPEG are allowed."), false);
+        cb({status:false,msg:"Invalid file type. Only PDFs, DOCS, PNG, JPG, and JPEG are allowed."}, false);
     }
 };
 

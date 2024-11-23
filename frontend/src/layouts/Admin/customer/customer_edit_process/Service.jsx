@@ -568,20 +568,20 @@ const Service = () => {
                                               data.data.map(
                                                 (data1, jobIndex) => (
                                                   <div
-                                                    className={`accordion-item ${data1.type}`}
+                                                    className={`accordion-item ${data1.id}`}
                                                     key={jobIndex}
 
                                                   >
                                                     <h2
                                                       className="accordion-header"
-                                                      id={`sub-headingOne${data1.type}`}
+                                                      id={`sub-headingOne${data1.id}`}
                                                       onClick={() => getCheckListData(item.id, data1)}
                                                     >
                                                       <button
                                                         className="accordion-button collapsed"
                                                         type="button"
                                                         data-bs-toggle="collapse"
-                                                        data-bs-target={`#sub-collapseOne${data1.type}`}
+                                                        data-bs-target={`#sub-collapseOne${data1.id}`}
                                                         aria-expanded="true"
                                                         aria-controls="collapseOne"
                                                       >
@@ -589,9 +589,9 @@ const Service = () => {
                                                       </button>
                                                     </h2>
                                                     <div
-                                                      id={`sub-collapseOne${data1.type}`}
+                                                      id={`sub-collapseOne${data1.id}`}
                                                       className="accordion-collapse collapse"
-                                                      aria-labelledby={`sub-headingOne${data1.type}`}
+                                                      aria-labelledby={`sub-headingOne${data1.id}`}
                                                       data-bs-parent="#sub-accordionExample"
                                                     >
                                                       <div className="accordion-body">
@@ -942,6 +942,10 @@ const Service = () => {
               </div>
             </div>
           </div>
+
+
+
+
 
           <CommanModal
             isOpen={getModal}

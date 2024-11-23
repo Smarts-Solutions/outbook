@@ -21,12 +21,39 @@ const Paper = () => {
   const handleFileChange = (event) => {
     const files = event.currentTarget.files;
     var fileArray;
+
     if (files && typeof files[Symbol.iterator] === "function") {
       fileArray = Array.from(files);
-      setNewFiles(fileArray);
-    } 
+    } else {
+      return;
+    }
 
-    const previewArray = fileArray.map((file) => {
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "image/png",
+      "image/jpg",
+      "image/jpeg",
+    ];
+
+    const validFiles = fileArray.filter((file) =>
+      allowedTypes.includes(file.type)
+    );
+
+    if (validFiles.length !== fileArray.length) {
+     
+      sweatalert.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Only PDFs, DOCS, PNG, JPG, and JPEG are allowed.",
+      });
+      return;
+    }
+
+    setNewFiles(validFiles);
+
+    const previewArray = validFiles.map((file) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       return new Promise((resolve) => {

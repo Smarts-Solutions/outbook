@@ -102,6 +102,7 @@ const Paper = () => {
   }, []);
 
   const handleSubmit = async (values) => {
+
     const data1 = {
       req: { fileData: newFiles, customer_id: address, authToken: token },
     };
@@ -121,6 +122,7 @@ const Paper = () => {
         }
       })
       .catch((error) => {
+          console.log(error)
         return;
       });
   };

@@ -88,12 +88,46 @@ const ReusableForm = ({
                         <select
                           className={formik.touched[field.name] && formik.errors[field.name] ? "default-select wide error-field form-select" : " default-select wide form-select"}
                           id={field.name}
-                          autoFocus={index === 0 ? true : false}  
+                          autoFocus={index === 0 ? true : false}
                           style={{ background: field.disable ? "#eeeeee" : "" }}
                           {...formik.getFieldProps(field.name)}
                           disabled={field.disable}
                         >
                           <option value="" selected disable={field.disable}>  Please Select {field.label} </option>
+                          {field.options.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        {formik.touched[field.name] &&
+                          formik.errors[field.name] && (
+                            <div className="error-text">
+                              {formik.errors[field.name]}
+                            </div>
+                          )}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : field.type === "select1" ? (
+                <>
+                  <div className={`col-lg-${title === "update_theme" ? 12 : field.col_size}`}  >
+                    <div className=" row">
+                      <label className={`col-lg-${field.label_size}`} htmlFor={field.name} >
+                        {field.label}
+                        <span className="text-danger">*</span>
+                      </label>
+                      <div className={`col-lg-${title === "addgroup" ? 12 : 12}`}  >
+                        <select
+                          className={formik.touched[field.name] && formik.errors[field.name] ? "default-select wide error-field form-select" : " default-select wide form-select"}
+                          id={field.name}
+                          autoFocus={index === 0 ? true : false}
+                          style={{ background: field.disable ? "#eeeeee" : "" }}
+                          {...formik.getFieldProps(field.name)}
+                          disabled={field.disable}
+                        >
+                          
                           {field.options.map((option) => (
                             <option key={option.value} value={option.value}>
                               {option.label}
@@ -250,8 +284,8 @@ const ReusableForm = ({
                       <div style={{ position: "relative" }}>
                         <input
                           id={field.name}
-                          autoFocus={index === 0 ? true : false}  
-                          type={  passwordVisible[field.name] ? "text" : field.type }
+                          autoFocus={index === 0 ? true : false}
+                          type={passwordVisible[field.name] ? "text" : field.type}
                           placeholder={field.label}
                           {...formik.getFieldProps(field.name)}
                           className={formik.touched[field.name] && formik.errors[field.name] ? "form-control error-field" : " form-control"}
@@ -301,7 +335,7 @@ const ReusableForm = ({
                             type={field.type}
                             name={field.name}
                             // className="form-control"
-                          autoFocus={index === 0 ? true : false}  
+                            autoFocus={index === 0 ? true : false}
 
                             className={formik.touched[field.name] && formik.errors[field.name] ? "form-control error-field" : " form-control"}
                             id={field.name}
@@ -380,7 +414,7 @@ const ReusableForm = ({
                           placeholder={`Enter ${field.label}`}
                           {...formik.getFieldProps(field.name)}
                           defaultValue=""
-                          autoFocus={index === 0 ? true : false}  
+                          autoFocus={index === 0 ? true : false}
 
                           readOnly={field.disable}
                           autoComplete="new-email"
@@ -418,7 +452,7 @@ const ReusableForm = ({
                           placeholder={`Enter ${field.label}`}
                           {...formik.getFieldProps(field.name)}
                           defaultValue=""
-                          autoFocus={index === 0 ? true : false}  
+                          autoFocus={index === 0 ? true : false}
 
                           readOnly={field.disable}
                           autoComplete="new-email"
@@ -436,41 +470,41 @@ const ReusableForm = ({
                     </div>
                   </div>
                 </>
-              )  : field.type === "phone" ? (
+              ) : field.type === "phone" ? (
                 <>
-                <div className={`col-lg-${title === "update_theme" ? 12 : field.col_size}`}  >
-                  <div className=" row">
-                    <label className={`col-lg-${field.label_size}`} htmlFor={field.name} >
-                      {field.label}
-                      <span className="text-danger">*</span>
-                    </label>
-                    <div className={`col-lg-${title === "addgroup" ? 12 : 12}`}  >
-                      <select
-                        className={formik.touched[field.name] && formik.errors[field.name] ? "default-select wide error-field form-select" : " default-select wide form-select"}
-                        id={field.name}
-                        autoFocus={index === 0 ? true : false}  
-                        style={{ background: field.disable ? "#eeeeee" : "" }}
-                        {...formik.getFieldProps(field.name)}
-                        disabled={field.disable}
-                      >
-                       
-                        
-                        {field.options.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                      {formik.touched[field.name] &&
-                        formik.errors[field.name] && (
-                          <div className="error-text">
-                            {formik.errors[field.name]}
-                          </div>
-                        )}
+                  <div className={`col-lg-${title === "update_theme" ? 12 : field.col_size}`}  >
+                    <div className=" row">
+                      <label className={`col-lg-${field.label_size}`} htmlFor={field.name} >
+                        {field.label}
+                        <span className="text-danger">*</span>
+                      </label>
+                      <div className={`col-lg-${title === "addgroup" ? 12 : 12}`}  >
+                        <select
+                          className={formik.touched[field.name] && formik.errors[field.name] ? "default-select wide error-field form-select" : " default-select wide form-select"}
+                          id={field.name}
+                          autoFocus={index === 0 ? true : false}
+                          style={{ background: field.disable ? "#eeeeee" : "" }}
+                          {...formik.getFieldProps(field.name)}
+                          disabled={field.disable}
+                        >
+
+
+                          {field.options.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        {formik.touched[field.name] &&
+                          formik.errors[field.name] && (
+                            <div className="error-text">
+                              {formik.errors[field.name]}
+                            </div>
+                          )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </>
+                </>
               ) : field.type === "number" ? (
                 <>
                   <div className={`col-lg-${field.col_size}`}>
@@ -528,7 +562,7 @@ const ReusableForm = ({
                           placeholder={`Enter ${field.label}`}
                           {...formik.getFieldProps(field.name)}
                           defaultValue=""
-                          autoFocus={index === 0 ? true : false}  
+                          autoFocus={index === 0 ? true : false}
 
                           readOnly={field.disable}
                           autoComplete="new-email"
@@ -612,7 +646,7 @@ const ReusableForm = ({
               className="btn btn-secondary m-2 "
               onClick={closeBtn}
             >
-             <i className='fa fa-xmark'></i>  Cancel
+              <i className='fa fa-xmark'></i>  Cancel
             </button>
 
             <button
@@ -621,7 +655,7 @@ const ReusableForm = ({
               type="submit"
               disabled={formik.isSubmitting}
             >
-             <i className='far fa-save'></i> {btn_name}
+              <i className='far fa-save'></i> {btn_name}
             </button>
           </div>
         )}
