@@ -1426,14 +1426,15 @@ const jobUpdate = async (job) => {
     vat_reconciliation,
     bookkeeping,
     processing_type,
-    invoiced,
-    currency,
-    invoice_value,
-    invoice_date,
-    invoice_hours,
-    invoice_remark,
     status_type
   } = job;
+
+  let  invoiced = job.invoiced == "" || job.invoiced == "0" ? '0' : '1';
+  let  currency = job.currency == ""  ? 0 : job.currency;
+  let  invoice_value = job.invoice_value == ""  ? null : job.invoice_value;
+  let  invoice_date = job.invoice_date == ""  ? null : job.invoice_date;
+  let  invoice_hours = job.invoice_hours == ""  ? null : job.invoice_hours;
+  let  invoice_remark = job.invoice_remark == ""  ? null : job.invoice_remark
  
   
 
