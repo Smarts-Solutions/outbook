@@ -268,9 +268,9 @@ const StaffPage = () => {
             <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
           </button>
           <div className="dropdown-menu custom-dropdown" aria-labelledby="dropdownMenuButton">
-            <a className="dropdown-item" onClick={() => { setPortfolio(true); GetAllCustomer() }} style={{ cursor: 'pointer' }}>
+            {/* <a className="dropdown-item" onClick={() => { setPortfolio(true); GetAllCustomer() }} style={{ cursor: 'pointer' }}>
               <FaPencilAlt />  Portfolio
-            </a>
+            </a> */}
             <a className="dropdown-item" onClick={() => { setEditShowModel(true); setEditStaff(true); setEditStaffData(row) }} style={{ cursor: 'pointer' }}>
               <FaBriefcase />  Edit
             </a>

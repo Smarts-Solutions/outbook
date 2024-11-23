@@ -402,7 +402,12 @@ const CreateJob = () => {
       due_on: jobData.DueOn,
       submission_deadline: jobData.SubmissionDeadline,
       customer_deadline_date: jobData.CustomerDeadlineDate,
-      sla_deadline_date: jobData.SLADeadlineDate,
+      //sla_deadline_date: jobData.SLADeadlineDate,
+       
+      sla_deadline_date: jobData.SLADeadlineDate
+        ? jobData.SLADeadlineDate
+        : new Date().toISOString().split("T")[0],
+
       internal_deadline_date: jobData.InternalDeadlineDate,
       filing_Companies_required: jobData.FilingWithCompaniesHouseRequired,
       filing_Companies_date: jobData.CompaniesHouseFilingDate,
@@ -429,6 +434,8 @@ const CreateJob = () => {
       },
     };
     const data = { req: req, authToken: token };
+
+    
     setIsSubmitted(true);
     const isValid = validateAllFields();
     if (isValid) {

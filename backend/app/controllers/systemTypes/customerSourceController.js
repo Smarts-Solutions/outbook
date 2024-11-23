@@ -19,6 +19,11 @@ const handleCustomerSource = async (req, res) => {
                 result = await CustomerSourceService.getCustomerSource();
                 res.status(200).json({ status: true, data: result });
                 break;
+            case 'getAllWithSubSource':
+                result = await CustomerSourceService.getAllWithSubSource();
+                res.status(200).json({ status: true, data: result });
+                break;
+                
             case 'getAll':
                 result = await CustomerSourceService.getCustomerSourceAll();
                 res.status(200).json({ status: true, data: result });

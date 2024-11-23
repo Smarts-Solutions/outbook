@@ -1196,6 +1196,7 @@ const getJobById = async (job) => {
     const query = `
     SELECT 
      jobs.id AS job_id,
+     jobs.staff_created_id AS staff_created_id,
      staffs3.id AS outbooks_acount_manager_id,
      staffs3.first_name AS outbooks_acount_manager_first_name,
      staffs3.last_name AS outbooks_acount_manager_last_name,
@@ -1304,6 +1305,7 @@ const getJobById = async (job) => {
 
       result = {
         job_id: rows[0].job_id,
+        staff_created_id: rows[0].staff_created_id,
         job_code_id: rows[0].job_code_id,
         customer_id: rows[0].customer_id,
         customer_trading_name: rows[0].customer_trading_name,
