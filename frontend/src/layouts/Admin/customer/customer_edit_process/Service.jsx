@@ -18,6 +18,7 @@ import {
   GETTASKDATA,
 } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import Swal from "sweetalert2";
+import Select from 'react-select';
 
 const Service = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
@@ -32,22 +33,16 @@ const Service = () => {
   const [getManager, setManager] = useState([]);
   const [services, setServices] = useState([]);
   const [tempServices, setTempServices] = useState("");
-  const [jobtype, SetJobtype] = useState(false);
-  const [tasks, setTasks] = useState([]);
   const [fileName, setFileName] = useState("No file selected");
   const [jobTypeData, setJobTypeData] = useState([]);
-  const [showJobTabel, setShowJobTabel] = useState("");
   const [tasksGet, setTasksData] = useState([]);
   const [tasksGet1, setTasksData1] = useState([]);
   const [tasksGetRemove, setTasksDataRemove] = useState([]);
-
-
-  const [getCustomerService, setCustomerService] = useState({
-    loading: true,
-    data: [],
-  });
+  const [getCustomerService, setCustomerService] = useState({ loading: true, data: [], });
   const [uploadMessage, uploadSetMessage] = useState("");
   const [uploadMessage1, uploadSetMessage1] = useState([]);
+  const [selectManager, setSelectManager] = useState([]);
+
 
   useEffect(() => {
     JobTypeDataAPi(services, 2);
@@ -88,6 +83,7 @@ const Service = () => {
   }, [dispatch, location.state.id, token]);
 
   useEffect(() => {
+
     if (getCustomerService.data.services) {
       setServices(
         getCustomerService.data.services.map((service) => service.service_id)
@@ -97,12 +93,14 @@ const Service = () => {
         getCustomerService.data.services.map((service) => ({
           service_id: service.service_id,
           account_manager_ids: service.account_manager_ids
-            ? service.account_manager_ids.map((id) =>
-              staffDataAll.data.find((staff) => staff.id === id)
-            )
+            ? service.account_manager_ids.map((id) => {
+                const staff = staffDataAll.data.find((staff) => staff.id === id);
+                return staff ? { value: id, label: staff.first_name } : null; // Ensure null for unmatched IDs
+              }).filter((item) => item !== null) // Remove null entries if any
             : [],
         }))
       );
+      
     }
   }, [getCustomerService.data, staffDataAll.data]);
 
@@ -117,6 +115,7 @@ const Service = () => {
       setFilteredData([]);
     }
   }, [searchValue, staffDataAll.data]);
+
 
   const handleCheckboxChange = (e, item) => {
     if (e.target.checked) {
@@ -133,45 +132,23 @@ const Service = () => {
     }
   };
 
+ 
   const AddManager = () => {
-    const trimmedValue = searchValue.trim();
-    if (!trimmedValue) return;
-
-    const matchingData = staffDataAll.data.find(
-      (data) => data.first_name === trimmedValue
-    );
-
-    if (matchingData) {
-      setManager((prevManager) => {
-        const existingServiceIndex = prevManager.findIndex(
-          (manager) => manager.service_id === tempServices
-        );
-
-        if (existingServiceIndex > -1) {
-          const updatedManagers = [...prevManager];
-          const existingService = updatedManagers[existingServiceIndex];
-
-          if (
-            !existingService.account_manager_ids.some(
-              (manager) => manager.id === matchingData.id
-            )
-          ) {
-            existingService.account_manager_ids.push(matchingData);
-          }
-
-          updatedManagers[existingServiceIndex] = existingService;
-          return updatedManagers;
-        } else {
-          return [
-            ...prevManager,
-            { service_id: tempServices, account_manager_ids: [matchingData] },
-          ];
-        }
+    if (selectManager.length === 0) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Please select at least one manager",
       });
+      return;
     }
 
-    setSearchValue("");
-  };
+    setModal(false);
+
+  }
+
+
+
 
   const removeManager = (id, serviceId) => {
     setManager((prevManager) =>
@@ -200,18 +177,29 @@ const Service = () => {
       return;
     }
 
-    const MatchData = GetAllService.data.map((service) => {
+    const MatchData = GetAllService.data
+    .map((service) => {
       const managerData = getManager.find(
         (item) => item.service_id === service.id
       );
+  
+      if (managerData && managerData.account_manager_ids.length > 0) {
+        return {
+          service_id: service.id,
+          account_manager_ids: managerData.account_manager_ids.map(
+            (manager) => manager.value
+          ),
+        };
+      }
+  
+      // Return undefined for non-matching or empty data
+      return undefined;
+    })
+    .filter((item) => item !== undefined); // Remove undefined entries
+  
 
-      return {
-        service_id: service.id,
-        account_manager_ids: managerData
-          ? managerData.account_manager_ids.map((manager) => manager.id)
-          : [],
-      };
-    });
+
+
 
     const filteredMatchData = MatchData.filter((item) =>
       services.includes(item.service_id)
@@ -222,7 +210,7 @@ const Service = () => {
       pageStatus: "2",
       services: filteredMatchData,
       Task: tasksGet,
-      RemoveTask:tasksGetRemove
+      RemoveTask: tasksGetRemove
     };
 
     try {
@@ -231,8 +219,8 @@ const Service = () => {
       ).unwrap();
       if (response.status) {
         next(response.data);
-      }else{
-       
+      } else {
+
         Swal.fire({
           icon: "error",
           title: "Oops...",
@@ -279,16 +267,16 @@ const Service = () => {
   };
 
   const TaskUpdate = async (e, id, serviceId) => {
- 
+
 
     if (tasksGet.length > 0) {
-      setTasksData((prev) => 
+      setTasksData((prev) =>
         prev.filter(
           (task) => !tasksGet.some((item) => item.JobTypeId === id && item.serviceId === serviceId && task.JobTypeId === id && task.serviceId === serviceId)
         )
       );
     }
-    
+
 
     if (e.target.files.length > 0) {
       // ONLY xlsx file is allowed
@@ -405,14 +393,14 @@ const Service = () => {
   };
 
   const handleDelete1 = (id) => {
-  
-    if(tasksGet1.length > 0){
+
+    if (tasksGet1.length > 0) {
       tasksGet1.map((task) => {
-        if(task.id === id){
-          setTasksDataRemove( prev => [...prev, task]);
+        if (task.id === id) {
+          setTasksDataRemove(prev => [...prev, task]);
         }
       })
-          
+
     }
     setTasksData1((prev) => prev.filter((task) => task.id !== id));
   };
@@ -443,7 +431,7 @@ const Service = () => {
 
 
   const getCheckListData = async (service_id, item) => {
-    const req = { service_id: service_id, job_type_id: item.id , customer_id: address};
+    const req = { service_id: service_id, job_type_id: item.id, customer_id: address };
     const data = { req, authToken: token };
     await dispatch(getcustomerschecklistApi(data))
       .unwrap()
@@ -452,12 +440,12 @@ const Service = () => {
           if (response.data.length > 0) {
             setTasksData1((prev) => {
               const mergedTasks = [...prev, ...response.data];
-  
+
               const uniqueTasks = mergedTasks.filter(
                 (task, index, self) =>
                   index === self.findIndex((t) => t.id === task.id)
               );
-  
+
               return uniqueTasks;
             });
           } else {
@@ -469,7 +457,36 @@ const Service = () => {
         return;
       });
   };
-  
+
+
+
+  const handleSelect = (selected) => {
+
+    setSelectManager(selected);
+
+
+    setManager((prevManager) => {
+
+      const existingIndex = prevManager.findIndex(
+        (item) => item.service_id === tempServices
+      );
+
+      if (existingIndex !== -1) {
+        const updatedManager = [...prevManager];
+        updatedManager[existingIndex].account_manager_ids = selected;
+        return updatedManager;
+      } else {
+        if (selected.length > 0) {
+          return [
+            ...prevManager,
+            { service_id: tempServices, account_manager_ids: selected },
+          ];
+        }
+        return prevManager;
+      }
+    });
+
+  }
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
@@ -488,7 +505,6 @@ const Service = () => {
                         <div className="form-check"></div>
                       </th>
                       <th style={{ width: "70%" }}>Service Name</th>
-                      {/* <th width="100"></th> */}
                       <th className="text-center">Action</th>
                     </tr>
                   </thead>
@@ -543,23 +559,23 @@ const Service = () => {
                                       >
                                         {services.includes(item.id) &&
                                           jobTypeData &&
-                                            
+
                                           jobTypeData.filter(
-                                              (data) =>
-                                                data.service_id === item.id
-                                            )
+                                            (data) =>
+                                              data.service_id === item.id
+                                          )
                                             .flatMap((data, subIndex) =>
                                               data.data.map(
                                                 (data1, jobIndex) => (
                                                   <div
                                                     className={`accordion-item ${data1.type}`}
                                                     key={jobIndex}
-                                                   
+
                                                   >
                                                     <h2
                                                       className="accordion-header"
                                                       id={`sub-headingOne${data1.type}`}
-                                                      onClick={() =>getCheckListData(item.id, data1)}
+                                                      onClick={() => getCheckListData(item.id, data1)}
                                                     >
                                                       <button
                                                         className="accordion-button collapsed"
@@ -610,7 +626,7 @@ const Service = () => {
                                                               </label>
                                                             </div>
 
-                                                        
+
                                                             <div className="col-auto ms-auto">
                                                               <button
                                                                 onClick={
@@ -624,7 +640,7 @@ const Service = () => {
                                                               </button>
                                                             </div>
                                                           </div>
-                                                     
+
                                                         </div>
                                                         <div className="table-responsive">
                                                           {tasksGet &&
@@ -778,7 +794,7 @@ const Service = () => {
                                                                   )}
 
 
-{tasksGet.map(
+                                                                  {tasksGet.map(
                                                                     (
                                                                       TaskShow
                                                                     ) => {
@@ -936,101 +952,34 @@ const Service = () => {
             handleClose={() => setModal(false)}
           >
             <div className="row">
-              <div className="col-9">
-                <div className="search-box">
-                  <i className="ri-search-line search-icon" />
-                  <input
-                    type="text"
-                    className="form-control search"
-                    placeholder="Search Manager..."
-                    value={searchValue}
-                    onChange={handleSearchChange}
-                  />
-                </div>
-
-                <div className="search-results">
-                  {searchValue.trim() === "" ? (
-                    <div className="no-results">
-                      <p>No search value entered</p>
-                    </div>
-                  ) : (
-                    staffDataAll.data
-                      .filter((data) =>
-                        data.first_name
-                          .toLowerCase()
-                          .includes(searchValue.toLowerCase())
-                      )
-                      .map((data, index) => (
-                        <div
-                          key={data.id || index}
-                          className="search-result-item"
-                          onClick={() => setSearchValue(data.first_name)}
-                        >
-                          {data.first_name}
-                        </div>
-                      ))
-                  )}
-                </div>
+              <div className="col-12">
+                <Select
+                  classNames="multiselect"
+                  options={staffDataAll.data.map((data) => ({
+                    value: data.id,
+                    label: data.first_name,
+                  }))}
+                  isMulti
+                  Clearable={false}
+                  className="basic-multi-select table-select"
+                  style={{ border: 'none' }}
+                  value={
+                    getManager &&
+                    getManager.find((item) => item.service_id === tempServices)?.account_manager_ids || []
+                  }
+                  onChange={(selected) => handleSelect(selected)}
+                  placeholder="Select options"
+                />
               </div>
 
-              <div className="col-3">
+              <div className="col-lg-12 mt-4 d-flex justify-content-end">
                 <button
                   type="button"
-                  className="btn btn-info add-btn"
+                  className="btn btn-info add-btn "
                   onClick={AddManager}
-                > <i className="pe-1 fa fa-plus"></i>
-                  Add
-
+                >
+                  Save
                 </button>
-              </div>
-
-              <div className="table-responsive mt-3 mb-1">
-                <table className="table align-middle table-nowrap">
-                  <thead className="table-light">
-                    <tr>
-                      <th>Add Account Manager</th>
-                      <th className="text-end">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {getManager.length > 0 ? (
-                      getManager
-                        .filter(
-                          (manager) => manager.service_id === tempServices
-                        )
-                        .flatMap((manager, managerIndex) =>
-                          manager.account_manager_ids.map(
-                            (accountManager, accountManagerIndex) => (
-                              <tr
-                                key={`${managerIndex}-${accountManagerIndex}`} // Ensure unique key for each row
-                              >
-                                <td>{accountManager.first_name}</td>
-                                <td className="text-end">
-                                  <button
-                                    onClick={() =>
-                                      removeManager(
-                                        accountManager.id,
-                                        manager.service_id
-                                      )
-                                    }
-                                    className="delete-icon"
-                                  >
-                                    <i className="ti-trash text-danger "></i>
-                                  </button>
-                                </td>
-                              </tr>
-                            )
-                          )
-                        )
-                    ) : (
-                      <tr>
-                        <td colSpan="2" className="text-center">
-                        No Account Manager Found!
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
               </div>
             </div>
           </CommanModal>
@@ -1054,24 +1003,4 @@ const Service = () => {
 };
 
 export default Service;
-
-// const ServicesUpdate = (value, type) => {
-//   if (type === 2) {
-//     setServices((prevServices) =>
-//       !prevServices.includes(value) ? [...prevServices, value] : prevServices
-//     );
-//   } else if (type === 1) {
-//     setServices(
-//       value.length === 0 ? [] : GetAllService.data.map((item) => item.id)
-//     );
-//   }
-// };
-
-// const handleSelectAllChange = (e) => {
-//   if (e.target.checked) {
-//     setServices(GetAllService.data.map((item) => item.id));
-//   } else {
-//     setServices([]);
-//   }
-// };
 
