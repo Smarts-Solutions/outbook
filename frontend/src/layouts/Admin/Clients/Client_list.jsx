@@ -283,6 +283,7 @@ const ClientList = () => {
               className="form-select form-control"
               value={row.status_type}
               onChange={(e) => handleStatusChange(e, row)}
+              disabled={ getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? false : true}
             >
               {statusDataAll.map((status) => (
                 <option key={status.id} value={status.id}>

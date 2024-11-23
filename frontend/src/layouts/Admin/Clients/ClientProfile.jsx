@@ -204,6 +204,7 @@ const ClientList = () => {
               className="form-select form-control"
               value={row.status == "completed" ? 6 : row.status == "WIP – To Be Reviewed" ? 5 : row.status == "WIP – In queries" ? 4 : row.status == "WIP – Processing" ? 3 : row.status == "WIP – Missing Paperwork" ? 2 : row.status == "To Be Started - Not Yet Allocated Internally" ? 1 : 0}
               onChange={(e) => handleStatusChange(e, row)}
+              disabled={ getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? false : true}
             >
               {statusDataAll.map((status) => (
                 <option key={status.id} value={status.id}>
@@ -457,30 +458,10 @@ const ClientList = () => {
                         Assigned Jobs
                       </button>
                     </li>
-                    {/* <li className="nav-item" role="presentation">
-                      <button
-                        className="nav-link"
-                        id="alljob-tab"
-                        data-bs-toggle="pill"
-                        data-bs-target="#alljob"
-                        type="button"
-                        role="tab"
-                        aria-controls="alljob"
-                        aria-selected="false"
-                        tabIndex={-1}
-                      >
-                        Assigned Jobs
-                      </button>
-                    </li> */}
+                    
                   </ul>
 
-                  {/* <div className="search-input">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Search Job.."
-                    />
-                  </div> */}
+                  
                 </div>
                 <div className="tab-content" id="pills-tabContent">
                   <div
@@ -508,11 +489,6 @@ const ClientList = () => {
                   >
                   </div>
                 </div>
-                {/* <div className="datatable-wrapper ">
-                {customerData && customerData && (
-            <Datatable columns={columns} data={customerData} filter={false} />
-          )}
-                </div> */}
               </div>
             </div>
           </div>
