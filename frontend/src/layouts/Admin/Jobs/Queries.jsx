@@ -177,21 +177,51 @@ const Queries = ({getAccessDataJob , goto}) => {
   }
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-
-
-    if (name === 'QueryDocument') {
+    const { name } = e.target;
+  
+    if (name === "QueryDocument") {
       const files = e.target.files;
-      var fileArray;
+      let fileArray;
+  
       if (files && typeof files[Symbol.iterator] === "function") {
         fileArray = Array.from(files);
-        setAllQueryInputdata({ ...AllQueryInputdata, QueryDocument: fileArray });
+  
+        const allowedTypes = [
+          "application/pdf",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "image/png",
+          "image/jpg",
+          "image/jpeg",
+        ];
+  
+        const validFiles = fileArray.filter((file) =>
+          allowedTypes.includes(file.type)
+        );
+  
+        if (validFiles.length !== fileArray.length) {
+          // Show warning alert
+          sweatalert.fire({
+            icon: "warning",
+            title: "Warning",
+            text: "Only PDFs, DOCS, PNG, JPG, and JPEG are allowed.",
+          });
+  
+  
+          e.target.value = ""; 
+          return;
+        } else {
+          setAllQueryInputdata({
+            ...AllQueryInputdata,
+            QueryDocument: fileArray,
+          });
+        }
       }
-    }
-    else {
-      setAllQueryInputdata({ ...AllQueryInputdata, [name]: value });
+    } else {
+      setAllQueryInputdata({ ...AllQueryInputdata, [name]: e.target.value });
     }
   };
+  
 
   const columns = [
     { name: 'Query Title', selector: row => row.title, reorder: false,sortable: true },
@@ -416,6 +446,7 @@ const Queries = ({getAccessDataJob , goto}) => {
                 id="QueryDocument"
                 name="QueryDocument"
                 onChange={(event) => { handleChange(event) }}
+
                 className="custom-file-input form-control"
               />
               {errors1["QueryDocument"] && (

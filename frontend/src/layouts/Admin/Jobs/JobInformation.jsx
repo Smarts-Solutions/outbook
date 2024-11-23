@@ -83,8 +83,6 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
     }, [JobInformationData]);
 
 
-
-
     const JobDetails = async () => {
         const req = { action: "getByJobId", job_id: location.state.job_id }
         const data = { req: req, authToken: token }
@@ -212,18 +210,8 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
 
     }
 
-
-    const filteredData = AllJobData.data?.engagement_model?.[0]
-        ? Object.keys(AllJobData.data.engagement_model[0])
-            .filter(key => AllJobData.data.engagement_model[0][key] === "1")
-            .reduce((obj, key) => {
-                obj[key] = AllJobData.data.engagement_model[0][key];
-                return obj;
-            }, {})
-        : {};
-
     const handleJobEdit = () => {
-        navigate('/admin/job/edit', { state: { job_id: location.state.job_id ,activeTab: location.state.activeTab } })
+        navigate('/admin/job/edit', { state: { job_id: location.state.job_id, activeTab: location.state.activeTab } })
     }
 
     const handleDelete = async (row, type) => {
@@ -242,7 +230,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                         timer: 1500,
                     });
                     setTimeout(() => {
-                        window.history.back() 
+                        window.history.back()
                     }, 1500);
 
                 } else {
@@ -259,7 +247,6 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                 return;
             });
     };
-
 
 
     const handleStatusChange = (e) => {
@@ -330,6 +317,28 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
         });
     };
 
+
+
+    const RearrangeEngagementOptionArr = [];
+    const filteredData = AllJobData.data?.engagement_model?.[0]
+        ? Object.keys(AllJobData.data.engagement_model[0])
+            .filter((key) => AllJobData.data.engagement_model[0][key] === "1")
+            .reduce((obj, key) => {
+                const keyMapping = {
+                    "fte_dedicated_staffing": "Fte Dedicated Staffing",
+                    "percentage_model": "Percentage Model",
+                    "adhoc_payg_hourly": "Adhoc Payg Hourly",
+                    "customised_pricing": "Customised Pricing"
+                };
+
+                if (keyMapping[key]) {
+                    RearrangeEngagementOptionArr.push(keyMapping[key]);
+                }
+
+                obj[key] = AllJobData.data.engagement_model[0][key];
+                return obj;
+            }, {})
+        : {};
 
 
     return (
@@ -802,8 +811,14 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                             value={JobInformationData.EngagementModel}
                                         >
                                             <option value="">Please Select Engagement Model</option>
-                                            {Object.keys(filteredData).map(key => (
+                                            {/* {Object.keys(filteredData).map(key => (
                                                 <option key={key} value={key}>{key}</option>
+                                            ))} */}
+
+                                            {Object.keys(filteredData).map((key, index) => (
+                                                <option key={key} value={key}>
+                                                    {RearrangeEngagementOptionArr[index]}
+                                                </option>
                                             ))}
                                         </select>
 
@@ -1197,53 +1212,53 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                             <div className="col-lg-4">
                                                 <div className="mb-3">
                                                     <label className="form-label" >Invoice </label>
-                                               
-                                                    
+
+
                                                     <div className="input-group">
-                                                    <div className='hours-div'>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder="Hours"
-                                                            defaultValue=""
-                                                            disabled
-                                                            onChange={(e) => {
-                                                                const value = e.target.value;
-                                                                if (value === '' || (Number(value) >= 0 && Number(value) <= 23)) {
-                                                                    setInvoiceTime({
-                                                                        ...invoiceTime,
-                                                                        hours: value
-                                                                    });
-                                                                }
-                                                            }}
-                                                            value={invoiceTime.hours}
-                                                        />
-                                                        <span className="input-group-text" id="basic-addon2">
-                                                        H
-                                                    </span>
+                                                        <div className='hours-div'>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control"
+                                                                placeholder="Hours"
+                                                                defaultValue=""
+                                                                disabled
+                                                                onChange={(e) => {
+                                                                    const value = e.target.value;
+                                                                    if (value === '' || (Number(value) >= 0 && Number(value) <= 23)) {
+                                                                        setInvoiceTime({
+                                                                            ...invoiceTime,
+                                                                            hours: value
+                                                                        });
+                                                                    }
+                                                                }}
+                                                                value={invoiceTime.hours}
+                                                            />
+                                                            <span className="input-group-text" id="basic-addon2">
+                                                                H
+                                                            </span>
                                                         </div>
-                                                         <div className='hours-div'>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder="Minutes"
-                                                            defaultValue=""
-                                                            disabled
-                                                            onChange={(e) => {
-                                                                const value = e.target.value;
-                                                                if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
-                                                                    setInvoiceTime({
-                                                                        ...invoiceTime,
-                                                                        minutes: value
-                                                                    });
-                                                                }
-                                                            }}
-                                                            value={invoiceTime.minutes}
-                                                        />
-                                                         <span className="input-group-text" id="basic-addon2">
-                                                        M
-                                                    </span>
-                                                    </div>
+                                                        <div className='hours-div'>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control"
+                                                                placeholder="Minutes"
+                                                                defaultValue=""
+                                                                disabled
+                                                                onChange={(e) => {
+                                                                    const value = e.target.value;
+                                                                    if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                                                                        setInvoiceTime({
+                                                                            ...invoiceTime,
+                                                                            minutes: value
+                                                                        });
+                                                                    }
+                                                                }}
+                                                                value={invoiceTime.minutes}
+                                                            />
+                                                            <span className="input-group-text" id="basic-addon2">
+                                                                M
+                                                            </span>
+                                                        </div>
                                                     </div>
 
                                                 </div>
