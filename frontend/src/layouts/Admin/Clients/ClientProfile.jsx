@@ -557,7 +557,8 @@ const ClientList = () => {
                 </div>
               </div>
             </div>
-
+           {
+            informationData.client_type == 4?"":
             <div className=" report-data mt-4">
               <div className="card-header border-bottom pb-3 row">
                 <div className="col-8">
@@ -565,9 +566,9 @@ const ClientList = () => {
                     {informationData && informationData.client_type == 1
                       ? "Sole Trader"
                       : informationData.client_type == 2
-                        ? "Company"
-                        : "Partnership"}{" "}
-                    Information
+                        ? "Company" : informationData.client_type == 3 ? "Partnership" :""
+                  
+                    }
                   </h4>
                 </div>
                 {/* <div className="col-4">
@@ -707,6 +708,8 @@ const ClientList = () => {
                 ""
               )}
             </div>
+           }
+            
           </div>
         )}
       </div>
