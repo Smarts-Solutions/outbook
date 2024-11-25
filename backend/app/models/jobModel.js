@@ -1760,10 +1760,13 @@ JOIN
 LEFT JOIN 
     jobs  ON staff_logs.module_name = 'job' AND staff_logs.module_id = jobs.id         
 WHERE
-    staff_logs.staff_id = ${staff_id} AND  staff_logs.module_name = "job" AND staff_logs.module_id = ${job_id}
+    staff_logs.module_name = "job" AND staff_logs.module_id = ${job_id}
 ORDER BY
     staff_logs.id DESC
 `;
+
+// WHERE
+//     staff_logs.staff_id = ${staff_id} AND  staff_logs.module_name = "job" AND staff_logs.module_id = ${job_id}
   const [result] = await pool.execute(query);
 
   const groupedResult = result.reduce((acc, log) => {

@@ -577,6 +577,8 @@ const reportCountJob = async (Report) => {
         staffs.first_name AS allocated_first_name,
         staffs.last_name AS allocated_last_name,
 
+        CONCAT(staffs.first_name, ' ', staffs.last_name) AS allocated_name,
+
         staffs2.id AS reviewer_id,
         staffs2.first_name AS reviewer_first_name,
         staffs2.last_name AS reviewer_last_name,
