@@ -1087,10 +1087,11 @@ const Setting = () => {
       ),
       sortable: true,
     },
+  
     {
-      name: "Task",
+      name: "Actions",
       cell: (row) => (
-        <div>
+        <div className="d-flex">
           <button
             className="view-icon"
             onClick={() => {
@@ -1100,17 +1101,6 @@ const Setting = () => {
           >
             <i className="ti-eye" />
           </button>
-        </div>
-      ),
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-    },
-    {
-      name: "Actions",
-      cell: (row) => (
-        <div>
-
 
           {
             (getAccessDataSetting.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
