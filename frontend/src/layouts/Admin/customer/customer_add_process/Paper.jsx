@@ -48,6 +48,7 @@ const Paper = () => {
         title: "Oops...",
         text: "Only PDFs, DOCS, PNG, JPG, and JPEG are allowed.",
       });
+      fileInputRef.current.value = "";
       return;
     }
 
@@ -200,7 +201,9 @@ const Paper = () => {
                                                 <div className="remove">
                                                   <button
                                                   className="delete-icon"
+
                                                     onClick={() => {
+                                                      fileInputRef.current.value = "";
                                                       const updatedFiles =
                                                         newFiles.filter(
                                                           (_, idx) =>
