@@ -577,7 +577,12 @@ ORDER BY
             staff2.first_name AS account_manager_firstname, 
             staff2.last_name AS account_manager_lastname,
             customer_company_information.company_name AS company_name,
-            customer_company_information.company_number AS company_number
+            customer_company_information.company_number AS company_number,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
         FROM 
             customers
         JOIN 
@@ -621,7 +626,12 @@ ORDER BY
                 staff2.first_name AS account_manager_firstname, 
                 staff2.last_name AS account_manager_lastname,
                 customer_company_information.company_name AS company_name,
-                customer_company_information.company_number AS company_number
+                customer_company_information.company_number AS company_number,
+                CONCAT(
+                'cust_', 
+                SUBSTRING(customers.trading_name, 1, 3), '_',
+                SUBSTRING(customers.customer_code, 1, 15)
+                ) AS customer_code
             FROM 
                 customers
             JOIN 
@@ -1013,12 +1023,12 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
 
         const { customer_id, fte_dedicated_staffing, number_of_accountants, fee_per_accountant, number_of_bookkeepers, fee_per_bookkeeper, number_of_payroll_experts, fee_per_payroll_expert, number_of_tax_experts, fee_per_tax_expert, number_of_admin_staff, fee_per_admin_staff } = customerProcessData;
 
-        console.log("fee_per_accountant",fee_per_accountant);
+        console.log("fee_per_accountant", fee_per_accountant);
 
         const checkQuery1 = `SELECT id FROM customer_engagement_fte WHERE customer_engagement_model_id  = ?`;
         const [exist1] = await pool.execute(checkQuery1, [customer_engagement_model_id]);
         let fte_dedicated_staffing_id;
-        
+
 
         if (exist1.length === 0) {
             // INSER

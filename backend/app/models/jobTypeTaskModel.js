@@ -488,7 +488,6 @@ const deleteChecklist = async (checklist) => {
 const updateChecklist = async (checklist) => {
   const {
     checklists_id,
-    customer_id,
     service_id,
     job_type_id,
     client_type_id,
@@ -496,6 +495,11 @@ const updateChecklist = async (checklist) => {
     status,
     task,
   } = checklist;
+
+  let customer_id = checklist.customer_id;
+  if(customer_id == null || customer_id == '' || customer_id == undefined){
+    customer_id = 0
+  }
 
   // EXIST checklist tasks id
   const [ExistChecklistsids] = await pool.execute(

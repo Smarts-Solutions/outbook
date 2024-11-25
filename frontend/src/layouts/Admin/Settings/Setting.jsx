@@ -98,6 +98,34 @@ const Setting = () => {
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
 
+
+  const [getAccessDataSetting, setAccessDataSetting] = useState({
+    insert: 0,
+    update: 0,
+    delete: 0,
+    view: 0,
+  });
+
+
+  const accessDataSetting =
+  JSON.parse(localStorage.getItem("accessData") || "[]").find(
+    (item) => item.permission_name === "setting"
+  )?.items || [];
+
+
+  useEffect(() => {
+    if (accessDataSetting.length === 0) return;
+    const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0 };
+    accessDataSetting.forEach((item) => {
+      if (item.type === "insert") updatedAccess.insert = item.is_assigned;
+      if (item.type === "update") updatedAccess.update = item.is_assigned;
+      if (item.type === "delete") updatedAccess.delete = item.is_assigned;
+      if (item.type === "view") updatedAccess.view = item.is_assigned;
+    });
+    setAccessDataSetting(updatedAccess);
+  }, []);
+
+
   useEffect(() => {
     const retrievedData = sessionStorage.getItem("settingTab");
     if (retrievedData) {
@@ -1013,13 +1041,14 @@ const Setting = () => {
 
     {
       cell: (row) => (
-        <div title={row.service_name}>
+        <div title={row.service_name} style={{fontSize:"10px"}}>
           {row.service_name}
         </div>
       ),
       name: "Service Type",
       selector: (row) => row.service_name,
       sortable: true,
+      width: "200px",
     },
     {
       cell: (row) => (
@@ -1033,13 +1062,15 @@ const Setting = () => {
     },
     {
       cell: (row) => (
-        <div title={row.client_type_type}>
+        <div title={row.client_type_type} style={{fontSize:"10px"}}>
           {row.client_type_type}
         </div>
       ),
       name: "Client Type",
       selector: (row) => row.client_type_type,
       sortable: true,
+      width: "280px",
+
     },
     {
       name: "Status",
@@ -1069,6 +1100,34 @@ const Setting = () => {
           >
             <i className="ti-eye" />
           </button>
+        </div>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+    },
+    {
+      name: "Actions",
+      cell: (row) => (
+        <div>
+
+
+          {
+            (getAccessDataSetting.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
+              <button className="edit-icon" onClick={() =>
+                navigate("/admin/edit/setting/checklist", {
+                  state: { id: row.id, checklist_id: row.checklists_id , settingTab: tabStatus.current },
+                })}>
+                <i className="ti-pencil" />
+              </button> 
+              : null
+          }
+          {
+            (getAccessDataSetting.delete === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
+              <button className="delete-icon" onClick={() => ChecklistDelete(row)}>
+                <i className="ti-trash text-danger" />
+              </button> : null
+          }
         </div>
       ),
       ignoreRowClick: true,
@@ -1144,6 +1203,37 @@ const Setting = () => {
 
     ,
   ];
+
+  
+  const ChecklistDelete = async (row) => {
+    const req = { action: "delete", checklist_id: row.checklists_id };
+    const data = { req: req, authToken: token };
+    await dispatch(getList(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          sweatalert.fire({
+            title: "Deleted",
+            icon: "success",
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          getCheckListData();
+        } else {
+          sweatalert.fire({
+            title: "Failed",
+            icon: "error",
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
 
   const handleJobType = (row) => {
     navigate("/admin/add/jobtype", {

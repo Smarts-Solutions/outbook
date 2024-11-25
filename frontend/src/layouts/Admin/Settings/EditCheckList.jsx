@@ -8,6 +8,8 @@ import {
   getList,
   UpdateChecklistData,
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
+
+import { Get_Service } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
 
@@ -25,6 +27,9 @@ const CreateCheckList = () => {
     check_list_name: "",
     status: "",
   });
+
+
+  console.log(formData, "formData");  
 
   const [tasks, setTasks] = useState([
     { task_id: "", task_name: "", budgeted_hour: "", checklist_tasks_id: "" },
@@ -44,6 +49,7 @@ const CreateCheckList = () => {
     { key: "4", label: "Individual" },
   ];
 
+  console.log(location.state, "selectedClientType");
   useEffect(() => {
     if (location.state?.checklist_id) {
       let req = {
@@ -62,6 +68,8 @@ const CreateCheckList = () => {
 
             getJobTypeData(checklistData.service_id);
 
+
+            console.log(checklistData.service_id, "checklistData.service_id");
             setFormData({
               customer_id: location.state?.id || "",
               service_id: checklistData.service_id,
@@ -88,29 +96,52 @@ const CreateCheckList = () => {
         });
     }
 
-    if (formData.customer_id) {
-      let req = { customer_id: formData.customer_id };
-      let data = { req, authToken: token };
+    // if (formData.customer_id) {
+    //   let req = { customer_id: formData.customer_id };
+    //   let data = { req, authToken: token };
 
-      dispatch(GetServicesByCustomers(data))
-        .unwrap()
-        .then((response) => {
-          if (response.status) {
-            setServiceList(response.data);
-            setFormData((prevData) => ({
-              ...prevData,
-              service_id: response.data.find(
-                (service) => service.service_id === prevData.service_id
-              )
-                ? prevData.service_id
-                : "",
-            }));
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-    }
+    //   dispatch(GetServicesByCustomers(data))
+    //     .unwrap()
+    //     .then((response) => {
+    //       if (response.status) {
+    //         setServiceList(response.data);
+    //         setFormData((prevData) => ({
+    //           ...prevData,
+    //           service_id: response.data.find(
+    //             (service) => service.service_id === prevData.service_id
+    //           )
+    //             ? prevData.service_id
+    //             : "",
+    //         }));
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       return;
+    //     });
+    // }
+
+    const req = { action: "get" };
+    const data = { req, authToken: token };
+     dispatch(Get_Service(data))
+      .unwrap()
+      .then((response) => {
+        if (response.status) {
+          
+
+             setServiceList(response.data);
+             setFormData((prevData) => ({
+               ...prevData,
+               service_id: response.data.find(
+                 (service) => service.id === prevData.service_id
+               )
+                 ? prevData.service_id
+                 : "",
+             }));
+        }
+      })
+      .catch((error) => {
+        return;
+      });
 
     // Fetch client types
     let reqClientType = { action: "getClientType" };
@@ -145,44 +176,44 @@ const CreateCheckList = () => {
   const handleTaskChange = (index, e) => {
     const { name, value } = e.target;
     const newTasks = [...tasks];
-  
+
 
     if (name === "hours" || name === "minutes") {
 
       const existingBudgetedHour = newTasks[index].budgeted_hour || "00:00";
       const [hours, minutes] = existingBudgetedHour.split(":");
-  
+
       if (name === "hours") {
         const numericValue = Number(value);
-  
-      
+
+
         if (!isNaN(numericValue) && numericValue >= 0) {
-          newTasks[index].budgeted_hour = 
+          newTasks[index].budgeted_hour =
             value === '' ? '' : numericValue.toString().padStart(2, "0") + ":" + minutes;
         }
       } else if (name === "minutes") {
         const numericValue = Number(value);
-  
-      
+
+
         if (value === '' || (numericValue >= 0 && numericValue <= 59)) {
-          newTasks[index].budgeted_hour = 
+          newTasks[index].budgeted_hour =
             hours + ":" + (value === '' ? '' : numericValue.toString().padStart(2, "0"));
         } else {
-          
+
           e.target.value = "59";
           newTasks[index].budgeted_hour = hours + ":59";
         }
       }
     } else {
-  
+
       newTasks[index][name] = value;
     }
-  
 
-  
+
+
     setTasks(newTasks);
   };
-  
+
 
 
   const addTask = () => {
@@ -225,7 +256,7 @@ const CreateCheckList = () => {
     if (!formData.job_type_id)
       validationErrors.job_type_id = "Job Type is required";
     if (selectedClientType.length === 0)
-      validationErrors.client_type_id = "Client Type is required";
+      validationErrors.client_type_id = "Please Select Client Type";
     if (!formData.check_list_name)
       validationErrors.check_list_name = "Check List Name is required";
     if (!formData.status) validationErrors.status = "Status is required";
@@ -235,9 +266,10 @@ const CreateCheckList = () => {
         validationErrors[`task_name_${index}`] = "Task Name is required";
       if (!task.budgeted_hour)
         validationErrors[`budgeted_hour_${index}`] =
-          "Budgeted Hour is required";
+          "Budgeted Time is required";
     });
 
+    console.log(validationErrors, "validationErrors");
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -260,9 +292,8 @@ const CreateCheckList = () => {
         checklist_tasks_id: task.checklist_tasks_id,
       })),
     };
-
+    console.log( "req", req);
     const data = { req, authToken: token };
-
     await dispatch(UpdateChecklistData(data))
       .unwrap()
       .then((response) => {
@@ -282,9 +313,10 @@ const CreateCheckList = () => {
             status: "",
           });
           setTasks([{ task_id: "", task_name: "", budgeted_hour: "" }]);
-          navigate("/admin/Clientlist", {
-            state: { id: location.state.id, route: "Checklist" },
-          });
+        
+            sessionStorage.setItem('settingTab', location?.state?.settingTab);
+           
+          window.history.back();
         }
       })
       .catch((error) => {
@@ -311,13 +343,17 @@ const CreateCheckList = () => {
           <button
             type="button"
             className="btn p-0"
-            onClick={() => window.history.back()}
+            onClick={() =>{
+              sessionStorage.setItem('settingTab', location?.state?.settingTab);
+               window.history.back()}}
+            
           >
             <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" />
           </button>
           <h3 className="card-title mb-0">Update Checklist</h3>
         </div>
 
+ 
         {data && (
           <div className="card-body">
             <div className="row">
@@ -338,10 +374,10 @@ const CreateCheckList = () => {
                       <option value="">Please Select Service Type</option>
                       {serviceList.map((service) => (
                         <option
-                          key={service.service_id}
-                          value={service.service_id}
+                          key={service.id}
+                          value={service.id}
                         >
-                          {service.service_name}
+                          {service.name}
                         </option>
                       ))}
                     </select>
@@ -388,7 +424,7 @@ const CreateCheckList = () => {
                       name="client_type_id"
                       handleOnChange={(e) => handleMultipleSelect(e)}
                       selected={
-                        selectedClientType.length > 0 ? selectedClientType : []
+                        selectedClientType?.length > 0 ? selectedClientType : []
                       } // Ensure it's an array
                       placeholder="Select Client Type"
                     />
@@ -449,7 +485,7 @@ const CreateCheckList = () => {
               </div>
             </div>
             {tasks.map((task, index) => (
-              <div key={index} className="row mt-4 align-items-end">
+              <div key={task.task_id} className="row mt-4 align-items-end">
                 <div className="col-lg-5">
                   <label className="form-label">Task Name</label>
                   <input
@@ -514,7 +550,7 @@ const CreateCheckList = () => {
               <div className="col-lg-12">
                 <button
                   type="button"
-                  className="btn btn-ouline-success"
+                  className="btn btn-outline-success"
                   onClick={handleSubmit}
                 >
                   <i className="far fa-save pe-1"></i>
