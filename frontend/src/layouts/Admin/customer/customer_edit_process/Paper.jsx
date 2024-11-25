@@ -53,6 +53,8 @@ const Paper = () => {
         title: "Oops...",
         text: "Only PDFs, DOCS, PNG, JPG, and JPEG are allowed.",
       });
+
+      fileInputRef.current.value = "";
       return;
     }
 
@@ -102,6 +104,7 @@ const Paper = () => {
   }, []);
 
   const handleSubmit = async (values) => {
+
     const data1 = {
       req: { fileData: newFiles, customer_id: address, authToken: token },
     };
@@ -121,6 +124,7 @@ const Paper = () => {
         }
       })
       .catch((error) => {
+          console.log(error)
         return;
       });
   };
@@ -292,6 +296,7 @@ const Paper = () => {
                                                     <button
                                                     className="delete-icon"
                                                       onClick={() => {
+                                                        fileInputRef.current.value = "";
                                                         const updatedFiles =
                                                           newFiles.filter(
                                                             (_, idx) =>
@@ -324,7 +329,6 @@ const Paper = () => {
                                   </table>
                                 )}
                                </div>
-                               
                             </div>
                           </div>
                         </div>

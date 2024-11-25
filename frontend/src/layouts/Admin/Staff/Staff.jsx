@@ -324,20 +324,16 @@ const StaffPage = () => {
         email: values.email,
         phone: values.phone,
         phone_code: values.phone_code,
-        // password: values.password,
         role_id: values.role,
         status: values.status,
         created_by: StaffUserId.id,
         hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"
           }`,
-      };
-
-
+      }; 
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
       }
 
-      // return
       await dispatch(
         Staff({
           req: { action: editStaff ? "update" : "add", ...req },
@@ -400,7 +396,7 @@ const StaffPage = () => {
     },
 
     {
-      type: "select",
+      type: "select1",
       name: "phone_code",
       label: "Phone Code",
       options: [
@@ -430,16 +426,6 @@ const StaffPage = () => {
       disable: false,
       placeholder: "Enter Email",
     },
-    // {
-    //   type: "password",
-    //   name: "password",
-    //   label: "Password",
-    //   label_size: 12,
-    //   col_size: 6,
-    //   disable: false,
-    //   placeholder: "Enter Password",
-    //   showWhen: (values) => !editStaff,
-    // },
     {
       type: "select",
       name: "role",

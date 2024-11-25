@@ -26,8 +26,6 @@ const Customer = () => {
   });
 
 
-
-
   const accessData =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
       (item) => item.permission_name === "customer"
@@ -38,8 +36,6 @@ const Customer = () => {
       (item) => item.permission_name === "client"
     )?.items || [];
 
-
-    
 
 
 
@@ -61,9 +57,6 @@ const Customer = () => {
 
     setAccessData(updatedAccess);
   }, []);
-
-
-
 
 
   const columns = [

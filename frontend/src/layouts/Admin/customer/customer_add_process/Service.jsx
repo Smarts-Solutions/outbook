@@ -19,6 +19,7 @@ import {
   GETTASKDATA,
 } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import Swal from "sweetalert2";
+import Select from 'react-select';
 
 const Service = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
@@ -33,20 +34,14 @@ const Service = () => {
   const [getManager, setManager] = useState([]);
   const [services, setServices] = useState([]);
   const [tempServices, setTempServices] = useState("");
-  const [jobtype, SetJobtype] = useState(false);
-  const [tasks, setTasks] = useState([]);
   const [fileName, setFileName] = useState("No file selected");
   const [jobTypeData, setJobTypeData] = useState([]);
-  const [showJobTabel, setShowJobTabel] = useState("");
   const [tasksGet, setTasksData] = useState([]);
-  const [getCustomerService, setCustomerService] = useState({
-    loading: true,
-    data: [],
-  });
+  const [getCustomerService, setCustomerService] = useState({ loading: true, data: [] });
   const [uploadMessage, uploadSetMessage] = useState("");
   const [tasksGet1, setTasksData1] = useState([]);
   const [tasksGetRemove, setTasksDataRemove] = useState([]);
-
+  const [selectManager, setSelectManager] = useState([]);
   useEffect(() => {
     JobTypeDataAPi(services, 2);
   }, [services]);
@@ -106,17 +101,7 @@ const Service = () => {
     }
   }, [searchValue, staffDataAll.data]);
 
-  const ServicesUpdate = (value, type) => {
-    if (type === 2) {
-      setServices((prevServices) =>
-        !prevServices.includes(value) ? [...prevServices, value] : prevServices
-      );
-    } else if (type === 1) {
-      setServices(
-        value.length === 0 ? [] : GetAllService.data.map((item) => item.id)
-      );
-    }
-  };
+
 
   const handleCheckboxChange = (e, item) => {
     if (e.target.checked) {
@@ -133,70 +118,10 @@ const Service = () => {
     }
   };
 
-  const handleSelectAllChange = (e) => {
-    if (e.target.checked) {
-      setServices(GetAllService.data.map((item) => item.id));
-    } else {
-      setServices([]);
-    }
-  };
-
   const AddManager = () => {
-    const trimmedValue = searchValue.trim();
-    if (!trimmedValue) return;
-
-    const matchingData = staffDataAll.data.find(
-      (data) => data.first_name === trimmedValue
-    );
-
-    if (matchingData) {
-      setManager((prevManager) => {
-        const existingServiceIndex = prevManager.findIndex(
-          (manager) => manager.service_id === tempServices
-        );
-
-        if (existingServiceIndex > -1) {
-          const updatedManagers = [...prevManager];
-          const existingService = updatedManagers[existingServiceIndex];
-
-          if (
-            !existingService.account_manager_ids.some(
-              (manager) => manager.id === matchingData.id
-            )
-          ) {
-            existingService.account_manager_ids.push(matchingData);
-          }
-
-          updatedManagers[existingServiceIndex] = existingService;
-          return updatedManagers;
-        } else {
-          return [
-            ...prevManager,
-            { service_id: tempServices, account_manager_ids: [matchingData] },
-          ];
-        }
-      });
-    }
-
-    setSearchValue("");
+    setModal(false)
   };
-
-  const removeManager = (id, serviceId) => {
-    setManager((prevManager) =>
-      prevManager
-        .map((manager) =>
-          manager.service_id === serviceId
-            ? {
-              ...manager,
-              account_manager_ids: manager.account_manager_ids.filter(
-                (accountManager) => accountManager.id !== id
-              ),
-            }
-            : manager
-        )
-        .filter((manager) => manager.account_manager_ids.length > 0)
-    );
-  };
+ 
 
   const handleSubmit = async (values) => {
     if (services.length === 0) {
@@ -210,11 +135,12 @@ const Service = () => {
 
     const MatchData = services.map((service) => {
       const managerData = getManager.find((item) => item.service_id == service);
+      console.log("managerData", managerData);
 
       return {
         service_id: service,
         account_manager_id: managerData
-          ? managerData.account_manager_ids.map((manager) => manager.id)
+          ? managerData.account_manager_ids.map((manager) => manager.value)
           : [],
       };
     });
@@ -243,18 +169,17 @@ const Service = () => {
   };
 
   const handleDelete1 = (id) => {
-  
-    if(tasksGet1.length > 0){
+
+    if (tasksGet1.length > 0) {
       tasksGet1.map((task) => {
-        if(task.id === id){
-          setTasksDataRemove( prev => [...prev, task]);
+        if (task.id === id) {
+          setTasksDataRemove(prev => [...prev, task]);
         }
       })
-          
+
     }
     setTasksData1((prev) => prev.filter((task) => task.id !== id));
   };
-
 
   const JobTypeDataAPi = async (req, id) => {
     const fetchJobTypeData = async (service_id) => {
@@ -291,22 +216,22 @@ const Service = () => {
   };
 
   const getCheckListData = async (service_id, item) => {
-    const req = { service_id: service_id, job_type_id: item.id , customer_id: address};
+    const req = { service_id: service_id, job_type_id: item.id, customer_id: address };
     const data = { req, authToken: token };
     await dispatch(getcustomerschecklistApi(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
           if (response.data.length > 0) {
-           
+
             setTasksData1((prev) => {
               const mergedTasks = [...prev, ...response.data];
-  
+
               const uniqueTasks = mergedTasks.filter(
                 (task, index, self) =>
                   index === self.findIndex((t) => t.id === task.id)
               );
-  
+
               return uniqueTasks;
             });
           } else {
@@ -322,13 +247,13 @@ const Service = () => {
   const TaskUpdate = async (e, id, serviceId) => {
 
     if (tasksGet.length > 0) {
-      setTasksData((prev) => 
+      setTasksData((prev) =>
         prev.filter(
           (task) => !tasksGet.some((item) => item.JobTypeId === id && item.serviceId === serviceId && task.JobTypeId === id && task.serviceId === serviceId)
         )
       );
     }
-    
+
 
 
     if (e.target.files.length > 0) {
@@ -445,8 +370,36 @@ const Service = () => {
   const handleSearchChange = (e) => {
     setSearchValue(e.target.value);
   };
+  const handleSelect = (selected) => {
 
-  
+    setSelectManager(selected);
+
+
+    setManager((prevManager) => {
+
+      const existingIndex = prevManager.findIndex(
+        (item) => item.service_id === tempServices
+      );
+
+      if (existingIndex !== -1) {
+        const updatedManager = [...prevManager];
+        updatedManager[existingIndex].account_manager_ids = selected;
+        return updatedManager;
+      } else {
+        if (selected.length > 0) {
+          return [
+            ...prevManager,
+            { service_id: tempServices, account_manager_ids: selected },
+          ];
+        }
+        return prevManager;
+      }
+    });
+
+  }
+
+  console.log("getManager", getManager);
+
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
       {({ handleSubmit }) => (
@@ -524,7 +477,7 @@ const Service = () => {
                                             .flatMap((data, subIndex) =>
                                               data.data.map((data1, jobIndex) => (
                                                 <div className="accordion-item" key={`${item.id}_${data1.id}_${jobIndex}`}>
-                                                  <h2 className="accordion-header" id={`sub-headingOne${item.id}_${data1.id}_${jobIndex}`}   onClick={() =>getCheckListData(item.id, data1)}>
+                                                  <h2 className="accordion-header" id={`sub-headingOne${item.id}_${data1.id}_${jobIndex}`} onClick={() => getCheckListData(item.id, data1)}>
                                                     <button
                                                       className="accordion-button  collapsed"
                                                       type="button"
@@ -566,10 +519,10 @@ const Service = () => {
                                                         </div>
                                                         <div className="table-responsive">
                                                           {[...tasksGet1, ...tasksGet].filter(
-                                                                (TaskShow) =>
-                                                                  data1.id === TaskShow.JobTypeId || TaskShow.job_type_id && item.id === TaskShow.serviceId || TaskShow.service_id
-                                                              )
-                                                              .length > 0 && (
+                                                            (TaskShow) =>
+                                                              data1.id === TaskShow.JobTypeId || TaskShow.job_type_id && item.id === TaskShow.serviceId || TaskShow.service_id
+                                                          )
+                                                            .length > 0 && (
                                                               <table className="table table-bordered mt-4">
                                                                 <thead className="table-head-blue">
                                                                   <tr>
@@ -592,7 +545,7 @@ const Service = () => {
                                                                 <tbody>
                                                                   {tasksGet.map((TaskShow) => {
 
-                                                                    
+
 
                                                                     if (
                                                                       data1.id == TaskShow.JobTypeId &&
@@ -652,7 +605,7 @@ const Service = () => {
                                                                     }
                                                                     return null;
                                                                   })}
- {tasksGet1.map(
+                                                                  {tasksGet1.map(
                                                                     (
                                                                       TaskShow
                                                                     ) => {
@@ -813,102 +766,34 @@ const Service = () => {
             handleClose={() => setModal(false)}
           >
             <div className="row">
-              <div className="col-9">
-                <div className="search-box">
-                  <i className="ri-search-line search-icon" />
-                  <input
-                    type="text"
-                    className="form-control search"
-                    placeholder="Search Manager..."
-                    value={searchValue}
-                    onChange={handleSearchChange}
-                  />
-                </div>
-
-                <div className="search-results">
-                  {searchValue.trim() === "" ? (
-                    <div className="no-results">
-                      <p>No search value entered</p>
-                    </div>
-                  ) : (
-                    staffDataAll.data
-                      .filter((data) =>
-                        data.first_name
-                          .toLowerCase()
-                          .includes(searchValue.toLowerCase())
-                      )
-                      .map((data, index) => (
-                        <div
-                          key={data.id || index}
-                          className="search-result-item"
-                          onClick={() => setSearchValue(data.first_name)}
-                        >
-                          {data.first_name}
-                        </div>
-                      ))
-                  )}
-                </div>
+              <div className="col-12">
+                <Select
+                  classNames="multiselect"
+                  options={staffDataAll.data.map((data) => ({
+                    value: data.id,
+                    label: data.first_name,
+                  }))}
+                  isMulti
+                  Clearable={false}
+                  className="basic-multi-select table-select"
+                  style={{ border: 'none' }}
+                  value={
+                    getManager &&
+                    getManager.find((item) => item.service_id === tempServices)?.account_manager_ids || []
+                  }
+                  onChange={(selected) => handleSelect(selected)}
+                  placeholder="Select options"
+                />
               </div>
 
-              <div className="col-3">
+              <div className="col-lg-12 mt-4 d-flex justify-content-end">
                 <button
                   type="button"
-                  className="btn btn-info "
+                  className="btn btn-info add-btn "
                   onClick={AddManager}
                 >
-                  <i className="pe-1 fa fa-plus"></i>
-                  Add
-
+                  Save
                 </button>
-              </div>
-
-              <div className="table-responsive mt-3 mb-1">
-                <table className="table align-middle table-nowrap">
-                  <thead className="table-light table-head-blue">
-                    <tr>
-                      <th>Add Account Manager</th>
-                      <th className="text-end">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {getManager.length > 0 ? (
-                      getManager
-                        .filter(
-                          (manager) => manager.service_id === tempServices
-                        )
-                        .flatMap((manager, managerIndex) =>
-                          manager.account_manager_ids.map(
-                            (accountManager, accountManagerIndex) => (
-                              <tr
-                                key={`${managerIndex}-${accountManagerIndex}`} // Ensure unique key for each row
-                              >
-                                <td>{accountManager.first_name}</td>
-                                <td className="text-align-right">
-                                  <button
-                                    onClick={() =>
-                                      removeManager(
-                                        accountManager.id,
-                                        manager.service_id
-                                      )
-                                    }
-                                    className=" delete-icon"
-                                  >
-                                    <i className="ti-trash text-danger "></i>
-                                  </button>
-                                </td>
-                              </tr>
-                            )
-                          )
-                        )
-                    ) : (
-                      <tr>
-                        <td colSpan="2" className="text-center">
-                        No Account Manager Found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
               </div>
             </div>
           </CommanModal>
