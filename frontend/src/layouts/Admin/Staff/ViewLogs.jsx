@@ -17,7 +17,7 @@ const ViewLogs = () => {
 
   const viewLogs = async (row) => {
     try {
-      const req = { staff_id: location?.state?.row?.id , type: 'staff' };
+      const req = { staff_id: location?.state?.row?.id, type: 'staff' };
       const data = { req: req, authToken: token };
       await dispatch(ActivityLog(data))
         .unwrap()
@@ -64,7 +64,7 @@ const ViewLogs = () => {
         <i className="fa fa-arrow-left pe-1" /> Back
       </div>
       <div className="row  report-data mt-5">
-        <div className="mapWrapper">
+        {/* <div className="mapWrapper">
           <div>
             {chunkedSpouseArray?.map((row, rowIndex) => (
               <div className="row" key={rowIndex} style={{ justifyContent: rowIndex % 2 === 0 ? 'flex-start' : 'flex-end' }}>
@@ -98,7 +98,54 @@ const ViewLogs = () => {
               </div>
             ))}
           </div>
+        </div> */}
+
+        <div className="mapWrapper">
+          <div>
+            {chunkedSpouseArray?.map((row, rowIndex) => (
+              <div
+                className="row"
+                key={rowIndex}
+                style={{
+                  justifyContent: rowIndex % 2 === 0 ? "flex-start" : "flex-end", // Alternate alignment
+                }}
+              >
+                {(rowIndex % 2 === 0 ? row : [...row].reverse()).map((item, index) => ( // Reverse data for snake pattern
+                  <div
+                    className="itemBar"
+                    key={index}
+                    style={{
+                      textAlign: rowIndex % 2 === 0 ? "left" : "right", // Alternate text alignment
+                    }}
+                  >
+                    <div className="box">
+                      <div className="tooltip--multiline report-data">
+                        {item?.allContain?.map((subItem, subIndex) => (
+                          <div key={subIndex}>
+                            <ul>
+                              <li>
+                                <b>{new Date(subItem.created_at).toLocaleTimeString()}</b>
+                                <p>{subItem.log_message}</p>
+                              </li>
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="itemInfo">
+                      <span>
+                        <i className="fa-solid fa-circle-info pe-1"></i>
+                      </span>
+                      {item.info}
+                    </div>
+                    <div className="itemDate">{item.date}</div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
+
       </div>
     </div >
   );
