@@ -605,9 +605,9 @@ const Setting = () => {
   ];
 
   const columnStatusType = [
-    { name: "Status", selector: (row) => row.type, sortable: true },
+    { name: "Status Name", selector: (row) => row.type,  },
     {
-      name: "Status",
+      name: "Status ",
       cell: (row) => (
         <div>
           <span
@@ -1338,12 +1338,12 @@ const Setting = () => {
           {
             type: "text",
             name: "name",
-            label: "Job Name",
-            placeholder: "Enter Job Name",
+            label: "Job/Project Name",
+            placeholder: "Enter Job/Project Name",
           },
           ,
         ],
-        title: "Job",
+        title: "Job/Project",
         tabStatus: tabStatus,
       });
     }
