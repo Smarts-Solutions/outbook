@@ -1084,7 +1084,7 @@ const Information = ({ id, pageStatus }) => {
                             <div className="mb-3">
                               <label className="form-label">
                                 VAT Registered
-                                <span style={{ color: "red" }}>*</span>
+                               
                               </label>
                               <select
                                 className="form-select "
@@ -1464,7 +1464,7 @@ const Information = ({ id, pageStatus }) => {
                                 <label className="form-label">
                                   Incorporation Date
                                 </label>
-
+                                <span style={{ color: "red" }}> *</span>
                                 <input
                                   type="text"
                                   className={errors2["IncorporationDate"] ? "error-field form-control" : "form-control"}
@@ -1788,9 +1788,7 @@ const Information = ({ id, pageStatus }) => {
                                           <div className="mb-3">
                                             <label className="form-label">
                                               Role
-                                              <span style={{ color: "red" }}>
-                                                *
-                                              </span>
+                                             
                                             </label>
                                             <select
                                               className="form-select"
@@ -2014,7 +2012,7 @@ const Information = ({ id, pageStatus }) => {
                               <div className="mb-3">
                                 <label className="form-label">
                                   VAT Registered
-                                  <span style={{ color: "red" }}>*</span>
+                               
                                 </label>
                                 <select
                                   className="form-select "
@@ -2205,9 +2203,7 @@ const Information = ({ id, pageStatus }) => {
                                         <div className="mb-3">
                                           <label className="form-label">
                                             Role
-                                            <span style={{ color: "red" }}>
-                                              *
-                                            </span>
+                                            
                                           </label>
                                           <select
                                             className="form-select"

@@ -184,6 +184,13 @@ const ClientList = () => {
 
     {
       name: "Client Code",
+      cell: (row) => (
+        <div
+        title={row.client_code || "-"}
+        >
+         {row.client_code || "-"}
+        </div>
+   ),
       selector: (row) => row.client_code || "-",
       sortable: true,
       reorder: false,
@@ -262,14 +269,26 @@ const ClientList = () => {
 
     {
       name: "Client Name",
-
+      cell: (row) => (
+        <div
+        title={row.client_trading_name || "-"}
+        >
+         {row.client_trading_name || "-"}
+        </div>
+   ),
       selector: (row) => row.client_trading_name || "-",
       sortable: true,
       reorder: false,
     },
     {
       name: "Job Type",
-
+      cell: (row) => (
+        <div
+        title={row.job_type_name || "-"}
+        >
+         {row.job_type_name || "-"}
+        </div>
+   ),
       selector: (row) => row.job_type_name || "-",
       sortable: true,
       reorder: false,
@@ -300,6 +319,18 @@ const ClientList = () => {
     },
     {
       name: "Account Manager",
+
+      cell: (row) => (
+        <div
+        title={ row.account_manager_officer_first_name +
+          " " +
+          row.account_manager_officer_last_name || "-"}
+        >
+         { row.account_manager_officer_first_name +
+        " " +
+        row.account_manager_officer_last_name || "-"}
+        </div>
+   ),
       selector: (row) =>
         row.account_manager_officer_first_name +
         " " +
@@ -309,12 +340,30 @@ const ClientList = () => {
     },
     {
       name: "Client Job Code",
+      cell: (row) => (
+        <div
+        title={row.client_job_code || "-"}
+        >
+         {row.client_job_code || "-"}
+        </div>
+   ),
       selector: (row) => row.client_job_code || "-",
       sortable: true,
       reorder: false,
     },
     {
       name: "Outbook Account Manager",
+      cell: (row) => (
+        <div
+        title={ row.outbooks_acount_manager_first_name +
+          " " +
+          row.outbooks_acount_manager_last_name || "-"}
+        >
+         { row.outbooks_acount_manager_first_name +
+        " " +
+        row.outbooks_acount_manager_last_name || "-"}
+        </div>
+   ),
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
         " " +
@@ -324,6 +373,13 @@ const ClientList = () => {
     },
     {
       name: "Allocated To",
+      cell: (row) => (
+        <div
+        title={row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name}
+        >
+         {row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name}
+        </div>
+   ),
       selector: (row) =>
         row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name,
       sortable: true,
@@ -331,6 +387,17 @@ const ClientList = () => {
     },
     {
       name: "Timesheet",
+      cell: (row) => (
+        <div
+        title={row.total_hours_status == "1" && row.total_hours != null ?
+          row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
+          : "-"}
+        >
+         {row.total_hours_status == "1" && row.total_hours != null ?
+          row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
+          : "-"}
+        </div>
+   ),
       selector: (row) =>
         row.total_hours_status == "1" && row.total_hours != null ?
           row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
@@ -530,6 +597,7 @@ const ClientList = () => {
   const tabs1 = [
     {
       key: "client",
+
       title: "Clients",
       placeholder: "Search clients...",
       data: ClientData,

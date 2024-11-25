@@ -2703,8 +2703,8 @@ hr.thick {
 }
 
 .activity .activity-info .activity-info-text {
-	margin-left: 16px;
-	width: 100%;
+    margin-left: 16px;
+    width: calc(100% - 31px);
 }
 
 .activity .activity-info .activity-info-text a,
@@ -3194,15 +3194,14 @@ span.sidebar-icons {
 	box-shadow: 2px 2px 1px #333547;
 }
 
-.datatable-container .rdt_TableCol,
-.datatable-container .rdt_TableCell {
-	font-size: 14px;
-	color: #4B4B4B;
-	font-weight: 600;
-	text-transform: none;
-	padding: 10px 15px;
+.datatable-container .rdt_TableCol, .datatable-container .rdt_TableCell {
+    font-size: 14px;
+    color: #4B4B4B;
+    font-weight: 600;
+    text-transform: none;
+    padding: 10px 15px;
+    white-space: normal;
 }
-
 .datatable-container .rdt_TableCol {
 	color: #000;
 	font-size: 16px;
@@ -4147,7 +4146,8 @@ span.breadcrumb__desc {
 }
 
 .itemBar:hover .tooltip--multiline {
-	display: block;
+    display: block;
+    overflow-x: hidden;
 }
 
 .tooltip--multiline {
@@ -4478,16 +4478,14 @@ select#tabSelect {
 }
 .week-data span {
     font-size: 13px;
-    margin: 0px 4px;
+    margin-right:  4px;
     width: 88px;
 }
 body .week-data .btn-link {
     padding-left: 0px !important;
     width: 90px;
 }
-.week-data span:first-child {
-    margin: 0;
-}
+
 .rdt_TableHead
 {	
 	z-index: 12 !important;		
