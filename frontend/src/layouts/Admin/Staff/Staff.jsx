@@ -203,7 +203,7 @@ const StaffPage = () => {
       ),
       selector: (row) => row.first_name + " " + row.last_name,
       sortable: true,
-      width: "180px",
+      width: "300px",
       reorder: false,
     },
     {
@@ -215,7 +215,7 @@ const StaffPage = () => {
       name: "Email Address",
       selector: (row) => row.email,
       sortable: true,
-
+      idth: "300px",
       reorder: false,
     },
     {
