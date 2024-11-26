@@ -396,7 +396,7 @@ const StaffPage = () => {
     },
 
     {
-      type: "select1",
+      type: "select2",
       name: "phone_code",
       label: "Phone Code",
       options: [
@@ -409,7 +409,7 @@ const StaffPage = () => {
       placeholder: "Enter Phone Number",
     },
     {
-      type: "number",
+      type: "number1",
       name: "phone",
       label: "Phone",
       label_size: 12,
