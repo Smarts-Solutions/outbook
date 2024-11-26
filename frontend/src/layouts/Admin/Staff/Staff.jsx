@@ -549,10 +549,10 @@ const StaffPage = () => {
       formik.setFieldValue("first_name", editStaffData.first_name || "null");
       formik.setFieldValue("last_name", editStaffData.last_name || "null");
       formik.setFieldValue("email", editStaffData.email || "null");
-      formik.setFieldValue("phone", editStaffData.phone || "null");
+      formik.setFieldValue("phone", editStaffData.phone || null);
       formik.setFieldValue("role", editStaffData.role_id || "null");
       formik.setFieldValue("status", editStaffData.status || "null");
-      formik.setFieldValue("phone_code", editStaffData.phone_code || "null");
+      formik.setFieldValue("phone_code", editStaffData.phone_code || null);
       if (editStaffData.hourminute) {
         setBudgetedHours({
           hours: editStaffData.hourminute.split(":")[0],

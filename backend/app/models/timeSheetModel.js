@@ -821,11 +821,7 @@ const getTimesheetTaskType = async (Timesheet) => {
 const saveTimesheet = async (Timesheet) => {
   try {
     const { staff_id, data, deleteRows } = Timesheet;
-   
-
-    
-
-
+  
 
     if (data.length > 0) {
       const formatTime = input => {
