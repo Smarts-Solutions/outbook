@@ -193,5 +193,56 @@ const pool = require('../config/database');
   
     return { startDate, endDate };
   };
+
+  const JobTaskNameWithId = async (data) => {
+       let job_id = data.job_id;
+       let task_id = data.task_id;
+       let TaskType = data.TaskType;
+
+       if(TaskType === 1){
+        const query = `SELECT 
+     sub_internal.name AS task_name,
+     internal.name AS job_code_id
+FROM 
+     internal
+JOIN 
+     sub_internal ON sub_internal.internal_id = internal.id
+WHERE
+     internal.id = ? AND sub_internal.id = ?;`
+        const [rows] = await pool.execute(query, [job_id,task_id]);
+        return { job_name: rows[0].job_code_id, task_name: rows[0].task_name };
+
+       }else if(TaskType === 2){
+        const query = `SELECT 
+        jobs.id AS job_id,
+        task.id AS task_id,
+        task.name AS task_name,
+        CONCAT(
+               SUBSTRING(customers.trading_name, 1, 3), '_',
+               SUBSTRING(clients.trading_name, 1, 3), '_',
+               SUBSTRING(job_types.type, 1, 4), '_',
+               SUBSTRING(jobs.job_id, 1, 15)
+               ) AS job_code_id
+   FROM 
+        jobs
+   JOIN 
+        clients ON jobs.client_id = clients.id
+   JOIN 
+        customers ON jobs.customer_id = customers.id
+   JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+   CROSS JOIN 
+        task  -- This will join all tasks with the jobs (cross product)
+   WHERE
+        jobs.id = ? AND task.id = ?`
+           const [rows] = await pool.execute(query, [job_id,task_id]);
+           return { job_name: rows[0].job_code_id, task_name: rows[0].task_name };
+       }else{
+        return { job_name: "", task_name: "" };
+       }
+
+
+  }
+    
   
-  module.exports = { SatffLogUpdateOperation ,generateNextUniqueCode ,generateNextUniqueCodeJobLogTitle ,getDateRange };
+  module.exports = { SatffLogUpdateOperation ,generateNextUniqueCode ,generateNextUniqueCodeJobLogTitle ,getDateRange ,JobTaskNameWithId };
