@@ -407,7 +407,7 @@ const getClient = async (client) => {
         LEFT JOIN 
           staffs ON customers.staff_id = staffs.id   
         WHERE 
-          (jobs.allocated_to = ? AND clients.customer_id = ? ) OR clients.staff_created_id = ?
+          (jobs.allocated_to = ? OR clients.customer_id = ? ) OR clients.staff_created_id = ?
         GROUP BY 
         CASE 
             WHEN jobs.allocated_to = ? THEN jobs.client_id
@@ -465,9 +465,9 @@ const getClient = async (client) => {
         LEFT JOIN 
           customer_services ON customer_services.customer_id = customers.id
         LEFT JOIN 
-          customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id    
+          customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id   
         WHERE 
-          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? AND jobs.client_id = clients.id) OR clients.staff_created_id = ? 
+          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id) OR clients.staff_created_id = ? 
         GROUP BY 
         CASE 
             WHEN jobs.account_manager_id = ? THEN jobs.client_id
@@ -477,7 +477,7 @@ const getClient = async (client) => {
         clients.id DESC
             `;
           const [resultAccounrManage] = await pool.execute(query, [StaffUserId,StaffUserId ,customer_id,StaffUserId,StaffUserId]);
-          console.log("resultAccounrManage ",resultAccounrManage);
+        //  console.log("resultAccounrManage ",resultAccounrManage);
           if(resultAccounrManage.length == 0){
             return { status: true, message: "success.", data: resultAccounrManage };
           }
@@ -524,7 +524,7 @@ const getClient = async (client) => {
         LEFT JOIN 
           staffs ON customers.staff_id = staffs.id  
         WHERE 
-          (jobs.reviewer = ? AND clients.customer_id = ? ) OR clients.staff_created_id = ?
+          (jobs.reviewer = ? OR clients.customer_id = ? ) OR clients.staff_created_id = ?
         GROUP BY 
         CASE 
             WHEN jobs.reviewer = ? THEN jobs.client_id 

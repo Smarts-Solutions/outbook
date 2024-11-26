@@ -113,7 +113,7 @@ const modifySubInternal = async (sub_internal) => {
             `edited Internal Task ${name}` :
             `changes the Internal Task status ${status_change} ${name}`
 
-        const [result] = await pool.query(query, [name, status, id]);
+        const [result] = await pool.query(updateQuery, [name, status, id]);
         if(result.changedRows > 0){
             const currentDate = new Date();
             await SatffLogUpdateOperation(
