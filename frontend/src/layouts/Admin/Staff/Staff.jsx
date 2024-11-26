@@ -432,7 +432,8 @@ const StaffPage = () => {
       label: "Role",
       label_size: 12,
       col_size: 6,
-      disable: editShowModel == true ? true : false,
+     // disable: editShowModel == true ? true : false,
+      disable:  false,
       options:
         roleDataAll &&
         roleDataAll.data.map((data) => {
