@@ -1196,11 +1196,13 @@ const getJobById = async (job) => {
     const query = `
     SELECT 
      jobs.id AS job_id,
+     jobs.staff_created_id AS staff_created_id,
      staffs3.id AS outbooks_acount_manager_id,
      staffs3.first_name AS outbooks_acount_manager_first_name,
      staffs3.last_name AS outbooks_acount_manager_last_name,
      customers.id AS customer_id,
      customers.trading_name AS customer_trading_name,
+     customers.staff_id AS customer_staff_id,
      clients.id AS client_id,
      clients.trading_name AS client_trading_name,
      jobs.client_job_code AS client_job_code,
@@ -1304,9 +1306,11 @@ const getJobById = async (job) => {
 
       result = {
         job_id: rows[0].job_id,
+        staff_created_id: rows[0].staff_created_id,
         job_code_id: rows[0].job_code_id,
         customer_id: rows[0].customer_id,
         customer_trading_name: rows[0].customer_trading_name,
+        customer_staff_id: rows[0].customer_staff_id,
         client_id: rows[0].client_id,
         client_trading_name: rows[0].client_trading_name,
         client_job_code: rows[0].client_job_code,
@@ -1424,14 +1428,15 @@ const jobUpdate = async (job) => {
     vat_reconciliation,
     bookkeeping,
     processing_type,
-    invoiced,
-    currency,
-    invoice_value,
-    invoice_date,
-    invoice_hours,
-    invoice_remark,
     status_type
   } = job;
+
+  let  invoiced = job.invoiced == "" || job.invoiced == "0" ? '0' : '1';
+  let  currency = job.currency == ""  ? 0 : job.currency;
+  let  invoice_value = job.invoice_value == ""  ? null : job.invoice_value;
+  let  invoice_date = job.invoice_date == ""  ? null : job.invoice_date;
+  let  invoice_hours = job.invoice_hours == ""  ? null : job.invoice_hours;
+  let  invoice_remark = job.invoice_remark == ""  ? null : job.invoice_remark
  
   
 
@@ -1757,10 +1762,13 @@ JOIN
 LEFT JOIN 
     jobs  ON staff_logs.module_name = 'job' AND staff_logs.module_id = jobs.id         
 WHERE
-    staff_logs.staff_id = ${staff_id} AND  staff_logs.module_name = "job" AND staff_logs.module_id = ${job_id}
+    staff_logs.module_name = "job" AND staff_logs.module_id = ${job_id}
 ORDER BY
     staff_logs.id DESC
 `;
+
+// WHERE
+//     staff_logs.staff_id = ${staff_id} AND  staff_logs.module_name = "job" AND staff_logs.module_id = ${job_id}
   const [result] = await pool.execute(query);
 
   const groupedResult = result.reduce((acc, log) => {

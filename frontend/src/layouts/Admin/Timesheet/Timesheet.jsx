@@ -304,9 +304,24 @@ const Timesheet = () => {
                       updatedRows[index].task_id = res3.data[0].id;
                     }
                   }
-                }
+                }else{
+                  sweatalert.fire({
+                    icon: 'warning',
+                    title: "There is no job available for this client.",
+                    timerProgressBar: true,
+                    showConfirmButton: true,
+                    timer: 1500
+                  });
+                  }
               }
-
+            }else{ 
+              sweatalert.fire({
+                icon: 'warning',
+                title: "This customer does not have an available client.",
+                timerProgressBar: true,
+                showConfirmButton: true,
+                timer: 1500
+              });
             }
           }
 
@@ -334,7 +349,45 @@ const Timesheet = () => {
         updatedRows[index].customer_id = e.target.value;
         updatedRows[index].clientData = res.data;
         updatedRows[index].client_id = res.data[0].id;
+        
 
+        const req = {
+          staff_id: staffDetails.id, task_type: "4", client_id
+            : res.data[0].id
+        };
+        const res2 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
+        if (res2.status) {
+          if (res2.data.length > 0) {
+            updatedRows[index].jobData = res2.data;
+            updatedRows[index].job_id = res2.data[0].id;
+            const req = { staff_id: staffDetails.id, task_type: "6", job_id: res2.data[0].id };
+            const res3 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
+            if (res3.status) {
+              if (res3.data.length > 0) {
+                updatedRows[index].taskData = res3.data;
+                updatedRows[index].task_id = res3.data[0].id;
+              }
+            }
+          }else{
+            sweatalert.fire({
+              icon: 'warning',
+              title: "There is no job available for this client.",
+              timerProgressBar: true,
+              showConfirmButton: true,
+              timer: 1500
+            });
+            }
+        }
+
+
+      }else{
+        sweatalert.fire({
+          icon: 'warning',
+          title: "There is no client available for this customer.",
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 1500
+          });
       }
     }
     setTimeSheetRows(updatedRows);
@@ -381,6 +434,14 @@ const Timesheet = () => {
             }
           }
         }
+      }else{
+        sweatalert.fire({
+          icon: 'warning',
+          title: "There is no job available for this client.",
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 1500
+        });
       }
     }
     setTimeSheetRows(updatedRows);
@@ -495,7 +556,7 @@ const Timesheet = () => {
       if (updatedRows[index].total_hours > parseFloat(convertTimeFormat(updatedRows[index].staffs_hourminute))) {
         sweatalert.fire({
           icon: 'warning',
-          title: "Your total allotted time has exceeded.",
+          title: "Your total allocated time has been exceeded",
           timerProgressBar: true,
           showConfirmButton: true,
           timer: 3000

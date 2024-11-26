@@ -771,7 +771,7 @@ const Service = () => {
                   classNames="multiselect"
                   options={staffDataAll.data.map((data) => ({
                     value: data.id,
-                    label: data.first_name,
+                    label: data.first_name+" "+data.last_name,
                   }))}
                   isMulti
                   Clearable={false}

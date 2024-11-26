@@ -570,7 +570,7 @@ const ClientList = () => {
     {
       name: "Actions",
       cell: (row) => (
-        <div>
+        <div className="d-flex"> 
           {
             (getAccessDataCustomer.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
               <button className="edit-icon" onClick={() =>

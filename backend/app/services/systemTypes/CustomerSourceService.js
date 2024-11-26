@@ -21,6 +21,9 @@ const removeCustomerSource = async (CustomerSourceId) => {
 const modifyCustomerSource = async (CustomerSource) => {
   return customerSourceModel.updateCustomerSource(CustomerSource);
 };
+const getAllWithSubSource = async () => {
+  return customerSourceModel.getAllWithSubSource();
+}
 
 
 module.exports = {
@@ -28,5 +31,6 @@ module.exports = {
   getCustomerSource,
   removeCustomerSource,
   modifyCustomerSource,
-  getCustomerSourceAll
+  getCustomerSourceAll,
+  getAllWithSubSource
 };

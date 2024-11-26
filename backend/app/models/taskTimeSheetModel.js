@@ -123,7 +123,7 @@ const addMissingLog = async (missingLog) => {
 
 
   const { job_id, missing_log, missing_log_sent_on, missing_log_reviewed_by, status } = missingLog.body;
-
+  let log_message = `sent the missing logs for job code:`
   let data = {
     table: 'missing_logs',
     field: 'missing_log_title',
@@ -157,6 +157,10 @@ const addMissingLog = async (missingLog) => {
       status
     ]);
 
+    if (parseInt(status) === 1) {
+      log_message = `Sent and completed the missing logs for job code:`
+    }
+
     if (rows.insertId > 0) {
       const currentDate = new Date();
       await SatffLogUpdateOperation(
@@ -165,7 +169,7 @@ const addMissingLog = async (missingLog) => {
           ip: missingLog.body.ip,
           date: currentDate.toISOString().split('T')[0],
           module_name: 'job',
-          log_message: `sent the missing logs for job code:`,
+          log_message: log_message,
           permission_type: 'created',
           module_id: job_id,
         }
@@ -400,8 +404,9 @@ const getMissingLogSingleView = async (missingLog) => {
 //Queries
 const addQuerie = async (querie) => {
   const { job_id, queries_remaining, reviewed_by, query_sent_date, response_received, status } = querie.body;
-  const query_document = querie.files;
 
+  const query_document = querie.files;
+  let log_message =  `sent the queries for job code:`
   let data = {
     table: 'queries',
     field: 'query_title',
@@ -425,6 +430,10 @@ const addQuerie = async (querie) => {
       `;
     const [rows] = await pool.execute(query, [job_id, queries_remaining, status, UniqueNoTitle, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date]);
 
+    if(status === "1"){
+      log_message = `Sent and completed the queries for the job code:`
+    }
+
     if (rows.insertId > 0) {
       const currentDate = new Date();
       await SatffLogUpdateOperation(
@@ -433,7 +442,7 @@ const addQuerie = async (querie) => {
           ip: querie.body.ip,
           date: currentDate.toISOString().split('T')[0],
           module_name: 'job',
-          log_message: `sent the queries for job code:`,
+          log_message: log_message,
           permission_type: 'created',
           module_id: job_id,
         }
@@ -570,6 +579,8 @@ const editQuerie = async (query) => {
   const { id, queries_remaining, reviewed_by, query_sent_date, response_received, status } = query.body;
   const query_document = query.files;
 
+  console.log("query.body", query.body)
+
   let missing_queries_prepared_date = query.body.missing_queries_prepared_date == 'null' ? null : query.body.missing_queries_prepared_date
 
   let final_query_response_received_date = query.body.final_query_response_received_date == 'null' ? null : query.body.final_query_response_received_date
@@ -599,7 +610,7 @@ const editQuerie = async (query) => {
 
     if (rows.changedRows > 0) {
       let querie_log_msg = []
-      if (parseInt(status) == 3) {
+      if (parseInt(status) == 1) {
         querie_log_msg.push('completed the queries')
       }
       else if (existQuerie.queries_remaining != queries_remaining || existQuerie.reviewed_by != reviewed_by || existQuerie.missing_queries_prepared_date != missing_queries_prepared_date || existQuerie.query_sent_date != query_sent_date || existQuerie.response_received != response_received || existQuerie.final_query_response_received_date != final_query_response_received_date) {
@@ -722,7 +733,7 @@ const getDraftSingleView = async (req, res) => {
 
 const addDraft = async (draft) => {
   const { job_id, draft_sent_on, feedback_received, updated_amendment, feedback, was_it_complete, final_draft_sent_on } = draft;
-
+  let log_message= `sent the draft for job code:`
   if (parseInt(was_it_complete) === 1) {
     const [[rowsCheckMissingLog]] = await pool.execute(`SELECT 
     CASE
@@ -759,6 +770,8 @@ const addDraft = async (draft) => {
     else if (rowsCheckQuery.status_check === 0) {
       return { status: false, message: 'Please complete the queries first.', data: "W" };
     }
+
+    log_message= `completed the draft for job code:`
   }
 
   let data = {
@@ -786,7 +799,7 @@ const addDraft = async (draft) => {
           ip: draft.ip,
           date: currentDate.toISOString().split('T')[0],
           module_name: 'job',
-          log_message: `sent the draft for job code:`,
+          log_message: log_message,
           permission_type: 'created',
           module_id: job_id,
         }
