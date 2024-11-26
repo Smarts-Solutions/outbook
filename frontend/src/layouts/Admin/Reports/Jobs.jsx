@@ -68,7 +68,7 @@ const JobStatus = () => {
     },
     
     {
-      name: "Account Manager",
+      name: "Client Contact Person",
       selector: (row) =>
         row.account_manager_officer_first_name +
         " " +
@@ -94,7 +94,7 @@ const JobStatus = () => {
     {
       name: "Allocated To",
       selector: (row) =>
-        row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name,
+      row.allocated_name == null ? "-" : row.allocated_name,
       sortable: true,
       reorder: false,
     },

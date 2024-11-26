@@ -268,9 +268,9 @@ const StaffPage = () => {
             <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
           </button>
           <div className="dropdown-menu custom-dropdown" aria-labelledby="dropdownMenuButton">
-            <a className="dropdown-item" onClick={() => { setPortfolio(true); GetAllCustomer() }} style={{ cursor: 'pointer' }}>
+            {/* <a className="dropdown-item" onClick={() => { setPortfolio(true); GetAllCustomer() }} style={{ cursor: 'pointer' }}>
               <FaPencilAlt />  Portfolio
-            </a>
+            </a> */}
             <a className="dropdown-item" onClick={() => { setEditShowModel(true); setEditStaff(true); setEditStaffData(row) }} style={{ cursor: 'pointer' }}>
               <FaBriefcase />  Edit
             </a>
@@ -587,21 +587,8 @@ const StaffPage = () => {
               <div className="col-md-5">
               </div>
               <div className="col-md-7">
-                <div className="d-flex justify-content-end">
-                  <div className="form-group w-50">
-                    <select
-                      className="form-control"
-                      id="tabSelect"
-                      value={activeTab}
-                      onChange={(e) => setActiveTab(e.target.value)}
-                    >
-                      {tabs.map((tab) => (
-                        <option key={tab.id} value={tab.id}>
-                          {tab.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                <div className="d-flex justify-content-end mb-4">
+                  
                   <div className="w-25">
                     {showStaffInsertTab && (
                       <button

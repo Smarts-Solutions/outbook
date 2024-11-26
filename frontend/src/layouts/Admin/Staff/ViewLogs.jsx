@@ -6,7 +6,7 @@ import { ActivityLog } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice"
 const ViewLogs = () => {
   const location = useLocation();
   const dispatch = useDispatch();
-  const token = JSON.parse(localStorage.getItem("token")); 
+  const token = JSON.parse(localStorage.getItem("token"));
   const [getActiviyLog, setActivityLog] = useState([]);
 
   useEffect(() => {
@@ -17,7 +17,7 @@ const ViewLogs = () => {
 
   const viewLogs = async (row) => {
     try {
-      const req = { staff_id: location?.state?.row?.id };
+      const req = { staff_id: location?.state?.row?.id, type: 'staff' };
       const data = { req: req, authToken: token };
       await dispatch(ActivityLog(data))
         .unwrap()
@@ -50,48 +50,103 @@ const ViewLogs = () => {
 
   return (
     <div className="container-fluid mt-5">
-     <div className="content-title">
+      <div className="content-title">
         <div className="tab-title">
           <h3 className="mt-0">View Logs</h3>
         </div>
       </div>
-      <div className="row  report-data mt-5">
-      <div className="mapWrapper">
-        <div>
-          {chunkedSpouseArray?.map((row, rowIndex) => (
-            <div className="row" key={rowIndex} style={{ justifyContent: rowIndex % 2 === 0 ? 'flex-start' : 'flex-end' }}>
-              {row.map((item, index) => (
-                <div className="itemBar" key={index} style={{ textAlign: rowIndex % 2 === 0 ? 'left' : 'right' }}>
-                  <div className="box">
-                    <div className="tooltip--multiline report-data">
-                     
-                      {item?.allContain?.map((item, index) => (
-                        <div key={index}>
-                          <ul>
-                            <li>
-                            <li><b>{new Date(item.created_at).toLocaleTimeString()}</b></li> 
-                              <p>{item.log_message}</p>
-                            </li>
-                          </ul>
-                        </div>
-                      ))}
-
-                    </div>
-                  </div> 
-                  <div className="itemInfo">
-                    <span>
-                      <i className="fa-solid fa-circle-info pe-1"></i>
-                    </span>
-                    {item.info}
-                  </div> 
-                  <div className="itemDate">{item.date}</div>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
+      <div
+        className="btn btn-info text-white float-end blue-btn me-2"
+        onClick={() => {
+          window.history.back();
+        }}
+      >
+        <i className="fa fa-arrow-left pe-1" /> Back
       </div>
-    </div>
+      <div className="row  report-data mt-5">
+        {/* <div className="mapWrapper">
+          <div>
+            {chunkedSpouseArray?.map((row, rowIndex) => (
+              <div className="row" key={rowIndex} style={{ justifyContent: rowIndex % 2 === 0 ? 'flex-start' : 'flex-end' }}>
+                {row.map((item, index) => (
+                  <div className="itemBar" key={index} style={{ textAlign: rowIndex % 2 === 0 ? 'left' : 'right' }}>
+                    <div className="box">
+                      <div className="tooltip--multiline report-data">
+
+                        {item?.allContain?.map((item, index) => (
+                          <div key={index}>
+                            <ul>
+                              <li>
+                                <li><b>{new Date(item.created_at).toLocaleTimeString()}</b></li>
+                                <p>{item.log_message}</p>
+                              </li>
+                            </ul>
+                          </div>
+                        ))}
+
+                      </div>
+                    </div>
+                    <div className="itemInfo">
+                      <span>
+                        <i className="fa-solid fa-circle-info pe-1"></i>
+                      </span>
+                      {item.info}
+                    </div>
+                    <div className="itemDate">{item.date}</div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div> */}
+
+        <div className="mapWrapper">
+          <div>
+            {chunkedSpouseArray?.map((row, rowIndex) => (
+              <div
+                className="row"
+                key={rowIndex}
+                style={{
+                  justifyContent: rowIndex % 2 === 0 ? "flex-start" : "flex-end", // Alternate alignment
+                }}
+              >
+                {(rowIndex % 2 === 0 ? row : [...row].reverse()).map((item, index) => ( // Reverse data for snake pattern
+                  <div
+                    className="itemBar"
+                    key={index}
+                    style={{
+                      textAlign: rowIndex % 2 === 0 ? "left" : "right", // Alternate text alignment
+                    }}
+                  >
+                    <div className="box">
+                      <div className="tooltip--multiline report-data">
+                        {item?.allContain?.map((subItem, subIndex) => (
+                          <div key={subIndex}>
+                            <ul>
+                              <li>
+                                <b>{new Date(subItem.created_at).toLocaleTimeString()}</b>
+                                <p>{subItem.log_message}</p>
+                              </li>
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="itemInfo">
+                      <span>
+                        <i className="fa-solid fa-circle-info pe-1"></i>
+                      </span>
+                      {item.info}
+                    </div>
+                    <div className="itemDate">{item.date}</div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
     </div >
   );
 };

@@ -53,6 +53,26 @@ const getCustomerSource = async () => {
   }
 };
 
+const getAllWithSubSource = async () => {
+  const query = `
+    SELECT customer_source.* FROM customer_source
+    JOIN customer_sub_source ON customer_source.id = customer_sub_source.customer_source_id
+    WHERE customer_source.status = '1'
+    GROUP BY customer_source.id
+    ORDER BY customer_source.id DESC
+    `;
+
+  try {
+    const [result] = await pool.execute(query);
+    return result;
+  } catch (err) {
+    console.error("Error selecting data:", err);
+    throw err;
+  }
+};
+
+
+
 const getCustomerSourceAll = async () => {
   const query = `
     SELECT * FROM customer_source
@@ -166,4 +186,6 @@ module.exports = {
   updateCustomerSource,
   getCustomerSource,
   getCustomerSourceAll,
+  getAllWithSubSource
+
 };

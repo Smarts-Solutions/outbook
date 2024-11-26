@@ -265,7 +265,10 @@ LEFT JOIN
 };
 
 const getDashboardActivityLog = async (dashboard) => {
-  const { staff_id } = dashboard;
+  const { staff_id  ,type} = dashboard;
+
+  console.log("staff_id ", staff_id)
+  console.log("type ", type)
   const QueryRole = `
   SELECT
     staffs.id AS id,
@@ -283,6 +286,7 @@ const getDashboardActivityLog = async (dashboard) => {
   // Condition with Admin And SuperAdmin
   let MatchCondition = `WHERE
     staff_logs.staff_id = ${staff_id}`
+
   if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
     MatchCondition = ''
   }
@@ -303,7 +307,40 @@ const getDashboardActivityLog = async (dashboard) => {
 `;
 
     const [result] = await pool.execute(query);
-    return { status: true, message: "success.", data: result };
+
+
+    if(result.length > 0){
+      const groupedResult = result.reduce((acc, log) => {
+        const existingDate = acc.find(item => item.date === log.date);
+        if (existingDate) {
+          existingDate.allContain.push({
+            created_at: log.created_at,
+            log_message: log.log_message
+          });
+        } else {
+          acc.push({
+            date: log.date,
+            allContain: [{
+              created_at: log.created_at,
+              log_message: log.log_message
+            }]
+          });
+        }
+    
+        return acc;
+      }, []);
+
+      
+      let finalResult = result
+      if(type == "staff"){
+        finalResult = groupedResult
+      }
+      return { status: true, message: "success.", data: finalResult };
+    }else{
+      return { status: true, message: "No Activity Log found.", data: [] }
+    }
+
+
   } catch (error) {
     console.log("error - ", error)
     return { status: false, message: "Err Dashboard Activity Log Get", error: error.message };

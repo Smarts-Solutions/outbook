@@ -202,7 +202,7 @@ const ClientList = () => {
           <div>
             <select
               className="form-select form-control"
-              value={row.status == "completed" ? 6 : row.status == "WIP – To Be Reviewed" ? 5 : row.status == "WIP – In queries" ? 4 : row.status == "WIP – Processing" ? 3 : row.status == "WIP – Missing Paperwork" ? 2 : row.status == "To Be Started - Not Yet Allocated Internally" ? 1 : 0}
+              value={row.status_type}
               onChange={(e) => handleStatusChange(e, row)}
               disabled={ getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? false : true}
             >
@@ -557,7 +557,8 @@ const ClientList = () => {
                 </div>
               </div>
             </div>
-
+           {
+            informationData.client_type == 4?"":
             <div className=" report-data mt-4">
               <div className="card-header border-bottom pb-3 row">
                 <div className="col-8">
@@ -565,9 +566,9 @@ const ClientList = () => {
                     {informationData && informationData.client_type == 1
                       ? "Sole Trader"
                       : informationData.client_type == 2
-                        ? "Company"
-                        : "Partnership"}{" "}
-                    Information
+                        ? "Company" : informationData.client_type == 3 ? "Partnership" :""
+                  
+                    }
                   </h4>
                 </div>
                 {/* <div className="col-4">
@@ -707,6 +708,8 @@ const ClientList = () => {
                 ""
               )}
             </div>
+           }
+            
           </div>
         )}
       </div>

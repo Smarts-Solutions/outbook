@@ -17,9 +17,11 @@ const EditJob = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
+  const role = JSON.parse(localStorage.getItem("role"));
   const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
   const dispatch = useDispatch();
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
+
   const [getJobDetails, setGetJobDetails] = useState({ loading: false, data: {} });
   const [errors, setErrors] = useState({});
   const [jobModalStatus, jobModalSetStatus] = useState(false);
@@ -703,6 +705,10 @@ const EditJob = () => {
   // }, [AddTaskArr]);
 
 
+  
+
+  console.log("getJobDetails", getJobDetails.data.staff_created_id);
+  console.log("staffCreatedId", staffCreatedId);
 
 
   return (
@@ -1051,6 +1057,7 @@ const EditJob = () => {
                                       name="Reviewer"
                                       onChange={HandleChange}
                                       value={jobData.Reviewer}
+                                      disabled={['ADMIN','SUPERADMIN'].includes(role)? false: getJobDetails.data.staff_created_id != undefined?getJobDetails.data.staff_created_id === staffCreatedId?false: getJobDetails.data.customer_staff_id === staffCreatedId ?false: true : false}
                                     >
                                       <option value=""> Select Reviewer</option>
                                       {(AllJobData?.data?.reviewer || []).map(
@@ -1080,6 +1087,9 @@ const EditJob = () => {
                                       name="AllocatedTo"
                                       onChange={HandleChange}
                                       value={jobData.AllocatedTo}
+                                      disabled={['ADMIN','SUPERADMIN'].includes(role)? false: getJobDetails.data.staff_created_id != undefined?getJobDetails.data.staff_created_id === staffCreatedId?false: getJobDetails.data.customer_staff_id === staffCreatedId ?false: true : false}
+                                     
+
                                     >
                                       <option value=""> Select Staff</option>
                                       {(AllJobData?.data?.allocated || []).map(

@@ -265,7 +265,7 @@ const CreateCheckList = () => {
         task.budgeted_hour.minutes === ""
       ) {
         validationErrors[`budgeted_hour_${index}`] =
-          "Budgeted Hour is required";
+          "Budgeted Time is required";
       }
     });
 
