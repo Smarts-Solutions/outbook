@@ -705,6 +705,10 @@ const EditJob = () => {
   // }, [AddTaskArr]);
 
 
+  
+
+  console.log("getJobDetails", getJobDetails.data.staff_created_id);
+  console.log("staffCreatedId", staffCreatedId);
 
 
   return (
@@ -1053,7 +1057,7 @@ const EditJob = () => {
                                       name="Reviewer"
                                       onChange={HandleChange}
                                       value={jobData.Reviewer}
-                                      disabled={['ADMIN','SUPERADMIN'].includes(role)? false: getJobDetails.data.staff_created_id != undefined?getJobDetails.data.staff_created_id != getJobDetails.staffCreatedId?true:false : false}
+                                      disabled={['ADMIN','SUPERADMIN'].includes(role)? false: getJobDetails.data.staff_created_id != undefined?getJobDetails.data.staff_created_id === staffCreatedId?false:true : false}
                                     >
                                       <option value=""> Select Reviewer</option>
                                       {(AllJobData?.data?.reviewer || []).map(
@@ -1084,9 +1088,10 @@ const EditJob = () => {
                                       onChange={HandleChange}
                                       value={jobData.AllocatedTo}
                                       disabled={['ADMIN','SUPERADMIN'].includes(role)? false: 
-                                        getJobDetails.data.staff_created_id != undefined?getJobDetails.data.staff_created_id != getJobDetails.staffCreatedId?true:false : false
-
+                                        getJobDetails.data.staff_created_id != undefined? getJobDetails.data.staff_created_id === staffCreatedId?false:true : false
                                       }
+                                     
+
                                     >
                                       <option value=""> Select Staff</option>
                                       {(AllJobData?.data?.allocated || []).map(
