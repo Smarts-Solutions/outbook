@@ -1057,7 +1057,7 @@ const EditJob = () => {
                                       name="Reviewer"
                                       onChange={HandleChange}
                                       value={jobData.Reviewer}
-                                      disabled={['ADMIN','SUPERADMIN'].includes(role)? false: getJobDetails.data.staff_created_id != undefined?getJobDetails.data.staff_created_id === staffCreatedId?false:true : false}
+                                      disabled={['ADMIN','SUPERADMIN'].includes(role)? false: getJobDetails.data.staff_created_id != undefined?getJobDetails.data.staff_created_id === staffCreatedId?false: getJobDetails.data.customer_staff_id === staffCreatedId ?false: true : false}
                                     >
                                       <option value=""> Select Reviewer</option>
                                       {(AllJobData?.data?.reviewer || []).map(
@@ -1087,9 +1087,7 @@ const EditJob = () => {
                                       name="AllocatedTo"
                                       onChange={HandleChange}
                                       value={jobData.AllocatedTo}
-                                      disabled={['ADMIN','SUPERADMIN'].includes(role)? false: 
-                                        getJobDetails.data.staff_created_id != undefined? getJobDetails.data.staff_created_id === staffCreatedId?false:true : false
-                                      }
+                                      disabled={['ADMIN','SUPERADMIN'].includes(role)? false: getJobDetails.data.staff_created_id != undefined?getJobDetails.data.staff_created_id === staffCreatedId?false: getJobDetails.data.customer_staff_id === staffCreatedId ?false: true : false}
                                      
 
                                     >
