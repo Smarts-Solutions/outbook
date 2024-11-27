@@ -371,20 +371,15 @@ const ClientList = () => {
       sortable: true,
       reorder: false,
     },
-    {
-      name: "Allocated To",
-      cell: (row) => (
-        <div
-        title={row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name}
-        >
-         {row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name}
-        </div>
-   ),
-      selector: (row) =>
-        row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name,
-      sortable: true,
-      reorder: false,
-    },
+
+  {
+    name: "Allocated To",
+    selector: (row) =>
+      row.allocated_id != null
+        ? row.allocated_first_name + " " + row.allocated_last_name
+        : "",
+    sortable: true,
+  },
     {
       name: "Timesheet",
       cell: (row) => (

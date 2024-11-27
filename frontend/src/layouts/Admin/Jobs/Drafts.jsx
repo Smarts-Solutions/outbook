@@ -130,7 +130,7 @@ const Drafts = ({ getAccessDataJob,  goto }) => {
             timer: 3000
           });
           setTimeout(() => {
-            window.location.reload();
+           // window.location.reload();
           }, 3000);
         }
         else {
