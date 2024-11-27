@@ -1494,15 +1494,25 @@ const jobUpdate = async (job) => {
     const [[ExistJob]] = await pool.execute(ExistJobQuery, [job_id]);
 
     let status_type_update = status_type;
+
     if (status_type == null || status_type == 0 || status_type == 1) {
+      
       if (allocated_to > 0) {
         status_type_update = 3
       }
-
       if (reviewer > 0) {
         status_type_update = 5
       }
     } else {
+      
+
+      if (allocated_to > 0 && ExistJob.allocated_to == 0) {
+        status_type_update = 3
+      }
+      if (reviewer > 0 && ExistJob.reviewer == 0) {
+        status_type_update = 5
+      }
+
       if (status_type == 3) {
         if (reviewer > 0 && ExistJob.reviewer != 0) {
           status_type_update = 5
@@ -1513,8 +1523,6 @@ const jobUpdate = async (job) => {
         }
       }
     }
-
-
 
     const query = `
          UPDATE jobs 
@@ -1634,7 +1642,8 @@ const jobUpdate = async (job) => {
           job_heading_name.push('edited the job other data')
         }
 
-
+        ExistJob.invoice_remark == "" ? ExistJob.invoice_remark = null : ExistJob.invoice_remark
+        
         if (ExistJob.invoiced !== invoiced || ExistJob.currency !== currency || ExistJob.invoice_value !== invoice_value || ExistJob.invoice_date !== invoice_date || ExistJob.invoice_hours.split(':').slice(0, 2).join(':') !== invoice_hours || ExistJob.invoice_remark !== invoice_remark) {
           job_heading_name.push('edited the job invoice data')
         }
@@ -1797,10 +1806,7 @@ ORDER BY
 
 const updateJobStatus = async (job) => {
   const { job_id, status_type } = job;
-
-  console.log("job", job)
   const [ExistJobData] = await pool.execute(`SELECT id , status_type FROM jobs WHERE id = ?`, [job_id]);
-  console.log("ExistJobData", ExistJobData[0].status_type)
   try {
 
     if (parseInt(status_type) == 6) {
