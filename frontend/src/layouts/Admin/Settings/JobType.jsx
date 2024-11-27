@@ -115,12 +115,12 @@ const Setting = () => {
       name: "Job Type",
       selector: (row) => row.type,
       sortable: true,
-      width: "80%",
+      width: "70%",
     },
     {
       name: "Actions",
       cell: (row) => (
-        <div className="d-flex">
+        <div className="d-flex justify-content-end">
           <button className="edit-icon" onClick={() => handleEdit(row)}>
             {" "}
             <i className="ti-pencil" />
@@ -153,6 +153,7 @@ const Setting = () => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
+      width: "30%",
     },
   ];
 

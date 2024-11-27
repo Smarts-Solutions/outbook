@@ -203,7 +203,7 @@ const StaffPage = () => {
       ),
       selector: (row) => row.first_name + " " + row.last_name,
       sortable: true,
-      width: "180px",
+      width: "300px",
       reorder: false,
     },
     {
@@ -215,7 +215,7 @@ const StaffPage = () => {
       name: "Email Address",
       selector: (row) => row.email,
       sortable: true,
-
+      idth: "300px",
       reorder: false,
     },
     {
@@ -396,7 +396,7 @@ const StaffPage = () => {
     },
 
     {
-      type: "select1",
+      type: "select2",
       name: "phone_code",
       label: "Phone Code",
       options: [
@@ -409,7 +409,7 @@ const StaffPage = () => {
       placeholder: "Enter Phone Number",
     },
     {
-      type: "number",
+      type: "number1",
       name: "phone",
       label: "Phone",
       label_size: 12,
@@ -432,8 +432,8 @@ const StaffPage = () => {
       label: "Role",
       label_size: 12,
       col_size: 6,
-     // disable: editShowModel == true ? true : false,
-      disable:  false,
+      disable: false,
+    //  disable: editShowModel == true ? true : false,
       options:
         roleDataAll &&
         roleDataAll.data.map((data) => {

@@ -116,7 +116,7 @@ const SlidingTable = () => {
 
           <div className="row">
 
-            <div className='col-md-3'>
+            <div className='col-md-3 pe-0'>
               <select className="form-select" id="tabSelect"
                 value={multipleFilter.customer_id}
                 onChange={(e) => setMultipleFilter({ ...multipleFilter, customer_id: e.target.value })}
@@ -131,7 +131,7 @@ const SlidingTable = () => {
 
             </div>
 
-            <div className='col-md-3'>
+            <div className='col-md-3 pe-0'>
               <select className="form-select" id="tabSelect"
                 value={multipleFilter.job_status_type_id}
                 onChange={(e) => setMultipleFilter({ ...multipleFilter, job_status_type_id: e.target.value })}
@@ -145,7 +145,7 @@ const SlidingTable = () => {
             </div>
 
 
-            <div className='col-md-3'>
+            <div className='col-md-3 pe-0'>
               <select className="form-select" id="tabSelect"
                 value={multipleFilter.processor_id}
                 onChange={(e) => setMultipleFilter({ ...multipleFilter, processor_id: e.target.value })}
@@ -159,7 +159,7 @@ const SlidingTable = () => {
 
             </div>
 
-            <div className='col-md-3'>
+            <div className='col-md-2 pe-0'>
               <select className="form-select" id="tabSelect"
                 value={multipleFilter.reviewer_id}
                 onChange={(e) => setMultipleFilter({ ...multipleFilter, reviewer_id: e.target.value })}
@@ -170,8 +170,7 @@ const SlidingTable = () => {
                 ))}
               </select>
             </div>
-          </div>
-          <div>
+            <div className='col-md-1 pe-0'>
             <button className="btn btn-info " onClick={() => setMultipleFilter({
               customer_id: "",
               job_status_type_id: "",
@@ -181,6 +180,9 @@ const SlidingTable = () => {
               Reset
             </button>
           </div>
+          </div>
+          </div>
+          <div className='row'>
           <div>
             <button className="btn btn-info " onClick={slidePrev} disabled={currentIndex === 0}>
               Prev
@@ -189,10 +191,13 @@ const SlidingTable = () => {
               Next
             </button>
           </div>
+          
+         
+        
 
         </div>
         <div className="table-wrapper">
-          <table className="table table-striped">
+          <table className="table ">
             <thead className='table-light table-head-blue'>
               <tr>
                 <th className="fixed-column">Name</th>

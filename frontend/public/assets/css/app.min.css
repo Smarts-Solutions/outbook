@@ -4497,3 +4497,7 @@ i.exp_icon {
     margin-right: 4px;
     font-size: 15px;
 }
+.basic-multi-select {
+    position: relative;
+    z-index: 9;
+}

@@ -51,11 +51,12 @@ const ViewLogs = () => {
   return (
     <div className="container-fluid mt-5">
       <div className="content-title">
-        <div className="tab-title">
+        <div className="row">
+        <div className="tab-title col-auto">
           <h3 className="mt-0">View Logs</h3>
         </div>
-      </div>
-      <div
+        <div className="col-auto ms-auto">
+        <div
         className="btn btn-info text-white float-end blue-btn me-2"
         onClick={() => {
           window.history.back();
@@ -63,6 +64,10 @@ const ViewLogs = () => {
       >
         <i className="fa fa-arrow-left pe-1" /> Back
       </div>
+      </div>
+        </div>
+      </div>
+      
       <div className="row  report-data mt-5">
         {/* <div className="mapWrapper">
           <div>

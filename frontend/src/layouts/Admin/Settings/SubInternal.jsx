@@ -95,7 +95,7 @@ const SubInternal = () => {
         {
             name: "Actions",
             cell: (row) => (
-                <div>
+                <div className="d-flex">
                     <button className="edit-icon" onClick={() => handleEdit(row)}>
                         <i className="ti-pencil" />
                     </button>
