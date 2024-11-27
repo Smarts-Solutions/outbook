@@ -249,7 +249,7 @@ const StaffPage = () => {
           </span>
         </div>
       ),
-      width: "80px",
+      width: "100px",
       reorder: false,
     },
     {

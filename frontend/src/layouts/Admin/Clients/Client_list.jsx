@@ -296,7 +296,7 @@ const ClientList = () => {
     {
       name: "Status",
       cell: (row) => (
-        <div>
+        <div >
           <div>
             <select
               className="form-select form-control"
@@ -414,7 +414,7 @@ const ClientList = () => {
     {
       name: "Actions",
       cell: (row) => (
-        <div>
+        <div className="d-flex">
           {
             getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
               <button className="edit-icon" onClick={() =>
@@ -566,7 +566,7 @@ const ClientList = () => {
         </div>
    ),
       selector: (row) => row.job_type_type, sortable: true,
-      width: "120px"
+      width: "200px"
     }
     ,
     {
@@ -580,13 +580,13 @@ const ClientList = () => {
    ),
       selector: (row) => row.client_type_type,
       sortable: true,
-      width: "400px",
+      width: "200px",
     },
     {
       name: "Status",
       selector: (row) => (row.status == "1" ? "Active" : "Deactive"),
       sortable: true,
-      width: "100px",
+      width: "150px",
 
     },
     {
