@@ -300,7 +300,7 @@ const jobAdd = async (job) => {
     invoice_hours,
     invoice_remark
   } = job;
- 
+
 
   // Set Status type
   let status_type = 0
@@ -324,7 +324,7 @@ const jobAdd = async (job) => {
   }
   //CUS_CLI_00001
   const job_id = await generateNextUniqueCode(data);
-  
+
   try {
 
     const query = `
@@ -348,7 +348,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
         }
       );
 
-  
+
       if (tasks.task.length > 0) {
         const job_id = result.insertId;
         //const checklist_id = tasks.checklist_id;
@@ -365,18 +365,18 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
                     SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?
                 `;
             const [existing] = await pool.execute(checkQuery, [task_name, service_id, job_type_id]);
-        
+
             if (existing.length === 0) {
               const query = `INSERT INTO task (name,service_id,job_type_id) VALUES (?, ?, ?) `;
               const [result] = await pool.execute(query, [task_name, service_id, job_type_id]);
               if (result.insertId > 0) {
                 let task_id_new = result.insertId;
-                 const query3 = `
+                const query3 = `
                INSERT INTO client_job_task (job_id,client_id,task_id,time)
                VALUES (?, ?, ?, ?)
                `;
-                  const [result3] = await pool.execute(query3, [job_id, client_id, task_id_new,budgeted_hour]);
-                
+                const [result3] = await pool.execute(query3, [job_id, client_id, task_id_new, budgeted_hour]);
+
               }
 
 
@@ -390,7 +390,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
                INSERT INTO client_job_task (job_id,client_id,task_id,time)
                VALUES (?, ?, ?, ?)
                `;
-            const [result] = await pool.execute(query, [job_id, client_id, task_id,budgeted_hour]);
+            const [result] = await pool.execute(query, [job_id, client_id, task_id, budgeted_hour]);
           }
         }
       }
@@ -470,7 +470,7 @@ const getJobByCustomer = async (job) => {
         ORDER BY 
          jobs.id DESC;
         `;
-        const [rows] = await pool.execute(query, [ExistStaff[0].id,ExistStaff[0].id, customer_id]);
+        const [rows] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id, customer_id]);
         result = rows
       }
       // Account Manger
@@ -538,7 +538,7 @@ const getJobByCustomer = async (job) => {
         ORDER BY 
          jobs.id DESC;
         `;
-        const [rows] = await pool.execute(query, [ExistStaff[0].id,ExistStaff[0].id, customer_id]);
+        const [rows] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id, customer_id]);
         result = rows
         if (rows.length === 0) {
           const query = `
@@ -676,7 +676,7 @@ const getJobByCustomer = async (job) => {
         ORDER BY 
          jobs.id DESC;
         `;
-        const [rows] = await pool.execute(query, [ExistStaff[0].id,ExistStaff[0].id, customer_id]);
+        const [rows] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id, customer_id]);
         result = rows
       }
       else {
@@ -759,7 +759,7 @@ const getJobByClient = async (job) => {
     if (ExistStaff.length > 0) {
       // Allocated to
       if (ExistStaff[0].role_id == 3) {
-       const query = `
+        const query = `
      SELECT 
      jobs.id AS job_id,
      job_types.type AS job_type_name,
@@ -820,7 +820,7 @@ const getJobByClient = async (job) => {
       ORDER BY
       jobs.id DESC;
      `;
-        const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id , client_id]);
+        const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id, client_id]);
         result = rowsAllocated
       }
       // Account Manger
@@ -887,7 +887,7 @@ const getJobByClient = async (job) => {
     ORDER BY
    jobs.id DESC;
    `;
-        const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id,client_id]);
+        const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id, client_id]);
         result = rowsAllocated
         if (rowsAllocated.length === 0) {
           const query = `
@@ -964,7 +964,7 @@ const getJobByClient = async (job) => {
       }
       // Reviewer
       else if (ExistStaff[0].role_id == 6) {
-     console.log("ExistStaff[0].role_id ",ExistStaff[0].role_id)
+        console.log("ExistStaff[0].role_id ", ExistStaff[0].role_id)
         const query = `
      SELECT 
      jobs.id AS job_id,
@@ -1027,14 +1027,14 @@ const getJobByClient = async (job) => {
       ORDER BY
       jobs.id DESC;
      `;
-       try {
-        const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id,ExistStaff[0].id,client_id]);
-        result = rowsAllocated
-       } catch (error) {
-          console.log("error",error)
-        
-       }
-        
+        try {
+          const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, ExistStaff[0].id, client_id]);
+          result = rowsAllocated
+        } catch (error) {
+          console.log("error", error)
+
+        }
+
 
       }
       else {
@@ -1287,7 +1287,7 @@ const getJobById = async (job) => {
      WHERE
       jobs.id = ? 
      `;
-     
+
     //  checklist_tasks ON checklist_tasks.checklist_id = client_job_task.checklist_id AND
     //  checklist_tasks.checklist_id = client_job_task.checklist_id AND checklist_tasks.task_id = client_job_task.task_id
 
@@ -1431,14 +1431,14 @@ const jobUpdate = async (job) => {
     status_type
   } = job;
 
-  let  invoiced = job.invoiced == "" || job.invoiced == "0" ? '0' : '1';
-  let  currency = job.currency == ""  ? 0 : job.currency;
-  let  invoice_value = job.invoice_value == ""  ? null : job.invoice_value;
-  let  invoice_date = job.invoice_date == ""  ? null : job.invoice_date;
-  let  invoice_hours = job.invoice_hours == ""  ? null : job.invoice_hours;
-  let  invoice_remark = job.invoice_remark == ""  ? null : job.invoice_remark
- 
-  
+  let invoiced = job.invoiced == "" || job.invoiced == "0" ? '0' : '1';
+  let currency = job.currency == "" ? 0 : job.currency;
+  let invoice_value = job.invoice_value == "" ? null : job.invoice_value;
+  let invoice_date = job.invoice_date == "" ? null : job.invoice_date;
+  let invoice_hours = job.invoice_hours == "" ? null : job.invoice_hours;
+  let invoice_remark = job.invoice_remark == "" ? null : job.invoice_remark
+
+
 
   const ExistJobQuery = `
  SELECT 
@@ -1514,8 +1514,8 @@ const jobUpdate = async (job) => {
       }
     }
 
-   
-   
+
+
     const query = `
          UPDATE jobs 
          SET account_manager_id = ?, customer_id = ?, client_id = ?, client_job_code = ?, customer_contact_details_id = ?, 
@@ -1595,7 +1595,7 @@ const jobUpdate = async (job) => {
                     INSERT INTO client_job_task (job_id, client_id, task_id,time)
                     VALUES (?, ?, ?, ?)
                   `;
-                await pool.execute(query3, [job_id, client_id, task_id_new,budgeted_hour]);
+                await pool.execute(query3, [job_id, client_id, task_id_new, budgeted_hour]);
               }
             }
           } else {
@@ -1605,7 +1605,7 @@ const jobUpdate = async (job) => {
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE task_id = VALUES(task_id), job_id = VALUES(job_id);
               `;
-            await pool.execute(query, [job_id, client_id, task_id,budgeted_hour]);
+            await pool.execute(query, [job_id, client_id, task_id, budgeted_hour]);
           }
         }
       }
@@ -1618,7 +1618,7 @@ const jobUpdate = async (job) => {
         if (ExistJob.client_job_code !== client_job_code || ExistJob.customer_contact_details_id !== customer_contact_details_id || ExistJob.service_id !== service_id || ExistJob.job_type_id !== job_type_id || ExistJob.budgeted_hours.split(':').slice(0, 2).join(':') !== budgeted_hours || ExistJob.reviewer !== reviewer || ExistJob.allocated_to !== allocated_to || ExistJob.allocated_on !== allocated_on || ExistJob.date_received_on !== date_received_on || ExistJob.year_end !== year_end || ExistJob.total_preparation_time.split(':').slice(0, 2).join(':') !== total_preparation_time || ExistJob.review_time.split(':').slice(0, 2).join(':') !== review_time || ExistJob.feedback_incorporation_time.split(':').slice(0, 2).join(':') !== feedback_incorporation_time || ExistJob.total_time.split(':').slice(0, 2).join(':') !== total_time || ExistJob.engagement_model !== engagement_model) {
           job_heading_name.push('edited the job information')
         }
-        
+
 
         if (ExistJob.expected_delivery_date !== expected_delivery_date || ExistJob.due_on !== due_on || ExistJob.submission_deadline !== submission_deadline || ExistJob.customer_deadline_date !== customer_deadline_date || ExistJob.sla_deadline_date !== sla_deadline_date || ExistJob.internal_deadline_date !== internal_deadline_date) {
           job_heading_name.push('edited the job deadline')
@@ -1629,7 +1629,7 @@ const jobUpdate = async (job) => {
           job_heading_name.push('edited the job other tasks')
         }
 
-        
+
         if (Number(ExistJob.number_of_transaction) !== number_of_transaction || ExistJob.number_of_balance_items !== number_of_balance_items || Number(ExistJob.turnover) !== turnover || ExistJob.number_of_employees !== number_of_employees || ExistJob.vat_reconciliation !== vat_reconciliation || ExistJob.bookkeeping !== bookkeeping || ExistJob.processing_type !== processing_type) {
           job_heading_name.push('edited the job other data')
         }
@@ -1638,36 +1638,36 @@ const jobUpdate = async (job) => {
         if (ExistJob.invoiced !== invoiced || ExistJob.currency !== currency || ExistJob.invoice_value !== invoice_value || ExistJob.invoice_date !== invoice_date || ExistJob.invoice_hours.split(':').slice(0, 2).join(':') !== invoice_hours || ExistJob.invoice_remark !== invoice_remark) {
           job_heading_name.push('edited the job invoice data')
         }
-          
+
         // reviewer,
-        if(parseInt(ExistJob.reviewer) == 0){
-          if(reviewer > 0){
-           const [[getStaff]] = await pool.execute('SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ', [reviewer]);
+        if (parseInt(ExistJob.reviewer) == 0) {
+          if (reviewer > 0) {
+            const [[getStaff]] = await pool.execute('SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ', [reviewer]);
             job_heading_name.push('has assigned the job to the reviewer, ' + getStaff.name)
-          } 
-        }else{
-          if(reviewer != ExistJob.reviewer){
+          }
+        } else {
+          if (reviewer != ExistJob.reviewer) {
             const [[getStaff]] = await pool.execute('SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ', [reviewer]);
             job_heading_name.push('changed the job to the reviewer, ' + getStaff.name)
           }
         }
 
         // allocated_to,
-        if(parseInt(ExistJob.allocated_to) == 0){
-          if(allocated_to > 0){
+        if (parseInt(ExistJob.allocated_to) == 0) {
+          if (allocated_to > 0) {
             const [[getStaff]] = await pool.execute('SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ', [allocated_to]);
             job_heading_name.push('has assigned the job to the processor, ' + getStaff.name)
           }
-        }else{
-          if(allocated_to != ExistJob.allocated_to){
+        } else {
+          if (allocated_to != ExistJob.allocated_to) {
             const [[getStaff]] = await pool.execute('SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ', [allocated_to]);
             job_heading_name.push('changed the job to the processor, ' + getStaff.name)
           }
         }
 
         //console.log("job_heading_name ", job_heading_name)
-      
-          
+
+
         if (job_heading_name.length > 0) {
           const msgLog = job_heading_name.length > 1
             ? job_heading_name.slice(0, -1).join(', ') + ' and ' + job_heading_name.slice(-1)
@@ -1701,7 +1701,7 @@ const jobUpdate = async (job) => {
 const deleteJobById = async (job) => {
   const { job_id } = job;
   try {
-    if(parseInt(job_id) > 0){
+    if (parseInt(job_id) > 0) {
       const currentDate = new Date();
       await SatffLogUpdateOperation(
         {
@@ -1767,8 +1767,8 @@ ORDER BY
     staff_logs.id DESC
 `;
 
-// WHERE
-//     staff_logs.staff_id = ${staff_id} AND  staff_logs.module_name = "job" AND staff_logs.module_id = ${job_id}
+  // WHERE
+  //     staff_logs.staff_id = ${staff_id} AND  staff_logs.module_name = "job" AND staff_logs.module_id = ${job_id}
   const [result] = await pool.execute(query);
 
   const groupedResult = result.reduce((acc, log) => {
@@ -1795,17 +1795,21 @@ ORDER BY
 
 }
 
-const updateJobStatus = async(job)=>{
+const updateJobStatus = async (job) => {
   const { job_id, status_type } = job;
+
+  console.log("job", job)
+  const [ExistJobData] = await pool.execute(`SELECT id , status_type FROM jobs WHERE id = ?`, [job_id]);
+  console.log("ExistJobData", ExistJobData[0].status_type)
   try {
 
-      if(parseInt(status_type)==6){
+    if (parseInt(status_type) == 6) {
       const [ExistDraft] = await pool.execute(`SELECT job_id FROM drafts WHERE job_id = ?`, [job_id]);
-      if(ExistDraft.length === 0){
-        return { status: false, message: 'Please sent first draft.', data: "W" }; 
+      if (ExistDraft.length === 0) {
+        return { status: false, message: 'Please sent first draft.', data: "W" };
       }
 
-       const [[rowsDraftProcess]] = await pool.execute(`SELECT 
+      const [[rowsDraftProcess]] = await pool.execute(`SELECT 
           CASE
               WHEN NOT EXISTS (
                   SELECT 1 
@@ -1816,12 +1820,12 @@ const updateJobStatus = async(job)=>{
               THEN 1
               ELSE 0
           END AS status_check;`, [job_id]);
-   
 
-         if(rowsDraftProcess.status_check === 0){
-            return { status: false, message: 'Please complete the draft.', data : "W" };
-         }
+
+      if (rowsDraftProcess.status_check === 0) {
+        return { status: false, message: 'Please complete the draft.', data: "W" };
       }
+    }
 
     const query = `
          UPDATE jobs 
@@ -1829,12 +1833,34 @@ const updateJobStatus = async(job)=>{
          WHERE id = ?
        `;
     const [result] = await pool.execute(query, [status_type, job_id]);
-    if (result.affectedRows > 0) {
+
+    console.log("result", result)
+
+    if (result.changedRows > 0) {
+  
+      const [[StatusName]] = await pool.execute(`SELECT  MAX(CASE WHEN id = ${ExistJobData[0].status_type} THEN name END) AS from_status, MAX(CASE WHEN id = ${status_type} THEN name END) AS to_status FROM master_status WHERE id IN (${ExistJobData[0].status_type}, ${status_type})`);
+
+         console.log("StatusName",StatusName)  
+
+      const currentDate = new Date();
+      await SatffLogUpdateOperation(
+        {
+          staff_id: job.StaffUserId,
+          ip: job.ip,
+          date: currentDate.toISOString().split('T')[0],
+          module_name: 'job',
+          log_message: `updated the job status from ${StatusName.from_status} to ${StatusName.to_status}. job code:`,
+          permission_type: 'updated',
+          module_id: job_id,
+        }
+      );
+
       return { status: true, message: 'Job status updated successfully.', data: job_id };
     } else {
       return { status: false, message: 'No job found with the given job_id.' };
     }
   } catch (err) {
+    console.log(err);
     return { status: false, message: 'Error updating job status.' };
   }
 }
