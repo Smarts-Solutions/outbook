@@ -532,6 +532,7 @@ const ClientList = () => {
       cell: (row) => (
         <div>
           <a
+           title={row.check_list_name}
           // onClick={() => HandleClientView(row)}
           // style={{ cursor: "pointer", color: "#26bdf0" }}
           >
@@ -545,17 +546,38 @@ const ClientList = () => {
 
     {
       name: "Service Type",
+      cell: (row) => (
+        <div
+        title={row.service_name}
+        >
+         {row.service_name}
+        </div>
+   ),
       selector: (row) => row.service_name,
       sortable: true,
     },
     {
       name: "Job Type",
+      cell: (row) => (
+        <div
+        title={row.job_type_type}
+        >
+         {row.job_type_type}
+        </div>
+   ),
       selector: (row) => row.job_type_type, sortable: true,
       width: "120px"
     }
     ,
     {
       name: "Client Type",
+      cell: (row) => (
+        <div
+        title={row.client_type_type}
+        >
+         {row.client_type_type}
+        </div>
+   ),
       selector: (row) => row.client_type_type,
       sortable: true,
       width: "400px",
