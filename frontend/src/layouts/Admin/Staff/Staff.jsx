@@ -304,8 +304,8 @@ const StaffPage = () => {
       phone: "",
       phone_code: "+44",
       // password: "",
-      role: "",
-      status: "",
+      role: "3",
+      status: "1",
     },
     validationSchema: Yup.object({
       first_name: Yup.string().required(Validation_Message.FirstNameValidation),
@@ -427,7 +427,7 @@ const StaffPage = () => {
       placeholder: "Enter Email",
     },
     {
-      type: "select",
+      type: "select1",
       name: "role",
       label: "Role",
       label_size: 12,
@@ -445,7 +445,7 @@ const StaffPage = () => {
         }),
     },
     {
-      type: "select",
+      type: "select1",
       name: "status",
       label: "Status",
       label_size: 12,
@@ -453,7 +453,7 @@ const StaffPage = () => {
       disable: false,
       options: [
         { label: "Active", value: "1" },
-        { label: "Deactive", value: "0" },
+        { label: "Inactive", value: "0" },
       ],
     },
   ];
