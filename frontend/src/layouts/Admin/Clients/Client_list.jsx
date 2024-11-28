@@ -296,7 +296,7 @@ const ClientList = () => {
     {
       name: "Status",
       cell: (row) => (
-        <div>
+        <div >
           <div>
             <select
               className="form-select form-control"
@@ -409,7 +409,7 @@ const ClientList = () => {
     {
       name: "Actions",
       cell: (row) => (
-        <div>
+        <div className="d-flex">
           {
             getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
               <button className="edit-icon" onClick={() =>
@@ -527,6 +527,7 @@ const ClientList = () => {
       cell: (row) => (
         <div>
           <a
+           title={row.check_list_name}
           // onClick={() => HandleClientView(row)}
           // style={{ cursor: "pointer", color: "#26bdf0" }}
           >
@@ -540,26 +541,47 @@ const ClientList = () => {
 
     {
       name: "Service Type",
+      cell: (row) => (
+        <div
+        title={row.service_name}
+        >
+         {row.service_name}
+        </div>
+   ),
       selector: (row) => row.service_name,
       sortable: true,
     },
     {
       name: "Job Type",
+      cell: (row) => (
+        <div
+        title={row.job_type_type}
+        >
+         {row.job_type_type}
+        </div>
+   ),
       selector: (row) => row.job_type_type, sortable: true,
-      width: "120px"
+      width: "200px"
     }
     ,
     {
       name: "Client Type",
+      cell: (row) => (
+        <div
+        title={row.client_type_type}
+        >
+         {row.client_type_type}
+        </div>
+   ),
       selector: (row) => row.client_type_type,
       sortable: true,
-      width: "400px",
+      width: "200px",
     },
     {
       name: "Status",
       selector: (row) => (row.status == "1" ? "Active" : "Deactive"),
       sortable: true,
-      width: "100px",
+      width: "150px",
 
     },
     {

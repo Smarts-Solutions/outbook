@@ -1036,19 +1036,20 @@ const Setting = () => {
       ),
       selector: (row) => row.trading_name,
       sortable: true,
+      width: "15%",
     },
     
 
     {
       cell: (row) => (
-        <div title={row.service_name} style={{fontSize:"10px"}}>
+        <div title={row.service_name} >
           {row.service_name}
         </div>
       ),
       name: "Service Type",
       selector: (row) => row.service_name,
       sortable: true,
-      width: "200px",
+      width: "20%",
     },
     {
       cell: (row) => (
@@ -1059,17 +1060,18 @@ const Setting = () => {
       name: "Job Type",
       selector: (row) => row.job_type_type,
       sortable: true,
+      width: "15%",
     },
     {
       cell: (row) => (
-        <div title={row.client_type_type} style={{fontSize:"10px"}}>
+        <div title={row.client_type_type} >
           {row.client_type_type}
         </div>
       ),
       name: "Client Type",
       selector: (row) => row.client_type_type,
       sortable: true,
-      width: "280px",
+      width: "15%",
 
     },
     {
@@ -1086,6 +1088,7 @@ const Setting = () => {
         </div>
       ),
       sortable: true,
+      width: "15%",
     },
   
     {
@@ -1123,6 +1126,7 @@ const Setting = () => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
+      width: "20%",
     },
   ];
 
