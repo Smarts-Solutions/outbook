@@ -170,7 +170,7 @@ const ClientList = () => {
     {
       name: "Job ID",
       cell: (row) => (
-        <div>
+        <div title={row.job_code_id}>
           {
             getAccessDataJob.view == 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
               <a onClick={() => HandleJob(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
@@ -185,13 +185,22 @@ const ClientList = () => {
     },
     {
       name: "Client Name",
-
+      cell: (row) => (
+        <div title={row.client_trading_name || "-"}>
+          {row.client_trading_name || "-"}
+        </div>
+      ),
       selector: (row) => row.client_trading_name || "-",
       sortable: true,
     },
 
     {
       name: "Job Type",
+      cell: (row) => (
+        <div title={row.job_type_name}>
+          {row.job_type_name}
+        </div>
+      ),
       selector: (row) => row.job_type_name,
       sortable: true,
     },
@@ -221,24 +230,46 @@ const ClientList = () => {
 
     {
       name: "Client Manager",
+      cell: (row) => (
+        <div title={ row.account_manager_officer_first_name +
+          " " +
+          row.account_manager_officer_last_name}>
+          { row.account_manager_officer_first_name +
+        " " +
+        row.account_manager_officer_last_name}
+        </div>
+      ),
       selector: (row) =>
         row.account_manager_officer_first_name +
         " " +
         row.account_manager_officer_last_name,
       sortable: true,
     },
-    {
-      name: "Client",
-      selector: (row) => row.client_trading_name,
-      sortable: true,
-    },
+    // {
+    //   name: "Client",
+    //   cell: (row) => (
+    //     <div title={row.client_trading_name}>
+    //       {row.client_trading_name}
+    //     </div>
+    //   ),
+    //   selector: (row) => row.client_trading_name,
+    //   sortable: true,
+    // },
     {
       name: "Outbook Account Manager",
+      cell: (row) => (
+        <div title={row.outbooks_acount_manager_first_name +
+          " " + row.outbooks_acount_manager_last_name}>
+          {row.outbooks_acount_manager_first_name +
+        " " + row.outbooks_acount_manager_last_name}
+        </div>
+      ),
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
         " " +
         row.outbooks_acount_manager_last_name,
       sortable: true,
+      width: "325px"
     },
     {
       name: "Allocated To",
@@ -257,7 +288,7 @@ const ClientList = () => {
     {
       name: "Actions",
       cell: (row) => (
-        <div>
+        <div className="d-flex">
           {(getAccessDataJob.update == 1 || role === "ADMIN" || role === "SUPERADMIN") && (
             <button className="edit-icon" onClick={() => handleEdit(row)}>
               <i className="ti-pencil" />

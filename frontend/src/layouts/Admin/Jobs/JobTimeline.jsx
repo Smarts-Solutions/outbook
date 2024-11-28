@@ -54,14 +54,14 @@ const JobTimeline = () => {
           </div>
         </div>
       </div>
-      <div className="col-lg-12  mt-2">
+      {/* <div className="col-lg-12  mt-2">
         <div className="my-3 col-md-7">
           <label className="form-label">Status</label>
           <select className="form-select ">
             <option value="volvo">All</option>
           </select>
         </div>
-      </div>
+      </div> */}
 
       <div className="mapWrapper">
         <div>

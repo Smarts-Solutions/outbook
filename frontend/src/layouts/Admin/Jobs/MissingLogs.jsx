@@ -255,7 +255,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
     {
       name: "Actions",
       cell: (row) => (
-        <div>
+        <div className="d-flex">
           <button className="view-icon" onClick={() => { HandleMissionView(row); setViewmissinglogs(true) }}>
             <i className="fa fa-eye fs-6 text-warning" />
           </button>
