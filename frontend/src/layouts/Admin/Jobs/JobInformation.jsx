@@ -340,7 +340,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
             }, {})
         : {};
 
-
+  console.log("RearrangeEngagementOptionArr", RearrangeEngagementOptionArr)
     return (
         <div>
             <div className='row mb-3'>
@@ -1143,7 +1143,10 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                             </div>
                         </div>
                     </div>
-                    <div className="col-lg-12">
+
+                    {
+                        RearrangeEngagementOptionArr.length > 0 && RearrangeEngagementOptionArr.includes("Fte Dedicated Staffing") ? "": 
+                        <div className="col-lg-12">
                         <div className="col-lg-12">
                             <div className="card card_shadow">
                                 <div className="card-header card-header-light-blue align-items-center d-flex">
@@ -1208,7 +1211,6 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                     value={JobInformationData.InvoiceDate}
                                                 />
                                             </div>
-
                                             <div className="col-lg-4">
                                                 <div className="mb-3">
                                                     <label className="form-label" >Invoice </label>
@@ -1282,6 +1284,8 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                             </div>
                         </div>
                     </div>
+                    }
+                    
                 </div>
 
             </div>

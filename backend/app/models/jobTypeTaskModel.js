@@ -619,8 +619,8 @@ const getClientTypeChecklist = async (checklist) => {
 
 const getByServiceWithJobType = async (checklist) => {
   const { customer_id, service_id, job_type_id, clientId } = checklist;
- console.log("clientId",clientId)
- console.log("checklist",checklist)
+//  console.log("clientId",clientId)
+//  console.log("checklist",checklist)
 
 //   const query = `
 //     SELECT 
@@ -695,7 +695,7 @@ ORDER BY checklists.id DESC
 `;
   try {
   
-    console.log("query ",query)
+   // console.log("query ",query)
     const [result] = await pool.execute(query, [
       service_id,
       job_type_id,
