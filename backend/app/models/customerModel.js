@@ -1702,8 +1702,37 @@ const getSingleCustomer = async (customer) => {
 
     //  Page Status 2 Service Part
     else if (pageStatus === "2") {
+        //     const query = `
+        //     SELECT 
+        //         customers.id AS customer_id,
+        //         customers.customer_type AS customer_type,
+        //         customers.staff_id AS staff_id,
+        //         customers.account_manager_id AS account_manager_id,
+        //         customers.trading_name AS trading_name,
+        //         customers.customer_code AS customer_code,
+        //         customers.trading_address AS trading_address,
+        //         customers.vat_registered AS vat_registered,
+        //         customers.vat_number AS vat_number,
+        //         customers.website AS website,
+        //         customers.form_process AS form_process,
+        //         customers.status AS status,
+        //         customer_services.id as customer_service_id,
+        //         customer_services.service_id,
+        //         GROUP_CONCAT(customer_service_account_managers.account_manager_id) AS account_manager_ids
+        //     FROM 
+        //         customers
+        //     JOIN 
+        //         customer_services ON customers.id = customer_services.customer_id
+        //     LEFT JOIN 
+        //         customer_service_account_managers ON customer_services.id = customer_service_account_managers.customer_service_id
+        //     WHERE 
+        //         customers.id = ?
+        //     GROUP BY
+        //         customers.id, customer_services.id
+        // `;
+
         const query = `
-        SELECT 
+       SELECT 
             customers.id AS customer_id,
             customers.customer_type AS customer_type,
             customers.staff_id AS staff_id,
@@ -1718,19 +1747,21 @@ const getSingleCustomer = async (customer) => {
             customers.status AS status,
             customer_services.id as customer_service_id,
             customer_services.service_id,
+            jobs.id AS job_id,
+            jobs.id AS job_exist,
             GROUP_CONCAT(customer_service_account_managers.account_manager_id) AS account_manager_ids
         FROM 
             customers
         JOIN 
             customer_services ON customers.id = customer_services.customer_id
         LEFT JOIN 
+            jobs ON jobs.service_id = customer_services.service_id AND jobs.customer_id = customers.id
+        LEFT JOIN 
             customer_service_account_managers ON customer_services.id = customer_service_account_managers.customer_service_id
         WHERE 
             customers.id = ?
         GROUP BY
-            customers.id, customer_services.id
-    `;
-
+            customers.id, customer_services.id`;
         const [rows] = await pool.execute(query, [customer_id]);
         if (rows.length > 0) {
             const customerData = {
@@ -1749,13 +1780,21 @@ const getSingleCustomer = async (customer) => {
 
             const services = rows.map(row => ({
                 service_id: row.service_id,
-                account_manager_ids: row.account_manager_ids ? row.account_manager_ids.split(',').map(Number) : []
+                job_id: row.job_id,
+                job_exist: row.job_exist,
+                //account_manager_ids: row.account_manager_ids ? row.account_manager_ids.split(',').map(Number) : []
+                account_manager_ids: row.account_manager_ids
+                    ? [...new Set(row.account_manager_ids.split(',').map(Number))]
+                    : []
+
             }));
 
             const result = {
                 customer: customerData,
                 services: services
             };
+
+            console.log("result ", result)
 
             return result;
         } else {
@@ -2442,7 +2481,7 @@ WHERE service_id = ${service_id} AND customer_id = 0;
 
 
             } catch (err) {
-
+                console.log("err ", err)
                 return { status: false, message: 'Customer Services Err update.' };
             }
         }

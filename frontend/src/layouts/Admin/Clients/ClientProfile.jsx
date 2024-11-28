@@ -257,7 +257,7 @@ const ClientList = () => {
     {
       name: "Actions",
       cell: (row) => (
-        <div>
+        <div className="d-flex">
           {(getAccessDataJob.update == 1 || role === "ADMIN" || role === "SUPERADMIN") && (
             <button className="edit-icon" onClick={() => handleEdit(row)}>
               <i className="ti-pencil" />
