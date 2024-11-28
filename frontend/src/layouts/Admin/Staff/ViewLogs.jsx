@@ -36,7 +36,7 @@ const ViewLogs = () => {
     }
   };
 
-
+  
   const chunkArray = (arr, size) => {
     const chunkedArr = [];
     for (let i = 0; i < arr.length; i += size) {
