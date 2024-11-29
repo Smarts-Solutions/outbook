@@ -42,6 +42,7 @@ const Service = () => {
   const [tasksGet1, setTasksData1] = useState([]);
   const [tasksGetRemove, setTasksDataRemove] = useState([]);
   const [selectManager, setSelectManager] = useState([]);
+  
   useEffect(() => {
     JobTypeDataAPi(services, 2);
   }, [services]);

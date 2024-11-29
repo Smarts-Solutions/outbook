@@ -340,7 +340,10 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
             }, {})
         : {};
 
-  console.log("RearrangeEngagementOptionArr", RearrangeEngagementOptionArr)
+        console.log("RearrangeEngagementOptionArr", RearrangeEngagementOptionArr)
+        console.log("JobInformationData", JobInformationData.EngagementModel)
+  
+  
     return (
         <div>
             <div className='row mb-3'>
@@ -1145,7 +1148,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                     </div>
 
                     {
-                        RearrangeEngagementOptionArr.length > 0 && RearrangeEngagementOptionArr.includes("Fte Dedicated Staffing") ? "": 
+                        JobInformationData.EngagementModel == "fte_dedicated_staffing" ? "": 
                         <div className="col-lg-12">
                         <div className="col-lg-12">
                             <div className="card card_shadow">

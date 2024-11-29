@@ -43,7 +43,6 @@ const Service = () => {
   const [uploadMessage1, uploadSetMessage1] = useState([]);
   const [selectManager, setSelectManager] = useState([]);
 
-
   useEffect(() => {
     JobTypeDataAPi(services, 2);
   }, [services]);
@@ -118,6 +117,25 @@ const Service = () => {
 
 
   const handleCheckboxChange = (e, item) => {
+    
+    
+    const ExistJobService = getCustomerService.data.services.find((ser) => ser.service_id === item.id) || null
+
+    console.log("ExistJobService",ExistJobService)
+
+    if(ExistJobService != null && ExistJobService.job_exist != null){
+     Swal.fire({
+      icon: 'warning',
+      title: "This service has been assigned to job, cannot remove it",
+      timerProgressBar: true,
+      showConfirmButton: true,
+      timer: 1500
+    });
+     e.target.checked = true
+     return
+    }
+
+ 
     if (e.target.checked) {
       JobTypeDataAPi(item, 1);
       setServices((prevServices) =>
@@ -131,6 +149,8 @@ const Service = () => {
       );
     }
   };
+
+ 
 
  
   const AddManager = () => {
@@ -167,6 +187,7 @@ const Service = () => {
     );
   };
 
+
   const handleSubmit = async (values) => {
     if (services.length === 0) {
       Swal.fire({
@@ -176,6 +197,8 @@ const Service = () => {
       });
       return;
     }
+   
+
 
     const MatchData = GetAllService.data
     .map((service) => {
@@ -191,20 +214,17 @@ const Service = () => {
           ),
         };
       }
-  
-      // Return undefined for non-matching or empty data
       return undefined;
-    })
-    .filter((item) => item !== undefined); // Remove undefined entries
+    }).filter((item) => item !== undefined);
+
+
   
-
-
-
-
-    const filteredMatchData = MatchData.filter((item) =>
-      services.includes(item.service_id)
-    );
-
+    const filteredMatchData = services.map(serviceId => {
+      const match = MatchData.find(item => item.service_id === serviceId);
+      return match || { service_id: serviceId, account_manager_ids: [] };
+    });
+    
+    
     const req = {
       customer_id: address,
       pageStatus: "2",
@@ -267,7 +287,6 @@ const Service = () => {
   };
 
   const TaskUpdate = async (e, id, serviceId) => {
-
 
     if (tasksGet.length > 0) {
       setTasksData((prev) =>
