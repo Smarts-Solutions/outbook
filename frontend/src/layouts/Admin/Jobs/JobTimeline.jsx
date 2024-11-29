@@ -54,14 +54,14 @@ const JobTimeline = () => {
           </div>
         </div>
       </div>
-      <div className="col-lg-12  mt-2">
+      {/* <div className="col-lg-12  mt-2">
         <div className="my-3 col-md-7">
           <label className="form-label">Status</label>
           <select className="form-select ">
             <option value="volvo">All</option>
           </select>
         </div>
-      </div>
+      </div> */}
 
       <div className="mapWrapper">
         <div>
@@ -101,7 +101,13 @@ const JobTimeline = () => {
                     </span>
                     {item.info}
                   </div>
-                  <div className="itemDate">{item.date}</div>
+                  <div className="itemDate">{(() => {
+    const date = new Date(item.date);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const year = date.getFullYear(); // Get last two digits of the year
+    return `${day}/${month}/${year}`;
+  })()}</div>
                 </div>
               ))}
             </div>

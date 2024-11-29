@@ -143,7 +143,13 @@ const ViewLogs = () => {
                       </span>
                       {item.info}
                     </div>
-                    <div className="itemDate">{item.date}</div>
+                    <div className="itemDate">{(() => {
+    const date = new Date(item.date);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const year = date.getFullYear(); // Get last two digits of the year
+    return `${day}/${month}/${year}`;
+  })()}</div>
                   </div>
                 ))}
               </div>

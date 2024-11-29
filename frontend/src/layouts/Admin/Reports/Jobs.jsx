@@ -45,7 +45,7 @@ const JobStatus = () => {
     {
       name: "Job ID (CustName+ClientName+UniqueNo)",
       cell: (row) => (
-        <div>
+        <div title={row.job_code_id}>
           <a
             onClick={() => HandleJobView(row)}
             style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -61,7 +61,13 @@ const JobStatus = () => {
 
     {
       name: "Job Type",
-
+      cell: (row) => (
+        <div title={row.job_type_name || "-"}>
+          
+            {row.job_type_name || "-"}
+         
+        </div>
+      ),
       selector: (row) => row.job_type_name || "-",
       sortable: true,
       reorder: false,
@@ -69,6 +75,17 @@ const JobStatus = () => {
     
     {
       name: "Client Contact Person",
+      cell: (row) => (
+        <div title={ row.account_manager_officer_first_name +
+          " " +
+          row.account_manager_officer_last_name || "-"}>
+         
+            { row.account_manager_officer_first_name +
+        " " +
+        row.account_manager_officer_last_name || "-"}
+         
+        </div>
+      ),
       selector: (row) =>
         row.account_manager_officer_first_name +
         " " +
@@ -84,6 +101,17 @@ const JobStatus = () => {
     },
     {
       name: "Outbook Account Manager",
+      cell: (row) => (
+        <div title={row.outbooks_acount_manager_first_name +
+          " " +
+          row.outbooks_acount_manager_last_name || "-"}>
+          
+            {row.outbooks_acount_manager_first_name +
+        " " +
+        row.outbooks_acount_manager_last_name || "-"}
+          
+        </div>
+      ),
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
         " " +
@@ -93,6 +121,13 @@ const JobStatus = () => {
     },
     {
       name: "Allocated To",
+      cell: (row) => (
+        <div title={ row.allocated_name == null ? "-" : row.allocated_name}>
+         
+            { row.allocated_name == null ? "-" : row.allocated_name}
+         
+        </div>
+      ),
       selector: (row) =>
       row.allocated_name == null ? "-" : row.allocated_name,
       sortable: true,
@@ -117,11 +152,10 @@ const JobStatus = () => {
   ];
   
   return (
-    <div className='container-fluid mt-5'>
-      <div className='report-data'>
-        <div className='row'>
-          <div className='col-md-12 mb-5'>
-            <div className='row'>
+    <div className='container-fluid '>
+
+      <div className='content-title mt-4'>
+       <div className='row'>
               <div className='tab-title d-flex'>
 
               <button
@@ -137,6 +171,11 @@ const JobStatus = () => {
               </div>
             
             </div>
+            </div>
+      <div className='report-data mt-4'>
+        <div className='row'>
+          <div className='col-md-12 mb-5'>
+           
             {/* <div className='job-filter-btn '>
               <button className='filter btn btn-info text-white fw-normal'><i className="fas fa-filter pe-2"></i>Filters</button>
               <button className='xl-sheet btn btn-info text-white fw-normal ms-2'><i className="fas fa-file-excel"></i></button>
