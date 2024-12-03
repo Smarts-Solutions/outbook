@@ -438,7 +438,8 @@ const JobStatus = () => {
                         <i className="fa fa-plus" /> Add Customer
                       </Link>
                     </div>
-                  ) : (
+                  ) : 
+                  (
                     getAccessData.insert === 1 && (
                       <div className="col-md-6">
                         <Link
@@ -449,7 +450,9 @@ const JobStatus = () => {
                         </Link>
                       </div>
                     )
-                  )}
+                  )
+                  
+                  }
                 </div>
 
               </div>

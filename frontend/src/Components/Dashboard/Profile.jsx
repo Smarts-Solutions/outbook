@@ -78,11 +78,11 @@ const Profile = () => {
                       <b>Status </b>:{" "}
                       {getProfileDetails && getProfileDetails.status==1 ? "Active" : "Inactive"}
                     </li>
-                    <li className="">
+                    {/* <li className="">
                       <button className="btn btn-info">
                         <i className="fa fa-edit pe-2"></i>Edit{" "}
                       </button>
-                    </li>
+                    </li> */}
                   </ul>
                 </div>
               </div>
