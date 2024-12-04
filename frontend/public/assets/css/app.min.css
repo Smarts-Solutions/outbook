@@ -4505,3 +4505,11 @@ i.exp_icon {
 .dropdown-menu.custom-dropdown.show {
     z-index: 999 !important;
 }
+.data-table-extensions > .data-table-extensions-filter > .icon {
+
+    display: none !important;
+}
+.data-table-extensions > .data-table-extensions-filter > .filter-text {
+
+    width: 96%;
+}
