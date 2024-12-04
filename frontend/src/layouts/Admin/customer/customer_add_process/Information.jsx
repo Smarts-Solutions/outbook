@@ -389,7 +389,7 @@ const Information = ({ id, pageStatus }) => {
   //  validate function sole trader
   const validate1 = (field, value) => {
     const newErrors = { ...errors1 };
-    if (!value) {
+    if (!value?.trim()) {
       switch (field) {
         case "IndustryType":
           newErrors[field] = EDIT_CUSTOMER.SELECT_CLIENT_INDUSTRIES;
@@ -443,7 +443,7 @@ const Information = ({ id, pageStatus }) => {
   // validate function company
   const validate2 = (name, value) => {
     const newErrors = { ...errors2 };
-    if (!value) {
+    if (!value?.trim()) {
       switch (name) {
         case "CompanyName":
           newErrors[name] = EDIT_CUSTOMER.COMPANY_NAME;
@@ -495,7 +495,7 @@ const Information = ({ id, pageStatus }) => {
   // validate function partnership
   const validate3 = (name, value) => {
     const newErrors = { ...errors3 };
-    if (!value) {
+    if (!value?.trim()) {
       switch (name) {
         case "TradingName":
           newErrors[name] = EDIT_CUSTOMER.ENTER_TRADING_NAME;
@@ -557,17 +557,17 @@ const Information = ({ id, pageStatus }) => {
     }
     switch (field) {
       case "firstName":
-        newErrors[index].firstName = value
+        newErrors[index].firstName = value?.trim()
           ? ""
           : EDIT_CUSTOMER.REQUIRED_FIRST_NAME;
         break;
       case "lastName":
-        newErrors[index].lastName = value
+        newErrors[index].lastName = value?.trim()
           ? ""
           : EDIT_CUSTOMER.REQUIRES_LAST_NAME;
         break;
       case "email":
-        if (!value) {
+        if (!value?.trim()) {
           newErrors[index].email = EDIT_CUSTOMER.REQUIRE_EMAIL;
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           newErrors[index].email = EDIT_CUSTOMER.VALID_EMAIL;
@@ -577,7 +577,7 @@ const Information = ({ id, pageStatus }) => {
         break;
       case "phoneNumber":
         errors[index].phoneNumber =
-          value === ""
+          value?.trim() === ""
             ? ""
             : /^\d{9,12}$/.test(value)
               ? ""

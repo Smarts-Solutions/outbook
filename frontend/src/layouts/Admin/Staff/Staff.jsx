@@ -307,16 +307,25 @@ const StaffPage = () => {
       role: "3",
       status: "1",
     },
-    validationSchema: Yup.object({
-      first_name: Yup.string().required(Validation_Message.FirstNameValidation),
-      last_name: Yup.string().required(Validation_Message.LastNameValidation),
+     validationSchema : Yup.object({
+      first_name: Yup.string()
+        .trim(Validation_Message.FirstNameValidation)  
+        .required(Validation_Message.FirstNameValidation),
+      last_name: Yup.string()
+        .trim(Validation_Message.LastNameValidation)  
+        .required(Validation_Message.LastNameValidation),
       email: Yup.string()
+        .trim(Validation_Message.EmailValidation)  
         .email(Validation_Message.EmailValidation)
         .required(Validation_Message.EmailIsRequire),
-      role: Yup.string().required(Validation_Message.RoleValidation),
-      status: Yup.string().required(Validation_Message.StatusValidation),
+      role: Yup.string()
+        .trim(Validation_Message.RoleValidation)  
+        .required(Validation_Message.RoleValidation),
+      status: Yup.string()
+        .trim(Validation_Message.StatusValidation) 
+        .required(Validation_Message.StatusValidation),
     }),
-
+    
     onSubmit: async (values) => {
       let req = {
         first_name: values.first_name,

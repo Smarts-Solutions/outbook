@@ -597,7 +597,7 @@ const ClientEdit = () => {
         break;
       case "phone":
         newErrors[index].phone =
-          value === ""
+          value?.trim() === ""
             ? ""
             : /^\d{9,12}$/.test(value)
               ? ""
@@ -606,7 +606,7 @@ const ClientEdit = () => {
 
       case "alternate_phone":
         newErrors[index].alternate_phone =
-          value === ""
+          value?.trim() === ""
             ? ""
             : /^\d{9,12}$/.test(value)
               ? ""
@@ -682,16 +682,16 @@ const ClientEdit = () => {
       let formIsValid = true;
       const newErrors = CompanyContacts.map((contact, index) => {
         const error = {
-          first_name: contact.first_name ? "" : "First Name is required",
-          last_name: contact.last_name ? "" : "Last Name is required",
+          first_name: contact.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact.last_name?.trim() ? "" : "Last Name is required",
           phone:
-            contact.phone === ""
+            contact.phone?.trim() === ""
               ? ""
               : /^\d{9,12}$/.test(contact.phone)
                 ? ""
                 : "Phone Number must be between 9 to 12 digits",
           email:
-            contact.email === ""
+            contact.email?.trim() === ""
               ? ""
               : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
                 ? ""
@@ -739,28 +739,28 @@ const ClientEdit = () => {
       let formIsValid = true;
       const newErrors = partnershipContacts.map((contact, index) => {
         const error = {
-          first_name: contact.first_name ? "" : "First Name is required",
-          last_name: contact.last_name ? "" : "Last Name is required",
+          first_name: contact.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact.last_name?.trim() ? "" : "Last Name is required",
           phone:
-            contact.phone === ""
+            contact.phone?.trim() === ""
               ? ""
               : /^\d{9,12}$/.test(contact.phone)
                 ? ""
                 : "Phone Number must be between 9 to 12 digits",
           alternate_phone:
-            contact.alternate_phone === ""
+            contact.alternate_phone?.trim() === ""
               ? ""
               : /^\d{9,12}$/.test(contact.alternate_phone)
                 ? ""
                 : "Alternate Phone Number must be between 9 to 12 digits",
           email:
-            contact.email === ""
+            contact.email?.trim() === ""
               ? ""
               : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
                 ? ""
                 : "Valid Email is required",
           alternate_email:
-            contact.alternate_email === ""
+            contact.alternate_email?.trim() === ""
               ? ""
               : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.alternate_email)
                 ? ""

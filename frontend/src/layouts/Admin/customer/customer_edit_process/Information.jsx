@@ -422,7 +422,7 @@ const Information = ({ id, pageStatus }) => {
 
   const validate1 = (field, value) => {
     const newErrors = { ...errors1 };
-    if (!value) {
+    if (!value?.trim()) {
       if (field === "IndustryType")
         newErrors[field] = EDIT_CUSTOMER.SELECT_CLIENT_INDUSTRIES;
       else if (field === "tradingName")
@@ -682,7 +682,7 @@ const Information = ({ id, pageStatus }) => {
 
   const validate2 = (name, value) => {
     const newErrors = { ...errors2 };
-    if (!value) {
+    if (!value?.trim()) {
       if (name === "CompanyName") newErrors[name] = EDIT_CUSTOMER.COMPANY_NAME;
       else if (name === "EntityType")
         newErrors[name] = EDIT_CUSTOMER.ENTITY_TYPE;
@@ -728,17 +728,17 @@ const Information = ({ id, pageStatus }) => {
     }
     switch (field) {
       case "first_name":
-        newErrors[index].first_name = value
+        newErrors[index].first_name = value?.trim()
           ? ""
           : EDIT_CUSTOMER.REQUIRED_FIRST_NAME;
         break;
       case "last_name":
-        newErrors[index].last_name = value
+        newErrors[index].last_name = value?.trim()
           ? ""
           : EDIT_CUSTOMER.REQUIRES_LAST_NAME;
         break;
       case "email":
-        if (!value) {
+        if (!value?.trim()) {  
           newErrors[index].email = EDIT_CUSTOMER.REQUIRE_EMAIL;
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           newErrors[index].email = EDIT_CUSTOMER.VALID_EMAIL;
@@ -748,7 +748,7 @@ const Information = ({ id, pageStatus }) => {
         break;
       case "phone":
         errors[index].phone =
-          value === ""
+          value?.trim() === ""
             ? ""
             : /^\d{9,12}$/.test(value)
             ? ""
@@ -775,7 +775,7 @@ const Information = ({ id, pageStatus }) => {
 
   const validate3 = (name, value) => {
     const newErrors = { ...errors3 };
-    if (!value) {
+    if (!value?.trim()) {
       if (name === "TradingName")
         newErrors[name] = EDIT_CUSTOMER.ENTER_TRADING_NAME;
       else if (name === "ClientIndustry")
@@ -805,7 +805,6 @@ const Information = ({ id, pageStatus }) => {
 
   const validateField1 = (index, field, value) => {
     const errors = [...contactsErrors];
-
     switch (field) {
       case "first_name":
       case "last_name":

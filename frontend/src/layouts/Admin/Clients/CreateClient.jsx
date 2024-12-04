@@ -327,7 +327,7 @@ const CreateClient = () => {
 
   const validate1 = (name, value) => {
     const newErrors = { ...errors1 };
-    if (!value) {
+    if (!value?.trim()) {
       switch (name) {
         case "tradingName":
           newErrors[name] = "Please enter Trading Name";
@@ -393,7 +393,7 @@ const CreateClient = () => {
 
   const validate2 = (name, value) => {
     const newErrors = { ...errors2 };
-    if (!value) {
+    if (!value?.trim()) {
       switch (name) {
         case "CompanyName":
           newErrors[name] = "Please Enter Company Name";
@@ -456,7 +456,7 @@ const CreateClient = () => {
 
   const validate3 = (name, value) => {
     const newErrors = { ...errors3 };
-    if (!value) {
+    if (!value?.trim()) {
       switch (name) {
         case "TradingName":
           newErrors[name] = "Please Enter Trading Name";
@@ -495,7 +495,7 @@ const CreateClient = () => {
 
   const validate4 = (name, value) => {
     const newErrors = { ...errors4 }
-    if (!value) {
+    if (!value?.trim()) {
       switch (name) {
         case "tradingName":
           newErrors[name] = "Please enter Trading Name";
@@ -617,14 +617,14 @@ const CreateClient = () => {
     const newErrors = [...errors];
     switch (field) {
       case "first_name":
-        newErrors[index].first_name = value ? "" : "First Name is required";
+        newErrors[index].first_name = value?.trim() ? "" : "First Name is required";
         break;
       case "last_name":
-        newErrors[index].last_name = value ? "" : "Last Name is required";
+        newErrors[index].last_name = value?.trim() ? "" : "Last Name is required";
         break;
 
       case "email":
-        if (!value) {
+        if (!value?.trim()) {
           newErrors[index].email = "";
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           newErrors[index].email = "Valid Email is required";
@@ -650,16 +650,16 @@ const CreateClient = () => {
     const newErrors = [...contactsErrors];
     switch (field) {
       case "first_name":
-        newErrors[index].first_name = value ? "" : "First Name is required";
+        newErrors[index].first_name = value?.trim() ? "" : "First Name is required";
         break;
       case "last_name":
-        newErrors[index].last_name = value ? "" : "Last Name is required";
+        newErrors[index].last_name = value?.trim() ? "" : "Last Name is required";
         break;
       case "role":
         // newErrors[index].role = value ? '' : 'Role is required';
         break;
       case "email":
-        if (!value) {
+        if (!value?.trim()) {
           newErrors[index].email = "";
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           newErrors[index].email = "Valid Email is required";
@@ -668,7 +668,7 @@ const CreateClient = () => {
         }
         break;
       case "alternate_email":
-        if (!value) {
+        if (!value?.trim()) {
           newErrors[index].alternate_email = "";
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           newErrors[index].alternate_email = "Valid Email is required";
@@ -678,7 +678,7 @@ const CreateClient = () => {
         break;
       case "phone":
         newErrors[index].phone =
-          value === ""
+          value?.trim() === ""
             ? ""
             : /^\d{9,12}$/.test(value)
               ? ""
@@ -687,7 +687,7 @@ const CreateClient = () => {
 
       case "alternate_phone":
         newErrors[index].alternate_phone =
-          value === ""
+          value?.trim() === ""
             ? ""
             : /^\d{9,12}$/.test(value)
               ? ""
@@ -762,17 +762,17 @@ const CreateClient = () => {
       let formIsValid = true;
       const newErrors = contacts.map((contact, index) => {
         const error = {
-          first_name: contact.first_name ? "" : "First Name is required",
-          last_name: contact.last_name ? "" : "Last Name is required",
+          first_name: contact.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact.last_name?.trim() ? "" : "Last Name is required",
           // role: contact.role ? '' : 'Role is required',
           phone:
-            contact.phone === ""
+            contact.phone?.trim() === ""
               ? ""
               : /^\d{9,12}$/.test(contact.phone)
                 ? ""
                 : "Phone Number must be between 9 to 12 digits",
           email:
-            contact.email === ""
+            contact.email?.trim() === ""
               ? ""
               : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
                 ? ""
@@ -820,29 +820,29 @@ const CreateClient = () => {
       let formIsValid = true;
       const newErrors = contacts1.map((contact, index) => {
         const error = {
-          first_name: contact.first_name ? "" : "First Name is required",
-          last_name: contact.last_name ? "" : "Last Name is required",
+          first_name: contact.first_name?.trim() ? "" : "First Name is required",
+          last_name: contact.last_name?.trim() ? "" : "Last Name is required",
           // role: contact.role ? '' : 'Role is required',
           phone:
-            contact.phone === ""
+            contact.phone?.trim() === ""
               ? ""
               : /^\d{9,12}$/.test(contact.phone)
                 ? ""
                 : "Phone Number must be between 9 to 12 digits",
           alternate_phone:
-            contact.alternate_phone === ""
+            contact.alternate_phone?.trim() === ""
               ? ""
               : /^\d{9,12}$/.test(contact.alternate_phone)
                 ? ""
                 : " Alternate Phone Number must be between 9 to 12 digits",
           email:
-            contact.email === ""
+            contact.email?.trim() === ""
               ? ""
               : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
                 ? ""
                 : "Valid Email is required",
           alternate_email:
-            contact.alternate_email === ""
+            contact.alternate_email.trim() === ""
               ? ""
               : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.alternate_email)
                 ? ""
