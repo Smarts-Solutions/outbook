@@ -161,18 +161,35 @@ const JobStatus = () => {
 
     {
       name: "Client Name",
-
+      cell: (row) => (
+        <div title={row.client_trading_name || "-"}>
+          {row.client_trading_name || "-"}
+        </div>
+      ),
       selector: (row) => row.client_trading_name || "-",
       sortable: true,
     },
     {
       name: "Job Type",
-
+      cell: (row) => (
+        <div title={row.job_type_name || "-"}>
+          {row.job_type_name || "-"}
+        </div>
+      ),
       selector: (row) => row.job_type_name || "-",
       sortable: true,
     },
     {
       name: "Account Manager",
+      cell: (row) => (
+        <div title={row.account_manager_officer_first_name +
+          " " +
+          row.account_manager_officer_last_name || "-"}>
+          {row.account_manager_officer_first_name +
+        " " +
+        row.account_manager_officer_last_name || "-"}
+        </div>
+      ),
       selector: (row) =>
         row.account_manager_officer_first_name +
         " " +
@@ -181,11 +198,26 @@ const JobStatus = () => {
     },
     {
       name: "Client Job Code",
+      cell: (row) => (
+        <div title={row.client_job_code || "-"}>
+          {row.client_job_code || "-"}
+        </div>
+      ),
       selector: (row) => row.client_job_code || "-",
       sortable: true,
     },
     {
       name: "Outbook Account Manager",
+      cell: (row) => (
+        <div title={row.outbooks_acount_manager_first_name +
+          " " +
+          row.outbooks_acount_manager_last_name || "-"}>
+          {row.outbooks_acount_manager_first_name +
+        " " +
+        row.outbooks_acount_manager_last_name || "-"}
+        </div>
+      ),
+     
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
         " " +
@@ -194,12 +226,28 @@ const JobStatus = () => {
     },
     {
       name: "Allocated To",
+      cell: (row) => (
+        <div title={ row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name}>
+          { row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name}
+        </div>
+      ),
+      
       selector: (row) =>
         row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name,
       sortable: true,
     },
     {
       name: "Timesheet",
+      cell: (row) => (
+        <div title={row.total_hours_status == "1" && row.total_hours != null ?
+          row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
+          : "-"}>
+          {row.total_hours_status == "1" && row.total_hours != null ?
+          row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
+          : "-"}
+        </div>
+      ),
+   
       selector: (row) =>
         row.total_hours_status == "1" && row.total_hours != null ?
           row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
@@ -208,6 +256,7 @@ const JobStatus = () => {
     },
     {
       name: "Invoicing",
+      
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
     },
@@ -336,17 +385,32 @@ const JobStatus = () => {
     // },
     {
       name: "Client Name",
+      cell: (row) => (
+        <div title={row.client_name || "-"}>
+          {row.client_name || "-"}
+        </div>
+      ),
       selector: (row) => row.client_name || "-",
       sortable: true,
     },
 
     {
       name: "Client Code",
+      cell: (row) => (
+        <div title={row.client_code || "-"}>
+          {row.client_code || "-"}
+        </div>
+      ),
       selector: (row) => row.client_code || "-",
       sortable: true,
     },
     {
       name: "Client Type",
+      cell: (row) => (
+        <div title={row.client_type_name == null ? "-" : row.client_type_name}>
+          {row.client_type_name == null ? "-" : row.client_type_name}
+        </div>
+      ),
       selector: (row) =>
         row.client_type_name == null ? "-" : row.client_type_name,
       sortable: true,
@@ -354,6 +418,7 @@ const JobStatus = () => {
     },
     {
       name: "Status",
+      
       selector: (row) => (<div>
         <span
           className={` ${row.status === "1" ? "text-success" : "text-danger"
@@ -371,24 +436,44 @@ const JobStatus = () => {
   const columnsStaff = [
     {
       name: "Full Name",
+      cell: (row) => (
+        <div title={row.first_name + " " + row.last_name}>
+          {row.first_name + " " + row.last_name}
+        </div>
+      ),
       selector: (row) => row.first_name + " " + row.last_name,
       sortable: true,
       // width: "250px",
     },
     {
       name: "Email Address",
+      cell: (row) => (
+        <div title={row.email}>
+          {row.email}
+        </div>
+      ),
       selector: (row) => row.email,
       sortable: true,
       // width: "250px",
     },
     {
       name: "Phone",
+      cell: (row) => (
+        <div title={row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - "}>
+          {row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - "}
+        </div>
+      ),
       selector: (row) => row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - ",
       sortable: true,
       // width: "250px",
     },
     {
       name: "Role",
+      cell: (row) => (
+        <div title={row.role_name}>
+          {row.role_name}
+        </div>
+      ),
       selector: (row) => row.role_name,
       sortable: true,
       // width: "250px",
@@ -436,7 +521,8 @@ const JobStatus = () => {
                         <i className="fa fa-plus" /> Add Customer
                       </Link>
                     </div>
-                  ) : (
+                  ) : 
+                  (
                     getAccessData.insert === 1 && (
                       <div className="col-md-6">
                         <Link
@@ -447,7 +533,9 @@ const JobStatus = () => {
                         </Link>
                       </div>
                     )
-                  )}
+                  )
+                  
+                  }
                 </div>
 
               </div>

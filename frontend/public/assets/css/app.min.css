@@ -253,7 +253,7 @@
 	.left-sidenav {
 		position: absolute;
 		overflow-y: auto;
-		z-index: 10;
+		z-index: 20;
 		bottom: 0;
 		top: 74px;
 		margin-top: 0;
@@ -4305,14 +4305,15 @@ input.error-field.form-control {
 }
 
 select#tabSelect {
-  position: relative;
-  z-index: 9;
-  appearance: auto;
-  padding: 0px 10px;
-  text-indent: 2px;
-  height: 35px;
-  line-height: 15px;
-  appearance: inherit;
+    position: relative;
+    z-index: 9;
+    appearance: auto;
+    padding: 0px 10px;
+    text-indent: 2px;
+    height: 35px;
+    line-height: 15px;
+    appearance: inherit;
+    top: -7px;
 }
 
 .data-table-extensions>.data-table-extensions-filter>.filter-text {
@@ -4424,7 +4425,7 @@ select#tabSelect {
 
 .rdt_TableBody ,.rdt_TableHeadRow{
     position: relative;
-    z-index: 9;
+    /* z-index: 9; */
 	background-color: #fff;
 }
 .scrollable-week {
@@ -4500,4 +4501,15 @@ i.exp_icon {
 .basic-multi-select {
     position: relative;
     z-index: 9;
+}
+.dropdown-menu.custom-dropdown.show {
+    z-index: 999 !important;
+}
+.data-table-extensions > .data-table-extensions-filter > .icon {
+
+    display: none !important;
+}
+.data-table-extensions > .data-table-extensions-filter > .filter-text {
+
+    width: 96%;
 }
