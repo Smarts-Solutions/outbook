@@ -65,7 +65,7 @@ const StaffPage = () => {
   const [portfolio, setPortfolio] = useState(false);
   const [editStaff, setEditStaff] = useState(false);
   const [editShowModel, setEditShowModel] = useState(false);
-  const [editStaffData, setEditStaffData] = useState(false);
+  const [editStaffData, setEditStaffData] = useState({});
   const [addCompetancy, SetCompetancy] = useState(false);
   const [staffViewLog, SetStaffViewLog] = useState(false);
   const [getActiviyLog, setActivityLog] = useState([]);
@@ -308,16 +308,25 @@ const StaffPage = () => {
       role: "3",
       status: "1",
     },
-    validationSchema: Yup.object({
-      first_name: Yup.string().required(Validation_Message.FirstNameValidation),
-      last_name: Yup.string().required(Validation_Message.LastNameValidation),
+     validationSchema : Yup.object({
+      first_name: Yup.string()
+        .trim(Validation_Message.FirstNameValidation)  
+        .required(Validation_Message.FirstNameValidation),
+      last_name: Yup.string()
+        .trim(Validation_Message.LastNameValidation)  
+        .required(Validation_Message.LastNameValidation),
       email: Yup.string()
+        .trim(Validation_Message.EmailValidation)  
         .email(Validation_Message.EmailValidation)
         .required(Validation_Message.EmailIsRequire),
-      role: Yup.string().required(Validation_Message.RoleValidation),
-      status: Yup.string().required(Validation_Message.StatusValidation),
+      role: Yup.string()
+        .trim(Validation_Message.RoleValidation)  
+        .required(Validation_Message.RoleValidation),
+      status: Yup.string()
+        .trim(Validation_Message.StatusValidation) 
+        .required(Validation_Message.StatusValidation),
     }),
-
+    
     onSubmit: async (values) => {
       let req = {
         first_name: values.first_name,
@@ -355,9 +364,11 @@ const StaffPage = () => {
             setTimeout(() => {
               setAddStaff(false);
               setEditStaff(false);
+              setEditStaffData({})
               SetRefresh(!refresh);
               formik.resetForm();
               window.location.reload();
+
             }
               , 1500);
           } else {
@@ -544,7 +555,6 @@ const StaffPage = () => {
     }
   };
 
-
   useEffect(() => {
     if (editStaffData && editStaffData) {
       formik.setFieldValue("first_name", editStaffData.first_name || "null");
@@ -633,7 +643,6 @@ const StaffPage = () => {
         backdrop="static"
         size="ms-7"
         title="Add Staff"
-
         hideBtn={true}
         handleClose={() => {
           setAddStaff(false);
@@ -646,7 +655,7 @@ const StaffPage = () => {
           )}
           formik={formik}
           btn_name="Add"
-          closeBtn={(e) => setAddStaff(false)}
+          closeBtn={(e) =>{formik.resetForm(); setAddStaff(false) }}
         />
       </CommanModal>
 
@@ -755,6 +764,8 @@ const StaffPage = () => {
         hideBtn={true}
         handleClose={() => {
           setEditStaff(false);
+          formik.resetForm();
+          setEditStaffData({});
         }}
       >
         <Formicform
@@ -763,7 +774,7 @@ const StaffPage = () => {
           )}
           formik={formik}
           btn_name="Update"
-          closeBtn={(e) => setEditStaff(false)}
+          closeBtn={(e) => {formik.resetForm(); setEditStaff(false) ; setEditStaffData({})}}
           additional_field={
             <div className="row mt-2 ">
 

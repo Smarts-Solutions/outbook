@@ -103,7 +103,7 @@ const CreateCheckList = () => {
         }
       }
     } else {
-      if (!value) {
+      if (!value?.trim()) {
         if (fieldErrors[name]) {
           newErrors[name] = fieldErrors[name];
         }
@@ -241,7 +241,7 @@ const CreateCheckList = () => {
     }
 
     tasks.forEach((task, index) => {
-      if (!task.task_name) {
+      if (!task.task_name?.trim()) {
         validationErrors[`task_name_${index}`] = "Task Name is required";
       }
 

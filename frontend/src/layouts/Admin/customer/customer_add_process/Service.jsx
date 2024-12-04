@@ -724,8 +724,6 @@ const Service = () => {
                                       </div>
                                     </div>
                                   )}
-
-
                                 </div>
                               </div>
                             </div>
@@ -734,6 +732,7 @@ const Service = () => {
                           <td className="align-top text-end">
                             <button
                               className="btn  btn-info remove-item-btn mt-3"
+                              disabled={!services.includes(item.id)}
                               onClick={() => {
                                 setModal(true);
                                 setTempServices(item.id);

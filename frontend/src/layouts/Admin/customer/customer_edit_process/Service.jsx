@@ -119,11 +119,11 @@ const Service = () => {
   const handleCheckboxChange = (e, item) => {
     
     
-    const ExistJobService = getCustomerService.data.services.find((ser) => ser.service_id === item.id) || null
+    const ExistJobService = getCustomerService?.data?.services?.find((ser) => ser?.service_id === item?.id) || null
 
-    console.log("ExistJobService",ExistJobService)
+  
 
-    if(ExistJobService != null && ExistJobService.job_exist != null){
+    if(ExistJobService != null && ExistJobService?.job_exist != null){
      Swal.fire({
       icon: 'warning',
       title: "This service has been assigned to job, cannot remove it",
@@ -506,6 +506,7 @@ const Service = () => {
     });
 
   }
+
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
@@ -938,6 +939,7 @@ const Service = () => {
                           <td className="align-top text-end">
                             <button
                               className="btn btn-info remove-item-btn mt-2"
+                              disabled={!services.includes(item.id)}
                               onClick={() => {
                                 setModal(true);
                                 setTempServices(item.id);

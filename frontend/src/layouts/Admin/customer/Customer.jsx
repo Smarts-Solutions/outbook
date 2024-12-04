@@ -62,6 +62,7 @@ const Customer = () => {
   const columns = [
     {
       name: "Trading Name",
+       
       cell: (row) => (
         <div
           style={{
@@ -96,6 +97,7 @@ const Customer = () => {
     },
     {
       name: "Customer Code",
+      selector: (row) => row.customer_code,
       cell: (row) => (
            <div
            title={row.customer_code}
@@ -146,7 +148,6 @@ const Customer = () => {
   name: "Account Manager",
   selector: (row) => row.account_manager_firstname + " " + row.account_manager_lastname,
   sortable: true,
-
   cell: row => (
     <div 
     title={row.account_manager_firstname + " " + row.account_manager_lastname}
@@ -160,6 +161,7 @@ const Customer = () => {
 },
     {
       name: "Status",
+      selector: (row) => row.form_process,
       cell: (row) => (
         <div>
           <div>

@@ -456,7 +456,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                     </div>
 
                                     <div className="col-lg-4">
-                                        <label className="form-label">Customer Account Manager(Officer)</label>
+                                        <label className="form-label">Customer Account Manager(Officer)<span className='text-danger'>*</span></label>
                                         <select className="form-select"
                                             name="CustomerAccountManager"
                                             disabled
@@ -475,7 +475,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                     </div>
 
                                     <div className="col-lg-4">
-                                        <label className="form-label">Service</label>
+                                        <label className="form-label">Service<span className='text-danger'>*</span></label>
                                         <select className="form-select mb-3"
                                             name="Service"
                                             defaultValue=""
@@ -494,7 +494,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                     </div>
 
                                     <div className="col-lg-4">
-                                        <label className="form-label">Job Type</label>
+                                        <label className="form-label">Job Type<span className='text-danger'>*</span></label>
                                         <select className="form-select mb-3 jobtype"
                                             disabled
                                             name="JobType"

@@ -207,7 +207,7 @@ const SubInternal = () => {
 
     const handleSave = (e) => {
         e.preventDefault();
-        if (modalData.fields[0].value == "" || modalData.fields[0].value == undefined) {
+        if (modalData.fields[0]?.value?.trim() == "" || modalData.fields[0].value == undefined) {
             sweatalert.fire({
                 title: "Please enter " + modalData.fields[0].label,
                 icon: "warning",
