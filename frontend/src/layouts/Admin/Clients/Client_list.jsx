@@ -185,9 +185,7 @@ const ClientList = () => {
     {
       name: "Client Code",
       cell: (row) => (
-        <div
-        title={row.client_code || "-"}
-        >
+        <div title={row.client_code || "-"}>
          {row.client_code || "-"}
         </div>
    ),
@@ -535,7 +533,7 @@ const ClientList = () => {
           </a>
         </div>
       ),
-      selector: (row) => row.trading_name,
+      selector: (row) => row.check_list_name,
       sortable: true,
     },
 

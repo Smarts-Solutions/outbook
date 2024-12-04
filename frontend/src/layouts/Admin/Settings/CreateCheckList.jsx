@@ -96,7 +96,7 @@ const CreateCheckList = () => {
     let value = e.target.value;
     setFormData1((prevState) => ({
       ...prevState,
-      [name]: value,
+      [name]: value?.trim(),
     }));
     validate(name, value);
   };
@@ -248,17 +248,14 @@ const CreateCheckList = () => {
     if (!isValid) {
       return;
     }
-
     if(selectedClientType.length==0){
       setErrors({ ...errors, client_type_id: "Please Select Client Type" });
       return;
     }
-
     tasks.forEach((task, index) => {
-      if (!task.task_name) {
+      if (!task?.task_name?.trim()) {
         validationErrors[`task_name_${index}`] = "Task Name is required";
       }
-
       if (
         !task.budgeted_hour ||
         task.budgeted_hour.hours === "" ||
@@ -288,8 +285,6 @@ const CreateCheckList = () => {
         task_id: task.task_id,
       })),
     };
-
-
 
     const data = { req, authToken: token };
     await dispatch(addChecklists(data))

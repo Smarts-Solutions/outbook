@@ -257,19 +257,18 @@ const CreateCheckList = () => {
       validationErrors.job_type_id = "Job Type is required";
     if (selectedClientType.length === 0)
       validationErrors.client_type_id = "Please Select Client Type";
-    if (!formData.check_list_name)
+    if (!formData?.check_list_name?.trim())
       validationErrors.check_list_name = "Check List Name is required";
     if (!formData.status) validationErrors.status = "Status is required";
 
     tasks.forEach((task, index) => {
-      if (!task.task_name)
+      if (!task?.task_name?.trim())
         validationErrors[`task_name_${index}`] = "Task Name is required";
       if (!task.budgeted_hour)
         validationErrors[`budgeted_hour_${index}`] =
           "Budgeted Time is required";
     });
 
-    console.log(validationErrors, "validationErrors");
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;

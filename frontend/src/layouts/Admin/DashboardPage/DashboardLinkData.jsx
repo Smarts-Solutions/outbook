@@ -310,7 +310,6 @@ const JobStatus = () => {
         </div>
       ),
       sortable: true,
-
     },
   ];
 
