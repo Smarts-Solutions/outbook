@@ -7,6 +7,12 @@ import {
 import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
+  const [visibleLogs, setVisibleLogs] = useState(4); // Initially show 5 logs
+
+  // Handle "Load More" functionality
+  const loadMoreLogs = () => {
+    setVisibleLogs((prev) => prev + 4); // Show 5 more logs each time
+  };
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const getActiveTab = sessionStorage.getItem('activDashborde');
   const navigate = useNavigate();
@@ -291,36 +297,44 @@ const Dashboard = () => {
                       <div className="simplebar-content" style={{ padding: 0 }}>
                         <div className="activity">
                           {/* Conditional Rendering */}
-                          {getActiviyLog && getActiviyLog.length > 0 ? (
-                            getActiviyLog.map((item, index) => {
-                              return (
-                                <div className="activity-info" key={index}>
-                                  <div className="icon-info-activity">
-                                    <i className="fa-solid fa-circle"></i>
-                                  </div>
-                                  <div className="activity-info-text">
-                                    <div className="">
-                                      <small className="">
-                                        {formatDate(item?.created_at)}
-                                      </small>
-                                      <p className="">{item?.log_message}</p>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })
-                          ) : (
-                            <div className="no-data-found">
-                              <img
-                                src="/assets/images/No-data-amico.png" 
-                                alt="No data found"
-                                style={{ maxWidth: "100%", height: "auto" }}
-                              />
-                              <p className="text-center">
-                                No Activity Logs Found
-                              </p>
-                            </div>
-                          )}
+                          <div>
+      {getActiviyLog && getActiviyLog.length > 0 ? (
+        getActiviyLog.slice(0, visibleLogs).map((item, index) => {
+          return (
+            <div className="activity-info" key={index}>
+              <div className="icon-info-activity">
+                <i className="fa-solid fa-circle"></i>
+              </div>
+              <div className="activity-info-text">
+                <div className="">
+                  <small className="">{formatDate(item?.created_at)}</small>
+                  <p className="">{item?.log_message}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })
+      ) : (
+        <div className="no-data-found">
+          <img
+            src="/assets/images/No-data-amico.png"
+            alt="No data found"
+            style={{ maxWidth: "100%", height: "auto" }}
+          />
+          <p className="text-center">No Activity Logs Found</p>
+        </div>
+      )}
+
+      {/* Show "Load More" button if there are more logs */}
+      {getActiviyLog && getActiviyLog.length > visibleLogs && (
+        <div className="load-more-btn-container text-center">
+          <button className="btn btn-info w-75" onClick={loadMoreLogs}>
+            Load More
+
+          </button>
+        </div>
+      )}
+    </div>
                         </div>
                       </div>
                     </div>
