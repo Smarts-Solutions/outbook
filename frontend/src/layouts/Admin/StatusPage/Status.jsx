@@ -8,7 +8,7 @@ import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 import { fa_time } from "../../../Utils/Date_formet";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import {convertDate } from '../../../Utils/Comman_function';
+import { convertDate } from '../../../Utils/Comman_function';
 
 
 const Status = () => {
@@ -37,7 +37,7 @@ const Status = () => {
       setAccessData(updatedAccess);
     });
   }, []);
- 
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -71,22 +71,9 @@ const Status = () => {
 
   const columns = [
     {
-      name : "S.No",
-      cell: (row, index) => <div>{index + 1}</div>,
-      width:"100px",
-      sortable: true,
-    },
-    {
       name: "Detailed Status",
-      
-      cell: (row) => (
-        <div
-        title={row.name}
-        >
-         {row.name}
-        </div>
-   ),
-   width:"50%",
+      selector: (row) => row.name,
+      cell: (row) => (<div title={row.name} >{row.name}</div>),
       sortable: true,
     },
     {
@@ -258,14 +245,17 @@ const Status = () => {
   };
 
   const createTask = async () => {
-    if (!getStatsAdd.statusname || !getStatsAdd.statustype) {
+    if (!getStatsAdd.statusname?.trim() || !getStatsAdd.statustype?.trim()) {
       Swal.fire({
         icon: "error",
         title: "Oops...",
         text: "Please fill in all required fields.",
+        timer: 2000,
+        timerProgressBar: true,
       });
       return;
     }
+
 
     const data = {
       req: {
@@ -287,6 +277,8 @@ const Status = () => {
               ? "Your status has been updated."
               : "Your status has been created.",
             icon: "success",
+            timer: 2000,
+            timerProgressBar: true,
           }).then(() => {
             setShowModal(false);
             GetStatus();
@@ -295,6 +287,15 @@ const Status = () => {
               statustype: "",
             });
             setEditItem(null);
+          });
+        }
+        else {
+          Swal.fire({
+            icon: "error",
+            title: "Failed !",
+            text: response.message,
+            timer: 2000,
+            timerProgressBar: true,
           });
         }
       })
@@ -337,7 +338,7 @@ const Status = () => {
                   </button>
                 ) : <div className="mt-5"></div>
               }
-              
+
             </div>
           </div>
           <div className="datatable-wrapper mt-minus">
@@ -372,7 +373,7 @@ const Status = () => {
                   id="customername-field"
                   className="form-control"
                   placeholder="Enter Status Name"
-                  autoFocus 
+                  autoFocus
                   required
                   name="statusname"
                   value={getStatsAdd.statusname}

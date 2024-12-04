@@ -295,7 +295,7 @@ const Login = () => {
                           />
                         </div>
                         {errorPassword ? (
-                          <span className="error-text"> uuu {errorPassword}</span>
+                          <span className="error-text"> {errorPassword}</span>
                         ) : (
                           ""
                         )}

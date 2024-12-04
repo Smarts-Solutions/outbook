@@ -312,7 +312,6 @@ const JobStatus = () => {
       sortable: true,
 
     },
-
   ];
 
   const ClientListColumns = [
