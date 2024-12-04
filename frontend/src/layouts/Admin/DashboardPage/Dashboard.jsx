@@ -329,9 +329,10 @@ const Dashboard = () => {
 
       {/* Show "Load More" button if there are more logs */}
       {getActiviyLog && getActiviyLog.length > visibleLogs && (
-        <div className="load-more-btn-container ">
-          <button className="btn btn-outline-info" onClick={loadMoreLogs}>
+        <div className="load-more-btn-container text-center">
+          <button className="btn btn-info w-75" onClick={loadMoreLogs}>
             Load More
+
           </button>
         </div>
       )}
