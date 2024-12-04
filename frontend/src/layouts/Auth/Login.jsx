@@ -302,10 +302,10 @@ const Login = () => {
                       </div>
                       <div className="form-group row my-2 text-center">
                         <div className="col-sm-12 ">
-                          <a className="text-muted font-13 forget-btn" href="">
+                          {/* <a className="text-muted font-13 forget-btn" href="">
                             <i className="ti-lock pe-1" />
                             Forgot password?
-                          </a>
+                          </a> */}
                         </div>
                         {/*end col*/}
                       </div>
