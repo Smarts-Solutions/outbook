@@ -2674,7 +2674,7 @@ hr.thick {
 	min-height: 70px;
 }
 
-.activity .activity-info::before {
+.activity .activity-info::before ,.activity-info::after{
 	content: "";
 	position: absolute;
 	bottom: -4px;
@@ -4193,7 +4193,7 @@ li::marker {
 }
 
 .analytic-dash-activity {
-	height: 400px;
+	height: 370px;
 	overflow-y: auto;
 	
 }
