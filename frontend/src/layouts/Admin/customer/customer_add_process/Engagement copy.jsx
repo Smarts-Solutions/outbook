@@ -392,7 +392,6 @@ const Engagement = () => {
         };
       }
 
-      console.log("CPPP", isValid);
 
       if (!validateForm() || !isValid) {
         console.log("!isValid", isValid);

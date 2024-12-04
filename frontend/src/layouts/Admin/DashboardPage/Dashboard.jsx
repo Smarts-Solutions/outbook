@@ -4,12 +4,11 @@ import {
   DashboardData,
   ActivityLog,
 } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
-import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
-  
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+  const getActiveTab = sessionStorage.getItem('activDashborde');
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
   const dispatch = useDispatch();
@@ -17,12 +16,10 @@ const Dashboard = () => {
   const [getActiviyLog, setActivityLog] = useState([]);
 
   const currentDate = new Date();
+  const [selectedTab, setSelectedTab] = useState(getActiveTab || "this_week");
 
-  // State to store the selected tab
-  const [selectedTab, setSelectedTab] = useState("this_week");
-
-  // Function to handle dropdown change
   const handleTabChange = (event) => {
+    sessionStorage.setItem('activDashborde', event.target.value);
     setSelectedTab(event.target.value);
   };
 

@@ -16,6 +16,7 @@ const JobStatus = () => {
   const role = JSON.parse(localStorage.getItem("role"));
   const [allLinkedData, setAllLinkedData] = useState([]);
 
+
   useEffect(() => {
     GetLinkedData();
   }, []);
@@ -186,8 +187,8 @@ const JobStatus = () => {
           " " +
           row.account_manager_officer_last_name || "-"}>
           {row.account_manager_officer_first_name +
-        " " +
-        row.account_manager_officer_last_name || "-"}
+            " " +
+            row.account_manager_officer_last_name || "-"}
         </div>
       ),
       selector: (row) =>
@@ -213,11 +214,11 @@ const JobStatus = () => {
           " " +
           row.outbooks_acount_manager_last_name || "-"}>
           {row.outbooks_acount_manager_first_name +
-        " " +
-        row.outbooks_acount_manager_last_name || "-"}
+            " " +
+            row.outbooks_acount_manager_last_name || "-"}
         </div>
       ),
-     
+
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
         " " +
@@ -227,11 +228,11 @@ const JobStatus = () => {
     {
       name: "Allocated To",
       cell: (row) => (
-        <div title={ row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name}>
-          { row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name}
+        <div title={row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name}>
+          {row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name}
         </div>
       ),
-      
+
       selector: (row) =>
         row.allocated_first_name == null ? "-" : row.allocated_first_name + " " + row.allocated_last_name == null ? "-" : row.allocated_last_name,
       sortable: true,
@@ -243,11 +244,11 @@ const JobStatus = () => {
           row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
           : "-"}>
           {row.total_hours_status == "1" && row.total_hours != null ?
-          row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
-          : "-"}
+            row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
+            : "-"}
         </div>
       ),
-   
+
       selector: (row) =>
         row.total_hours_status == "1" && row.total_hours != null ?
           row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
@@ -256,7 +257,7 @@ const JobStatus = () => {
     },
     {
       name: "Invoicing",
-      
+
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
     },
@@ -418,7 +419,7 @@ const JobStatus = () => {
     },
     {
       name: "Status",
-      
+
       selector: (row) => (<div>
         <span
           className={` ${row.status === "1" ? "text-success" : "text-danger"
@@ -512,7 +513,7 @@ const JobStatus = () => {
                   >
                     <i className="fa fa-arrow-left pe-1" /> Back
                   </div>
-                  {role === "ADMIN" || role === "SUPERADMIN" ? (
+                  {(role === "ADMIN" || role === "SUPERADMIN" ||  getAccessData.insert === 1) && location?.state?.req?.heading=="Customers" ? (
                     <div className="col-md-6">
                       <Link
                         to="/admin/addcustomer"
@@ -521,20 +522,10 @@ const JobStatus = () => {
                         <i className="fa fa-plus" /> Add Customer
                       </Link>
                     </div>
-                  ) : 
-                  (
-                    getAccessData.insert === 1 && (
-                      <div className="col-md-6">
-                        <Link
-                          to="/admin/addcustomer"
-                          className="btn btn-outline-info fw-bold float-end border-3"
-                        >
-                          <i className="fa fa-plus" /> Add Customer
-                        </Link>
-                      </div>
-                    )
+                  ) : (
+                    ""
                   )
-                  
+
                   }
                 </div>
 

@@ -64,7 +64,7 @@ const StaffPage = () => {
   const [portfolio, setPortfolio] = useState(false);
   const [editStaff, setEditStaff] = useState(false);
   const [editShowModel, setEditShowModel] = useState(false);
-  const [editStaffData, setEditStaffData] = useState(false);
+  const [editStaffData, setEditStaffData] = useState({});
   const [addCompetancy, SetCompetancy] = useState(false);
   const [staffViewLog, SetStaffViewLog] = useState(false);
   const [getActiviyLog, setActivityLog] = useState([]);
@@ -363,9 +363,11 @@ const StaffPage = () => {
             setTimeout(() => {
               setAddStaff(false);
               setEditStaff(false);
+              setEditStaffData({})
               SetRefresh(!refresh);
               formik.resetForm();
               window.location.reload();
+
             }
               , 1500);
           } else {
@@ -552,7 +554,6 @@ const StaffPage = () => {
     }
   };
 
-
   useEffect(() => {
     if (editStaffData && editStaffData) {
       formik.setFieldValue("first_name", editStaffData.first_name || "null");
@@ -641,7 +642,6 @@ const StaffPage = () => {
         backdrop="static"
         size="ms-7"
         title="Add Staff"
-
         hideBtn={true}
         handleClose={() => {
           setAddStaff(false);
@@ -654,7 +654,7 @@ const StaffPage = () => {
           )}
           formik={formik}
           btn_name="Add"
-          closeBtn={(e) => setAddStaff(false)}
+          closeBtn={(e) =>{formik.resetForm(); setAddStaff(false) }}
         />
       </CommanModal>
 
@@ -763,6 +763,8 @@ const StaffPage = () => {
         hideBtn={true}
         handleClose={() => {
           setEditStaff(false);
+          formik.resetForm();
+          setEditStaffData({});
         }}
       >
         <Formicform
@@ -771,7 +773,7 @@ const StaffPage = () => {
           )}
           formik={formik}
           btn_name="Update"
-          closeBtn={(e) => setEditStaff(false)}
+          closeBtn={(e) => {formik.resetForm(); setEditStaff(false) ; setEditStaffData({})}}
           additional_field={
             <div className="row mt-2 ">
 
