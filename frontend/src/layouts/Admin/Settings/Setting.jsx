@@ -612,7 +612,9 @@ const Setting = () => {
   ];
 
   const columnStatusType = [
-    { name: "Status Name", selector: (row) => row.type, },
+    { name: "Status Name", selector: (row) => row.type,
+      sortable: true,
+     },
     {
       name: "Status ",
       cell: (row) => (
