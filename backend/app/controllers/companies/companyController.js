@@ -16,6 +16,7 @@ const seachCompany = async (req, res) => {
 
       await axios.request(config)
         .then((response) => {
+      
           return res.status(200).json({ status: true,data:response.data, message: "success.." });
         })
         .catch((error) => {

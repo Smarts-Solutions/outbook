@@ -38,6 +38,10 @@ const Information = ({ id, pageStatus }) => {
   const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);
 
+  // console.log("getSearchDetails", getSearchDetails);
+  //   if(getSearchDetails.length > 0){
+  //     console.log("getSearchDetails Number", getSearchDetails[0].company_number);
+  //   }
   // state for sole trader
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     tradingName: "",
@@ -162,6 +166,11 @@ const Information = ({ id, pageStatus }) => {
 
   useEffect(() => {
     if (getSearchDetails && getSearchDetails.length > 0) {
+      
+      console.log("getSearchDetails ", getSearchDetails);
+      console.log("getSearchDetails comapany number", getSearchDetails[0].company_number);
+
+
       // Update company details
       setCompanyDetails((prevState) => ({
         ...prevState,
