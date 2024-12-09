@@ -64,6 +64,7 @@ const JobPendingReport = () => {
           <div>{row.number_of_job}</div>
         )
       ),
+      selector: row => row.number_of_job,
       sortable: true,
       reorder: false,
     },
