@@ -156,7 +156,7 @@ const JobStatus = () => {
           {/* </a> */}
         </div>
       ),
-      selector: (row) => row.trading_name,
+      selector: (row) => row.job_code_id,
       sortable: true,
     },
 
@@ -257,7 +257,6 @@ const JobStatus = () => {
     },
     {
       name: "Invoicing",
-
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
     },

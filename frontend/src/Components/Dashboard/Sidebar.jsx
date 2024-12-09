@@ -51,7 +51,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div ref={menuRef} onClick={()=>sessionStorage.clear()}>
+    <div ref={menuRef} onClick={()=>{sessionStorage.clear() ;  localStorage.removeItem('newCustomerId');}}>
       <div className="left-sidenav">
         <div className="brand mt-4">
           <Link

@@ -109,7 +109,7 @@ const createCustomer = async (customer) => {
 
                 for (const detail of contactDetails) {
 
-                    let role = detail.role == '' ? 0 : detail.role;
+                    let role = detail.customer_contact_person_role_id == '' ? 0 : detail.customer_contact_person_role_id;
                     let first_name = detail.firstName;
                     let last_name = detail.lastName;
                     let phone_code = detail.phone_code == undefined ? "" : detail.phone_code;
@@ -130,7 +130,10 @@ const createCustomer = async (customer) => {
 
         else if (customer.CustomerType == "3") {
 
+
             const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, contactDetails } = customer;
+
+
 
             const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
 
@@ -171,17 +174,19 @@ const createCustomer = async (customer) => {
 
                 for (const detail of contactDetails) {
 
-                    let role = detail.role == '' ? 0 : detail.role;
-                    let first_name = detail.firstName;
-                    let last_name = detail.lastName;
+                    let role = detail.customer_contact_person_role_id == '' ? 0 : detail.customer_contact_person_role_id;
+                    let first_name = detail.first_name;
+                    let last_name = detail.last_name;
                     let phone_code = detail.phone_code == undefined ? "" : detail.phone_code;
-                    let phone = detail.phoneNumber;
+                    let phone = detail.phone;
                     let email = detail.email;
                     let authorised_signatory_status = detail.authorised_signatory_status == true ? "1" : "0";
+
 
                     const [result3] = await pool.execute(query2, [customer_id, role, first_name, last_name, phone_code, phone, email, authorised_signatory_status]);
 
                 }
+
 
                 return { status: true, message: 'customer add successfully.', data: customer_id };
 
@@ -223,26 +228,24 @@ const createCustomer = async (customer) => {
 
             let phone_code = customer.phone_code == undefined ? "" : customer.phone_code
             try {
-                const [result2] = await pool.execute(query2, [First_Name, Last_Name, phone_code, Phone, Email, Residential_Address, customer_id, contact_id]);
+
+
+                const [result2] = await pool.execute(query2, [First_Name, Last_Name, Phone, phone_code, Email, Residential_Address, customer_id, contact_id]);
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
             } catch (err) {
-
+                console.error('Error inserting data:', err);
                 return { status: false, message: 'Update Error Customer Type 1' };
             }
 
 
         }
 
+
         // Company Details
         else if (CustomerType == "2") {
-            const { company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date, incorporation_in } = customer;
+            const { company_name, entity_type, company_status, company_number, Registered_Office_Addres, Incorporation_Date, Incorporation_in } = customer;
             try {
                 // Update customer_company_information
-
-
-
-
-                const [incorporation_date_s] = incorporation_date.split('T');
 
 
                 const query2 = `
@@ -250,7 +253,8 @@ const createCustomer = async (customer) => {
                 SET company_name = ?, entity_type = ?, company_status = ?, company_number = ?, registered_office_address = ?, incorporation_date = ?, incorporation_in = ?
                 WHERE customer_id = ?
             `;
-                const [result2] = await pool.execute(query2, [company_name, entity_type, company_status, company_number, registered_office_address, incorporation_date_s, incorporation_in, customer_id]);
+
+                const [result2] = await pool.execute(query2, [company_name, entity_type, company_status, company_number, Registered_Office_Addres, Incorporation_Date, Incorporation_in, customer_id]);
 
 
 
@@ -264,12 +268,38 @@ const createCustomer = async (customer) => {
                 // Update customer_contact_details
                 const query3 = `
                 UPDATE customer_contact_details
-                SET contact_person_role_id = ?, first_name = ?, last_name = ?, phone_code = ?, phone = ?, email = ? ,residential_address = ?
+                SET contact_person_role_id = ?, first_name = ?, last_name = ?, phone_code = ?, phone = ?, email = ? 
                 WHERE customer_id = ? AND id = ?
             `;
 
-                for (const detail of contactDetails) {
 
+
+
+
+                // [
+                //     {
+                //         "contact_id": 46,
+                //         "customer_contact_person_role_id": 11,
+                //         "customer_contact_person_role_name": "Director",
+                //         "first_name": "ui88",
+                //         "last_name": "88",
+                //         "email": "swdsd@gmail.com",
+                //         "phone_code": "+44",
+                //         "phone": "888888888",
+                //         "residential_address": null
+                //     },
+                //     {
+                //         "authorised_signatory_status": false,
+                //         "first_name": "5",
+                //         "last_name": "5",
+                //         "customer_contact_person_role_id": "11",
+                //         "phone": "5767676767",
+                //         "email": "cppatel73@gmail.com",
+                //         "phone_code": "+44"
+                //     }
+                // ]
+
+                for (const detail of contactDetails) {
                     let contact_id = detail.contact_id;
                     let customer_contact_person_role_id = detail.customer_contact_person_role_id;
                     let first_name = detail.first_name;
@@ -277,21 +307,21 @@ const createCustomer = async (customer) => {
                     let email = detail.email;
                     let phone_code = detail.phone_code == undefined ? "" : detail.phone_code;
                     let phone = detail.phone;
-                    let residential_address = detail.residential_address;
+
                     if (contact_id == "" || contact_id == undefined || contact_id == null) {
 
 
                         const query4 = `
-                    INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email,residential_address)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
                     `;
-                        const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, residential_address]);
+                        const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone_code, phone, email]);
 
                     }
                     else {
 
                         arrayInterId.push(contact_id)
-                        const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, residential_address, customer_id, contact_id]);
+                        const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, customer_id, contact_id]);
                     }
                 }
 
@@ -312,6 +342,7 @@ const createCustomer = async (customer) => {
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
+                console.error('Error inserting data:', err);
 
                 return { status: false, message: 'Update Error Customer Type 2' };
             }
@@ -323,8 +354,6 @@ const createCustomer = async (customer) => {
         else if (CustomerType == "3") {
 
             try {
-
-
                 const [existIdResult] = await pool.execute('SELECT id FROM customer_contact_details WHERE customer_id = ?', [customer_id]);
                 const idArray = await existIdResult.map(item => item.id);
                 let arrayInterId = []
@@ -332,11 +361,9 @@ const createCustomer = async (customer) => {
 
                 const query3 = `
             UPDATE customer_contact_details
-            SET contact_person_role_id = ?, first_name = ?, last_name = ?,phone_code = ? ,phone = ?, email = ? ,residential_address = ? ,authorised_signatory_status = ?
+            SET contact_person_role_id = ?, first_name = ?, last_name = ?,phone_code = ? ,phone = ?, email = ? ,authorised_signatory_status = ?
             WHERE customer_id = ? AND id = ?
            `;
-
-
 
                 for (const detail of contactDetails) {
 
@@ -347,18 +374,22 @@ const createCustomer = async (customer) => {
                     let email = detail.email;
                     let phone_code = detail.phone_code == undefined ? "" : detail.phone_code;
                     let phone = detail.phone;
-                    let residential_address = detail.residential_address;
+                   
                     let authorised_signatory_status = detail.authorised_signatory_status;
+
+
                     if (contact_id == "" || contact_id == undefined || contact_id == null) {
                         const query4 = `
-                    INSERT INTO customer_contact_details (customer_id,contact_person_role_id,first_name,last_name,phone_code,phone,email,residential_address,authorised_signatory_status)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO customer_contact_details (customer_id, contact_person_role_id, first_name, last_name, phone_code,phone, email, authorised_signatory_status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     `;
-                        const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, residential_address, authorised_signatory_status]);
+
+
+                        const [result3] = await pool.execute(query4, [customer_id, customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, authorised_signatory_status]);
                     } else {
 
                         arrayInterId.push(contact_id)
-                        const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, residential_address, authorised_signatory_status, customer_id, contact_id]);
+                        const [result3] = await pool.execute(query3, [customer_contact_person_role_id, first_name, last_name, phone_code, phone, email, authorised_signatory_status, customer_id, contact_id]);
                     }
 
                 }
@@ -383,9 +414,6 @@ const createCustomer = async (customer) => {
         }
 
     }
-
-
-
 
 };
 
@@ -788,10 +816,14 @@ const updateProcessCustomerServices = async (customerProcessData) => {
     var account_manager_id_exit = ExistCustomer[0].account_manager_id;
     const customer_type = ExistCustomer[0].customer_type;
 
+
     for (const serVal of services) {
         let service_id = serVal.service_id;
         let account_manager_id = serVal.account_manager_id;
         let customer_service_task = serVal.customer_service_task;
+
+        console.log("service_id", service_id);
+        console.log("account_manager_id", account_manager_id);
 
         //checklist submit customer
         const QueryCustomerAssign = `

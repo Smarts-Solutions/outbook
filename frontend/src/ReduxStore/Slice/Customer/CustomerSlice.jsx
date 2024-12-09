@@ -599,7 +599,12 @@ const CustomerSlice = createSlice({
     updatestatus: [],
     customerchcklist: [],
   },
-  reducers: {},
+  reducers: {
+    addCustomer: (state, action) => {
+      state.addcustomer = action.payload;
+    },
+
+  },
   extraReducers: (builder) => {
     builder
       .addCase(GetAllCompany.pending, (state) => {

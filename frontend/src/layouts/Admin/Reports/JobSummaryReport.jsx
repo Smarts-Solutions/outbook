@@ -4,6 +4,7 @@ import { jobSummaryReports } from '../../../ReduxStore/Slice/Report/ReportSlice'
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
+
 const JobStatus = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -53,11 +54,10 @@ const JobStatus = () => {
           <div>{row.number_of_job}</div>
         )
       ),
+      selector: row => row.number_of_job,
       sortable: true,
       width: '50%'
     }
-    
-
   ]
 
   return (
@@ -73,7 +73,8 @@ const JobStatus = () => {
         <div className='datatable-wrapper mt-minus'>
           <Datatable
             filter={true}
-            columns={columns} data={jobSummaryReportData && jobSummaryReportData} />
+            columns={columns}
+             data={jobSummaryReportData && jobSummaryReportData} />
         </div>
       </div>
     </div>

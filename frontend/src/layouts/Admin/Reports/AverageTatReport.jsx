@@ -43,22 +43,7 @@ const AverageTatReport = () => {
       sortable: true,
       reorder: false,
     },
-    // {
-    //   name: 'Average TAT Per Day',
-    //   cell: (row) => (
-    //     row.job_ids!="" ? (
-    //       <div 
-    //         style={{ color: 'rgb(38, 189, 240)', cursor: 'pointer' }} 
-    //         onClick={() => handleOnClick(row)}
-    //       >
-    //         {row.average_tat_per_day}
-    //       </div>
-    //     ) : (
-    //       <div>{row.average_tat_per_day}</div>
-    //     )
-    //   ),
-    //   sortable: true,
-    // },
+   
 
     {
         name: 'Average TAT Per Day',

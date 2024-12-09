@@ -4,18 +4,15 @@ import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
 import { JobType, customerSourceApi, customerSubSourceApi, } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import { useDispatch } from "react-redux";
-import { EngagementErrorMsg } from "../../../../Utils/Common_Message";
-import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
-import { ADD_SERVICES_CUSTOMERS, Get_Service } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { ADD_SERVICES_CUSTOMERS, Get_Service , GET_CUSTOMER_DATA } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
-
 import { FTEDedicatedErrorMessages, PercentageModelErrorMessages, AdhocPAYGHourlyErrorMessages, } from "../../../../Utils/Common_Message";
-
 
 const Engagement = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
+  const newCustomerId = localStorage.getItem("newCustomerId");
   const [errors1, setErrors1] = useState({});
   const [errors2, setErrors2] = useState({});
   const [errors3, setErrors3] = useState({});
@@ -24,6 +21,7 @@ const Engagement = () => {
   const [getAllServices, setAllServices] = useState([]);
   const [coustomerSource, setCoustomerSource] = useState([]);
   const [coustomerSubSource, setCoustomerSubSource] = useState([]);
+  const [customerDetails, setCustomerDetails] = useState({loading: true,data: []});
   const [formState1, setFormState1] = useState({
     customerJoiningDate: new Date().toISOString().split('T')[0]
   });
@@ -58,8 +56,6 @@ const Engagement = () => {
   const [jobEntries, setJobEntries] = useState([
     { minimum_number_of_jobs: "", job_type_id: "", service_id: "", cost_per_job: "" },
   ]);
-
-
   const checkboxOptions = [
     { id: "formCheck1", label: "FTE/Dedicated Staffing" },
     { id: "formCheck2", label: "Percentage Model" },
@@ -81,7 +77,37 @@ const Engagement = () => {
     customerSourceData();
     GetJobTypeApi();
     GetAllServicesApi();
+    GetCustomerData();
   }, []);
+  
+  const GetCustomerData = async () => {
+    const req = { customer_id: Number(newCustomerId), pageStatus: "3" };
+    const data = { req: req, authToken: token };
+    await dispatch(GET_CUSTOMER_DATA(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setCustomerDetails({
+            loading: false,
+            data: response.data,
+          });
+
+          setFormState1({
+            customerSource: response.data.customer?.customerSource,
+            customerSubSource: response.data.customer?.customerSubSource,
+            customerJoiningDate: response.data.customer?.customerJoiningDate || new Date().toISOString().split('T')[0],
+          });
+        } else {
+          setCustomerDetails({
+            loading: false,
+            data: [],
+          });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
 
   const handleCheckboxChange = (index) => {
     setCheckboxStates((prevStates) => {
@@ -90,7 +116,6 @@ const Engagement = () => {
       return newStates;
     });
   };
-
 
   const handleAddJob = () => {
     setJobEntries([
@@ -118,9 +143,6 @@ const Engagement = () => {
     validate5(name, value, index)
     setJobEntries(newJobEntries);
   };
-
-
- 
 
   const GetJobTypeApi = async () => {
     const req = { action: "get" };
@@ -314,7 +336,6 @@ const Engagement = () => {
     return newErrors.length > 0 ? false : true;
   };
 
-
   const validateAllFields1 = () => {
     let isValid = true;
     for (const key in formValues1) {
@@ -345,7 +366,6 @@ const Engagement = () => {
     }
     return isValid;
   };
-
 
   const handleSubmit = async () => {
     if (!checkboxStates.some((state) => state === 1)) {
@@ -425,9 +445,11 @@ const Engagement = () => {
     }
 
 
+    console.log("req", req);
     if (!validateForm()) {
       return;
     }
+
 
     const data = { req: req, authToken: token };
     await dispatch(ADD_SERVICES_CUSTOMERS(data))
@@ -443,7 +465,6 @@ const Engagement = () => {
       });
   };
 
-
   const GetAllServicesApi = async () => {
     dispatch(Get_Service({ req: { action: "get" }, authToken: token }))
       .unwrap()
@@ -456,6 +477,118 @@ const Engagement = () => {
         return;
       });
   };
+
+
+  useEffect(() => {
+    if (!customerDetails.loading && customerDetails.data && customerDetails.data.customer_engagement_model_status) {
+      const { customer_engagement_model_status } = customerDetails.data;
+      const updatedStates = checkboxOptions.map((option) => {
+        switch (option.id) {
+          case "formCheck1":
+            return customer_engagement_model_status.fte_dedicated_staffing ===
+              "1"
+              ? 1
+              : 0;
+          case "formCheck2":
+            return customer_engagement_model_status.percentage_model === "1"
+              ? 1
+              : 0;
+          case "formCheck3":
+            return customer_engagement_model_status.adhoc_payg_hourly === "1"
+              ? 1
+              : 0;
+          case "formCheck4":
+            return customer_engagement_model_status.customised_pricing === "1"
+              ? 1
+              : 0;
+          default:
+            return 0;
+        }
+      });
+      setCheckboxStates(updatedStates);
+
+      if (customer_engagement_model_status.fte_dedicated_staffing === "1") {
+        setFormValues1({
+          accountants: Number(
+            customerDetails.data.fte_dedicated_staffing.number_of_accountants
+          ),
+          feePerAccountant: Number(
+            customerDetails.data.fte_dedicated_staffing.fee_per_accountant
+          ),
+          bookkeepers: Number(
+            customerDetails.data.fte_dedicated_staffing.number_of_bookkeepers
+          ),
+          feePerBookkeeper: Number(
+            customerDetails.data.fte_dedicated_staffing.fee_per_bookkeeper
+          ),
+          payrollExperts: Number(
+            customerDetails.data.fte_dedicated_staffing
+              .number_of_payroll_experts
+          ),
+          feePerPayrollExpert: Number(
+            customerDetails.data.fte_dedicated_staffing.fee_per_payroll_expert
+          ),
+          taxExperts: Number(
+            customerDetails.data.fte_dedicated_staffing.number_of_tax_experts
+          ),
+          feePerTaxExpert: Number(
+            customerDetails.data.fte_dedicated_staffing.fee_per_tax_expert
+          ),
+          numberOfAdmin: Number(
+            customerDetails.data.fte_dedicated_staffing.number_of_admin_staff
+          ),
+          feePerAdmin: Number(
+            customerDetails.data.fte_dedicated_staffing.fee_per_admin_staff
+          ),
+        });
+      }
+      if (customer_engagement_model_status.percentage_model === "1") {
+        setFormValues2({
+          total_outsourcing: Number(
+            customerDetails.data.percentage_model.total_outsourcing
+          ),
+          accountants: Number(
+            customerDetails.data.percentage_model.accountants
+          ),
+          bookkeepers: Number(
+            customerDetails.data.percentage_model.bookkeepers
+          ),
+          payroll_experts: Number(
+            customerDetails.data.percentage_model.payroll_experts
+          ),
+          tax_experts: Number(
+            customerDetails.data.percentage_model.tax_experts
+          ),
+          admin_staff: Number(
+            customerDetails.data.percentage_model.admin_staff
+          ),
+        });
+      }
+      if (customer_engagement_model_status.adhoc_payg_hourly === "1") {
+        setFormValues3({
+          adhoc_accountants: Number(
+            customerDetails.data.adhoc_payg_hourly.adhoc_accountants
+          ),
+          adhoc_bookkeepers: Number(
+            customerDetails.data.adhoc_payg_hourly.adhoc_bookkeepers
+          ),
+          adhoc_payroll_experts: Number(
+            customerDetails.data.adhoc_payg_hourly.adhoc_payroll_experts
+          ),
+          adhoc_tax_experts: Number(
+            customerDetails.data.adhoc_payg_hourly.adhoc_tax_experts
+          ),
+          adhoc_admin_staff: Number(
+            customerDetails.data.adhoc_payg_hourly.adhoc_admin_staff
+          ),
+        });
+      }
+
+      if (customer_engagement_model_status.customised_pricing === "1") {
+        setJobEntries(customerDetails.data.customised_pricing);
+      }
+    }
+  }, [customerDetails]);
 
   useEffect(() => {
     if (checkboxStates[0] === 0) setErrors1({});
@@ -994,7 +1127,7 @@ const Engagement = () => {
                       type="date"
                       className={formErrors.customerJoiningDate ? "error-field form-control" : "form-control"}
                       name="customerJoiningDate"
-                      defaultValue={formState1.customerJoiningDate || new Date().toISOString().split('T')[0]}
+                      value={formState1?.customerJoiningDate || new Date().toISOString().split('T')[0]}
                       onChange={handleInputChange}
                     />
                     {formErrors.customerJoiningDate && (

@@ -24,6 +24,7 @@ import Select from 'react-select';
 const Service = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
   const token = JSON.parse(localStorage.getItem("token"));
+  const newCustomerId = localStorage.getItem("newCustomerId");
   const location = useLocation();
   const dispatch = useDispatch();
   const [GetAllService, setAllService] = useState({ loading: true, data: [] });
@@ -51,6 +52,11 @@ const Service = () => {
     const fetchData = async () => {
       try {
         await Promise.all([
+          dispatch(GET_CUSTOMER_DATA({ req: { customer_id: newCustomerId, pageStatus: "2" }, authToken: token}))
+            .unwrap()
+            .then((response) =>
+              setCustomerService({ loading: false, data: response.data })
+            ),
           dispatch(Get_Service({ req: { action: "get" }, authToken: token }))
             .unwrap()
             .then((response) =>
@@ -71,6 +77,8 @@ const Service = () => {
     fetchData();
   }, [dispatch, token]);
 
+
+  console.log(" staffDataAll.data",  staffDataAll.data);
   useEffect(() => {
     if (getCustomerService.data.services) {
       setServices(
@@ -81,11 +89,16 @@ const Service = () => {
         getCustomerService.data.services.map((service) => ({
           service_id: service.service_id,
           account_manager_ids: service.account_manager_ids
-            ? service.account_manager_ids.map((id) =>
-              staffDataAll.data.find((staff) => staff.id === id)
-            )
+            ? service.account_manager_ids.map((id) => {
+                // Find the staff object matching the id
+                const staff = staffDataAll.data.find((staff) => staff.id === id);
+                // Return the staff object or handle missing staff
+                return staff ? { value: staff.id, label: staff.first_name } : null; 
+              }).filter(Boolean) // Remove null values if a staff object isn't found
             : [],
         }))
+  
+      
       );
     }
   }, [getCustomerService.data, staffDataAll.data]);
@@ -103,8 +116,28 @@ const Service = () => {
   }, [searchValue, staffDataAll.data]);
 
 
-
   const handleCheckboxChange = (e, item) => {
+
+
+
+
+    const ExistJobService = getCustomerService?.data?.services?.find((ser) => ser?.service_id === item?.id) || null
+
+
+
+    if (ExistJobService != null && ExistJobService?.job_exist != null) {
+      Swal.fire({
+        icon: 'warning',
+        title: "This service has been assigned to job, cannot remove it",
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500
+      });
+      e.target.checked = true
+      return
+    }
+
+
     if (e.target.checked) {
       JobTypeDataAPi(item, 1);
       setServices((prevServices) =>
@@ -122,7 +155,6 @@ const Service = () => {
   const AddManager = () => {
     setModal(false)
   };
- 
 
   const handleSubmit = async (values) => {
     if (services.length === 0) {
@@ -136,11 +168,11 @@ const Service = () => {
 
     const MatchData = services.map((service) => {
       const managerData = getManager.find((item) => item.service_id == service);
-      console.log("managerData", managerData);
+   
 
       return {
         service_id: service,
-        account_manager_id: managerData
+        account_manager_ids: managerData
           ? managerData.account_manager_ids.map((manager) => manager.value)
           : [],
       };
@@ -159,7 +191,7 @@ const Service = () => {
 
     try {
       const response = await dispatch(
-        ADD_SERVICES_CUSTOMERS({ req, authToken: token })
+        Edit_Customer({ req, authToken: token })
       ).unwrap();
       if (response.status) {
         next(response.data);
@@ -371,13 +403,10 @@ const Service = () => {
   const handleSearchChange = (e) => {
     setSearchValue(e.target.value);
   };
+
   const handleSelect = (selected) => {
-
     setSelectManager(selected);
-
-
     setManager((prevManager) => {
-
       const existingIndex = prevManager.findIndex(
         (item) => item.service_id === tempServices
       );
@@ -400,7 +429,7 @@ const Service = () => {
   }
 
   console.log("getManager", getManager);
-
+  console.log("tempServices", tempServices);
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
       {({ handleSubmit }) => (
@@ -772,14 +801,14 @@ const Service = () => {
                   options={staffDataAll.data.map((data) => ({
                     value: data.id,
                     label: data.first_name+" "+data.last_name,
-                  }))}
+                  }))}  
                   isMulti
                   Clearable={false}
                   className="basic-multi-select table-select"
                   style={{ border: 'none' }}
                   value={
                     getManager &&
-                    getManager.find((item) => item.service_id === tempServices)?.account_manager_ids || []
+                    getManager.find((item) => item.service_id == tempServices)?.account_manager_ids || []
                   }
                   onChange={(selected) => handleSelect(selected)}
                   placeholder="Select options"

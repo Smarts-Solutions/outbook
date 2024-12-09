@@ -62,17 +62,17 @@ const Customer = () => {
   const columns = [
     {
       name: "Trading Name",
-       
+
       cell: (row) => (
         <div
           style={{
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
-            
+
           }}
         >
-          {(role === "ADMIN" || role === "SUPERADMIN") && row.status==1 ? (
+          {(role === "ADMIN" || role === "SUPERADMIN") && row.status == 1 ? (
             <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -81,7 +81,7 @@ const Customer = () => {
               {row.trading_name}
             </a>
           ) : (
-            getAccessData.client == 1 && row.status==1 ? <a
+            getAccessData.client == 1 && row.status == 1 ? <a
               onClick={() => HandleClientView(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
               title={row.trading_name}
@@ -93,20 +93,20 @@ const Customer = () => {
       ),
       selector: (row) => row.trading_name,
       sortable: true,
-      
+
     },
     {
       name: "Customer Code",
       selector: (row) => row.customer_code,
       cell: (row) => (
-           <div
-           title={row.customer_code}
-           >
-            {row.customer_code}
-           </div>
+        <div
+          title={row.customer_code}
+        >
+          {row.customer_code}
+        </div>
       ),
       sortable: true,
-    
+
     },
     // {
     //   name: "Company Name",
@@ -142,48 +142,48 @@ const Customer = () => {
               ? "Partnership"
               : "-",
       sortable: true,
-      
+
     },
-  {
-  name: "Account Manager",
-  selector: (row) => row.account_manager_firstname + " " + row.account_manager_lastname,
-  sortable: true,
-  cell: row => (
-    <div 
-    title={row.account_manager_firstname + " " + row.account_manager_lastname}
-      className="data-table-cell" 
-      data-fulltext={row.account_manager_firstname + " " + row.account_manager_lastname}
-      style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-    >
-      {row.account_manager_firstname + " " + row.account_manager_lastname}
-    </div>
-  ),
-},
+    {
+      name: "Account Manager",
+      selector: (row) => row.account_manager_firstname + " " + row.account_manager_lastname,
+      sortable: true,
+      cell: row => (
+        <div
+          title={row.account_manager_firstname + " " + row.account_manager_lastname}
+          className="data-table-cell"
+          data-fulltext={row.account_manager_firstname + " " + row.account_manager_lastname}
+          style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+        >
+          {row.account_manager_firstname + " " + row.account_manager_lastname}
+        </div>
+      ),
+    },
     {
       name: "Status",
       selector: (row) => row.form_process,
       cell: (row) => (
         <div>
           <div>
-          {row.form_process === "4" ? 
-           <select
-           className="form-select form-control"
-           value={row.status}
-           onChange={(e) => handleChangeStatus(e, row)}
-         >
-            <option value="0" className="text-danger">Deactive</option>
-            <option value="1" className="text-success">Active</option>
-         </select>
-          : (
-            <span className="text-warning">Inprogress</span>
-          )}
+            {row.form_process === "4" ?
+              <select
+                className="form-select form-control"
+                value={row.status}
+                onChange={(e) => handleChangeStatus(e, row)}
+              >
+                <option value="0" className="text-danger">Deactive</option>
+                <option value="1" className="text-success">Active</option>
+              </select>
+              : (
+                <span className="text-warning">Inprogress</span>
+              )}
 
-           
+
           </div>
         </div>
       ),
       sortable: true,
-     
+
     },
 
     // {
@@ -204,10 +204,10 @@ const Customer = () => {
       name: "Actions",
       cell: (row) => {
         const hasUpdateAccess = getAccessData.update === 1;
-        const hasDeleteAccess = getAccessData.delete === 1; 
+        const hasDeleteAccess = getAccessData.delete === 1;
         return (
           <div style={{ textAlign: "center" }}>
-            {(role === "ADMIN" || role === "SUPERADMIN") && row.status==1 ? (
+            {(role === "ADMIN" || role === "SUPERADMIN") && row.status == 1 ? (
               <>
                 <button className="edit-icon rounded-pills border-primary" onClick={() => handleEdit(row)}>
                   <i className="ti-pencil text-primary" />
@@ -221,7 +221,7 @@ const Customer = () => {
               </>
             ) : (
               <>
-                {hasUpdateAccess && row.status==1 &&  (
+                {hasUpdateAccess && row.status == 1 && (
                   <button className="edit-icon " onClick={() => handleEdit(row)}>
                     <i className="ti-pencil text-primary" />
                   </button>
@@ -242,7 +242,7 @@ const Customer = () => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-    
+
     },
   ];
 
@@ -270,7 +270,7 @@ const Customer = () => {
               timer: 1000,
               showConfirmButton: false,
             });
-            GetAllCustomerData(); 
+            GetAllCustomerData();
           } else {
             Swal.fire({
               title: "Error",
@@ -297,7 +297,7 @@ const Customer = () => {
       }
     });
   };
-  
+
   const [selectedTab, setSelectedTab] = useState('this-year');
 
   const tabs = [
@@ -326,7 +326,7 @@ const Customer = () => {
   };
 
   const GetAllCustomerData = async () => {
-    const req = { action: 'get', staff_id: staffDetails.id }; 
+    const req = { action: 'get', staff_id: staffDetails.id };
     const data = { req, authToken: token };
 
     try {
@@ -335,13 +335,13 @@ const Customer = () => {
       if (response.status) {
         const filteredData = response.data.filter((item) => {
           const itemDate = new Date(item.created_at);
-          const { startDate, endDate } = getDateRange(selectedTab); 
+          const { startDate, endDate } = getDateRange(selectedTab);
           return itemDate >= startDate && itemDate <= endDate;
         });
 
-        setFilteredData(filteredData); 
+        setFilteredData(filteredData);
       } else {
-        setFilteredData([]); 
+        setFilteredData([]);
       }
     } catch (error) {
       console.error('Error fetching customer data:', error);
@@ -422,19 +422,8 @@ const Customer = () => {
           <div className="page-title-box pt-0">
             <div className="row align-items-start justify-content-end">
               <div className="col-4">
-                <div className="form-group mb-2 mt-1 pe-3">
-                  <select
-                    className="form-select"
-                    id="tabSelect"
-                    value={selectedTab}
-                    onChange={handleTabChange}
-                  >
-                    {tabs.map((tab) => (
-                      <option key={tab.id} value={tab.id}>
-                        {tab.label}
-                      </option>
-                    ))}
-                  </select>
+                <div className="form-group mb-2 mt-1 pe-3 pt-5">
+                 
                 </div>
               </div>
 
@@ -443,23 +432,11 @@ const Customer = () => {
 
                 {/* Tab content */}
                 <div className="tab-content mt-minus-60" id="pills-tabContent">
-                  {tabs.map((tab) => (
-                    <div
-                      key={tab.id}
-                      className={`tab-pane fade ${selectedTab === tab.id ? 'show active' : ''}`}
-                      id={tab.id}
-                      role="tabpanel"
-                      aria-labelledby={`${tab.id}-tab`}
-                    >
-                      <div className="card-datatable">
-
-                        <div className="card-datatable">
-                          {/* Render filtered data here, for example: */}
-                          <Datatable columns={columns} data={filteredData} />
-                        </div>
-                      </div>
+                  <div className="card-datatable">
+                    <div className="card-datatable">
+                      <Datatable columns={columns} data={filteredData} />
                     </div>
-                  ))}
+                  </div>
                 </div>
               </div>
             </div>
