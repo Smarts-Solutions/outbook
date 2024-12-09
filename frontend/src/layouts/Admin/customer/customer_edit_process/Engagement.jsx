@@ -33,8 +33,6 @@ const Engagement = () => {
   const [formState1, setFormState1] = useState({});
 
 
-
-
   const [customerDetails, setCustomerDetails] = useState({
     loading: true,
     data: [],
@@ -731,7 +729,7 @@ const Engagement = () => {
 
     setFormErrors(errors);
 
-    return Object.keys(errors).length === 0; // Return true if no errors
+    return Object.keys(errors).length === 0;  
   };
 
   return (

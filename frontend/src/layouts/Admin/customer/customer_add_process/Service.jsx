@@ -168,7 +168,7 @@ const Service = () => {
 
     const MatchData = services.map((service) => {
       const managerData = getManager.find((item) => item.service_id == service);
-      console.log("managerData", managerData);
+   
 
       return {
         service_id: service,
