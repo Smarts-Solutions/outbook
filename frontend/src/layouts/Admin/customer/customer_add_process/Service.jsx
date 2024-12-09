@@ -102,8 +102,6 @@ const Service = () => {
     }
   }, [searchValue, staffDataAll.data]);
 
-
-
   const handleCheckboxChange = (e, item) => {
     if (e.target.checked) {
       JobTypeDataAPi(item, 1);
@@ -122,7 +120,6 @@ const Service = () => {
   const AddManager = () => {
     setModal(false)
   };
- 
 
   const handleSubmit = async (values) => {
     if (services.length === 0) {
@@ -372,12 +369,8 @@ const Service = () => {
     setSearchValue(e.target.value);
   };
   const handleSelect = (selected) => {
-
     setSelectManager(selected);
-
-
     setManager((prevManager) => {
-
       const existingIndex = prevManager.findIndex(
         (item) => item.service_id === tempServices
       );
@@ -398,8 +391,6 @@ const Service = () => {
     });
 
   }
-
-  console.log("getManager", getManager);
 
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
