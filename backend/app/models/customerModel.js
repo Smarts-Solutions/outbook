@@ -414,7 +414,7 @@ const createCustomer = async (customer) => {
         }
 
     }
-    
+
 };
 
 const getCustomer = async (customer) => {
@@ -816,10 +816,14 @@ const updateProcessCustomerServices = async (customerProcessData) => {
     var account_manager_id_exit = ExistCustomer[0].account_manager_id;
     const customer_type = ExistCustomer[0].customer_type;
 
+
     for (const serVal of services) {
         let service_id = serVal.service_id;
         let account_manager_id = serVal.account_manager_id;
         let customer_service_task = serVal.customer_service_task;
+
+        console.log("service_id", service_id);
+        console.log("account_manager_id", account_manager_id);
 
         //checklist submit customer
         const QueryCustomerAssign = `
