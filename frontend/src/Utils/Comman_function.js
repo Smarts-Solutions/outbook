@@ -139,7 +139,7 @@ const RemoveErrorFromErrors = (name, setErrors) => {
 
 export const validate = (name, value, errors, setErrors) => {
   const newErrors = { ...errors };
-  if (!value?.trim() && ClientErrorMessages[name]) { 
+  if (value != '' && !value?.trim() && ClientErrorMessages[name]) { 
     if (name === "email" || name === "phone") {
       delete newErrors[name]; 
       RemoveErrorFromErrors(name, setErrors);  

@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   GETALLCOMPANY,
+  GETOFFICERDETAILS,
   ADD_CUSTOMER,
   GET_SERVICE,
   ADD_SERVICES,
@@ -47,6 +48,21 @@ export const GetAllCompany = createAsyncThunk("seachCompany", async (data) => {
     throw err;
   }
 });
+
+export const GetOfficerDetails = createAsyncThunk("seachCompany", async (data) => {
+  try {
+    const updatedReq = {
+      company_number: data.company_number,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await GETOFFICERDETAILS(updatedReq);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+
 
 export const AddCustomer = createAsyncThunk("addCustomer", async (data) => {
   try {

@@ -19,6 +19,23 @@ export async function GETALLCOMPANY(data) {
   }
 }
 
+
+// GET GETOFFICERDETAILS
+export async function GETOFFICERDETAILS(data) {
+  try {
+    const token = JSON.parse(localStorage.getItem("token"));
+    const res = await axios.post(`${Config.base_url}getCompanyOfficerDetails`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+
+
 // Add Customer
 export async function ADD_CUSTOMER(data, token) {
   try {

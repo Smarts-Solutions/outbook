@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { GetClientIndustry, Add_Client, } from "../../../ReduxStore/Slice/Client/ClientSlice";
-import { GetAllCompany } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { GetAllCompany ,GetOfficerDetails} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { Email_regex } from "../../../Utils/Common_regex";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -171,6 +171,7 @@ const CreateClient = () => {
 
   useEffect(() => {
     if (getSearchDetails.length > 0) {
+      Get_Officer_Details(getSearchDetails[0].company_number);
       setCompanyDetails((prevState) => ({
         ...prevState,
         CompanyName: getSearchDetails[0].title,
@@ -597,6 +598,56 @@ const CreateClient = () => {
       .catch((err) => {
         return;
       });
+  };
+
+  const Get_Officer_Details = async (company_number) => {
+    const data = { company_number: company_number };
+    await dispatch(GetOfficerDetails(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status) {
+          if (res.data.length > 0) {
+            const officer_name = res.data[0].name.split(", ").map(part => part.trim());
+            let first_name = officer_name[1]
+            let last_name = officer_name[0]
+            if (officer_name[1] == undefined) {
+              first_name = officer_name[0]
+              last_name = ""
+            }
+
+            setContacts((prevContacts) => {
+              // Clone the current state
+              const updatedContacts = [...prevContacts];
+              // Update only the first object
+              updatedContacts[0] = {
+                ...updatedContacts[0],
+                first_name: first_name,
+                last_name: last_name,
+              };
+              // Return the updated state
+              return updatedContacts;
+            });
+          } else {
+            setContacts((prevContacts) => {
+              // Clone the current state
+              const updatedContacts = [...prevContacts];
+              // Update only the first object
+              updatedContacts[0] = {
+                ...updatedContacts[0],
+                first_name: '',
+                last_name: '',
+              };
+              // Return the updated state
+              return updatedContacts;
+            });
+          }
+        } else {
+        }
+      })
+      .catch((err) => {
+        return;
+      }
+      );
   };
 
   const handleChange = (index, field, value) => {

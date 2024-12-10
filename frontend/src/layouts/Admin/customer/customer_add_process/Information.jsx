@@ -9,7 +9,7 @@ import { Email_regex } from "../../../../Utils/Common_regex";
 import axios from "axios";
 import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
 import { PersonRole, Country, IncorporationApi } from "../../../../ReduxStore/Slice/Settings/settingSlice";
-import { AddCustomer, GetAllCompany, GET_CUSTOMER_DATA } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { AddCustomer, GetAllCompany, GET_CUSTOMER_DATA, GetOfficerDetails} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import { ScrollToViewFirstError, ScrollToViewFirstErrorContactForm } from '../../../../Utils/Comman_function'
 import { use } from "react";
@@ -39,9 +39,8 @@ const Information = ({ id, pageStatus }) => {
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);
   const [customerDetails, setCustomerDetails] = useState([]);
 
- 
-  console.log("newCustomerId", newCustomerId);
- 
+
+
   // state for sole trader
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     tradingName: "",
@@ -167,11 +166,7 @@ const Information = ({ id, pageStatus }) => {
 
   useEffect(() => {
     if (getSearchDetails && getSearchDetails.length > 0) {
-      
-      console.log("getSearchDetails ", getSearchDetails);
-      console.log("getSearchDetails comapany number", getSearchDetails[0].company_number);
-
-
+      Get_Officer_Details(getSearchDetails[0].company_number);
       // Update company details
       setCompanyDetails((prevState) => ({
         ...prevState,
@@ -205,6 +200,11 @@ const Information = ({ id, pageStatus }) => {
       if (getSearchDetails[0].title) delete newErrors["TradingName"];
       if (getSearchDetails[0].address_snippet)
         delete newErrors["TradingAddress"];
+
+
+
+
+
 
       setErrors2(newErrors);
     }
@@ -1029,6 +1029,59 @@ const Information = ({ id, pageStatus }) => {
         return;
       });
   };
+
+  const Get_Officer_Details = async (company_number) => {
+    const data = { company_number: company_number };
+    await dispatch(GetOfficerDetails(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status) {
+          if (res.data.length > 0) {
+            const officer_name = res.data[0].name.split(", ").map(part => part.trim());
+            let first_name = officer_name[1]
+            let last_name = officer_name[0]
+            if (officer_name[1] == undefined) {
+              first_name = officer_name[0]
+              last_name = ""
+            }
+
+            setContacts((prevContacts) => {
+              // Clone the current state
+              const updatedContacts = [...prevContacts];
+              // Update only the first object
+              updatedContacts[0] = {
+                ...updatedContacts[0],
+                first_name: first_name,
+                last_name: last_name,
+              };
+              // Return the updated state
+              return updatedContacts;
+            });
+          } else {
+            setContacts((prevContacts) => {
+              // Clone the current state
+              const updatedContacts = [...prevContacts];
+              // Update only the first object
+              updatedContacts[0] = {
+                ...updatedContacts[0],
+                first_name: '',
+                last_name: '',
+              };
+              // Return the updated state
+              return updatedContacts;
+            });
+          }
+          
+        } else {
+          
+        }
+      })
+      .catch((err) => {
+        return;
+      }
+      );
+  };
+
 
   const capitalizeFirstLetter = (string) => {
     if (!string) return "";
