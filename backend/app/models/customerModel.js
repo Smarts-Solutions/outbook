@@ -108,23 +108,12 @@ const createCustomer = async (customer) => {
         `;
 
                 for (const detail of contactDetails) {
-                   
-                    console.log("detail", detail);
                     let role = detail.customer_contact_person_role_id == '' ? 0 : detail.customer_contact_person_role_id;
                     let first_name = detail.first_name;
                     let last_name = detail.last_name;
                     let phone_code = detail.phone_code == undefined ? "" : detail.phone_code;
                     let phone = detail.phone;
                     let email = detail.email;
-
-                    console.log("role", role);
-                    console.log("first_name", first_name);
-                    console.log("last_name", last_name);
-                    console.log("phone_code", phone_code);
-                    console.log("phone", phone);
-                    console.log("email", email);
-
-
                     const [result3] = await pool.execute(query3, [customer_id, role, first_name, last_name, phone_code, phone, email]);
 
                 }
@@ -280,37 +269,9 @@ const createCustomer = async (customer) => {
                 SET contact_person_role_id = ?, first_name = ?, last_name = ?, phone_code = ?, phone = ?, email = ? 
                 WHERE customer_id = ? AND id = ?
             `;
-
-
-
-
-
-                // [
-                //     {
-                //         "contact_id": 46,
-                //         "customer_contact_person_role_id": 11,
-                //         "customer_contact_person_role_name": "Director",
-                //         "first_name": "ui88",
-                //         "last_name": "88",
-                //         "email": "swdsd@gmail.com",
-                //         "phone_code": "+44",
-                //         "phone": "888888888",
-                //         "residential_address": null
-                //     },
-                //     {
-                //         "authorised_signatory_status": false,
-                //         "first_name": "5",
-                //         "last_name": "5",
-                //         "customer_contact_person_role_id": "11",
-                //         "phone": "5767676767",
-                //         "email": "cppatel73@gmail.com",
-                //         "phone_code": "+44"
-                //     }
-                // ]
-
                 for (const detail of contactDetails) {
                     let contact_id = detail.contact_id;
-                    let customer_contact_person_role_id = detail.customer_contact_person_role_id;
+                    let customer_contact_person_role_id = detail.customer_contact_person_role_id == '' ? 0 : detail.customer_contact_person_role_id;
                     let first_name = detail.first_name;
                     let last_name = detail.last_name;
                     let email = detail.email;
