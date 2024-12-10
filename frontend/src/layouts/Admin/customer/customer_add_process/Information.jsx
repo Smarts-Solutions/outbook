@@ -21,11 +21,9 @@ const Information = ({ id, pageStatus }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
-  const customer_id = localStorage.getItem("coustomerId");
   const newCustomerId = localStorage.getItem("newCustomerId");
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [staffDataAll, setStaffDataAll] = useState([]);
-  const [location, setLocation] = useState("");
   const [countryDataAll, setCountryDataAll] = useState([]);
   const [customerType, setCustomerType] = useState("1");
   const [ManagerType, setManagerType] = useState("");
@@ -41,11 +39,9 @@ const Information = ({ id, pageStatus }) => {
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);
   const [customerDetails, setCustomerDetails] = useState([]);
 
-
-  // console.log("getSearchDetails", getSearchDetails);
-  //   if(getSearchDetails.length > 0){
-  //     console.log("getSearchDetails Number", getSearchDetails[0].company_number);
-  //   }
+ 
+  console.log("newCustomerId", newCustomerId);
+ 
   // state for sole trader
   const [getSoleTraderDetails, setSoleTraderDetails] = useState({
     tradingName: "",
@@ -1092,6 +1088,7 @@ const Information = ({ id, pageStatus }) => {
                             className="form-select "
                             onChange={(e) => setCustomerType(e.target.value)}
                             value={customerType}
+                            disabled={!['', null, undefined].includes(newCustomerId)}
                           >
                             <option value="1">Sole Trader</option>
                             <option value="2">Company</option>

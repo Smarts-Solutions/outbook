@@ -108,13 +108,22 @@ const createCustomer = async (customer) => {
         `;
 
                 for (const detail of contactDetails) {
-
+                   
+                    console.log("detail", detail);
                     let role = detail.customer_contact_person_role_id == '' ? 0 : detail.customer_contact_person_role_id;
-                    let first_name = detail.firstName;
-                    let last_name = detail.lastName;
+                    let first_name = detail.first_name;
+                    let last_name = detail.last_name;
                     let phone_code = detail.phone_code == undefined ? "" : detail.phone_code;
-                    let phone = detail.phoneNumber;
+                    let phone = detail.phone;
                     let email = detail.email;
+
+                    console.log("role", role);
+                    console.log("first_name", first_name);
+                    console.log("last_name", last_name);
+                    console.log("phone_code", phone_code);
+                    console.log("phone", phone);
+                    console.log("email", email);
+
 
                     const [result3] = await pool.execute(query3, [customer_id, role, first_name, last_name, phone_code, phone, email]);
 
@@ -123,7 +132,7 @@ const createCustomer = async (customer) => {
                 return { status: true, message: 'customer add successfully.', data: customer_id };
 
             } catch (err) {
-                console.error('Error inserting data:', err);
+                console.log('Error inserting data:', err);
                 throw err;
             }
         }
