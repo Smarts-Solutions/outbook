@@ -277,17 +277,45 @@
 		min-height: 100vh;
 		padding: 0 0 50px 0;
 	}
+	
 	.enlarge-menu .page-wrapper .page-content {
-		width: calc(100% - 250px);
+		width: calc(100% - 200px);
+		margin-left: 200px;
+	}
+	body.dark-sidenav .left-sidenav-menu li>a {
+		
+		padding-left: 20px !important;
 		
 	}
-	.enlarge-menu .page-wrapper .page-content {
-		width: calc(100% - 250px);
-		margin-left: 239px;
+	span.sidebar-icons {
+		padding-right: 8px !important;
 	}
 
 }
-
+@media (max-width: 1050px) {
+	.title-text, .card-title {
+		font-size: 18px !important;
+		
+	}
+	:where(.css-dev-only-do-not-override-p8b6i).ant-steps {
+		
+		display: flex;
+		
+		flex-direction: column;
+		
+	}
+	:where(.css-dev-only-do-not-override-p8b6i).ant-steps .ant-steps-item-title::after {
+		display: none;
+	}
+	:where(.css-dev-only-do-not-override-p8b6i).ant-steps.ant-steps-horizontal:not(.ant-steps-label-vertical) .ant-steps-item {
+		padding-inline-start: 0px !important;
+		padding-top: 18px;
+	}
+	.left-sidenav {
+		min-width: 190px !important;
+		max-width: 190px !important;
+	}
+}
 .enlarge-menu .left-sidenav {
 	left: 10px;
 }
@@ -3300,7 +3328,7 @@ button.delete-icon i {
 
 .datatable-container .data-table-extensions-filter {
 	border: 1px solid #9E9E9E;
-	width: 350px;
+	width: 40%;
 
 	border-radius: 35px;
 }
