@@ -962,6 +962,7 @@ const Setting = () => {
         {
           name: "Actions",
           cell: (row) => (
+            
             <div className="d-lg-flex">
               {showSettingUpdateTab && (
                 <button
