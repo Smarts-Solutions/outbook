@@ -57,7 +57,7 @@ const Profile = () => {
                   <ul className="list-unstyled personal-detail mb-0">
                     <li className=" mb-3">
                       <i className=" ti-user mr-2 text-secondary font-22 align-middle" />{" "}
-                      <b>Full Name </b>
+                      <b>Full Name : </b>
                       {getProfileDetails &&
                         getProfileDetails.first_name +
                           " " +
@@ -65,17 +65,17 @@ const Profile = () => {
                     </li>
                     <li className="mb-3">
                       <i className="fa-regular fa-phone mr-2 text-secondary font-22 align-middle" />{" "}
-                      <b>phone </b>:{" "}
+                      <b>phone :</b>{" "}
                       {getProfileDetails && getProfileDetails.phone || 'NA'}
                     </li>
                     <li className="mb-3">
                       <i className="fa-regular fa-envelope text-secondary font-22 align-middle mr-2" />{" "}
-                      <b>Email </b>:{" "}
+                      <b>Email :</b>{" "}
                       {getProfileDetails && getProfileDetails.email || 'NA'}
                     </li>
                     <li className="mb-3">
                       <i className="fa-regular fa-power-off text-secondary font-22 align-middle mr-2" />{" "}
-                      <b>Status </b>:{" "}
+                      <b>Status :</b>{" "}
                       {getProfileDetails && getProfileDetails.status==1 ? "Active" : "Inactive"}
                     </li>
                     {/* <li className="">

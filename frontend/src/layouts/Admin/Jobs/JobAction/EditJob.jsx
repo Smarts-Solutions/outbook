@@ -749,6 +749,7 @@ const EditJob = () => {
                                     <label className="form-label">
                                       {" "}
                                       Outbook Account Manager
+                                      <span className='text-danger'>*</span>
                                     </label>
                                     <input
                                       type="text"
@@ -773,6 +774,7 @@ const EditJob = () => {
                                   >
                                     <label className="form-label">
                                       Customer
+                                      <span className='text-danger'>*</span>
                                     </label>
                                     <input
                                       type="text"
@@ -794,6 +796,7 @@ const EditJob = () => {
                                     <div className="col-lg-4">
                                       <label className="form-label">
                                         Client
+                                        <span className='text-danger'>*</span>
                                       </label>
                                       <select
                                         className={errors["Client"] ? "error-field form-select" : "form-select"}
@@ -825,6 +828,7 @@ const EditJob = () => {
                                     <div className="col-lg-4">
                                       <label className="form-label">
                                         Client
+                                        <span className='text-danger'>*</span>
                                       </label>
                                       <input
                                         type="text"
@@ -869,6 +873,7 @@ const EditJob = () => {
                                   <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Customer Account Manager(Officer)
+                                      <span className='text-danger'>*</span>
                                     </label>
                                     <select
                                       className={errors["CustomerAccountManager"] ? "error-field form-select" : "form-select"}
@@ -910,6 +915,7 @@ const EditJob = () => {
                                   <div className="col-lg-4">
                                     <label className="form-label">
                                       Service
+                                      <span className='text-danger'>*</span>
                                     </label>
                                     <select
                                       className={errors["Service"] ? "error-field form-select" : "form-select"}
@@ -941,6 +947,7 @@ const EditJob = () => {
                                   <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Job Type
+                                      <span className='text-danger'>*</span>
                                     </label>
                                     <select
                                       className={errors["JobType"] ? "error-field form-select  jobtype" : "form-select  jobtype"}
