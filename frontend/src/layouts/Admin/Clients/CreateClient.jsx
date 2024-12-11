@@ -1099,7 +1099,7 @@ const CreateClient = () => {
                                             type="text"
                                             name="tradingName"
                                             id="tradingName"
-
+                                            maxLength={200}
                                             className={errors1["tradingName"] ? "error-field form-control" : "form-control"}
                                             placeholder="Trading Name"
                                             onChange={(e) => handleChange1(e)}
@@ -1129,6 +1129,7 @@ const CreateClient = () => {
                                             placeholder="Trading Address"
                                             name="tradingAddress"
                                             id="tradingAddress"
+                                            maxLength={200}
                                             onChange={(e) => handleChange1(e)}
                                             value={
                                               getSoleTraderDetails.tradingAddress
@@ -1237,6 +1238,7 @@ const CreateClient = () => {
                                           value={
                                             getSoleTraderDetails.first_name
                                           }
+                                          maxLength={50}
                                           onChange={(e) => handleChange1(e)}
                                         />
                                         {errors1["first_name"] && (
@@ -1261,6 +1263,7 @@ const CreateClient = () => {
                                           name="last_name"
                                           id="last_name"
                                           value={getSoleTraderDetails.last_name}
+                                          maxLength={50}
                                           onChange={(e) => handleChange1(e)}
                                         />
                                         {errors1["last_name"] && (
@@ -1776,7 +1779,7 @@ const CreateClient = () => {
                                           <input
                                             type="text"
                                             className={errors2["TradingName"] ? "error-field form-control" : "form-control"}
-
+                                            maxLength={200}
                                             placeholder="Trading Name"
                                             name="TradingName"
                                             id="TradingName"
@@ -1803,7 +1806,7 @@ const CreateClient = () => {
                                           <input
                                             type="text"
                                             className={errors2["TradingAddress"] ? "error-field form-control" : "form-control"}
-
+                                            maxLength={200}
                                             placeholder="Trading Address"
                                             name="TradingAddress"
                                             id="TradingAddress"
@@ -1869,6 +1872,7 @@ const CreateClient = () => {
                                                         placeholder="First Name"
                                                         id={`first_name-${index}`}
                                                         value={contact.first_name}
+                                                        maxLength={50}
                                                         onChange={(e) =>
                                                           handleChange(
                                                             index,
@@ -1911,6 +1915,7 @@ const CreateClient = () => {
                                                         value={
                                                           contact.last_name
                                                         }
+                                                        maxLength={50}
                                                         onChange={(e) =>
                                                           handleChange(
                                                             index,
@@ -2155,7 +2160,7 @@ const CreateClient = () => {
                                               getPartnershipDetails.TradingName
                                             }
                                             onChange={(e) => handleChange3(e)}
-                                            maxLength={100}
+                                            maxLength={200}
                                           />
                                           {errors3["TradingName"] && (
                                             <div className="error-text">
@@ -2175,7 +2180,7 @@ const CreateClient = () => {
                                           <input
                                             type="text"
                                             className={errors3["TradingAddress"] ? "error-field form-control" : "form-control"}
-
+                                            maxLength={200}
                                             placeholder="Trading Address"
                                             name="TradingAddress"
                                             id="TradingAddress"
@@ -2183,7 +2188,7 @@ const CreateClient = () => {
                                               getPartnershipDetails.TradingAddress
                                             }
                                             onChange={(e) => handleChange3(e)}
-                                            maxLength={200}
+                                            
                                           />
                                           {errors3["TradingAddress"] && (
                                             <div className="error-text">
@@ -2338,6 +2343,7 @@ const CreateClient = () => {
                                                       value={
                                                         contacts1.first_name
                                                       }
+                                                      maxLength={50}
                                                       onChange={(e) =>
                                                         handleChange4(
                                                           index,
@@ -2345,7 +2351,7 @@ const CreateClient = () => {
                                                           e.target.value
                                                         )
                                                       }
-                                                      maxLength={50}
+                                                     
                                                     />
                                                     {contactsErrors[index]
                                                       .first_name && (
@@ -2696,7 +2702,7 @@ const CreateClient = () => {
                                           name="tradingName"
                                           id="tradingName"
                                           className={errors4["tradingName"] ? "error-field form-control" : "form-control"}
-
+                                          maxLength={200}
                                           placeholder="Trading Name"
                                           onChange={(e) => handleChangeIndivisul(e)}
                                           value={

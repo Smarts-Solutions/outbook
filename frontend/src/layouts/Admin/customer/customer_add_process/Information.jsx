@@ -738,6 +738,7 @@ const Information = ({ id, pageStatus }) => {
 
   // validate partnership contact fields when submit
   const validateField1 = (index, field, value) => {
+
     const errors = [...contactsErrors];
 
     switch (field) {
@@ -2317,6 +2318,7 @@ const Information = ({ id, pageStatus }) => {
                                           name="first_name"
                                           id={`first_name-${index}`}
                                           value={contact.first_name}
+                                          maxLength={50}
                                           onChange={(e) =>
                                             handleChange4(
                                               index,
@@ -2351,6 +2353,7 @@ const Information = ({ id, pageStatus }) => {
                                           name="last_name"
                                           id={`last_name-${index}`}
                                           value={contact.last_name}
+                                          maxLength={50}
                                           onChange={(e) =>
                                             handleChange4(
                                               index,

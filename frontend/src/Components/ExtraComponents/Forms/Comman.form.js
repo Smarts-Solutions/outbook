@@ -467,7 +467,8 @@ const ReusableForm = ({
                     </div>
                   </div>
                 </>
-              ) : field.type === "text" ? (
+              ) :
+               field.type === "text" ? (
                 <>
                   <div className={`col-lg-${field.col_size}`}>
                     <div className="mb-3 row flex-column">
@@ -505,7 +506,47 @@ const ReusableForm = ({
                     </div>
                   </div>
                 </>
-              ) : field.type === "phone" ? (
+              ) :
+              field.type === "text5" ? (
+                <>
+                  <div className={`col-lg-${field.col_size}`}>
+                    <div className="mb-3 row flex-column">
+                      <label
+                        className={`col-lg-${field.label_size}`}
+                        htmlFor={field.name}
+                      >
+                        {field.label}
+                        <span className="text-danger">*</span>
+                      </label>
+                      <div>
+                        <input
+                          type="text"
+                          className={formik.touched[field.name] && formik.errors[field.name] ? "error-field form-control" : "form-control"}
+                          style={{ background: field.disable ? "#eeeeee" : "" }}
+                          id={field.name}
+                          placeholder={`Enter ${field.label}`}
+                          {...formik.getFieldProps(field.name)}
+                          defaultValue=""
+                          autoFocus={index === 0 ? true : false}
+                          maxLength={50}
+                          readOnly={field.disable}
+                          autoComplete="new-email"
+                        />
+                        <div className="invalid-feedback">
+                          Please enter {field.label}
+                        </div>
+                        {formik.touched[field.name] &&
+                          formik.errors[field.name] && (
+                            <div className="error-text">
+                              {formik.errors[field.name]}
+                            </div>
+                          )}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) 
+              : field.type === "phone" ? (
                 <>
                   <div className={`col-lg-${title === "update_theme" ? 12 : field.col_size}`}  >
                     <div className=" row">
