@@ -2361,11 +2361,6 @@ const customerUpdate = async (customer) => {
     //  Page Status 2 Service Part
     else if (pageStatus === "2") {
         const { services, Task } = customer;
-
-        console.log("services", services)
-        console.log("Task", Task)
-
-
         const [ExistServiceids] = await pool.execute('SELECT service_id  FROM `customer_services` WHERE customer_id =' + customer_id);
         const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
         var account_manager_id = ExistCustomer[0].account_manager_id;
@@ -2536,10 +2531,10 @@ WHERE service_id = ${service_id} AND customer_id = 0;
 
 
         if (Task.length > 0) {
+        
             const checklistName = Task[0].checklistName;
             const JobTypeId = Task[0].JobTypeId;
             const serviceId = Task[0].serviceId;
-
             const client_type_id = customer_type
             const checkQueryChecklist = `
     SELECT id FROM checklists WHERE customer_id = ? AND service_id = ? AND job_type_id = ? AND client_type_id = ? AND check_list_name = ?
@@ -2553,10 +2548,10 @@ WHERE service_id = ${service_id} AND customer_id = 0;
                 const [result] = await pool.execute(insertChecklistQuery, [customer_id, serviceId, JobTypeId, client_type_id, checklistName]);
                 const checklist_id = result.insertId;
 
-                if (Task[0].Task.length > 0) {
-                    for (const tsk_name of Task[0].Task) {
-                        const TaskName = tsk_name.TaskName;
-                        const BudgetHour = tsk_name.BudgetHour;
+                if (Task.length > 0) {
+                    for (const tsk_name of Task) {
+                        const TaskName = tsk_name.Task[0].TaskName;
+                        const BudgetHour = tsk_name.Task[0].BudgetHour;
                         const checkQuery = `SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?`;
                         const [existing] = await pool.execute(checkQuery, [TaskName, serviceId, JobTypeId,
                         ]);
