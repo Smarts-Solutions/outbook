@@ -940,7 +940,7 @@ const Setting = () => {
       name: "Source Name",
       selector: (row) => row.name,
       sortable: true,
-      width: "60%",
+      width: "40%",
     },
     {
       name: "Status",
@@ -954,6 +954,7 @@ const Setting = () => {
           </span>
         </div>
       ),
+      width: "20%",
     },
 
     ...(showSettingUpdateTab || showSettingDeleteTab || showSettingInsertTab
@@ -961,7 +962,7 @@ const Setting = () => {
         {
           name: "Actions",
           cell: (row) => (
-            <div className="d-flex">
+            <div className="d-lg-flex">
               {showSettingUpdateTab && (
                 <button
                   className="edit-icon"
@@ -994,7 +995,7 @@ const Setting = () => {
           ignoreRowClick: true,
           allowOverflow: true,
           button: true,
-          width: "30%",
+          width: "40%",
         },
       ]
       : []),
