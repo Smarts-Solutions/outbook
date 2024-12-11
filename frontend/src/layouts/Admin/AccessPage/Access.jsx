@@ -202,7 +202,7 @@ const Access = () => {
                                                 <div className="accordion-body">
                                                     <div className="row">
                                                         {accessData && accessData.data.map((section, index) => (
-                                                            <div key={index} className="col-lg-2">
+                                                            <div key={index} className="col-lg-2 col-md-6">
                                                                 <AccordionItem section={section} TradingName={val.role_name} role_id={val.id} />
                                                             </div>
                                                         ))}

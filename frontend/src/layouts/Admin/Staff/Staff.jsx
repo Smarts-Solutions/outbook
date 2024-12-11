@@ -595,12 +595,12 @@ const StaffPage = () => {
         <div className="col-sm-12">
           <div className="page-title-box pt-0">
             <div className="row align-items-start">
-              <div className="col-md-5">
+              <div className="col-md-6">
               </div>
-              <div className="col-md-7">
+              <div className="col-md-6">
                 <div className="d-flex justify-content-end mb-4">
                   
-                  <div className="w-25">
+                  <div className="">
                     {showStaffInsertTab && (
                       <button
                         type="button"

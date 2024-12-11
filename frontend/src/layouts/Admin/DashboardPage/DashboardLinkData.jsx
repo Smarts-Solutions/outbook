@@ -505,17 +505,17 @@ const JobStatus = () => {
           <div className='col-md-12'>
             <div className='' >
               <div className=' row mb-5'>
-                <div className='tab-title col-lg-8'>
+                <div className='tab-title col-lg-6 '>
                   <h3>{location?.state?.req?.heading}</h3>
                 </div>
-                <div className='col-lg-4 d-flex justify-content-end'>
+                <div className='col-lg-6  d-flex justify-content-end'>
                   <div className="btn btn-info text-white blue-btn"
                     onClick={() => { window.history.back() }}
                   >
                     <i className="fa fa-arrow-left pe-1" /> Back
                   </div>
                   {(role === "ADMIN" || role === "SUPERADMIN" ||  getAccessData.insert === 1) && location?.state?.req?.heading=="Customers" ? (
-                    <div className="col-md-6">
+                    <div className="ms-2">
                       <Link
                         to="/admin/addcustomer"
                         className="btn btn-outline-info  fw-bold float-end border-3"
