@@ -325,6 +325,14 @@ const Timesheet = () => {
             }
           }
 
+        }else{
+          sweatalert.fire({
+            icon: 'warning',
+            title: "There is no customer available.",
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 1500
+          });
         }
       }
     }
