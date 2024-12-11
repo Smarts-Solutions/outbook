@@ -6,7 +6,7 @@ const { SatffLogUpdateOperation, generateNextUniqueCode, getDateRange } = requir
 const getDashboardData = async (dashboard) => {
   const { staff_id, date_filter } = dashboard;
   const { startDate, endDate } = await getDateRange(date_filter);
-  console.log("dashboard ", dashboard)
+
 
 
   try {
@@ -88,8 +88,8 @@ const getDashboardData = async (dashboard) => {
       return { status: true, message: "success.", data: result };
 
     }
-    else {
-
+    else if ([3, 4, 6].includes(rowRoles[0].role_id)) {
+   console.log("staff_id 11111", staff_id, "date_filter 111 ", date_filter);
       const checkViewQuery = `
   SELECT table_name 
   FROM information_schema.views 
@@ -133,8 +133,7 @@ LEFT JOIN
       if (checkViewResult.length === 0) {
         await pool.execute(createViewQuery);
       }
-      console.log("staff_id ", staff_id, "date_filter", date_filter);
-      console.log("startDate ", startDate, "endDate", endDate);
+
       const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + staff_id + '" LIMIT 1');
 
       if (rows.length === 0) {
@@ -145,66 +144,34 @@ LEFT JOIN
 
 
 
-      let query = `SELECT * FROM dashboard_data_view WHERE 1=1 `;
-      //       let query = `SELECT  
-      //     customers.id AS customer_id,
-      //     customers.customer_type AS customer_type,
-      //     customers.staff_id AS staff_id,
-      //     customers.account_manager_id AS account_manager_id,
-      //     customer_service_account_managers.account_manager_id AS a_account_manager_id,
-      //     jobs.allocated_to AS allocated_to,
-      //     jobs.reviewer AS reviewer,
-      //     jobs.id AS job_id,
-      //     clients.id AS client_id
-      // FROM 
-      //     customers
-      // LEFT JOIN 
-      //     jobs ON jobs.customer_id = customers.id    
-      // LEFT JOIN 
-      //     clients ON clients.id = jobs.client_id     
-      // JOIN 
-      //     staffs AS staff1 ON customers.staff_id = staff1.id
-      // JOIN 
-      //     staffs AS staff2 ON customers.account_manager_id = staff2.id
-      // LEFT JOIN 
-      //     customer_services ON customer_services.customer_id = customers.id
-      // LEFT JOIN 
-      //     customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id    
-      // LEFT JOIN 
-      //     customer_company_information ON customers.id = customer_company_information.customer_id
-      //     WHERE 1=1`;
-      let params = [];
-      // let params = [startDate, endDate, startDate, endDate, startDate, endDate];
-
+     // let query = `SELECT * FROM dashboard_data_view WHERE 1=1 `;
+     // let params = [];
+      let query
 
       // Allocated Staff Role
       if (rows[0].role_id == 3) {
-        query += ' AND allocated_to = ? OR staff_id = ?';
-        params.push(staff_id, staff_id);
-        // query += ' AND customer_created_at BETWEEN ? AND ?'; 
-        // query += ' AND job_created_at BETWEEN ? AND ?'; 
-        // query += ' AND client_created_at BETWEEN ? AND ?';
-
-        //  params.push(startDate, endDate, startDate, endDate, startDate, endDate);
+        // query += ' AND allocated_to = ? OR staff_id = ?';
+        // params.push(staff_id, staff_id);
+        query = 'SELECT * FROM dashboard_data_view WHERE 1=1 AND (allocated_to = '+staff_id+' OR staff_id = '+staff_id+') AND (customer_created_at BETWEEN "'+startDate+'" AND "'+endDate+'"  OR job_created_at BETWEEN "'+startDate+'" AND "'+endDate+'" OR client_created_at BETWEEN "'+startDate+'" AND "'+endDate+'")';
       }
       // Account Manager Role
       else if (rows[0].role_id == 4) {
-        query += ' AND account_manager_id = ? OR a_account_manager_id = ?  OR staff_id = ?';
-        params.push(staff_id, staff_id, staff_id);
+        //  query += ' AND  account_manager_id = ? OR a_account_manager_id = ?  OR staff_id = ?';
+        //  params.push(staff_id, staff_id, staff_id);
+        query = 'SELECT * FROM dashboard_data_view WHERE 1=1 AND (account_manager_id = '+staff_id+' OR a_account_manager_id = '+staff_id+'  OR staff_id = '+staff_id+') AND (customer_created_at BETWEEN "'+startDate+'" AND "'+endDate+'"  OR job_created_at BETWEEN "'+startDate+'" AND "'+endDate+'" OR client_created_at BETWEEN "'+startDate+'" AND "'+endDate+'")';
+
       }
       // Reviewer Role
       else if (rows[0].role_id == 6) {
-        query += ' AND reviewer = ? OR staff_id = ?';
-        params.push(staff_id, staff_id);
+        // query += ' AND reviewer = ? OR staff_id = ?';
+        // params.push(staff_id, staff_id);
+        query = 'SELECT * FROM dashboard_data_view WHERE 1=1 AND (reviewer = '+staff_id+' OR staff_id = '+staff_id+') AND (customer_created_at BETWEEN "'+startDate+'" AND "'+endDate+'"  OR job_created_at BETWEEN "'+startDate+'" AND "'+endDate+'" OR client_created_at BETWEEN "'+startDate+'" AND "'+endDate+'")';
       }
 
 
-      
-
-      console.log("query",query)
-
-      const [viewResult] = await pool.execute(query, params);
-      console.log("viewResult ", viewResult);
+     // const [viewResult] = await pool.execute(query, params);
+      const [viewResult] = await pool.execute(query);
+     // console.log("viewResult ", viewResult);
       const uniqueCustomerIds = [...new Set(viewResult.map(item => item.customer_id))];
       const uniqueClientIds = [...new Set(viewResult.filter(item => item.client_id !== null).map(item => item.client_id))];
       const uniqueJobIds = [...new Set(viewResult.filter(item => item.job_id !== null).map(item => item.job_id))];
@@ -216,8 +183,8 @@ LEFT JOIN
         ...viewResult.map(item => item.reviewer)
       ])].filter(id => id !== null);
 
-
-      const [jobStatus] = await pool.execute(`
+      
+      const [jobStatus] = uniqueJobIdss.length > 0 ? await pool.execute(`
           SELECT 
             SUM(CASE WHEN status_type != 6 THEN 1 ELSE 0 END) AS pending_job_count,
             GROUP_CONCAT(CASE WHEN status_type != 6 THEN id ELSE NULL END) AS pending_job_ids,
@@ -225,9 +192,8 @@ LEFT JOIN
             GROUP_CONCAT(CASE WHEN status_type = 6 THEN id ELSE NULL END) AS completed_job_ids
           FROM jobs
           WHERE id IN (${uniqueJobIdss})
-        `);
+        `) :[]
 
-      //  console.log("jobStatus ", jobStatus)
       const result = {
         customer: {
           count: uniqueCustomerIds.length,
@@ -246,15 +212,116 @@ LEFT JOIN
           ids: uniqueStaffIds.join(',')
         },
         pending_job: {
-          count: jobStatus[0].pending_job_count,
-          ids: jobStatus[0].pending_job_ids
+          count: jobStatus != undefined ?jobStatus[0].pending_job_count : 0,
+          ids:jobStatus != undefined ? jobStatus[0].pending_job_ids:null
         },
         completed_job: {
-          count: jobStatus[0].completed_job_count,
-          ids: jobStatus[0].completed_job_ids
+          count:  jobStatus != undefined ? jobStatus[0].completed_job_count : 0,
+          ids:  jobStatus != undefined ? jobStatus[0].completed_job_ids : null
         }
       };
       return { status: true, message: "success.", data: result };
+    }
+    else {
+    
+      const query = `
+  SELECT
+    (SELECT COUNT(*) FROM customers WHERE staff_id = ${staff_id} AND created_at BETWEEN ? AND ?) AS customer,
+    (SELECT GROUP_CONCAT(id) FROM customers WHERE staff_id = ${staff_id} AND created_at BETWEEN ? AND ?) AS customer_ids,
+
+    (SELECT COUNT(*) 
+     FROM clients c
+     JOIN customers cu ON c.customer_id = cu.id
+     WHERE cu.staff_id = ${staff_id} AND cu.created_at BETWEEN ? AND ?) AS client,
+    (SELECT GROUP_CONCAT(c.id) 
+     FROM clients c
+     JOIN customers cu ON c.customer_id = cu.id
+     WHERE cu.staff_id = ${staff_id} AND cu.created_at BETWEEN ? AND ?) AS client_ids,
+
+     (SELECT COUNT(*) FROM staffs WHERE created_by = ${staff_id} AND created_at BETWEEN ? AND ?) AS staff,
+     (SELECT GROUP_CONCAT(id) FROM staffs WHERE created_by = ${staff_id} AND created_at BETWEEN ? AND ?) AS staff_ids,
+
+    (SELECT COUNT(*) 
+     FROM jobs j
+     JOIN clients c ON j.client_id = c.id
+     JOIN customers cu ON c.customer_id = cu.id
+     WHERE cu.staff_id = ${staff_id} AND c.created_at BETWEEN ? AND ?) AS job,
+    (SELECT GROUP_CONCAT(j.id) 
+     FROM jobs j
+     JOIN clients c ON j.client_id = c.id
+     JOIN customers cu ON c.customer_id = cu.id
+     WHERE cu.staff_id = ${staff_id} AND c.created_at BETWEEN ? AND ?) AS job_ids,
+
+    (SELECT COUNT(*) 
+     FROM jobs j
+     JOIN clients c ON j.client_id = c.id
+     JOIN customers cu ON c.customer_id = cu.id
+     WHERE j.status_type != '6' AND cu.staff_id = ${staff_id} AND c.created_at BETWEEN ? AND ?) AS pending_job,
+    (SELECT GROUP_CONCAT(j.id) 
+     FROM jobs j
+     JOIN clients c ON j.client_id = c.id
+     JOIN customers cu ON c.customer_id = cu.id
+     WHERE j.status_type != '6' AND cu.staff_id = ${staff_id} AND c.created_at BETWEEN ? AND ?) AS pending_job_ids,
+
+    (SELECT COUNT(*) 
+     FROM jobs j
+     JOIN clients c ON j.client_id = c.id
+     JOIN customers cu ON c.customer_id = cu.id
+     WHERE j.status_type = '6' AND cu.staff_id = ${staff_id} AND c.created_at BETWEEN ? AND ?) AS completed_job,
+    (SELECT GROUP_CONCAT(j.id) 
+     FROM jobs j
+     JOIN clients c ON j.client_id = c.id
+     JOIN customers cu ON c.customer_id = cu.id
+     WHERE j.status_type = '6' AND cu.staff_id = ${staff_id} AND c.created_at BETWEEN ? AND ?) AS completed_job_ids
+`;
+
+      const [rowAllCounts] = await pool.execute(query, [
+        startDate, endDate, startDate, endDate,
+        // For client
+        startDate, endDate, startDate, endDate,
+        // For staff
+        startDate, endDate, startDate, endDate,
+        // For jobs
+        startDate, endDate, startDate, endDate,
+        // For pending jobs
+        startDate, endDate, startDate, endDate,
+        // For completed jobs
+        startDate, endDate, startDate, endDate
+      ]);
+
+
+      const result = {
+        customer: {
+          count: rowAllCounts[0].customer,
+          ids: rowAllCounts[0].customer_ids
+        },
+        client: {
+          count: rowAllCounts[0].client,
+          ids: rowAllCounts[0].client_ids
+        },
+        job: {
+          count: rowAllCounts[0].job,
+          ids: rowAllCounts[0].job_ids
+        },
+        staff: {
+          count: rowAllCounts[0].staff,
+          ids: rowAllCounts[0].staff_ids
+        },
+        pending_job: {
+          count: rowAllCounts[0].pending_job,
+          ids: rowAllCounts[0].pending_job_ids
+        },
+        completed_job: {
+          count: rowAllCounts[0].completed_job,
+          ids: rowAllCounts[0].completed_job_ids
+        }
+      };
+      return { status: true, message: "success.", data: result };
+
+
+
+
+
     }
 
   } catch (err) {
@@ -265,7 +332,7 @@ LEFT JOIN
 };
 
 const getDashboardActivityLog = async (dashboard) => {
-  const { staff_id  ,type} = dashboard;
+  const { staff_id, type } = dashboard;
 
   console.log("staff_id ", staff_id)
   console.log("type ", type)
@@ -309,7 +376,7 @@ const getDashboardActivityLog = async (dashboard) => {
     const [result] = await pool.execute(query);
 
 
-    if(result.length > 0){
+    if (result.length > 0) {
       const groupedResult = result.reduce((acc, log) => {
         const existingDate = acc.find(item => item.date === log.date);
         if (existingDate) {
@@ -326,17 +393,17 @@ const getDashboardActivityLog = async (dashboard) => {
             }]
           });
         }
-    
+
         return acc;
       }, []);
 
-      
+
       let finalResult = result
-      if(type == "staff"){
+      if (type == "staff") {
         finalResult = groupedResult
       }
       return { status: true, message: "success.", data: finalResult };
-    }else{
+    } else {
       return { status: true, message: "No Activity Log found.", data: [] }
     }
 

@@ -32,6 +32,7 @@ const StaffPage = () => {
     minutes: "",
   });
 
+  
   useEffect(() => {
     if (
       accessData &&
@@ -388,7 +389,7 @@ const StaffPage = () => {
 
   const fields = [
     {
-      type: "text",
+      type: "text5",
       name: "first_name",
       label: "First Name",
       label_size: 12,
@@ -397,7 +398,7 @@ const StaffPage = () => {
       placeholder: "Enter First Name",
     },
     {
-      type: "text",
+      type: "text5",
       name: "last_name",
       label: "Last Name",
       label_size: 12,

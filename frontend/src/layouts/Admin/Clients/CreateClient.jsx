@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { GetClientIndustry, Add_Client, } from "../../../ReduxStore/Slice/Client/ClientSlice";
-import { GetAllCompany } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { GetAllCompany ,GetOfficerDetails} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { Email_regex } from "../../../Utils/Common_regex";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -171,6 +171,7 @@ const CreateClient = () => {
 
   useEffect(() => {
     if (getSearchDetails.length > 0) {
+      Get_Officer_Details(getSearchDetails[0].company_number);
       setCompanyDetails((prevState) => ({
         ...prevState,
         CompanyName: getSearchDetails[0].title,
@@ -597,6 +598,56 @@ const CreateClient = () => {
       .catch((err) => {
         return;
       });
+  };
+
+  const Get_Officer_Details = async (company_number) => {
+    const data = { company_number: company_number };
+    await dispatch(GetOfficerDetails(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status) {
+          if (res.data.length > 0) {
+            const officer_name = res.data[0].name.split(", ").map(part => part.trim());
+            let first_name = officer_name[1]
+            let last_name = officer_name[0]
+            if (officer_name[1] == undefined) {
+              first_name = officer_name[0]
+              last_name = ""
+            }
+
+            setContacts((prevContacts) => {
+              // Clone the current state
+              const updatedContacts = [...prevContacts];
+              // Update only the first object
+              updatedContacts[0] = {
+                ...updatedContacts[0],
+                first_name: first_name,
+                last_name: last_name,
+              };
+              // Return the updated state
+              return updatedContacts;
+            });
+          } else {
+            setContacts((prevContacts) => {
+              // Clone the current state
+              const updatedContacts = [...prevContacts];
+              // Update only the first object
+              updatedContacts[0] = {
+                ...updatedContacts[0],
+                first_name: '',
+                last_name: '',
+              };
+              // Return the updated state
+              return updatedContacts;
+            });
+          }
+        } else {
+        }
+      })
+      .catch((err) => {
+        return;
+      }
+      );
   };
 
   const handleChange = (index, field, value) => {
@@ -1048,7 +1099,7 @@ const CreateClient = () => {
                                             type="text"
                                             name="tradingName"
                                             id="tradingName"
-
+                                            maxLength={200}
                                             className={errors1["tradingName"] ? "error-field form-control" : "form-control"}
                                             placeholder="Trading Name"
                                             onChange={(e) => handleChange1(e)}
@@ -1078,6 +1129,7 @@ const CreateClient = () => {
                                             placeholder="Trading Address"
                                             name="tradingAddress"
                                             id="tradingAddress"
+                                            maxLength={200}
                                             onChange={(e) => handleChange1(e)}
                                             value={
                                               getSoleTraderDetails.tradingAddress
@@ -1186,6 +1238,7 @@ const CreateClient = () => {
                                           value={
                                             getSoleTraderDetails.first_name
                                           }
+                                          maxLength={50}
                                           onChange={(e) => handleChange1(e)}
                                         />
                                         {errors1["first_name"] && (
@@ -1210,6 +1263,7 @@ const CreateClient = () => {
                                           name="last_name"
                                           id="last_name"
                                           value={getSoleTraderDetails.last_name}
+                                          maxLength={50}
                                           onChange={(e) => handleChange1(e)}
                                         />
                                         {errors1["last_name"] && (
@@ -1725,7 +1779,7 @@ const CreateClient = () => {
                                           <input
                                             type="text"
                                             className={errors2["TradingName"] ? "error-field form-control" : "form-control"}
-
+                                            maxLength={200}
                                             placeholder="Trading Name"
                                             name="TradingName"
                                             id="TradingName"
@@ -1752,7 +1806,7 @@ const CreateClient = () => {
                                           <input
                                             type="text"
                                             className={errors2["TradingAddress"] ? "error-field form-control" : "form-control"}
-
+                                            maxLength={200}
                                             placeholder="Trading Address"
                                             name="TradingAddress"
                                             id="TradingAddress"
@@ -1818,6 +1872,7 @@ const CreateClient = () => {
                                                         placeholder="First Name"
                                                         id={`first_name-${index}`}
                                                         value={contact.first_name}
+                                                        maxLength={50}
                                                         onChange={(e) =>
                                                           handleChange(
                                                             index,
@@ -1860,6 +1915,7 @@ const CreateClient = () => {
                                                         value={
                                                           contact.last_name
                                                         }
+                                                        maxLength={50}
                                                         onChange={(e) =>
                                                           handleChange(
                                                             index,
@@ -2104,7 +2160,7 @@ const CreateClient = () => {
                                               getPartnershipDetails.TradingName
                                             }
                                             onChange={(e) => handleChange3(e)}
-                                            maxLength={100}
+                                            maxLength={200}
                                           />
                                           {errors3["TradingName"] && (
                                             <div className="error-text">
@@ -2124,7 +2180,7 @@ const CreateClient = () => {
                                           <input
                                             type="text"
                                             className={errors3["TradingAddress"] ? "error-field form-control" : "form-control"}
-
+                                            maxLength={200}
                                             placeholder="Trading Address"
                                             name="TradingAddress"
                                             id="TradingAddress"
@@ -2132,7 +2188,7 @@ const CreateClient = () => {
                                               getPartnershipDetails.TradingAddress
                                             }
                                             onChange={(e) => handleChange3(e)}
-                                            maxLength={200}
+                                            
                                           />
                                           {errors3["TradingAddress"] && (
                                             <div className="error-text">
@@ -2287,6 +2343,7 @@ const CreateClient = () => {
                                                       value={
                                                         contacts1.first_name
                                                       }
+                                                      maxLength={50}
                                                       onChange={(e) =>
                                                         handleChange4(
                                                           index,
@@ -2294,7 +2351,7 @@ const CreateClient = () => {
                                                           e.target.value
                                                         )
                                                       }
-                                                      maxLength={50}
+                                                     
                                                     />
                                                     {contactsErrors[index]
                                                       .first_name && (
@@ -2645,7 +2702,7 @@ const CreateClient = () => {
                                           name="tradingName"
                                           id="tradingName"
                                           className={errors4["tradingName"] ? "error-field form-control" : "form-control"}
-
+                                          maxLength={200}
                                           placeholder="Trading Name"
                                           onChange={(e) => handleChangeIndivisul(e)}
                                           value={

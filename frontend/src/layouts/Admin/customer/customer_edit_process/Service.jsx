@@ -20,6 +20,7 @@ import {
 import Swal from "sweetalert2";
 import Select from 'react-select';
 
+
 const Service = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
   const token = JSON.parse(localStorage.getItem("token"));
@@ -51,12 +52,7 @@ const Service = () => {
     const fetchData = async () => {
       try {
         await Promise.all([
-          dispatch(
-            GET_CUSTOMER_DATA({
-              req: { customer_id: location.state.id, pageStatus: "2" },
-              authToken: token,
-            })
-          )
+          dispatch(GET_CUSTOMER_DATA({ req: { customer_id: location.state.id, pageStatus: "2" }, authToken: token}))
             .unwrap()
             .then((response) =>
               setCustomerService({ loading: false, data: response.data })
@@ -81,6 +77,7 @@ const Service = () => {
     fetchData();
   }, [dispatch, location.state.id, token]);
 
+
   useEffect(() => {
 
     if (getCustomerService.data.services) {
@@ -93,15 +90,16 @@ const Service = () => {
           service_id: service.service_id,
           account_manager_ids: service.account_manager_ids
             ? service.account_manager_ids.map((id) => {
-                const staff = staffDataAll.data.find((staff) => staff.id === id);
-                return staff ? { value: id, label: staff.first_name } : null; // Ensure null for unmatched IDs
-              }).filter((item) => item !== null) // Remove null entries if any
+              const staff = staffDataAll.data.find((staff) => staff.id === id);
+              return staff ? { value: id, label: staff.first_name } : null; 
+            }).filter((item) => item !== null) 
             : [],
         }))
       );
-      
+
     }
   }, [getCustomerService.data, staffDataAll.data]);
+
 
   useEffect(() => {
     if (searchValue.trim()) {
@@ -117,25 +115,25 @@ const Service = () => {
 
 
   const handleCheckboxChange = (e, item) => {
-    
-    
+
+
     const ExistJobService = getCustomerService?.data?.services?.find((ser) => ser?.service_id === item?.id) || null
 
-  
 
-    if(ExistJobService != null && ExistJobService?.job_exist != null){
-     Swal.fire({
-      icon: 'warning',
-      title: "This service has been assigned to job, cannot remove it",
-      timerProgressBar: true,
-      showConfirmButton: true,
-      timer: 1500
-    });
-     e.target.checked = true
-     return
+
+    if (ExistJobService != null && ExistJobService?.job_exist != null) {
+      Swal.fire({
+        icon: 'warning',
+        title: "This service has been assigned to job, cannot remove it",
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500
+      });
+      e.target.checked = true
+      return
     }
 
- 
+
     if (e.target.checked) {
       JobTypeDataAPi(item, 1);
       setServices((prevServices) =>
@@ -150,9 +148,6 @@ const Service = () => {
     }
   };
 
- 
-
- 
   const AddManager = () => {
     if (selectManager.length === 0) {
       Swal.fire({
@@ -166,28 +161,7 @@ const Service = () => {
     setModal(false);
 
   }
-
-
-
-
-  const removeManager = (id, serviceId) => {
-    setManager((prevManager) =>
-      prevManager
-        .map((manager) =>
-          manager.service_id === serviceId
-            ? {
-              ...manager,
-              account_manager_ids: manager.account_manager_ids.filter(
-                (accountManager) => accountManager.id !== id
-              ),
-            }
-            : manager
-        )
-        .filter((manager) => manager.account_manager_ids.length > 0)
-    );
-  };
-
-
+ 
   const handleSubmit = async (values) => {
     if (services.length === 0) {
       Swal.fire({
@@ -197,34 +171,30 @@ const Service = () => {
       });
       return;
     }
-   
-
 
     const MatchData = GetAllService.data
-    .map((service) => {
-      const managerData = getManager.find(
-        (item) => item.service_id === service.id
-      );
-  
-      if (managerData && managerData.account_manager_ids.length > 0) {
-        return {
-          service_id: service.id,
-          account_manager_ids: managerData.account_manager_ids.map(
-            (manager) => manager.value
-          ),
-        };
-      }
-      return undefined;
-    }).filter((item) => item !== undefined);
+      .map((service) => {
+        const managerData = getManager.find(
+          (item) => item.service_id === service.id
+        );
 
+        if (managerData && managerData.account_manager_ids.length > 0) {
+          return {
+            service_id: service.id,
+            account_manager_ids: managerData.account_manager_ids.map(
+              (manager) => manager.value
+            ),
+          };
+        }
+        return undefined;
+      }).filter((item) => item !== undefined);
 
-  
     const filteredMatchData = services.map(serviceId => {
       const match = MatchData.find(item => item.service_id === serviceId);
       return match || { service_id: serviceId, account_manager_ids: [] };
     });
-    
-    
+
+
     const req = {
       customer_id: address,
       pageStatus: "2",
@@ -435,20 +405,6 @@ const Service = () => {
     link.remove();
   };
 
-  const handleClearFile = () => {
-    setFileName("No file selected");
-
-    document.getElementById("uploadButton").value = null;
-    setTasksData([]);
-    uploadSetMessage("");
-  };
-
-  const handleSearchChange = (e) => {
-    setSearchValue(e.target.value);
-  };
-
-
-
   const getCheckListData = async (service_id, item) => {
     const req = { service_id: service_id, job_type_id: item.id, customer_id: address };
     const data = { req, authToken: token };
@@ -477,15 +433,9 @@ const Service = () => {
       });
   };
 
-
-
   const handleSelect = (selected) => {
-
     setSelectManager(selected);
-
-
     setManager((prevManager) => {
-
       const existingIndex = prevManager.findIndex(
         (item) => item.service_id === tempServices
       );

@@ -75,7 +75,12 @@ const AddCustomer = () => {
                         type="button"
                         className="btn p-0" 
                     >
-                        <i className="pe-3 fa-regular fa-arrow-left-long  fs-4" onClick={()=>window.history.back()}></i>
+                        <i className="pe-3 fa-regular fa-arrow-left-long  fs-4" onClick={()=>
+                        {
+                            localStorage.removeItem('newCustomerId');
+                            window.history.back();
+                        }
+                            }></i>
                     </button>
                     <h3 className='mt-0'>Create New Customer</h3>
                 </div>

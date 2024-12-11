@@ -304,6 +304,7 @@ const JobStatus = () => {
           {row.customer_code}
         </div>
       ),
+      selector: (row) => row.customer_code,
       sortable: true,
 
     },
@@ -347,17 +348,16 @@ const JobStatus = () => {
                 value={row.status}
                 onChange={(e) => handleChangeStatus(e, row)}
               >
-                <option value="0" className="text-danger">Deactive</option>
+                <option value="0" className="text-danger">Inactive</option>
                 <option value="1" className="text-success">Active</option>
               </select>
               : (
                 <span className="text-warning">Inprogress</span>
               )}
-
-
           </div>
         </div>
       ),
+      selector: (row) => row.status=="1" ? 1 : 0,
       sortable: true,
     },
   ];
@@ -512,7 +512,7 @@ const JobStatus = () => {
                   >
                     <i className="fa fa-arrow-left pe-1" /> Back
                   </div>
-                  {(role === "ADMIN" || role === "SUPERADMIN" ||  getAccessData.insert === 1) && location?.state?.req?.heading=="Customers" ? (
+                  {(role === "ADMIN" || role === "SUPERADMIN" || getAccessData.insert === 1) && location?.state?.req?.heading == "Customers" ? (
                     <div className="ms-2">
                       <Link
                         to="/admin/addcustomer"

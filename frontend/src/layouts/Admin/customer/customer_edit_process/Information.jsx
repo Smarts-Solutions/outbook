@@ -17,6 +17,7 @@ import {
   GET_CUSTOMER_DATA,
   Edit_Customer,
   GetAllCompany,
+  GetOfficerDetails
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 
 const Information = ({ id, pageStatus }) => {
@@ -258,6 +259,11 @@ const Information = ({ id, pageStatus }) => {
 
   useEffect(() => {
     if (getSearchDetails && getSearchDetails.length > 0) {
+      
+ 
+      Get_Officer_Details(getSearchDetails[0].company_number);
+
+
       setCompanyDetails((prevState) => ({
         ...prevState,
         CompanyName: getSearchDetails[0]?.title,
@@ -879,6 +885,58 @@ const Information = ({ id, pageStatus }) => {
       .catch((err) => {
         return;
       });
+  };
+
+  const Get_Officer_Details = async (company_number) => {
+    const data = { company_number: company_number };
+    await dispatch(GetOfficerDetails(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status) {
+          if(res.data.length > 0){
+            const officer_name = res.data[0].name.split(", ").map(part => part.trim());
+            let first_name = officer_name[1]
+            let last_name = officer_name[0]
+            if(officer_name[1] == undefined){
+              first_name = officer_name[0]
+              last_name = ""
+            }
+
+            setContacts((prevContacts) => {
+              // Clone the current state
+              const updatedContacts = [...prevContacts];
+              // Update only the first object
+              updatedContacts[0] = {
+                ...updatedContacts[0],
+                first_name: first_name,
+                last_name: last_name,
+              };
+              // Return the updated state
+              return updatedContacts;
+            });
+          }else{
+            setContacts((prevContacts) => {
+              // Clone the current state
+              const updatedContacts = [...prevContacts];
+              // Update only the first object
+              updatedContacts[0] = {
+                ...updatedContacts[0],
+                first_name: '',
+                last_name: '',
+              };
+              // Return the updated state
+              return updatedContacts;
+            });
+          }
+          
+        } else {
+     
+        }
+      })
+      .catch((err) => {
+        return;
+      }
+    );
   };
 
   const capitalizeFirstLetter = (string) => {
@@ -2098,6 +2156,7 @@ const Information = ({ id, pageStatus }) => {
                                             name="first_name"
                                             id={`first_name-${index}`}
                                             value={contact?.first_name}
+                                            maxLength={50}
                                             onChange={(e) =>
                                               handleChange4(
                                                 index,
@@ -2133,6 +2192,7 @@ const Information = ({ id, pageStatus }) => {
                                             name="last_name"
                                             id={`last_name-${index}`}
                                             value={contact?.last_name}
+                                            maxLength={50}
                                             onChange={(e) =>
                                               handleChange4(
                                                 index,
