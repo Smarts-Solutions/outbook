@@ -42,7 +42,8 @@ const CommonModal = ({
                 <label htmlFor={field.name} className="icon mb-1 mt-2">
                   {field.label}
                 </label>
-                {field.type === "text" ? (
+                {
+                field.type === "text" ? (
                   <>
                     <input
                       type="text"
@@ -50,11 +51,13 @@ const CommonModal = ({
                       className="filter-text form-control"
                       placeholder={field.placeholder}
                       value={field.value}
+                      maxLength={30}
                       autoFocus={index === 0}
                       onChange={(e) => onChange(e, index)}
                     />
                   </>
-                ) : field.type === "hourminute" ? (
+                )  
+                : field.type === "hourminute" ? (
                   <>
                     <div className="input-group">
                       <input
