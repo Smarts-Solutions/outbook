@@ -304,6 +304,7 @@ const JobStatus = () => {
           {row.customer_code}
         </div>
       ),
+      selector: (row) => row.customer_code,
       sortable: true,
 
     },
@@ -347,7 +348,7 @@ const JobStatus = () => {
                 value={row.status}
                 onChange={(e) => handleChangeStatus(e, row)}
               >
-                <option value="0" className="text-danger">Deactive</option>
+                <option value="0" className="text-danger">Inactive</option>
                 <option value="1" className="text-success">Active</option>
               </select>
               : (
@@ -358,6 +359,7 @@ const JobStatus = () => {
           </div>
         </div>
       ),
+      selector: (row) => row.status,
       sortable: true,
     },
   ];

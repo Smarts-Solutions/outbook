@@ -545,11 +545,11 @@ const getClient = async (client) => {
                   FROM client_contact_details cd
                   WHERE cd.client_id = clients.id
               )
-          WHERE clients.customer_id = ? OR clients.staff_created_id = ?
+          WHERE clients.customer_id = ?
        ORDER BY 
           clients.id DESC;
             `;
-            const [result] = await pool.execute(query, [customer_id, StaffUserId]);
+            const [result] = await pool.execute(query, [customer_id]);
             return { status: true, message: "success.", data: result };
         }
 

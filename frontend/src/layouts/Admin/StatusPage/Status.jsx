@@ -378,6 +378,7 @@ const Status = () => {
                   name="statusname"
                   value={getStatsAdd.statusname}
                   onChange={handleChange}
+                  maxLength={50}
                 />
               </div>
               <div className="col-lg-12">

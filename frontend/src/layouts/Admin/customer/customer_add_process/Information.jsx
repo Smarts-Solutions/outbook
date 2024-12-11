@@ -9,7 +9,7 @@ import { Email_regex } from "../../../../Utils/Common_regex";
 import axios from "axios";
 import { Staff } from "../../../../ReduxStore/Slice/Staff/staffSlice";
 import { PersonRole, Country, IncorporationApi } from "../../../../ReduxStore/Slice/Settings/settingSlice";
-import { AddCustomer, GetAllCompany, GET_CUSTOMER_DATA } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { AddCustomer, GetAllCompany, GET_CUSTOMER_DATA, GetOfficerDetails} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import { ScrollToViewFirstError, ScrollToViewFirstErrorContactForm } from '../../../../Utils/Comman_function'
 import { use } from "react";
@@ -21,11 +21,9 @@ const Information = ({ id, pageStatus }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
-  const customer_id = localStorage.getItem("coustomerId");
   const newCustomerId = localStorage.getItem("newCustomerId");
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const [staffDataAll, setStaffDataAll] = useState([]);
-  const [location, setLocation] = useState("");
   const [countryDataAll, setCountryDataAll] = useState([]);
   const [customerType, setCustomerType] = useState("1");
   const [ManagerType, setManagerType] = useState("");
@@ -40,6 +38,7 @@ const Information = ({ id, pageStatus }) => {
   const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);
   const [customerDetails, setCustomerDetails] = useState([]);
+
 
 
   // state for sole trader
@@ -167,6 +166,7 @@ const Information = ({ id, pageStatus }) => {
 
   useEffect(() => {
     if (getSearchDetails && getSearchDetails.length > 0) {
+      Get_Officer_Details(getSearchDetails[0].company_number);
       // Update company details
       setCompanyDetails((prevState) => ({
         ...prevState,
@@ -200,6 +200,11 @@ const Information = ({ id, pageStatus }) => {
       if (getSearchDetails[0].title) delete newErrors["TradingName"];
       if (getSearchDetails[0].address_snippet)
         delete newErrors["TradingAddress"];
+
+
+
+
+
 
       setErrors2(newErrors);
     }
@@ -733,6 +738,7 @@ const Information = ({ id, pageStatus }) => {
 
   // validate partnership contact fields when submit
   const validateField1 = (index, field, value) => {
+
     const errors = [...contactsErrors];
 
     switch (field) {
@@ -1025,6 +1031,59 @@ const Information = ({ id, pageStatus }) => {
       });
   };
 
+  const Get_Officer_Details = async (company_number) => {
+    const data = { company_number: company_number };
+    await dispatch(GetOfficerDetails(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status) {
+          if (res.data.length > 0) {
+            const officer_name = res.data[0].name.split(", ").map(part => part.trim());
+            let first_name = officer_name[1]
+            let last_name = officer_name[0]
+            if (officer_name[1] == undefined) {
+              first_name = officer_name[0]
+              last_name = ""
+            }
+
+            setContacts((prevContacts) => {
+              // Clone the current state
+              const updatedContacts = [...prevContacts];
+              // Update only the first object
+              updatedContacts[0] = {
+                ...updatedContacts[0],
+                first_name: first_name,
+                last_name: last_name,
+              };
+              // Return the updated state
+              return updatedContacts;
+            });
+          } else {
+            setContacts((prevContacts) => {
+              // Clone the current state
+              const updatedContacts = [...prevContacts];
+              // Update only the first object
+              updatedContacts[0] = {
+                ...updatedContacts[0],
+                first_name: '',
+                last_name: '',
+              };
+              // Return the updated state
+              return updatedContacts;
+            });
+          }
+          
+        } else {
+          
+        }
+      })
+      .catch((err) => {
+        return;
+      }
+      );
+  };
+
+
   const capitalizeFirstLetter = (string) => {
     if (!string) return "";
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
@@ -1083,6 +1142,7 @@ const Information = ({ id, pageStatus }) => {
                             className="form-select "
                             onChange={(e) => setCustomerType(e.target.value)}
                             value={customerType}
+                            disabled={!['', null, undefined].includes(newCustomerId)}
                           >
                             <option value="1">Sole Trader</option>
                             <option value="2">Company</option>
@@ -2258,6 +2318,7 @@ const Information = ({ id, pageStatus }) => {
                                           name="first_name"
                                           id={`first_name-${index}`}
                                           value={contact.first_name}
+                                          maxLength={50}
                                           onChange={(e) =>
                                             handleChange4(
                                               index,
@@ -2292,6 +2353,7 @@ const Information = ({ id, pageStatus }) => {
                                           name="last_name"
                                           id={`last_name-${index}`}
                                           value={contact.last_name}
+                                          maxLength={50}
                                           onChange={(e) =>
                                             handleChange4(
                                               index,
