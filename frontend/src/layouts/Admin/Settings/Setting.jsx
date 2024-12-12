@@ -690,7 +690,56 @@ const Setting = () => {
         {
           name: "Actions",
           cell: (row) => (
-            <div className="d-lg-flex">
+         <>
+ <div className="dropdown d-lg-none setting-drop-down">
+                  <button
+                    className="btn"
+                    type="button"
+                    id="dropdownMenuButton"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                  </button>
+                  <div
+                    className="dropdown-menu custom-dropdown"
+                    aria-labelledby="dropdownMenuButton"
+                  >
+
+<div className="px-2">
+{showSettingUpdateTab && (
+                <button
+                  className="edit-icon dropdown-item w-auto mb-2"
+                  onClick={() => handleEdit(row, "4")}
+                >
+                  {" "}
+                  <i className="ti-pencil" />
+                </button>
+              )}
+              {showSettingDeleteTab && (
+                <button
+                  className="delete-icon dropdown-item w-auto mb-2"
+                  onClick={() => handleDelete(row, "4")}
+                >
+                  {" "}
+                  <i className="ti-trash text-danger" />
+                </button>
+              )}
+              {showSettingInsertTab && (
+                <button
+                  className="btn btn-sm btn-info text-white dropdown-item"
+                  onClick={(e) => handleJobType(row)}
+                >
+                  <i className="fa fa-plus pe-1"></i>Add Job Type
+                </button>
+              )}
+            </div>
+                
+                  </div>
+                </div>
+
+         <div className="d-lg-flex d-none">
               {showSettingUpdateTab && (
                 <button
                   className="edit-icon"
@@ -718,6 +767,9 @@ const Setting = () => {
                 </button>
               )}
             </div>
+         </>
+
+            
           ),
           ignoreRowClick: true,
           allowOverflow: true,
@@ -912,9 +964,48 @@ const Setting = () => {
     {
       name: "Actions",
       cell: (row) => (
-        <div>
+
+        <>
+         <div className="dropdown d-lg-none setting-drop-down">
+                  <button
+                    className="btn"
+                    type="button"
+                    id="dropdownMenuButton"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                  </button>
+                  <div
+                    className="dropdown-menu custom-dropdown"
+                    aria-labelledby="dropdownMenuButton"
+                  >
+
+<div className="px-2">
+<div>
           {showSettingUpdateTab && (
-            <button className="edit-icon" onClick={() => handleEdit(row, "7")}>
+            <button className="edit-icon dropdown-item w-auto mb-2" onClick={() => handleEdit(row, "7")}>
+              <i className="ti-pencil" />
+            </button>
+          )}
+          {showSettingDeleteTab && (
+            <button
+              className="delete-icon dropdown-item w-auto "
+              onClick={() => handleDelete(row, "7")}
+            >
+              <i className="ti-trash text-danger" />
+            </button>
+          )}
+        </div>
+            </div>
+                
+                  </div>
+                </div>
+
+                <div className="d-lg-flex d-none">
+          {showSettingUpdateTab && (
+            <button className="edit-icon " onClick={() => handleEdit(row, "7")}>
               <i className="ti-pencil" />
             </button>
           )}
@@ -927,6 +1018,8 @@ const Setting = () => {
             </button>
           )}
         </div>
+        </>
+        
       ),
       ignoreRowClick: true,
       allowOverflow: true,
@@ -959,47 +1052,95 @@ const Setting = () => {
 
     ...(showSettingUpdateTab || showSettingDeleteTab || showSettingInsertTab
       ? [
-        {
-          name: "Actions",
-          cell: (row) => (
-            
-            <div className="d-lg-flex">
-              {showSettingUpdateTab && (
-                <button
-                  className="edit-icon"
-                  onClick={() => handleEdit(row, "8")}
-                >
-                  {" "}
-                  <i className="ti-pencil" />
-                </button>
-              )}
-              {showSettingDeleteTab && (
-                <button
-                  className="delete-icon"
-                  onClick={() => handleDelete(row, "8")}
-                >
-                  {" "}
-                  <i className="ti-trash text-danger" />
-                </button>
-              )}
-              {showSettingInsertTab && (
-                <button
-                  className="btn btn-info btn-sm text-white ms-1"
-                  onClick={(e) => handleSubSource(row)}
-                >
-                  <i className="fa fa-plus pe-1" />
-                  Add Sub Source Type
-                </button>
-              )}
-            </div>
-          ),
-          ignoreRowClick: true,
-          allowOverflow: true,
-          button: true,
-          width: "40%",
-        },
-      ]
-      : []),
+          {
+            name: "Actions",
+            cell: (row) => (
+              <>
+                <div className="dropdown d-lg-none setting-drop-down">
+                  <button
+                    className="btn"
+                    type="button"
+                    id="dropdownMenuButton"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                  </button>
+                  <div
+                    className="dropdown-menu custom-dropdown"
+                    aria-labelledby="dropdownMenuButton"
+                  >
+
+                   <div className="px-2">
+                  {showSettingUpdateTab && (
+                    <button
+                      className="edit-icon dropdown-item w-auto mb-2"
+                      onClick={() => handleEdit(row, "8")}
+                    >
+                      <i className="ti-pencil" />
+                    </button>
+                  )}
+                  {showSettingDeleteTab && (
+                    <button
+                      className="delete-icon btn-sm dropdown-item w-auto  mb-2"
+                      onClick={() => handleDelete(row, "8")}
+                    >
+                      <i className="ti-trash text-danger" />
+                    </button>
+                  )}
+                  {showSettingInsertTab && (
+                    <button
+                      className="btn btn-info btn-sm text-white ms-1 dropdown-item w-auto "
+                      onClick={(e) => handleSubSource(row)}
+                    >
+                      <i className="fa fa-plus pe-1" />
+                      Add Sub Source Type
+                    </button>
+                  )}
+                </div>
+                
+                  </div>
+                </div>
+    
+                <div className="d-lg-flex d-none">
+                  {showSettingUpdateTab && (
+                    <button
+                      className="edit-icon"
+                      onClick={() => handleEdit(row, "8")}
+                    >
+                      <i className="ti-pencil" />
+                    </button>
+                  )}
+                  {showSettingDeleteTab && (
+                    <button
+                      className="delete-icon"
+                      onClick={() => handleDelete(row, "8")}
+                    >
+                      <i className="ti-trash text-danger" />
+                    </button>
+                  )}
+                  {showSettingInsertTab && (
+                    <button
+                      className="btn btn-info btn-sm text-white ms-1"
+                      onClick={(e) => handleSubSource(row)}
+                    >
+                      <i className="fa fa-plus pe-1" />
+                      Add Sub Source Type
+                    </button>
+                  )}
+                </div>
+              </>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+            width: "40%",
+          },
+        ]
+      : [])
+    
+     
   ];
 
   const CheckListColumns = [
@@ -1130,7 +1271,56 @@ const Setting = () => {
         {
           name: "Actions",
           cell: (row) => (
-            <div className="d--lg-flex">
+            <>
+             <div className="dropdown d-lg-none setting-drop-down">
+                  <button
+                    className="btn"
+                    type="button"
+                    id="dropdownMenuButton"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                  </button>
+                  <div
+                    className="dropdown-menu custom-dropdown"
+                    aria-labelledby="dropdownMenuButton"
+                  >
+
+<div className="px-2">
+              {showSettingUpdateTab && (
+                <button
+                  className="edit-icon dropdown-item w-auto mb-2"
+                  onClick={() => handleEdit(row, "8")}
+                >
+                  {" "}
+                  <i className="ti-pencil" />{" "}
+                </button>
+              )}
+              {showSettingDeleteTab && (
+                <button
+                  className="delete-icon dropdown-item w-auto mb-2"
+                  onClick={() => handleDelete(row, "8")}
+                >
+                  <i className="ti-trash text-danger" />
+                </button>
+              )}
+              {showSettingInsertTab && (
+                <button
+                  className="btn btn-info btn-sm text-white dropdown-item"
+                  onClick={(e) => handleTaskAdd(row)}
+                >
+                  <i className="fa fa-plus pe-1" />
+                  Add Internal Task
+                </button>
+              )}
+            </div>
+                
+                  </div>
+                </div>
+
+                <div className="d-lg-flex d-none">
               {showSettingUpdateTab && (
                 <button
                   className="edit-icon"
@@ -1158,6 +1348,8 @@ const Setting = () => {
                 </button>
               )}
             </div>
+            </>
+           
           ),
           ignoreRowClick: true,
           allowOverflow: true,

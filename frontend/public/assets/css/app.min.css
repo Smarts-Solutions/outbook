@@ -3262,25 +3262,16 @@ button.secondary-icon {
 	color: #222222;
 	border: 3px solid #222222;
 }
-
-.datatable-container button.edit-icon,
-.datatable-container button.delete-icon,
-button.delete-icon,
-button.edit-icon,
-.datatable-container button.view-icon,
-button.view-icon,
-button.add-icon,
-button.secondary-icon,
-.datatable-container button.add-icon,
-.secondary-icon {
-	border-radius: 20px;
-	padding: 7px 8px;
-	font-size: 20px;
-	margin: 0px 4px;
-	background: none;
-	border-width: 3px;
-	line-height: 19px;
-
+.datatable-container button.edit-icon, .datatable-container button.delete-icon, button.delete-icon, button.edit-icon, .datatable-container button.view-icon, button.view-icon, button.add-icon, button.secondary-icon, .datatable-container button.add-icon, .secondary-icon {
+    border-radius: 20px;
+    padding: 7px 8px;
+    font-size: 20px;
+    margin: 0px 4px;
+    background: none;
+    border-width: 3px;
+    line-height: 19px;
+    width: 40px;
+    height: 40px;
 }
 
 button.add-icon,
@@ -3346,7 +3337,7 @@ button.btn.btn-info,
 	line-height: 16.94px;
 	height: auto;
 	position: relative;
-
+text-align: center;
 	z-index: 1;
 	color: #00AFEF !important;
 }
@@ -4551,4 +4542,12 @@ i.exp_icon {
 .data-table-extensions > .data-table-extensions-filter > .filter-text {
 
     width: 96%;
+}
+.setting-drop-down .dropdown-item:hover
+{
+	background-color: transparent !important;
+}
+
+.setting-drop-down .dropdown-item.btn-info:hover {
+    background-color: #00AFEF !important;
 }
