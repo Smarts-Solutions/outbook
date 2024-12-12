@@ -244,6 +244,12 @@
 .left-sidenav-menu .menu-arrow i {
 	width: 15px;
 }
+@media (max-width: 575px) {
+.flex-direction-sm-reverse
+{
+	flex-direction: column-reverse !important;
+}
+}
 
 @media (max-width: 1024px) {
 	body {
@@ -3530,6 +3536,8 @@ body .btn-info:hover {
     width: 100%;
     display: block;
     word-wrap: break-word;
+	
+    white-space: break-spaces;
 }
 .accordion-button:not(.collapsed) {
 	background: #EBF4F7 !important;

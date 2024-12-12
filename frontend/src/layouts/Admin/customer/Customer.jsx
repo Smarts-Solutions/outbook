@@ -388,16 +388,16 @@ const Customer = () => {
     <div className="container-fluid">
       <div className="content-title">
         <div className="row">
-          <div className="col-md-8">
+          <div className="col-md-6 col-sm-5">
             <div className="tab-title">
               <h3 className="mt-0">Customers</h3>
             </div>
           </div>
           {role === "ADMIN" || role === "SUPERADMIN" ? (
-            <div className="col-md-4">
+            <div className="col-md-6 col-sm-7">
               <Link
                 to="/admin/addcustomer"
-                className="btn btn-outline-info  fw-bold float-end border-3"
+                className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
               >
                 <i className="fa fa-plus" /> Add Customer
               </Link>
