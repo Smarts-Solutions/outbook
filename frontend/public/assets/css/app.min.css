@@ -3522,13 +3522,15 @@ body .btn-info:hover {
 }
 
 .accordion-header .accordion-button {
-	color: #4B4B4B !important;
-	background-color: transparent;
-	outline: 0 !important;
-	padding: 5px 14px !important;
-	font-weight: 600;
+    color: #4B4B4B !important;
+    background-color: transparent;
+    outline: 0 !important;
+    padding: 5px 14px !important;
+    font-weight: 600;
+    width: 100%;
+    display: block;
+    word-wrap: break-word;
 }
-
 .accordion-button:not(.collapsed) {
 	background: #EBF4F7 !important;
 	border-radius: 21px 21px 0px 0px !important;
