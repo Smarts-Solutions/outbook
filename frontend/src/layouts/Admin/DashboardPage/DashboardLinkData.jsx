@@ -488,7 +488,7 @@ const JobStatus = () => {
             className={` ${row.status === "1" ? "text-success" : "text-danger"
               }`}
           >
-            {row.status === "1" ? "Active" : "Deactive"}
+            {row.status === "1" ? "Active" : "Inactive"}
           </span>
         </div>
       ),

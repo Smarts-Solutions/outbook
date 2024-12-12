@@ -772,6 +772,7 @@ const CreateJob = () => {
                                       id="ClientJobCode"
                                       autoFocus={true}
                                       onChange={HandleChange}
+                                      maxLength={50}
                                       value={jobData.ClientJobCode}
                                     />
                                     {errors["ClientJobCode"] && (

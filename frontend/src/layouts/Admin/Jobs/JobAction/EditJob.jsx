@@ -861,7 +861,7 @@ const EditJob = () => {
                                       autoFocus={true}
                                       onChange={HandleChange}
                                       value={jobData.ClientJobCode}
-                                      maxLength={30}
+                                      maxLength={50}
                                     />
                                     {errors["ClientJobCode"] && (
                                       <div className="error-text">
