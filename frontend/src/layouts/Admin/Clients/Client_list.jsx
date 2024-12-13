@@ -316,7 +316,7 @@ const ClientList = () => {
       reorder: false,
     },
     {
-      name: "Account Manager",
+      name: "Client Contact Person",
 
       cell: (row) => (
         <div
@@ -870,7 +870,7 @@ const ClientList = () => {
                   ))}
                 </ul>
               </div>
-              <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-contene-end">
+              <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end">
                 {activeTab === "client" ||
                   activeTab === "checklist" ||
                   activeTab === "" ||

@@ -229,7 +229,7 @@ const ClientList = () => {
     },
 
     {
-      name: "Client Manager",
+      name: "Client Contact Person",
       cell: (row) => (
         <div title={ row.account_manager_officer_first_name +
           " " +
