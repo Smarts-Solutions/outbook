@@ -93,6 +93,9 @@ const Dashboard = () => {
 
 
   const handleClick = async(type , data , heading) => {
+    if(parseInt(data.count) === 0){
+      return;
+    }
     const req  = {staff_id : staffDetails.id , key : type , ids : data.ids, heading : heading}
     navigate("/admin/dashboard/data", { state: { req: req } });
   }
