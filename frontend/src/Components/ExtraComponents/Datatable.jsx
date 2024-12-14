@@ -42,10 +42,10 @@ const Datatable = ({ columns, data, filter }) => {
               noHeader
               defaultSortField="JobId"
               defaultSortAsc={false}
-              pagination
-              onColumnOrderChange={cols => console.log(cols)}
+             // pagination
+             // onColumnOrderChange={cols => console.log(cols)}
               highlightOnHover
-              paginationRowsPerPageOptions={[10, 50, 100]}
+            //  paginationRowsPerPageOptions={[10, 50, 100]}
               paginationComponentOptions={{ selectAllRowsItem: true, selectAllRowsItemText: 'All' }}
             />
           </DataTableExtensions>

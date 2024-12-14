@@ -6,7 +6,6 @@ import { GET_ALL_CUSTOMERS } from "../../../ReduxStore/Slice/Customer/CustomerSl
 import { Update_Customer_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getDateRange } from "../../../Utils/Comman_function";
 import Swal from "sweetalert2";
-import ReactPaginate from "react-paginate";
 
 const Customer = () => {
   const navigate = useNavigate();
@@ -315,59 +314,32 @@ const Customer = () => {
   ];
 
   useEffect(() => {
-  //  GetAllCustomerData();
+    GetAllCustomerData();
   }, []);
 
   useEffect(() => {
-  //  GetAllCustomerData();
+    GetAllCustomerData();
   }, [selectedTab]);
 
   const handleTabChange = (event) => {
     setSelectedTab(event.target.value);
   };
 
-
-
-  ////////////////////////////////////
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalRecords, setTotalRecords] = useState(0);
-
-  const handlePageChange = (selected) => {
-    console.log("dd",selected.selected);
-    const newPage = selected.selected + 1; // Pagination libraries use 0-based indexing.
-    setCurrentPage(newPage);
-    GetAllCustomerData(newPage, pageSize); // Fetch data for the new page.
-  };
-
-  const handlePageSizeChange = (event) => {
-    const newSize = parseInt(event.target.value, 10);
-    setPageSize(newSize);
-    setCurrentPage(1); // Reset to the first page
-    GetAllCustomerData(1, newSize); // Fetch data with new page size
-  };
-
-
-
-  const GetAllCustomerData = async (page = 1, limit = 10) => {
-    const req = { action: 'get', staff_id: staffDetails.id , page, limit };
+  const GetAllCustomerData = async () => {
+    const req = { action: 'get', staff_id: staffDetails.id };
     const data = { req, authToken: token };
 
     try {
       const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
 
       if (response.status) {
-        const filteredData = response.data.data.filter((item) => {
+        const filteredData = response.data.filter((item) => {
           const itemDate = new Date(item.created_at);
           const { startDate, endDate } = getDateRange(selectedTab);
           return itemDate >= startDate && itemDate <= endDate;
         });
 
         setFilteredData(filteredData);
-        setTotalRecords(response.data.pagination.totalItems);
-        // setCustomerData(response.data.pagination.totalItems);
-      
       } else {
         setFilteredData([]);
       }
@@ -447,11 +419,11 @@ const Customer = () => {
 
       <div className="report-data mt-4">
         <div className="col-sm-12">
-          <div className="page-title-box pt-0 pb-0">
+          <div className="page-title-box pt-0">
             <div className="row align-items-start justify-content-end">
               <div className="col-4">
                 <div className="form-group mb-2 mt-1 pe-3 pt-5">
-
+                 
                 </div>
               </div>
 
@@ -463,26 +435,7 @@ const Customer = () => {
                   <div className="card-datatable">
                     <div className="card-datatable">
                       <Datatable columns={columns} data={filteredData} />
-
-                      {/* Pagination Controls */}
-                      <ReactPaginate
-                        previousLabel={"Previous"}
-                        nextLabel={"Next"}
-                        breakLabel={"..."}
-                        pageCount={Math.ceil(totalRecords / pageSize)}
-                        marginPagesDisplayed={2}
-                        pageRangeDisplayed={5}
-                        onPageChange={handlePageChange}
-                        containerClassName={"pagination"}
-                        activeClassName={"active"}
-                      />
                     </div>
-                    <select className="perpage-select" value={pageSize} onChange={handlePageSizeChange}>
-                      <option value={5}>5</option>
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                      <option value={50}>50</option>
-                    </select>
                   </div>
                 </div>
               </div>

@@ -4552,3 +4552,19 @@ i.exp_icon {
 
     width: 96%;
 }
+ul.pagination {
+    margin-top: 20px;
+}
+ul.pagination li {
+    padding: 2px 8px;
+    border: 1px solid #4b4b4b;
+    margin: 2px;
+    border-radius: 3px;
+}
+.perpage-select {
+    border-radius: 3px;
+    border: 1px solid #4b4b4b;
+    padding: 5px 8px;
+    float: right;
+    margin-top: -45px;
+}
