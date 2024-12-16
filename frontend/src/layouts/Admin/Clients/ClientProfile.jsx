@@ -385,8 +385,8 @@ const ClientList = () => {
     <div className="container-fluid">
       <div className="col-sm-12">
         <div className="page-title-box">
-          <div className="row align-items-start">
-            <div className="col-md-8">
+          <div className="row align-items-start flex-md-row flex-column-reverse">
+            <div className=" col-md-6 col-lg-8">
               <ul
                 className="nav nav-pills rounded-tabs"
                 id="pills-tab"
@@ -415,17 +415,10 @@ const ClientList = () => {
             </div>
             {activeTab == "NoOfJobs" && (
               <>
-                <div className="col-md-4 col-auto">
-                  {
-                    (getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN") && (
-                      <div className="btn btn-info text-white float-end blue-btn ms-2" onClick={handleCreateJob}   >
-                        <i className="fa fa-plus pe-1" /> Create Job
-                      </div>
-                    )
-                  }
-                  <button
+                <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
+                <button
                     type="button"
-                    className="btn btn-info text-white float-end blue-btn"
+                    className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
 
                     onClick={() => {
                       sessionStorage.setItem('activeTab', location.state.activeTab);
@@ -435,6 +428,14 @@ const ClientList = () => {
                   >
                     <i className="fa fa-arrow-left pe-1" /> Back
                   </button>
+                  {
+                    (getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN") && (
+                      <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={handleCreateJob}   >
+                        <i className="fa fa-plus pe-1" /> Create Job
+                      </div>
+                    )
+                  }
+                  
                 </div>
               </>
             )}

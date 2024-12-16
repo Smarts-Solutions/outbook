@@ -245,6 +245,34 @@
 	width: 15px;
 }
 @media (max-width: 575px) {
+
+	.breadcrumb {
+		display: block !important;
+		border-radius: 0 !important;
+		overflow: visible !important;
+		margin: auto;
+		text-align: center;
+		margin-top: 5px !important;
+		/* top: 56% !important; */
+		width: 100%;
+		height: auto !important;
+		transform: translateY(0%);
+		box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+		z-index: 1;
+		background-color: #fff;
+		font-size: 14px;
+		padding: 0px 0px;
+		transition: 0.3s linear;
+	}
+	.breadcrumb a.active, .breadcrumb a:hover {
+		
+		border-left: 0 !important;
+	}
+	.breadcrumb a {
+		
+		margin-top: 5px !important;
+		
+	}
 .flex-direction-sm-reverse
 {
 	flex-direction: column-reverse !important;
@@ -283,10 +311,13 @@
 		min-height: 100vh;
 		padding: 0 0 50px 0;
 	}
-	
+	.enlarge-menu .page-wrapper {
+		
+		margin-left: 200px;
+	}
 	.enlarge-menu .page-wrapper .page-content {
 		width: calc(100% - 200px);
-		margin-left: 200px;
+		margin-left: 200px ;
 	}
 	body.dark-sidenav .left-sidenav-menu li>a {
 		
@@ -295,6 +326,19 @@
 	}
 	span.sidebar-icons {
 		padding-right: 8px !important;
+	}
+	span.breadcrumb__title {
+		FONT-SIZE: 12px !important;
+	}
+	button.btn.btn-info, .blue-btn, .swal2-confirm,.btn-outline-info {
+		
+		padding: 8px 15px !important;
+		font-size: 13px !important;
+	
+	}
+	.datatable-container .data-table-extensions-filter {
+		width: 50% !important;
+	
 	}
 
 }
@@ -3415,7 +3459,7 @@ body .btn-info:hover {
 	color: #00AFEF !important;
 	border-radius: 20px !important;
 	padding: 7px 20px;
-	letter-spacing: -0.75px;
+	/* letter-spacing: -0.75px; */
 }
 
 .btn-outline-info:hover {
@@ -4031,6 +4075,7 @@ button.actions-btn.btn.btn-light:hover {
 	flex-direction: column;
 	margin: auto;
 	z-index: 2;
+	width: 100%;
 }
 
 .breadcrumb__title {
@@ -4089,7 +4134,7 @@ span.breadcrumb__desc {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	width: 180px;
+	width: 100%;
 	font-size: 14px;
 }
 
@@ -4561,3 +4606,5 @@ i.exp_icon {
 .setting-drop-down .dropdown-item.btn-info:hover {
     background-color: #00AFEF !important;
 }
+
+
