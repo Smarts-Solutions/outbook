@@ -3320,7 +3320,7 @@ button.secondary-icon {
     background: none;
     border-width: 3px;
     line-height: 19px;
-    width: 40px;
+    width: 40px !important;
     height: 40px;
 }
 
