@@ -690,7 +690,7 @@ const Setting = () => {
         {
           name: "Actions",
           cell: (row) => (
-            <div className="d-flex">
+            <div className="d-lg-flex">
               {showSettingUpdateTab && (
                 <button
                   className="edit-icon"
@@ -1128,7 +1128,7 @@ const Setting = () => {
         {
           name: "Actions",
           cell: (row) => (
-            <div className="d-flex">
+            <div className="d--lg-flex">
               {showSettingUpdateTab && (
                 <button
                   className="edit-icon"
@@ -1914,7 +1914,7 @@ const Setting = () => {
                 }`}
             >
               <div className="report-data">
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-lg-flex justify-content-between align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">Customer Contact Person Role</h3>
                   </div>
@@ -1922,7 +1922,7 @@ const Setting = () => {
                     <div>
                       <button
                         type="button"
-                        className="btn btn-info text-white float-end"
+                        className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "2")}
                       >
                         <i className="fa fa-plus" /> Customer Contact Person
@@ -2163,7 +2163,7 @@ const Setting = () => {
                 }`}
             >
               <div className="report-data">
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-block d-lg-flex justify-content-between align-items-center">
                   <div className="tab-title">
                     <h3 className="mt-0">Internal Job/Project</h3>
                   </div>
@@ -2171,7 +2171,7 @@ const Setting = () => {
                     <div>
                       <button
                         type="button"
-                        className="btn btn-info text-white float-end"
+                        className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "10")}
                       >
                         <i className="fa fa-plus" /> Add Internal Job/Project

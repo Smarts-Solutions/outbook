@@ -354,12 +354,10 @@ const JobStatus = () => {
               : (
                 <span className="text-warning">Inprogress</span>
               )}
-
-
           </div>
         </div>
       ),
-      selector: (row) => row.status,
+      selector: (row) => row.status=="1" ? 1 : 0,
       sortable: true,
     },
   ];
@@ -514,7 +512,7 @@ const JobStatus = () => {
                   >
                     <i className="fa fa-arrow-left pe-1" /> Back
                   </div>
-                  {(role === "ADMIN" || role === "SUPERADMIN" ||  getAccessData.insert === 1) && location?.state?.req?.heading=="Customers" ? (
+                  {(role === "ADMIN" || role === "SUPERADMIN" || getAccessData.insert === 1) && location?.state?.req?.heading == "Customers" ? (
                     <div className="ms-2">
                       <Link
                         to="/admin/addcustomer"
