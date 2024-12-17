@@ -583,108 +583,109 @@ ORDER BY
             const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id,limit, offset]);
             result = resultAllocated;
             total = result.length;
-        //     if (resultAllocated.length > 0) {
-        //         const query = `
-        //     SELECT  
-        //     customers.id AS id,
-        //     customers.customer_type AS customer_type,
-        //     customers.staff_id AS staff_id,
-        //     customers.account_manager_id AS account_manager_id,
-        //     customers.trading_name AS trading_name,
-        //     customers.customer_code AS customer_code,
-        //     customers.trading_address AS trading_address,
-        //     customers.vat_registered AS vat_registered,
-        //     customers.vat_number AS vat_number,
-        //     customers.website AS website,
-        //     customers.form_process AS form_process,
-        //     customers.created_at AS created_at,
-        //     customers.updated_at AS updated_at,
-        //     customers.status AS status,
-        //     staff1.first_name AS staff_firstname, 
-        //     staff1.last_name AS staff_lastname,
-        //     staff2.first_name AS account_manager_firstname, 
-        //     staff2.last_name AS account_manager_lastname,
-        //     customer_company_information.company_name AS company_name,
-        //     customer_company_information.company_number AS company_number,
-        //     CONCAT(
-        //     'cust_', 
-        //     SUBSTRING(customers.trading_name, 1, 3), '_',
-        //     SUBSTRING(customers.customer_code, 1, 15)
-        //     ) AS customer_code
-        // FROM 
-        //     customers
-        // JOIN 
-        //     customer_services ON customer_services.customer_id = customers.id
-        // JOIN 
-        //     customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
-        // JOIN 
-        //     staffs AS staff1 ON customers.staff_id = staff1.id
-        // JOIN 
-        //     staffs AS staff2 ON customers.account_manager_id = staff2.id
-        // LEFT JOIN 
-        //     customer_company_information ON customers.id = customer_company_information.customer_id
-        // WHERE customer_service_account_managers.account_manager_id = ? OR customers.staff_id= ?
-        // GROUP BY 
-        // customers.id
-        // ORDER BY 
-        // customers.id DESC
-        // LIMIT ? OFFSET ?;
-        //     `;
-        //         const [resultAllocated2] = await pool.execute(query, [staff_id, staff_id,limit, offset]);
-        //         result = resultAllocated2;
-        //         console.log("result 2 ",result.length)
-        //     } else {
+            if (resultAllocated.length > 0) {
+                const query = `
+            SELECT  
+            customers.id AS id,
+            customers.customer_type AS customer_type,
+            customers.staff_id AS staff_id,
+            customers.account_manager_id AS account_manager_id,
+            customers.trading_name AS trading_name,
+            customers.customer_code AS customer_code,
+            customers.trading_address AS trading_address,
+            customers.vat_registered AS vat_registered,
+            customers.vat_number AS vat_number,
+            customers.website AS website,
+            customers.form_process AS form_process,
+            customers.created_at AS created_at,
+            customers.updated_at AS updated_at,
+            customers.status AS status,
+            staff1.first_name AS staff_firstname, 
+            staff1.last_name AS staff_lastname,
+            staff2.first_name AS account_manager_firstname, 
+            staff2.last_name AS account_manager_lastname,
+            customer_company_information.company_name AS company_name,
+            customer_company_information.company_number AS company_number,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
+        FROM 
+            customers
+        JOIN 
+            customer_services ON customer_services.customer_id = customers.id
+        JOIN 
+            customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
+        JOIN 
+            staffs AS staff1 ON customers.staff_id = staff1.id
+        JOIN 
+            staffs AS staff2 ON customers.account_manager_id = staff2.id
+        LEFT JOIN 
+            customer_company_information ON customers.id = customer_company_information.customer_id
+        WHERE customer_service_account_managers.account_manager_id = ? OR customers.staff_id= ?
+        GROUP BY 
+        customers.id
+        ORDER BY 
+        customers.id DESC
+        LIMIT ? OFFSET ?;
+            `;
+                const [resultAllocated2] = await pool.execute(query, [staff_id, staff_id,limit, offset]);
+                result = resultAllocated2;
+                total = result.length;
+                console.log("result 2 ",result.length)
+            } else {
 
-        //         const query = `
-        //         SELECT  
-        //         customers.id AS id,
-        //         customers.customer_type AS customer_type,
-        //         customers.staff_id AS staff_id,
-        //         customers.account_manager_id AS account_manager_id,
-        //         customers.trading_name AS trading_name,
-        //         customers.customer_code AS customer_code,
-        //         customers.trading_address AS trading_address,
-        //         customers.vat_registered AS vat_registered,
-        //         customers.vat_number AS vat_number,
-        //         customers.website AS website,
-        //         customers.form_process AS form_process,
-        //         customers.created_at AS created_at,
-        //         customers.updated_at AS updated_at,
-        //         customers.status AS status,
-        //         staff1.first_name AS staff_firstname, 
-        //         staff1.last_name AS staff_lastname,
-        //         staff2.first_name AS account_manager_firstname, 
-        //         staff2.last_name AS account_manager_lastname,
-        //         customer_company_information.company_name AS company_name,
-        //         customer_company_information.company_number AS company_number,
-        //         CONCAT(
-        //         'cust_', 
-        //         SUBSTRING(customers.trading_name, 1, 3), '_',
-        //         SUBSTRING(customers.customer_code, 1, 15)
-        //         ) AS customer_code
-        //     FROM 
-        //         customers
-        //     JOIN 
-        //         customer_services ON customer_services.customer_id = customers.id
-        //     JOIN 
-        //         customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
-        //     JOIN 
-        //         staffs AS staff1 ON customers.staff_id = staff1.id
-        //     JOIN 
-        //         staffs AS staff2 ON customers.account_manager_id = staff2.id
-        //     LEFT JOIN 
-        //         customer_company_information ON customers.id = customer_company_information.customer_id
-        //     WHERE customer_service_account_managers.account_manager_id = ? OR customers.staff_id= ?
-        //     GROUP BY 
-        //     customers.id
-        //     ORDER BY 
-        //     customers.id DESC;
-        //         `;
-        //         const [resultAllocated3] = await pool.execute(query, [staff_id, staff_id]);
-        //         result = resultAllocated3;
-        //         console.log("result 3 ",result.length)
+                const query = `
+                SELECT  
+                customers.id AS id,
+                customers.customer_type AS customer_type,
+                customers.staff_id AS staff_id,
+                customers.account_manager_id AS account_manager_id,
+                customers.trading_name AS trading_name,
+                customers.customer_code AS customer_code,
+                customers.trading_address AS trading_address,
+                customers.vat_registered AS vat_registered,
+                customers.vat_number AS vat_number,
+                customers.website AS website,
+                customers.form_process AS form_process,
+                customers.created_at AS created_at,
+                customers.updated_at AS updated_at,
+                customers.status AS status,
+                staff1.first_name AS staff_firstname, 
+                staff1.last_name AS staff_lastname,
+                staff2.first_name AS account_manager_firstname, 
+                staff2.last_name AS account_manager_lastname,
+                customer_company_information.company_name AS company_name,
+                customer_company_information.company_number AS company_number,
+                CONCAT(
+                'cust_', 
+                SUBSTRING(customers.trading_name, 1, 3), '_',
+                SUBSTRING(customers.customer_code, 1, 15)
+                ) AS customer_code
+            FROM 
+                customers
+            JOIN 
+                customer_services ON customer_services.customer_id = customers.id
+            JOIN 
+                customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
+            JOIN 
+                staffs AS staff1 ON customers.staff_id = staff1.id
+            JOIN 
+                staffs AS staff2 ON customers.account_manager_id = staff2.id
+            LEFT JOIN 
+                customer_company_information ON customers.id = customer_company_information.customer_id
+            WHERE customer_service_account_managers.account_manager_id = ? OR customers.staff_id= ?
+            GROUP BY 
+            customers.id
+            ORDER BY 
+            customers.id DESC;
+                `;
+                const [resultAllocated3] = await pool.execute(query, [staff_id, staff_id]);
+                result = resultAllocated3;
+                console.log("result 3 ",result.length)
 
-        //     }
+            }
 
         }
         // Reviewer

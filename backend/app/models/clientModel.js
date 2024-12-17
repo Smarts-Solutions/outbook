@@ -374,7 +374,7 @@ const getClient = async (client) => {
         LEFT JOIN 
           staffs ON customers.staff_id = staffs.id   
         WHERE 
-          (jobs.allocated_to = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?)
+          (jobs.allocated_to = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?) OR clients.customer_id = ?
         GROUP BY 
         CASE 
             WHEN jobs.allocated_to = ? THEN jobs.client_id
@@ -383,7 +383,7 @@ const getClient = async (client) => {
         ORDER BY 
         clients.id DESC
             `;
-          const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId,StaffUserId,StaffUserId,StaffUserId,StaffUserId]);
+          const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId,StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId]);
           if(resultAllocated.length == 0){
             return { status: true, message: "success.", data: resultAllocated };
           }
@@ -434,7 +434,7 @@ const getClient = async (client) => {
         LEFT JOIN 
           customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id   
           WHERE 
-          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?  OR clients.staff_created_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
+          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?  OR clients.staff_created_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR clients.customer_id = ?
         ORDER BY 
         clients.id DESC
             `;
@@ -443,7 +443,7 @@ const getClient = async (client) => {
           // (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
 
 
-          const [resultAccounrManage] = await pool.execute(query, [StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId]);
+          const [resultAccounrManage] = await pool.execute(query, [StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId,customer_id]);
           if(resultAccounrManage.length == 0){
             return { status: true, message: "success.", data: resultAccounrManage };
           }
@@ -493,7 +493,7 @@ const getClient = async (client) => {
         LEFT JOIN 
           staffs ON customers.staff_id = staffs.id
         WHERE 
-          (jobs.reviewer = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?)
+          (jobs.reviewer = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id = ?
         GROUP BY
         CASE 
             WHEN jobs.reviewer = ? THEN jobs.client_id 
@@ -504,7 +504,7 @@ const getClient = async (client) => {
             `;
 
    
-            const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id,StaffUserId, StaffUserId,StaffUserId,StaffUserId,StaffUserId]);
+            const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id,StaffUserId, StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId]);
 
             if(resultReviewer.length == 0){
               return { status: true, message: "success.", data: resultReviewer };
@@ -632,7 +632,7 @@ const getClient = async (client) => {
         LEFT JOIN 
           staffs ON customers.staff_id = staffs.id   
         WHERE 
-          (jobs.allocated_to = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?)
+          (jobs.allocated_to = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?) OR clients.customer_id = ?
         GROUP BY 
         CASE 
             WHEN jobs.allocated_to = ? THEN jobs.client_id
@@ -641,7 +641,7 @@ const getClient = async (client) => {
         ORDER BY 
         clients.id DESC
             `;
-          const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId,StaffUserId,StaffUserId,StaffUserId,StaffUserId]);
+          const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId,StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId]);
           if(resultAllocated.length == 0){
             return { status: true, message: "success.", data: resultAllocated };
           }
@@ -692,7 +692,7 @@ const getClient = async (client) => {
         LEFT JOIN 
           customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id   
           WHERE 
-          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ? OR clients.staff_created_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
+          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ? OR clients.staff_created_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR clients.customer_id = ?
         ORDER BY 
         clients.id DESC
             `;
@@ -701,7 +701,7 @@ const getClient = async (client) => {
           // (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
 
 
-          const [resultAccounrManage] = await pool.execute(query, [StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId]);
+          const [resultAccounrManage] = await pool.execute(query, [StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId,customer_id]);
           if(resultAccounrManage.length == 0){
             return { status: true, message: "success.", data: resultAccounrManage };
           }
@@ -751,7 +751,7 @@ const getClient = async (client) => {
         LEFT JOIN 
           staffs ON customers.staff_id = staffs.id
         WHERE 
-          (jobs.reviewer = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?)
+          (jobs.reviewer = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id = ?
         GROUP BY
         CASE 
             WHEN jobs.reviewer = ? THEN jobs.client_id 
@@ -762,7 +762,7 @@ const getClient = async (client) => {
             `;
 
    
-            const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id,StaffUserId, StaffUserId,StaffUserId,StaffUserId,StaffUserId]);
+            const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id,StaffUserId, StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId]);
 
             if(resultReviewer.length == 0){
               return { status: true, message: "success.", data: resultReviewer };
