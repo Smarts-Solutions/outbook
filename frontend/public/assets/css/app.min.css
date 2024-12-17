@@ -246,6 +246,11 @@
 }
 @media (max-width: 575px) {
 
+	.rdt_Pagination button{
+		width: 30px !important;
+		height: 30px !important;
+	}
+
 	.breadcrumb {
 		display: block !important;
 		border-radius: 0 !important;
@@ -4598,6 +4603,7 @@ i.exp_icon {
 
     width: 96%;
 }
+
 .setting-drop-down .dropdown-item:hover
 {
 	background-color: transparent !important;
@@ -4608,3 +4614,20 @@ i.exp_icon {
 }
 
 
+
+ul.pagination {
+    margin-top: 20px;
+}
+ul.pagination li {
+    padding: 2px 8px;
+    border: 1px solid #4b4b4b;
+    margin: 2px;
+    border-radius: 3px;
+}
+.perpage-select {
+    border-radius: 3px;
+    border: 1px solid #4b4b4b;
+    padding: 5px 8px;
+    float: right;
+    margin-top: -45px;
+}
