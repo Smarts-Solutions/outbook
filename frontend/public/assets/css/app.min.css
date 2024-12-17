@@ -246,6 +246,11 @@
 }
 @media (max-width: 575px) {
 
+	.rdt_Pagination button{
+		width: 30px !important;
+		height: 30px !important;
+	}
+
 	.breadcrumb {
 		display: block !important;
 		border-radius: 0 !important;
