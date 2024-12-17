@@ -65,7 +65,7 @@ const Profile = () => {
                     </li>
                     <li className="mb-3">
                       <i className="fa-regular fa-phone mr-2 text-secondary font-22 align-middle" />{" "}
-                      <b>phone :</b>{" "}
+                      <b>Phone :</b>{" "}
                       {getProfileDetails && getProfileDetails.phone || 'NA'}
                     </li>
                     <li className="mb-3">

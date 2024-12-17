@@ -388,8 +388,12 @@ const createCustomer = async (customer) => {
 };
 
 const getCustomer = async (customer) => {
-    const { staff_id } = customer;
-
+    const { staff_id  } = customer;
+         const page = parseInt(customer.page) || 1; // Default to page 1
+        const limit = parseInt(customer.limit) || 10; // Default to 10 items per page
+        const offset = (page - 1) * limit;
+    
+    console.log("customer", customer);
 
     const QueryRole = `
   SELECT
@@ -407,6 +411,10 @@ const getCustomer = async (customer) => {
     const [rows] = await pool.execute(QueryRole);
     // Condition with Admin And SuperAdmin
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+
+        const countQuery = `SELECT COUNT(*) AS total FROM customers`;
+        const [[{ total }]] = await pool.execute(countQuery);
+
         const query = `
     SELECT  
     customers.id AS id,
@@ -442,13 +450,30 @@ JOIN
 LEFT JOIN 
     customer_company_information ON customers.id = customer_company_information.customer_id   
 ORDER BY 
-    customers.id DESC;
+    customers.id DESC
+LIMIT ? OFFSET ?
+    ;
     `;
-        const [result] = await pool.execute(query);
-        return { status: true, message: 'Success..', data: result };
+        const [result] = await pool.execute(query, [limit, offset]);
+       
+        return {
+            status: true,
+            message: 'Success..',
+            data: {data:result,pagination: {
+                totalItems: total,
+                totalPages: Math.ceil(total / limit),
+                currentPage: page,
+                limit
+            }},
+            
+        };
+        
+       // return { status: true, message: 'Success..', data: result };
     }
     let result = []
+    let total = 0;
     if (rows.length > 0) {
+        
         // Allocated to
         if (rows[0].role_id == 3) {
             const query = `
@@ -496,15 +521,18 @@ GROUP BY
     END
 ORDER BY 
     customers.id DESC
+     LIMIT ? OFFSET ?
+
+
             `;
-            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
+            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id,limit, offset]);
             result = resultAllocated
+            total = result.length;
 
         }
         // Account Manger
         else if (rows[0].role_id == 4) {
-
-
+            
             const query = `
             SELECT  
             customers.id AS id,
@@ -548,110 +576,115 @@ ORDER BY
         ELSE customers.id
     END
         ORDER BY 
-            customers.id DESC;
+            customers.id DESC
+        LIMIT ? OFFSET ?
+            ;
             `;
-            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
+            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id,limit, offset]);
             result = resultAllocated;
+            total = result.length;
+        //     if (resultAllocated.length > 0) {
+        //         const query = `
+        //     SELECT  
+        //     customers.id AS id,
+        //     customers.customer_type AS customer_type,
+        //     customers.staff_id AS staff_id,
+        //     customers.account_manager_id AS account_manager_id,
+        //     customers.trading_name AS trading_name,
+        //     customers.customer_code AS customer_code,
+        //     customers.trading_address AS trading_address,
+        //     customers.vat_registered AS vat_registered,
+        //     customers.vat_number AS vat_number,
+        //     customers.website AS website,
+        //     customers.form_process AS form_process,
+        //     customers.created_at AS created_at,
+        //     customers.updated_at AS updated_at,
+        //     customers.status AS status,
+        //     staff1.first_name AS staff_firstname, 
+        //     staff1.last_name AS staff_lastname,
+        //     staff2.first_name AS account_manager_firstname, 
+        //     staff2.last_name AS account_manager_lastname,
+        //     customer_company_information.company_name AS company_name,
+        //     customer_company_information.company_number AS company_number,
+        //     CONCAT(
+        //     'cust_', 
+        //     SUBSTRING(customers.trading_name, 1, 3), '_',
+        //     SUBSTRING(customers.customer_code, 1, 15)
+        //     ) AS customer_code
+        // FROM 
+        //     customers
+        // JOIN 
+        //     customer_services ON customer_services.customer_id = customers.id
+        // JOIN 
+        //     customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
+        // JOIN 
+        //     staffs AS staff1 ON customers.staff_id = staff1.id
+        // JOIN 
+        //     staffs AS staff2 ON customers.account_manager_id = staff2.id
+        // LEFT JOIN 
+        //     customer_company_information ON customers.id = customer_company_information.customer_id
+        // WHERE customer_service_account_managers.account_manager_id = ? OR customers.staff_id= ?
+        // GROUP BY 
+        // customers.id
+        // ORDER BY 
+        // customers.id DESC
+        // LIMIT ? OFFSET ?;
+        //     `;
+        //         const [resultAllocated2] = await pool.execute(query, [staff_id, staff_id,limit, offset]);
+        //         result = resultAllocated2;
+        //         console.log("result 2 ",result.length)
+        //     } else {
 
-            if (resultAllocated.length > 0) {
-                const query = `
-            SELECT  
-            customers.id AS id,
-            customers.customer_type AS customer_type,
-            customers.staff_id AS staff_id,
-            customers.account_manager_id AS account_manager_id,
-            customers.trading_name AS trading_name,
-            customers.customer_code AS customer_code,
-            customers.trading_address AS trading_address,
-            customers.vat_registered AS vat_registered,
-            customers.vat_number AS vat_number,
-            customers.website AS website,
-            customers.form_process AS form_process,
-            customers.created_at AS created_at,
-            customers.updated_at AS updated_at,
-            customers.status AS status,
-            staff1.first_name AS staff_firstname, 
-            staff1.last_name AS staff_lastname,
-            staff2.first_name AS account_manager_firstname, 
-            staff2.last_name AS account_manager_lastname,
-            customer_company_information.company_name AS company_name,
-            customer_company_information.company_number AS company_number,
-            CONCAT(
-            'cust_', 
-            SUBSTRING(customers.trading_name, 1, 3), '_',
-            SUBSTRING(customers.customer_code, 1, 15)
-            ) AS customer_code
-        FROM 
-            customers
-        JOIN 
-            customer_services ON customer_services.customer_id = customers.id
-        JOIN 
-            customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
-        JOIN 
-            staffs AS staff1 ON customers.staff_id = staff1.id
-        JOIN 
-            staffs AS staff2 ON customers.account_manager_id = staff2.id
-        LEFT JOIN 
-            customer_company_information ON customers.id = customer_company_information.customer_id
-        WHERE customer_service_account_managers.account_manager_id = ? OR customers.staff_id= ?
-        GROUP BY 
-        customers.id
-        ORDER BY 
-        customers.id DESC;
-            `;
-                const [resultAllocated2] = await pool.execute(query, [staff_id, staff_id]);
-                result = resultAllocated2;
-            } else {
+        //         const query = `
+        //         SELECT  
+        //         customers.id AS id,
+        //         customers.customer_type AS customer_type,
+        //         customers.staff_id AS staff_id,
+        //         customers.account_manager_id AS account_manager_id,
+        //         customers.trading_name AS trading_name,
+        //         customers.customer_code AS customer_code,
+        //         customers.trading_address AS trading_address,
+        //         customers.vat_registered AS vat_registered,
+        //         customers.vat_number AS vat_number,
+        //         customers.website AS website,
+        //         customers.form_process AS form_process,
+        //         customers.created_at AS created_at,
+        //         customers.updated_at AS updated_at,
+        //         customers.status AS status,
+        //         staff1.first_name AS staff_firstname, 
+        //         staff1.last_name AS staff_lastname,
+        //         staff2.first_name AS account_manager_firstname, 
+        //         staff2.last_name AS account_manager_lastname,
+        //         customer_company_information.company_name AS company_name,
+        //         customer_company_information.company_number AS company_number,
+        //         CONCAT(
+        //         'cust_', 
+        //         SUBSTRING(customers.trading_name, 1, 3), '_',
+        //         SUBSTRING(customers.customer_code, 1, 15)
+        //         ) AS customer_code
+        //     FROM 
+        //         customers
+        //     JOIN 
+        //         customer_services ON customer_services.customer_id = customers.id
+        //     JOIN 
+        //         customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
+        //     JOIN 
+        //         staffs AS staff1 ON customers.staff_id = staff1.id
+        //     JOIN 
+        //         staffs AS staff2 ON customers.account_manager_id = staff2.id
+        //     LEFT JOIN 
+        //         customer_company_information ON customers.id = customer_company_information.customer_id
+        //     WHERE customer_service_account_managers.account_manager_id = ? OR customers.staff_id= ?
+        //     GROUP BY 
+        //     customers.id
+        //     ORDER BY 
+        //     customers.id DESC;
+        //         `;
+        //         const [resultAllocated3] = await pool.execute(query, [staff_id, staff_id]);
+        //         result = resultAllocated3;
+        //         console.log("result 3 ",result.length)
 
-                const query = `
-                SELECT  
-                customers.id AS id,
-                customers.customer_type AS customer_type,
-                customers.staff_id AS staff_id,
-                customers.account_manager_id AS account_manager_id,
-                customers.trading_name AS trading_name,
-                customers.customer_code AS customer_code,
-                customers.trading_address AS trading_address,
-                customers.vat_registered AS vat_registered,
-                customers.vat_number AS vat_number,
-                customers.website AS website,
-                customers.form_process AS form_process,
-                customers.created_at AS created_at,
-                customers.updated_at AS updated_at,
-                customers.status AS status,
-                staff1.first_name AS staff_firstname, 
-                staff1.last_name AS staff_lastname,
-                staff2.first_name AS account_manager_firstname, 
-                staff2.last_name AS account_manager_lastname,
-                customer_company_information.company_name AS company_name,
-                customer_company_information.company_number AS company_number,
-                CONCAT(
-                'cust_', 
-                SUBSTRING(customers.trading_name, 1, 3), '_',
-                SUBSTRING(customers.customer_code, 1, 15)
-                ) AS customer_code
-            FROM 
-                customers
-            JOIN 
-                customer_services ON customer_services.customer_id = customers.id
-            JOIN 
-                customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
-            JOIN 
-                staffs AS staff1 ON customers.staff_id = staff1.id
-            JOIN 
-                staffs AS staff2 ON customers.account_manager_id = staff2.id
-            LEFT JOIN 
-                customer_company_information ON customers.id = customer_company_information.customer_id
-            WHERE customer_service_account_managers.account_manager_id = ? OR customers.staff_id= ?
-            GROUP BY 
-            customers.id
-            ORDER BY 
-            customers.id DESC;
-                `;
-                const [resultAllocated3] = await pool.execute(query, [staff_id, staff_id]);
-                result = resultAllocated3;
-
-            }
+        //     }
 
         }
         // Reviewer
@@ -700,10 +733,12 @@ ORDER BY
         ELSE customers.id
     END
         ORDER BY 
-            customers.id DESC;
+            customers.id DESC
+             LIMIT ? OFFSET ?;
             `;
-            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
+            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id,limit, offset]);
             result = resultAllocated
+            total = result.length;
 
         }
         else {
@@ -743,16 +778,28 @@ ORDER BY
             customer_company_information ON customers.id = customer_company_information.customer_id
         WHERE staff1.id = ?   
         ORDER BY 
-            customers.id DESC;
+            customers.id DESC
+            LIMIT ? OFFSET ?;
             `;
-            const [result1] = await pool.execute(query, [staff_id]);
+            const [result1] = await pool.execute(query, [staff_id,limit, offset]);
             result = result1
+            total = result.length;
         }
     }
 
     try {
-
-        return { status: true, message: 'Success..', data: result };
+        return {
+            status: true,
+            message: 'Success..',
+            data: {data:result,pagination: {
+                totalItems: total,
+                totalPages: Math.ceil(total / limit),
+                currentPage: page,
+                limit
+            }},
+            
+        };
+       // return { status: true, message: 'Success..', data: result };
 
     } catch (err) {
 
@@ -760,6 +807,7 @@ ORDER BY
     }
 
 }
+
 
 const deleteCustomer = async (customer) => {
     // if(parseInt(customer_id)  > 0){
@@ -2361,11 +2409,6 @@ const customerUpdate = async (customer) => {
     //  Page Status 2 Service Part
     else if (pageStatus === "2") {
         const { services, Task } = customer;
-
-        console.log("services", services)
-        console.log("Task", Task)
-
-
         const [ExistServiceids] = await pool.execute('SELECT service_id  FROM `customer_services` WHERE customer_id =' + customer_id);
         const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
         var account_manager_id = ExistCustomer[0].account_manager_id;
@@ -2536,10 +2579,10 @@ WHERE service_id = ${service_id} AND customer_id = 0;
 
 
         if (Task.length > 0) {
+        
             const checklistName = Task[0].checklistName;
             const JobTypeId = Task[0].JobTypeId;
             const serviceId = Task[0].serviceId;
-
             const client_type_id = customer_type
             const checkQueryChecklist = `
     SELECT id FROM checklists WHERE customer_id = ? AND service_id = ? AND job_type_id = ? AND client_type_id = ? AND check_list_name = ?
@@ -2553,10 +2596,10 @@ WHERE service_id = ${service_id} AND customer_id = 0;
                 const [result] = await pool.execute(insertChecklistQuery, [customer_id, serviceId, JobTypeId, client_type_id, checklistName]);
                 const checklist_id = result.insertId;
 
-                if (Task[0].Task.length > 0) {
-                    for (const tsk_name of Task[0].Task) {
-                        const TaskName = tsk_name.TaskName;
-                        const BudgetHour = tsk_name.BudgetHour;
+                if (Task.length > 0) {
+                    for (const tsk_name of Task) {
+                        const TaskName = tsk_name.Task[0].TaskName;
+                        const BudgetHour = tsk_name.Task[0].BudgetHour;
                         const checkQuery = `SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?`;
                         const [existing] = await pool.execute(checkQuery, [TaskName, serviceId, JobTypeId,
                         ]);

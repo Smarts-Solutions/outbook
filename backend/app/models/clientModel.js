@@ -434,7 +434,7 @@ const getClient = async (client) => {
         LEFT JOIN 
           customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id   
           WHERE 
-          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
+          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?  OR clients.staff_created_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
         ORDER BY 
         clients.id DESC
             `;
@@ -443,7 +443,7 @@ const getClient = async (client) => {
           // (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
 
 
-          const [resultAccounrManage] = await pool.execute(query, [StaffUserId,StaffUserId,customer_id,StaffUserId]);
+          const [resultAccounrManage] = await pool.execute(query, [StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId]);
           if(resultAccounrManage.length == 0){
             return { status: true, message: "success.", data: resultAccounrManage };
           }
@@ -692,7 +692,7 @@ const getClient = async (client) => {
         LEFT JOIN 
           customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id   
           WHERE 
-          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
+          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ? OR clients.staff_created_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
         ORDER BY 
         clients.id DESC
             `;
@@ -701,7 +701,7 @@ const getClient = async (client) => {
           // (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
 
 
-          const [resultAccounrManage] = await pool.execute(query, [StaffUserId,StaffUserId,customer_id,StaffUserId]);
+          const [resultAccounrManage] = await pool.execute(query, [StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId]);
           if(resultAccounrManage.length == 0){
             return { status: true, message: "success.", data: resultAccounrManage };
           }

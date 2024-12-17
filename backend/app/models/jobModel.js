@@ -406,8 +406,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
 const getJobByCustomer = async (job) => {
   const { customer_id, StaffUserId } = job;
 
-  console.log("customer_id", customer_id)
-  console.log("StaffUserId", StaffUserId)
   try {
     const [ExistStaff] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + StaffUserId + '" LIMIT 1');
     let result = []
@@ -551,6 +549,7 @@ const getJobByCustomer = async (job) => {
         SELECT 
         jobs.id AS job_id,
         job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
         customer_contact_details.id AS account_manager_officer_id,
         customer_contact_details.first_name AS account_manager_officer_first_name,
         customer_contact_details.last_name AS account_manager_officer_last_name,
@@ -606,13 +605,13 @@ const getJobByCustomer = async (job) => {
         master_status ON master_status.id = jobs.status_type
         WHERE 
         jobs.customer_id = customers.id AND 
-        customer_service_account_managers.account_manager_id = ? AND jobs.customer_id = ?
+        customer_service_account_managers.account_manager_id = ? AND jobs.customer_id = ? OR jobs.staff_created_id = ?
         GROUP BY 
         jobs.id 
         ORDER BY 
          jobs.id DESC;
         `;
-          const [rows] = await pool.execute(query, [ExistStaff[0].id, customer_id]);
+          const [rows] = await pool.execute(query, [ExistStaff[0].id, customer_id ,ExistStaff[0].id]);
           result = rows
 
           console.log("result 2 ", result)
@@ -902,6 +901,7 @@ const getJobByClient = async (job) => {
    SELECT 
    jobs.id AS job_id,
    job_types.type AS job_type_name,
+   jobs.status_type AS status_type,
    customer_contact_details.id AS account_manager_officer_id,
    customer_contact_details.first_name AS account_manager_officer_first_name,
    customer_contact_details.last_name AS account_manager_officer_last_name,
@@ -956,13 +956,13 @@ const getJobByClient = async (job) => {
    master_status ON master_status.id = jobs.status_type   
    WHERE 
    jobs.client_id = clients.id AND
-   customer_service_account_managers.account_manager_id = ? AND jobs.client_id = ? 
+   customer_service_account_managers.account_manager_id = ? AND jobs.client_id = ? OR jobs.staff_created_id = ?
    GROUP BY 
    jobs.id
     ORDER BY
    jobs.id DESC;
    `;
-          const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, client_id]);
+          const [rowsAllocated] = await pool.execute(query, [ExistStaff[0].id, client_id ,ExistStaff[0].id]);
           result = rowsAllocated
 
        // }

@@ -318,10 +318,6 @@ LEFT JOIN
       };
       return { status: true, message: "success.", data: result };
 
-
-
-
-
     }
 
   } catch (err) {

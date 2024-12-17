@@ -51,7 +51,7 @@ const CommonModal = ({
                       className="filter-text form-control"
                       placeholder={field.placeholder}
                       value={field.value}
-                      maxLength={30}
+                      maxLength={100}
                       autoFocus={index === 0}
                       onChange={(e) => onChange(e, index)}
                     />
