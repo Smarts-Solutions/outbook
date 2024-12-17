@@ -438,7 +438,7 @@ const Customer = () => {
             </div>
           ) : (
             getAccessData.insert === 1 && (
-              <div className="col-md-4">
+              <div className="col-md-6 col-sm-7">
                 <Link
                   to="/admin/addcustomer"
                   className="btn btn-outline-info fw-bold float-end border-3"

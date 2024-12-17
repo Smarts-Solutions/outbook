@@ -86,7 +86,7 @@ const CreateCheckList = () => {
 
   const fieldErrors = {
     service_id: "Please Select Service Type",
-    job_type_id: "Please Select Job Type",
+    job_type_id: "Please e",
     check_list_name: "Please Enter Check List Name",
     status: "Please Select Status",
   };
@@ -382,7 +382,7 @@ const CreateCheckList = () => {
             <div className="col-lg-4">
               <div className="row">
                 <div className="col-lg-12">
-                  <label className="form-label"> Select Job Typ</label>
+                  <label className="form-label"> Select Job Type</label>
                   <select
                     className={errors.job_type_id ? "error-field form-select" : "form-select"}
                     // className="default-select wide form-select"

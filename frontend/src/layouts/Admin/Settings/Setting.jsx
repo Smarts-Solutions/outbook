@@ -564,7 +564,7 @@ const Setting = () => {
       name: "Role Name",
       selector: (row) => row.role_name,
       sortable: true,
-      width: "40%",
+      width: "35%",
     },
     {
       name: "Hours",
@@ -592,7 +592,7 @@ const Setting = () => {
           </span>
         </div>
       ),
-      width: "10%",
+      width: "15%",
     },
 
     ...(showSettingUpdateTab || showSettingDeleteTab
@@ -1046,9 +1046,8 @@ const Setting = () => {
           {
             name: "Actions",
             cell: (row) => (
-
               <>
-              <div className="dropdown d-lg-none setting-drop-down">
+                <div className="dropdown d-lg-none setting-drop-down">
                   <button
                     className="btn"
                     type="button"
@@ -1063,52 +1062,50 @@ const Setting = () => {
                     className="dropdown-menu custom-dropdown"
                     aria-labelledby="dropdownMenuButton"
                   >
-
-<div className="px-2">
-{showSettingUpdateTab && (
-                  <button
-                    className="edit-icon dropdown-item w-auto mb-2"
-                    onClick={() => handleEdit(row, "6")}
-                  >
-                    {" "}
-                    <i className="ti-pencil" />
-                  </button>
-                )}
-                {showSettingDeleteTab && (
-                  <button
-                    className="delete-icon dropdown-item w-auto mb-2"
-                    onClick={() => handleDelete(row, "6")}
-                  >
-                    {" "}
-                    <i className="ti-trash text-danger" />
-                  </button>
-                )}
-            </div>
-                
+                    <div className="px-2">
+                      {showSettingUpdateTab && (
+                        <button
+                          className="edit-icon dropdown-item w-auto mb-2"
+                          onClick={() => handleEdit(row, "6")}
+                        >
+                          {" "}
+                          <i className="ti-pencil" />
+                        </button>
+                      )}
+                      {showSettingDeleteTab && (
+                        <button
+                          className="delete-icon dropdown-item w-auto mb-2"
+                          onClick={() => handleDelete(row, "6")}
+                        >
+                          {" "}
+                          <i className="ti-trash text-danger" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-         <div className="d-lg-flex d-none">
-          {showSettingUpdateTab && (
-                  <button
-                    className="edit-icon"
-                    onClick={() => handleEdit(row, "6")}
-                  >
-                    {" "}
-                    <i className="ti-pencil" />
-                  </button>
-                )}
-                {showSettingDeleteTab && (
-                  <button
-                    className="delete-icon"
-                    onClick={() => handleDelete(row, "6")}
-                  >
-                    {" "}
-                    <i className="ti-trash text-danger" />
-                  </button>
-                )}</div>
+                <div className="d-lg-flex d-none">
+                  {showSettingUpdateTab && (
+                    <button
+                      className="edit-icon"
+                      onClick={() => handleEdit(row, "6")}
+                    >
+                      {" "}
+                      <i className="ti-pencil" />
+                    </button>
+                  )}
+                  {showSettingDeleteTab && (
+                    <button
+                      className="delete-icon"
+                      onClick={() => handleDelete(row, "6")}
+                    >
+                      {" "}
+                      <i className="ti-trash text-danger" />
+                    </button>
+                  )}
+                </div>
               </>
-              
             ),
             ignoreRowClick: true,
             allowOverflow: true,
@@ -2314,7 +2311,7 @@ const Setting = () => {
               }`}
             >
               <div className="report-data">
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-lg-flex justify-content-between align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">Staff Role</h3>
                   </div>
@@ -2322,7 +2319,7 @@ const Setting = () => {
                     <div>
                       <button
                         type="button"
-                        className="btn btn-info text-white float-end"
+                        className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "1")}
                       >
                         {" "}
@@ -2380,7 +2377,7 @@ const Setting = () => {
               }`}
             >
               <div className="report-data">
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-lg-flex justify-content-between align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">Job Status Name</h3>
                   </div>
@@ -2388,7 +2385,7 @@ const Setting = () => {
                     <div>
                       <button
                         type="button"
-                        className="btn btn-info text-white float-end"
+                        className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "3")}
                       >
                         <i className="fa fa-plus" /> Add Status
@@ -2412,7 +2409,7 @@ const Setting = () => {
               }`}
             >
               <div className="report-data">
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-lg-flex justify-content-between align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">Services</h3>
                   </div>
@@ -2420,7 +2417,7 @@ const Setting = () => {
                     <div>
                       <button
                         type="button"
-                        className="btn btn-info text-white float-end"
+                        className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "4")}
                       >
                         <i className="fa fa-plus" /> Add Service
@@ -2444,7 +2441,7 @@ const Setting = () => {
               }`}
             >
               <div className="report-data">
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-lg-flex justify-content-between align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">Client Industry</h3>
                   </div>
@@ -2452,7 +2449,7 @@ const Setting = () => {
                     <div>
                       <button
                         type="button"
-                        className="btn btn-info text-white float-end"
+                        className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "5")}
                       >
                         <i className="fa fa-plus" /> Add Client Industry
@@ -2476,7 +2473,7 @@ const Setting = () => {
               }`}
             >
               <div className="report-data">
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-lg-flex justify-content-between align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">Country</h3>
                   </div>
@@ -2484,7 +2481,7 @@ const Setting = () => {
                     <div>
                       <button
                         type="button"
-                        className="btn btn-info text-white float-end"
+                        className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "6")}
                       >
                         <i className="fa fa-plus" /> Add Country
@@ -2508,7 +2505,7 @@ const Setting = () => {
               }`}
             >
               <div className="report-data">
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-lg-flex justify-content-between align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">Incorporation</h3>
                   </div>
@@ -2516,7 +2513,7 @@ const Setting = () => {
                     <div>
                       <button
                         type="button"
-                        className="btn btn-info text-white float-end"
+                        className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "7")}
                       >
                         <i className="fa fa-plus" /> Add Incorporation{" "}
@@ -2540,7 +2537,7 @@ const Setting = () => {
               }`}
             >
               <div className="report-data">
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-lg-flex justify-content-between align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">Customer Source</h3>
                   </div>
@@ -2548,7 +2545,7 @@ const Setting = () => {
                     <div>
                       <button
                         type="button"
-                        className="btn btn-info text-white float-end"
+                        className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "8")}
                       >
                         <i className="fa fa-plus" /> Add Customer Source
@@ -2572,7 +2569,7 @@ const Setting = () => {
               }`}
             >
               <div className="report-data">
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-lg-flex justify-content-between align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">CheckList</h3>
                   </div>
@@ -2580,7 +2577,7 @@ const Setting = () => {
                     <div>
                       <button
                         type="button"
-                        className="btn btn-info text-white float-end"
+                        className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={() => HandleAddCheckList()}
                       >
                         <i className="fa fa-plus" /> Add CheckList

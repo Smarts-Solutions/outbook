@@ -389,7 +389,7 @@ const CreateCheckList = () => {
               <div className="col-lg-4 ">
                 <div className="row">
                   <div className="col-lg-12">
-                    <label className="form-label"> Select Job Typ</label>
+                    <label className="form-label"> Select Job Type</label>
                     <select
                       className="default-select wide form-select"
                       name="job_type_id"
