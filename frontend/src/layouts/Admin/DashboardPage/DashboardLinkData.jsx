@@ -181,7 +181,7 @@ const JobStatus = () => {
       sortable: true,
     },
     {
-      name: "Account Manager",
+      name: "Client Contact Person",
       cell: (row) => (
         <div title={row.account_manager_officer_first_name +
           " " +
@@ -323,7 +323,7 @@ const JobStatus = () => {
 
     },
     {
-      name: "Account Manager",
+      name: "Client Contact Person",
       selector: (row) => row.account_manager_firstname + " " + row.account_manager_lastname,
       sortable: true,
       cell: row => (
