@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import Datatable from "../../../Components/ExtraComponents/Datatable";
+// import Datatable from "../../../Components/ExtraComponents/Datatable";
+import Datatable from "../../../Components/ExtraComponents/Datatable_1";
 import { GET_ALL_CUSTOMERS } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { Update_Customer_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getDateRange } from "../../../Utils/Comman_function";
@@ -41,7 +42,7 @@ const Customer = () => {
 
 
   useEffect(() => {
-    GetAllCustomerData();
+    GetAllCustomerData(1, pageSize, '');
   }, [activeTab]);
 
   useEffect(() => {
@@ -271,7 +272,7 @@ const Customer = () => {
               timer: 1000,
               showConfirmButton: false,
             });
-            GetAllCustomerData();
+            GetAllCustomerData(1, pageSize, '');
           } else {
             Swal.fire({
               title: "Error",
@@ -315,11 +316,11 @@ const Customer = () => {
   ];
 
   useEffect(() => {
-  //  GetAllCustomerData();
+    //  GetAllCustomerData();
   }, []);
 
   useEffect(() => {
-  //  GetAllCustomerData();
+    //  GetAllCustomerData();
   }, [selectedTab]);
 
   const handleTabChange = (event) => {
@@ -335,23 +336,28 @@ const Customer = () => {
   const [totalRecords, setTotalRecords] = useState(0);
 
   const handlePageChange = (selected) => {
-    console.log("dd",selected.selected);
+    console.log("dd", selected.selected);
     const newPage = selected.selected + 1; // Pagination libraries use 0-based indexing.
     setCurrentPage(newPage);
-    GetAllCustomerData(newPage, pageSize); // Fetch data for the new page.
+    GetAllCustomerData(newPage, pageSize, ''); // Fetch data for the new page.
   };
 
   const handlePageSizeChange = (event) => {
     const newSize = parseInt(event.target.value, 10);
     setPageSize(newSize);
     setCurrentPage(1); // Reset to the first page
-    GetAllCustomerData(1, newSize); // Fetch data with new page size
+    GetAllCustomerData(1, newSize, ''); // Fetch data with new page size
   };
 
+  const handleSearchChange = (term) => {
+    console.log("term ", term);
+    setSearchTerm(term);
+    setCurrentPage(1);
+    GetAllCustomerData(1, pageSize, term);
+  };
 
-
-  const GetAllCustomerData = async (page = 1, limit = 10) => {
-    const req = { action: 'get', staff_id: staffDetails.id , page, limit };
+  const GetAllCustomerData = async (page = 1, limit = 10, term) => {
+    const req = { action: 'get', staff_id: staffDetails.id, page, limit, search: term };
     const data = { req, authToken: token };
 
     try {
@@ -367,7 +373,7 @@ const Customer = () => {
         setFilteredData(filteredData);
         setTotalRecords(response.data.pagination.totalItems);
         // setCustomerData(response.data.pagination.totalItems);
-      
+
       } else {
         setFilteredData([]);
       }
@@ -462,6 +468,19 @@ const Customer = () => {
                 <div className="tab-content mt-minus-60" id="pills-tabContent">
                   <div className="card-datatable">
                     <div className="card-datatable">
+
+                      <div className="row mb-3">
+                        <div className="col-md-4">
+                          <input
+                            type="text"
+                            placeholder="Search Customers"
+                            className="form-control"
+                            value={searchTerm}
+                            onChange={(e) => handleSearchChange(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
                       <Datatable columns={columns} data={filteredData} />
 
                       {/* Pagination Controls */}

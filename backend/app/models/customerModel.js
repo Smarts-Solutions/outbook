@@ -344,7 +344,7 @@ const createCustomer = async (customer) => {
                     let email = detail.email;
                     let phone_code = detail.phone_code == undefined ? "" : detail.phone_code;
                     let phone = detail.phone;
-                   
+
                     let authorised_signatory_status = detail.authorised_signatory_status;
 
 
@@ -388,12 +388,11 @@ const createCustomer = async (customer) => {
 };
 
 const getCustomer = async (customer) => {
-    const { staff_id  } = customer;
-         const page = parseInt(customer.page) || 1; // Default to page 1
-        const limit = parseInt(customer.limit) || 10; // Default to 10 items per page
-        const offset = (page - 1) * limit;
-    
-    console.log("customer", customer);
+    const { staff_id } = customer;
+    const page = parseInt(customer.page) || 1; // Default to page 1
+    const limit = parseInt(customer.limit) || 10; // Default to 10 items per page
+    const offset = (page - 1) * limit;
+    const search = customer.search || "";
 
     const QueryRole = `
   SELECT
@@ -412,8 +411,9 @@ const getCustomer = async (customer) => {
     // Condition with Admin And SuperAdmin
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
 
-        const countQuery = `SELECT COUNT(*) AS total FROM customers`;
-        const [[{ total }]] = await pool.execute(countQuery);
+        const countQuery = `SELECT COUNT(*) AS total FROM customers WHERE trading_name LIKE ?`;
+
+        const [[{ total }]] = await pool.execute(countQuery, [`%${search}%`]);
 
         const query = `
     SELECT  
@@ -448,143 +448,167 @@ JOIN
 JOIN 
     staffs AS staff2 ON customers.account_manager_id = staff2.id
 LEFT JOIN 
-    customer_company_information ON customers.id = customer_company_information.customer_id   
+    customer_company_information ON customers.id = customer_company_information.customer_id
+ WHERE 
+    customers.trading_name LIKE ?
 ORDER BY 
     customers.id DESC
 LIMIT ? OFFSET ?
     ;
     `;
-        const [result] = await pool.execute(query, [limit, offset]);
-       
+
+        const searchQuery = `%${search}%`;
+        const [result] = await pool.execute(query, [searchQuery, limit, offset]);
+
         return {
             status: true,
             message: 'Success..',
-            data: {data:result,pagination: {
-                totalItems: total,
-                totalPages: Math.ceil(total / limit),
-                currentPage: page,
-                limit
-            }},
-            
+            data: {
+                data: result, pagination: {
+                    totalItems: total,
+                    totalPages: Math.ceil(total / limit),
+                    currentPage: page,
+                    limit
+                }
+            },
+
         };
-        
-       // return { status: true, message: 'Success..', data: result };
+
+        // return { status: true, message: 'Success..', data: result };
     }
     let result = []
     let total = 0;
     if (rows.length > 0) {
-        
+
         // Allocated to
         if (rows[0].role_id == 3) {
+            const countQuery = `SELECT COUNT(*) AS total_count
+                FROM (
+                    SELECT  
+                        customers.id AS id
+                    FROM 
+                        customers
+                    LEFT JOIN
+                        jobs ON jobs.customer_id = customers.id   
+                    JOIN 
+                        staffs AS staff1 ON customers.staff_id = staff1.id
+                    JOIN 
+                        staffs AS staff2 ON customers.account_manager_id = staff2.id
+                    LEFT JOIN
+                        customer_company_information ON customers.id = customer_company_information.customer_id
+                    WHERE 
+                    ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.allocated_to = ? OR customers.staff_id = ?)` : 'jobs.allocated_to = ? OR customers.staff_id = ?'}
+                    GROUP BY 
+                        CASE 
+                            WHEN jobs.allocated_to = ? THEN jobs.customer_id
+                            ELSE customers.id
+                        END
+                ) AS result;
+          `;
+
+            let queryDataCount = [staff_id, staff_id, staff_id];
+            if (search) {
+                queryDataCount = [staff_id, staff_id, staff_id];
+            }
+
+            const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
+
             const query = `
-           SELECT  
-    customers.id AS id,
-    customers.customer_type AS customer_type,
-    customers.staff_id AS staff_id,
-    customers.account_manager_id AS account_manager_id,
-    customers.trading_name AS trading_name,
-    customers.trading_address AS trading_address,
-    customers.vat_registered AS vat_registered,
-    customers.vat_number AS vat_number,
-    customers.website AS website,
-    customers.form_process AS form_process,
-    customers.created_at AS created_at,
-    customers.updated_at AS updated_at,
-    customers.status AS status,
-    staff1.first_name AS staff_firstname, 
-    staff1.last_name AS staff_lastname,
-    staff2.first_name AS account_manager_firstname, 
-    staff2.last_name AS account_manager_lastname,
-    customer_company_information.company_name AS company_name,
-    customer_company_information.company_number AS company_number,
-    CONCAT(
-        'cust_', 
-        SUBSTRING(customers.trading_name, 1, 3), '_',
-        SUBSTRING(customers.customer_code, 1, 15)
-    ) AS customer_code
-FROM 
-    customers
-LEFT JOIN
-    jobs ON jobs.customer_id = customers.id   
-JOIN 
-    staffs AS staff1 ON customers.staff_id = staff1.id
-JOIN 
-    staffs AS staff2 ON customers.account_manager_id = staff2.id
-LEFT JOIN
-    customer_company_information ON customers.id = customer_company_information.customer_id
-WHERE 
-    jobs.allocated_to = ? OR customers.staff_id = ?
-GROUP BY 
-    CASE 
-        WHEN jobs.allocated_to = ? THEN jobs.customer_id
-        ELSE customers.id
-    END
-ORDER BY 
-    customers.id DESC
-     LIMIT ? OFFSET ?
+            SELECT  
+                customers.id AS id,
+                customers.customer_type AS customer_type,
+                customers.staff_id AS staff_id,
+                customers.account_manager_id AS account_manager_id,
+                customers.trading_name AS trading_name,
+                customers.trading_address AS trading_address,
+                customers.vat_registered AS vat_registered,
+                customers.vat_number AS vat_number,
+                customers.website AS website,
+                customers.form_process AS form_process,
+                customers.created_at AS created_at,
+                customers.updated_at AS updated_at,
+                customers.status AS status,
+                staff1.first_name AS staff_firstname, 
+                staff1.last_name AS staff_lastname,
+                staff2.first_name AS account_manager_firstname, 
+                staff2.last_name AS account_manager_lastname,
+                customer_company_information.company_name AS company_name,
+                customer_company_information.company_number AS company_number,
+                CONCAT(
+                    'cust_', 
+                    SUBSTRING(customers.trading_name, 1, 3), '_',
+                    SUBSTRING(customers.customer_code, 1, 15)
+                ) AS customer_code
+            FROM 
+                customers
+            LEFT JOIN
+                jobs ON jobs.customer_id = customers.id   
+            JOIN 
+                staffs AS staff1 ON customers.staff_id = staff1.id
+            JOIN 
+                staffs AS staff2 ON customers.account_manager_id = staff2.id
+            LEFT JOIN
+                customer_company_information ON customers.id = customer_company_information.customer_id
+            WHERE 
+                ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.allocated_to = ? OR customers.staff_id = ?)` : 'jobs.allocated_to = ? OR customers.staff_id = ?'}
+            GROUP BY 
+                CASE 
+                    WHEN jobs.allocated_to = ? THEN jobs.customer_id
+                    ELSE customers.id
+                END
+            ORDER BY 
+                customers.id DESC
+            LIMIT ? OFFSET ?
+        `;
+            let queryData = [staff_id, staff_id, staff_id, limit, offset];
+            if (search) {
+                queryData = [staff_id, staff_id, staff_id, limit, offset];
+            }
 
+            const [resultAllocated] = await pool.execute(query, queryData);
 
-            `;
-            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id,limit, offset]);
             result = resultAllocated
-            total = result.length;
+            total = total_count;
 
         }
         // Account Manger
         else if (rows[0].role_id == 4) {
-            
+            const countQuery = `SELECT COUNT(*) AS total_count
+            FROM (
+                SELECT 
+                    customers.id
+                FROM 
+                    customers
+                LEFT JOIN 
+                    customer_services ON customer_services.customer_id = customers.id
+                LEFT JOIN 
+                    customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+                LEFT JOIN 
+                    staffs AS staff1 ON customers.staff_id = staff1.id
+                LEFT JOIN 
+                    staffs AS staff2 ON customers.account_manager_id = staff2.id
+                LEFT JOIN 
+                    customer_company_information ON customers.id = customer_company_information.customer_id
+                WHERE 
+         ${search ? `customers.trading_name LIKE '%${search}%' AND (customer_service_account_managers.account_manager_id = ?
+                OR customers.account_manager_id = ?
+                OR customers.staff_id = ?)` :
+                    `customer_service_account_managers.account_manager_id = ?
+            OR customers.account_manager_id = ?
+            OR customers.staff_id = ?`}
+
+            GROUP BY 
+                customers.id
+        ) AS result`;
+
+            let queryDataCount = [staff_id, staff_id, staff_id];
+            if (search) {
+                queryDataCount = [staff_id, staff_id, staff_id];
+            }
+            const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
+
+
             const query = `
-            SELECT  
-            customers.id AS id,
-            customers.customer_type AS customer_type,
-            customers.staff_id AS staff_id,
-            customers.account_manager_id AS account_manager_id,
-            customers.trading_name AS trading_name,
-            customers.trading_address AS trading_address,
-            customers.vat_registered AS vat_registered,
-            customers.vat_number AS vat_number,
-            customers.website AS website,
-            customers.form_process AS form_process,
-            customers.created_at AS created_at,
-            customers.updated_at AS updated_at,
-            customers.status AS status,
-            staff1.first_name AS staff_firstname, 
-            staff1.last_name AS staff_lastname,
-            staff2.first_name AS account_manager_firstname, 
-            staff2.last_name AS account_manager_lastname,
-            customer_company_information.company_name AS company_name,
-            customer_company_information.company_number AS company_number,
-            CONCAT(
-            'cust_', 
-            SUBSTRING(customers.trading_name, 1, 3), '_',
-            SUBSTRING(customers.customer_code, 1, 15)
-            ) AS customer_code
-        FROM 
-            customers
-        LEFT JOIN 
-            jobs ON jobs.customer_id = customers.id   
-        JOIN 
-            staffs AS staff1 ON customers.staff_id = staff1.id
-        JOIN 
-            staffs AS staff2 ON customers.account_manager_id = staff2.id
-        LEFT JOIN 
-            customer_company_information ON customers.id = customer_company_information.customer_id
-        WHERE jobs.account_manager_id = ? OR customers.staff_id = ?
-        GROUP BY 
-    CASE 
-        WHEN jobs.account_manager_id = ? THEN jobs.customer_id
-        ELSE customers.id
-    END
-        ORDER BY 
-            customers.id DESC
-        LIMIT ? OFFSET ?
-            ;
-            `;
-            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id,limit, offset]);
-            result = resultAllocated;
-            total = result.length;
-            if (resultAllocated.length > 0) {
-                const query = `
             SELECT  
             customers.id AS id,
             customers.customer_type AS customer_type,
@@ -613,84 +637,73 @@ ORDER BY
             ) AS customer_code
         FROM 
             customers
-        JOIN 
+        LEFT JOIN 
             customer_services ON customer_services.customer_id = customers.id
-        JOIN 
+        LEFT JOIN 
             customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
-        JOIN 
+        LEFT JOIN 
             staffs AS staff1 ON customers.staff_id = staff1.id
-        JOIN 
+        LEFT JOIN 
             staffs AS staff2 ON customers.account_manager_id = staff2.id
         LEFT JOIN 
             customer_company_information ON customers.id = customer_company_information.customer_id
-        WHERE customer_service_account_managers.account_manager_id = ? OR customers.staff_id= ?
+        WHERE 
+            ${search ? `customers.trading_name LIKE '%${search}%' AND (customer_service_account_managers.account_manager_id = ?
+                OR customers.account_manager_id = ?
+                OR customers.staff_id = ?)` :
+                    `customer_service_account_managers.account_manager_id = ?
+            OR customers.account_manager_id = ?
+            OR customers.staff_id = ?`}
+
         GROUP BY 
         customers.id
         ORDER BY 
         customers.id DESC
-        LIMIT ? OFFSET ?;
+        LIMIT ? OFFSET ?
+           ;
             `;
-                const [resultAllocated2] = await pool.execute(query, [staff_id, staff_id,limit, offset]);
-                result = resultAllocated2;
-                total = result.length;
-                console.log("result 2 ",result.length)
-            } else {
 
-                const query = `
-                SELECT  
-                customers.id AS id,
-                customers.customer_type AS customer_type,
-                customers.staff_id AS staff_id,
-                customers.account_manager_id AS account_manager_id,
-                customers.trading_name AS trading_name,
-                customers.customer_code AS customer_code,
-                customers.trading_address AS trading_address,
-                customers.vat_registered AS vat_registered,
-                customers.vat_number AS vat_number,
-                customers.website AS website,
-                customers.form_process AS form_process,
-                customers.created_at AS created_at,
-                customers.updated_at AS updated_at,
-                customers.status AS status,
-                staff1.first_name AS staff_firstname, 
-                staff1.last_name AS staff_lastname,
-                staff2.first_name AS account_manager_firstname, 
-                staff2.last_name AS account_manager_lastname,
-                customer_company_information.company_name AS company_name,
-                customer_company_information.company_number AS company_number,
-                CONCAT(
-                'cust_', 
-                SUBSTRING(customers.trading_name, 1, 3), '_',
-                SUBSTRING(customers.customer_code, 1, 15)
-                ) AS customer_code
-            FROM 
-                customers
-            JOIN 
-                customer_services ON customer_services.customer_id = customers.id
-            JOIN 
-                customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
-            JOIN 
-                staffs AS staff1 ON customers.staff_id = staff1.id
-            JOIN 
-                staffs AS staff2 ON customers.account_manager_id = staff2.id
-            LEFT JOIN 
-                customer_company_information ON customers.id = customer_company_information.customer_id
-            WHERE customer_service_account_managers.account_manager_id = ? OR customers.staff_id= ?
-            GROUP BY 
-            customers.id
-            ORDER BY 
-            customers.id DESC;
-                `;
-                const [resultAllocated3] = await pool.execute(query, [staff_id, staff_id]);
-                result = resultAllocated3;
-                console.log("result 3 ",result.length)
-
+            let queryData = [staff_id, staff_id, staff_id, limit, offset];
+            if (search) {
+                queryData = [staff_id, staff_id, staff_id, limit, offset];
             }
-
+            const [resultAllocated] = await pool.execute(query, queryData);
+            result = resultAllocated;
+            total = total_count;
         }
         // Reviewer
         else if (rows[0].role_id == 6) {
+            const countQuery = `
+            SELECT COUNT(*) AS total_count
+            FROM (
+                SELECT  
+                    customers.id AS id
+                FROM 
+                    customers
+                LEFT JOIN 
+                    jobs ON jobs.customer_id = customers.id   
+                JOIN 
+                    staffs AS staff1 ON customers.staff_id = staff1.id
+                JOIN 
+                    staffs AS staff2 ON customers.account_manager_id = staff2.id
+                LEFT JOIN 
+                    customer_company_information ON customers.id = customer_company_information.customer_id
+                WHERE 
+                    ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ?)` : 'jobs.reviewer = ? OR customers.staff_id = ?'}
+                GROUP BY 
+                    CASE 
+                        WHEN jobs.reviewer = ? THEN jobs.customer_id
+                        ELSE customers.id
+                    END
+            ) AS result;
+`;
 
+            let queryDataCount = [staff_id, staff_id, staff_id];
+            if (search) {
+                queryDataCount = [staff_id, staff_id, staff_id];
+            }
+
+            const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
             const query = `
             SELECT  
             customers.id AS id,
@@ -727,7 +740,7 @@ ORDER BY
             staffs AS staff2 ON customers.account_manager_id = staff2.id
         LEFT JOIN 
             customer_company_information ON customers.id = customer_company_information.customer_id
-        WHERE jobs.reviewer = ? OR customers.staff_id = ?  
+        WHERE  ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ?)` : 'jobs.reviewer = ? OR customers.staff_id = ?'} 
          GROUP BY 
     CASE 
         WHEN jobs.reviewer = ? THEN jobs.customer_id
@@ -737,12 +750,40 @@ ORDER BY
             customers.id DESC
              LIMIT ? OFFSET ?;
             `;
-            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id,limit, offset]);
+
+            let queryData = [staff_id, staff_id, staff_id, limit, offset];
+            if (search) {
+                queryData = [staff_id, staff_id, staff_id, limit, offset];
+            }
+
+            const [resultAllocated] = await pool.execute(query, queryData);
             result = resultAllocated
-            total = result.length;
+            total = total_count;
 
         }
         else {
+            const countQuery = `
+            SELECT COUNT(*) AS total_count
+            FROM (
+                SELECT
+                    customers.id AS id
+                FROM
+                    customers
+                JOIN
+                    staffs AS staff1 ON customers.staff_id = staff1.id
+                JOIN
+                    staffs AS staff2 ON customers.account_manager_id = staff2.id
+                LEFT JOIN
+                    customer_company_information ON customers.id = customer_company_information.customer_id
+                WHERE 
+                    ${search ? `customers.trading_name LIKE '%${search}%' AND staff1.id = ?` : 'staff1.id = ?'}    
+            ) AS result;`;
+
+            let queryDataCount = [staff_id];
+            if (search) {
+                queryDataCount = [staff_id];
+            }
+            const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
             const query = `
             SELECT  
             customers.id AS id,
@@ -777,33 +818,40 @@ ORDER BY
             staffs AS staff2 ON customers.account_manager_id = staff2.id
         LEFT JOIN 
             customer_company_information ON customers.id = customer_company_information.customer_id
-        WHERE staff1.id = ?   
+        WHERE 
+            ${search ? `customers.trading_name LIKE '%${search}%' AND staff1.id = ?` : 'staff1.id = ?'}    
         ORDER BY 
             customers.id DESC
             LIMIT ? OFFSET ?;
             `;
-            const [result1] = await pool.execute(query, [staff_id,limit, offset]);
+
+            let queryData = [staff_id, limit, offset];
+            if (search) {
+                queryData = [staff_id, limit, offset];
+                }
+            const [result1] = await pool.execute(query, queryData);
             result = result1
-            total = result.length;
+            total = total_count;
         }
     }
-
     try {
         return {
             status: true,
             message: 'Success..',
-            data: {data:result,pagination: {
-                totalItems: total,
-                totalPages: Math.ceil(total / limit),
-                currentPage: page,
-                limit
-            }},
-            
+            data: {
+                data: result, pagination: {
+                    totalItems: total,
+                    totalPages: Math.ceil(total / limit),
+                    currentPage: page,
+                    limit
+                }
+            },
+
         };
-       // return { status: true, message: 'Success..', data: result };
+        // return { status: true, message: 'Success..', data: result };
 
     } catch (err) {
-
+        console.error('Error selecting data:', err);
         return { status: true, message: 'Error selecting data', data: err };
     }
 
@@ -2580,7 +2628,7 @@ WHERE service_id = ${service_id} AND customer_id = 0;
 
 
         if (Task.length > 0) {
-        
+
             const checklistName = Task[0].checklistName;
             const JobTypeId = Task[0].JobTypeId;
             const serviceId = Task[0].serviceId;
