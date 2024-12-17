@@ -147,7 +147,7 @@ const Dashboard = () => {
              
                    <div className="tab-pane show active">
                     <div className="row justify-content-center">
-                      <div className="col-md-6 col-xl-4 col-lg-6" style={{cursor: 'pointer'}}>
+                      <div className="col-md-12 col-xl-4 col-lg-6" style={{cursor: 'pointer'}}>
                         <div className="card report-card dashboard-card">
                           <div className="card-body">
                             <div className="row d-flex justify-content-center">
@@ -169,7 +169,7 @@ const Dashboard = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="col-md-6 col-xl-4 col-lg-6" style={{cursor: 'pointer'}}>
+                      <div className="col-md-12 col-xl-4 col-lg-6" style={{cursor: 'pointer'}}>
                         <div className="card report-card dashboard-card">
                           <div className="card-body">
                             <div className="row d-flex justify-content-center">
@@ -192,7 +192,7 @@ const Dashboard = () => {
                           </div>
                         </div>
                       </div> 
-                      <div className="col-md-6 col-xl-4 col-lg-6" style={{cursor: 'pointer'}}>
+                      <div className="col-md-12 col-xl-4 col-lg-6" style={{cursor: 'pointer'}}>
                         <div className="card report-card dashboard-card ">
                           <div className="card-body">
                             <div className="row d-flex justify-content-center">
@@ -214,7 +214,7 @@ const Dashboard = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="col-md-6 col-xl-4 col-lg-6" style={{cursor: 'pointer'}}>
+                      <div className="col-md-12 col-xl-4 col-lg-6" style={{cursor: 'pointer'}}>
                         <div className="card report-card dashboard-card">
                           <div className="card-body">
                             <div className="row d-flex justify-content-center">
@@ -234,7 +234,7 @@ const Dashboard = () => {
                           </div>
                         </div>
                       </div> 
-                      <div className="col-md-6 col-xl-4 col-lg-6" style={{cursor: 'pointer'}}>
+                      <div className="col-md-12 col-xl-4 col-lg-6" style={{cursor: 'pointer'}}>
                         <div className="card report-card dashboard-card">
                           <div className="card-body">
                             <div className="row d-flex justify-content-center">
@@ -256,7 +256,7 @@ const Dashboard = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="col-md-6 col-xl-4 col-lg-6" style={{cursor: 'pointer'}}>
+                      <div className="col-md-12 col-xl-4 col-lg-6" style={{cursor: 'pointer'}}>
                         <div className="card report-card dashboard-card">
                           <div className="card-body">
                             <div className="row d-flex justify-content-center">

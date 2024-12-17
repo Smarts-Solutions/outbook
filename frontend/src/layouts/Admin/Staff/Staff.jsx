@@ -257,7 +257,8 @@ const StaffPage = () => {
       name: "Actions",
       cell: (row) => {
 
-        return <div className="dropdown">
+        return 
+        <div className="dropdown">
           <button
             className="btn "
             type="button"

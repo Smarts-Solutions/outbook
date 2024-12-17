@@ -244,6 +244,40 @@
 .left-sidenav-menu .menu-arrow i {
 	width: 15px;
 }
+@media (max-width: 575px) {
+
+	.breadcrumb {
+		display: block !important;
+		border-radius: 0 !important;
+		overflow: visible !important;
+		margin: auto;
+		text-align: center;
+		margin-top: 5px !important;
+		/* top: 56% !important; */
+		width: 100%;
+		height: auto !important;
+		transform: translateY(0%);
+		box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+		z-index: 1;
+		background-color: #fff;
+		font-size: 14px;
+		padding: 0px 0px;
+		transition: 0.3s linear;
+	}
+	.breadcrumb a.active, .breadcrumb a:hover {
+		
+		border-left: 0 !important;
+	}
+	.breadcrumb a {
+		
+		margin-top: 5px !important;
+		
+	}
+.flex-direction-sm-reverse
+{
+	flex-direction: column-reverse !important;
+}
+}
 
 @media (max-width: 1024px) {
 	body {
@@ -277,10 +311,13 @@
 		min-height: 100vh;
 		padding: 0 0 50px 0;
 	}
-	
+	.enlarge-menu .page-wrapper {
+		
+		margin-left: 200px;
+	}
 	.enlarge-menu .page-wrapper .page-content {
 		width: calc(100% - 200px);
-		margin-left: 200px;
+		margin-left: 200px ;
 	}
 	body.dark-sidenav .left-sidenav-menu li>a {
 		
@@ -289,6 +326,19 @@
 	}
 	span.sidebar-icons {
 		padding-right: 8px !important;
+	}
+	span.breadcrumb__title {
+		FONT-SIZE: 12px !important;
+	}
+	button.btn.btn-info, .blue-btn, .swal2-confirm,.btn-outline-info {
+		
+		padding: 8px 15px !important;
+		font-size: 13px !important;
+	
+	}
+	.datatable-container .data-table-extensions-filter {
+		width: 50% !important;
+	
 	}
 
 }
@@ -3262,25 +3312,16 @@ button.secondary-icon {
 	color: #222222;
 	border: 3px solid #222222;
 }
-
-.datatable-container button.edit-icon,
-.datatable-container button.delete-icon,
-button.delete-icon,
-button.edit-icon,
-.datatable-container button.view-icon,
-button.view-icon,
-button.add-icon,
-button.secondary-icon,
-.datatable-container button.add-icon,
-.secondary-icon {
-	border-radius: 20px;
-	padding: 7px 8px;
-	font-size: 20px;
-	margin: 0px 4px;
-	background: none;
-	border-width: 3px;
-	line-height: 19px;
-
+.datatable-container button.edit-icon, .datatable-container button.delete-icon, button.delete-icon, button.edit-icon, .datatable-container button.view-icon, button.view-icon, button.add-icon, button.secondary-icon, .datatable-container button.add-icon, .secondary-icon {
+    border-radius: 20px;
+    padding: 7px 8px;
+    font-size: 20px;
+    margin: 0px 4px;
+    background: none;
+    border-width: 3px;
+    line-height: 19px;
+    width: 40px !important;
+    height: 40px;
 }
 
 button.add-icon,
@@ -3346,7 +3387,7 @@ button.btn.btn-info,
 	line-height: 16.94px;
 	height: auto;
 	position: relative;
-
+text-align: center;
 	z-index: 1;
 	color: #00AFEF !important;
 }
@@ -3418,7 +3459,7 @@ body .btn-info:hover {
 	color: #00AFEF !important;
 	border-radius: 20px !important;
 	padding: 7px 20px;
-	letter-spacing: -0.75px;
+	/* letter-spacing: -0.75px; */
 }
 
 .btn-outline-info:hover {
@@ -3531,13 +3572,17 @@ body .btn-info:hover {
 }
 
 .accordion-header .accordion-button {
-	color: #4B4B4B !important;
-	background-color: transparent;
-	outline: 0 !important;
-	padding: 5px 14px !important;
-	font-weight: 600;
+    color: #4B4B4B !important;
+    background-color: transparent;
+    outline: 0 !important;
+    padding: 5px 14px !important;
+    font-weight: 600;
+    width: 100%;
+    display: block;
+    word-wrap: break-word;
+	
+    white-space: break-spaces;
 }
-
 .accordion-button:not(.collapsed) {
 	background: #EBF4F7 !important;
 	border-radius: 21px 21px 0px 0px !important;
@@ -4030,6 +4075,7 @@ button.actions-btn.btn.btn-light:hover {
 	flex-direction: column;
 	margin: auto;
 	z-index: 2;
+	width: 100%;
 }
 
 .breadcrumb__title {
@@ -4088,7 +4134,7 @@ span.breadcrumb__desc {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	width: 180px;
+	width: 100%;
 	font-size: 14px;
 }
 
@@ -4552,19 +4598,13 @@ i.exp_icon {
 
     width: 96%;
 }
-ul.pagination {
-    margin-top: 20px;
+.setting-drop-down .dropdown-item:hover
+{
+	background-color: transparent !important;
 }
-ul.pagination li {
-    padding: 2px 8px;
-    border: 1px solid #4b4b4b;
-    margin: 2px;
-    border-radius: 3px;
+
+.setting-drop-down .dropdown-item.btn-info:hover {
+    background-color: #00AFEF !important;
 }
-.perpage-select {
-    border-radius: 3px;
-    border: 1px solid #4b4b4b;
-    padding: 5px 8px;
-    float: right;
-    margin-top: -45px;
-}
+
+

@@ -316,7 +316,7 @@ const ClientList = () => {
       reorder: false,
     },
     {
-      name: "Account Manager",
+      name: "Client Contact Person",
 
       cell: (row) => (
         <div
@@ -842,8 +842,8 @@ const ClientList = () => {
       <div className="row ">
         <div className="col-sm-12">
           <div className="page-title-box">
-            <div className="row align-items-start">
-              <div className="col-md-8">
+            <div className="row align-items-start flex-md-row flex-column-reverse">
+              <div className="col-md-6 col-lg-8">
                 <ul
                   className="nav nav-pills rounded-tabs"
                   id="pills-tab"
@@ -870,17 +870,24 @@ const ClientList = () => {
                   ))}
                 </ul>
               </div>
-              <div className="col-md-4 col-auto">
+              <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
                 {activeTab === "client" ||
                   activeTab === "checklist" ||
                   activeTab === "" ||
                   activeTab === "job" ? (
                   <>
-
+                           <div
+                      className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
+                      onClick={() => {
+                        window.history.back();
+                      }}
+                    >
+                      <i className="fa fa-arrow-left pe-1" /> Back
+                    </div>
                     {
                       (getAccessDataClient.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") && activeTab === "client" ? (
                         <>
-                          <div className="btn btn-info text-white float-end blue-btn"
+                          <div className="btn btn-info text-white mt-2 mt-sm-0  blue-btn"
                             onClick={() => navigate("/admin/addclient", { state: { id: location.state.id, activeTab: activeTab } })} >
                             <i className="fa fa-plus pe-1" /> Add Client
                           </div>
@@ -888,7 +895,7 @@ const ClientList = () => {
                       ) : (ClientData?.length > 0 && (getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN")) && activeTab === "job" ? (
                         <>
 
-                          <div className="btn btn-info text-white float-end blue-btn" onClick={() =>
+                          <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={() =>
                             navigate("/admin/createjob", {
                               state: { customer_id: location.state.id, goto: "Customer", activeTab: activeTab },
                             })
@@ -898,7 +905,7 @@ const ClientList = () => {
                         </>
                       ) : (getAccessDataCustomer.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") && activeTab === "checklist" ? (
                         <>
-                          <div className="btn btn-info text-white float-end blue-btn" onClick={() =>
+                          <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={() =>
                             navigate("/admin/create/checklist", { state: { id: location.state.id, activeTab: activeTab } })
                           } >
                             <i className="fa fa-plus pe-1" /> Add Checklist
@@ -907,14 +914,7 @@ const ClientList = () => {
                       ) : (
                         null
                       )}
-                    <div
-                      className="btn btn-info text-white float-end blue-btn me-2"
-                      onClick={() => {
-                        window.history.back();
-                      }}
-                    >
-                      <i className="fa fa-arrow-left pe-1" /> Back
-                    </div>
+                  
                   </>
                 ) : null}
               </div>
