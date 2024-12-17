@@ -358,6 +358,11 @@
   .datatable-container .data-table-extensions-filter {
     width: 50% !important;
   }
+
+  :where(.css-dev-only-do-not-override-p8b6i).ant-steps .ant-steps-item-title {
+    font-size: 14px !important;
+    line-height: 20px !important;
+}
 }
 @media (max-width: 1050px) {
   .title-text,

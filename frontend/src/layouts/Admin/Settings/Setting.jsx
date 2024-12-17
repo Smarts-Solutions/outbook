@@ -2319,7 +2319,7 @@ const Setting = () => {
                     <div>
                       <button
                         type="button"
-                        className="btn btn-info text-white float-end"
+                        className="btn btn-info text-white float-lg-end mt-3 mt-lg-0"
                         onClick={(e) => handleAdd(e, "1")}
                       >
                         {" "}
