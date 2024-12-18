@@ -433,7 +433,7 @@ const Service = () => {
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
       {({ handleSubmit }) => (
-        <div className="details__wrapper">
+        <div className="details__wrapper service__wrapper">
           <div className="card pricing-box m-2 mt-0">
             <div className="card-header step-header-blue">
               <h4 className="card-title mb-0">Select Services</h4>
@@ -443,10 +443,10 @@ const Service = () => {
                 <table className="table align-middle table-nowrap">
                   <thead className="table-light table-head-blue">
                     <tr>
-                      <th scope="col" style={{ width: 50 }}>
+                      <th scope="col" >
                         <div className="form-check"></div>
                       </th>
-                      <th style={{ width: "70%" }}>Service Name</th>
+                      <th>Service Name</th>
                       {/* <th width="100"></th> */}
                       <th className="text-center">Action</th>
                     </tr>
@@ -467,7 +467,7 @@ const Service = () => {
                           </th>
 
                           <td className="customer_name">
-
+                            <div className="accordion-div">
                             <div
                               className="accordion"
                               id={`accordionExample${index}`}
@@ -540,7 +540,7 @@ const Service = () => {
                                                               }}
                                                             />
                                                           </div>
-                                                          <div className="col-auto ms-auto">
+                                                          <div className="col-auto ms-xl-auto">
                                                             <button onClick={handleDownload} className="btn btn-outline-info">
                                                               <i className="fas fa-download me-2"></i>
                                                               Download Sample File
@@ -755,6 +755,7 @@ const Service = () => {
                                   )}
                                 </div>
                               </div>
+                            </div>
                             </div>
                           </td>
 
