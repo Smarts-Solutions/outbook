@@ -527,9 +527,9 @@ const Service = () => {
                                                   >
                                                     <div className="accordion-body">
                                                       <div className="pb-3">
-                                                        <div className="row align-items-center">
+                                                        <div className="row align-items-center justify-content-lg-between">
                                                           {/* Upload File Button */}
-                                                          <div className="col-auto">
+                                                          <div className="col-md-auto">
                                                             <input
                                                               type="file"
                                                               id="uploadButton"
@@ -540,8 +540,8 @@ const Service = () => {
                                                               }}
                                                             />
                                                           </div>
-                                                          <div className="col-auto ms-xl-auto">
-                                                            <button onClick={handleDownload} className="btn btn-outline-info">
+                                                          <div className="col-md-auto float-lg-end ms-0 ">
+                                                            <button onClick={handleDownload} className="btn btn-outline-info mt-2 mt-xxl-0">
                                                               <i className="fas fa-download me-2"></i>
                                                               Download Sample File
                                                             </button>

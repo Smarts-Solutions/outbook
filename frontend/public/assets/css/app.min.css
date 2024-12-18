@@ -291,6 +291,17 @@
   .flex-direction-sm-reverse {
     flex-direction: column-reverse !important;
   }
+ 
+}
+@media (max-width: 992px) {
+
+  .label-height {
+    height: auto !important;
+    
+}
+}
+@media (max-width: 1024px) {
+
   .service__wrapper .customer_name .accordion-div  {
     width: 500px;
 }
@@ -298,11 +309,6 @@
 {
  width: 206px;
 }
-}
-
-@media (max-width: 1024px) {
-
- 
   body .rounded-tabs button {
     font-size: 12px !important;
 	border: 2px solid #333547 !important;
