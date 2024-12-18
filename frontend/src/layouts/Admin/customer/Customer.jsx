@@ -336,7 +336,6 @@ const Customer = () => {
   const [totalRecords, setTotalRecords] = useState(0);
 
   const handlePageChange = (selected) => {
-    console.log("dd", selected.selected);
     const newPage = selected.selected + 1; // Pagination libraries use 0-based indexing.
     setCurrentPage(newPage);
     GetAllCustomerData(newPage, pageSize, ''); // Fetch data for the new page.

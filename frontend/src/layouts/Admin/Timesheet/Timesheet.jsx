@@ -5,18 +5,73 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getTimesheetData, getTimesheetTaskTypedData, saveTimesheetData, getStaffHourMinute } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
 import sweatalert from 'sweetalert2';
+import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 
 const Timesheet = () => {
+
+  const getFormattedDate = (type , date) => {
+     let now = new Date();
+     if(type === "convert"){
+      now = new Date(date);
+     }
+
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1; // Months are 0-indexed
+    const week = Math.ceil(now.getDate() / 7); // Calculate week number of the month
+    return `Week ${week}, Month ${month}, Year ${year}`;
+  };
+
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
+  const role = JSON.parse(localStorage.getItem("role"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+
   const weekOffSetValue = useRef(0);
   const [submitStatusAllKey, setSubmitStatusAllKey] = useState(0);
-
-
   const [expandedRows, setExpandedRows] = useState([]);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const [multipleFilter, setMultipleFilter] = useState({
+    staff_id: staffDetails.id,
+    week: 0,
+  });
+
+  const selectFilterStaffANdWeek = async (e) => {
+   
+    const { name, value } = e.target;
+    if(name === "staff_id"){
+      setMultipleFilter((prev) => ({ ...prev, [name]: value })); 
+    }else if(name === "week"){
+      await GetTimeSheet(value)
+    }
+   
+  };
+
+  const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
+  const [staffDataWeekDataAll, setStaffDataWeekDataAll] = useState({ loading: true, data: [] });
+
+
+  const staffData = async () => {
+    await dispatch(Staff({ req: { action: "get" }, authToken: token }))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          // const filteredData = response.data.filter((item) => {
+          //   return item.status === "1";
+          // });
+          const filteredData = response.data;
+          setStaffDataAll({ loading: false, data: filteredData });
+        } else {
+          setStaffDataAll({ loading: false, data: [] });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
   const toggleAllRowsView = () => {
     setIsExpanded(prevState => !prevState);
   };
@@ -27,13 +82,13 @@ const Timesheet = () => {
     );
   };
   const GetTimeSheet = async (weekOffset) => {
-
-    const req = { staff_id: staffDetails.id, weekOffset: weekOffset };
+    const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
 
     const res = await dispatch(getTimesheetData({ req, authToken: token })).unwrap();
     setSubmitStatusAllKey(0)
     setDeleteRows([])
     if (res.status) {
+      setStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
       if (res.data.length > 0 && res.data[0].submit_status === "1") {
         setSubmitStatusAllKey(1)
       }
@@ -46,19 +101,27 @@ const Timesheet = () => {
 
       );
     } else {
+      setStaffDataWeekDataAll({ loading: false, data: [] });
       setSubmitStatusAllKey(0)
       setTimeSheetRows([])
     }
   }
 
   const [currentDay, setCurrentDay] = useState('');
+
   useEffect(() => {
+    staffData();
+  }, [])
+
+  
+  useEffect(() => {
+    staffData();
     GetTimeSheet(weekOffSetValue.current);
     // set day wise Input
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const todays = new Date().getDay();
     setCurrentDay(days[todays]);
-  }, [])
+  }, [multipleFilter.staff_id])
 
 
 
@@ -124,6 +187,7 @@ const Timesheet = () => {
   const handleTabChange = (event) => {
     setSelectedTab(event.target.value);
   };
+
   const handleAddNewSheet = async () => {
 
     if (timeSheetRows.length > 0) {
@@ -167,7 +231,7 @@ const Timesheet = () => {
     };
 
     // setTimeSheetRows((prevRows) => [...prevRows, newSheetRow]);
-    let req = { staff_id: staffDetails.id };
+    let req = { staff_id: multipleFilter.staff_id };
     const resStaffTime = await dispatch(getStaffHourMinute({ req, authToken: token })).unwrap();
     let staffs_hourminute = resStaffTime?.data?.[0]?.hourminute || null;
 
@@ -180,12 +244,12 @@ const Timesheet = () => {
       return updatedRows;
     });
 
-    req = { staff_id: staffDetails.id, task_type: "1" };
+    req = { staff_id: multipleFilter.staff_id, task_type: "1" };
     const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
 
     if (res.status) {
 
-      let req = { staff_id: staffDetails.id, task_type: "5", internal_id: res.data[0].id };
+      let req = { staff_id: multipleFilter.staff_id, task_type: "5", internal_id: res.data[0].id };
       const res1 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
       setTimeSheetRows((prevRows) => {
         const updatedRows = [...prevRows];
@@ -211,8 +275,6 @@ const Timesheet = () => {
 
   };
 
-  // console.log("setTimeSheetRows", timeSheetRows)
-  // console.log("updateTimeSheetRows", updateTimeSheetRows)
 
   const [deleteRows, setDeleteRows] = useState([]);
   const handleDeleteRow = (index) => {
@@ -258,11 +320,11 @@ const Timesheet = () => {
     setTimeSheetRows(updatedRows);
 
     if (e.target.value === "1") {
-      const req = { staff_id: staffDetails.id, task_type: e.target.value };
+      const req = { staff_id: multipleFilter.staff_id, task_type: e.target.value };
       const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
 
       if (res.status) {
-        let req = { staff_id: staffDetails.id, task_type: "5", internal_id: res.data[0].id };
+        let req = { staff_id: multipleFilter.staff_id, task_type: "5", internal_id: res.data[0].id };
         const res1 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
         updatedRows[index].jobData = res.data;
         updatedRows[index].job_id = res.data[0].id;
@@ -274,21 +336,21 @@ const Timesheet = () => {
       updatedRows[index].job_id = null;
       updatedRows[index].taskData = [];
       updatedRows[index].task_id = null;
-      const req = { staff_id: staffDetails.id, task_type: e.target.value };
+      const req = { staff_id: multipleFilter.staff_id, task_type: e.target.value };
       const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
       if (res.status) {
         if (res.data.length > 0) {
           updatedRows[index].customerData = res.data;
           updatedRows[index].customer_id = res.data[0].id;
 
-          const req = { staff_id: staffDetails.id, task_type: "3", customer_id: res.data[0].id };
+          const req = { staff_id: multipleFilter.staff_id, task_type: "3", customer_id: res.data[0].id };
           const res1 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
           if (res1.status) {
             if (res1.data.length > 0) {
               updatedRows[index].clientData = res1.data;
               updatedRows[index].client_id = res1.data[0].id;
               const req = {
-                staff_id: staffDetails.id, task_type: "4", client_id
+                staff_id: multipleFilter.staff_id, task_type: "4", client_id
                   : res1.data[0].id
               };
               const res2 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
@@ -296,7 +358,7 @@ const Timesheet = () => {
                 if (res2.data.length > 0) {
                   updatedRows[index].jobData = res2.data;
                   updatedRows[index].job_id = res2.data[0].id;
-                  const req = { staff_id: staffDetails.id, task_type: "6", job_id: res2.data[0].id };
+                  const req = { staff_id: multipleFilter.staff_id, task_type: "6", job_id: res2.data[0].id };
                   const res3 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
                   if (res3.status) {
                     if (res3.data.length > 0) {
@@ -304,7 +366,7 @@ const Timesheet = () => {
                       updatedRows[index].task_id = res3.data[0].id;
                     }
                   }
-                }else{
+                } else {
                   sweatalert.fire({
                     icon: 'warning',
                     title: "There is no job available for this client.",
@@ -312,9 +374,9 @@ const Timesheet = () => {
                     showConfirmButton: true,
                     timer: 1500
                   });
-                  }
+                }
               }
-            }else{ 
+            } else {
               sweatalert.fire({
                 icon: 'warning',
                 title: "This customer does not have an available client.",
@@ -325,7 +387,7 @@ const Timesheet = () => {
             }
           }
 
-        }else{
+        } else {
           sweatalert.fire({
             icon: 'warning',
             title: "There is no customer available.",
@@ -349,7 +411,7 @@ const Timesheet = () => {
     updatedRows[index].clientData = [];
     updatedRows[index].taskData = [];
 
-    const req = { staff_id: staffDetails.id, task_type: "3", customer_id: e.target.value };
+    const req = { staff_id: multipleFilter.staff_id, task_type: "3", customer_id: e.target.value };
     const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
 
     if (res.status) {
@@ -357,10 +419,10 @@ const Timesheet = () => {
         updatedRows[index].customer_id = e.target.value;
         updatedRows[index].clientData = res.data;
         updatedRows[index].client_id = res.data[0].id;
-        
+
 
         const req = {
-          staff_id: staffDetails.id, task_type: "4", client_id
+          staff_id: multipleFilter.staff_id, task_type: "4", client_id
             : res.data[0].id
         };
         const res2 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
@@ -368,7 +430,7 @@ const Timesheet = () => {
           if (res2.data.length > 0) {
             updatedRows[index].jobData = res2.data;
             updatedRows[index].job_id = res2.data[0].id;
-            const req = { staff_id: staffDetails.id, task_type: "6", job_id: res2.data[0].id };
+            const req = { staff_id: multipleFilter.staff_id, task_type: "6", job_id: res2.data[0].id };
             const res3 = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
             if (res3.status) {
               if (res3.data.length > 0) {
@@ -376,7 +438,7 @@ const Timesheet = () => {
                 updatedRows[index].task_id = res3.data[0].id;
               }
             }
-          }else{
+          } else {
             sweatalert.fire({
               icon: 'warning',
               title: "There is no job available for this client.",
@@ -384,18 +446,18 @@ const Timesheet = () => {
               showConfirmButton: true,
               timer: 1500
             });
-            }
+          }
         }
 
 
-      }else{
+      } else {
         sweatalert.fire({
           icon: 'warning',
           title: "There is no client available for this customer.",
           timerProgressBar: true,
           showConfirmButton: true,
           timer: 1500
-          });
+        });
       }
     }
     setTimeSheetRows(updatedRows);
@@ -419,7 +481,7 @@ const Timesheet = () => {
     updatedRows[index].jobData = [];
     updatedRows[index].taskData = [];
 
-    const req = { staff_id: staffDetails.id, task_type: "4", client_id: e.target.value };
+    const req = { staff_id: multipleFilter.staff_id, task_type: "4", client_id: e.target.value };
     const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
     if (res.status) {
       if (res.data.length > 0) {
@@ -429,9 +491,9 @@ const Timesheet = () => {
         updatedRows[index].job_total_time = convertTimeFormat(res.data[0].job_total_time);
         let req;
         if (updatedRows[index].task_type === "1") {
-          req = { staff_id: staffDetails.id, task_type: "5", internal_id: res.data[0].id };
+          req = { staff_id: multipleFilter.staff_id, task_type: "5", internal_id: res.data[0].id };
         } else if (updatedRows[index].task_type === "2") {
-          req = { staff_id: staffDetails.id, task_type: "6", job_id: res.data[0].id };
+          req = { staff_id: multipleFilter.staff_id, task_type: "6", job_id: res.data[0].id };
         }
         if (req.staff_id != undefined) {
           const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
@@ -442,7 +504,7 @@ const Timesheet = () => {
             }
           }
         }
-      }else{
+      } else {
         sweatalert.fire({
           icon: 'warning',
           title: "There is no job available for this client.",
@@ -466,9 +528,9 @@ const Timesheet = () => {
     updatedRows[index].taskData = [];
     let req;
     if (task_type === "1") {
-      req = { staff_id: staffDetails.id, task_type: "5", internal_id: e.target.value };
+      req = { staff_id: multipleFilter.staff_id, task_type: "5", internal_id: e.target.value };
     } else if (task_type === "2") {
-      req = { staff_id: staffDetails.id, task_type: "6", job_id: e.target.value };
+      req = { staff_id: multipleFilter.staff_id, task_type: "6", job_id: e.target.value };
     }
     if (req.staff_id != undefined) {
       const res = await dispatch(getTimesheetTaskTypedData({ req, authToken: token })).unwrap();
@@ -629,7 +691,7 @@ const Timesheet = () => {
         return rest;
       });
 
-      const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows, deleteRows: deleteRows };
+      const req = { staff_id: multipleFilter.staff_id, data: updatedTimeSheetRows, deleteRows: deleteRows };
       const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
       if (res.status) {
         sweatalert.fire({
@@ -678,7 +740,7 @@ const Timesheet = () => {
         return rest;
       });
 
-      const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows1, deleteRows: deleteRows };
+      const req = { staff_id: multipleFilter.staff_id, data: updatedTimeSheetRows1, deleteRows: deleteRows };
       const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
       if (res.status) {
         setRemarkText(null)
@@ -718,7 +780,7 @@ const Timesheet = () => {
       return rest;
     });
 
-    const req = { staff_id: staffDetails.id, data: updatedTimeSheetRows1, deleteRows: deleteRows };
+    const req = { staff_id: multipleFilter.staff_id, data: updatedTimeSheetRows1, deleteRows: deleteRows };
     const res = await dispatch(saveTimesheetData({ req, authToken: token })).unwrap();
     if (res.status) {
       setRemarkText(null)
@@ -737,22 +799,6 @@ const Timesheet = () => {
     }
   }
 
-  // const dayMonthFormatDate = (dateString) => {
-  //     const parts = dateString.split(', ')[1].split('/');
-  //     const day = parts[0];
-  //     const monthIndex = parts[1] - 1;
-  //     const year = parts[2];
-  //     const date = new Date(year, monthIndex, day);
-  //     const options = { month: 'short' };
-  //     const month = date.toLocaleDateString('en-US', options).toLowerCase();
-  //     return `${day} ${month}`;
-  // };
-
-  // // Example usage
-  // console.log("weekDays.monday ", weekDays);
-  // if (weekDays.monday !== "") {
-  //     console.log("dayMonthFormatDate ", dayMonthFormatDate(weekDays.monday));
-  // }
 
   const dayMonthFormatDate = (dateString) => {
     const parts = dateString.split(', ');
@@ -782,13 +828,16 @@ const Timesheet = () => {
       <div className="content-title">
         <div className="row">
           <div className="col-md-8">
-            <div className="tab-title">
-              <h3 className="mt-0">Timesheet</h3>
+            <div className="tab-title d-flex align-items-center" style={{ gap: '15px' }}>
+              <h3 className="mt-0">Timesheet</h3><div><span>{getFormattedDate('current','')}</span></div>
             </div>
           </div>
         </div>
       </div>
       <div className="report-data mt-4">
+
+
+
         {/* <div className="col-md-4">
             <div className="form-group">
               <select
@@ -812,6 +861,59 @@ const Timesheet = () => {
             </div>
           </div> */}
 
+        <div className="col-md-12">
+          <div className="row">
+         {
+          ['SUPERADMIN', 'ADMIN'].includes(role) ? 
+          <div className="form-group col-md-4">
+          <select
+            name="staff_id"
+            className="form-select"
+            id="tabSelect"
+            defaultValue={staffDetails.id}
+            onChange={(e) => selectFilterStaffANdWeek(e)}
+          >
+            {staffDataAll.data &&
+              staffDataAll.data.map((val, index) => (
+                <option
+                  key={index}
+                  value={val.id}
+                  selected={staffDetails.id === val.id}
+                >
+                  {val.first_name + ' ' + val.last_name}
+                </option>
+              ))}
+          </select>
+        </div>
+          : ""
+         }
+         {
+          staffDataWeekDataAll.data && staffDataWeekDataAll.data.length > 0 ?
+          <div className="form-group col-md-4">
+            <select
+              name="week"
+              className="form-select"
+              id="tabSelect"
+              // defaultValue={staffDataWeekDataAll.data && staffDataWeekDataAll.data[0].valid_weekOffsets}
+              onChange={(e) => selectFilterStaffANdWeek(e)}
+            >
+              {staffDataWeekDataAll.data &&
+                staffDataWeekDataAll.data.map((val, index) => (
+                  <option
+                    key={index}
+                    value={val.valid_weekOffsets}
+                   // selected={staffDetails.id === val.id}
+                  >
+                    {getFormattedDate('convert',val.month_date)}
+                  </option>
+                ))}
+            </select>
+          </div> :
+          ""
+         }
+         </div>
+        </div>
+
         {/* Tabs Content */}
         <div className="tab-content mt-5">
           {/* Render content based on selected tab */}
@@ -820,59 +922,59 @@ const Timesheet = () => {
               <div id="customerList">
                 <div className="row">
 
-                    <div className="table-responsive table-card  mb-1">
-                      <table
-                        className="timesheetTable table align-middle table-nowrap"
-                        id="customerTable"
-                        style={{ width: "max-content" }}
-                      >
-                        <thead className="table-light table-head-blue">
-                          
-                          <tr>
-                            <th className="dropdwnCol2 pe-0" data-field="phone"  style={{ width: '10px' }}>
-                              No
-                            </th>
-                            <th className="ps-0" data-field="phone" style={{ width: '130px' }} >
-                              Task Type
-                            </th>
-                            <th className="dropdwnCol7" data-field="phone"  style={{ width: '130px' }}>
-                              Customer
-                            </th>
-                            <th className="dropdwnCol6" data-field="phone"  style={{ width: '130px' }}>
-                              Client
-                            </th>
-                            <th className="dropdwnCol5" data-field="phone" style={{ width: '130px' }} >
-                              Job
-                            </th>
-                            <th className="dropdwnCol5" data-field="phone" style={{ width: '130px' }}>
-                              Task
-                            </th>
-                           
-                            <th colSpan="8" className="pe-0 week-data">
-                           
-                           <div className="d-flex align-items-center">
-                           <ChevronLeft onClick={(e) => { e.preventDefault(); changeWeek(-1); }} />
-                           <span className="pt-1 me-0">{weekDays.monday ? dayMonthFormatDate(weekDays.monday) : ""}</span>
-         {/* Conditionally render weekdays when expanded */}
-         {isExpanded && (
-           <div style={{width:'70%'}}>
-           
-           <span>{weekDays.tuesday ? dayMonthFormatDate(weekDays.tuesday) : ""}</span>
-           <span>{weekDays.wednesday ? dayMonthFormatDate(weekDays.wednesday) : ""}</span>
-           <span>{weekDays.thursday ? dayMonthFormatDate(weekDays.thursday) : ""}</span>
-           <span>{weekDays.friday ? dayMonthFormatDate(weekDays.friday) : ""}</span>
-           <span>{weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : ""}</span>
-           <span>{weekDays.sunday ? dayMonthFormatDate(weekDays.sunday) : ""}</span>
-           </div>
-         )}
-             <button  onClick={toggleAllRowsView} className=" px-0 btn btn-sm btn-link text-decoration-none">
-             {isExpanded ? "Collapse All" : "Expand All"}
-           </button>
-           <ChevronRight onClick={(e) => { e.preventDefault(); changeWeek(1); }} />
-         </div>
-        
-       </th>
-                            {/* <th className="dropdwnCol5" data-field="phone">
+                  <div className="table-responsive table-card  mb-1">
+                    <table
+                      className="timesheetTable table align-middle table-nowrap"
+                      id="customerTable"
+                      style={{ width: "max-content" }}
+                    >
+                      <thead className="table-light table-head-blue">
+
+                        <tr>
+                          <th className="dropdwnCol2 pe-0" data-field="phone" style={{ width: '10px' }}>
+                            No
+                          </th>
+                          <th className="ps-0" data-field="phone" style={{ width: '130px' }} >
+                            Task Type
+                          </th>
+                          <th className="dropdwnCol7" data-field="phone" style={{ width: '130px' }}>
+                            Customer
+                          </th>
+                          <th className="dropdwnCol6" data-field="phone" style={{ width: '130px' }}>
+                            Client
+                          </th>
+                          <th className="dropdwnCol5" data-field="phone" style={{ width: '130px' }} >
+                            Job
+                          </th>
+                          <th className="dropdwnCol5" data-field="phone" style={{ width: '130px' }}>
+                            Task
+                          </th>
+
+                          <th colSpan="8" className="pe-0 week-data">
+
+                            <div className="d-flex align-items-center">
+                              <ChevronLeft onClick={(e) => { e.preventDefault(); changeWeek(-1); }} />
+                              <span className="pt-1 me-0">{weekDays.monday ? dayMonthFormatDate(weekDays.monday) : ""}</span>
+                              {/* Conditionally render weekdays when expanded */}
+                              {isExpanded && (
+                                <div style={{ width: '70%' }}>
+
+                                  <span>{weekDays.tuesday ? dayMonthFormatDate(weekDays.tuesday) : ""}</span>
+                                  <span>{weekDays.wednesday ? dayMonthFormatDate(weekDays.wednesday) : ""}</span>
+                                  <span>{weekDays.thursday ? dayMonthFormatDate(weekDays.thursday) : ""}</span>
+                                  <span>{weekDays.friday ? dayMonthFormatDate(weekDays.friday) : ""}</span>
+                                  <span>{weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : ""}</span>
+                                  <span>{weekDays.sunday ? dayMonthFormatDate(weekDays.sunday) : ""}</span>
+                                </div>
+                              )}
+                              <button onClick={toggleAllRowsView} className=" px-0 btn btn-sm btn-link text-decoration-none">
+                                {isExpanded ? "Collapse All" : "Expand All"}
+                              </button>
+                              <ChevronRight onClick={(e) => { e.preventDefault(); changeWeek(1); }} />
+                            </div>
+
+                          </th>
+                          {/* <th className="dropdwnCol5" data-field="phone">
                               {weekDays.sunday!=""?dayMonthFormatDate(weekDays.sunday): ""}
                             </th> */}
 
@@ -1170,7 +1272,7 @@ const Timesheet = () => {
                         <tr className="tabel_new">
                           <td>
                             {
-                              submitStatusAllKey === 0 ?
+                             staffDetails.id ==multipleFilter.staff_id ? submitStatusAllKey === 0 ?
                                 <button
                                   className="d-flex btn btn-info fw-normal px-2"
                                   onClick={handleAddNewSheet}
@@ -1184,7 +1286,7 @@ const Timesheet = () => {
                                     className="ri-add-circle-fill"
                                   />
                                 </button>
-                                : ""
+                                : "":""
                             }
                           </td>
                           <td colSpan={12}></td>
@@ -1224,8 +1326,12 @@ const Timesheet = () => {
           )}
           {selectedTab === "custom" && <div>Custom content...</div>}
         </div>
+
+
         <div className="d-flex justify-content-end mt-3">
-          {submitStatusAllKey === 0 ?
+          {
+          staffDetails.id ==multipleFilter.staff_id?
+          submitStatusAllKey === 0 ?
             <>
               <button className="btn btn-info"
                 onClick={(e) => {
@@ -1241,7 +1347,10 @@ const Timesheet = () => {
                 <i className="far fa-save"></i> Submit
               </button>
             </>
-            : ""}
+            : ""
+            :""
+            
+            }
 
         </div>
 
