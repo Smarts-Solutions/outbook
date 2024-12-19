@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Trash2, ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getTimesheetData, getTimesheetTaskTypedData, saveTimesheetData, getStaffHourMinute } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
@@ -9,11 +9,11 @@ import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 
 const Timesheet = () => {
 
-  const getFormattedDate = (type , date) => {
-     let now = new Date();
-     if(type === "convert"){
+  const getFormattedDate = (type, date) => {
+    let now = new Date();
+    if (type === "convert") {
       now = new Date(date);
-     }
+    }
 
     const year = now.getFullYear();
     const month = now.getMonth() + 1; // Months are 0-indexed
@@ -41,7 +41,7 @@ const Timesheet = () => {
     saturday: '',
     sunday: '',
   });
- 
+
   useEffect(() => {
     const today = new Date();
     const dayOfWeek = today.getDay();
@@ -56,7 +56,7 @@ const Timesheet = () => {
       saturday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
       sunday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
     });
-  }, [weekOffset]); 
+  }, [weekOffset]);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -75,11 +75,10 @@ const Timesheet = () => {
   });
   const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
   const [staffDataWeekDataAll, setStaffDataWeekDataAll] = useState({ loading: true, data: [] });
-  
+
   const GetTimeSheet = async (weekOffset) => {
-  console.log("GetTimeSheet call ",weekOffset)
     const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
-     console.log("req",req)
+    console.log("req", req)
     const res = await dispatch(getTimesheetData({ req, authToken: token })).unwrap();
     setSubmitStatusAllKey(0)
     setDeleteRows([])
@@ -103,23 +102,22 @@ const Timesheet = () => {
     }
   }
 
-
   const selectFilterStaffANdWeek = async (e) => {
     const { name, value } = e.target;
-    if(name === "staff_id"){
-      setMultipleFilter((prev) => ({ ...prev, [name]: value })); 
+    if (name === "staff_id") {
+      setMultipleFilter((prev) => ({ ...prev, [name]: value }));
       weekOffSetValue.current = 0;
       setWeekOffset(0);
-     // await GetTimeSheet(0)
-    }else if(name === "week"){
+      // await GetTimeSheet(0)
+    } else if (name === "week") {
       weekOffSetValue.current = parseInt(value)
       setWeekOffset(value);
       await GetTimeSheet(value)
     }
-   
+
   };
 
- 
+
 
 
   const staffData = async () => {
@@ -150,7 +148,7 @@ const Timesheet = () => {
       prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
     );
   };
-  
+
 
   const [currentDay, setCurrentDay] = useState('');
 
@@ -158,10 +156,9 @@ const Timesheet = () => {
     staffData();
   }, [])
 
-  
+
   useEffect(() => {
     GetTimeSheet(0);
-    // set day wise Input
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const todays = new Date().getDay();
     setCurrentDay(days[todays]);
@@ -169,7 +166,6 @@ const Timesheet = () => {
 
   useEffect(() => {
     GetTimeSheet(weekOffSetValue.current);
-    // set day wise Input
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const todays = new Date().getDay();
     setCurrentDay(days[todays]);
@@ -808,20 +804,68 @@ const Timesheet = () => {
 
   const dayMonthFormatDate = (dateString) => {
     const parts = dateString.split(', ');
-    const dayOfWeek = parts[0]; 
-    const dateParts = parts[1].split('/'); 
+    const dayOfWeek = parts[0];
+    const dateParts = parts[1].split('/');
     const day = dateParts[0];
-    const monthIndex = dateParts[1] - 1; 
+    const monthIndex = dateParts[1] - 1;
     const year = dateParts[2];
     const date = new Date(year, monthIndex, day);
     const options = { month: 'short' };
-    const month = date.toLocaleDateString('en-US', options).toLowerCase(); 
+    const month = date.toLocaleDateString('en-US', options).toLowerCase();
     // Return formatted string
     return `${dayOfWeek} ${day} ${month}`;
   };
 
+  const exportToCSV = (timeSheetRows) => {
+    if (!timeSheetRows || timeSheetRows.length === 0) {
+      alert('No data to export!');
+      return;
+    }
 
-   console.log("weekOffSetValue.current",weekOffSetValue.current)
+    const headers = [
+      'Index',
+      'Task Type',
+      'Customer Name',
+      'Client Name',
+      'Job Name',
+      'Task Name',
+      'Monday Hours',
+      'Tuesday Hours',
+      'Wednesday Hours',
+      'Thursday Hours',
+      'Friday Hours',
+      'Saturday Hours',
+      'Sunday Hours',
+    ];
+
+    const rows = timeSheetRows.map((item, index) => [
+      index + 1,
+      item.task_type === '1' ? 'Internal' : 'External',
+      item.customer_name || 'No Customer',
+      item.client_name || 'No Client',
+      item.job_name || 'No Job',
+      item.task_name || 'No Task',
+      item.monday_hours || 0,
+      item.tuesday_hours || 0,
+      item.wednesday_hours || 0,
+      item.thursday_hours || 0,
+      item.friday_hours || 0,
+      item.saturday_hours || 0,
+      item.sunday_hours || 0,
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'TimeSheetData.csv';
+    link.click();
+  };
+
+
   // Example usage
   return (
 
@@ -830,89 +874,68 @@ const Timesheet = () => {
         <div className="row">
           <div className="col-md-8">
             <div className="tab-title d-flex align-items-center" style={{ gap: '15px' }}>
-              <h3 className="mt-0">Timesheet</h3><div><span>{getFormattedDate('current','')}</span></div>
+              <h3 className="mt-0">Timesheet</h3><div><span>{getFormattedDate('current', '')}</span></div>
             </div>
           </div>
         </div>
       </div>
       <div className="report-data mt-4">
-
-
-
-        {/* <div className="col-md-4">
-            <div className="form-group">
-              <select
-                className="form-select"
-                id="tabSelect"
-                value={selectedTab}
-                onChange={handleTabChange}
-              >
-                <option >Select Options</option>
-                <option value="this-week">This Week</option>
-                <option value="last-week">Last Week</option>
-                <option value="this-month">This Month</option>
-                <option value="last-month">Last Month</option>
-                <option value="last-quarter">Last Quarter</option>
-                <option value="this-6-months">This 6 Months</option>
-                <option value="last-6-months">Last 6 Months</option>
-                <option value="this-year">This Year</option>
-                <option value="last-year">Last Year</option>
-                <option value="custom">Custom</option>
-              </select>
-            </div>
-          </div> */}
-
         <div className="col-md-12">
           <div className="row">
-         {
-          ['SUPERADMIN', 'ADMIN'].includes(role) ? 
-          <div className="form-group col-md-4">
-          <select
-            name="staff_id"
-            className="form-select"
-            id="tabSelect"
-            defaultValue={staffDetails.id}
-            onChange={(e) => selectFilterStaffANdWeek(e)}
-          >
-            {staffDataAll.data &&
-              staffDataAll.data.map((val, index) => (
-                <option
-                  key={index}
-                  value={val.id}
-                  selected={staffDetails.id === val.id}
-                >
-                  {val.first_name + ' ' + val.last_name}
-                </option>
-              ))}
-          </select>
-        </div>
-          : ""
-         }
-         {
-          staffDataWeekDataAll.data && staffDataWeekDataAll.data.length > 0 ?
-          <div className="form-group col-md-4">
-            <select
-              name="week"
-              className="form-select"
-              id="tabSelect"
-              // defaultValue={staffDataWeekDataAll.data && staffDataWeekDataAll.data[0].valid_weekOffsets}
-              onChange={(e) => selectFilterStaffANdWeek(e)}
-            >
-              {staffDataWeekDataAll.data &&
-                staffDataWeekDataAll.data.map((val, index) => (
-                  <option
-                    key={index}
-                    value={val.valid_weekOffsets}
-                    selected={weekOffSetValue.current == val.valid_weekOffsets}
+            {
+              ['SUPERADMIN', 'ADMIN'].includes(role) ?
+                <div className="form-group col-md-4">
+                  <select
+                    name="staff_id"
+                    className="form-select"
+                    id="tabSelect"
+                    defaultValue={staffDetails.id}
+                    onChange={(e) => selectFilterStaffANdWeek(e)}
                   >
-                    {getFormattedDate('convert',val.month_date)}
-                  </option>
-                ))}
-            </select>
-          </div> :
-          ""
-         }
-         </div>
+                    {staffDataAll.data &&
+                      staffDataAll.data.map((val, index) => (
+                        <option
+                          key={index}
+                          value={val.id}
+                          selected={staffDetails.id === val.id}
+                        >
+                          {val.first_name + ' ' + val.last_name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                : ""
+            }
+            {
+              staffDataWeekDataAll.data && staffDataWeekDataAll.data.length > 0 ?
+                <div className="form-group col-md-4">
+                  <select
+                    name="week"
+                    className="form-select"
+                    id="tabSelect"
+                    // defaultValue={staffDataWeekDataAll.data && staffDataWeekDataAll.data[0].valid_weekOffsets}
+                    onChange={(e) => selectFilterStaffANdWeek(e)}
+                  >
+                    {staffDataWeekDataAll.data &&
+                      staffDataWeekDataAll.data.map((val, index) => (
+                        <option
+                          key={index}
+                          value={val.valid_weekOffsets}
+                          selected={weekOffSetValue.current == val.valid_weekOffsets}
+                        >
+                          {getFormattedDate('convert', val.month_date)}
+                        </option>
+                      ))}
+                  </select>
+                </div> :
+                ""
+            }
+
+            <div className="form-group col-md-4">
+              <Download onClick={() => exportToCSV(timeSheetRows)} />
+            </div>
+
+          </div>
         </div>
 
         {/* Tabs Content */}
@@ -965,7 +988,7 @@ const Timesheet = () => {
                                   <span>{weekDays.thursday ? dayMonthFormatDate(weekDays.thursday) : ""}</span>
                                   <span>{weekDays.friday ? dayMonthFormatDate(weekDays.friday) : ""}</span>
                                   <span>{weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : ""}</span>
-                              
+
                                 </div>
                               )}
                               <button onClick={toggleAllRowsView} className=" px-0 btn btn-sm btn-link text-decoration-none">
@@ -1133,7 +1156,7 @@ const Timesheet = () => {
                                     onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday, item)}
                                     value={item.monday_hours == null ? "0" : item.monday_hours}
                                     // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false :false}
-                                    disabled={staffDetails.id != multipleFilter.staff_id?true: item.submit_status === "1" ? true : false}
+                                    disabled={staffDetails.id != multipleFilter.staff_id ? true : item.submit_status === "1" ? true : false}
                                   />
                                     <input
                                       style={{ width: '70px' }}
@@ -1143,7 +1166,7 @@ const Timesheet = () => {
                                       onChange={(e) => handleHoursInput(e, index, 'tuesday_date', weekDays.tuesday, item)}
                                       value={item.tuesday_hours == null ? "0" : item.tuesday_hours}
                                       // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false : true : false : currentDay !== 'tuesday'}
-                                      disabled={staffDetails.id != multipleFilter.staff_id?true:item.submit_status === "1" ? true : false}
+                                      disabled={staffDetails.id != multipleFilter.staff_id ? true : item.submit_status === "1" ? true : false}
                                     />
                                     <input
                                       style={{ width: '70px' }}
@@ -1153,7 +1176,7 @@ const Timesheet = () => {
                                       onChange={(e) => handleHoursInput(e, index, 'wednesday_date', weekDays.wednesday, item)}
                                       value={item.wednesday_hours == null ? "0" : item.wednesday_hours}
                                       // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false : true : false : currentDay !== 'wednesday'}
-                                      disabled={staffDetails.id != multipleFilter.staff_id?true:item.submit_status === "1" ? true : false}
+                                      disabled={staffDetails.id != multipleFilter.staff_id ? true : item.submit_status === "1" ? true : false}
                                     />
                                     <input
                                       style={{ width: '70px' }}
@@ -1163,7 +1186,7 @@ const Timesheet = () => {
                                       onChange={(e) => handleHoursInput(e, index, 'thursday_date', weekDays.thursday, item)}
                                       value={item.thursday_hours == null ? "0" : item.thursday_hours}
                                       // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ? currentDay === 'thursday' ? false : true : false : currentDay !== 'thursday'}
-                                      disabled={staffDetails.id != multipleFilter.staff_id?true:item.submit_status === "1" ? true : false}
+                                      disabled={staffDetails.id != multipleFilter.staff_id ? true : item.submit_status === "1" ? true : false}
                                     />
                                     <input
                                       style={{ width: '70px' }}
@@ -1173,7 +1196,7 @@ const Timesheet = () => {
                                       onChange={(e) => handleHoursInput(e, index, 'friday_date', weekDays.friday, item)}
                                       value={item.friday_hours == null ? "0" : item.friday_hours}
                                       // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ? false : true : false : currentDay !== 'friday'}
-                                      disabled={staffDetails.id != multipleFilter.staff_id?true:item.submit_status === "1" ? true : false}
+                                      disabled={staffDetails.id != multipleFilter.staff_id ? true : item.submit_status === "1" ? true : false}
                                     />
                                     <input
                                       style={{ width: '70px' }}
@@ -1183,7 +1206,7 @@ const Timesheet = () => {
                                       onChange={(e) => handleHoursInput(e, index, 'saturday_date', weekDays.saturday, item)}
                                       value={item.saturday_hours == null ? "0" : item.saturday_hours}
                                       // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
-                                      disabled={staffDetails.id != multipleFilter.staff_id?true:item.submit_status === "1" ? true : false}
+                                      disabled={staffDetails.id != multipleFilter.staff_id ? true : item.submit_status === "1" ? true : false}
                                     />
                                   </div>
 
@@ -1198,7 +1221,7 @@ const Timesheet = () => {
                                     onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday, item)}
                                     value={item.monday_hours == null ? "0" : item.monday_hours}
                                     // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false : currentDay !== 'monday'}
-                                    disabled={staffDetails.id != multipleFilter.staff_id?true: item.submit_status === "1" ? true : false}
+                                    disabled={staffDetails.id != multipleFilter.staff_id ? true : item.submit_status === "1" ? true : false}
                                   /></div>
                                 )}
                               </div>
@@ -1263,7 +1286,7 @@ const Timesheet = () => {
                         <tr className="tabel_new">
                           <td>
                             {
-                             staffDetails.id ==multipleFilter.staff_id ? submitStatusAllKey === 0 ?
+                              staffDetails.id == multipleFilter.staff_id ? submitStatusAllKey === 0 ?
                                 <button
                                   className="d-flex btn btn-info fw-normal px-2"
                                   onClick={handleAddNewSheet}
@@ -1277,7 +1300,7 @@ const Timesheet = () => {
                                     className="ri-add-circle-fill"
                                   />
                                 </button>
-                                : "":""
+                                : "" : ""
                             }
                           </td>
                           <td colSpan={12}></td>
@@ -1321,27 +1344,27 @@ const Timesheet = () => {
 
         <div className="d-flex justify-content-end mt-3">
           {
-          staffDetails.id ==multipleFilter.staff_id?
-          submitStatusAllKey === 0 ?
-            <>
-              <button className="btn btn-info"
-                onClick={(e) => {
-                  saveData(e);
-                }}>
-                <i className="fa fa-check"></i> Save
-              </button>
+            staffDetails.id == multipleFilter.staff_id ?
+              submitStatusAllKey === 0 ?
+                <>
+                  <button className="btn btn-info"
+                    onClick={(e) => {
+                      saveData(e);
+                    }}>
+                    <i className="fa fa-check"></i> Save
+                  </button>
 
-              <button className="btn btn-outline-success ms-3"
-                onClick={(e) => {
-                  submitData(e);
-                }}>
-                <i className="far fa-save"></i> Submit
-              </button>
-            </>
-            : ""
-            :""
-            
-            }
+                  <button className="btn btn-outline-success ms-3"
+                    onClick={(e) => {
+                      submitData(e);
+                    }}>
+                    <i className="far fa-save"></i> Submit
+                  </button>
+                </>
+                : ""
+              : ""
+
+          }
 
         </div>
 
