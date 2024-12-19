@@ -70,16 +70,47 @@ const Timesheet = () => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const [multipleFilter, setMultipleFilter] = useState({
-    staff_id: staffDetails.id,
+    staff_id: parseInt(staffDetails.id),
     week: 0,
   });
   const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
   const [staffDataWeekDataAll, setStaffDataWeekDataAll] = useState({ loading: true, data: [] });
+  
+  const GetTimeSheet = async (weekOffset) => {
+  console.log("GetTimeSheet call ",weekOffset)
+    const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
+     console.log("req",req)
+    const res = await dispatch(getTimesheetData({ req, authToken: token })).unwrap();
+    setSubmitStatusAllKey(0)
+    setDeleteRows([])
+    if (res.status) {
+      setStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
+      if (res.data.length > 0 && res.data[0].submit_status === "1") {
+        setSubmitStatusAllKey(1)
+      }
+      setTimeSheetRows(res.data)
+      setTimeSheetRows((prevRows) =>
+        prevRows.map((row) => {
+          const sum = (parseFloat(row.monday_hours) || 0) + (parseFloat(row.tuesday_hours) || 0) + (parseFloat(row.wednesday_hours) || 0) + (parseFloat(row.thursday_hours) || 0) + (parseFloat(row.friday_hours) || 0) + (parseFloat(row.saturday_hours) || 0) + (parseFloat(row.sunday_hours) || 0);
+          return { ...row, total_hours: parseFloat(sum).toFixed(2) };
+        })
+
+      );
+    } else {
+      setStaffDataWeekDataAll({ loading: false, data: [] });
+      setSubmitStatusAllKey(0)
+      setTimeSheetRows([])
+    }
+  }
+
 
   const selectFilterStaffANdWeek = async (e) => {
     const { name, value } = e.target;
     if(name === "staff_id"){
       setMultipleFilter((prev) => ({ ...prev, [name]: value })); 
+      weekOffSetValue.current = 0;
+      setWeekOffset(0);
+     // await GetTimeSheet(0)
     }else if(name === "week"){
       weekOffSetValue.current = parseInt(value)
       setWeekOffset(value);
@@ -119,31 +150,7 @@ const Timesheet = () => {
       prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
     );
   };
-  const GetTimeSheet = async (weekOffset) => {
-    const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
-
-    const res = await dispatch(getTimesheetData({ req, authToken: token })).unwrap();
-    setSubmitStatusAllKey(0)
-    setDeleteRows([])
-    if (res.status) {
-      setStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
-      if (res.data.length > 0 && res.data[0].submit_status === "1") {
-        setSubmitStatusAllKey(1)
-      }
-      setTimeSheetRows(res.data)
-      setTimeSheetRows((prevRows) =>
-        prevRows.map((row) => {
-          const sum = (parseFloat(row.monday_hours) || 0) + (parseFloat(row.tuesday_hours) || 0) + (parseFloat(row.wednesday_hours) || 0) + (parseFloat(row.thursday_hours) || 0) + (parseFloat(row.friday_hours) || 0) + (parseFloat(row.saturday_hours) || 0) + (parseFloat(row.sunday_hours) || 0);
-          return { ...row, total_hours: parseFloat(sum).toFixed(2) };
-        })
-
-      );
-    } else {
-      setStaffDataWeekDataAll({ loading: false, data: [] });
-      setSubmitStatusAllKey(0)
-      setTimeSheetRows([])
-    }
-  }
+  
 
   const [currentDay, setCurrentDay] = useState('');
 
@@ -153,13 +160,20 @@ const Timesheet = () => {
 
   
   useEffect(() => {
-    staffData();
-    GetTimeSheet(weekOffSetValue.current);
+    GetTimeSheet(0);
     // set day wise Input
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const todays = new Date().getDay();
     setCurrentDay(days[todays]);
   }, [multipleFilter.staff_id])
+
+  useEffect(() => {
+    GetTimeSheet(weekOffSetValue.current);
+    // set day wise Input
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const todays = new Date().getDay();
+    setCurrentDay(days[todays]);
+  }, [])
 
   // Function to handle week change
   const changeWeek = (offset) => {
@@ -806,6 +820,8 @@ const Timesheet = () => {
     return `${dayOfWeek} ${day} ${month}`;
   };
 
+
+   console.log("weekOffSetValue.current",weekOffSetValue.current)
   // Example usage
   return (
 
@@ -887,7 +903,7 @@ const Timesheet = () => {
                   <option
                     key={index}
                     value={val.valid_weekOffsets}
-                   // selected={staffDetails.id === val.id}
+                    selected={weekOffSetValue.current == val.valid_weekOffsets}
                   >
                     {getFormattedDate('convert',val.month_date)}
                   </option>
@@ -1117,7 +1133,7 @@ const Timesheet = () => {
                                     onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday, item)}
                                     value={item.monday_hours == null ? "0" : item.monday_hours}
                                     // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false :false}
-                                    disabled={item.submit_status === "1" ? true : false}
+                                    disabled={staffDetails.id != multipleFilter.staff_id?true: item.submit_status === "1" ? true : false}
                                   />
                                     <input
                                       style={{ width: '70px' }}
@@ -1127,7 +1143,7 @@ const Timesheet = () => {
                                       onChange={(e) => handleHoursInput(e, index, 'tuesday_date', weekDays.tuesday, item)}
                                       value={item.tuesday_hours == null ? "0" : item.tuesday_hours}
                                       // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false : true : false : currentDay !== 'tuesday'}
-                                      disabled={item.submit_status === "1" ? true : false}
+                                      disabled={staffDetails.id != multipleFilter.staff_id?true:item.submit_status === "1" ? true : false}
                                     />
                                     <input
                                       style={{ width: '70px' }}
@@ -1137,7 +1153,7 @@ const Timesheet = () => {
                                       onChange={(e) => handleHoursInput(e, index, 'wednesday_date', weekDays.wednesday, item)}
                                       value={item.wednesday_hours == null ? "0" : item.wednesday_hours}
                                       // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false : true : false : currentDay !== 'wednesday'}
-                                      disabled={item.submit_status === "1" ? true : false}
+                                      disabled={staffDetails.id != multipleFilter.staff_id?true:item.submit_status === "1" ? true : false}
                                     />
                                     <input
                                       style={{ width: '70px' }}
@@ -1147,7 +1163,7 @@ const Timesheet = () => {
                                       onChange={(e) => handleHoursInput(e, index, 'thursday_date', weekDays.thursday, item)}
                                       value={item.thursday_hours == null ? "0" : item.thursday_hours}
                                       // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ? currentDay === 'thursday' ? false : true : false : currentDay !== 'thursday'}
-                                      disabled={item.submit_status === "1" ? true : false}
+                                      disabled={staffDetails.id != multipleFilter.staff_id?true:item.submit_status === "1" ? true : false}
                                     />
                                     <input
                                       style={{ width: '70px' }}
@@ -1157,7 +1173,7 @@ const Timesheet = () => {
                                       onChange={(e) => handleHoursInput(e, index, 'friday_date', weekDays.friday, item)}
                                       value={item.friday_hours == null ? "0" : item.friday_hours}
                                       // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ? false : true : false : currentDay !== 'friday'}
-                                      disabled={item.submit_status === "1" ? true : false}
+                                      disabled={staffDetails.id != multipleFilter.staff_id?true:item.submit_status === "1" ? true : false}
                                     />
                                     <input
                                       style={{ width: '70px' }}
@@ -1167,7 +1183,7 @@ const Timesheet = () => {
                                       onChange={(e) => handleHoursInput(e, index, 'saturday_date', weekDays.saturday, item)}
                                       value={item.saturday_hours == null ? "0" : item.saturday_hours}
                                       // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
-                                      disabled={item.submit_status === "1" ? true : false}
+                                      disabled={staffDetails.id != multipleFilter.staff_id?true:item.submit_status === "1" ? true : false}
                                     />
                                   </div>
 
@@ -1182,7 +1198,7 @@ const Timesheet = () => {
                                     onChange={(e) => handleHoursInput(e, index, 'monday_date', weekDays.monday, item)}
                                     value={item.monday_hours == null ? "0" : item.monday_hours}
                                     // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false : currentDay !== 'monday'}
-                                    disabled={item.submit_status === "1" ? true : false}
+                                    disabled={staffDetails.id != multipleFilter.staff_id?true: item.submit_status === "1" ? true : false}
                                   /></div>
                                 )}
                               </div>
