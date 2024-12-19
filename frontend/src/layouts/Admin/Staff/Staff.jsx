@@ -256,8 +256,7 @@ const StaffPage = () => {
     {
       name: "Actions",
       cell: (row) => {
-
-        return 
+        return(
         <div className="dropdown">
           <button
             className="btn "
@@ -288,7 +287,7 @@ const StaffPage = () => {
             </a>
           </div>
         </div>
-      },
+      )},
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
