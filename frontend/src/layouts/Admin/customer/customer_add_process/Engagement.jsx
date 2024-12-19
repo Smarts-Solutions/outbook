@@ -1010,7 +1010,7 @@ const Engagement = () => {
                                     </div>
                                   </div>
 
-                                  <div className="col-lg-4">
+                                  <div className="col-lg-4 mb-3">
                                     <label
                                       htmlFor={`services_${index}`}
                                       className="form-label"
@@ -1121,7 +1121,7 @@ const Engagement = () => {
               </div>
               <div className="card-body">
                 <div className="row">
-                  <div className="col-lg-4">
+                  <div className="col-lg-4 mb-3">
                     <label className="form-label">Customer Joining Date</label>
                     <input
                       type="date"
@@ -1136,7 +1136,7 @@ const Engagement = () => {
                       </span>
                     )}
                   </div>
-                  <div className="col-lg-4">
+                  <div className="col-lg-4 mb-3">
                     <label className="form-label">Select Customer Source</label>
                     <select
 
@@ -1159,7 +1159,7 @@ const Engagement = () => {
                       </span>
                     )}
                   </div>
-                  <div className="col-lg-4">
+                  <div className="col-lg-4 mb-3">
                     <label className="form-label">
                       Select Customer Sub-Source
                     </label>

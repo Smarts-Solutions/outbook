@@ -1370,11 +1370,11 @@ const Information = ({ id, pageStatus }) => {
                               )}
                             </div>
                           </div>
-                          <div className="col-lg-4 pe-0">
+                          <div className="col-lg-4 ">
                             <div className="mb-3">
                               <label className="form-label">Phone</label>
                               <div className="row">
-                                <div className="col-md-4">
+                                <div className="col-md-4 col-4">
                                   <select
                                     className="form-select"
                                     onChange={(e) => handleChange1(e)}
@@ -1393,7 +1393,7 @@ const Information = ({ id, pageStatus }) => {
                                       ))}
                                   </select>
                                 </div>
-                                <div className=" col-md-8 ps-1">
+                                <div className=" col-md-8 col-8 ps-1">
                                   <input
                                     type="text"
                                     className="form-control"
@@ -1997,13 +1997,13 @@ const Information = ({ id, pageStatus }) => {
                                         </div>
                                       </div>
 
-                                      <div className="col-lg-4 pe-0">
+                                      <div className="col-lg-4 ">
                                         <div className="mb-3">
                                           <label className="form-label">
                                             Phone
                                           </label>
                                           <div className="row">
-                                            <div className="col-md-4 pe-0">
+                                            <div className="col-md-4 col-4">
                                               <select
                                                 className="form-select"
                                                 onChange={(e) =>
@@ -2029,7 +2029,7 @@ const Information = ({ id, pageStatus }) => {
                                                   )}
                                               </select>
                                             </div>
-                                            <div className="mb-3 col-md-8 ps-1">
+                                            <div className=" col-md-8 col-8 ps-1">
                                               <input
                                                 type="text"
                                                 className="form-control"
@@ -2416,13 +2416,13 @@ const Information = ({ id, pageStatus }) => {
                                       </div>
                                     </div>
 
-                                    <div className="col-lg-4 pe-1">
+                                    <div className="col-lg-4">
                                       <div className="mb-3">
                                         <label className="form-label">
                                           Phone
                                         </label>
                                         <div className="row">
-                                          <div className="col-md-4">
+                                          <div className="col-md-4 col-4">
                                             <select
                                               className="form-select"
                                               onChange={(e) =>
@@ -2447,7 +2447,7 @@ const Information = ({ id, pageStatus }) => {
                                                 ))}
                                             </select>
                                           </div>
-                                          <div className="mb-3 col-md-8 ps-0">
+                                          <div className=" col-md-8 ps-0 col-8">
                                             <input
                                               type="text"
                                               className="form-control"
