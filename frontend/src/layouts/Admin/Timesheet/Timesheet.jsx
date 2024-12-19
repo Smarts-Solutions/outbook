@@ -22,6 +22,42 @@ const Timesheet = () => {
   };
 
 
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-GB', {
+      weekday: 'short',  // Mon, Tue, etc.
+      day: '2-digit',    // 01, 02, etc.
+      month: '2-digit',  // 01, 02, etc.
+      year: 'numeric',   // 2024, etc.
+    });
+  };
+
+  const [weekOffset, setWeekOffset] = useState(0); // 0 for current week
+  const [weekDays, setWeekDays] = useState({
+    monday: '',
+    tuesday: '',
+    wednesday: '',
+    thursday: '',
+    friday: '',
+    saturday: '',
+    sunday: '',
+  });
+ 
+  useEffect(() => {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - (dayOfWeek - 1) + weekOffset * 7);
+    setWeekDays({
+      monday: formatDate(startOfWeek),
+      tuesday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
+      wednesday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
+      thursday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
+      friday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
+      saturday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
+      sunday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
+    });
+  }, [weekOffset]); 
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
@@ -37,20 +73,22 @@ const Timesheet = () => {
     staff_id: staffDetails.id,
     week: 0,
   });
+  const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
+  const [staffDataWeekDataAll, setStaffDataWeekDataAll] = useState({ loading: true, data: [] });
 
   const selectFilterStaffANdWeek = async (e) => {
-   
     const { name, value } = e.target;
     if(name === "staff_id"){
       setMultipleFilter((prev) => ({ ...prev, [name]: value })); 
     }else if(name === "week"){
+      weekOffSetValue.current = parseInt(value)
+      setWeekOffset(value);
       await GetTimeSheet(value)
     }
    
   };
 
-  const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
-  const [staffDataWeekDataAll, setStaffDataWeekDataAll] = useState({ loading: true, data: [] });
+ 
 
 
   const staffData = async () => {
@@ -123,57 +161,12 @@ const Timesheet = () => {
     setCurrentDay(days[todays]);
   }, [multipleFilter.staff_id])
 
-
-
-  const formatDate = (date) => {
-    return date.toLocaleDateString('en-GB', {
-      weekday: 'short',  // Mon, Tue, etc.
-      day: '2-digit',    // 01, 02, etc.
-      month: '2-digit',  // 01, 02, etc.
-      year: 'numeric',   // 2024, etc.
-    });
-  };
-
-  const [weekOffset, setWeekOffset] = useState(0); // 0 for current week
-  const [weekDays, setWeekDays] = useState({
-    monday: '',
-    tuesday: '',
-    wednesday: '',
-    thursday: '',
-    friday: '',
-    saturday: '',
-    sunday: '',
-  });
-
-
-
-
-  useEffect(() => {
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-    const startOfWeek = new Date(today);
-
-    // Calculate the start of the week based on weekOffset
-    startOfWeek.setDate(today.getDate() - (dayOfWeek - 1) + weekOffset * 7);
-
-    setWeekDays({
-      monday: formatDate(startOfWeek),
-      tuesday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
-      wednesday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
-      thursday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
-      friday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
-      saturday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
-      sunday: formatDate(new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))),
-    });
-  }, [weekOffset]); // Depend on weekOffset
-
   // Function to handle week change
   const changeWeek = (offset) => {
     setWeekOffset(weekOffset + offset);
     GetTimeSheet(weekOffset + offset);
     weekOffSetValue.current = parseInt(weekOffset) + offset
   };
-
 
   const [submitStatus, setSubmitStatus] = useState(0);
   const [remarkText, setRemarkText] = useState(null);
@@ -799,29 +792,21 @@ const Timesheet = () => {
     }
   }
 
-
   const dayMonthFormatDate = (dateString) => {
     const parts = dateString.split(', ');
-    const dayOfWeek = parts[0]; // Get the day of the week
-    const dateParts = parts[1].split('/'); // Split date part
-
+    const dayOfWeek = parts[0]; 
+    const dateParts = parts[1].split('/'); 
     const day = dateParts[0];
-    const monthIndex = dateParts[1] - 1; // Month is 0-indexed
+    const monthIndex = dateParts[1] - 1; 
     const year = dateParts[2];
-
-    // Create a Date object
     const date = new Date(year, monthIndex, day);
-
-    // Get the short month
     const options = { month: 'short' };
-    const month = date.toLocaleDateString('en-US', options).toLowerCase(); // Convert to lowercase
-
+    const month = date.toLocaleDateString('en-US', options).toLowerCase(); 
     // Return formatted string
     return `${dayOfWeek} ${day} ${month}`;
   };
 
   // Example usage
-
   return (
 
     <div className="container-fluid">
@@ -964,7 +949,7 @@ const Timesheet = () => {
                                   <span>{weekDays.thursday ? dayMonthFormatDate(weekDays.thursday) : ""}</span>
                                   <span>{weekDays.friday ? dayMonthFormatDate(weekDays.friday) : ""}</span>
                                   <span>{weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : ""}</span>
-                                  <span>{weekDays.sunday ? dayMonthFormatDate(weekDays.sunday) : ""}</span>
+                              
                                 </div>
                               )}
                               <button onClick={toggleAllRowsView} className=" px-0 btn btn-sm btn-link text-decoration-none">
@@ -1182,16 +1167,6 @@ const Timesheet = () => {
                                       onChange={(e) => handleHoursInput(e, index, 'saturday_date', weekDays.saturday, item)}
                                       value={item.saturday_hours == null ? "0" : item.saturday_hours}
                                       // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
-                                      disabled={item.submit_status === "1" ? true : false}
-                                    />
-                                    <input
-                                      style={{ width: '70px' }}
-                                      className="form-control cursor-pointer ms-2"
-                                      type="text"
-                                      name="sunday_hours"
-                                      onChange={(e) => handleHoursInput(e, index, 'sunday_date', weekDays.sunday, item)}
-                                      value={item.sunday_hours == null ? "0" : item.sunday_hours}
-                                      // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.sunday) > new Date() ? currentDay === 'sunday' ? false : true : false : currentDay !== 'sunday'}
                                       disabled={item.submit_status === "1" ? true : false}
                                     />
                                   </div>
