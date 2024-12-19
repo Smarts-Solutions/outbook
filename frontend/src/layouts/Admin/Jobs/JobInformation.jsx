@@ -317,8 +317,6 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
         });
     };
 
-
-
     const RearrangeEngagementOptionArr = [];
     const filteredData = AllJobData.data?.engagement_model?.[0]
         ? Object.keys(AllJobData.data.engagement_model[0])
@@ -342,6 +340,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
 
         console.log("RearrangeEngagementOptionArr", RearrangeEngagementOptionArr)
         console.log("JobInformationData", JobInformationData.EngagementModel)
+        console.log("location.state", location.state)
   
   
     return (
@@ -378,11 +377,15 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                     </button>
                                 )}
 
-                                {(getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
+                                {
+                                
+                                (getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
                                     <button className='delete-icon' onClick={handleDelete}>
                                         <i className="ti-trash text-danger" />
                                     </button>
-                                )}
+                                )
+                                
+                                }
                             </>
                         )}
                     </div>

@@ -419,11 +419,12 @@ const ClientList = () => {
             ) : null
           }
           {
+            row.timesheet_job_id ==null ?
             getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
               <button className="delete-icon" onClick={() => handleDelete(row, "job")}>
                 <i className="ti-trash text-danger" />
               </button>
-            ) : null
+            ) : null :""
           }
 
         </div>
@@ -923,7 +924,7 @@ const ClientList = () => {
         </div>
       </div>
 
-      <Hierarchy show={["Customer", activeTab]} active={1} data={hararchyData} NumberOfActive={activeTab == 'client' ? ClientData?.length : activeTab == 'job' ? getJobDetails?.length : ""} />
+     <Hierarchy show={["Customer", activeTab]} active={1} data={hararchyData} NumberOfActive={activeTab == 'client' ? ClientData?.length : activeTab == 'job' ? getJobDetails?.length : ""} />
 
       <div className="tab-content" id="pills-tabContent">
         {tabs1.map((tab) => (

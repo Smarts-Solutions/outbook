@@ -416,6 +416,7 @@ const getJobByCustomer = async (job) => {
         const query = `
         SELECT 
         jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
         job_types.type AS job_type_name,
         jobs.status_type AS status_type,
         customer_contact_details.id AS account_manager_officer_id,
@@ -463,6 +464,8 @@ const getJobByCustomer = async (job) => {
         staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
         LEFT JOIN 
         master_status ON master_status.id = jobs.status_type
+        LEFT JOIN
+        timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE 
         jobs.customer_id = customers.id 
         AND 
@@ -479,6 +482,7 @@ const getJobByCustomer = async (job) => {
           const query = `
         SELECT 
         jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
         job_types.type AS job_type_name,
         jobs.status_type AS status_type,
         customer_contact_details.id AS account_manager_officer_id,
@@ -534,6 +538,8 @@ const getJobByCustomer = async (job) => {
         staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
         LEFT JOIN 
         master_status ON master_status.id = jobs.status_type
+         LEFT JOIN
+         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE 
         jobs.customer_id = customers.id AND 
         customer_service_account_managers.account_manager_id = ? AND jobs.customer_id = ? OR (jobs.staff_created_id = ? AND jobs.customer_id = ?)
@@ -554,6 +560,7 @@ const getJobByCustomer = async (job) => {
         const query = `
         SELECT 
         jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
         job_types.type AS job_type_name,
         jobs.status_type AS status_type,
         customer_contact_details.id AS account_manager_officer_id,
@@ -606,6 +613,8 @@ const getJobByCustomer = async (job) => {
         staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
         LEFT JOIN 
         master_status ON master_status.id = jobs.status_type
+        LEFT JOIN
+        timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE 
         jobs.customer_id = customers.id 
         AND 
@@ -621,6 +630,7 @@ const getJobByCustomer = async (job) => {
         const query = `
         SELECT 
         jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
         job_types.type AS job_type_name,
         jobs.status_type AS status_type,
         customer_contact_details.id AS account_manager_officer_id,
@@ -670,6 +680,8 @@ const getJobByCustomer = async (job) => {
         staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
         LEFT JOIN 
         master_status ON master_status.id = jobs.status_type
+        LEFT JOIN
+        timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE 
         jobs.customer_id = customers.id AND 
         jobs.customer_id = ?
@@ -700,6 +712,7 @@ const getJobByClient = async (job) => {
         const query = `
      SELECT 
      jobs.id AS job_id,
+     timesheet.job_id AS timesheet_job_id,
      job_types.type AS job_type_name,
      jobs.status_type AS status_type,
      customer_contact_details.id AS account_manager_officer_id,
@@ -750,7 +763,9 @@ const getJobByClient = async (job) => {
      LEFT JOIN 
      staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
      LEFT JOIN 
-     master_status ON master_status.id = jobs.status_type   
+     master_status ON master_status.id = jobs.status_type
+      LEFT JOIN
+     timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'   
      WHERE 
      jobs.client_id = clients.id 
      AND (jobs.allocated_to = ? OR jobs.staff_created_id = ?)
@@ -766,6 +781,7 @@ const getJobByClient = async (job) => {
           const query = `
    SELECT 
    jobs.id AS job_id,
+   timesheet.job_id AS timesheet_job_id,
    job_types.type AS job_type_name,
    jobs.status_type AS status_type,
    customer_contact_details.id AS account_manager_officer_id,
@@ -819,7 +835,9 @@ const getJobByClient = async (job) => {
    LEFT JOIN 
    staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
    LEFT JOIN
-   master_status ON master_status.id = jobs.status_type   
+   master_status ON master_status.id = jobs.status_type
+   LEFT JOIN
+   timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'  
    WHERE 
    jobs.client_id = clients.id AND
    customer_service_account_managers.account_manager_id = ? AND jobs.client_id = ? OR (jobs.staff_created_id = ? AND jobs.client_id = ?) 
@@ -840,6 +858,7 @@ const getJobByClient = async (job) => {
         const query = `
      SELECT 
      jobs.id AS job_id,
+     timesheet.job_id AS timesheet_job_id,
      job_types.type AS job_type_name,
      jobs.status_type AS status_type,
      customer_contact_details.id AS account_manager_officer_id,
@@ -890,7 +909,9 @@ const getJobByClient = async (job) => {
      LEFT JOIN 
      staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
      LEFT JOIN 
-     master_status ON master_status.id = jobs.status_type   
+     master_status ON master_status.id = jobs.status_type
+     LEFT JOIN
+     timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
      WHERE 
      jobs.client_id = clients.id 
      AND
@@ -913,6 +934,7 @@ const getJobByClient = async (job) => {
         const query = `
      SELECT 
      jobs.id AS job_id,
+     timesheet.job_id AS timesheet_job_id,
      job_types.type AS job_type_name,
      jobs.status_type AS status_type,
      customer_contact_details.id AS account_manager_officer_id,
@@ -963,7 +985,9 @@ const getJobByClient = async (job) => {
      LEFT JOIN 
      staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
      LEFT JOIN 
-     master_status ON master_status.id = jobs.status_type   
+     master_status ON master_status.id = jobs.status_type
+     LEFT JOIN
+     timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
      WHERE 
      jobs.client_id = clients.id AND
      jobs.client_id = ?
@@ -992,6 +1016,7 @@ const getByJobStaffId = async (job) => {
     const query = `
   SELECT 
   jobs.id AS job_id,
+  timesheet.job_id AS timesheet_job_id,
   job_types.type AS job_type_name,
   jobs.status_type AS status_type,
   customer_contact_details.id AS account_manager_officer_id,
@@ -1045,6 +1070,8 @@ const getByJobStaffId = async (job) => {
   staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
   LEFT JOIN
   master_status ON master_status.id = jobs.status_type
+  LEFT JOIN
+  timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
  WHERE 
   jobs.staff_created_id = ? OR 
   jobs.allocated_to = ? OR 
@@ -1068,6 +1095,7 @@ const getJobById = async (job) => {
     const query = `
     SELECT 
      jobs.id AS job_id,
+     timesheet.job_id AS timesheet_job_id,
      jobs.staff_created_id AS staff_created_id,
      staffs3.id AS outbooks_acount_manager_id,
      staffs3.first_name AS outbooks_acount_manager_first_name,
@@ -1156,6 +1184,8 @@ const getJobById = async (job) => {
      client_job_task ON client_job_task.job_id = jobs.id
      LEFT JOIN
      task ON client_job_task.task_id = task.id
+      LEFT JOIN
+     timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
      WHERE
       jobs.id = ? 
      `;

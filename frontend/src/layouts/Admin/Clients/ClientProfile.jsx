@@ -15,6 +15,9 @@ const ClientList = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const [customerData, setCustomerData] = useState([]);
+ 
+  console.log('customerData ',customerData)
+
   const [activeTab, setActiveTab] = useState("NoOfJobs");
   const [getClientDetails, setClientDetails] = useState({ loading: true, data: [], });
   const [informationData, informationSetData] = useState([]);
@@ -295,11 +298,13 @@ const ClientList = () => {
             </button>
           )}
           {
+             row.timesheet_job_id ==null ?
             (getAccessDataJob.delete == 1 || role === "ADMIN" || role === "SUPERADMIN") && (
               <button className="delete-icon" onClick={() => handleDelete(row, 'job')}>
                 <i className="ti-trash text-danger" />
               </button>
-            )}
+            )
+          :""}
         </div>
       ),
       ignoreRowClick: true,
