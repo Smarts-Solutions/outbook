@@ -891,7 +891,7 @@ const Timesheet = () => {
       </div>
       <div className="report-data mt-4">
         <div className="col-md-12">
-          <div className="row">
+          <div className="row align-items-center">
             {
               ['SUPERADMIN', 'ADMIN'].includes(role) ?
                 <div className="form-group col-md-4">
@@ -944,8 +944,10 @@ const Timesheet = () => {
             }
 
             <div className="form-group col-md-4">
-              <button className=" btn btn-info p-2"  onClick={() => exportToCSV(timeSheetRows)}>
-              <Download />
+              <button className=" btn btn-info "  onClick={() => exportToCSV(timeSheetRows)}>
+              Export Timesheet Data
+               <i className="fa fa-download ms-2" />
+
               </button>
            
             </div>
@@ -954,7 +956,7 @@ const Timesheet = () => {
         </div>
 
         {/* Tabs Content */}
-        <div className="tab-content mt-5">
+        <div className="tab-content mt-1">
           {/* Render content based on selected tab */}
           {selectedTab === "this-week" && (
             <div className="tab-pane show active">
