@@ -885,6 +885,7 @@ const Timesheet = () => {
             {
               ['SUPERADMIN', 'ADMIN'].includes(role) ?
                 <div className="form-group col-md-4">
+                  <label  className="form-label mb-2">Select Staff</label>
                   <select
                     name="staff_id"
                     className="form-select"
@@ -909,6 +910,7 @@ const Timesheet = () => {
             {
               staffDataWeekDataAll.data && staffDataWeekDataAll.data.length > 0 ?
                 <div className="form-group col-md-4">
+                  <label  className="form-label mb-2">Select Date</label>
                   <select
                     name="week"
                     className="form-select"
@@ -932,7 +934,10 @@ const Timesheet = () => {
             }
 
             <div className="form-group col-md-4">
-              <Download onClick={() => exportToCSV(timeSheetRows)} />
+              <button className=" btn btn-info"  onClick={() => exportToCSV(timeSheetRows)}>
+              <Download />
+              </button>
+           
             </div>
 
           </div>
