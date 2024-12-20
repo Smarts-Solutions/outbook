@@ -874,7 +874,17 @@ const Timesheet = () => {
         <div className="row">
           <div className="col-md-8">
             <div className="tab-title d-flex align-items-center" style={{ gap: '15px' }}>
-              <h3 className="mt-0">Timesheet</h3><div><span>{getFormattedDate('current', '')}</span></div>
+              <h3 className="mt-0">Timesheet</h3>
+              
+              <div className="text-center ">
+  <p className="text-info bg-soft-primary px-3 py-2 mb-0 font-11 rounded">
+    <i className="fa fa-calendar-clock me-1" />
+   <span> {getFormattedDate('current', '')}</span>
+   
+  </p>
+</div>
+
+              
             </div>
           </div>
         </div>
@@ -934,7 +944,7 @@ const Timesheet = () => {
             }
 
             <div className="form-group col-md-4">
-              <button className=" btn btn-info"  onClick={() => exportToCSV(timeSheetRows)}>
+              <button className=" btn btn-info p-2"  onClick={() => exportToCSV(timeSheetRows)}>
               <Download />
               </button>
            
