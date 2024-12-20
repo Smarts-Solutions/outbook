@@ -832,7 +832,7 @@ const ClientList = () => {
         ...prevState,
         job: row
       };
-      navigate("/admin/job/logs", { state: { job_id: row.job_id, goto: "Customer", data: updatedData, activeTab: activeTab } });
+      navigate("/admin/job/logs", { state: { job_id: row.job_id,timesheet_job_id:row?.timesheet_job_id, goto: "Customer", data: updatedData, activeTab: activeTab } });
       return updatedData;
     });
   };

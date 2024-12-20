@@ -338,9 +338,9 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
             }, {})
         : {};
 
-        console.log("RearrangeEngagementOptionArr", RearrangeEngagementOptionArr)
-        console.log("JobInformationData", JobInformationData.EngagementModel)
-        console.log("location.state", location.state)
+        //console.log("RearrangeEngagementOptionArr", RearrangeEngagementOptionArr)
+       // console.log("JobInformationData", JobInformationData.EngagementModel)
+        console.log("location.state - 1 ", location.state)
   
   
     return (
@@ -378,12 +378,12 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                 )}
 
                                 {
-                                
+                                location.state.timesheet_job_id == null?
                                 (getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
                                     <button className='delete-icon' onClick={handleDelete}>
                                         <i className="ti-trash text-danger" />
                                     </button>
-                                )
+                                ):""
                                 
                                 }
                             </>

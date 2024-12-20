@@ -91,7 +91,7 @@ const Service = () => {
           account_manager_ids: service.account_manager_ids
             ? service.account_manager_ids.map((id) => {
               const staff = staffDataAll.data.find((staff) => staff.id === id);
-              return staff ? { value: id, label: staff.first_name } : null; 
+              return staff ? { value: id, label: staff.first_name+' '+staff.last_name } : null; 
             }).filter((item) => item !== null) 
             : [],
         }))

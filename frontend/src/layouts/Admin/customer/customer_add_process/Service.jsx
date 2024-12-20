@@ -93,8 +93,8 @@ const Service = () => {
                 // Find the staff object matching the id
                 const staff = staffDataAll.data.find((staff) => staff.id === id);
                 // Return the staff object or handle missing staff
-                return staff ? { value: staff.id, label: staff.first_name } : null; 
-              }).filter(Boolean) // Remove null values if a staff object isn't found
+                return staff ? { value: staff.id, label: staff.first_name+' '+staff.last_name } : null; 
+              }).filter(Boolean) 
             : [],
         }))
   
