@@ -4134,10 +4134,11 @@ button.actions-btn.btn.btn-light:hover {
 .breadcrumb a:first-child {
   padding-left: 15.2px;
 }
-
 .breadcrumb a:last-child {
   padding-right: 15.2px;
   border-right: 0 !important;
+  padding-top: 5px;
+  padding-bottom: 10px;
 }
 
 .breadcrumb a.active,

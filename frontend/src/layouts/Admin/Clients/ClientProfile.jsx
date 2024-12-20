@@ -390,7 +390,7 @@ const ClientList = () => {
     <div className="container-fluid">
       <div className="col-sm-12">
         <div className="page-title-box">
-          <div className="row align-items-start flex-md-row flex-column-reverse">
+          <div className="row align-items-start flex-md-row flex-column-reverse justify-content-between">
             <div className=" col-md-6 col-lg-8">
               <ul
                 className="nav nav-pills rounded-tabs"
@@ -537,7 +537,7 @@ const ClientList = () => {
               <div className="card-body">
                 <div className="dastyle-profile">
                   <div className="row">
-                    <div className="col-lg-4 align-self-center mb-3 mb-lg-0">
+                    <div className="col-md-4 col-sm-12 col-lg-4 align-self-center mb-3 mb-lg-0">
                       <div className="dastyle-profile-main">
                         <div className="dastyle-profile-main-pic">
                           <span className="dastyle-profile_main-pic-change">
@@ -556,7 +556,7 @@ const ClientList = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="col-lg-4 ml-auto align-self-center">
+                    <div className="col-md-4 col-sm-6 col-lg-4 ml-auto align-self-center">
                       <ul className="list-unstyled personal-detail mb-0">
                         <li className="">
                           <i className="fa-regular fa-phone me-2 text-secondary font-22 align-middle"></i>
@@ -576,7 +576,7 @@ const ClientList = () => {
                       </ul>
                     </div>
 
-                    <div className="col-lg-4 align-self-center">
+                    <div className=" col-md-4 col-sm-6 col-lg-4 align-self-center mt-2 mt-sm-0">
                       <ul className="list-unstyled personal-detail mb-0">
                         <li className="row">
                           <div className="col-md-12">
