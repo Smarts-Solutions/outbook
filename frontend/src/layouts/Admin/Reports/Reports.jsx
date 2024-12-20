@@ -54,7 +54,7 @@ function Reportsnew() {
           <div className="page-title-box">
             <div className="row">
               <div>
-                <h5 className="mb-2" style={{ fontWeight: 600 }}>Reports</h5>
+                <h5 className="mb-4" style={{ fontWeight: 600 }}>Reports</h5>
               </div>
               <div className="col-md-4">
                 <>
