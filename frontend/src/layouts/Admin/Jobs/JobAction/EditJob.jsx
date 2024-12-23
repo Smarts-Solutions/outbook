@@ -793,7 +793,7 @@ const EditJob = () => {
                                     )}
                                   </div>
                                   {location.state.goto == "Customer" ? (
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Client
                                         <span className='text-danger'>*</span>
@@ -825,7 +825,7 @@ const EditJob = () => {
                                       )}
                                     </div>
                                   ) : (
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Client
                                         <span className='text-danger'>*</span>
@@ -912,7 +912,7 @@ const EditJob = () => {
                                     )}
                                   </div>
 
-                                  <div className="col-lg-4">
+                                  <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Service
                                       <span className='text-danger'>*</span>
@@ -1055,7 +1055,7 @@ const EditJob = () => {
                                     </div>
                                   </div>
 
-                                  <div className="col-lg-4">
+                                  <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Reviewer
                                     </label>
@@ -1085,7 +1085,7 @@ const EditJob = () => {
                                     )}
                                   </div>
 
-                                  <div className="col-lg-4">
+                                  <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Allocated To
                                     </label>
@@ -1954,7 +1954,7 @@ const EditJob = () => {
                                   <div className="card-body">
                                     <div style={{ marginTop: 15 }}>
                                       <div className="row">
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                           <label className="form-label">
                                             Invoiced
                                           </label>
@@ -1976,7 +1976,7 @@ const EditJob = () => {
                                             </div>
                                           )}
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                           <label className="form-label">
                                             Currency
                                           </label>
@@ -2007,7 +2007,7 @@ const EditJob = () => {
                                             </div>
                                           )}
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                           <label className="form-label">
                                             {" "}
                                             Invoice Value{" "}

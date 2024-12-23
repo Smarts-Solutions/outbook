@@ -78,20 +78,20 @@ const Documents = ({ getAccessDataJob }) => {
   return (
     <div className=''>
       <div className='row'>
-        <div className='col-md-7'>
+        <div className='col-md-5 col-lg-5 col-sm-3'>
           <div className='tab-title'>
             <h3>Document</h3>
           </div>
         </div>
-        <div className='col-md-5'>
+        <div className='col-md-7 col-lg-7 col-sm-9 mt-3 mt-sm-0'>
           <div>
             {
               (getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
-                <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" className="btn btn-secondary  float-end ms-2"> <i className="ti-trash pe-1"></i>  Delete Selected</button>
+                <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" className="btn btn-secondary  float-sm-end ms-sm-2"> <i className="ti-trash pe-1"></i>  Delete Selected</button>
               )}
             {
               (getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
-                <button type="button" className="btn btn-info text-white float-end ms-2"> <i className="fa-regular fa-plus pe-1"></i> Add Document</button>
+                <button type="button" className="btn btn-info text-white float-sm-end ms-2"> <i className="fa-regular fa-plus pe-1"></i> Add Document</button>
               )}
 
 
