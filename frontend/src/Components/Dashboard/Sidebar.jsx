@@ -151,21 +151,7 @@ const Sidebar = () => {
                             Customer Detail
                           </Link>
                         </li>
-                        <li
-                          className={
-                            activeLink === "/admin/customer/crm" ? "active" : ""
-                          }
-                        >
-                          <Link
-                            to="/admin/customer/crm"
-                            onClick={(e) =>
-                              handleMenuClick(e, "/admin/customer/crm")
-                            }
-                          >
-                            <i className="ti-control-record" />
-                            Job
-                          </Link>
-                        </li>
+
                         <li
                           className={
                             activeLink === "/admin/Clientlist" ? "active" : ""
@@ -181,6 +167,23 @@ const Sidebar = () => {
                             Client
                           </Link>
                         </li>
+                        
+                        <li
+                          className={
+                            activeLink === "/admin/customer/crm" ? "active" : ""
+                          }
+                        >
+                          <Link
+                            to="/admin/customer/crm"
+                            onClick={(e) =>
+                              handleMenuClick(e, "/admin/customer/crm")
+                            }
+                          >
+                            <i className="ti-control-record" />
+                            Job
+                          </Link>
+                        </li>
+                       
                       </ul>
                     </li>
                   )}
