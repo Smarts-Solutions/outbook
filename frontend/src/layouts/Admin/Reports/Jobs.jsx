@@ -38,7 +38,7 @@ const JobStatus = () => {
 
 
   const HandleJobView = (row) => {
-    navigate("/admin/job/logs", { state: { job_id: row.job_id, goto: "report", } });
+    navigate("/admin/job/logs", { state: { job_id: row.job_id, timesheet_job_id:row.timesheet_job_id,goto: "report", } });
   }
 
   const columns = [

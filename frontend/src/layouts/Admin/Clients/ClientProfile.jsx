@@ -320,7 +320,7 @@ const ClientList = () => {
         ...prevState,
         job: row
       };
-      navigate("/admin/job/logs", { state: { job_id: row?.job_id, data: updatedData, goto: "client" , activeTab : location?.state?.activeTab  } });
+      navigate("/admin/job/logs", { state: { job_id: row?.job_id, timesheet_job_id:row?.timesheet_job_id,data: updatedData, goto: "client" , activeTab : location?.state?.activeTab  } });
       return updatedData;
     });
   };
