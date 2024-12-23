@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   JobType,
   AddTask,
-  GETTASKDATA
+  GETTASKDATA,
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import Modal from "../../../Components/ExtraComponents/Modals/Modal";
@@ -12,8 +12,6 @@ import { useDispatch, useSelector } from "react-redux";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { useFormik } from "formik";
 import * as XLSX from "xlsx";
-
-
 
 const Setting = () => {
   const token = JSON.parse(localStorage.getItem("token"));
@@ -30,7 +28,7 @@ const Setting = () => {
   const [taskInput, setTaskInput] = useState("");
   const [tasks, setTasks] = useState([]);
   const [ViewTaskData, setViewTaskData] = useState([]);
-  
+
   const JobTypeData = async (req) => {
     if (location.state.Id) {
       req = {
@@ -59,18 +57,18 @@ const Setting = () => {
               JobTypeData({ action: "get" });
             }, 2000);
           } else {
-            if(response.key == "warning"){
+            if (response.key == "warning") {
               sweatalert.fire({
                 title: response.message,
                 icon: "warning",
                 timer: 2000,
               });
-            }else{
-            sweatalert.fire({
-              title: response.message,
-              icon: "error",
-              timer: 2000,
-            });
+            } else {
+              sweatalert.fire({
+                title: response.message,
+                icon: "error",
+                timer: 2000,
+              });
             }
           }
         }
@@ -87,7 +85,7 @@ const Setting = () => {
   const handleViewTask = async (row) => {
     const req = { service_id: location?.state?.Id, job_type_id: row?.id };
 
-    const data = { req: req, authToken: token }
+    const data = { req: req, authToken: token };
     await dispatch(GETTASKDATA(data))
       .unwrap()
       .then(async (response) => {
@@ -111,49 +109,99 @@ const Setting = () => {
 
   const columnJobType = [
     {
-      
       name: "Job Type",
       selector: (row) => row.type,
       sortable: true,
-      width: "70%",
+      width: "60%",
     },
     {
       name: "Actions",
       cell: (row) => (
-        <div className="d-flex justify-content-end">
-          <button className="edit-icon" onClick={() => handleEdit(row)}>
-            {" "}
-            <i className="ti-pencil" />
-          </button>
-          <button className="delete-icon" onClick={() => handleDelete(row)}>
-            {" "}
-            <i className="ti-trash text-danger" />
-          </button>
-          <button
-            className="view-icon"
-            onClick={(e) => {
-              handleViewTask(row);
-              setViewtask(true);
-            }}
-          >
-            {" "}
-            <i className="fa-regular fa-eye " />
-          </button>
-          <button
-            className="btn btn-sm btn-info text-white"
-            onClick={(e) => {
-              setShowAddTask(true);
-              setJobTypeId(row);
-            }}
-          >
-            <i className="fa fa-plus pe-1"></i>  Add Task
-          </button>
-        </div>
+        <>
+          <div className="dropdown d-lg-none setting-drop-down">
+            <button
+              className="btn"
+              type="button"
+              id="dropdownMenuButton"
+              data-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+            </button>
+            <div
+              className="dropdown-menu custom-dropdown"
+              aria-labelledby="dropdownMenuButton"
+            >
+              <div className="px-2">
+                <button
+                  className="edit-icon dropdown-item w-auto  mb-2"
+                  onClick={() => handleEdit(row)}
+                >
+                  {" "}
+                  <i className="ti-pencil" />
+                </button>
+                <button
+                  className="delete-icon dropdown-item w-auto  mb-2"
+                  onClick={() => handleDelete(row)}
+                >
+                  <i className="ti-trash text-danger" />
+                </button>
+                <button
+                  className="view-icon dropdown-item w-auto  mb-2"
+                  onClick={(e) => {
+                    handleViewTask(row);
+                    setViewtask(true);
+                  }}
+                >
+                  <i className="fa-regular fa-eye " />
+                </button>
+
+                <button
+                  className="btn btn-sm btn-info text-white dropdown-item w-auto  mb-2"
+                  onClick={(e) => {
+                    setShowAddTask(true);
+                    setJobTypeId(row);
+                  }}
+                >
+                  <i className="fa fa-plus pe-1"></i> Add Task
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="d-lg-flex d-none">
+            <button className="edit-icon" onClick={() => handleEdit(row)}>
+              <i className="ti-pencil" />
+            </button>
+            <button className="delete-icon" onClick={() => handleDelete(row)}>
+              <i className="ti-trash text-danger" />
+            </button>
+            <button
+              className="view-icon"
+              onClick={(e) => {
+                handleViewTask(row);
+                setViewtask(true);
+              }}
+            >
+              <i className="fa-regular fa-eye " />
+            </button>
+
+            <button
+              className="btn btn-sm btn-info text-white"
+              onClick={(e) => {
+                setShowAddTask(true);
+                setJobTypeId(row);
+              }}
+            >
+              <i className="fa fa-plus pe-1"></i> Add Task
+            </button>
+          </div>
+        </>
       ),
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      width: "30%",
+      width: "40%",
     },
   ];
 
@@ -359,13 +407,9 @@ const Setting = () => {
             title: "Deleted!",
             text: "Your file has been deleted.",
             icon: "success",
-
           });
-
         }
-
       });
-
   };
 
   const handleInputChange = (e) => {
@@ -442,7 +486,6 @@ const Setting = () => {
       });
   };
 
-
   const handleDeleteTask = (e) => {
     const index = e.target.parentNode.parentNode.parentNode.rowIndex;
     let temp = [...tasks];
@@ -455,10 +498,17 @@ const Setting = () => {
       <div className="container-fluid">
         <div className="card mt-4">
           <div className="card-header align-items-center step-header-blue d-flex">
-            <button type="button" className="btn p-0" onClick={(e) => {
-              sessionStorage.setItem('settingTab', location?.state?.settingTab);
-              window.history.back()
-            }}>
+            <button
+              type="button"
+              className="btn p-0"
+              onClick={(e) => {
+                sessionStorage.setItem(
+                  "settingTab",
+                  location?.state?.settingTab
+                );
+                window.history.back();
+              }}
+            >
               <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4"></i>
             </button>
             <h4 className="card-title">Job Type</h4>
@@ -475,7 +525,7 @@ const Setting = () => {
                 </button>
               </div>
             </div>
-            <div className="datatable-wrapper mt-minus">
+            <div className="datatable-wrapper mt-minus job-type">
               <Datatable
                 filter={true}
                 columns={columnJobType}
@@ -499,7 +549,8 @@ const Setting = () => {
           onChange={handleModalChange}
           buttonName={
             <>
-              <i className={`far ${isEdit ? 'fa-edit' : 'fa-save'}`}></i> {isEdit ? "Update" : "Save"}
+              <i className={`far ${isEdit ? "fa-edit" : "fa-save"}`}></i>{" "}
+              {isEdit ? "Update" : "Save"}
             </>
           }
         />
@@ -537,7 +588,6 @@ const Setting = () => {
                 <div className="mb-3">
                   <input
                     type="text"
-                    
                     className="form-control"
                     placeholder="Enter Task Name"
                     id="firstNameinput"
@@ -547,12 +597,9 @@ const Setting = () => {
                   />
                 </div>
               </div>
-              <div className="col-lg-3 ps-0">
+              <div className="col-lg-3 ps-lg-0">
                 <div className="remove">
-                  <button
-                    className="btn  btn-info"
-                    onClick={handleAddTask}
-                  >
+                  <button className="btn  btn-info" onClick={handleAddTask}>
                     <i className="fa fa-plus pe-2"> </i>
                     Add
                   </button>
@@ -589,7 +636,9 @@ const Setting = () => {
                 <tr>
                   <th className="">Task Name</th>
 
-                  <th className="tabel_left" width="80">Action</th>
+                  <th className="tabel_left" width="80">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody className="list form-check-all">
@@ -599,7 +648,10 @@ const Setting = () => {
                     <td className="tabel_left">
                       <div className="d-flex gap-2">
                         <div className="remove">
-                          <button className="delete-icon" onClick={(e) => handleDeleteTask(e)}>
+                          <button
+                            className="delete-icon"
+                            onClick={(e) => handleDeleteTask(e)}
+                          >
                             <i className="ti-trash text-danger" />
                           </button>
                         </div>
@@ -632,7 +684,6 @@ const Setting = () => {
         hideBtn={true}
         handleClose={() => {
           setViewtask(false);
-
         }}
       >
         <div className="">
@@ -657,7 +708,6 @@ const Setting = () => {
                     <td>{task.name}</td>
                   </tr>
                 ))}
-
               </tbody>
             </table>
           </div>

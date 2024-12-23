@@ -305,6 +305,16 @@ ul.nav-second-level.in li a {
     height: auto !important;
     
 }
+.custom-datatable {
+  min-height: 185px !important;
+}
+
+}
+@media (max-width: 991px) {
+.mt-minus-lg
+{
+  margin-top: 0px !important;
+}
 }
 @media (max-width: 1024px) {
 
@@ -4734,3 +4744,4 @@ button.btn.dropdown-toggle.btn-light {
   background-color: rgb(237 247 251) !important;
   color: #0cb2ef !important;
 }
+
