@@ -32,6 +32,7 @@ const Timesheet = () => {
   };
 
   const [weekOffset, setWeekOffset] = useState(0); // 0 for current week
+  const [hasValidWeekOffsetZero, setHasValidWeekOffsetZero] = useState(false);
   const [weekDays, setWeekDays] = useState({
     monday: '',
     tuesday: '',
@@ -84,6 +85,15 @@ const Timesheet = () => {
     setDeleteRows([])
     if (res.status) {
       setStaffDataWeekDataAll({ loading: false, data: res.filterDataWeek });
+
+      const hasValidWeekOffsetZeroValue = res.filterDataWeek.length > 0 && res.filterDataWeek.some(item => parseInt(item.valid_weekOffsets) === 0);
+      if (hasValidWeekOffsetZeroValue) {
+        setHasValidWeekOffsetZero(true)
+      } else {
+        setHasValidWeekOffsetZero(false)
+      }
+
+
       if (res.data.length > 0 && res.data[0].submit_status === "1") {
         setSubmitStatusAllKey(1)
       }
@@ -834,24 +844,21 @@ const Timesheet = () => {
       'Wednesday Hours',
       'Thursday Hours',
       'Friday Hours',
-      'Saturday Hours',
-      'Sunday Hours',
+      'Saturday Hours'
     ];
-
     const rows = timeSheetRows.map((item, index) => [
       index + 1,
       item.task_type === '1' ? 'Internal' : 'External',
       item.customer_name || 'No Customer',
       item.client_name || 'No Client',
-      item.job_name || 'No Job',
-      item.task_name || 'No Task',
+      item.task_type === '1'? item.internal_name || 'No Job' : item.job_name || 'No Job',
+      item.task_type === '1'? item.sub_internal_name || 'No Task' : item.task_name || 'No Task',
       item.monday_hours || 0,
       item.tuesday_hours || 0,
       item.wednesday_hours || 0,
       item.thursday_hours || 0,
       item.friday_hours || 0,
-      item.saturday_hours || 0,
-      item.sunday_hours || 0,
+      item.saturday_hours || 0
     ]);
 
     const csvContent = [headers, ...rows]
@@ -865,7 +872,6 @@ const Timesheet = () => {
     link.click();
   };
 
-
   // Example usage
   return (
 
@@ -875,16 +881,15 @@ const Timesheet = () => {
           <div className="col-md-8">
             <div className="tab-title d-flex align-items-center" style={{ gap: '15px' }}>
               <h3 className="mt-0">Timesheet</h3>
-              
-              <div className="text-center ">
-  <p className="text-info bg-soft-primary px-3 py-2 mb-0 font-11 rounded">
-    <i className="fa fa-calendar-clock me-1" />
-   <span> {getFormattedDate('current', '')}</span>
-   
-  </p>
-</div>
 
-              
+              <div className="text-center ">
+                <p className="text-info bg-soft-primary px-3 py-2 mb-0 font-11 rounded">
+                  <i className="fa fa-calendar-clock me-1" />
+                  <span> {getFormattedDate('current', '')}</span>
+                </p>
+              </div>
+
+
             </div>
           </div>
         </div>
@@ -895,7 +900,7 @@ const Timesheet = () => {
             {
               ['SUPERADMIN', 'ADMIN'].includes(role) ?
                 <div className="form-group col-md-4">
-                  <label  className="form-label mb-2">Select Staff</label>
+                  <label className="form-label mb-2">Select Staff</label>
                   <select
                     name="staff_id"
                     className="form-select"
@@ -920,7 +925,7 @@ const Timesheet = () => {
             {
               staffDataWeekDataAll.data && staffDataWeekDataAll.data.length > 0 ?
                 <div className="form-group col-md-4">
-                  <label  className="form-label mb-2">Select Date</label>
+                  <label className="form-label mb-2">Select Date</label>
                   <select
                     name="week"
                     className="form-select"
@@ -928,7 +933,13 @@ const Timesheet = () => {
                     // defaultValue={staffDataWeekDataAll.data && staffDataWeekDataAll.data[0].valid_weekOffsets}
                     onChange={(e) => selectFilterStaffANdWeek(e)}
                   >
-                    {staffDataWeekDataAll.data &&
+
+                    {!hasValidWeekOffsetZero && (
+                      <option value='0'>{getFormattedDate('current', '')}</option>
+                    )}
+
+                    {
+                      staffDataWeekDataAll.data &&
                       staffDataWeekDataAll.data.map((val, index) => (
                         <option
                           key={index}
@@ -943,14 +954,18 @@ const Timesheet = () => {
                 ""
             }
 
-            <div className="form-group col-md-4">
-              <button className=" btn btn-info "  onClick={() => exportToCSV(timeSheetRows)}>
-              Export Timesheet Data
-               <i className="fa fa-download ms-2" />
+            {
+              ['SUPERADMIN', 'ADMIN'].includes(role) && timeSheetRows.length > 0 ?
+                <div className="form-group col-md-4">
+                  <button className=" btn btn-info " onClick={() => exportToCSV(timeSheetRows)}>
+                    Export Timesheet Data
+                    <i className="fa fa-download ms-2" />
 
-              </button>
-           
-            </div>
+                  </button>
+                </div>
+                : ""
+            }
+
 
           </div>
         </div>
@@ -1030,9 +1045,6 @@ const Timesheet = () => {
 
                       <tbody className="list form-check-all">
                         {timeSheetRows?.map((item, index) => (
-
-
-
                           <tr className="tabel_new">
                             <td className="pe-0">{index + 1}</td>
 

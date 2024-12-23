@@ -596,7 +596,6 @@ LIMIT ? OFFSET ?
                     `customer_service_account_managers.account_manager_id = ?
             OR customers.account_manager_id = ?
             OR customers.staff_id = ?`}
-
             GROUP BY 
                 customers.id
         ) AS result`;
