@@ -429,7 +429,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                         />
                                     </div>
 
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                         <label className="form-label">Client<span className='text-danger'>*</span></label>
                                         <input
                                             type="text"
@@ -458,7 +458,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                         />
                                     </div>
 
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                         <label className="form-label">Customer Account Manager(Officer)<span className='text-danger'>*</span></label>
                                         <select className="form-select"
                                             name="CustomerAccountManager"
@@ -757,8 +757,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                     <div className="col-lg-4">
                                         <div className="mb-3">
                                             <label className="form-label"> Total Time</label>
-                                            <div className="row">
-                                                <div className="col-md-6 pe-0">
+                                          
                                                     <div className="input-group">
                                                         <div className='hours-div'>
                                                             <input
@@ -777,10 +776,6 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                                 H
                                                             </span>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                                <div className="col-md-6 ps-0">
-                                                    <div className="input-group">
                                                         <div className='hours-div'>
                                                             <input
                                                                 type="text"
@@ -799,10 +794,11 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                         </div>
                                                     </div>
                                                 </div>
+                                            
 
 
-                                            </div>
-                                        </div>
+                                            
+                                       
                                     </div>
 
                                     <div id="invoice_type" className="col-lg-4">
@@ -857,7 +853,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
 
                                             />
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                             <label className="form-label">Due On</label>
                                             <input
                                                 type="date"
@@ -870,7 +866,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                 value={JobInformationData.DueOn}
                                             />
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                             <label className="form-label">Submission Deadline</label>
                                             <input
                                                 type="date"
@@ -884,7 +880,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                 value={JobInformationData.SubmissionDeadline}
                                             />
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                             <label className="form-label">Customer Deadline Date</label>
                                             <input
                                                 type="date"
@@ -897,7 +893,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                 value={JobInformationData.CustomerDeadlineDate}
                                             />
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                             <label className="form-label">SLA Deadline Date</label>
                                             <input
                                                 type="date"
@@ -971,7 +967,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                 />
                                             </div>
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                             <label className="form-label">Filing with HMRC Required?</label>
                                             <select
                                                 className="form-select invoice_type_dropdown"
@@ -1060,7 +1056,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                 value={JobInformationData.NumberOfTransactions}
                                             />
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                             <label className="form-label">
                                                 Number of Trial Balance Items
                                             </label>
@@ -1075,7 +1071,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                 value={JobInformationData.NumberOfTrialBalanceItems}
                                             />
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                             <label className="form-label">Turnover</label>
                                             <input
                                                 type="text"
@@ -1102,7 +1098,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
 
                                             />
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                             <label className="form-label">VAT Reconciliation</label>
                                             <select
                                                 className="form-select invoice_type_dropdown"
@@ -1116,7 +1112,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                 <option value={0}>No</option>
                                             </select>
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                             <label className="form-label">Bookkeeping?</label>
                                             <select
                                                 className="form-select invoice_type_dropdown"
@@ -1175,7 +1171,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                     <option value={0}>No</option>
                                                 </select>
                                             </div>
-                                            <div className="col-lg-4">
+                                            <div className="col-lg-4 mb-3">
                                                 <label className="form-label">Currency</label>
                                                 <select
                                                     className="invoiced_dropdown form-select"
@@ -1189,7 +1185,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                     <option>Dollar</option>
                                                 </select>
                                             </div>
-                                            <div className="col-lg-4">
+                                            <div className="col-lg-4 mb-3">
                                                 <label className="form-label"> Invoice Value </label>
                                                 <input
                                                     type="text"
@@ -1203,7 +1199,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                     value={JobInformationData.InvoiceValue}
                                                 />
                                             </div>
-                                            <div className="col-lg-4">
+                                            <div className="col-lg-4 mb-3">
                                                 <label className="form-label">Invoice Date</label>
                                                 <input
                                                     type="date"

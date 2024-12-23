@@ -701,7 +701,7 @@ const CreateJob = () => {
                                     )}
                                   </div>
                                   {location.state.goto == "Customer" ? (
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Client
                                         <span className='text-danger'>*</span>
@@ -782,7 +782,7 @@ const CreateJob = () => {
                                     )}
                                   </div>
 
-                                  <div className="col-lg-4">
+                                  <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Customer Account Manager(Officer)
                                       <span className='text-danger'>*</span>
@@ -822,7 +822,7 @@ const CreateJob = () => {
                                     )}
                                   </div>
 
-                                  <div className="col-lg-4">
+                                  <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Service
                                       <span className='text-danger'>*</span>
@@ -950,7 +950,7 @@ const CreateJob = () => {
                                   </div>
 
 
-                                  <div className="col-lg-4">
+                                  <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Reviewer
                                     </label>
@@ -1010,7 +1010,7 @@ const CreateJob = () => {
                                     )}
                                   </div>
 
-                                  <div className="col-lg-4">
+                                  <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       {" "}
                                       Allocated On{" "}
@@ -1030,7 +1030,7 @@ const CreateJob = () => {
                                     )}
                                   </div>
 
-                                  <div className="col-lg-4">
+                                  <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Date Received On
                                     </label>
@@ -1348,7 +1348,7 @@ const CreateJob = () => {
                                     </div>
                                   </div>
 
-                                  <div id="invoice_type" className="col-lg-4">
+                                  <div id="invoice_type" className="col-lg-4 mb-3">
                                     <label
                                       htmlFor="firstNameinput"
                                       className="form-label"
@@ -1409,7 +1409,7 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Due On
                                       </label>
@@ -1427,7 +1427,7 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Submission Deadline
                                       </label>
@@ -1445,7 +1445,7 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Customer Deadline Date
                                       </label>
@@ -1463,7 +1463,7 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         SLA Deadline Date
                                       </label>
@@ -1569,7 +1569,7 @@ const CreateJob = () => {
                                         )}
                                       </div>
                                     </div>
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Filing with HMRC Required?
                                       </label>
@@ -1701,7 +1701,7 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Number of Trial Balance Items
                                       </label>
@@ -1721,7 +1721,7 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Turnover
                                       </label>
@@ -1757,7 +1757,7 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3 ">
                                       <label className="form-label">
                                         VAT Reconciliation
                                       </label>
@@ -1779,7 +1779,7 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Bookkeeping?
                                       </label>
@@ -1864,7 +1864,7 @@ const CreateJob = () => {
                                               </div>
                                             )}
                                           </div>
-                                          <div className="col-lg-4">
+                                          <div className="col-lg-4 mb-3">
                                             <label className="form-label">
                                               Currency
                                             </label>
@@ -1894,7 +1894,7 @@ const CreateJob = () => {
                                               </div>
                                             )}
                                           </div>
-                                          <div className="col-lg-4">
+                                          <div className="col-lg-4 mb-3">
                                             <label className="form-label">
                                               Invoice Value
                                             </label>
@@ -1912,7 +1912,7 @@ const CreateJob = () => {
                                               </div>
                                             )}
                                           </div>
-                                          <div className="col-lg-4">
+                                          <div className="col-lg-4 mb-3">
                                             <label className="form-label">
                                               Invoice Date
                                             </label>

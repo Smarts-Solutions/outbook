@@ -56,7 +56,7 @@ function Reportsnew() {
               <div>
                 <h5 className="mb-4" style={{ fontWeight: 600 }}>Reports</h5>
               </div>
-              <div className="col-md-4">
+              <div className="col-lg-4 col-md-6 ">
                 <>
                   <select className="form-select" id="tabSelect" 
                    value={activeTab}

@@ -922,6 +922,7 @@ const Timesheet = () => {
                 </div>
                 : ""
             }
+            <div className="form-group col-md-4">
             {
               staffDataWeekDataAll.data && staffDataWeekDataAll.data.length > 0 ?
                 <div className="form-group col-md-4">
@@ -930,6 +931,7 @@ const Timesheet = () => {
                     name="week"
                     className="form-select"
                     id="tabSelect"
+                   
                     // defaultValue={staffDataWeekDataAll.data && staffDataWeekDataAll.data[0].valid_weekOffsets}
                     onChange={(e) => selectFilterStaffANdWeek(e)}
                   >
@@ -990,7 +992,7 @@ const Timesheet = () => {
                           <th className="dropdwnCol2 pe-0" data-field="phone" style={{ width: '10px' }}>
                             No
                           </th>
-                          <th className="ps-0" data-field="phone" style={{ width: '130px' }} >
+                          <th className="" data-field="phone" style={{ width: '130px' }} >
                             Task Type
                           </th>
                           <th className="dropdwnCol7" data-field="phone" style={{ width: '130px' }}>

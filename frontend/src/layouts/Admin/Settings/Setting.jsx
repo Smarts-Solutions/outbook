@@ -1121,7 +1121,7 @@ const Setting = () => {
       name: "Incorporation Name",
       selector: (row) => row.name,
       sortable: true,
-      width: "70%",
+      width: "50%",
     },
     {
       name: "Status",

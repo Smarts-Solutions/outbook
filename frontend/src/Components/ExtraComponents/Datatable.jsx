@@ -37,6 +37,7 @@ const Datatable = ({ columns, data, filter }) => {
             filter={filter}
           >
             <DataTable
+            className='custom-datatable'
               fixedHeader={true}
               fixedHeaderScrollHeight="500px"
               noHeader
