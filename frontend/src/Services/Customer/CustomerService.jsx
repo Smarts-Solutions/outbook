@@ -126,6 +126,21 @@ export async function GET_ALL_CUSTOMER(data, token) {
   }
 }
 
+// Get All get_All_Customer_DropDown KE LITE
+export async function get_All_Customer_DropDown(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerAction`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+
+
 // Get All Customer KE EK FUNCTION BNA KE
 export async function GET_CUSTOMER(data, token) {
   try {

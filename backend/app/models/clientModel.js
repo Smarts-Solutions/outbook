@@ -279,6 +279,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 const getClient = async (client) => {
   const { customer_id, StaffUserId } = client;
 
+ console.log('client', client)
+
   try {
     const QueryRole = `
   SELECT
@@ -387,7 +389,7 @@ const getClient = async (client) => {
           if(resultAllocated.length == 0){
             return { status: true, message: "success.", data: resultAllocated };
           }
-          const filteredData = resultAllocated.filter(item => item.customer_id === customer_id);
+          const filteredData = resultAllocated.filter(item => parseInt(item.customer_id) === parseInt(customer_id));
 
           const uniqueData = filteredData.filter((value, index, self) =>
             index === self.findIndex((t) => t.id === value.id)
@@ -448,7 +450,7 @@ const getClient = async (client) => {
             return { status: true, message: "success.", data: resultAccounrManage };
           }
 
-          const filteredData = resultAccounrManage.filter(item => item.customer_id === customer_id);
+          const filteredData = resultAccounrManage.filter(item => parseInt(item.customer_id) === parseInt(customer_id));
 
           const uniqueData = filteredData.filter((value, index, self) =>
             index === self.findIndex((t) => t.id === value.id)
@@ -458,8 +460,6 @@ const getClient = async (client) => {
         }
         // Reviewer
         else if (rows[0].role_id == 6) {
-       console.log('Reviewer')
-
           const query = `
            SELECT  
           clients.customer_id AS customer_id,
@@ -503,14 +503,19 @@ const getClient = async (client) => {
         clients.id DESC
             `;
 
-   
-            const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id,StaffUserId, StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId]);
-
+            try {
+              const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id,StaffUserId, StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId]);
+            console.log('resultReviewer', resultReviewer)
+            } catch (error) {
+              console.log('error', error)
+              
+            }
+            
             if(resultReviewer.length == 0){
               return { status: true, message: "success.", data: resultReviewer };
             }
            
-            const filteredData = resultReviewer.filter(item => item.customer_id === customer_id);
+            const filteredData = resultReviewer.filter(item => parseInt(item.customer_id) === parseInt(customer_id));
 
             const uniqueData = filteredData.filter((value, index, self) =>
               index === self.findIndex((t) => t.id === value.id)
@@ -555,41 +560,6 @@ const getClient = async (client) => {
 
       }
 
-      ///////////////////////////////////////
-     
-//       const query = `
-//     SELECT  
-//         clients.id AS id,
-//         clients.trading_name AS client_name,
-//         clients.status AS status,
-//         client_types.type AS client_type_name,
-//         client_contact_details.email AS email,
-//         client_contact_details.phone_code AS phone_code,
-//         client_contact_details.phone AS phone,
-//         CONCAT(
-//             'cli_', 
-//             SUBSTRING(customers.trading_name, 1, 3), '_',
-//             SUBSTRING(clients.trading_name, 1, 3), '_',
-//             SUBSTRING(clients.client_code, 1, 15)
-//             ) AS client_code
-//     FROM 
-//         clients
-//     JOIN 
-//        customers ON customers.id = clients.customer_id    
-//     JOIN 
-//         client_types ON client_types.id = clients.client_type
-//     LEFT JOIN 
-//         client_contact_details ON client_contact_details.id = (
-//             SELECT MIN(cd.id)
-//             FROM client_contact_details cd
-//             WHERE cd.client_id = clients.id
-//         )
-//     WHERE clients.customer_id = ? OR clients.staff_created_id = ?
-//  ORDER BY 
-//     clients.id DESC;
-//       `;
-//       const [result] = await pool.execute(query, [customer_id, StaffUserId]);
-//       return { status: true, message: "success.", data: result };
 
     } else {
 
@@ -645,7 +615,7 @@ const getClient = async (client) => {
           if(resultAllocated.length == 0){
             return { status: true, message: "success.", data: resultAllocated };
           }
-          const filteredData = resultAllocated.filter(item => item.customer_id === customer_id);
+          const filteredData = resultAllocated.filter(item => parseInt(item.customer_id) === parseInt(customer_id));
 
           const uniqueData = filteredData.filter((value, index, self) =>
             index === self.findIndex((t) => t.id === value.id)
@@ -706,7 +676,7 @@ const getClient = async (client) => {
             return { status: true, message: "success.", data: resultAccounrManage };
           }
 
-          const filteredData = resultAccounrManage.filter(item => item.customer_id === customer_id);
+          const filteredData = resultAccounrManage.filter(item => parseInt(item.customer_id) === parseInt(customer_id));
 
           const uniqueData = filteredData.filter((value, index, self) =>
             index === self.findIndex((t) => t.id === value.id)
@@ -716,8 +686,6 @@ const getClient = async (client) => {
         }
         // Reviewer
         else if (rows[0].role_id == 6) {
-       console.log('Reviewer')
-
           const query = `
            SELECT  
           clients.customer_id AS customer_id,
@@ -768,8 +736,7 @@ const getClient = async (client) => {
               return { status: true, message: "success.", data: resultReviewer };
             }
            
-            const filteredData = resultReviewer.filter(item => item.customer_id === customer_id);
-
+            const filteredData = resultReviewer.filter(item => parseInt(item.customer_id) === parseInt(customer_id));
             const uniqueData = filteredData.filter((value, index, self) =>
               index === self.findIndex((t) => t.id === value.id)
             );

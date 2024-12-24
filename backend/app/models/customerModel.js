@@ -856,6 +856,174 @@ LIMIT ? OFFSET ?
 
 }
 
+const getCustomer_dropdown = async (customer) => {
+    const { StaffUserId } = customer;
+    const QueryRole = `
+  SELECT
+    staffs.id AS id,
+    staffs.role_id AS role_id,
+    roles.role AS role_name
+  FROM
+    staffs
+  JOIN
+    roles ON roles.id = staffs.role_id
+  WHERE
+    staffs.id = ${StaffUserId}
+  LIMIT 1
+  `
+    const [rows] = await pool.execute(QueryRole);
+    // Condition with Admin And SuperAdmin
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+        const query = `
+    SELECT  
+    customers.id AS id,
+    customers.trading_name AS trading_name,
+    CONCAT(
+    'cust_', 
+    SUBSTRING(customers.trading_name, 1, 3), '_',
+    SUBSTRING(customers.customer_code, 1, 15)
+    ) AS customer_code
+FROM 
+    customers
+ORDER BY 
+id DESC;`;
+
+        const [result] = await pool.execute(query);
+        console.log("result",result)
+
+        return { status: true, message: 'Success..', data: result };
+    }
+    let result = []
+
+    if (rows.length > 0) {
+        // Allocated to
+        if (rows[0].role_id == 3) {
+        
+            const query = `
+            SELECT  
+                customers.id AS id,
+                customers.trading_name AS trading_name,
+                CONCAT(
+                    'cust_', 
+                    SUBSTRING(customers.trading_name, 1, 3), '_',
+                    SUBSTRING(customers.customer_code, 1, 15)
+                ) AS customer_code
+            FROM 
+                customers
+            LEFT JOIN
+                jobs ON jobs.customer_id = customers.id
+            WHERE 
+                jobs.allocated_to = ? OR customers.staff_id = ?
+            GROUP BY 
+                CASE 
+                    WHEN jobs.allocated_to = ? THEN jobs.customer_id
+                    ELSE customers.id
+                END
+            ORDER BY 
+                customers.id DESC`;
+            const [resultAllocated] = await pool.execute(query, [StaffUserId, StaffUserId, StaffUserId]);
+            result = resultAllocated
+
+        }
+        // Account Manger
+        else if (rows[0].role_id == 4) {
+             console.log("modelll INSIDE...",customer)
+            const query = `
+            SELECT  
+            customers.id AS id,
+            customers.trading_name AS trading_name,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
+        FROM 
+            customers
+        LEFT JOIN 
+            customer_services ON customer_services.customer_id = customers.id
+        LEFT JOIN 
+            customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+        WHERE 
+            customer_service_account_managers.account_manager_id = ?
+            OR customers.account_manager_id = ?
+            OR customers.staff_id = ?
+
+        GROUP BY 
+        customers.id
+        ORDER BY 
+        customers.id DESC
+           ;
+            `;
+            const [resultAllocated] = await pool.execute(query, [StaffUserId, StaffUserId, StaffUserId]);
+            result = resultAllocated;
+           
+        }
+
+        // Reviewer
+        else if (rows[0].role_id == 6) {
+           
+            const query = `
+            SELECT  
+            customers.id AS id,
+            customers.trading_name AS trading_name,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
+        FROM 
+            customers
+        LEFT JOIN 
+            jobs ON jobs.customer_id = customers.id
+        WHERE 
+         jobs.reviewer = ? OR customers.staff_id = ?
+         GROUP BY 
+    CASE 
+        WHEN jobs.reviewer = ? THEN jobs.customer_id
+        ELSE customers.id
+    END
+        ORDER BY 
+            customers.id DESC;
+            `;
+
+            const [resultAllocated] = await pool.execute(query, [StaffUserId, StaffUserId, StaffUserId]);
+            result = resultAllocated
+
+        }
+        else {
+           
+            const query = `
+            SELECT  
+            customers.id AS id,
+            customers.trading_name AS trading_name,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
+        FROM 
+            customers
+        WHERE 
+           staff1.id = ?  
+        ORDER BY 
+            customers.id DESC;
+            `;
+            const [result1] = await pool.execute(query, [StaffUserId]);
+            result = result1
+            total = total_count;
+        }
+    }
+    try {
+       
+         return { status: true, message: 'Success..', data: result };
+
+    } catch (err) {
+        console.error('Error selecting getCustomer_dropdown  data:', err);
+        return { status: true, message: 'Error selecting getCustomer_dropdown data', data: err };
+    }
+
+}
+
 
 const deleteCustomer = async (customer) => {
     // if(parseInt(customer_id)  > 0){
@@ -3277,6 +3445,7 @@ const getcustomerschecklist = async (customer) => {
 module.exports = {
     createCustomer,
     getCustomer,
+    getCustomer_dropdown,
     deleteCustomer,
     updateProcessCustomerServices,
     updateProcessCustomerEngagementModel,
@@ -3286,6 +3455,7 @@ module.exports = {
     getSingleCustomer,
     customerUpdate,
     customerStatusUpdate,
-    getcustomerschecklist
+    getcustomerschecklist,
+
 
 };
