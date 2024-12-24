@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
-import { JobAction, Update_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { JobAction, Update_Status ,getAllCustomerDropDown } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import sweatalert from "sweetalert2";
@@ -10,25 +10,78 @@ import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlic
 
 const ClientList = () => {
   const navigate = useNavigate();
+
+ 
+    const [customerDataAll, setCustomerDataAll] = useState([]);
+    const [customerDetails, setCustomerDetails] = useState({id: "", trading_name: ""});
+    
+    const GetAllCustomer = async () => {
+      const req = { action: "get_dropdown" };
+      const data = { req: req, authToken: token };
+      await dispatch(getAllCustomerDropDown(data)).unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            setCustomerDataAll(response.data);
+          } else {
+           setCustomerDataAll(response.data);
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+    };
+  
+    useEffect(() => {
+    GetAllCustomer();
+    }, []);
+
+    const [clientData, setClientData] = useState([]);
+    const [clientDetailSingle, setClientDetailSingle] = useState({id: "", client_name: ""});
+
+
+    console.log("clientData",clientData);
+
+     const GetAllClientData = async (id) => {
+        const req = { action: "get", customer_id: id };
+        const data = { req: req, authToken: token };
+        await dispatch(ClientAction(data))
+          .unwrap()
+          .then(async (response) => {
+            if (response.status) {
+              setClientData(response.data);
+            } else {
+              setClientData(response.data);
+            }
+          })
+          .catch((error) => {
+            return;
+          });
+      };
+
+
+
+
+
   const location = useLocation();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const [customerData, setCustomerData] = useState([]);
- 
-
   const [activeTab, setActiveTab] = useState("NoOfJobs");
   const [getClientDetails, setClientDetails] = useState({ loading: true, data: [], });
   const [informationData, informationSetData] = useState([]);
   const [clientInformationData, setClientInformationData] = useState([]);
   const [companyDetails, setCompanyDetails] = useState([]);
   // const [hararchyData, setHararchyData] = useState(location.state.data);
-    const [hararchyData, setHararchyData] = useState({ customer: {}, client: {}, job: {} });
+  const [hararchyData, setHararchyData] = useState({ customer: {}, client: {}, job: {} });
   const [statusDataAll, setStatusDataAll] = useState([])
   const [selectStatusIs, setStatusId] = useState('')
   const [getAccessDataJob, setAccessDataJob] = useState({ insert: 0, update: 0, delete: 0, view: 0, });
   
  
+ 
+
+
 
   useEffect(() => {
     //GetAllJobList();
@@ -54,8 +107,8 @@ const ClientList = () => {
     setAccessDataJob(updatedAccess);
   }, []);
 
-  const GetClientDetails = async () => {
-    const req = { action: "getByid", client_id: location.state.Client_id };
+  const GetClientDetails = async (client_id) => {
+    const req = { action: "getByid", client_id: client_id };
     const data = { req: req, authToken: token };
     await dispatch(ClientAction(data))
       .unwrap()
@@ -127,7 +180,7 @@ const ClientList = () => {
             });
 
             setStatusId(Id);
-            GetAllJobList();
+            GetAllJobList(clientDetailSingle.id);
           } else if (res.data === "W") {
             sweatalert.fire({
               title: "Warning",
@@ -346,7 +399,7 @@ const ClientList = () => {
             timer: 1500,
           });
 
-          type === "job" ? GetAllJobList() : GetClientDetails();
+          type === "job" ? GetAllJobList(clientDetailSingle.id) : GetClientDetails(clientDetailSingle.id);
 
         } else {
           sweatalert.fire({
@@ -363,8 +416,8 @@ const ClientList = () => {
       });
   };
 
-  const GetAllJobList = async () => {
-    const req = { action: "getByClient", client_id: location.state.Client_id };
+  const GetAllJobList = async (client_id) => {
+    const req = { action: "getByClient", client_id: client_id };
     const data = { req: req, authToken: token };
     await dispatch(JobAction(data))
       .unwrap()
@@ -388,9 +441,109 @@ const ClientList = () => {
     }
   };
 
+
+  const selectCustomerId = (id , name) => {
+    if(id != "") {
+      setCustomerData([]);
+      setCustomerDetails({id:id,trading_name:name});
+      setHararchyData({ customer: {id:id,trading_name:name}, client: {id:'',client_name:''}});
+      setClientDetailSingle({id:'',client_name:''});
+      GetAllClientData(id);
+      setActiveTab("NoOfJobs");
+      setClientDetails({loading: false, data: [],});
+      informationSetData([]);
+      setClientInformationData([]);
+      setCompanyDetails([]);
+    }else {
+      setCustomerData([]);
+      setClientData([]);
+      setCustomerDetails({id:'',trading_name:''});
+      setHararchyData({ customer: {id:'',trading_name:''}, client: {id:'',client_name:''}});
+      setClientDetails({loading: false, data: [],});
+      informationSetData([]);
+      setClientInformationData([]);
+      setCompanyDetails([]);
+    }
+   }
+
+   const selectClientId = (id , name) => {
+    if(id != "") {
+       GetAllJobList(id);
+       GetClientDetails(id);
+       setClientDetailSingle({id:id,client_name:name});
+       setHararchyData({ customer: customerDetails, client: {id:id,client_name:name}});
+       setActiveTab("NoOfJobs");
+    }else {
+       setClientDetailSingle({id:'',client_name:''});
+       setHararchyData({ customer: customerDetails, client: {id:'',client_name:''}});
+       setClientDetails({loading: false, data: [],});
+      informationSetData([]);
+      setClientInformationData([]);
+      setCompanyDetails([]);
+    }
+  }
+
   return (
     <div className="container-fluid">
       <div className="col-sm-12">
+       
+      <div className="form-group col-md-4">
+                  <label className="form-label mb-2">Select Customer</label>
+                  <select
+                    name="staff_id"
+                    className="form-select"
+                    id="tabSelect"
+                    defaultValue={customerDetails.id}
+                    // onChange={(e) => selectCustomerId(e)}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      const selectedCustomer = customerDataAll.find(customer => customer.id == selectedId);
+                      selectCustomerId(selectedId, selectedCustomer?.trading_name);
+                    }}
+                  > <option value="">Select Customer</option>
+                    {customerDataAll &&
+                      customerDataAll.map((val, index) => (
+                        <option
+                          key={index}
+                          value={val.id}
+                          selected={customerDetails.id == val.id}
+                        >
+                          {val.trading_name}
+                        </option>
+                      ))}
+                  </select>
+         </div>
+
+
+         <div className="form-group col-md-4">
+                  <label className="form-label mb-2">Select Client</label>
+                  <select
+                    name="staff_id"
+                    className="form-select"
+                    id="tabSelect"
+                    defaultValue={clientDetailSingle.id}
+                    // onChange={(e) => selectCustomerId(e)}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      const selectedClient = clientData.find(client => client.id == selectedId);
+                      selectClientId(selectedId, selectedClient?.client_name);
+                    }}
+                  > <option value="">Select Client</option>
+                    {clientData &&
+                      clientData.map((val, index) => (
+                        <option
+                          key={index}
+                          value={val.id}
+                          selected={clientDetailSingle.id == val.id}
+                        >
+                          {val.client_name}
+                        </option>
+                      ))}
+                  </select>
+         </div>
+
+
+
         <div className="page-title-box">
           <div className="row align-items-start flex-md-row flex-column-reverse justify-content-between">
             <div className=" col-md-6 col-lg-8">

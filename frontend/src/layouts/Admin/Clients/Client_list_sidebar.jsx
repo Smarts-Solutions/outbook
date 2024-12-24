@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useNavigate, useLocation } from "react-router-dom";
-import { JobAction, Update_Status ,GET_ALL_CUSTOMERS ,getAllCustomerDropDown } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { JobAction, Update_Status ,getAllCustomerDropDown } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
@@ -882,7 +882,7 @@ const ClientLists = () => {
       <div className="row ">
         <div className="col-sm-12">
          <div className="form-group col-md-4">
-                  <label className="form-label mb-2">Select Staff</label>
+                  <label className="form-label mb-2">Select Customer</label>
                   <select
                     name="staff_id"
                     className="form-select"
@@ -906,7 +906,7 @@ const ClientLists = () => {
                         </option>
                       ))}
                   </select>
-                </div>
+         </div>
 
           <div className="page-title-box">
             <div className="row align-items-start flex-md-row flex-column-reverse">
