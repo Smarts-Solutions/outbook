@@ -896,7 +896,7 @@ const Timesheet = () => {
       </div>
       <div className="report-data mt-4">
         <div className="col-md-12">
-          <div className="row align-items-center">
+          <div className="row ">
             {
               ['SUPERADMIN', 'ADMIN'].includes(role) ?
                 <div className="form-group col-md-4">
@@ -922,11 +922,11 @@ const Timesheet = () => {
                 </div>
                 : ""
             }
-            <div className="form-group col-md-4">
+            <div className="form-group col-md-8 row align-items-center">
             {
               staffDataWeekDataAll.data && staffDataWeekDataAll.data.length > 0 ?
 
-                <div className="form-group col-md-4">
+                <div className="form-group col-md-6 pe-0">
                   <label className="form-label mb-2">Select Date</label>
 
                   <select
@@ -961,8 +961,8 @@ const Timesheet = () => {
 
             {
               ['SUPERADMIN', 'ADMIN'].includes(role) && timeSheetRows.length > 0 ?
-                <div className="form-group col-md-4">
-                  <button className=" btn btn-info " onClick={() => exportToCSV(timeSheetRows)}>
+                <div className="form-group col-md-6">
+                  <button className=" btn btn-info float-md-end mt-lg-2" onClick={() => exportToCSV(timeSheetRows)}>
                     Export Timesheet Data
                     <i className="fa fa-download ms-2" />
 
