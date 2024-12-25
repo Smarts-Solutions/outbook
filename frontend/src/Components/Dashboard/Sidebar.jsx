@@ -154,13 +154,13 @@ const Sidebar = () => {
 
                         <li
                           className={
-                            activeLink === "/admin/Clientlist" ? "active" : ""
+                            activeLink === "/admin/ClientLists" ? "active" : ""
                           }
                         >
                           <Link
-                            to="/admin/customer"
+                            to="/admin/ClientLists"
                             onClick={(e) =>
-                              handleMenuClick(e, "/admin/Clientlist")
+                              handleMenuClick(e, "/admin/ClientLists")
                             }
                           >
                             <i className="ti-control-record" />
@@ -170,13 +170,13 @@ const Sidebar = () => {
                         
                         <li
                           className={
-                            activeLink === "/admin/customer/crm" ? "active" : ""
+                            activeLink === "/admin/client/profiles" ? "active" : ""
                           }
                         >
                           <Link
-                            to="/admin/customer/crm"
+                            to="/admin/client/profiles"
                             onClick={(e) =>
-                              handleMenuClick(e, "/admin/customer/crm")
+                              handleMenuClick(e, "/admin/client/profiles")
                             }
                           >
                             <i className="ti-control-record" />

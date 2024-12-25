@@ -31,6 +31,7 @@ import {
   GET_JOB_TIMELINE,
   UPDATE_STATUS,
   getcustomerschecklist,
+  get_All_Customer_DropDown,
 } from "../../../Services/Customer/CustomerService";
 import { add } from "date-fns";
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -149,6 +150,28 @@ export const GET_ALL_CUSTOMERS = createAsyncThunk(
         StaffUserId: StaffUserId.id,
       };
       const res = await GET_ALL_CUSTOMER(updatedReq, authToken);
+
+      return await res;
+    } catch (err) {
+      throw err;
+    }
+  }
+);
+
+
+
+export const getAllCustomerDropDown = createAsyncThunk(
+  "customerAction",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+      const updatedReq = {
+        ...req,
+        ip: IP_Data,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await get_All_Customer_DropDown(updatedReq, authToken);
 
       return await res;
     } catch (err) {
