@@ -287,8 +287,6 @@ const Timesheet = () => {
 
 
   };
-
-
   const [deleteRows, setDeleteRows] = useState([]);
   const handleDeleteRow = (index) => {
     const newSheetRows = [...timeSheetRows];
@@ -1050,7 +1048,9 @@ const Timesheet = () => {
                       </thead>
 
                       <tbody className="list form-check-all">
-                        {timeSheetRows?.map((item, index) => (
+                        {
+                        timeSheetRows.length > 0?
+                        timeSheetRows?.map((item, index) => (
                           <tr className="tabel_new">
                             <td className="pe-0">{index + 1}</td>
 
@@ -1317,8 +1317,14 @@ const Timesheet = () => {
                               : ""}
 
                           </tr>
-                        ))}
-                        <tr className="tabel_new">
+                        ))
+                        :
+                        <tr>
+                          <td colSpan={12} className="text-center">No data found</td>
+                        </tr>
+                        
+                        }
+                         <tr className="tabel_new">
                           <td>
                             {
                               staffDetails.id == multipleFilter.staff_id ? submitStatusAllKey === 0 ?
