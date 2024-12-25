@@ -24,10 +24,16 @@ const ClientLists = () => {
       .then(async (response) => {
         if (response.status) {
           setCustomerData(response.data);
-          setCustomerId(customer_id_sidebar || response?.data[0]?.id);
+          if(response?.data[0]?.id != "" && response?.data[0]?.id != undefined) {
+            setCustomerId(customer_id_sidebar || response?.data[0]?.id);
+            GetAllClientData(customer_id_sidebar || response?.data[0]?.id);
+            setCustomerName(response?.data[0]?.trading_name);
+            setHararchyData({ customer: {id:customer_id_sidebar || response?.data[0]?.id,trading_name:response?.data[0]?.trading_name}});
+            setActiveTab("client");
+          }
 
         } else {
-         setCustomerData(response.data);
+         setCustomerData([]);
         }
       })
       .catch((error) => {
@@ -67,8 +73,6 @@ const ClientLists = () => {
     (item) => item.permission_name === "customer"
   )?.items || [];
   
-  console.log("hararchyData",hararchyData);
-
   useEffect(() => {
     if (accessDataCustomer.length === 0) return;
     const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0 };

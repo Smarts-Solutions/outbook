@@ -406,6 +406,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
 const getJobByCustomer = async (job) => {
   const { customer_id, StaffUserId } = job;
 
+  console.log("customer_id", customer_id)
+  console.log("StaffUserId", StaffUserId) 
+
   try {
     const [ExistStaff] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + StaffUserId + '" LIMIT 1');
     let result = []
@@ -471,6 +474,7 @@ const getJobByCustomer = async (job) => {
         AND 
         (jobs.allocated_to = ? OR jobs.staff_created_id = ?)
         AND jobs.customer_id = ?
+        GROUP BY jobs.id
         ORDER BY 
          jobs.id DESC;
         `;
@@ -619,7 +623,8 @@ const getJobByCustomer = async (job) => {
         jobs.customer_id = customers.id 
         AND 
         (jobs.reviewer = ? OR jobs.staff_created_id = ?)
-        AND jobs.customer_id = ? 
+        AND jobs.customer_id = ?
+        GROUP BY jobs.id
         ORDER BY 
          jobs.id DESC;
         `;
@@ -685,6 +690,7 @@ const getJobByCustomer = async (job) => {
         WHERE 
         jobs.customer_id = customers.id AND 
         jobs.customer_id = ?
+        GROUP BY jobs.id
         ORDER BY 
          jobs.id DESC;
         `;
@@ -769,7 +775,8 @@ const getJobByClient = async (job) => {
      WHERE 
      jobs.client_id = clients.id 
      AND (jobs.allocated_to = ? OR jobs.staff_created_id = ?)
-     AND jobs.client_id = ? 
+     AND jobs.client_id = ?
+     GROUP BY jobs.id
       ORDER BY
       jobs.id DESC;
      `;
@@ -916,7 +923,8 @@ const getJobByClient = async (job) => {
      jobs.client_id = clients.id 
      AND
      (jobs.reviewer = ? OR jobs.staff_created_id = ?) 
-     AND jobs.client_id = ? 
+     AND jobs.client_id = ?
+     GROUP BY jobs.id
       ORDER BY
       jobs.id DESC;
      `;
@@ -991,6 +999,7 @@ const getJobByClient = async (job) => {
      WHERE 
      jobs.client_id = clients.id AND
      jobs.client_id = ?
+     GROUP BY jobs.id
       ORDER BY
       jobs.id DESC;
      `;
@@ -1076,6 +1085,7 @@ const getByJobStaffId = async (job) => {
   jobs.staff_created_id = ? OR 
   jobs.allocated_to = ? OR 
   jobs.reviewer = ?
+  GROUP BY jobs.id
   ORDER BY
   jobs.id DESC
   `;
@@ -1186,8 +1196,10 @@ const getJobById = async (job) => {
      task ON client_job_task.task_id = task.id
       LEFT JOIN
      timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+     
      WHERE
-      jobs.id = ? 
+      jobs.id = ?
+      GROUP BY jobs.id 
      `;
 
     //  checklist_tasks ON checklist_tasks.checklist_id = client_job_task.checklist_id AND

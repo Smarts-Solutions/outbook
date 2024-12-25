@@ -10,13 +10,17 @@ import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlic
 
 const ClientList = () => {
   const navigate = useNavigate();
+  const cust_id_sidebar = sessionStorage.getItem('cust_id_sidebar');
+  const cli_id_sidebar = sessionStorage.getItem('cli_id_sidebar');
+
  
   useEffect(() => {
+    GetAllCustomer();
     GetStatus();
   }, []);
 
   const [customerDataAll, setCustomerDataAll] = useState([]);
-  const [customerDetails, setCustomerDetails] = useState({ id: "", trading_name: "" });
+  const [customerDetails, setCustomerDetails] = useState({ id: cust_id_sidebar || "", trading_name: "" });
 
   const GetAllCustomer = async () => {
     const req = { action: "get_dropdown" };
@@ -25,11 +29,11 @@ const ClientList = () => {
       .then(async (response) => {
         if (response.status) {
           setCustomerDataAll(response.data);
-          setCustomerDetails({ id: response?.data[0]?.id, trading_name: response?.data[0]?.trading_name });
-          setHararchyData({ customer: { id: response?.data[0]?.id, trading_name: response?.data[0]?.trading_name }, client: { id: '', client_name: '' } });
-          if(response?.data[0]?.id){
-            GetAllClientData(response?.data[0]?.id);
-           // GetAllClientData(57);
+          if(response?.data[0]?.id != undefined && response?.data[0]?.id != "") {
+          setCustomerDetails({ id: cust_id_sidebar || response?.data[0]?.id, trading_name: response?.data[0]?.trading_name });
+          setHararchyData({ customer: { id: cust_id_sidebar || response?.data[0]?.id, trading_name: response?.data[0]?.trading_name }, client: { id: '', client_name: '' } });
+          GetAllClientData(cust_id_sidebar || response?.data[0]?.id , response?.data[0]?.trading_name);
+
           }
         } else {
           setCustomerDataAll(response.data);
@@ -40,9 +44,32 @@ const ClientList = () => {
       });
   };
 
-  useEffect(() => {
-    GetAllCustomer();
-  }, []);
+  const [clientData, setClientData] = useState([]);
+  const [clientDetailSingle, setClientDetailSingle] = useState({ id: cli_id_sidebar || "", client_name: "" });
+  const GetAllClientData = async (id , name) => {
+    const req = { action: "get", customer_id: id };
+    const data = { req: req, authToken: token };
+    await dispatch(ClientAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setClientData(response.data);
+          if(response?.data[0]?.id != undefined && response?.data[0]?.id != "") {
+          setClientDetailSingle({ id: cli_id_sidebar || response?.data[0]?.id, client_name: response?.data[0]?.client_name });
+          setHararchyData({ customer: {id:id ,trading_name:name}, client: { id: cli_id_sidebar || response?.data[0]?.id, client_name: response?.data[0]?.client_name } });
+          GetAllJobList(cli_id_sidebar || response?.data[0]?.id);
+          GetClientDetails(cli_id_sidebar || response?.data[0]?.id);
+          setActiveTab("NoOfJobs");  
+          }
+        } else {
+          setClientData([]);
+          setClientDetailSingle({ id: '', client_name: '' });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
 
   
 
@@ -90,7 +117,6 @@ const ClientList = () => {
   }, []);
 
   const GetClientDetails = async (client_id) => {
-    if(client_id != undefined && client_id != ""){
     const req = { action: "getByid", client_id: client_id };
     const data = { req: req, authToken: token };
     await dispatch(ClientAction(data))
@@ -114,39 +140,7 @@ const ClientList = () => {
       .catch((error) => {
         return;
       });
-    }else{
-      return;
-    }
-  };
-
-
-  const [clientData, setClientData] = useState([]);
-  const [clientDetailSingle, setClientDetailSingle] = useState({ id: "", client_name: "" });
-  console.log("clientData", clientData);
-  const GetAllClientData = async (id) => {
-    console.log("id", id);
-    const req = { action: "get", customer_id: id };
-    const data = { req: req, authToken: token };
-    await dispatch(ClientAction(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          setClientData(response.data);
-          setClientDetailSingle({ id: response?.data[0]?.id, client_name: response?.data[0]?.client_name });
-          setHararchyData({ customer: customerDetails, client: { id: response?.data[0]?.id, client_name: response?.data[0]?.client_name } });
-          GetAllJobList(response?.data[0]?.id);
-          GetClientDetails(response?.data[0]?.id);
-          // setActiveTab("NoOfJobs");
-        } else {
-          setClientData([]);
-          setClientDetailSingle({ id: '', client_name: '' });
-          setHararchyData({ customer: customerDetails, client: { id: '', client_name: '' } });
-
-        }
-      })
-      .catch((error) => {
-        return;
-      });
+    
   };
 
   // const tabs = [
@@ -460,7 +454,7 @@ const ClientList = () => {
   const handleCreateJob = (row) => {
     if (getClientDetails?.data?.client?.customer_id) {
       navigate("/admin/createjob", {
-        state: { customer_id: getClientDetails?.data?.client?.customer_id, clientName: location?.state?.data?.client, goto: "client", activeTab: location?.state?.activeTab },
+        state: { customer_id: getClientDetails?.data?.client?.customer_id, clientName: clientDetailSingle , goto: "client", activeTab: "client" },
       });
     }
   };
@@ -468,16 +462,13 @@ const ClientList = () => {
 
   const selectCustomerId = (id, name) => {
     if (id != "") {
+      sessionStorage.setItem('cust_id_sidebar', id);
       setCustomerData([]);
       setCustomerDetails({ id: id, trading_name: name });
       setHararchyData({ customer: { id: id, trading_name: name }, client: { id: '', client_name: '' } });
       setClientDetailSingle({ id: '', client_name: '' });
-      GetAllClientData(id);
       setActiveTab("NoOfJobs");
-      setClientDetails({ loading: false, data: [], });
-      informationSetData([]);
-      setClientInformationData([]);
-      setCompanyDetails([]);
+      GetAllClientData(id,name);
     } else {
       setCustomerData([]);
       setClientData([]);
@@ -492,6 +483,7 @@ const ClientList = () => {
 
   const selectClientId = (id, name) => {
     if (id != "") {
+      sessionStorage.setItem('cli_id_sidebar', id);
       GetAllJobList(id);
       GetClientDetails(id);
       setClientDetailSingle({ id: id, client_name: name });
@@ -506,7 +498,8 @@ const ClientList = () => {
       setCompanyDetails([]);
     }
   }
-
+  
+  console.log("hararchyData", hararchyData);
   return (
     <div className="container-fluid">
       <div className="content-title">
