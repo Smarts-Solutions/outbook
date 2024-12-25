@@ -1,44 +1,81 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const menuRef = useRef(null);
   const role = JSON.parse(localStorage.getItem("role"));
   const updatedShowTab = JSON.parse(localStorage.getItem("updatedShowTab"));
-
   const [activeLink, setActiveLink] = useState(location.pathname);
   const [menuState, setMenuState] = useState({
-    dropdownOpen: {}, // Tracks which dropdown menus are open
+    dropdownOpen: {
+      "/admin/customer": false, // Initially set the "Customer" dropdown to be closed or open based on current location
+      "/admin/client/profiles": false, // For "Job" dropdown
+      "/admin/ClientLists": false, // For "Client" dropdown
+    },
   });
 
   // Update active link when location changes
   useEffect(() => {
     setActiveLink(location.pathname);
-  }, [location]);
-
-  const handleLinkClick = (e, linkPathname) => {
-    e.preventDefault();
-    setActiveLink(linkPathname);
-    setMenuState({ dropdownOpen: {} }); // Close all dropdowns
-    navigate(linkPathname);
-  };
-
-  const handleMenuClick = (e, linkPathname, isDropdown = false) => {
-    e.preventDefault();
-    if (isDropdown) {
+  
+    // Check if we're on any customer-related page, and set the dropdown state accordingly
+    if (location.pathname.startsWith("/admin/customer")) {
       setMenuState((prevState) => ({
         ...prevState,
         dropdownOpen: {
-          [linkPathname]: !prevState.dropdownOpen[linkPathname], // Toggle current dropdown
+          ...prevState.dropdownOpen,
+          "/admin/customer": true, // Keep the "Customer" dropdown open if we're on any customer-related page
+        },
+      }));
+    } else if (location.pathname.startsWith("/admin/client")) {
+      setMenuState((prevState) => ({
+        ...prevState,
+        dropdownOpen: {
+          ...prevState.dropdownOpen,
+          "/admin/client/profiles": true, // Keep the "Job" dropdown open if we're on any job-related page
+        },
+      }));
+    } else if (location.pathname === "/admin/ClientLists") {
+      setMenuState((prevState) => ({
+        ...prevState,
+        dropdownOpen: {
+          ...prevState.dropdownOpen,
+          "/admin/ClientLists": true, // Keep the "Client" dropdown open when on Client Lists page
         },
       }));
     } else {
-      setMenuState({ dropdownOpen: {} }); // Close all dropdowns
-      setActiveLink(linkPathname);
-      navigate(linkPathname);
+      // Close the dropdowns if we're not on any customer or job-related page
+      setMenuState((prevState) => ({
+        ...prevState,
+        dropdownOpen: {
+          ...prevState.dropdownOpen,
+          "/admin/customer": false,
+          "/admin/client/profiles": false,
+          "/admin/ClientLists": false, // Close Client dropdown as well
+        },
+      }));
     }
+  }, [location]);
+  
+
+  // Handle link click and set the active tab
+  const handleLinkClick = (e, linkPathname) => {
+    e.preventDefault();
+    setActiveLink(linkPathname); // Update the active link state
+    navigate(linkPathname); // Navigate to the new link
+  };
+
+  // Handle dropdown menu click
+  const handleMenuClick = (e, linkPathname) => {
+    e.preventDefault();
+    setMenuState((prevState) => ({
+      ...prevState,
+      dropdownOpen: {
+        ...prevState.dropdownOpen,
+        [linkPathname]: !prevState.dropdownOpen[linkPathname], // Toggle current dropdown
+      },
+    }));
   };
 
   return (
@@ -47,7 +84,6 @@ const Sidebar = () => {
         <div className="brand mt-4">
           <Link
             to="/admin/dashboard"
-            aria-expanded="false"
             onClick={(e) => handleLinkClick(e, "/admin/dashboard")}
           >
             <span className="sidebar-icons">
@@ -60,135 +96,96 @@ const Sidebar = () => {
           </Link>
         </div>
         <div className="menu-content h-100 mm-active" data-simplebar="init">
-          <div className="simplebar-wrapper">
-            <div className="simplebar-content-wrapper">
-              <div
-                className="simplebar-content"
-                style={{ padding: "0px 0px 70px" }}
+          <ul className="metismenu left-sidenav-menu mm-show">
+            {/* Dashboard Link */}
+            <li className={activeLink === "/admin/dashboard" ? "active" : ""}>
+              <Link
+                to="/admin/dashboard"
+                onClick={(e) => handleLinkClick(e, "/admin/dashboard")}
               >
-                <ul className="metismenu left-sidenav-menu mm-show">
-                  <li
-                    className={
-                      activeLink === "/admin/dashboard" ? "active" : ""
-                    }
+                <span className="sidebar-icons">
+                  <i className="fa-regular fa-grid-2"></i>
+                </span>
+                <span>Dashboard</span>
+              </Link>
+            </li>
+
+            {/* Customer Dropdown */}
+            <li
+  className={
+    activeLink.startsWith("/admin/customer") ||
+    activeLink.startsWith("/admin/ClientLists") ||
+    activeLink.startsWith("/admin/client/profiles")
+      ? "active"
+      : ""
+  }
+>
+              <Link
+                to="/admin/customer"
+                onClick={(e) => handleMenuClick(e, "/admin/customer")}
+              >
+                <div>
+                  <span className="sidebar-icons">
+                    <i className="fas fa-users"></i>
+                  </span>
+                  <span className="pe-4 pe-lg-4">Customer</span>
+                </div>
+                <span className="chevron-icon">
+                  <i
+                    className={`fas ${
+                      menuState.dropdownOpen["/admin/customer"]
+                        ? "fa-chevron-down"
+                        : "fa-chevron-right"
+                    }`}
+                  ></i>
+                </span>
+              </Link>
+              <ul
+                className={`nav-second-level ${
+                  menuState.dropdownOpen["/admin/customer"] ? "in" : "mm-collapse"
+                }`}
+                aria-expanded={
+                  menuState.dropdownOpen["/admin/customer"] ? "true" : "false"
+                }
+              >
+                <li className={activeLink === "/admin/customer" ? "active" : ""}>
+                  <Link
+                    to="/admin/customer"
+                    onClick={(e) => handleLinkClick(e, "/admin/customer")}
                   >
-                    <Link
-                      to="/admin/dashboard"
-                      aria-expanded="false"
-                      onClick={(e) => handleLinkClick(e, "/admin/dashboard")}
-                    >
-                      <span className="sidebar-icons">
-                        <i className="fa-regular fa-grid-2"></i>
-                      </span>
-                      <span>Dashboard</span>
-                    </Link>
-                  </li>
+                    <i className="ti-control-record" />
+                    Customer Detail
+                  </Link>
+                </li>
 
-                  {((updatedShowTab && updatedShowTab.customer) ||
-                    role === "ADMIN" ||
-                    role === "SUPERADMIN") && (
-                    <li
-                      className={
-                        activeLink.startsWith("/admin/customer") ? "active" : ""
-                      }
-                    >
-                      <Link
-                        to="/admin/customer"
-                        aria-expanded={
-                          menuState.dropdownOpen["/admin/customer"]
-                            ? "true"
-                            : "false"
-                        }
-                        onClick={(e) =>
-                          handleMenuClick(e, "/admin/customer", true)
-                        }
-                      >
-                        <div>
-                          <span className="sidebar-icons">
-                            <i className="fas fa-users"></i>
-                          </span>
-                          <span className="pe-4 pe-lg-4">Customer</span>
-                        </div>
-                        <span className="chevron-icon">
-                          <i
-                            className={`fas ${
-                              menuState.dropdownOpen["/admin/customer"]
-                                ? "fa-chevron-down"
-                                : "fa-chevron-right"
-                            }`}
-                          ></i>
-                        </span>
-                      </Link>
-                      <ul
-                        className={`nav-second-level ${
-                          menuState.dropdownOpen["/admin/customer"]
-                            ? "in"
-                            : "mm-collapse"
-                        }`}
-                        aria-expanded={
-                          menuState.dropdownOpen["/admin/customer"]
-                            ? "true"
-                            : "false"
-                        }
-                        style={{
-                          height: menuState.dropdownOpen["/admin/customer"]
-                            ? "auto"
-                            : 0,
-                        }}
-                      >
-                        <li
-                          className={
-                            activeLink === "/admin/customer" ? "active" : ""
-                          }
-                        >
-                          <Link
-                            to="/admin/customer"
-                            onClick={(e) =>
-                              handleMenuClick(e, "/admin/customer")
-                            }
-                          >
-                            <i className="ti-control-record" />
-                            Customer Detail
-                          </Link>
-                        </li>
+                <li
+                  className={activeLink === "/admin/ClientLists" ? "active" : ""}
+                >
+                  <Link
+                    to="/admin/ClientLists"
+                    onClick={(e) => handleLinkClick(e, "/admin/ClientLists")}
+                  >
+                    <i className="ti-control-record" />
+                    Client
+                  </Link>
+                </li>
 
-                        <li
-                          className={
-                            activeLink === "/admin/ClientLists" ? "active" : ""
-                          }
-                        >
-                          <Link
-                            to="/admin/ClientLists"
-                            onClick={(e) =>
-                              handleMenuClick(e, "/admin/ClientLists")
-                            }
-                          >
-                            <i className="ti-control-record" />
-                            Client
-                          </Link>
-                        </li>
-                        
-                        <li
-                          className={
-                            activeLink === "/admin/client/profiles" ? "active" : ""
-                          }
-                        >
-                          <Link
-                            to="/admin/client/profiles"
-                            onClick={(e) =>
-                              handleMenuClick(e, "/admin/client/profiles")
-                            }
-                          >
-                            <i className="ti-control-record" />
-                            Job
-                          </Link>
-                        </li>
-                       
-                      </ul>
-                    </li>
-                  )}
+                <li
+                  className={activeLink === "/admin/client/profiles" ? "active" : ""}
+                >
+                  <Link
+                    to="/admin/client/profiles"
+                    onClick={(e) => handleLinkClick(e, "/admin/client/profiles")}
+                  >
+                    <i className="ti-control-record" />
+                    Job
+                  </Link>
+                </li>
+              </ul>
+            </li>
 
-                  {((updatedShowTab && updatedShowTab.status) ||
+           
+            {((updatedShowTab && updatedShowTab.status) ||
                     role === "ADMIN" ||
                     role === "SUPERADMIN") && (
                     <li
@@ -307,10 +304,7 @@ const Sidebar = () => {
                       </Link>
                     </li>
                   )}
-                </ul>
-              </div>
-            </div>
-          </div>
+          </ul>
         </div>
       </div>
     </div>

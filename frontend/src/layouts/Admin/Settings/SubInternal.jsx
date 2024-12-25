@@ -77,7 +77,7 @@ const SubInternal = () => {
             name: "Internal Task Name",
             selector: (row) => row.name,
             sortable: true,
-            width: "70%",
+           
         },
         {
             name: "Status",
@@ -95,7 +95,33 @@ const SubInternal = () => {
         {
             name: "Actions",
             cell: (row) => (
-                <div className="d-flex">
+                <> <div className="dropdown d-lg-none setting-drop-down">
+                <button
+                  className="btn"
+                  type="button"
+                  id="dropdownMenuButton"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  <i className="fa fa-ellipsis-v" aria-hidden="true"></i>
+                </button>
+                <div
+                  className="dropdown-menu custom-dropdown"
+                  aria-labelledby="dropdownMenuButton"
+                >
+                  <div className="px-2">
+                  <button className="edit-icon dropdown-item mb-3" onClick={() => handleEdit(row)}>
+                        <i className="ti-pencil" />
+                    </button>
+                    <button className="delete-icon" onClick={() => handleDelete(row)}>
+                        <i className="ti-trash text-danger" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="d-lg-flex d-none">
                     <button className="edit-icon" onClick={() => handleEdit(row)}>
                         <i className="ti-pencil" />
                     </button>
@@ -103,6 +129,7 @@ const SubInternal = () => {
                         <i className="ti-trash text-danger" />
                     </button>
                 </div>
+                </>
             ),
             ignoreRowClick: true,
             allowOverflow: true,

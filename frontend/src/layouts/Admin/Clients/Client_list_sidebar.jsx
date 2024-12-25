@@ -883,9 +883,11 @@ const ClientLists = () => {
  
   return (
     <div className="container-fluid">
+      <div className="content-title">
       <div className="row ">
+        
         <div className="col-sm-12">
-         <div className="form-group col-md-4">
+         <div className="form-group col-md-4 mb-0">
                   <label className="form-label mb-2">Select Customer</label>
                   <select
                     name="staff_id"
@@ -912,7 +914,7 @@ const ClientLists = () => {
                   </select>
          </div>
 
-          <div className="page-title-box">
+          <div className="page-title-box pt-2">
             <div className="row align-items-start flex-md-row flex-column-reverse">
               <div className="col-md-6 col-lg-8">
                 <ul
@@ -1045,6 +1047,7 @@ const ClientLists = () => {
           </div>
 
         ))}
+      </div>
       </div>
     </div>
   );

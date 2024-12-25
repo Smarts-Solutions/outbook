@@ -950,8 +950,14 @@ body.dark-sidenav .left-sidenav-menu li > a:hover span i {
 body.dark-sidenav .left-sidenav-menu li > a i {
   color: #fff;
 }
-
-body.dark-sidenav .left-sidenav-menu li ul li > a {
+/* body.dark-sidenav .left-sidenav-menu li ul li.active > a,body.dark-sidenav .left-sidenav-menu li ul li.active > a i {
+  color: #00afef;
+  
+} */
+body.dark-sidenav .left-sidenav-menu li ul li.active {
+ background-color: #dee0e0;;
+}
+body.dark-sidenav .left-sidenav-menu li ul li > a,body.dark-sidenav .left-sidenav-menu li ul li > a i {
   color: #000;
 }
 body.dark-sidenav .left-sidenav-menu li ul li > a:hover {

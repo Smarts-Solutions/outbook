@@ -509,9 +509,10 @@ const ClientList = () => {
 
   return (
     <div className="container-fluid">
-      <div className="col-sm-12">
+      <div className="content-title">
+      <div className="row">
 
-        <div className="form-group col-md-4">
+        <div className="form-group col-md-4 mb-0">
           <label className="form-label mb-2">Select Customer</label>
           <select
             name="staff_id"
@@ -539,7 +540,7 @@ const ClientList = () => {
         </div>
 
 
-        <div className="form-group col-md-4">
+        <div className="form-group col-md-4 mb-0">
           <label className="form-label mb-2">Select Client</label>
          {
           clientData.length == 0 ?
@@ -575,7 +576,7 @@ const ClientList = () => {
 
 
 
-        <div className="page-title-box">
+        <div className="page-title-box pt-2">
           <div className="row align-items-start flex-md-row flex-column-reverse justify-content-between">
             <div className=" col-md-6 col-lg-8">
               <ul
@@ -630,7 +631,7 @@ const ClientList = () => {
 
       </div>
 
-      <div className="mt-4">
+      <div className="mt-2">
         {activeTab == "NoOfJobs" && (
           <div
             className={`tab-pane fade ${activeTab == "NoOfJobs" ? "show active" : ""
@@ -912,6 +913,7 @@ const ClientList = () => {
 
           </div>
         )}
+      </div>
       </div>
     </div>
   );
