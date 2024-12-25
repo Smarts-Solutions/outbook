@@ -12,9 +12,9 @@ import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlic
 
 const ClientLists = () => {
   const navigate = useNavigate();
- 
+  const customer_id_sidebar = sessionStorage.getItem('customer_id_sidebar');
   const [CustomerData, setCustomerData] = useState([]);
-  const [customerId, setCustomerId] = useState('');
+  const [customerId, setCustomerId] = useState(customer_id_sidebar || '');
   const [customerName, setCustomerName] = useState('');
 
   const GetAllCustomer = async () => {
@@ -24,6 +24,8 @@ const ClientLists = () => {
       .then(async (response) => {
         if (response.status) {
           setCustomerData(response.data);
+          setCustomerId(customer_id_sidebar || response?.data[0]?.id);
+
         } else {
          setCustomerData(response.data);
         }
@@ -865,6 +867,7 @@ const ClientLists = () => {
 
  const selectCustomerId = (id , name) => {
   if(id != "") {
+    sessionStorage.setItem('customer_id_sidebar', id);
     setCustomerId(id);
     GetAllClientData(id);
     setCustomerName(name);
@@ -872,6 +875,7 @@ const ClientLists = () => {
     setActiveTab("client");
   }else {
     setCustomerId('');
+    setClientData([]);
     setHararchyData({ customer: {id:'',trading_name:''}});
   }
  }
@@ -894,7 +898,7 @@ const ClientLists = () => {
                       const selectedCustomer = CustomerData.find(customer => customer.id == selectedId);
                       selectCustomerId(selectedId, selectedCustomer?.trading_name);
                     }}
-                  > <option value="">Select Customer</option>
+                  >
                     {CustomerData &&
                       CustomerData.map((val, index) => (
                         <option

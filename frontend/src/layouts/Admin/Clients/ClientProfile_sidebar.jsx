@@ -10,7 +10,10 @@ import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlic
 
 const ClientList = () => {
   const navigate = useNavigate();
-
+ 
+  useEffect(() => {
+    GetStatus();
+  }, []);
 
   const [customerDataAll, setCustomerDataAll] = useState([]);
   const [customerDetails, setCustomerDetails] = useState({ id: "", trading_name: "" });
@@ -22,6 +25,12 @@ const ClientList = () => {
       .then(async (response) => {
         if (response.status) {
           setCustomerDataAll(response.data);
+          setCustomerDetails({ id: response?.data[0]?.id, trading_name: response?.data[0]?.trading_name });
+          setHararchyData({ customer: { id: response?.data[0]?.id, trading_name: response?.data[0]?.trading_name }, client: { id: '', client_name: '' } });
+          if(response?.data[0]?.id){
+            GetAllClientData(response?.data[0]?.id);
+           // GetAllClientData(57);
+          }
         } else {
           setCustomerDataAll(response.data);
         }
@@ -35,28 +44,7 @@ const ClientList = () => {
     GetAllCustomer();
   }, []);
 
-  const [clientData, setClientData] = useState([]);
-  const [clientDetailSingle, setClientDetailSingle] = useState({ id: "", client_name: "" });
-
-
-  console.log("clientData", clientData);
-
-  const GetAllClientData = async (id) => {
-    const req = { action: "get", customer_id: id };
-    const data = { req: req, authToken: token };
-    await dispatch(ClientAction(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          setClientData(response.data);
-        } else {
-          setClientData(response.data);
-        }
-      })
-      .catch((error) => {
-        return;
-      });
-  };
+  
 
 
 
@@ -83,12 +71,6 @@ const ClientList = () => {
 
 
 
-  useEffect(() => {
-    //GetAllJobList();
-    // GetClientDetails();
-    GetStatus();
-  }, []);
-
   const accessDataJob =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
       (item) => item.permission_name === "job"
@@ -108,6 +90,7 @@ const ClientList = () => {
   }, []);
 
   const GetClientDetails = async (client_id) => {
+    if(client_id != undefined && client_id != ""){
     const req = { action: "getByid", client_id: client_id };
     const data = { req: req, authToken: token };
     await dispatch(ClientAction(data))
@@ -126,6 +109,39 @@ const ClientList = () => {
             loading: false,
             data: [],
           });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+    }else{
+      return;
+    }
+  };
+
+
+  const [clientData, setClientData] = useState([]);
+  const [clientDetailSingle, setClientDetailSingle] = useState({ id: "", client_name: "" });
+  console.log("clientData", clientData);
+  const GetAllClientData = async (id) => {
+    console.log("id", id);
+    const req = { action: "get", customer_id: id };
+    const data = { req: req, authToken: token };
+    await dispatch(ClientAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setClientData(response.data);
+          setClientDetailSingle({ id: response?.data[0]?.id, client_name: response?.data[0]?.client_name });
+          setHararchyData({ customer: customerDetails, client: { id: response?.data[0]?.id, client_name: response?.data[0]?.client_name } });
+          GetAllJobList(response?.data[0]?.id);
+          GetClientDetails(response?.data[0]?.id);
+          // setActiveTab("NoOfJobs");
+        } else {
+          setClientData([]);
+          setClientDetailSingle({ id: '', client_name: '' });
+          setHararchyData({ customer: customerDetails, client: { id: '', client_name: '' } });
+
         }
       })
       .catch((error) => {
@@ -508,7 +524,7 @@ const ClientList = () => {
               const selectedCustomer = customerDataAll.find(customer => customer.id == selectedId);
               selectCustomerId(selectedId, selectedCustomer?.trading_name);
             }}
-          > <option value="">Select Customer</option>
+          >
             {customerDataAll &&
               customerDataAll.map((val, index) => (
                 <option
@@ -525,29 +541,36 @@ const ClientList = () => {
 
         <div className="form-group col-md-4">
           <label className="form-label mb-2">Select Client</label>
+         {
+          clientData.length == 0 ?
+           <input type="text" className="form-select"  disabled  value={"The customer's client is not available."} />
+          :
           <select
-            name="staff_id"
-            className="form-select"
-            id="tabSelect"
-            defaultValue={clientDetailSingle.id}
-            // onChange={(e) => selectCustomerId(e)}
-            onChange={(e) => {
-              const selectedId = e.target.value;
-              const selectedClient = clientData.find(client => client.id == selectedId);
-              selectClientId(selectedId, selectedClient?.client_name);
-            }}
-          > <option value="">Select Client</option>
-            {clientData &&
-              clientData.map((val, index) => (
-                <option
-                  key={index}
-                  value={val.id}
-                  selected={clientDetailSingle.id == val.id}
-                >
-                  {val.client_name}
-                </option>
-              ))}
-          </select>
+          name="staff_id"
+          className="form-select"
+          id="tabSelect"
+          defaultValue={clientDetailSingle.id}
+          // onChange={(e) => selectCustomerId(e)}
+          onChange={(e) => {
+            const selectedId = e.target.value;
+            const selectedClient = clientData.find(client => client.id == selectedId);
+            selectClientId(selectedId, selectedClient?.client_name);
+          }}
+        > 
+          {clientData &&
+            clientData.map((val, index) => (
+              <option
+                key={index}
+                value={val.id}
+                selected={clientDetailSingle.id == val.id}
+              >
+                {val.client_name}
+              </option>
+            ))}
+        </select>
+         }
+    
+          
         </div>
 
 
@@ -585,7 +608,7 @@ const ClientList = () => {
               <>
                 <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
                   {
-                    ((getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN") && clientDetailSingle.id != "") && (
+                    ((getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN") && clientData.length > 0 ) && (
                       <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={handleCreateJob}   >
                         <i className="fa fa-plus pe-1" /> Create Job
                       </div>
@@ -748,7 +771,7 @@ const ClientList = () => {
                         }
                       </h4>
                     </div>
-                    {/* <div className="col-4">
+              {/* <div className="col-4">
                 <div className="float-end">
                   <button type="button" className="btn btn-info text-white " onClick={(e) => ClientEdit(informationData.id)}>
                     <i className="fa-regular fa-pencil me-2" />
