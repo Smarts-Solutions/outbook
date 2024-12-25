@@ -598,17 +598,6 @@ const ClientList = () => {
 
             {activeTab === "view client" && (
               <div className="col-md-4 col-auto">
-                {/* <button
-                  type="button"
-                  className="btn btn-info text-white float-end blue-btn me-2"
-                  onClick={() => {
-                    sessionStorage.setItem('activeTab', location.state.activeTab);
-                    window.history.back()
-                  }
-                  }
-                >
-                  <i className="fa fa-arrow-left pe-1" /> Back
-                </button> */}
               </div>
             )}
           </div>
