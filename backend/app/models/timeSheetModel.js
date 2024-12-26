@@ -365,7 +365,7 @@ const getTimesheetTaskType = async (Timesheet) => {
                     staffs AS staff2 ON customers.account_manager_id = staff2.id
                 LEFT JOIN 
                     customer_company_information ON customers.id = customer_company_information.customer_id
-                WHERE staff1.id = ?   
+                WHERE customers.staff_id = ?   
                 ORDER BY 
                     customers.id DESC;
                     `;

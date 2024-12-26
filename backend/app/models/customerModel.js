@@ -778,7 +778,7 @@ LIMIT ? OFFSET ?
                 LEFT JOIN
                     customer_company_information ON customers.id = customer_company_information.customer_id
                 WHERE 
-                    ${search ? `customers.trading_name LIKE '%${search}%' AND staff1.id = ?` : 'staff1.id = ?'}    
+                    ${search ? `customers.trading_name LIKE '%${search}%' AND customers.staff_id = ?` : 'customers.staff_id = ?'}    
             ) AS result;`;
 
             let queryDataCount = [staff_id];
@@ -821,7 +821,7 @@ LIMIT ? OFFSET ?
         LEFT JOIN 
             customer_company_information ON customers.id = customer_company_information.customer_id
         WHERE 
-            ${search ? `customers.trading_name LIKE '%${search}%' AND staff1.id = ?` : 'staff1.id = ?'}    
+            ${search ? `customers.trading_name LIKE '%${search}%' AND customers.staff_id = ?` : 'customers.staff_id = ?'}    
         ORDER BY 
             customers.id DESC
             LIMIT ? OFFSET ?;
@@ -994,26 +994,19 @@ id DESC;`;
 
         }
         else {
-           
             const query = `
             SELECT  
-            customers.id AS id,
-            customers.trading_name AS trading_name,
-            CONCAT(
-            'cust_', 
-            SUBSTRING(customers.trading_name, 1, 3), '_',
-            SUBSTRING(customers.customer_code, 1, 15)
-            ) AS customer_code
+            id,
+            trading_name
         FROM 
             customers
         WHERE 
-           staff1.id = ?  
+            staff_id = ? 
         ORDER BY 
-            customers.id DESC;
+            id DESC;
             `;
             const [result1] = await pool.execute(query, [StaffUserId]);
             result = result1
-            total = total_count;
         }
     }
     try {
