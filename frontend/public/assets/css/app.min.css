@@ -954,7 +954,7 @@ body.dark-sidenav .left-sidenav-menu li > a i {
   color: #00afef;
   
 } */
-body.dark-sidenav .left-sidenav-menu li ul li.active {
+body.dark-sidenav .left-sidenav-menu li ul li.active,body.dark-sidenav .left-sidenav-menu li ul li:hover {
  background-color: #dee0e0;;
 }
 body.dark-sidenav .left-sidenav-menu li ul li > a,body.dark-sidenav .left-sidenav-menu li ul li > a i {
@@ -4672,12 +4672,12 @@ select#tabSelect {
 }
 .week-data span {
   font-size: 13px;
-  margin-right: 4px;
+  margin-right: 11px;
   width: 88px;
-}
-body .week-data .btn-link {
+}body .week-data .btn-link {
   padding-left: 0px !important;
-  width: 90px;
+  width: 20px;
+  padding: 0 !important;
 }
 
 .rdt_TableHead {
@@ -4751,3 +4751,6 @@ button.btn.dropdown-toggle.btn-light {
   color: #0cb2ef !important;
 }
 
+tbody.list.form-check-all tr:last-child td {
+  border: none;
+}

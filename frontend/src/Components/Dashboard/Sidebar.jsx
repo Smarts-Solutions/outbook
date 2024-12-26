@@ -153,8 +153,10 @@ const Sidebar = () => {
                     to="/admin/customer"
                     onClick={(e) => handleLinkClick(e, "/admin/customer")}
                   >
-                    <i className="ti-control-record" />
-                    Customer Detail
+                    {/* <i className="ti-control-record" /> */}
+                    <i className="fa-solid fa-users-line"></i>
+                   
+                    Customers
                   </Link>
                 </li>
 
@@ -165,8 +167,9 @@ const Sidebar = () => {
                     to="/admin/ClientLists"
                     onClick={(e) => handleLinkClick(e, "/admin/ClientLists")}
                   >
-                    <i className="ti-control-record" />
-                    Client
+                     <i className="fa-solid fa-user"></i>
+                    {/* <i className="ti-control-record" /> */}
+                    Clients
                   </Link>
                 </li>
 
@@ -177,8 +180,9 @@ const Sidebar = () => {
                     to="/admin/client/profiles"
                     onClick={(e) => handleLinkClick(e, "/admin/client/profiles")}
                   >
-                    <i className="ti-control-record" />
-                    Job
+                    <i className="fa-solid fa-briefcase"></i>
+                    {/* <i className="ti-control-record" /> */}
+                    Jobs
                   </Link>
                 </li>
               </ul>
