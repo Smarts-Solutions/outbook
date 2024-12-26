@@ -1382,7 +1382,6 @@ const Timesheet = () => {
           {selectedTab === "custom" && <div>Custom content...</div>}
         </div>
 
-
         <div className="d-flex justify-content-end mt-3">
           {
             staffDetails.id == multipleFilter.staff_id ?
@@ -1408,10 +1407,6 @@ const Timesheet = () => {
           }
 
         </div>
-
-
-
-
 
         <CommonModal
           isOpen={remarkModel}

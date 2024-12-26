@@ -154,7 +154,7 @@ WHERE
     staff_id = ? AND submit_status = '1'
 GROUP BY valid_weekOffsets  
 ORDER BY
-    valid_weekOffsets DESC
+    valid_weekOffsets ASC
     `
     const [rows1] = await pool.query(query_week_filter, [staff_id]);
     // const filterDataWeek = rows1.map(item => {
