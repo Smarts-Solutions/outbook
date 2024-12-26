@@ -90,8 +90,9 @@ const EditJob = () => {
     InvoiceHours: "",
     InvoiceRemark: "",
     status_type: null,
+    notes: "",
   });
- 
+
 
   const JobDetails = async () => {
     const req = { action: "getByJobId", job_id: location.state.job_id };
@@ -196,6 +197,7 @@ const EditJob = () => {
               InvoiceHours: response.data.invoice_hours ?? "",
               InvoiceRemark: response.data.invoice_remark ?? "",
               status_type: response.data.status_type ?? null,
+              notes: response.data.notes ?? "",
             }));
           }
 
@@ -485,6 +487,7 @@ const EditJob = () => {
           ? ""
           : jobData.InvoiceRemark,
       status_type: jobData.status_type,
+      notes: jobData.notes,
       tasks: {
         checklist_id: getChecklistId,
         task: AddTaskArr,
@@ -529,17 +532,17 @@ const EditJob = () => {
           "adhoc_payg_hourly": "Adhoc Payg Hourly",
           "customised_pricing": "Customised Pricing"
         };
-        
+
         if (keyMapping[key]) {
           RearrangeEngagementOptionArr.push(keyMapping[key]);
         }
-        
+
         obj[key] = AllJobData.data.engagement_model[0][key];
         return obj;
       }, {})
     : {};
 
- 
+
   const openJobModal = (e) => {
     if (e.target.value != "") {
       jobModalSetStatus(true);
@@ -705,7 +708,7 @@ const EditJob = () => {
   // }, [AddTaskArr]);
 
 
-  
+
 
   console.log("getJobDetails", getJobDetails.data.staff_created_id);
   console.log("staffCreatedId", staffCreatedId);
@@ -723,7 +726,8 @@ const EditJob = () => {
                   className="btn p-0"
                   onClick={() => {
                     sessionStorage.setItem('activeTab', location.state.activeTab);
-                    window.history.back()}}
+                    window.history.back()
+                  }}
                 >
                   <i className="pe-3 fa-regular fa-arrow-left-long text-white fs-4" />
                 </button>
@@ -1002,13 +1006,13 @@ const EditJob = () => {
                                               }
                                             }}
                                             value={budgetedHours?.hours || ""}
-                                            // value={
-                                            //   budgeted_hour_totalTime !=
-                                            //     undefined
-                                            //     ? budgeted_hour_totalTime.hours
-                                            //     : "0"
-                                            // }
-                                            
+                                          // value={
+                                          //   budgeted_hour_totalTime !=
+                                          //     undefined
+                                          //     ? budgeted_hour_totalTime.hours
+                                          //     : "0"
+                                          // }
+
                                           />
                                           <span
                                             className="input-group-text"
@@ -1036,13 +1040,13 @@ const EditJob = () => {
                                               }
                                             }}
                                             value={budgetedHours?.minutes || ""}
-                                            // value={
-                                            //   budgeted_hour_totalTime !=
-                                            //     undefined
-                                            //     ? budgeted_hour_totalTime.minutes
-                                            //     : "0"
-                                            // }
-                                            
+                                          // value={
+                                          //   budgeted_hour_totalTime !=
+                                          //     undefined
+                                          //     ? budgeted_hour_totalTime.minutes
+                                          //     : "0"
+                                          // }
+
                                           />
                                           <span
                                             className="input-group-text"
@@ -1064,7 +1068,7 @@ const EditJob = () => {
                                       name="Reviewer"
                                       onChange={HandleChange}
                                       value={jobData.Reviewer}
-                                      disabled={['ADMIN','SUPERADMIN'].includes(role)? false: getJobDetails.data.staff_created_id != undefined?getJobDetails.data.staff_created_id === staffCreatedId?false: getJobDetails.data.customer_staff_id === staffCreatedId ?false: true : false}
+                                      disabled={['ADMIN', 'SUPERADMIN'].includes(role) ? false : getJobDetails.data.staff_created_id != undefined ? getJobDetails.data.staff_created_id === staffCreatedId ? false : getJobDetails.data.customer_staff_id === staffCreatedId ? false : true : false}
                                     >
                                       <option value=""> Select Reviewer</option>
                                       {(AllJobData?.data?.reviewer || []).map(
@@ -1094,8 +1098,8 @@ const EditJob = () => {
                                       name="AllocatedTo"
                                       onChange={HandleChange}
                                       value={jobData.AllocatedTo}
-                                      disabled={['ADMIN','SUPERADMIN'].includes(role)? false: getJobDetails.data.staff_created_id != undefined?getJobDetails.data.staff_created_id === staffCreatedId?false: getJobDetails.data.customer_staff_id === staffCreatedId ?false: true : false}
-                                     
+                                      disabled={['ADMIN', 'SUPERADMIN'].includes(role) ? false : getJobDetails.data.staff_created_id != undefined ? getJobDetails.data.staff_created_id === staffCreatedId ? false : getJobDetails.data.customer_staff_id === staffCreatedId ? false : true : false}
+
 
                                     >
                                       <option value=""> Select Staff</option>
@@ -2495,13 +2499,44 @@ const EditJob = () => {
                             </Modal>
                           )}
 
+                          <div className="col-lg-12">
+                            <div className="card card_shadow">
+                              <div className="card-header align-items-center d-flex card-header-light-blue ">
+                                <h4 className="card-title mb-0 flex-grow-1">
+                                  Notes
+                                </h4>
+                              </div>
+                              <div className="card-body">
+                                <div className="row">
+                                  <div className="mb-3 col-lg-12">
+                                    <input
+                                      type="text"
+                                      className={errors["notes"] ? "error-field form-control" : "form-control"}
+                                      placeholder="Enter Notes"
+                                      name="notes"
+                                      id="notes"
+                                      onChange={HandleChange}
+                                      value={jobData.notes}
+                                    />
+                                    {errors["notes"] && (
+                                      <div className="error-text">
+                                        {errors["notes"]}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
                           <div className="hstack gap-2 justify-content-end">
                             <button
                               type="button"
                               className="btn btn-secondary"
-                              onClick={() =>{
+                              onClick={() => {
                                 sessionStorage.setItem('activeTab', location.state.activeTab)
-                                 window.history.back()}}
+                                window.history.back()
+                              }}
                             >
                               <i className="fa fa-times"></i> Cancel
                             </button>

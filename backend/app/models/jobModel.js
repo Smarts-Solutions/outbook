@@ -301,6 +301,8 @@ const jobAdd = async (job) => {
     invoice_remark
   } = job;
 
+  let notes = job.notes == undefined ? "" : job.notes;
+
 
   // Set Status type
   let status_type = 0
@@ -328,10 +330,10 @@ const jobAdd = async (job) => {
   try {
 
     const query = `
-INSERT INTO jobs (staff_created_id,job_id,account_manager_id,customer_id,client_id,client_job_code,customer_contact_details_id, service_id,job_type_id, budgeted_hours,reviewer, allocated_to,allocated_on,date_received_on,year_end,total_preparation_time, review_time, feedback_incorporation_time,total_time, engagement_model, expected_delivery_date,due_on,submission_deadline, customer_deadline_date, sla_deadline_date,internal_deadline_date, filing_Companies_required, filing_Companies_date,filing_hmrc_required, filing_hmrc_date, opening_balance_required,opening_balance_date, number_of_transaction, number_of_balance_items,turnover, number_of_employees, vat_reconciliation, bookkeeping,processing_type, invoiced, currency, invoice_value, invoice_date,invoice_hours, invoice_remark,status_type)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO jobs (staff_created_id,job_id,account_manager_id,customer_id,client_id,client_job_code,customer_contact_details_id, service_id,job_type_id, budgeted_hours,reviewer, allocated_to,allocated_on,date_received_on,year_end,total_preparation_time, review_time, feedback_incorporation_time,total_time, engagement_model, expected_delivery_date,due_on,submission_deadline, customer_deadline_date, sla_deadline_date,internal_deadline_date, filing_Companies_required, filing_Companies_date,filing_hmrc_required, filing_hmrc_date, opening_balance_required,opening_balance_date, number_of_transaction, number_of_balance_items,turnover, number_of_employees, vat_reconciliation, bookkeeping,processing_type, invoiced, currency, invoice_value, invoice_date,invoice_hours, invoice_remark,status_type,notes)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `;
-    const [result] = await pool.execute(query, [staffCreatedId, job_id, account_manager_id, customer_id, client_id, client_job_code, customer_contact_details_id, service_id, job_type_id, budgeted_hours, reviewer, allocated_to, allocated_on, date_received_on, year_end, total_preparation_time, review_time, feedback_incorporation_time, total_time, engagement_model, expected_delivery_date, due_on, submission_deadline, customer_deadline_date, sla_deadline_date, internal_deadline_date, filing_Companies_required, filing_Companies_date, filing_hmrc_required, filing_hmrc_date, opening_balance_required, opening_balance_date, number_of_transaction, number_of_balance_items, turnover, number_of_employees, vat_reconciliation, bookkeeping, processing_type, invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark, status_type]);
+    const [result] = await pool.execute(query, [staffCreatedId, job_id, account_manager_id, customer_id, client_id, client_job_code, customer_contact_details_id, service_id, job_type_id, budgeted_hours, reviewer, allocated_to, allocated_on, date_received_on, year_end, total_preparation_time, review_time, feedback_incorporation_time, total_time, engagement_model, expected_delivery_date, due_on, submission_deadline, customer_deadline_date, sla_deadline_date, internal_deadline_date, filing_Companies_required, filing_Companies_date, filing_hmrc_required, filing_hmrc_date, opening_balance_required, opening_balance_date, number_of_transaction, number_of_balance_items, turnover, number_of_employees, vat_reconciliation, bookkeeping, processing_type, invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark, status_type, notes]);
 
 
     if (result.insertId > 0) {
@@ -1167,6 +1169,7 @@ const getJobById = async (job) => {
      jobs.invoice_hours AS invoice_hours,
      jobs.invoice_remark AS invoice_remark,
      jobs.status_type AS status_type,
+     jobs.notes AS notes,
      client_job_task.time AS task_budgeted_hour,
      task.id AS task_id,
      task.name AS task_name
@@ -1282,6 +1285,7 @@ const getJobById = async (job) => {
         invoice_hours: rows[0].invoice_hours,
         invoice_remark: rows[0].invoice_remark,
         status_type: rows[0].status_type,
+        notes: rows[0].notes,
         tasks: {
           checklist_id: rows[0].checklist_id,
           task: tasks
@@ -1351,6 +1355,7 @@ const jobUpdate = async (job) => {
   let invoice_date = job.invoice_date == "" ? null : job.invoice_date;
   let invoice_hours = job.invoice_hours == "" ? null : job.invoice_hours;
   let invoice_remark = job.invoice_remark == "" ? null : job.invoice_remark
+  let notes = job.notes == "" ? null : job.notes
 
 
 
@@ -1401,7 +1406,8 @@ const jobUpdate = async (job) => {
  invoice_value,
  DATE_FORMAT(invoice_date, '%Y-%m-%d') AS invoice_date,
  invoice_hours,
- invoice_remark
+ invoice_remark,
+ notes
  FROM jobs WHERE id = ?
  `
   try {
@@ -1447,7 +1453,7 @@ const jobUpdate = async (job) => {
              filing_Companies_required = ?, filing_Companies_date = ?, filing_hmrc_required = ?, filing_hmrc_date = ?, 
              opening_balance_required = ?, opening_balance_date = ?, number_of_transaction = ?, number_of_balance_items = ?, 
              turnover = ?, number_of_employees = ?, vat_reconciliation = ?, bookkeeping = ?, processing_type = ?, 
-             invoiced = ?, currency = ?, invoice_value = ?, invoice_date = ?, invoice_hours = ?, invoice_remark = ?,status_type = ?
+             invoiced = ?, currency = ?, invoice_value = ?, invoice_date = ?, invoice_hours = ?, invoice_remark = ?,status_type = ? , notes = ?
          WHERE id = ?
        `;
     const [result] = await pool.execute(query, [
@@ -1459,7 +1465,7 @@ const jobUpdate = async (job) => {
       filing_Companies_required, filing_Companies_date, filing_hmrc_required, filing_hmrc_date,
       opening_balance_required, opening_balance_date, number_of_transaction, number_of_balance_items,
       turnover, number_of_employees, vat_reconciliation, bookkeeping, processing_type,
-      invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark, status_type_update, job_id
+      invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark, status_type_update,notes, job_id
     ]);
 
     if (result.affectedRows > 0) {
