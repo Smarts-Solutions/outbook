@@ -122,7 +122,7 @@ const updateJobTimeTotalHours = async (timeSheet) => {
 const addMissingLog = async (missingLog) => {
 
 
-  const { job_id, missing_log, missing_log_sent_on, missing_log_reviewed_by, status } = missingLog.body;
+  const { job_id, missing_log, missing_log_sent_on, missing_log_reviewed_by, last_chaser ,status } = missingLog.body;
   let log_message = `sent the missing logs for job code:`
   let data = {
     table: 'missing_logs',
@@ -130,6 +130,7 @@ const addMissingLog = async (missingLog) => {
     filter_id: `job_id = ${job_id}`,
     prefix: 'M'
   }
+
   const UniqueNoTitle = await generateNextUniqueCodeJobLogTitle(data)
 
   let missing_log_prepared_date = missingLog.body.missing_log_prepared_date == 'null' ? null : missingLog.body.missing_log_prepared_date
@@ -142,9 +143,9 @@ const addMissingLog = async (missingLog) => {
     const query = `
      INSERT INTO 
      missing_logs
-      (job_id, missing_log, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,status)
+      (job_id, missing_log, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,last_chaser,status)
       VALUES
-      (?,?,?,?,?,?,?,?)
+      (?,?,?,?,?,?,?,?,?)
       `;
     const [rows] = await pool.execute(query, [
       job_id,
@@ -154,6 +155,7 @@ const addMissingLog = async (missingLog) => {
       UniqueNoTitle,
       missing_log_reviewed_by,
       missing_log_reviewed_date,
+      last_chaser,
       status
     ]);
 
@@ -212,7 +214,6 @@ const addMissingLog = async (missingLog) => {
 
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-
     return { status: false, message: 'Error addMissingLog .' };
   }
 }
@@ -232,6 +233,7 @@ const getMissingLog = async (missingLog) => {
     missing_logs.missing_log_reviewed_by AS missing_log_reviewed_by,
     DATE_FORMAT(missing_logs.missing_log_reviewed_date, '%Y-%m-%d') AS missing_log_reviewed_date,
     DATE_FORMAT(missing_logs.missing_paperwork_received_on, '%Y-%m-%d') AS missing_paperwork_received_on,
+    DATE_FORMAT(missing_logs.last_chaser, '%Y-%m-%d') AS last_chaser,
     missing_logs.status AS status,
     CONCAT(
       SUBSTRING(customers.trading_name, 1, 3), '_', 
@@ -277,7 +279,8 @@ const getMissingLog = async (missingLog) => {
 }
 
 const editMissingLog = async (missingLog) => {
-  const { id, missing_log, missing_log_sent_on, missing_log_reviewed_by, status } = missingLog.body;
+  const { id, missing_log, missing_log_sent_on, missing_log_reviewed_by,last_chaser,status } = missingLog.body;
+  
 
   let missing_log_prepared_date = missingLog.body.missing_log_prepared_date == 'null' ? null : missingLog.body.missing_log_prepared_date
 
@@ -286,7 +289,7 @@ const editMissingLog = async (missingLog) => {
   const missing_log_document = missingLog.files;
 
   const [[existMissingLog]] = await pool.execute(
-    "SELECT id ,job_id, missing_log, DATE_FORMAT(missing_log_sent_on, '%Y-%m-%d') AS missing_log_sent_on,DATE_FORMAT(missing_log_prepared_date, '%Y-%m-%d') AS missing_log_prepared_date ,missing_log_reviewed_by,DATE_FORMAT(missing_log_reviewed_date, '%Y-%m-%d') AS missing_log_reviewed_date,status FROM missing_logs WHERE id = ? "
+    "SELECT id ,job_id, missing_log, DATE_FORMAT(missing_log_sent_on, '%Y-%m-%d') AS missing_log_sent_on,DATE_FORMAT(missing_log_prepared_date, '%Y-%m-%d') AS missing_log_prepared_date ,missing_log_reviewed_by,DATE_FORMAT(missing_log_reviewed_date, '%Y-%m-%d') AS missing_log_reviewed_date,DATE_FORMAT(last_chaser, '%Y-%m-%d') AS last_chaser ,status FROM missing_logs WHERE id = ? "
     , [id]);
 
 
@@ -300,11 +303,12 @@ const editMissingLog = async (missingLog) => {
      missing_log_prepared_date = ?,
      missing_log_reviewed_by = ?,
      missing_log_reviewed_date = ?,
+     last_chaser = ?,
      status = ?
      WHERE 
      id = ?
      `;
-    const [rows] = await pool.execute(query, [missing_log, missing_log_sent_on, missing_log_prepared_date, missing_log_reviewed_by, missing_log_reviewed_date, status, id]);
+    const [rows] = await pool.execute(query, [missing_log, missing_log_sent_on, missing_log_prepared_date, missing_log_reviewed_by, missing_log_reviewed_date, last_chaser,status, id]);
 
     if (rows.changedRows > 0) {
 
@@ -312,7 +316,7 @@ const editMissingLog = async (missingLog) => {
       if (parseInt(status) == 1) {
         missing_log_msg.push('completed the missing logs')
 
-      } else if (existMissingLog.missing_log != missing_log || existMissingLog.missing_log_sent_on != missing_log_sent_on || existMissingLog.missing_log_prepared_date != missing_log_prepared_date || existMissingLog.missing_log_reviewed_by != missing_log_reviewed_by || existMissingLog.missing_log_reviewed_date != missing_log_reviewed_date) {
+      } else if (existMissingLog.missing_log != missing_log || existMissingLog.missing_log_sent_on != missing_log_sent_on || existMissingLog.missing_log_prepared_date != missing_log_prepared_date || existMissingLog.missing_log_reviewed_by != missing_log_reviewed_by || existMissingLog.missing_log_reviewed_date != missing_log_reviewed_date || existMissingLog.last_chaser != last_chaser) {
         missing_log_msg.push('edited the missing logs')
       }
 
@@ -413,6 +417,7 @@ const addQuerie = async (querie) => {
     filter_id: `job_id = ${job_id}`,
     prefix: 'Q'
   }
+
 
   const UniqueNoTitle = await generateNextUniqueCodeJobLogTitle(data)
 

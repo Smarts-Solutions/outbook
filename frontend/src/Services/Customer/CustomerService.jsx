@@ -295,6 +295,7 @@ export async function ADD_MISSION_LOG(data, token) {
     formData.append('missing_log_reviewed_by', staffDetails.id);  
     formData.append('missing_log_reviewed_date', data.missionDetails.missing_log_reviewed_date);
     // formData.append('missing_paperwork_received_on', data.missionDetails.missing_paperwork_received_on);
+    formData.append('last_chaser', data.missionDetails.last_chaser);
     formData.append('status', data.missionDetails.status);
     formData.append('StaffUserId', data.StaffUserId);
     formData.append('ip', data.ip);
@@ -337,6 +338,7 @@ export async function EDIT_MISSION_LOG(data, token) {
     formData.append('missing_log_reviewed_by', staffDetails.id);  
     // formData.append('missing_paperwork', data.missionDetails.missing_log_paperwork);
     formData.append('missing_log_reviewed_date', data.missionDetails.missing_log_reviewed_date);
+    formData.append('last_chaser', data.missionDetails.last_chaser);
     formData.append('status', data.missionDetails.status); 
     if (Array.isArray(data.missionDetails.missing_log_document)) {
       data.missionDetails.missing_log_document.forEach((file) => {

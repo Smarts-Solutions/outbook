@@ -3,6 +3,7 @@ const deleteUploadFile = require('../../app/middlewares/deleteUploadFile');
 const { SatffLogUpdateOperation, generateNextUniqueCode } = require('../../app/utils/helper');
 
 const createCustomer = async (customer) => {
+  
     // Customer Code(cust+CustName+UniqueNo)
     const { customer_id } = customer;
 
@@ -15,7 +16,9 @@ const createCustomer = async (customer) => {
         const customer_code = await generateNextUniqueCode(data);
 
         if (customer.CustomerType == "1") {
-            const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, First_Name, Last_Name, Phone, Email, Residential_Address } = customer;
+            const { CustomerType, staff_id, account_manager_id, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, First_Name, Last_Name, Phone, Email, Residential_Address ,notes } = customer;
+
+            const Trading_Name  = customer.Trading_Name;
 
             const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
 
@@ -26,12 +29,12 @@ const createCustomer = async (customer) => {
 
 
             const query = `
-    INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process,notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?)
     `;
 
             try {
-                const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, customer_code, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus]);
+                const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, customer_code, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus , notes]);
                 const customer_id = result.insertId;
                 const currentDate = new Date();
                 await SatffLogUpdateOperation(
@@ -60,10 +63,11 @@ const createCustomer = async (customer) => {
                 throw err;
             }
         }
-
         else if (customer.CustomerType == "2") {
 
-            const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, company_name, entity_type, company_status, company_number, Registered_Office_Addres, Incorporation_Date, Incorporation_in, contactDetails } = customer;
+            const { CustomerType, staff_id, account_manager_id, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, company_name, entity_type, company_status, company_number, Registered_Office_Addres, Incorporation_Date, Incorporation_in, contactDetails,notes} = customer;
+
+            const Trading_Name  = customer.Trading_Name+'_'+customer_code;
 
             const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
 
@@ -74,12 +78,12 @@ const createCustomer = async (customer) => {
 
 
             const query = `
-    INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process,notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
             try {
-                const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, customer_code, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus]);
+                const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, customer_code, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, notes]);
                 const customer_id = result.insertId;
                 const currentDate = new Date();
                 await SatffLogUpdateOperation(
@@ -125,13 +129,12 @@ const createCustomer = async (customer) => {
                 throw err;
             }
         }
-
         else if (customer.CustomerType == "3") {
 
 
-            const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, contactDetails } = customer;
-
-
+            const { CustomerType, staff_id, account_manager_id, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, contactDetails ,notes } = customer;
+            
+            const Trading_Name  = customer.Trading_Name;
 
             const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
 
@@ -143,12 +146,12 @@ const createCustomer = async (customer) => {
 
 
             const query = `
-    INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process,notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
             try {
-                const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, customer_code, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus]);
+                const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, customer_code, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, notes]);
                 const customer_id = result.insertId;
                 const currentDate = new Date();
                 await SatffLogUpdateOperation(
@@ -1703,6 +1706,7 @@ const getSingleCustomer = async (customer) => {
         customers.vat_number AS vat_number,
         customers.website AS website,
         customers.form_process AS form_process,
+        customers.notes AS notes,
         customers.status AS status,
         customer_contact_details.id AS contact_id,
         customer_contact_details.first_name AS first_name,
@@ -1745,6 +1749,7 @@ const getSingleCustomer = async (customer) => {
                     website: rows[0].website,
                     form_process: rows[0].form_process,
                     status: rows[0].status,
+                    notes: rows[0].notes
 
 
                 };
@@ -1792,6 +1797,7 @@ const getSingleCustomer = async (customer) => {
             customers.vat_number AS vat_number,
             customers.website AS website,
             customers.form_process AS form_process,
+            customers.notes AS notes,
             customers.status AS status, 
             customer_contact_details.id AS contact_id,
             customer_contact_details.first_name AS first_name,
@@ -1837,6 +1843,7 @@ const getSingleCustomer = async (customer) => {
                     vat_number: rows[0].vat_number,
                     website: rows[0].website,
                     form_process: rows[0].form_process,
+                    notes: rows[0].notes,
                     status: rows[0].status,
                 };
 
@@ -1894,6 +1901,7 @@ const getSingleCustomer = async (customer) => {
             customers.vat_number AS vat_number,
             customers.website AS website,
             customers.form_process AS form_process,
+            customers.notes AS notes,
             customers.status AS status,
             customer_contact_details.id AS contact_id,
             customer_contact_details.first_name AS first_name,
@@ -1931,6 +1939,7 @@ const getSingleCustomer = async (customer) => {
                     vat_number: rows[0].vat_number,
                     website: rows[0].website,
                     form_process: rows[0].form_process,
+                    notes: rows[0].notes,
                     status: rows[0].status,
                 };
 
@@ -2010,6 +2019,7 @@ const getSingleCustomer = async (customer) => {
             customers.vat_number AS vat_number,
             customers.website AS website,
             customers.form_process AS form_process,
+            customers.notes AS notes,
             customers.status AS status,
             customer_services.id as customer_service_id,
             customer_services.service_id,
@@ -2041,6 +2051,7 @@ const getSingleCustomer = async (customer) => {
                 vat_number: rows[0].vat_number,
                 website: rows[0].website,
                 form_process: rows[0].form_process,
+                notes: rows[0].notes,
                 status: rows[0].status,
             };
 
@@ -2059,8 +2070,6 @@ const getSingleCustomer = async (customer) => {
                 customer: customerData,
                 services: services
             };
-
-            console.log("result ", result)
 
             return result;
         } else {
@@ -2086,6 +2095,7 @@ const getSingleCustomer = async (customer) => {
             customers.vat_number AS vat_number,
             customers.website AS website,
             customers.form_process AS form_process,
+            customers.notes AS notes,
             customers.status AS status,
 
             DATE_FORMAT(customers.customerJoiningDate, '%Y-%m-%d') AS customerJoiningDate,
@@ -2133,6 +2143,7 @@ const getSingleCustomer = async (customer) => {
                 vat_number: rows[0].vat_number,
                 website: rows[0].website,
                 form_process: rows[0].form_process,
+                notes: rows[0].notes,
                 status: rows[0].status,
                 customerJoiningDate: rows[0].customerJoiningDate,
                 customerSource: rows[0].customerSource,
@@ -2235,6 +2246,7 @@ const getSingleCustomer = async (customer) => {
             customers.vat_number AS vat_number,
             customers.website AS website,
             customers.form_process AS form_process,
+            customers.notes AS notes,
             customers.status AS status,
             customer_paper_work.id AS customer_paper_work_id,
             customer_paper_work.file_name AS file_name,
@@ -2263,6 +2275,7 @@ const getSingleCustomer = async (customer) => {
                 vat_number: rows[0].vat_number,
                 website: rows[0].website,
                 form_process: rows[0].form_process,
+                notes: rows[0].notes,
                 status: rows[0].status,
             };
 
@@ -2301,8 +2314,7 @@ const customerUpdate = async (customer) => {
     // Page Status 1 
     if (pageStatus === "1") {
 
-
-        const { customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website, contactDetails } = customer;
+        const { customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website, contactDetails ,notes } = customer;
 
 
         const firstThreeLetters = trading_name.substring(0, 3);
@@ -2317,11 +2329,11 @@ const customerUpdate = async (customer) => {
 
         const query = `
         UPDATE customers
-        SET customer_type = ?, staff_id = ?, account_manager_id = ?, trading_name = ?, trading_address = ?, vat_registered = ?, vat_number = ?, website = ?
+        SET customer_type = ?, staff_id = ?, account_manager_id = ?, trading_name = ?, trading_address = ?, vat_registered = ?, vat_number = ?, website = ? ,notes = ? 
         WHERE id = ?
         `;
 
-        const [result] = await pool.execute(query, [customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website, customer_id]);
+        const [result] = await pool.execute(query, [customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website,notes, customer_id]);
 
         let cust_type = 'sole trader'
         if (customer_type === '2') {

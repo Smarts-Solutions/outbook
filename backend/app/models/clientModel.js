@@ -15,14 +15,19 @@ const createClient = async (client) => {
   const {
     client_type,
     customer_id,
-    trading_name,
     trading_address,
     vat_registered,
     vat_number,
     website,
     StaffUserId
   } = client;
+  
+  let trading_name = client.trading_name;
+  let notes = client.notes;
 
+  if(client_type == "2"){
+    trading_name = trading_name +'_'+ client_code;
+  }
 
   const checkQuery = `SELECT 1 FROM clients WHERE trading_name = ?`;
 
@@ -38,8 +43,8 @@ const createClient = async (client) => {
 
   if (client_type != "4") {
     const query = `
-INSERT INTO clients (client_type,customer_id,staff_created_id,client_industry_id,trading_name,client_code,trading_address,vat_registered,vat_number,website)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO clients (client_type,customer_id,staff_created_id,client_industry_id,trading_name,client_code,trading_address,vat_registered,vat_number,website,notes)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `;
 
     try {
@@ -54,6 +59,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         vat_registered,
         vat_number,
         website,
+        notes,
       ]);
       client_id = result.insertId;
       const currentDate = new Date();
@@ -75,8 +81,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     }
   } else {
     const query = `
-    INSERT INTO clients (client_type,customer_id,staff_created_id,client_industry_id,trading_name,client_code)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO clients (client_type,customer_id,staff_created_id,client_industry_id,trading_name,client_code,notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
     try {
@@ -87,6 +93,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         client_industry_id,
         trading_name,
         client_code,
+        notes,
       ]);
       client_id = result.insertId;
       const currentDate = new Date();
@@ -278,8 +285,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 
 const getClient = async (client) => {
   const { customer_id, StaffUserId } = client;
-
- console.log('client', client)
 
   try {
     const QueryRole = `
@@ -779,6 +784,7 @@ const getByidClient = async (client) => {
     clients.vat_registered AS vat_registered, 
     clients.vat_number AS vat_number, 
     clients.website AS website, 
+    clients.notes AS notes, 
     clients.status AS status, 
     client_contact_details.id AS contact_id,
     client_contact_details.first_name AS first_name,
@@ -820,6 +826,7 @@ WHERE
         vat_registered: rows[0].vat_registered,
         vat_number: rows[0].vat_number,
         website: rows[0].website,
+        notes: rows[0].notes,
         status: rows[0].status,
       };
 
@@ -858,7 +865,8 @@ WHERE
     clients.trading_address AS trading_address, 
     clients.vat_registered AS vat_registered, 
     clients.vat_number AS vat_number, 
-    clients.website AS website, 
+    clients.website AS website,
+    clients.notes AS notes,
     clients.status AS status, 
     client_contact_details.id AS contact_id,
     client_contact_details.first_name AS first_name,
@@ -903,6 +911,7 @@ WHERE
         vat_registered: rows[0].vat_registered,
         vat_number: rows[0].vat_number,
         website: rows[0].website,
+        notes: rows[0].notes,
         status: rows[0].status,
       };
 
@@ -951,7 +960,8 @@ WHERE
     clients.trading_address AS trading_address, 
     clients.vat_registered AS vat_registered, 
     clients.vat_number AS vat_number, 
-    clients.website AS website, 
+    clients.website AS website,
+    clients.notes AS notes,
     clients.status AS status, 
     client_contact_details.id AS contact_id,
     client_contact_details.first_name AS first_name,
@@ -996,6 +1006,7 @@ WHERE
         vat_registered: rows[0].vat_registered,
         vat_number: rows[0].vat_number,
         website: rows[0].website,
+        notes: rows[0].notes,
         status: rows[0].status,
       };
 
@@ -1033,7 +1044,8 @@ WHERE
     clients.client_type AS client_type, 
     clients.customer_id AS customer_id,  
     clients.trading_name AS trading_name,
-    clients.status AS status, 
+    clients.status AS status,
+    clients.notes AS notes,
     client_contact_details.id AS contact_id,
     client_contact_details.first_name AS first_name,
     client_contact_details.last_name AS last_name,
@@ -1070,6 +1082,7 @@ WHERE
 
         trading_name: rows[0].trading_name,
         client_code: rows[0].client_code,
+        notes: rows[0].notes,
 
         status: rows[0].status,
       };
@@ -1254,6 +1267,8 @@ const clientUpdate = async (client) => {
     website,
   } = client;
 
+  let notes = client.notes == undefined ? "" : client.notes;
+
 
   const checkQuery = `SELECT 1 FROM clients WHERE trading_name = ? AND id != ?`;
 
@@ -1285,7 +1300,8 @@ const clientUpdate = async (client) => {
              trading_address = ?,
              vat_registered = ?,
              vat_number = ?,
-             website = ?
+             website = ?,
+             notes = ?
          WHERE
              id = ?
       `;
@@ -1297,6 +1313,7 @@ const clientUpdate = async (client) => {
         vat_registered,
         vat_number,
         website,
+        notes,
         client_id,
       ]);
       if (result.changedRows > 0) {
@@ -1311,7 +1328,8 @@ const clientUpdate = async (client) => {
          UPDATE clients
          SET 
              client_type = ?,
-             trading_name = ?
+             trading_name = ?,
+             notes = ?
          
          WHERE
              id = ?
@@ -1319,6 +1337,7 @@ const clientUpdate = async (client) => {
       const [result] = await pool.execute(query, [
         client_type,
         trading_name,
+        notes,
         client_id
       ]);
       if (result.changedRows > 0) {
