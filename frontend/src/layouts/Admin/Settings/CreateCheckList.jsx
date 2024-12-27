@@ -31,7 +31,7 @@ const CreateCheckList = () => {
     job_type_id: "",
     client_type_id: "",
     check_list_name: "",
-    status: "",
+    status: "1",
   });
 
   const [formData1, setFormData1] = useState({
@@ -40,7 +40,7 @@ const CreateCheckList = () => {
     job_type_id: "",
     client_type_id: "",
     check_list_name: "",
-    status: "",
+    status: "1",
   });
 
   const options = [
@@ -88,7 +88,7 @@ const CreateCheckList = () => {
     service_id: "Please Select Service Type",
     job_type_id: "Please Select Job Type",
     check_list_name: "Please Enter Check List Name",
-    status: "Please Select Status",
+   // status: "Please Select Status",
   };
 
   const handleInputChange = (e) => {
@@ -242,6 +242,11 @@ const CreateCheckList = () => {
 
   const handleSubmit = async () => {
     let validationErrors = {};
+
+
+
+
+
     const formattedTasks = formatBudgetedHours();
 
     const isValid = validateAllFields();
@@ -452,10 +457,10 @@ const CreateCheckList = () => {
                   <select
                     className={errors.status ? "error-field form-select" : "form-select"}
                     name="status"
-                    defaultValue={formData.status}
+                    value={formData.status}
                     onChange={handleInputChange}
                   >
-                    <option value="">Please Select Status</option>
+                    {/* <option value="">Please Select Status</option> */}
                     <option value="1">Active</option>
                     <option value="0">Inactive</option>
                   </select>
