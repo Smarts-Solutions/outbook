@@ -1181,7 +1181,7 @@ const Timesheet = () => {
                                     changeWeek(-1);
                                   }}
                                 />
-                                <span className="pt-1 me-0">
+                                <span className=" me-0">
                                   {weekDays.monday
                                     ? dayMonthFormatDate(weekDays.monday)
                                     : ""}
