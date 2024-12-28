@@ -954,6 +954,10 @@ body.dark-sidenav .left-sidenav-menu li > a i {
   color: #00afef;
   
 } */
+
+ul.nav-second-level.in li {
+  padding-bottom: 5px !important;
+}
 body.dark-sidenav .left-sidenav-menu li ul li.active,body.dark-sidenav .left-sidenav-menu li ul li:hover {
  background-color: #dee0e0;;
 }
@@ -3703,7 +3707,7 @@ body .btn-info:hover {
   padding: 5px 14px !important;
   font-weight: 600;
   width: 100%;
-  display: block;
+
   word-wrap: break-word;
 
   white-space: break-spaces;
