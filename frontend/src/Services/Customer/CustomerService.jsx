@@ -395,7 +395,8 @@ export async function ADD_QUERY(data, token) {
     formData.append('response_received', data.data.ResponseReceived);
     // formData.append('response', data.data.Response);
     formData.append('status', data.data.status);
-    formData.append('final_query_response_received_date',data.data.FinalQueryResponseReceivedDate);  
+    formData.append('final_query_response_received_date',data.data.FinalQueryResponseReceivedDate);
+    formData.append('last_chaser', data.data.last_chaser);  
     if (Array.isArray(data.data.QueryDocument)) {
       data.data.QueryDocument.forEach((file) => {
         formData.append('files[]', file);
@@ -436,6 +437,7 @@ export async function EDIT_QUERY(data, token) {
     formData.append('reviewed_by', data.data.ReviewedBy); 
     formData.append('missing_queries_prepared_date', data.data.MissingQueriesPreparedDate);
     formData.append('query_sent_date', data.data.QuerySentDate);
+    formData.append('last_chaser', data.data.last_chaser);
     formData.append('response_received', data.data.ResponseReceived);
     // formData.append('response', data.data.Response);
     formData.append('status', data.data.status);

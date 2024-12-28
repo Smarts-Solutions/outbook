@@ -31,6 +31,7 @@ const Queries = ({getAccessDataJob , goto}) => {
     id: null,
     FinalQueryResponseReceivedDate: null,
     QueryDocument: null,
+    last_chaser: new Date().toISOString().substr(0, 10),
   });
 
   const resetForm = () => {
@@ -45,6 +46,7 @@ const Queries = ({getAccessDataJob , goto}) => {
       id: null,
       FinalQueryResponseReceivedDate: null,
       QueryDocument: null,
+      last_chaser: new Date().toISOString().substr(0, 10),
     });
   };
 
@@ -60,7 +62,8 @@ const Queries = ({getAccessDataJob , goto}) => {
         status: EditData.status,
         FinalQueryResponseReceivedDate: EditData.final_query_response_received_date,
         QueryDocument: EditData.query_document,
-        id: EditData.id
+        id: EditData.id,
+        last_chaser: EditData.last_chaser,
       });
     }
   }, [EditData, editViewquery]);
@@ -228,6 +231,7 @@ const Queries = ({getAccessDataJob , goto}) => {
     { name: 'Query Sent Date', selector: row => convertDate(row.query_sent_date),reorder: false, sortable: true },
     { name: 'Missing Queries Prepared Date', selector: row => convertDate(row.missing_queries_prepared_date),reorder: false, sortable: true },
     { name: 'Final Query Response Received Date', selector: row => convertDate(row.final_query_response_received_date), reorder: false,sortable: true },
+    { name: 'Last Chaser', selector: row => convertDate(row.last_chaser), reorder: false,sortable: true },
     { name: 'Status', selector: row => row.status == 1 ? "Complete" : "Incomplete",reorder: false, sortable: true },
     {
       name: "Actions",
@@ -430,6 +434,29 @@ const Queries = ({getAccessDataJob , goto}) => {
               {errors1["FinalQueryResponseReceivedDate"] && (
                 <div className="error-text">
                   {errors1["FinalQueryResponseReceivedDate"]}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+              Last Chaser 
+              </label>
+              <input
+                type="date"
+                className="form-control"
+                placeholder=""
+
+                id="last_chaser"
+                name="last_chaser"
+                onChange={(e) => handleChange(e)}
+                value={AllQueryInputdata.last_chaser}
+              />
+              {errors1["last_chaser"] && (
+                <div className="error-text">
+                  {errors1["last_chaser"]}
                 </div>
               )}
             </div>
@@ -654,6 +681,34 @@ const Queries = ({getAccessDataJob , goto}) => {
               )}
             </div>
           </div>
+
+
+
+          <div className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+              Last Chaser
+              </label>
+              <input
+                type="date"
+                className="form-control"
+                placeholder=""
+
+                id="last_chaser"
+                name="last_chaser"
+                onChange={(e) => handleChange(e)}
+                value={AllQueryInputdata.last_chaser}
+              />
+              {errors1["last_chaser"] && (
+                <div className="error-text">
+                  {errors1["last_chaser"]}
+                </div>
+              )}
+            </div>
+          </div>
+
+
+
 
           <div className="col-lg-6">
             <div className="mb-3">
