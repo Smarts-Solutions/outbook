@@ -181,7 +181,7 @@ const Dashboard = () => {
   const [data, setData] = useState(null);
 
   const accessToken =
-    "eyJ0eXAiOiJKV1QiLCJub25jZSI6IjVPX3ZKWG9tRTVPLUFlZV93TnFKczgyOTZOblltVnRlZWFxZnRGa0hjbTAiLCJhbGciOiJSUzI1NiIsIng1dCI6InoxcnNZSEhKOS04bWdndDRIc1p1OEJLa0JQdyIsImtpZCI6InoxcnNZSEhKOS04bWdndDRIc1p1OEJLa0JQdyJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8zMzJkY2Q4OS1jZDM3LTQwYTAtYmJhMi1hMmI5MWFiZDQzNGEvIiwiaWF0IjoxNzM1NjQyNzMzLCJuYmYiOjE3MzU2NDI3MzMsImV4cCI6MTczNTY0NzM1NiwiYWNjdCI6MCwiYWNyIjoiMSIsImFpbyI6IkFUUUF5LzhZQUFBQTg4TDRzc2c4OWJDZHk0MDBHWG91UTJQWWs3S3VTN29jQ3B4a3V3RWRuQ2NYT2FpV0dvU3NWVW9FVXFPcDRIVnMiLCJhbXIiOlsicHdkIl0sImFwcF9kaXNwbGF5bmFtZSI6Ik91dGJvb2tBcHAiLCJhcHBpZCI6IjkxODU4NTdmLTczNjUtNGQzNS1iMDBhLTVhMzFkY2RkNThkMiIsImFwcGlkYWNyIjoiMSIsImZhbWlseV9uYW1lIjoiQmhhZ2F0IiwiZ2l2ZW5fbmFtZSI6Ik5pa2l0YSIsImlkdHlwIjoidXNlciIsImlwYWRkciI6IjEwMy4xMDMuMjEzLjIxNyIsIm5hbWUiOiJOaWtpdGEgQmhhZ2F0Iiwib2lkIjoiNDI2MWM4MTMtMjViNC00ZjM1LWJmNmItNGE5NzVjZjBhMDU3IiwicGxhdGYiOiIzIiwicHVpZCI6IjEwMDMyMDA0MUFFRkI5QTQiLCJyaCI6IjEuQVhrQWljMHRNemZOb0VDN29xSzVHcjFEU2dNQUFBQUFBQUFBd0FBQUFBQUFBQUFNQVNSNUFBLiIsInNjcCI6Ik15RmlsZXMuUmVhZCBNeUZpbGVzLldyaXRlIFNpdGVzLlJlYWRXcml0ZS5BbGwgVXNlci5SZWFkIHByb2ZpbGUgb3BlbmlkIGVtYWlsIiwic2lnbmluX3N0YXRlIjpbImttc2kiXSwic3ViIjoiLUFhU09zbnd2T0hmZkhzZmJjbmgwenBKNUtZckhxQ0RiaFluN0hMZmctayIsInRlbmFudF9yZWdpb25fc2NvcGUiOiJFVSIsInRpZCI6IjMzMmRjZDg5LWNkMzctNDBhMC1iYmEyLWEyYjkxYWJkNDM0YSIsInVuaXF1ZV9uYW1lIjoiTmlraXRhLkJoYWdhdEBvdXRib29rcy5jb20iLCJ1cG4iOiJOaWtpdGEuQmhhZ2F0QG91dGJvb2tzLmNvbSIsInV0aSI6ImVFaGx6OE5DeWstRG1ZOWROR3YtQUEiLCJ2ZXIiOiIxLjAiLCJ3aWRzIjpbImNmMWMzOGU1LTM2MjEtNDAwNC1hN2NiLTg3OTYyNGRjZWQ3YyIsImI3OWZiZjRkLTNlZjktNDY4OS04MTQzLTc2YjE5NGU4NTUwOSJdLCJ4bXNfaWRyZWwiOiIxIDIyIiwieG1zX3N0Ijp7InN1YiI6IjRidjJCemlEWUxUNThPVzV6UF91N2Zqc3RkLWFxVEYzamFuZHdDbF9WdkUifSwieG1zX3RjZHQiOjE2MDM0NTY2MDJ9.E0mr6Po_ez3BAHR_64WAdYfqIy_8rrIGS7ZP3ktqC5VYR4tz247g9IWy9z6OyELPGFo20IT4danf2sadYp9d0votF_k2XypPuZBVzMPZqu3Uw9Pw8254NLXt7a6E7JXfGOeyOp4jkTEqDcrtRsJ9bkQZ-aHn1l4JZ4P9P0T90BJ30khLbh61eN1h6AC8nLWC09cdb8efYCvgJkE2CqUVJ6NODTs8sc2woaf4N2WefWGrY27T8wGGdPBezbUCM4OmNj_wRvZLwZsaVZSytia3q3SJsLBbq10YZOUt6qKaysa6O5Av2ly_ndQUGpTAKpM8P0tOn40ABFabU47hBnX5dA";
+    "eyJ0eXAiOiJKV1QiLCJub25jZSI6InZWTVd5aXc3N09MajI0bTVHcmI4OUZXa1Vva2R1ZG84Y29VNWNaNlhfMzAiLCJhbGciOiJSUzI1NiIsIng1dCI6InoxcnNZSEhKOS04bWdndDRIc1p1OEJLa0JQdyIsImtpZCI6InoxcnNZSEhKOS04bWdndDRIc1p1OEJLa0JQdyJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8zMzJkY2Q4OS1jZDM3LTQwYTAtYmJhMi1hMmI5MWFiZDQzNGEvIiwiaWF0IjoxNzM1NjQ3NTE2LCJuYmYiOjE3MzU2NDc1MTYsImV4cCI6MTczNTY1MTg2OSwiYWNjdCI6MCwiYWNyIjoiMSIsImFpbyI6IkFUUUF5LzhZQUFBQWRRekFncEhBTlBPNDhFZnJCOXRjV2VCanlKUWl4VE1jaVI3MGZyN2pwUGJGd0dJQmcyL2x1Nm51RWdSQVdJRG0iLCJhbXIiOlsicHdkIl0sImFwcF9kaXNwbGF5bmFtZSI6Ik91dGJvb2tBcHAiLCJhcHBpZCI6IjkxODU4NTdmLTczNjUtNGQzNS1iMDBhLTVhMzFkY2RkNThkMiIsImFwcGlkYWNyIjoiMSIsImZhbWlseV9uYW1lIjoiQmhhZ2F0IiwiZ2l2ZW5fbmFtZSI6Ik5pa2l0YSIsImlkdHlwIjoidXNlciIsImlwYWRkciI6IjEwMy4xMDMuMjEzLjIxNyIsIm5hbWUiOiJOaWtpdGEgQmhhZ2F0Iiwib2lkIjoiNDI2MWM4MTMtMjViNC00ZjM1LWJmNmItNGE5NzVjZjBhMDU3IiwicGxhdGYiOiIzIiwicHVpZCI6IjEwMDMyMDA0MUFFRkI5QTQiLCJyaCI6IjEuQVhrQWljMHRNemZOb0VDN29xSzVHcjFEU2dNQUFBQUFBQUFBd0FBQUFBQUFBQUFNQVNSNUFBLiIsInNjcCI6Ik15RmlsZXMuUmVhZCBNeUZpbGVzLldyaXRlIFNpdGVzLlJlYWRXcml0ZS5BbGwgVXNlci5SZWFkIHByb2ZpbGUgb3BlbmlkIGVtYWlsIiwic2lnbmluX3N0YXRlIjpbImttc2kiXSwic3ViIjoiLUFhU09zbnd2T0hmZkhzZmJjbmgwenBKNUtZckhxQ0RiaFluN0hMZmctayIsInRlbmFudF9yZWdpb25fc2NvcGUiOiJFVSIsInRpZCI6IjMzMmRjZDg5LWNkMzctNDBhMC1iYmEyLWEyYjkxYWJkNDM0YSIsInVuaXF1ZV9uYW1lIjoiTmlraXRhLkJoYWdhdEBvdXRib29rcy5jb20iLCJ1cG4iOiJOaWtpdGEuQmhhZ2F0QG91dGJvb2tzLmNvbSIsInV0aSI6Im5jejhYMng4QmtTREdVMndXdGNJQUEiLCJ2ZXIiOiIxLjAiLCJ3aWRzIjpbImNmMWMzOGU1LTM2MjEtNDAwNC1hN2NiLTg3OTYyNGRjZWQ3YyIsImI3OWZiZjRkLTNlZjktNDY4OS04MTQzLTc2YjE5NGU4NTUwOSJdLCJ4bXNfaWRyZWwiOiIxIDMwIiwieG1zX3N0Ijp7InN1YiI6IjRidjJCemlEWUxUNThPVzV6UF91N2Zqc3RkLWFxVEYzamFuZHdDbF9WdkUifSwieG1zX3RjZHQiOjE2MDM0NTY2MDJ9.gavEZGChC11bt6PUwlhkgy2e8zo7TMsABUtorahPaZa8gQKUkNOoXhDb5mHAw53PFIwBI0LbhEQxSjj_ZOyevGd9I3h6ymP-ejersmF8x352TN8rJoL_K_RGUMle3mgGxgb2Q_hNX05c-Sbrq73HduYNa2LC2E7kc_BnwekZRVxnhKJhTERP0-ZIvinYL8_0WuTfh8Oyla7_w-s-tg_2bpw_chsHiuwygxY2bEeEi6g9CWDchlgi33Zhq2ip9HhcT6TwuUtv6GPfKl5uFyrCdxACz_U0JsQsvLd6VYS81DVWpnwUwhfz__Bcl4MBl2k0FKbTaOQbeWrdb3vlgAdEJQ";
 
   const siteUrl =
     "https://graph.microsoft.com/v1.0/sites/outbooksglobal.sharepoint.com:/sites/SharePointOnlineforJobManagement";
@@ -236,9 +236,9 @@ const Dashboard = () => {
               folder_ID = jobManagementObject.id;
             }
 
-            console.log("site - ID ", site_ID);
-            console.log("drive_ID - ID ", drive_ID);
-            console.log("folder_ID", folder_ID);
+            // console.log("site - ID ", site_ID);
+            // console.log("drive_ID - ID ", drive_ID);
+            // console.log("folder_ID", folder_ID);
 
 
             return {site_ID: site_ID,drive_ID :drive_ID,folder_ID:folder_ID};
@@ -318,42 +318,38 @@ const handleFileChange = (event) => {
 
 
 
-
-
-
-
-
-
 const deleteImage = async () => {
-
-  let fileName = "SHK.png"; // Replace with your file name
-
-  const val = await fetchData(); // Fetch site_ID, drive_ID, folder_ID
-
-  const site_ID = val.site_ID;
-  const drive_ID = val.drive_ID;
-  const folder_ID = val.folder_ID;
+  const val = await fetchData();
+  let fileName = "001.png";
+  let site_ID = val.site_ID; 
+  let drive_ID = val.drive_ID; 
+  let folder_ID = val.folder_ID; 
 
   console.log("site_ID - ", site_ID);
   console.log("drive_ID - ", drive_ID);
   console.log("folder_ID - ", folder_ID);
-  console.log("folder_path - ", folder_path);
-  console.log("accessToken - ", accessToken);
+
+  
+  const filePath = `${folder_path}/${fileName}`; 
+
+  const deleteUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${filePath}`;
 
   try {
-    const deleteUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${folder_path}/${fileName}:/content`;
-
-    const response = await axios.delete(deleteUrl, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    console.log("Image deleted successfully:", response.status);
+      
+      const response = await axios.delete(deleteUrl, {
+          headers: {
+              Authorization: `Bearer ${accessToken}`,
+          },
+      });
+      
+      console.log("Image deleted successfully:", response.data);
   } catch (error) {
-    console.error("Error deleting image:", error.response ? error.response.data : error.message);
+      console.error("Error deleting image:", error);
   }
 };
+
+// Usage
+
 
 
 
@@ -421,8 +417,13 @@ const deleteImage = async () => {
 
                   </div>
 
+                  {/* <div>
+                  <input className="form-control" type="file" onChange={handleFileChange} />
+                  </div> */}
+
                   <div>
-                  <input type="file" onChange={handleFileChange} />
+                  <button className="form-control" onClick={deleteImage} > Delete Image</button>
+                 
                   </div>
                 </div>
 
