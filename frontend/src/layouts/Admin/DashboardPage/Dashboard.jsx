@@ -121,8 +121,6 @@ const Dashboard = () => {
       refresh_token: refreshToken,
     };
 
-    
-
     try {
       const response = await axios.post(url, new URLSearchParams(data));
       console.log("New Access Token: " + response);
