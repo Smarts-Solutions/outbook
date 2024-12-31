@@ -256,61 +256,12 @@ const Dashboard = () => {
                 },
               });
 
-            console.log("uploadResponse - ",uploadResponse);
-
-
-
-
-
-
-            // Upload an image
-            // const imagePath = "/Activity.PNG";
-            // const imageFile = await readFileAsBlob(imagePath); // Helper function to read file as Blob
-            // const imageUploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${folder_path}/SHK.png:/content`;
-
-            // const imageUpload =   await axios.put(imageUploadUrl, imageFile, {
-            //   headers: {
-            //     Authorization: `Bearer ${accessToken}`,
-            //     "Content-Type": "image/png",
-            //   },
-            // });
-
-            // console.log("Image uploaded successfully.",imageUpload);
-
-            // Upload a PDF
-          //   const pdfPath = "C:/Users/SHK/Desktop/SHK.pdf";
-          //   const pdfFile = await readFileAsBlob(pdfPath); // Helper function to read file as Blob
-          //   const pdfUploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${folder_path}/SHK.pdf:/content`;
-
-          //  const pdfUpload =  await axios.put(pdfUploadUrl, pdfFile, {
-          //     headers: {
-          //       Authorization: `Bearer ${accessToken}`,
-          //       "Content-Type": "application/pdf",
-          //     },
-          //   });
-
-          //   console.log("PDF uploaded successfully.",pdfUpload);
+             console.log("uploadResponse - ",uploadResponse);
 
 
           }
 
-
-
-
-
-
-
         } 
-
-
-
-
-
-
-
-
-
-
 
       }
 
@@ -320,16 +271,6 @@ const Dashboard = () => {
       setError(err.message);
     }
   };
-
-  const readFileAsBlob = async (filePath) => {
-    const response = await fetch(filePath);
-    return response.blob();
-  };
-
-
-
-
-
 
 
 
@@ -347,7 +288,7 @@ const Dashboard = () => {
     console.log("folder_ID - ",folder_ID);
     console.log("folder_path - ",folder_path);
     console.log("accessToken - ",accessToken);
-
+    return
     try {
       
       const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${folder_path}/${file.name}:/content`;
@@ -365,16 +306,6 @@ const Dashboard = () => {
     }
   };
 
-
-
-
-
-
-
-
-
-
-
   // File selection handler
 const handleFileChange = (event) => {
   const file = event.target.files[0];
@@ -384,6 +315,49 @@ const handleFileChange = (event) => {
     console.error("No file selected.");
   }
 };
+
+
+
+
+
+
+
+
+
+const deleteImage = async () => {
+
+  let fileName = "SHK.png"; // Replace with your file name
+
+  const val = await fetchData(); // Fetch site_ID, drive_ID, folder_ID
+
+  const site_ID = val.site_ID;
+  const drive_ID = val.drive_ID;
+  const folder_ID = val.folder_ID;
+
+  console.log("site_ID - ", site_ID);
+  console.log("drive_ID - ", drive_ID);
+  console.log("folder_ID - ", folder_ID);
+  console.log("folder_path - ", folder_path);
+  console.log("accessToken - ", accessToken);
+
+  try {
+    const deleteUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${folder_path}/${fileName}:/content`;
+
+    const response = await axios.delete(deleteUrl, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    console.log("Image deleted successfully:", response.status);
+  } catch (error) {
+    console.error("Error deleting image:", error.response ? error.response.data : error.message);
+  }
+};
+
+
+
+
 
 
 
