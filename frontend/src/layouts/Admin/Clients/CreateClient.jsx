@@ -445,7 +445,6 @@ const CreateClient = () => {
     }
 
     ScrollToViewFirstError(newErrors);
-
     if (Object.keys(newErrors).length !== 0) {
       setErrors2((prevErrors) => ({
         ...prevErrors,
