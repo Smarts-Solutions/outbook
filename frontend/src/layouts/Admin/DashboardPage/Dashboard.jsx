@@ -7,6 +7,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import qs from 'qs';
+import jwtDecode from "jwt-decode";
 
 const Dashboard = () => {
   const [visibleLogs, setVisibleLogs] = useState(4); // Initially show 5 logs
@@ -180,8 +181,8 @@ const Dashboard = () => {
   // get data
   const [data, setData] = useState(null);
 
-  const accessToken =
-    "eyJ0eXAiOiJKV1QiLCJub25jZSI6InZWTVd5aXc3N09MajI0bTVHcmI4OUZXa1Vva2R1ZG84Y29VNWNaNlhfMzAiLCJhbGciOiJSUzI1NiIsIng1dCI6InoxcnNZSEhKOS04bWdndDRIc1p1OEJLa0JQdyIsImtpZCI6InoxcnNZSEhKOS04bWdndDRIc1p1OEJLa0JQdyJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8zMzJkY2Q4OS1jZDM3LTQwYTAtYmJhMi1hMmI5MWFiZDQzNGEvIiwiaWF0IjoxNzM1NjQ3NTE2LCJuYmYiOjE3MzU2NDc1MTYsImV4cCI6MTczNTY1MTg2OSwiYWNjdCI6MCwiYWNyIjoiMSIsImFpbyI6IkFUUUF5LzhZQUFBQWRRekFncEhBTlBPNDhFZnJCOXRjV2VCanlKUWl4VE1jaVI3MGZyN2pwUGJGd0dJQmcyL2x1Nm51RWdSQVdJRG0iLCJhbXIiOlsicHdkIl0sImFwcF9kaXNwbGF5bmFtZSI6Ik91dGJvb2tBcHAiLCJhcHBpZCI6IjkxODU4NTdmLTczNjUtNGQzNS1iMDBhLTVhMzFkY2RkNThkMiIsImFwcGlkYWNyIjoiMSIsImZhbWlseV9uYW1lIjoiQmhhZ2F0IiwiZ2l2ZW5fbmFtZSI6Ik5pa2l0YSIsImlkdHlwIjoidXNlciIsImlwYWRkciI6IjEwMy4xMDMuMjEzLjIxNyIsIm5hbWUiOiJOaWtpdGEgQmhhZ2F0Iiwib2lkIjoiNDI2MWM4MTMtMjViNC00ZjM1LWJmNmItNGE5NzVjZjBhMDU3IiwicGxhdGYiOiIzIiwicHVpZCI6IjEwMDMyMDA0MUFFRkI5QTQiLCJyaCI6IjEuQVhrQWljMHRNemZOb0VDN29xSzVHcjFEU2dNQUFBQUFBQUFBd0FBQUFBQUFBQUFNQVNSNUFBLiIsInNjcCI6Ik15RmlsZXMuUmVhZCBNeUZpbGVzLldyaXRlIFNpdGVzLlJlYWRXcml0ZS5BbGwgVXNlci5SZWFkIHByb2ZpbGUgb3BlbmlkIGVtYWlsIiwic2lnbmluX3N0YXRlIjpbImttc2kiXSwic3ViIjoiLUFhU09zbnd2T0hmZkhzZmJjbmgwenBKNUtZckhxQ0RiaFluN0hMZmctayIsInRlbmFudF9yZWdpb25fc2NvcGUiOiJFVSIsInRpZCI6IjMzMmRjZDg5LWNkMzctNDBhMC1iYmEyLWEyYjkxYWJkNDM0YSIsInVuaXF1ZV9uYW1lIjoiTmlraXRhLkJoYWdhdEBvdXRib29rcy5jb20iLCJ1cG4iOiJOaWtpdGEuQmhhZ2F0QG91dGJvb2tzLmNvbSIsInV0aSI6Im5jejhYMng4QmtTREdVMndXdGNJQUEiLCJ2ZXIiOiIxLjAiLCJ3aWRzIjpbImNmMWMzOGU1LTM2MjEtNDAwNC1hN2NiLTg3OTYyNGRjZWQ3YyIsImI3OWZiZjRkLTNlZjktNDY4OS04MTQzLTc2YjE5NGU4NTUwOSJdLCJ4bXNfaWRyZWwiOiIxIDMwIiwieG1zX3N0Ijp7InN1YiI6IjRidjJCemlEWUxUNThPVzV6UF91N2Zqc3RkLWFxVEYzamFuZHdDbF9WdkUifSwieG1zX3RjZHQiOjE2MDM0NTY2MDJ9.gavEZGChC11bt6PUwlhkgy2e8zo7TMsABUtorahPaZa8gQKUkNOoXhDb5mHAw53PFIwBI0LbhEQxSjj_ZOyevGd9I3h6ymP-ejersmF8x352TN8rJoL_K_RGUMle3mgGxgb2Q_hNX05c-Sbrq73HduYNa2LC2E7kc_BnwekZRVxnhKJhTERP0-ZIvinYL8_0WuTfh8Oyla7_w-s-tg_2bpw_chsHiuwygxY2bEeEi6g9CWDchlgi33Zhq2ip9HhcT6TwuUtv6GPfKl5uFyrCdxACz_U0JsQsvLd6VYS81DVWpnwUwhfz__Bcl4MBl2k0FKbTaOQbeWrdb3vlgAdEJQ";
+
+  const accessToken = "eyJ0eXAiOiJKV1QiLCJub25jZSI6ImM3YmJUQVR3NmwzdlBHRVY4dE9FSmNUTWZCSWMzb2lWbFpHNktrN3BQQ2ciLCJhbGciOiJSUzI1NiIsIng1dCI6InoxcnNZSEhKOS04bWdndDRIc1p1OEJLa0JQdyIsImtpZCI6InoxcnNZSEhKOS04bWdndDRIc1p1OEJLa0JQdyJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8zMzJkY2Q4OS1jZDM3LTQwYTAtYmJhMi1hMmI5MWFiZDQzNGEvIiwiaWF0IjoxNzM1NzA5NDYwLCJuYmYiOjE3MzU3MDk0NjAsImV4cCI6MTczNTcxMzk4MCwiYWNjdCI6MCwiYWNyIjoiMSIsImFpbyI6IkFUUUF5LzhZQUFBQWxkbG9jd1NZeTVrVVhtZEpGM1ZxSEdlTW13M3prV2hkem5uSUFBZTlKRHR2RUM1QjE5TVI3VHJIL0dYTE80WVoiLCJhbXIiOlsicHdkIl0sImFwcF9kaXNwbGF5bmFtZSI6Ik91dGJvb2tBcHAiLCJhcHBpZCI6IjkxODU4NTdmLTczNjUtNGQzNS1iMDBhLTVhMzFkY2RkNThkMiIsImFwcGlkYWNyIjoiMSIsImZhbWlseV9uYW1lIjoiQmhhZ2F0IiwiZ2l2ZW5fbmFtZSI6Ik5pa2l0YSIsImlkdHlwIjoidXNlciIsImlwYWRkciI6IjEwMy4xMDMuMjEzLjIxNyIsIm5hbWUiOiJOaWtpdGEgQmhhZ2F0Iiwib2lkIjoiNDI2MWM4MTMtMjViNC00ZjM1LWJmNmItNGE5NzVjZjBhMDU3IiwicGxhdGYiOiIzIiwicHVpZCI6IjEwMDMyMDA0MUFFRkI5QTQiLCJyaCI6IjEuQVhrQWljMHRNemZOb0VDN29xSzVHcjFEU2dNQUFBQUFBQUFBd0FBQUFBQUFBQUFNQVNSNUFBLiIsInNjcCI6Ik15RmlsZXMuUmVhZCBNeUZpbGVzLldyaXRlIFNpdGVzLlJlYWRXcml0ZS5BbGwgVXNlci5SZWFkIHByb2ZpbGUgb3BlbmlkIGVtYWlsIiwic2lkIjoiZTg3M2Y2OWYtYTE5NS00N2EwLTljYWUtYjc3MDc1MDQ5NzlhIiwic2lnbmluX3N0YXRlIjpbImttc2kiXSwic3ViIjoiLUFhU09zbnd2T0hmZkhzZmJjbmgwenBKNUtZckhxQ0RiaFluN0hMZmctayIsInRlbmFudF9yZWdpb25fc2NvcGUiOiJFVSIsInRpZCI6IjMzMmRjZDg5LWNkMzctNDBhMC1iYmEyLWEyYjkxYWJkNDM0YSIsInVuaXF1ZV9uYW1lIjoiTmlraXRhLkJoYWdhdEBvdXRib29rcy5jb20iLCJ1cG4iOiJOaWtpdGEuQmhhZ2F0QG91dGJvb2tzLmNvbSIsInV0aSI6InByei1XeHZvWFVHSTQ3c0FjQU5CQVEiLCJ2ZXIiOiIxLjAiLCJ3aWRzIjpbImNmMWMzOGU1LTM2MjEtNDAwNC1hN2NiLTg3OTYyNGRjZWQ3YyIsImI3OWZiZjRkLTNlZjktNDY4OS04MTQzLTc2YjE5NGU4NTUwOSJdLCJ4bXNfaWRyZWwiOiIxIDI0IiwieG1zX3N0Ijp7InN1YiI6IjRidjJCemlEWUxUNThPVzV6UF91N2Zqc3RkLWFxVEYzamFuZHdDbF9WdkUifSwieG1zX3RjZHQiOjE2MDM0NTY2MDJ9.asj14SOJHlwK9pSb4fWTL6UuRzdK5H0IxmbErPtaO4VAWVcIRW1k9G8jpzEZq1qKLyI_HMSkxs-fUnQjbwnrrv5TuK_a0dybfT7sB0vi-IUQ5MxSf51CcCyBWF24lrCu35QXvvuET-U7-Wm_Di6iLbSJDzI971bgnqm0vvR9wWbtNA9FmcQE2Zb3i4ubD_PekyZMmFeKL8IwYkPcuJ04bBHIlondtdOvroqEUlnWBE71AkuLwscKk27kIpXui6jZCYcb4Urfddlov288rHKP8LVtMkbtRDDNYGX3Y1fRYhLjxU8jsMltU74NdN6iOt8uQae1gk_ruQru8X2J99wJpQ";
 
   const siteUrl =
     "https://graph.microsoft.com/v1.0/sites/outbooksglobal.sharepoint.com:/sites/SharePointOnlineforJobManagement";
@@ -334,6 +335,64 @@ const Dashboard = () => {
     }
 };
 
+const createFolderIfNotExists = async (folderName) => {
+  const val = await fetchData();
+  
+  let site_ID = val.site_ID;
+  let drive_ID = val.drive_ID;
+  let parentFolderId = val.folder_ID; // Assuming this is the ID of the parent folder
+
+  // Construct the URL to check for the folder
+  const folderUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${parentFolderId}/children`;
+
+  try {
+      // List the children of the parent folder
+      const response = await axios.get(folderUrl, {
+          headers: {
+              Authorization: `Bearer ${accessToken}`,
+          },
+      });
+
+      // Check if the folder already exists
+      const folderExists = response.data.value.some(item => item.name === folderName && item.folder);
+
+      if (!folderExists) {
+          // Create the folder if it doesn't exist
+          const createFolderUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${parentFolderId}/children`;
+          const folderData = {
+              name: folderName,
+              folder: {},
+              "@microsoft.graph.conflictBehavior": "rename" // Handle conflicts by renaming
+          };
+
+          await axios.post(createFolderUrl, folderData, {
+              headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                  "Content-Type": "application/json",
+              },
+          });
+
+          console.log(`Folder '${folderName}' created successfully.`);
+      } else {
+          console.log(`Folder '${folderName}' already exists.`);
+      }
+
+      // Return the folder ID for further use
+      const folderResponse = await axios.get(folderUrl, {
+          headers: {
+              Authorization: `Bearer ${accessToken}`,
+          },
+      });
+
+      const createdFolder = folderResponse.data.value.find(item => item.name === folderName);
+      return createdFolder.id; // Return the ID of the created or existing folder
+
+  } catch (error) {
+      console.error("Error checking or creating folder:", error);
+      throw error; // Rethrow the error for handling in the upload function
+  }
+};
+
   // File selection handler
 const handleFileChange = (event) => {
   const file = event.target.files[0];
@@ -376,7 +435,59 @@ const deleteImage = async () => {
   }
 };
 
-// Usage
+
+
+
+
+
+
+
+  // cheked AcessToken status 
+
+
+  // const checkTokenExpiration = (token) => {
+  //   try {
+  //     const decoded =  jwtDecode(token); // Decode the token
+  //     const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+  //     if (decoded.exp < currentTime) {
+  //       return { isExpired: true, remainingTime: 0 };
+  //     }
+  //     return {
+  //       isExpired: false,
+  //       remainingTime: decoded.exp - currentTime,
+  //     };
+  //   } catch (error) {
+  //     console.error("Invalid token", error);
+  //     return { isExpired: true, remainingTime: 0 };
+  //   }
+  // };
+  
+  
+  // const { isExpired, remainingTime } = checkTokenExpiration(accessToken);
+  
+  // console.log("Token Expired:", isExpired);
+  // console.log("Time Left (seconds):", remainingTime);
+
+
+  const clearSession = async (token) => {
+      if(token != null && token != undefined && token != ""){
+      const decodedToken = JSON.parse(atob(token.split(".")[1]));
+      const currentTime = Math.floor(Date.now() / 1000);
+
+      if (decodedToken.exp && decodedToken.exp < currentTime) {
+       console.log("Token Expired");
+      }else{
+       console.log("Token Not Expired");
+      }
+
+    }else{
+
+    }
+  
+  };
+
+  clearSession(accessToken);
+
 
 
 
@@ -389,64 +500,6 @@ const deleteImage = async () => {
   // End Process SharePoint Refresh Process End //
 
 
-
-  const createFolderIfNotExists = async (folderName) => {
-    const val = await fetchData();
-    
-    let site_ID = val.site_ID;
-    let drive_ID = val.drive_ID;
-    let parentFolderId = val.folder_ID; // Assuming this is the ID of the parent folder
-
-    // Construct the URL to check for the folder
-    const folderUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${parentFolderId}/children`;
-
-    try {
-        // List the children of the parent folder
-        const response = await axios.get(folderUrl, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-            },
-        });
-
-        // Check if the folder already exists
-        const folderExists = response.data.value.some(item => item.name === folderName && item.folder);
-
-        if (!folderExists) {
-            // Create the folder if it doesn't exist
-            const createFolderUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${parentFolderId}/children`;
-            const folderData = {
-                name: folderName,
-                folder: {},
-                "@microsoft.graph.conflictBehavior": "rename" // Handle conflicts by renaming
-            };
-
-            await axios.post(createFolderUrl, folderData, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    "Content-Type": "application/json",
-                },
-            });
-
-            console.log(`Folder '${folderName}' created successfully.`);
-        } else {
-            console.log(`Folder '${folderName}' already exists.`);
-        }
-
-        // Return the folder ID for further use
-        const folderResponse = await axios.get(folderUrl, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-            },
-        });
-
-        const createdFolder = folderResponse.data.value.find(item => item.name === folderName);
-        return createdFolder.id; // Return the ID of the created or existing folder
-
-    } catch (error) {
-        console.error("Error checking or creating folder:", error);
-        throw error; // Rethrow the error for handling in the upload function
-    }
-};
 
 
 
