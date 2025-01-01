@@ -7,14 +7,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import sweatalert from "sweetalert2";
 import {  ADD_PEPPER_WORKS,  GET_CUSTOMER_DATA,   DELETE_CUSTOMER_FILE} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
+import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder ,SiteUrlFolderPath  } from "../../../../Utils/graphAPI";
 
 const Paper = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
   const fileInputRef = useRef(null);
-
   const location = useLocation();
   const token = JSON.parse(localStorage.getItem("token"));
-  const sharepoint_token = JSON.parse(localStorage.getItem("sharepoint_token"));
+ // const sharepoint_token = JSON.parse(localStorage.getItem("sharepoint_token"));
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [customerDetails, setCustomerDetails] = useState({
@@ -24,15 +24,17 @@ const Paper = () => {
   const [fileState, setFileState] = useState([]);
   const [newFiles, setNewFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
-
-  console.log("newFiles", newFiles);
+  const [siteUrl, setSiteUrl] = useState("");
+  const [folderPath, setFolderPath] = useState("");
+  const [sharepoint_token, setSharepoint_token] = useState("");
+  
 
   //console.log("sharepoint_token", sharepoint_token);
 
-  const handleFileChange = (event) => {
+  const handleFileChange = async (event) => {
     const files = event.currentTarget.files;
     var fileArray;
-
+   
     if (files && typeof files[Symbol.iterator] === "function") {
       fileArray = Array.from(files);
     } else {
@@ -48,12 +50,13 @@ const Paper = () => {
       "image/jpeg",
     ];
 
+  
+
     const validFiles = fileArray.filter((file) =>
       allowedTypes.includes(file.type)
     );
 
     if (validFiles.length !== fileArray.length) {
-     
       Swal.fire({
         icon: "error",
         title: "Oops...",
@@ -63,11 +66,11 @@ const Paper = () => {
       fileInputRef.current.value = "";
       return;
     }
-
+ 
 
   const existingFileNames = new Set(newFiles.map(file => file.name));
   const uniqueValidFiles = validFiles.filter(file => !existingFileNames.has(file.name));
-  
+
     if (uniqueValidFiles.length === 0) {
       Swal.fire({
         icon: "error",
@@ -78,8 +81,9 @@ const Paper = () => {
     }
 
     // setNewFiles(validFiles);
-      const updatedNewFiles = [...newFiles, ...uniqueValidFiles];
-      setNewFiles(updatedNewFiles);
+
+    const updatedNewFiles = [...newFiles, ...uniqueValidFiles];
+    setNewFiles(updatedNewFiles);
 
     const previewArray = updatedNewFiles.map((file) => {
       const reader = new FileReader();
@@ -90,9 +94,22 @@ const Paper = () => {
     });
     
     Promise.all(previewArray).then((previewData) => {
-      //setPreviews(previewData);
-      setPreviews((prevPreviews) => [...prevPreviews, ...previewData]);
+     setPreviews(previewData);
+      //setPreviews((prevPreviews) => [...prevPreviews, ...previewData]);
     });
+
+    
+    const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+    const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, "JohnDoe", sharepoint_token);
+    console.log("folderId", folderId);
+
+    for (const file of uniqueValidFiles) {
+      const uplaodDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
+      console.log(`Uploaded file: ${file.name}`);
+      console.log(`uplaodDataUrl: ${uplaodDataUrl}`);
+    }
+
+      
 
   };
 
@@ -122,8 +139,18 @@ const Paper = () => {
       });
   };
 
+
+
+  const fetchSiteDetails = async () => {
+    const { siteUrl, folderPath ,sharepoint_token} = await SiteUrlFolderPath();
+    setSiteUrl(siteUrl);
+    setFolderPath(folderPath);
+    setSharepoint_token(sharepoint_token);
+  };
+
   useEffect(() => {
     GetCustomerData();
+    fetchSiteDetails();
   }, []);
 
   const handleSubmit = async (values) => {

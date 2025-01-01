@@ -81,6 +81,18 @@ export async function STATUS(data) {
     }
 }
 
+export async function GET_SHAREPOINT_TOKEN(data) {
+    try {
+        const res = await axios.post(`${Config.base_url}getSharePointToken`, data, {
+            data: {},
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
  
 
 
