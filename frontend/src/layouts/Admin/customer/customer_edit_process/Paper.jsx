@@ -11,8 +11,10 @@ import Swal from "sweetalert2";
 const Paper = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
   const fileInputRef = useRef(null);
+
   const location = useLocation();
   const token = JSON.parse(localStorage.getItem("token"));
+  const sharepoint_token = JSON.parse(localStorage.getItem("sharepoint_token"));
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [customerDetails, setCustomerDetails] = useState({
@@ -23,8 +25,14 @@ const Paper = () => {
   const [newFiles, setNewFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
 
+  console.log("newFiles", newFiles);
+
+  //console.log("sharepoint_token", sharepoint_token);
+
   const handleFileChange = (event) => {
     const files = event.currentTarget.files;
+
+    console.log("files", files);
     var fileArray;
 
     if (files && typeof files[Symbol.iterator] === "function") {
@@ -46,6 +54,9 @@ const Paper = () => {
       allowedTypes.includes(file.type)
     );
 
+    console.log("validFiles", validFiles.length);
+    console.log("fileArray.length", fileArray.length);
+
     if (validFiles.length !== fileArray.length) {
      
       Swal.fire({
@@ -58,9 +69,12 @@ const Paper = () => {
       return;
     }
 
-    setNewFiles(validFiles);
+    // setNewFiles(validFiles);
+    setNewFiles((prevState) => [...prevState, ...validFiles]);
 
-    const previewArray = validFiles.map((file) => {
+    
+
+    const previewArray = newFiles.map((file) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       return new Promise((resolve) => {
@@ -108,6 +122,7 @@ const Paper = () => {
     const data1 = {
       req: { fileData: newFiles, customer_id: address, authToken: token },
     };
+
     await dispatch(ADD_PEPPER_WORKS(data1))
       .unwrap()
       .then(async (response) => {
