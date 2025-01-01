@@ -67,7 +67,7 @@ const Paper = () => {
 
   const existingFileNames = new Set(newFiles.map(file => file.name));
   const uniqueValidFiles = validFiles.filter(file => !existingFileNames.has(file.name));
-
+  
     if (uniqueValidFiles.length === 0) {
       Swal.fire({
         icon: "error",
@@ -78,7 +78,7 @@ const Paper = () => {
     }
 
     // setNewFiles(validFiles);
-      const updatedNewFiles = [...newFiles, ...validFiles];
+      const updatedNewFiles = [...newFiles, ...uniqueValidFiles];
       setNewFiles(updatedNewFiles);
 
     const previewArray = updatedNewFiles.map((file) => {
@@ -90,7 +90,8 @@ const Paper = () => {
     });
     
     Promise.all(previewArray).then((previewData) => {
-      setPreviews(previewData);
+      //setPreviews(previewData);
+      setPreviews((prevPreviews) => [...prevPreviews, ...previewData]);
     });
 
   };
