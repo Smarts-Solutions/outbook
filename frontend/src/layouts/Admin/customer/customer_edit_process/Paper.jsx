@@ -69,22 +69,40 @@ const Paper = () => {
       return;
     }
 
+
+
+
+     // Create a Set of existing file names
+  const existingFileNames = new Set(newFiles.map(file => file.name));
+
+  // Filter out validFiles that have the same name as existing files
+  const uniqueValidFiles = validFiles.filter(file => !existingFileNames.has(file.name));
+
+  if (uniqueValidFiles.length === 0) {
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: "Files with the same name already exist.",
+    });
+    return;
+  }
+
     // setNewFiles(validFiles);
-    setNewFiles((prevState) => [...prevState, ...validFiles]);
+      const updatedNewFiles = [...newFiles, ...validFiles];
+      setNewFiles(updatedNewFiles);
 
-    
-
-    const previewArray = newFiles.map((file) => {
+    const previewArray = updatedNewFiles.map((file) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       return new Promise((resolve) => {
         reader.onload = () => resolve(reader.result);
       });
     });
-
+    
     Promise.all(previewArray).then((previewData) => {
       setPreviews(previewData);
     });
+
   };
 
   const GetCustomerData = async () => {
