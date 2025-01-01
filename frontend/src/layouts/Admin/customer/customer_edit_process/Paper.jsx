@@ -31,8 +31,6 @@ const Paper = () => {
 
   const handleFileChange = (event) => {
     const files = event.currentTarget.files;
-
-    console.log("files", files);
     var fileArray;
 
     if (files && typeof files[Symbol.iterator] === "function") {
@@ -54,9 +52,6 @@ const Paper = () => {
       allowedTypes.includes(file.type)
     );
 
-    console.log("validFiles", validFiles.length);
-    console.log("fileArray.length", fileArray.length);
-
     if (validFiles.length !== fileArray.length) {
      
       Swal.fire({
@@ -70,22 +65,17 @@ const Paper = () => {
     }
 
 
-
-
-     // Create a Set of existing file names
   const existingFileNames = new Set(newFiles.map(file => file.name));
-
-  // Filter out validFiles that have the same name as existing files
   const uniqueValidFiles = validFiles.filter(file => !existingFileNames.has(file.name));
 
-  if (uniqueValidFiles.length === 0) {
-    Swal.fire({
-      icon: "error",
-      title: "Oops...",
-      text: "Files with the same name already exist.",
-    });
-    return;
-  }
+    if (uniqueValidFiles.length === 0) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Files with the same name already exist.",
+      });
+      return;
+    }
 
     // setNewFiles(validFiles);
       const updatedNewFiles = [...newFiles, ...validFiles];
