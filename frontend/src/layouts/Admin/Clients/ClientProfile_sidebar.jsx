@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
-import { JobAction, Update_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { JobAction, Update_Status, getAllCustomerDropDown } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import sweatalert from "sweetalert2";
@@ -10,29 +10,93 @@ import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlic
 
 const ClientList = () => {
   const navigate = useNavigate();
+  const cust_id_sidebar = sessionStorage.getItem('cust_id_sidebar');
+  const cli_id_sidebar = sessionStorage.getItem('cli_id_sidebar');
+
+ 
+  useEffect(() => {
+    GetAllCustomer();
+    GetStatus();
+  }, []);
+
+  const [customerDataAll, setCustomerDataAll] = useState([]);
+  const [customerDetails, setCustomerDetails] = useState({ id: cust_id_sidebar || "", trading_name: "" });
+
+  const GetAllCustomer = async () => {
+    const req = { action: "get_dropdown" };
+    const data = { req: req, authToken: token };
+    await dispatch(getAllCustomerDropDown(data)).unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setCustomerDataAll(response.data);
+          if(response?.data[0]?.id != undefined && response?.data[0]?.id != "") {
+          setCustomerDetails({ id: cust_id_sidebar || response?.data[0]?.id, trading_name: response?.data[0]?.trading_name });
+          setHararchyData({ customer: { id: cust_id_sidebar || response?.data[0]?.id, trading_name: response?.data[0]?.trading_name }, client: { id: '', client_name: '' } });
+          GetAllClientData(cust_id_sidebar || response?.data[0]?.id , response?.data[0]?.trading_name);
+
+          }
+        } else {
+          setCustomerDataAll(response.data);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+  const [clientData, setClientData] = useState([]);
+  const [clientDetailSingle, setClientDetailSingle] = useState({ id: cli_id_sidebar || "", client_name: "" });
+  const GetAllClientData = async (id , name) => {
+    const req = { action: "get", customer_id: id };
+    const data = { req: req, authToken: token };
+    await dispatch(ClientAction(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setClientData(response.data);
+          if(response?.data[0]?.id != undefined && response?.data[0]?.id != "") {
+          setClientDetailSingle({ id: cli_id_sidebar || response?.data[0]?.id, client_name: response?.data[0]?.client_name });
+          setHararchyData({ customer: {id:id ,trading_name:name}, client: { id: cli_id_sidebar || response?.data[0]?.id, client_name: response?.data[0]?.client_name } });
+          GetAllJobList(cli_id_sidebar || response?.data[0]?.id);
+          GetClientDetails(cli_id_sidebar || response?.data[0]?.id);
+          setActiveTab("NoOfJobs");  
+          }
+        } else {
+          setClientData([]);
+          setClientDetailSingle({ id: '', client_name: '' });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+  
+
+
+
+
+
   const location = useLocation();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const [customerData, setCustomerData] = useState([]);
- 
-  console.log('customerData ',customerData)
-
   const [activeTab, setActiveTab] = useState("NoOfJobs");
   const [getClientDetails, setClientDetails] = useState({ loading: true, data: [], });
   const [informationData, informationSetData] = useState([]);
   const [clientInformationData, setClientInformationData] = useState([]);
   const [companyDetails, setCompanyDetails] = useState([]);
-  const [hararchyData, setHararchyData] = useState(location.state.data);
+  // const [hararchyData, setHararchyData] = useState(location.state.data);
+  const [hararchyData, setHararchyData] = useState({ customer: {}, client: {}, job: {} });
   const [statusDataAll, setStatusDataAll] = useState([])
   const [selectStatusIs, setStatusId] = useState('')
   const [getAccessDataJob, setAccessDataJob] = useState({ insert: 0, update: 0, delete: 0, view: 0, });
 
-  useEffect(() => {
-    GetAllJobList();
-    GetClientDetails();
-    GetStatus();
-  }, []);
+
+
+
+
 
   const accessDataJob =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
@@ -52,8 +116,8 @@ const ClientList = () => {
     setAccessDataJob(updatedAccess);
   }, []);
 
-  const GetClientDetails = async () => {
-    const req = { action: "getByid", client_id: location.state.Client_id };
+  const GetClientDetails = async (client_id) => {
+    const req = { action: "getByid", client_id: client_id };
     const data = { req: req, authToken: token };
     await dispatch(ClientAction(data))
       .unwrap()
@@ -76,12 +140,21 @@ const ClientList = () => {
       .catch((error) => {
         return;
       });
+    
   };
+
+  // const tabs = [
+  //   { id: "NoOfJobs", label: "No. Of Jobs", icon: "fa-solid fa-briefcase" },
+  //   { id: "view client",label: "View Client", icon: "fa-solid fa-user" },
+  //   //{ id: "documents", label: "Documents", icon: "fa-solid fa-file" },
+  // ];
 
   const tabs = [
     { id: "NoOfJobs", label: "No. Of Jobs", icon: "fa-solid fa-briefcase" },
-    { id: "view client", label: "View Client", icon: "fa-solid fa-user" },
-    { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
+    ...(clientDetailSingle.id !== ""
+      ? [{ id: "view client", label: "View Client", icon: "fa-solid fa-user" }]
+      : []),
+    // { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
   ];
 
   const GetStatus = async () => {
@@ -125,7 +198,7 @@ const ClientList = () => {
             });
 
             setStatusId(Id);
-            GetAllJobList();
+            GetAllJobList(clientDetailSingle.id);
           } else if (res.data === "W") {
             sweatalert.fire({
               title: "Warning",
@@ -216,7 +289,7 @@ const ClientList = () => {
               className="form-select form-control"
               value={row.status_type}
               onChange={(e) => handleStatusChange(e, row)}
-              disabled={ getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? false : true}
+              disabled={getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? false : true}
             >
               {statusDataAll.map((status) => (
                 <option key={status.id} value={status.id}>
@@ -234,12 +307,12 @@ const ClientList = () => {
     {
       name: "Client Contact Person",
       cell: (row) => (
-        <div title={ row.account_manager_officer_first_name +
+        <div title={row.account_manager_officer_first_name +
           " " +
           row.account_manager_officer_last_name}>
-          { row.account_manager_officer_first_name +
-        " " +
-        row.account_manager_officer_last_name}
+          {row.account_manager_officer_first_name +
+            " " +
+            row.account_manager_officer_last_name}
         </div>
       ),
       selector: (row) =>
@@ -264,7 +337,7 @@ const ClientList = () => {
         <div title={row.outbooks_acount_manager_first_name +
           " " + row.outbooks_acount_manager_last_name}>
           {row.outbooks_acount_manager_first_name +
-        " " + row.outbooks_acount_manager_last_name}
+            " " + row.outbooks_acount_manager_last_name}
         </div>
       ),
       selector: (row) =>
@@ -298,13 +371,13 @@ const ClientList = () => {
             </button>
           )}
           {
-             row.timesheet_job_id ==null ?
-            (getAccessDataJob.delete == 1 || role === "ADMIN" || role === "SUPERADMIN") && (
-              <button className="delete-icon" onClick={() => handleDelete(row, 'job')}>
-                <i className="ti-trash text-danger" />
-              </button>
-            )
-          :""}
+            row.timesheet_job_id == null ?
+              (getAccessDataJob.delete == 1 || role === "ADMIN" || role === "SUPERADMIN") && (
+                <button className="delete-icon" onClick={() => handleDelete(row, 'job')}>
+                  <i className="ti-trash text-danger" />
+                </button>
+              )
+              : ""}
         </div>
       ),
       ignoreRowClick: true,
@@ -320,13 +393,13 @@ const ClientList = () => {
         ...prevState,
         job: row
       };
-      navigate("/admin/job/logs", { state: { job_id: row?.job_id, timesheet_job_id:row?.timesheet_job_id,data: updatedData, goto: "client" , activeTab : location?.state?.activeTab  } });
+      navigate("/admin/job/logs", { state: { job_id: row?.job_id, timesheet_job_id: row?.timesheet_job_id, data: updatedData, goto: "client", activeTab: location?.state?.activeTab } });
       return updatedData;
     });
   };
 
   function handleEdit(row) {
-    navigate("/admin/job/edit", { state: { job_id: row.job_id, goto: "client" , activeTab : location?.state?.activeTab  } });
+    navigate("/admin/job/edit", { state: { job_id: row.job_id, goto: "client", activeTab: location?.state?.activeTab } });
   }
 
   const handleDelete = async (row, type) => {
@@ -344,7 +417,7 @@ const ClientList = () => {
             timer: 1500,
           });
 
-          type === "job" ? GetAllJobList() : GetClientDetails();
+          type === "job" ? GetAllJobList(clientDetailSingle.id) : GetClientDetails(clientDetailSingle.id);
 
         } else {
           sweatalert.fire({
@@ -361,8 +434,8 @@ const ClientList = () => {
       });
   };
 
-  const GetAllJobList = async () => {
-    const req = { action: "getByClient", client_id: location.state.Client_id };
+  const GetAllJobList = async (client_id) => {
+    const req = { action: "getByClient", client_id: client_id };
     const data = { req: req, authToken: token };
     await dispatch(JobAction(data))
       .unwrap()
@@ -381,15 +454,122 @@ const ClientList = () => {
   const handleCreateJob = (row) => {
     if (getClientDetails?.data?.client?.customer_id) {
       navigate("/admin/createjob", {
-        state: { customer_id: getClientDetails?.data?.client?.customer_id, clientName: location?.state?.data?.client, goto: "client" , activeTab : location?.state?.activeTab },
+        state: { customer_id: getClientDetails?.data?.client?.customer_id, clientName: clientDetailSingle , goto: "client", activeTab: "client" },
       });
     }
   };
 
+
+  const selectCustomerId = (id, name) => {
+    if (id != "") {
+      sessionStorage.setItem('cust_id_sidebar', id);
+      setCustomerData([]);
+      setCustomerDetails({ id: id, trading_name: name });
+      setHararchyData({ customer: { id: id, trading_name: name }, client: { id: '', client_name: '' } });
+      setClientDetailSingle({ id: '', client_name: '' });
+      setActiveTab("NoOfJobs");
+      GetAllClientData(id,name);
+    } else {
+      setCustomerData([]);
+      setClientData([]);
+      setCustomerDetails({ id: '', trading_name: '' });
+      setHararchyData({ customer: { id: '', trading_name: '' }, client: { id: '', client_name: '' } });
+      setClientDetails({ loading: false, data: [], });
+      informationSetData([]);
+      setClientInformationData([]);
+      setCompanyDetails([]);
+    }
+  }
+
+  const selectClientId = (id, name) => {
+    if (id != "") {
+      sessionStorage.setItem('cli_id_sidebar', id);
+      GetAllJobList(id);
+      GetClientDetails(id);
+      setClientDetailSingle({ id: id, client_name: name });
+      setHararchyData({ customer: customerDetails, client: { id: id, client_name: name } });
+      setActiveTab("NoOfJobs");
+    } else {
+      setClientDetailSingle({ id: '', client_name: '' });
+      setHararchyData({ customer: customerDetails, client: { id: '', client_name: '' } });
+      setClientDetails({ loading: false, data: [], });
+      informationSetData([]);
+      setClientInformationData([]);
+      setCompanyDetails([]);
+    }
+  }
+  
+  console.log("hararchyData", hararchyData);
   return (
     <div className="container-fluid">
-      <div className="col-sm-12">
-        <div className="page-title-box">
+      <div className="content-title">
+      <div className="row">
+
+        <div className="form-group col-md-4 mb-0">
+          <label className="form-label mb-2">Select Customer</label>
+          <select
+            name="staff_id"
+            className="form-select"
+            id="tabSelect"
+            defaultValue={customerDetails.id}
+            // onChange={(e) => selectCustomerId(e)}
+            onChange={(e) => {
+              const selectedId = e.target.value;
+              const selectedCustomer = customerDataAll.find(customer => customer.id == selectedId);
+              selectCustomerId(selectedId, selectedCustomer?.trading_name);
+            }}
+          >
+            {customerDataAll &&
+              customerDataAll.map((val, index) => (
+                <option
+                  key={index}
+                  value={val.id}
+                  selected={customerDetails.id == val.id}
+                >
+                  {val.trading_name}
+                </option>
+              ))}
+          </select>
+        </div>
+
+
+        <div className="form-group col-md-4 mb-0">
+          <label className="form-label mb-2">Select Client</label>
+         {
+          clientData.length == 0 ?
+           <input type="text" className="form-select"  disabled  value={"The customer's client is not available."} />
+          :
+          <select
+          name="staff_id"
+          className="form-select"
+          id="tabSelect"
+          defaultValue={clientDetailSingle.id}
+          // onChange={(e) => selectCustomerId(e)}
+          onChange={(e) => {
+            const selectedId = e.target.value;
+            const selectedClient = clientData.find(client => client.id == selectedId);
+            selectClientId(selectedId, selectedClient?.client_name);
+          }}
+        > 
+          {clientData &&
+            clientData.map((val, index) => (
+              <option
+                key={index}
+                value={val.id}
+                selected={clientDetailSingle.id == val.id}
+              >
+                {val.client_name}
+              </option>
+            ))}
+        </select>
+         }
+    
+          
+        </div>
+
+
+
+        <div className="page-title-box pt-2">
           <div className="row align-items-start flex-md-row flex-column-reverse justify-content-between">
             <div className=" col-md-6 col-lg-8">
               <ul
@@ -421,43 +601,20 @@ const ClientList = () => {
             {activeTab == "NoOfJobs" && (
               <>
                 <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
-                <button
-                    type="button"
-                    className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
-
-                    onClick={() => {
-                      sessionStorage.setItem('activeTab', location.state.activeTab);
-                      window.history.back()
-                    }
-                    }
-                  >
-                    <i className="fa fa-arrow-left pe-1" /> Back
-                  </button>
                   {
-                    (getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN") && (
+                    ((getAccessDataJob.insert == 1 || role === "ADMIN" || role === "SUPERADMIN") && clientData.length > 0 ) && (
                       <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={handleCreateJob}   >
                         <i className="fa fa-plus pe-1" /> Create Job
                       </div>
                     )
                   }
-                  
+
                 </div>
               </>
             )}
 
             {activeTab === "view client" && (
               <div className="col-md-4 col-auto">
-                <button
-                  type="button"
-                  className="btn btn-info text-white float-end blue-btn me-2"
-                  onClick={() => {
-                    sessionStorage.setItem('activeTab', location.state.activeTab);
-                    window.history.back()
-                  }
-                  }
-                >
-                  <i className="fa fa-arrow-left pe-1" /> Back
-                </button>
               </div>
             )}
           </div>
@@ -467,7 +624,7 @@ const ClientList = () => {
 
       </div>
 
-      <div className="mt-4">
+      <div className="mt-2">
         {activeTab == "NoOfJobs" && (
           <div
             className={`tab-pane fade ${activeTab == "NoOfJobs" ? "show active" : ""
@@ -495,10 +652,10 @@ const ClientList = () => {
                         Assigned Jobs
                       </button>
                     </li>
-                    
+
                   </ul>
 
-                  
+
                 </div>
                 <div className="tab-content" id="pills-tabContent">
                   <div
@@ -594,21 +751,21 @@ const ClientList = () => {
                 </div>
               </div>
             </div>
-           {
-            informationData.client_type == 4?"":
-            <div className=" report-data mt-4">
-              <div className="card-header border-bottom pb-3 row">
-                <div className="col-8">
-                  <h4 className="card-title">
-                    {informationData && informationData.client_type == 1
-                      ? "Sole Trader"
-                      : informationData.client_type == 2
-                        ? "Company" : informationData.client_type == 3 ? "Partnership" :""
-                  
-                    }
-                  </h4>
-                </div>
-                {/* <div className="col-4">
+            {
+              informationData.client_type == 4 ? "" :
+                <div className=" report-data mt-4">
+                  <div className="card-header border-bottom pb-3 row">
+                    <div className="col-8">
+                      <h4 className="card-title">
+                        {informationData && informationData.client_type == 1
+                          ? "Sole Trader"
+                          : informationData.client_type == 2
+                            ? "Company" : informationData.client_type == 3 ? "Partnership" : ""
+
+                        }
+                      </h4>
+                    </div>
+              {/* <div className="col-4">
                 <div className="float-end">
                   <button type="button" className="btn btn-info text-white " onClick={(e) => ClientEdit(informationData.id)}>
                     <i className="fa-regular fa-pencil me-2" />
@@ -623,132 +780,133 @@ const ClientList = () => {
                   </button>
                 </div>
               </div> */}
-              </div>
+                  </div>
 
-              {informationData.client_type == 1 ? (
-                <div className="card-body pt-3">
-                  <div className="row">
-                    <div className="col-lg-6">
-                      <ul className="list-unstyled faq-qa">
-                        <li className="mb-4">
-                        <b>Trading Name :</b> {informationData.trading_name || 'NA'}
-                       
-                          {/* <p className="font-14  ml-3">
+                  {informationData.client_type == 1 ? (
+                    <div className="card-body pt-3">
+                      <div className="row">
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b>Trading Name :</b> {informationData.trading_name || 'NA'}
+
+                              {/* <p className="font-14  ml-3">
                             {informationData.trading_name}
                           </p> */}
-                        </li>
-                        <li className="mb-4">
-                          <b className="">VAT Registered : </b>{informationData.vat_registered == 0 ?  "No" : "Yes"}
-                          {/* <p className="font-14  ml-3">
+                            </li>
+                            <li className="mb-4">
+                              <b className="">VAT Registered : </b>{informationData.vat_registered == 0 ? "No" : "Yes"}
+                              {/* <p className="font-14  ml-3">
                             {" "}
                             
                           </p> */}
-                        </li>
-                        <li className="mb-4">
-                          <b className="">Website : </b>{informationData.website || 'NA'}
-                          {/* <p className="font-14  ml-3">
+                            </li>
+                            <li className="mb-4">
+                              <b className="">Website : </b>{informationData.website || 'NA'}
+                              {/* <p className="font-14  ml-3">
                             
                           </p> */}
-                        </li>
-                      </ul>
-                    </div>
-                    <div className="col-lg-6">
-                      <ul className="list-unstyled faq-qa">
-                        <li className="mb-4">
-                          <b className="">Trading Address :</b> {informationData.trading_address || 'NA'}
-                          {/* <p className="font-14  ml-3">
+                            </li>
+                          </ul>
+                        </div>
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b className="">Trading Address :</b> {informationData.trading_address || 'NA'}
+                              {/* <p className="font-14  ml-3">
                             {" "}
                             {informationData.trading_address}
                           </p> */}
-                        </li>
-                        <li className="mb-4">
-                          <b className="">VAT Number :</b>  {informationData.vat_number || 'NA'}
-                          {/* <p className="font-14  ml-3">
+                            </li>
+                            <li className="mb-4">
+                              <b className="">VAT Number :</b>  {informationData.vat_number || 'NA'}
+                              {/* <p className="font-14  ml-3">
                             {" "}
                             {informationData.vat_number}
                           </p> */}
-                        </li>
-                      </ul>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ) : informationData.client_type == 2 ? (
+                    <div className="card-body pt-3">
+                      <div className="row">
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b className="">Company Name : </b> {companyDetails.company_name || "NA"}
+
+                            </li>
+                            <li className="mb-4">
+                              <b className="">Company Status :</b>  {companyDetails.company_status || "NA"}
+
+                            </li>
+                            <li className="mb-4">
+                              <b className="">Registered Office Address :</b>  {companyDetails.registered_office_address || "NA"}
+
+                            </li>
+                          </ul>
+                        </div>
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b className="">Entity Type :</b> {companyDetails.entity_type || "NA"}
+
+                            </li>
+                            <li className="mb-4">
+                              <b className="">Company Number :</b> {companyDetails.company_number || "NA"}
+
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  ) : informationData.client_type == 3 ? (
+                    <div className="card-body pt-3">
+                      <div className="row">
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b className="">Trading Name :</b> {informationData && informationData.trading_name || "NA"}
+                              <p className="font-14  ml-3">
+
+                              </p>
+                            </li>
+                            <li className="mb-4">
+                              <b className="">VAT Registered :</b> {informationData &&
+                                informationData.vat_registered == "0"
+                                ? "No"
+                                : "Yes"}
+
+                            </li>
+                            <li className="mb-4">
+                              <b className="">Website :</b> {informationData && informationData.website || "NA"}
+
+                            </li>
+                          </ul>
+                        </div>
+                        <div className="col-lg-6">
+                          <ul className="list-unstyled faq-qa">
+                            <li className="mb-4">
+                              <b className="">Trading Address :</b> {informationData && informationData.trading_address || "NA"}
+                            </li>
+                            <li className="mb-4">
+                              <b className="">VAT Number :</b> {informationData && informationData.vat_number || "NA"}
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    ""
+                  )}
                 </div>
-              ) : informationData.client_type == 2 ? (
-                <div className="card-body pt-3">
-                  <div className="row">
-                    <div className="col-lg-6">
-                      <ul className="list-unstyled faq-qa">
-                        <li className="mb-4">
-                          <b className="">Company Name : </b> {companyDetails.company_name || "NA"}
+            }
 
-                        </li>
-                        <li className="mb-4">
-                          <b className="">Company Status :</b>  {companyDetails.company_status || "NA"}
-
-                        </li>
-                        <li className="mb-4">
-                          <b className="">Registered Office Address :</b>  {companyDetails.registered_office_address || "NA"}
-
-                        </li>
-                      </ul>
-                    </div>
-                    <div className="col-lg-6">
-                      <ul className="list-unstyled faq-qa">
-                        <li className="mb-4">
-                          <b className="">Entity Type :</b> {companyDetails.entity_type || "NA"}
-
-                        </li>
-                        <li className="mb-4">
-                          <b className="">Company Number :</b> {companyDetails.company_number || "NA"}
-
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              ) : informationData.client_type == 3 ? (
-                <div className="card-body pt-3">
-                  <div className="row">
-                    <div className="col-lg-6">
-                      <ul className="list-unstyled faq-qa">
-                        <li className="mb-4">
-                          <b className="">Trading Name :</b> {informationData && informationData.trading_name || "NA"}
-                          <p className="font-14  ml-3">
-
-                          </p>
-                        </li>
-                        <li className="mb-4">
-                          <b className="">VAT Registered :</b> {informationData &&
-                            informationData.vat_registered == "0"
-                            ? "No"
-                            : "Yes"}
-
-                        </li>
-                        <li className="mb-4">
-                          <b className="">Website :</b> {informationData && informationData.website || "NA"}
-
-                        </li>
-                      </ul>
-                    </div>
-                    <div className="col-lg-6">
-                      <ul className="list-unstyled faq-qa">
-                        <li className="mb-4">
-                          <b className="">Trading Address :</b> {informationData && informationData.trading_address || "NA"}
-                        </li>
-                        <li className="mb-4">
-                          <b className="">VAT Number :</b> {informationData && informationData.vat_number || "NA"}
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                ""
-              )}
-            </div>
-           }
-            
           </div>
         )}
+      </div>
       </div>
     </div>
   );

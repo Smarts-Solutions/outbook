@@ -28,9 +28,11 @@ import { RoleAccess } from "../ReduxStore/Slice/Access/AccessSlice";
 
 import AddNewClient from "../layouts/Admin/Clients/CreateClient";
 import ClientList from "../layouts/Admin/Clients/Client_list";
+import ClientListSidebar from "../layouts/Admin/Clients/Client_list_sidebar";
 import ClientEdit from "../layouts/Admin/Clients/Client_Edit";
 
 import ClientProfile from "../layouts/Admin/Clients/ClientProfile";
+import ClientProfiles from "../layouts/Admin/Clients/ClientProfile_sidebar";
 
 import CreateCheckList from "../layouts/Admin/Clients/CreateCheckList";
 import EditCheckList from "../layouts/Admin/Clients/Editchecklist";
@@ -217,9 +219,11 @@ const Admin_Route = () => {
               <Route path="/service" element={<Service />} />
               <Route path="/addclient" element={<AddNewClient />} />
               <Route path="/Clientlist" element={<ClientList />} />
+              <Route path="/ClientLists" element={<ClientListSidebar />} />
               <Route path="/client/edit" element={<ClientEdit />} />
               <Route path="/editcustomer" element={<Editcustomer />} />
               <Route path="/client/profile" element={<ClientProfile />} />
+              <Route path="/client/profiles" element={<ClientProfiles />} />
               <Route path="/createjob" element={<CreateJob />} />
               <Route path="/job/edit" element={<JobEdit />} />
               <Route path="/create/checklist" element={<CreateCheckList />} />

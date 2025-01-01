@@ -91,7 +91,7 @@ const Service = () => {
           account_manager_ids: service.account_manager_ids
             ? service.account_manager_ids.map((id) => {
               const staff = staffDataAll.data.find((staff) => staff.id === id);
-              return staff ? { value: id, label: staff.first_name } : null; 
+              return staff ? { value: id, label: staff.first_name+' '+staff.last_name } : null; 
             }).filter((item) => item !== null) 
             : [],
         }))
@@ -461,7 +461,7 @@ const Service = () => {
   return (
     <Formik initialValues={address} onSubmit={handleSubmit}>
       {({ handleSubmit }) => (
-        <div className="details__wrapper">
+        <div className="details__wrapper service__wrapper">
           <div className="card pricing-box m-2 mt-0">
             <div className="card-header step-header-blue">
               <h4 className="card-title mb-0">Select Services</h4>
@@ -495,6 +495,7 @@ const Service = () => {
 
                           <td className="customer_name">
                             {/* Main Accordion */}
+                            <div className="accordion-div">
                             <div
                               className="accordion"
                               id={`accordionExample${index}`}
@@ -568,7 +569,7 @@ const Service = () => {
                                                         <div className="pb-3">
                                                           <div className="row align-items-center">
                                                             {/* Upload File Button */}
-                                                            <div className="col-auto">
+                                                            <div className="col-md-auto ">
                                                               <label
                                                                 htmlFor="uploadButton"
                                                                 className=""
@@ -597,7 +598,7 @@ const Service = () => {
                                                             </div>
 
 
-                                                            <div className="col-auto ms-auto">
+                                                            <div className="col-md-auto float-lg-end ms-0">
                                                               <button
                                                                 onClick={
                                                                   handleDownload
@@ -883,6 +884,7 @@ const Service = () => {
                                   )}
                                 </div>
                               </div>
+                            </div>
                             </div>
                           </td>
 

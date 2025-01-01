@@ -5,7 +5,6 @@ import 'react-data-table-component-extensions/dist/index.css';
 
 const Datatable = ({ columns, data, filter }) => {
   const noDataImage = '/assets/images/No-data-amico.png';
-
   const handleTableRef = (node) => {
     if (node) {
       const searchInput = node.querySelector('.data-table-extensions-filter input');
@@ -19,37 +18,43 @@ const Datatable = ({ columns, data, filter }) => {
     <div className="datatable-container" ref={handleTableRef}>
       {data.length === 0 ? (
         <div className='text-center'>
-          <img 
-            src={noDataImage} 
-            alt="No records available" 
+          <img
+            src={noDataImage}
+            alt="No records available"
             style={{ width: '250px', height: 'auto', objectFit: 'contain' }}
           />
           <p className='fs-16'>There are no records to display</p>
         </div>
       ) : (
-        <div >  
-          <DataTableExtensions
+        <div >
+          <DataTable
+            columns={columns}
+            data={data}
+            fixedHeader={true}
+            fixedHeaderScrollHeight="500px"
+            highlightOnHover
+          />
+          {/* <DataTableExtensions
             columns={columns}
             data={data}
             export={false}
             print={false}
-            search={true}
+            search={false}
             filter={filter}
           >
             <DataTable
-            className='custom-datatable'
               fixedHeader={true}
               fixedHeaderScrollHeight="500px"
               noHeader
               defaultSortField="JobId"
               defaultSortAsc={false}
-              pagination
-              onColumnOrderChange={cols => console.log(cols)}
+             // pagination
+             // onColumnOrderChange={cols => console.log(cols)}
               highlightOnHover
-              paginationRowsPerPageOptions={[10, 50, 100]}
-              paginationComponentOptions={{ selectAllRowsItem: true, selectAllRowsItemText: 'All' }}
+            //  paginationRowsPerPageOptions={[10, 50, 100]}
+            //  paginationComponentOptions={{ selectAllRowsItem: true, selectAllRowsItemText: 'All' }}
             />
-          </DataTableExtensions>
+          </DataTableExtensions> */}
         </div>
       )}
     </div>

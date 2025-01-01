@@ -78,6 +78,7 @@ const ClientEdit = () => {
     email: "",
     residentialAddress: "",
     phone_code: "",
+    notes: "",
   });
   const [getCompanyDetails, setCompanyDetails] = useState({
     SearchCompany: "",
@@ -91,6 +92,7 @@ const ClientEdit = () => {
     VATRegistered: "",
     VATNumber: "",
     Website: "",
+    notes: "",
     ClientIndustry: "",
     TradingName: "",
     TradingAddress: "",
@@ -102,6 +104,7 @@ const ClientEdit = () => {
     VATRegistered: "",
     VATNumber: "",
     Website: "",
+    notes: "",
   });
   const [CompanyContacts, setCompanyContacts] = useState([
     {
@@ -125,6 +128,7 @@ const ClientEdit = () => {
     email: "",
     residentialAddress: "",
     phone_code: "+44",
+    notes: "",
   });
 
   useEffect(() => {
@@ -165,6 +169,8 @@ const ClientEdit = () => {
           !getClientDetails.loading && getClientDetails.data.client.vat_number,
         website:
           !getClientDetails.loading && getClientDetails.data.client.website,
+        notes:
+        !getClientDetails.loading && getClientDetails.data.client.notes,
         first_name:
           !getClientDetails.loading &&
           getClientDetails.data.contact_details[0].first_name,
@@ -217,6 +223,8 @@ const ClientEdit = () => {
           !getClientDetails.loading && getClientDetails.data.client.vat_number,
         Website:
           !getClientDetails.loading && getClientDetails.data.client.website,
+        notes:
+          !getClientDetails.loading && getClientDetails.data.client.notes,
         ClientIndustry:
           !getClientDetails.loading &&
           getClientDetails.data.client.client_industry_id,
@@ -273,6 +281,8 @@ const ClientEdit = () => {
           !getClientDetails.loading && getClientDetails.data.client.vat_number,
         Website:
           !getClientDetails.loading && getClientDetails.data.client.website,
+        notes:
+          !getClientDetails.loading && getClientDetails.data.client.notes,
       }));
       setPartnershipContacts(
         getClientDetails.data && getClientDetails.data.contact_details
@@ -319,6 +329,8 @@ const ClientEdit = () => {
         phone_code:
           !getClientDetails.loading &&
           getClientDetails.data.contact_details[0].phone_code,
+        notes:
+          !getClientDetails.loading && getClientDetails.data.client.notes,
       }));
     }
 
@@ -722,6 +734,7 @@ const ClientEdit = () => {
         vat_registered: getSoleTraderDetails.VATRegistered,
         vat_number: getSoleTraderDetails.VATNumber,
         website: getSoleTraderDetails.website,
+        notes: getSoleTraderDetails.notes,
         first_name: getSoleTraderDetails.first_name,
         last_name: getSoleTraderDetails.last_name,
         phone: getSoleTraderDetails.phone,
@@ -778,6 +791,7 @@ const ClientEdit = () => {
           vat_registered: getCompanyDetails.VATRegistered,
           vat_number: getCompanyDetails.VATNumber,
           website: getCompanyDetails.Website,
+          notes: getCompanyDetails.notes,
           client_industry_id: Number(getCompanyDetails.ClientIndustry),
           trading_name: getCompanyDetails.TradingName,
           trading_address: getCompanyDetails.TradingAddress,
@@ -844,6 +858,7 @@ const ClientEdit = () => {
           vat_registered: getPartnershipDetails.VATRegistered,
           vat_number: getPartnershipDetails.VATNumber,
           website: getPartnershipDetails.Website,
+          notes: getPartnershipDetails.notes,
           contactDetails: partnershipContacts,
         };
         await EditClientFun(req);
@@ -865,6 +880,7 @@ const ClientEdit = () => {
         residential_address: getIndivisualDetails.residentialAddress,
         client_code: location.state.row.id,
         phone_code: getIndivisualDetails.phone_code,
+        notes: getIndivisualDetails.notes,
       };
       await EditClientFun(req);
 
@@ -1276,6 +1292,36 @@ const ClientEdit = () => {
                                     </div>
                                   </div>
                                 </div>
+                                <div className="card ">
+                                  <div className="card-header card-header-light-blue ">
+                                    <h4 className="card-title fs-16 mb-0">
+                                      Notes
+                                    </h4>
+                                  </div>
+                                  <div className="card-body row">
+                                    <div className="col-lg-12">
+                                      <div className="mb-3">
+                                        <textarea
+                                          type="text"
+                                          className={errors1["notes"] ? "error-field form-control" : "form-control"}
+                                          placeholder="Enter Notes"
+                                          name="notes"
+                                          id="notes"
+                                          value={
+                                            getSoleTraderDetails.notes
+                                          }
+                                          onChange={(e) => handleInputsChange(e, 1)}
+                                        />
+                                        {errors1["notes"] && (
+                                          <div className="error-text">
+                                            {errors1["notes"]}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>  
+                                  </div>
+                                </div>
+
                               </div>
                             </div>
                           ) : selectClientType == 2 ? (
@@ -1731,7 +1777,6 @@ const ClientEdit = () => {
                                   </div>
                                 </div>
                               </div>
-                             
                                 <div className="col-lg-12">
                                   <div className="card card_shadow">
                                     <div className="card-header card-header-light-blue align-items-center d-flex">
@@ -2045,7 +2090,42 @@ const ClientEdit = () => {
                                     </div>
                                   </div>
                                 </div>{" "}
-                                {/* end col */}
+                                <div className="col-lg-12">
+                                <div className="card card_shadow ">
+                                  {/* end card header */}
+                                  <div className="card-header card-header-light-blue align-items-center d-flex">
+                                    <h4 className="card-title fs-16 mb-0 flex-grow-1">
+                                      Notes
+                                    </h4>
+                                  </div>
+                                  <div className="card-body">
+                                    <div className="row">
+                                      <div className="col-lg-12">
+                                        <div className="mb-3">
+                            
+                                          <textarea
+                                            type="text"
+                                            className={errors2["notes"] ? "error-field form-control" : "form-control"}
+
+                                            placeholder="Enter Notes"
+                                            name="notes"
+                                            id="notes"
+                                            onChange={(e) => handleInputsChange(e, 2)}
+                                            value={
+                                              getCompanyDetails.notes
+                                            }
+                                          />
+                                          {errors2["notes"] && (
+                                            <div className="error-text">
+                                              {errors2["notes"]}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
                               </div>
                            
                           ) : selectClientType == 3 ? (
@@ -2676,6 +2756,43 @@ const ClientEdit = () => {
                                     </div>
                                   </div>
                                 </div>
+
+                                <div className="col-lg-12">
+                                <div className="card card_shadow ">
+                                  <div className="card-header card-header-light-blue align-items-center d-flex">
+                                    <h4 className="card-title fs-16 mb-0 flex-grow-1">
+                                      Notes
+                                    </h4>
+                                  </div>
+                                  {/* end card header */}
+                                  <div className="card-body">
+                                    <div className="row">
+                                      <div className="col-lg-12">
+                                        <div className="mb-3">
+                                          <textarea
+                                            type="text"
+                                            className={errors3["notes"] ? "error-field form-control" : "form-control"}
+
+                                            placeholder="Enter Notes"
+                                            name="notes"
+                                            id="notes"
+                                            value={
+                                              getPartnershipDetails.notes
+                                            }
+                                            onChange={(e) => handleInputsChange(e, 3)}
+                                          />
+                                          {errors3["notes"] && (
+                                            <div className="error-text">
+                                              {errors3["notes"]}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
                               
                             </div>
                           ) : selectClientType == 4 ? (
@@ -2880,6 +2997,44 @@ const ClientEdit = () => {
                                     </div>
                                   </div>
                                 </div>
+
+                                <div className="col-lg-12">
+                                  <div className="card ">
+                                    <div className="card-header card-header-light-blue ">
+                                      <h4 className="card-title fs-16 mb-0">
+                                        Notes
+                                      </h4>
+                                    </div>
+                                    <div className="card-body row">
+                                      <div className="col-lg-12">
+                                        <div className="mb-3">
+                                          
+                                          <textarea
+                                            type="text"
+                                            name="notes"
+                                            id="notes"
+                                            autoFocus
+                                            className={errors4["notes"] ? "error-field form-control" : "form-control"}
+
+                                            placeholder="Enter Notes"
+                                            onChange={(e) => handleInputsChange(e, 4)}
+                                            value={
+                                              getIndivisualDetails.notes
+                                            }
+                                          />
+                                          {errors4["notes"] && (
+                                            <div className="error-text">
+                                              {errors4["notes"]}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+
+
                               </div>
                             )
                           ) : (

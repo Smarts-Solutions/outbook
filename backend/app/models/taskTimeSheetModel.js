@@ -122,7 +122,7 @@ const updateJobTimeTotalHours = async (timeSheet) => {
 const addMissingLog = async (missingLog) => {
 
 
-  const { job_id, missing_log, missing_log_sent_on, missing_log_reviewed_by, status } = missingLog.body;
+  const { job_id, missing_log, missing_log_sent_on, missing_log_reviewed_by, last_chaser ,status } = missingLog.body;
   let log_message = `sent the missing logs for job code:`
   let data = {
     table: 'missing_logs',
@@ -130,6 +130,7 @@ const addMissingLog = async (missingLog) => {
     filter_id: `job_id = ${job_id}`,
     prefix: 'M'
   }
+
   const UniqueNoTitle = await generateNextUniqueCodeJobLogTitle(data)
 
   let missing_log_prepared_date = missingLog.body.missing_log_prepared_date == 'null' ? null : missingLog.body.missing_log_prepared_date
@@ -142,9 +143,9 @@ const addMissingLog = async (missingLog) => {
     const query = `
      INSERT INTO 
      missing_logs
-      (job_id, missing_log, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,status)
+      (job_id, missing_log, missing_log_sent_on,missing_log_prepared_date,missing_log_title,missing_log_reviewed_by,missing_log_reviewed_date,last_chaser,status)
       VALUES
-      (?,?,?,?,?,?,?,?)
+      (?,?,?,?,?,?,?,?,?)
       `;
     const [rows] = await pool.execute(query, [
       job_id,
@@ -154,6 +155,7 @@ const addMissingLog = async (missingLog) => {
       UniqueNoTitle,
       missing_log_reviewed_by,
       missing_log_reviewed_date,
+      last_chaser,
       status
     ]);
 
@@ -212,7 +214,6 @@ const addMissingLog = async (missingLog) => {
 
     return { status: true, message: 'Success.', data: rows };
   } catch (error) {
-
     return { status: false, message: 'Error addMissingLog .' };
   }
 }
@@ -232,6 +233,7 @@ const getMissingLog = async (missingLog) => {
     missing_logs.missing_log_reviewed_by AS missing_log_reviewed_by,
     DATE_FORMAT(missing_logs.missing_log_reviewed_date, '%Y-%m-%d') AS missing_log_reviewed_date,
     DATE_FORMAT(missing_logs.missing_paperwork_received_on, '%Y-%m-%d') AS missing_paperwork_received_on,
+    DATE_FORMAT(missing_logs.last_chaser, '%Y-%m-%d') AS last_chaser,
     missing_logs.status AS status,
     CONCAT(
       SUBSTRING(customers.trading_name, 1, 3), '_', 
@@ -277,7 +279,8 @@ const getMissingLog = async (missingLog) => {
 }
 
 const editMissingLog = async (missingLog) => {
-  const { id, missing_log, missing_log_sent_on, missing_log_reviewed_by, status } = missingLog.body;
+  const { id, missing_log, missing_log_sent_on, missing_log_reviewed_by,last_chaser,status } = missingLog.body;
+  
 
   let missing_log_prepared_date = missingLog.body.missing_log_prepared_date == 'null' ? null : missingLog.body.missing_log_prepared_date
 
@@ -286,7 +289,7 @@ const editMissingLog = async (missingLog) => {
   const missing_log_document = missingLog.files;
 
   const [[existMissingLog]] = await pool.execute(
-    "SELECT id ,job_id, missing_log, DATE_FORMAT(missing_log_sent_on, '%Y-%m-%d') AS missing_log_sent_on,DATE_FORMAT(missing_log_prepared_date, '%Y-%m-%d') AS missing_log_prepared_date ,missing_log_reviewed_by,DATE_FORMAT(missing_log_reviewed_date, '%Y-%m-%d') AS missing_log_reviewed_date,status FROM missing_logs WHERE id = ? "
+    "SELECT id ,job_id, missing_log, DATE_FORMAT(missing_log_sent_on, '%Y-%m-%d') AS missing_log_sent_on,DATE_FORMAT(missing_log_prepared_date, '%Y-%m-%d') AS missing_log_prepared_date ,missing_log_reviewed_by,DATE_FORMAT(missing_log_reviewed_date, '%Y-%m-%d') AS missing_log_reviewed_date,DATE_FORMAT(last_chaser, '%Y-%m-%d') AS last_chaser ,status FROM missing_logs WHERE id = ? "
     , [id]);
 
 
@@ -300,11 +303,12 @@ const editMissingLog = async (missingLog) => {
      missing_log_prepared_date = ?,
      missing_log_reviewed_by = ?,
      missing_log_reviewed_date = ?,
+     last_chaser = ?,
      status = ?
      WHERE 
      id = ?
      `;
-    const [rows] = await pool.execute(query, [missing_log, missing_log_sent_on, missing_log_prepared_date, missing_log_reviewed_by, missing_log_reviewed_date, status, id]);
+    const [rows] = await pool.execute(query, [missing_log, missing_log_sent_on, missing_log_prepared_date, missing_log_reviewed_by, missing_log_reviewed_date, last_chaser,status, id]);
 
     if (rows.changedRows > 0) {
 
@@ -312,7 +316,7 @@ const editMissingLog = async (missingLog) => {
       if (parseInt(status) == 1) {
         missing_log_msg.push('completed the missing logs')
 
-      } else if (existMissingLog.missing_log != missing_log || existMissingLog.missing_log_sent_on != missing_log_sent_on || existMissingLog.missing_log_prepared_date != missing_log_prepared_date || existMissingLog.missing_log_reviewed_by != missing_log_reviewed_by || existMissingLog.missing_log_reviewed_date != missing_log_reviewed_date) {
+      } else if (existMissingLog.missing_log != missing_log || existMissingLog.missing_log_sent_on != missing_log_sent_on || existMissingLog.missing_log_prepared_date != missing_log_prepared_date || existMissingLog.missing_log_reviewed_by != missing_log_reviewed_by || existMissingLog.missing_log_reviewed_date != missing_log_reviewed_date || existMissingLog.last_chaser != last_chaser) {
         missing_log_msg.push('edited the missing logs')
       }
 
@@ -403,7 +407,7 @@ const getMissingLogSingleView = async (missingLog) => {
 
 //Queries
 const addQuerie = async (querie) => {
-  const { job_id, queries_remaining, reviewed_by, query_sent_date, response_received, status } = querie.body;
+  const { job_id, queries_remaining, reviewed_by, query_sent_date, response_received, last_chaser,status } = querie.body;
 
   const query_document = querie.files;
   let log_message =  `sent the queries for job code:`
@@ -413,6 +417,7 @@ const addQuerie = async (querie) => {
     filter_id: `job_id = ${job_id}`,
     prefix: 'Q'
   }
+
 
   const UniqueNoTitle = await generateNextUniqueCodeJobLogTitle(data)
 
@@ -424,11 +429,11 @@ const addQuerie = async (querie) => {
     const query = `
      INSERT INTO 
      queries
-      (job_id, queries_remaining, status ,query_title, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received,final_query_response_received_date)
+      (job_id, queries_remaining, status ,query_title, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received,final_query_response_received_date,last_chaser)
       VALUES
-      (?,?,?,?,?,?,?,?,?)
+      (?,?,?,?,?,?,?,?,?,?)
       `;
-    const [rows] = await pool.execute(query, [job_id, queries_remaining, status, UniqueNoTitle, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date]);
+    const [rows] = await pool.execute(query, [job_id, queries_remaining, status, UniqueNoTitle, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date, last_chaser]);
 
     if(status === "1"){
       log_message = `Sent and completed the queries for the job code:`
@@ -499,6 +504,7 @@ const getQuerie = async (querie) => {
       queries.reviewed_by AS reviewed_by,
       DATE_FORMAT(queries.missing_queries_prepared_date, '%Y-%m-%d') AS missing_queries_prepared_date,
       DATE_FORMAT(queries.query_sent_date, '%Y-%m-%d') AS query_sent_date,
+      DATE_FORMAT(queries.last_chaser, '%Y-%m-%d') AS last_chaser,
       queries.response_received AS response_received,
       queries.response AS response,
       DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
@@ -576,10 +582,8 @@ const getQuerieSingleView = async (querie) => {
 }
 
 const editQuerie = async (query) => {
-  const { id, queries_remaining, reviewed_by, query_sent_date, response_received, status } = query.body;
+  const { id, queries_remaining, reviewed_by, query_sent_date, response_received,last_chaser, status } = query.body;
   const query_document = query.files;
-
-  console.log("query.body", query.body)
 
   let missing_queries_prepared_date = query.body.missing_queries_prepared_date == 'null' ? null : query.body.missing_queries_prepared_date
 
@@ -587,7 +591,7 @@ const editQuerie = async (query) => {
 
 
   const [[existQuerie]] = await pool.execute(
-    "SELECT id ,job_id, queries_remaining, reviewed_by, DATE_FORMAT(missing_queries_prepared_date, '%Y-%m-%d') AS missing_queries_prepared_date, DATE_FORMAT(query_sent_date, '%Y-%m-%d') AS query_sent_date, response_received, response, DATE_FORMAT(final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date, status FROM queries WHERE id = ? "
+    "SELECT id ,job_id, queries_remaining, reviewed_by, DATE_FORMAT(missing_queries_prepared_date, '%Y-%m-%d') AS missing_queries_prepared_date, DATE_FORMAT(query_sent_date, '%Y-%m-%d') AS query_sent_date, response_received, response, DATE_FORMAT(final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,DATE_FORMAT(last_chaser, '%Y-%m-%d') AS last_chaser, status FROM queries WHERE id = ? "
     , [id]);
 
 
@@ -602,18 +606,19 @@ const editQuerie = async (query) => {
      missing_queries_prepared_date = ?,
      query_sent_date = ?,
      response_received = ?,
-     final_query_response_received_date = ?
+     final_query_response_received_date = ?,
+     last_chaser = ?
      WHERE 
      id = ?
      `;
-    const [rows] = await pool.execute(query_table, [queries_remaining, status, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date, id]);
+    const [rows] = await pool.execute(query_table, [queries_remaining, status, reviewed_by, missing_queries_prepared_date, query_sent_date, response_received, final_query_response_received_date,last_chaser ,id]);
 
     if (rows.changedRows > 0) {
       let querie_log_msg = []
       if (parseInt(status) == 1) {
         querie_log_msg.push('completed the queries')
       }
-      else if (existQuerie.queries_remaining != queries_remaining || existQuerie.reviewed_by != reviewed_by || existQuerie.missing_queries_prepared_date != missing_queries_prepared_date || existQuerie.query_sent_date != query_sent_date || existQuerie.response_received != response_received || existQuerie.final_query_response_received_date != final_query_response_received_date) {
+      else if (existQuerie.queries_remaining != queries_remaining || existQuerie.reviewed_by != reviewed_by || existQuerie.missing_queries_prepared_date != missing_queries_prepared_date || existQuerie.query_sent_date != query_sent_date || existQuerie.response_received != response_received || existQuerie.final_query_response_received_date != final_query_response_received_date || existQuerie.last_chaser != last_chaser) {
         querie_log_msg.push('edited the queries')
       }
 

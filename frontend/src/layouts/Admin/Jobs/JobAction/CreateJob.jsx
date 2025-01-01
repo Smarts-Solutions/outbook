@@ -17,7 +17,7 @@ const CreateJob = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const role = JSON.parse(localStorage.getItem("role"));
- 
+
   const token = JSON.parse(localStorage.getItem("token"));
   const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
@@ -84,8 +84,9 @@ const CreateJob = () => {
     InvoiceDate: null,
     InvoiceHours: "",
     InvoiceRemark: "",
+    notes: "",
   });
-
+  console.log("location.state", location.state);
   useEffect(() => {
     setJobData((prevState) => ({
       ...prevState,
@@ -125,6 +126,8 @@ const CreateJob = () => {
     GetJobData();
   }, []);
 
+
+
   const getAllChecklist = async () => {
     if (
       AllJobData?.data?.client?.[0]?.client_id &&
@@ -137,14 +140,15 @@ const CreateJob = () => {
         service_id: jobData.Service,
         customer_id: AllJobData?.data?.customer?.customer_id,
         job_type_id: jobData.JobType,
-        clientId: AllJobData?.data?.client[0]?.client_id,
-      };
+        // clientId: AllJobData?.data?.client[0]?.client_id,
+        clientId: location?.state?.goto == "Customer" ? Number(jobData.Client) : location?.state?.clientName?.id,
 
+      };
       const data = { req: req, authToken: token };
       await dispatch(GET_ALL_CHECKLIST(data))
         .unwrap()
         .then(async (response) => {
-
+          //  console.log("data checklist",response)
           if (response.status) {
             if (response.data.length > 0) {
               const isIncluded = response.data[0].client_type_id.split(',').includes(response.data[0].client_type);
@@ -403,7 +407,7 @@ const CreateJob = () => {
       submission_deadline: jobData.SubmissionDeadline,
       customer_deadline_date: jobData.CustomerDeadlineDate,
       //sla_deadline_date: jobData.SLADeadlineDate,
-       
+
       sla_deadline_date: jobData.SLADeadlineDate
         ? jobData.SLADeadlineDate
         : new Date().toISOString().split("T")[0],
@@ -428,6 +432,7 @@ const CreateJob = () => {
       invoice_date: jobData.InvoiceDate,
       invoice_hours: formatTime(invoiceTime.hours, invoiceTime.minutes),
       invoice_remark: jobData.InvoiceRemark,
+      notes: jobData.notes,
       tasks: {
         checklist_id: getChecklistId,
         task: AddTaskArr,
@@ -435,7 +440,7 @@ const CreateJob = () => {
     };
     const data = { req: req, authToken: token };
 
-    
+
     setIsSubmitted(true);
     const isValid = validateAllFields();
     if (isValid) {
@@ -698,7 +703,7 @@ const CreateJob = () => {
                                     )}
                                   </div>
                                   {location.state.goto == "Customer" ? (
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Client
                                         <span className='text-danger'>*</span>
@@ -769,6 +774,7 @@ const CreateJob = () => {
                                       id="ClientJobCode"
                                       autoFocus={true}
                                       onChange={HandleChange}
+                                      maxLength={50}
                                       value={jobData.ClientJobCode}
                                     />
                                     {errors["ClientJobCode"] && (
@@ -778,7 +784,7 @@ const CreateJob = () => {
                                     )}
                                   </div>
 
-                                  <div className="col-lg-4">
+                                  <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Customer Account Manager(Officer)
                                       <span className='text-danger'>*</span>
@@ -818,7 +824,7 @@ const CreateJob = () => {
                                     )}
                                   </div>
 
-                                  <div className="col-lg-4">
+                                  <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Service
                                       <span className='text-danger'>*</span>
@@ -900,7 +906,7 @@ const CreateJob = () => {
                                             placeholder="Hours"
                                             onChange={(e) => {
                                               const value = e.target.value;
-                                        
+
 
                                               // Only allow non-negative numbers for hours
                                               if (value === "" || Number(value) >= 0) {
@@ -946,7 +952,7 @@ const CreateJob = () => {
                                   </div>
 
 
-                                  <div className="col-lg-4">
+                                  <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Reviewer
                                     </label>
@@ -984,7 +990,7 @@ const CreateJob = () => {
                                       name="AllocatedTo"
                                       onChange={HandleChange}
                                       value={jobData.AllocatedTo}
-                                     // disabled={role === "ADMIN" || role === "SUPERADMIN" ? false : true}
+                                    // disabled={role === "ADMIN" || role === "SUPERADMIN" ? false : true}
 
                                     >
                                       <option value=""> Select Staff</option>
@@ -1006,7 +1012,7 @@ const CreateJob = () => {
                                     )}
                                   </div>
 
-                                  <div className="col-lg-4">
+                                  <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       {" "}
                                       Allocated On{" "}
@@ -1026,7 +1032,7 @@ const CreateJob = () => {
                                     )}
                                   </div>
 
-                                  <div className="col-lg-4">
+                                  <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Date Received On
                                     </label>
@@ -1344,7 +1350,7 @@ const CreateJob = () => {
                                     </div>
                                   </div>
 
-                                  <div id="invoice_type" className="col-lg-4">
+                                  <div id="invoice_type" className="col-lg-4 mb-3">
                                     <label
                                       htmlFor="firstNameinput"
                                       className="form-label"
@@ -1405,7 +1411,7 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Due On
                                       </label>
@@ -1423,7 +1429,7 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Submission Deadline
                                       </label>
@@ -1441,7 +1447,7 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Customer Deadline Date
                                       </label>
@@ -1459,7 +1465,7 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         SLA Deadline Date
                                       </label>
@@ -1565,7 +1571,7 @@ const CreateJob = () => {
                                         )}
                                       </div>
                                     </div>
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Filing with HMRC Required?
                                       </label>
@@ -1697,7 +1703,7 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Number of Trial Balance Items
                                       </label>
@@ -1717,7 +1723,7 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Turnover
                                       </label>
@@ -1753,7 +1759,7 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3 ">
                                       <label className="form-label">
                                         VAT Reconciliation
                                       </label>
@@ -1775,7 +1781,7 @@ const CreateJob = () => {
                                         </div>
                                       )}
                                     </div>
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                       <label className="form-label">
                                         Bookkeeping?
                                       </label>
@@ -1860,7 +1866,7 @@ const CreateJob = () => {
                                               </div>
                                             )}
                                           </div>
-                                          <div className="col-lg-4">
+                                          <div className="col-lg-4 mb-3">
                                             <label className="form-label">
                                               Currency
                                             </label>
@@ -1890,7 +1896,7 @@ const CreateJob = () => {
                                               </div>
                                             )}
                                           </div>
-                                          <div className="col-lg-4">
+                                          <div className="col-lg-4 mb-3">
                                             <label className="form-label">
                                               Invoice Value
                                             </label>
@@ -1908,7 +1914,7 @@ const CreateJob = () => {
                                               </div>
                                             )}
                                           </div>
-                                          <div className="col-lg-4">
+                                          <div className="col-lg-4 mb-3">
                                             <label className="form-label">
                                               Invoice Date
                                             </label>
@@ -2026,6 +2032,41 @@ const CreateJob = () => {
                                 </div>
                               </div>
                             )}
+
+
+                          <div className="col-lg-12">
+                            <div className="card card_shadow">
+                              <div className="card-header align-items-center d-flex card-header-light-blue">
+                                <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                  Notes
+                                </h4>
+                              </div>
+                              <div className="card-body">
+                                <div className="" style={{ marginTop: 15 }}>
+                                  <div className="row">
+                                  <div className="mb-3 col-lg-12">
+                                    <textarea
+                                      type="text"
+                                      className={errors["notes"] ? "error-field form-control" : "form-control"}
+                                      placeholder="Enter Notes"
+                                      name="notes"
+                                      id="notes"
+                                      onChange={HandleChange}
+                                      value={jobData.notes}
+                                    />
+                                    {errors["notes"] && (
+                                      <div className="error-text">
+                                        {errors["notes"]}
+                                      </div>
+                                    )}
+                                  </div>
+                                   
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
                         </div>
                       </div>
                     </div>

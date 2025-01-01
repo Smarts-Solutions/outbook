@@ -73,13 +73,13 @@ const ReusableForm = ({
           overflowY: `${title === "addgroup" ? "scroll" : ""}`,
         }}
       >
-        <div className={`row`}>
+        <div className={`row  mb-3 `}>
           {fieldtype.map((field, index) => (
             <>
               {field.type === "select" ? (
                 <>
                   <div className={`col-lg-${title === "update_theme" ? 12 : field.col_size}`}  >
-                    <div className=" row">
+                    <div className=" row mb-3">
                       <label className={`col-lg-${field.label_size}`} htmlFor={field.name} >
                         {field.label}
                         <span className="text-danger">*</span>
@@ -113,7 +113,7 @@ const ReusableForm = ({
               ) : field.type === "select1" ? (
                 <>
                   <div className={`col-lg-${title === "update_theme" ? 12 : field.col_size}`}  >
-                    <div className=" row">
+                    <div className=" row mb-3">
                       <label className={`col-lg-${field.label_size}`} htmlFor={field.name} >
                         {field.label}
                         <span className="text-danger">*</span>
@@ -147,7 +147,7 @@ const ReusableForm = ({
               ) : field.type === "select2" ? (
                 <>
                   <div className={`col-lg-${title === "update_theme" ? 12 : field.col_size}`}  >
-                    <div className=" row">
+                    <div className=" row mb-3">
                       <label className={`col-lg-${field.label_size}`} htmlFor={field.name} >
                         {field.label}
                        
@@ -549,7 +549,7 @@ const ReusableForm = ({
               : field.type === "phone" ? (
                 <>
                   <div className={`col-lg-${title === "update_theme" ? 12 : field.col_size}`}  >
-                    <div className=" row">
+                    <div className=" row mb-3">
                       <label className={`col-lg-${field.label_size}`} htmlFor={field.name} >
                         {field.label}
                         <span className="text-danger">*</span>

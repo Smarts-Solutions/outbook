@@ -19,7 +19,6 @@ const addCustomer = async (req, res) => {
 const customerAction = async (req, res) => {
   try {
      const { ...customer } = req.body;
-   
       const result = await customerService.customerAction(customer);
       if(!result.status){
         return  res.status(200).json({ status: false, message: result.message });  

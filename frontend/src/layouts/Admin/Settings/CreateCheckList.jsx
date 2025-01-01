@@ -31,7 +31,7 @@ const CreateCheckList = () => {
     job_type_id: "",
     client_type_id: "",
     check_list_name: "",
-    status: "",
+    status: "1",
   });
 
   const [formData1, setFormData1] = useState({
@@ -40,7 +40,7 @@ const CreateCheckList = () => {
     job_type_id: "",
     client_type_id: "",
     check_list_name: "",
-    status: "",
+    status: "1",
   });
 
   const options = [
@@ -88,7 +88,7 @@ const CreateCheckList = () => {
     service_id: "Please Select Service Type",
     job_type_id: "Please Select Job Type",
     check_list_name: "Please Enter Check List Name",
-    status: "Please Select Status",
+   // status: "Please Select Status",
   };
 
   const handleInputChange = (e) => {
@@ -242,6 +242,11 @@ const CreateCheckList = () => {
 
   const handleSubmit = async () => {
     let validationErrors = {};
+
+
+
+
+
     const formattedTasks = formatBudgetedHours();
 
     const isValid = validateAllFields();
@@ -349,7 +354,7 @@ const CreateCheckList = () => {
         </div>
         <div className="card-body">
           <div className="row">
-            <div className="col-lg-4">
+            <div className="col-lg-4 mb-lg-0 mb-3">
               <div className="row">
                 <div className="col-lg-12">
                   <label className="form-label"> Select Service Type</label>
@@ -374,15 +379,15 @@ const CreateCheckList = () => {
                       ))}
                   </select>
                   {errors.service_id && (
-                    <p className="error-text">{errors.service_id}</p>
+                    <p className="mb-0 error-text">{errors.service_id}</p>
                   )}
                 </div>
               </div>
             </div>
-            <div className="col-lg-4">
+            <div className="col-lg-4 mb-lg-0 mb-3">
               <div className="row">
                 <div className="col-lg-12">
-                  <label className="form-label"> Select Job Typ</label>
+                  <label className="form-label"> Select Job Type</label>
                   <select
                     className={errors.job_type_id ? "error-field form-select" : "form-select"}
                     // className="default-select wide form-select"
@@ -402,12 +407,12 @@ const CreateCheckList = () => {
                       ))}
                   </select>
                   {errors.job_type_id && (
-                    <p className="error-text">{errors.job_type_id}</p>
+                    <p className="mb-0 error-text">{errors.job_type_id}</p>
                   )}
                 </div>
               </div>
             </div>
-            <div className="col-lg-4">
+            <div className="col-lg-4 mb-lg-0 ">
               <div className="row">
                 <div className="col-lg-12">
                   <label className="form-label">Select Client Type</label>
@@ -420,13 +425,13 @@ const CreateCheckList = () => {
                     />
                   </div>
                   {errors.client_type_id && (
-                    <p className="error-text">{errors.client_type_id}</p>
+                    <p className="mb-0 error-text">{errors.client_type_id}</p>
                   )}
                 </div>
               </div>
             </div>
             <div className="col-lg-4 mt-3">
-              <div className="mb-3 row flex-column">
+              <div className=" row flex-column">
                 <div>
                   <label className="form-label">Check List Name</label>
                   <input
@@ -439,7 +444,7 @@ const CreateCheckList = () => {
                     onChange={handleInputChange}
                   />
                   {errors.check_list_name && (
-                    <p className="error-text">{errors.check_list_name}</p>
+                    <p className="mb-0 error-text">{errors.check_list_name}</p>
                   )}
                 </div>
               </div>
@@ -452,15 +457,15 @@ const CreateCheckList = () => {
                   <select
                     className={errors.status ? "error-field form-select" : "form-select"}
                     name="status"
-                    defaultValue={formData.status}
+                    value={formData.status}
                     onChange={handleInputChange}
                   >
-                    <option value="">Please Select Status</option>
+                    {/* <option value="">Please Select Status</option> */}
                     <option value="1">Active</option>
                     <option value="0">Inactive</option>
                   </select>
                   {errors.status && (
-                    <p className="error-text">{errors.status}</p>
+                    <p className="mb-0 error-text">{errors.status}</p>
                   )}
                 </div>
               </div>
@@ -474,7 +479,7 @@ const CreateCheckList = () => {
           <div className="mt-4">
           {tasks.map((task, index) => (
               <div key={task.task_id} className="row  mt-4 ">
-                <div className="col-lg-5">
+                <div className="col-lg-5 mb-lg-0 mb-3">
                   <div>
                     <label className="form-label">Task Name</label>
                     <input
@@ -487,7 +492,7 @@ const CreateCheckList = () => {
                       disabled={task.task_id}
                     />
                     {errors1[`task_name_${index}`] && (
-                      <p className="error-text">
+                      <p className="mb-0 error-text">
                         {errors1[`task_name_${index}`]}
                       </p>
                     )}
@@ -522,7 +527,7 @@ const CreateCheckList = () => {
                    
                   </div>
                   {errors1[`budgeted_hour_${index}`] && (
-                    <p className="error-text">
+                    <p className="mb-0 error-text">
                       {errors1[`budgeted_hour_${index}`]}
                     </p>
                   )} */}
@@ -561,7 +566,7 @@ const CreateCheckList = () => {
 
                   {/* Error Message */}
                   {errors1[`budgeted_hour_${index}`] && (
-                    <p className="error-text">
+                    <p className="mb-0 error-text">
                       {errors1[`budgeted_hour_${index}`]}
                     </p>
                   )}

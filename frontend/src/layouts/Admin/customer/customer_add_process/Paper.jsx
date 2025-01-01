@@ -11,8 +11,11 @@ const Paper = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
   const fileInputRef = useRef(null);
   const token = JSON.parse(localStorage.getItem("token"));
+  const sharepoint_token = JSON.parse(localStorage.getItem("sharepoint_token"));
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  console.log("sharepoint_token ",sharepoint_token);
 
   const [fileState, setFileState] = useState([]);
   const [newFiles, setNewFiles] = useState([]);

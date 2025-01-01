@@ -323,7 +323,7 @@ const CreateCheckList = () => {
         {data && (
           <div className="card-body">
             <div className="row">
-              <div className="col-lg-4 ">
+              <div className="col-lg-4 mb-lg-0 mb-3">
                 <div className="row">
                   <div className="col-lg-12">
                     <label className="form-label"> Select Service Type</label>
@@ -353,10 +353,10 @@ const CreateCheckList = () => {
                   </div>
                 </div>
               </div>
-              <div className="col-lg-4 ">
+              <div className="col-lg-4 mb-lg-0 mb-3">
                 <div className="row">
                   <div className="col-lg-12">
-                    <label className="form-label"> Select Job Typ</label>
+                    <label className="form-label"> Select Job Type</label>
                     <select
                       className="default-select wide form-select"
                       name="job_type_id"
@@ -400,7 +400,7 @@ const CreateCheckList = () => {
                   </div>
                 </div>
               </div>
-              <div className="col-lg-4 mt-4">
+              <div className="col-lg-4 mt-3">
                 <div className="row">
                   <div className="col-lg-12">
                     <label className="form-label">Check List Name</label>
@@ -418,7 +418,7 @@ const CreateCheckList = () => {
                   </div>
                 </div>
               </div>
-              <div className="col-lg-4 mt-4">
+              <div className="col-lg-4 mt-3">
                 <div className="row">
                   <div className="col-lg-12">
                     <label className="form-label">Status</label>
@@ -452,7 +452,7 @@ const CreateCheckList = () => {
             </div>
             {tasks.map((task, index) => (
               <div key={task.task_id} className="row mt-4 align-items-end">
-                <div className="col-lg-5">
+                <div className="col-lg-5 mb-lg-0 mb-3">
                   <label className="form-label">Task Name</label>
                   <input
                     type="text"
@@ -469,9 +469,45 @@ const CreateCheckList = () => {
                     </p>
                   )}
                 </div>
-                <div className="col-lg-5">
+                <div className="col-lg-5 mb-lg-0 mb-3">
                   <label className="form-label">Budgeted Hours</label>
                   <div className="input-group">
+                    {/* Hours Input */}
+                    <div className="hours-div w-50">
+                      <input
+                        type="number"
+
+                        className={errors[`budgeted_hour_${index}`] ? "error-field form-control" : "form-control"}
+
+                        placeholder="Hours"
+                        name="hours"
+                        defaultValue={task.budgeted_hour?.hours || ""}
+                        onChange={(e) => handleTaskChange(index, e)}
+                      />
+                      <span className="input-group-text">H</span>
+                    </div>
+
+                    {/* Minutes Input */}
+                    <div className="hours-div w-50">
+                      <input
+                        type="number"
+                        className="form-control"
+                        placeholder="Minutes"
+                        name="minutes"
+                        min="0"
+                        max="59"
+                        defaultValue={task.budgeted_hour?.minutes || ""}
+                        onChange={(e) => handleTaskChange(index, e)}
+                      />
+                      <span className="input-group-text">M</span>
+                    </div>
+                  </div>
+                  {errors[`budgeted_hour_${index}`] && (
+                      <p className="text-danger">
+                        {errors[`budgeted_hour_${index}`]}
+                      </p>
+                    )}
+                  {/* <div className="input-group">
                     <input
                       type="number"
                       className="form-control"
@@ -491,13 +527,13 @@ const CreateCheckList = () => {
                       defaultValue={task.budgeted_hour?.split(":")[1] || ""}
                       onChange={(e) => handleTaskChange(index, e)}
                     />
-                    {/* Minutes Error */}
+                   
                     {errors[`budgeted_hour_${index}`] && (
                       <p className="text-danger">
                         {errors[`budgeted_hour_${index}`]}
                       </p>
                     )}
-                  </div>
+                  </div> */}
                 </div>
                 <div className="col-lg-2 d-flex align-items-center">
                   {tasks.length > 1 && (

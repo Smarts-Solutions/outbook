@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-// import Datatable from "../../../Components/ExtraComponents/Datatable";
-import Datatable from "../../../Components/ExtraComponents/Datatable_1";
+import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { GET_ALL_CUSTOMERS } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { Update_Customer_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getDateRange } from "../../../Utils/Comman_function";
 import Swal from "sweetalert2";
-import ReactPaginate from "react-paginate";
 
 const Customer = () => {
   const navigate = useNavigate();
@@ -42,7 +40,7 @@ const Customer = () => {
 
 
   useEffect(() => {
-    GetAllCustomerData(1, pageSize, '');
+    GetAllCustomerData();
   }, [activeTab]);
 
   useEffect(() => {
@@ -272,7 +270,7 @@ const Customer = () => {
               timer: 1000,
               showConfirmButton: false,
             });
-            GetAllCustomerData(1, pageSize, '');
+            GetAllCustomerData();
           } else {
             Swal.fire({
               title: "Error",
@@ -316,62 +314,32 @@ const Customer = () => {
   ];
 
   useEffect(() => {
-    //  GetAllCustomerData();
+    GetAllCustomerData();
   }, []);
 
   useEffect(() => {
-    //  GetAllCustomerData();
+    GetAllCustomerData();
   }, [selectedTab]);
 
   const handleTabChange = (event) => {
     setSelectedTab(event.target.value);
   };
 
-
-
-  ////////////////////////////////////
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalRecords, setTotalRecords] = useState(0);
-
-  const handlePageChange = (selected) => {
-    const newPage = selected.selected + 1; // Pagination libraries use 0-based indexing.
-    setCurrentPage(newPage);
-    GetAllCustomerData(newPage, pageSize, ''); // Fetch data for the new page.
-  };
-
-  const handlePageSizeChange = (event) => {
-    const newSize = parseInt(event.target.value, 10);
-    setPageSize(newSize);
-    setCurrentPage(1); // Reset to the first page
-    GetAllCustomerData(1, newSize, ''); // Fetch data with new page size
-  };
-
-  const handleSearchChange = (term) => {
-    console.log("term ", term);
-    setSearchTerm(term);
-    setCurrentPage(1);
-    GetAllCustomerData(1, pageSize, term);
-  };
-
-  const GetAllCustomerData = async (page = 1, limit = 10, term) => {
-    const req = { action: 'get', staff_id: staffDetails.id, page, limit, search: term };
+  const GetAllCustomerData = async () => {
+    const req = { action: 'get', staff_id: staffDetails.id };
     const data = { req, authToken: token };
 
     try {
       const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
-      if (response.status) {
-        // const filteredData = response.data.data.filter((item) => {
-        //   const itemDate = new Date(item.created_at);
-        //   const { startDate, endDate } = getDateRange(selectedTab);
-        //   return itemDate >= startDate && itemDate <= endDate;
-        // });
-    
-        setFilteredData(response.data.data);
-        setTotalRecords(response.data.pagination.totalItems);
-        // setCustomerData(response.data.pagination.totalItems);
 
+      if (response.status) {
+        const filteredData = response.data.filter((item) => {
+          const itemDate = new Date(item.created_at);
+          const { startDate, endDate } = getDateRange(selectedTab);
+          return itemDate >= startDate && itemDate <= endDate;
+        });
+
+        setFilteredData(filteredData);
       } else {
         setFilteredData([]);
       }
@@ -420,23 +388,23 @@ const Customer = () => {
     <div className="container-fluid">
       <div className="content-title">
         <div className="row">
-          <div className="col-md-6 col-sm-5">
+          <div className="col-md-8">
             <div className="tab-title">
               <h3 className="mt-0">Customers</h3>
             </div>
           </div>
           {role === "ADMIN" || role === "SUPERADMIN" ? (
-            <div className="col-md-6 col-sm-7">
+            <div className="col-md-4">
               <Link
                 to="/admin/addcustomer"
-                className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
+                className="btn btn-outline-info  fw-bold float-end border-3"
               >
                 <i className="fa fa-plus" /> Add Customer
               </Link>
             </div>
           ) : (
             getAccessData.insert === 1 && (
-              <div className="col-md-6 col-sm-7">
+              <div className="col-md-4">
                 <Link
                   to="/admin/addcustomer"
                   className="btn btn-outline-info fw-bold float-end border-3"
@@ -451,11 +419,11 @@ const Customer = () => {
 
       <div className="report-data mt-4">
         <div className="col-sm-12">
-          <div className="page-title-box pt-0 pb-0">
+          <div className="page-title-box pt-0">
             <div className="row align-items-start justify-content-end">
               <div className="col-4">
                 <div className="form-group mb-2 mt-1 pe-3 pt-5">
-
+                 
                 </div>
               </div>
 
@@ -466,40 +434,8 @@ const Customer = () => {
                 <div className="tab-content mt-minus-60" id="pills-tabContent">
                   <div className="card-datatable">
                     <div className="card-datatable">
-
-                      <div className="row mb-3">
-                        <div className="col-md-4">
-                          <input
-                            type="text"
-                            placeholder="Search Customers"
-                            className="form-control"
-                            value={searchTerm}
-                            onChange={(e) => handleSearchChange(e.target.value)}
-                          />
-                        </div>
-                      </div>
-
                       <Datatable columns={columns} data={filteredData} />
-
-                      {/* Pagination Controls */}
-                      <ReactPaginate
-                        previousLabel={"Previous"}
-                        nextLabel={"Next"}
-                        breakLabel={"..."}
-                        pageCount={Math.ceil(totalRecords / pageSize)}
-                        marginPagesDisplayed={2}
-                        pageRangeDisplayed={5}
-                        onPageChange={handlePageChange}
-                        containerClassName={"pagination"}
-                        activeClassName={"active"}
-                      />
                     </div>
-                    <select className="perpage-select" value={pageSize} onChange={handlePageSizeChange}>
-                      <option value={5}>5</option>
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                      <option value={50}>50</option>
-                    </select>
                   </div>
                 </div>
               </div>

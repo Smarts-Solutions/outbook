@@ -54,7 +54,12 @@ const login = async (credentials) => {
     const { email, password } = credentials;
     const user = await staffModel.getStaffByEmail(email);
 
-    console.log("user,",user);
+    // console.log("user,",user);
+
+    const sharepoint_token = await staffModel.sharepoint_token();
+
+    //console.log("sharepoint_token",sharepoint_token);
+
     if (!user) {
       return {status:false,message:"Please enter a valid Email"}
     }
@@ -85,12 +90,14 @@ const login = async (credentials) => {
       }
   );
 
-    return {status:true,token:token , staffDetails:user};
+    return {status:true,token:token , staffDetails:user ,sharepoint_token:sharepoint_token};
   };
 
 const loginWithAzure = async (credentials) => {
     const { email } = credentials;
     const user = await staffModel.getStaffByEmail(email);
+
+    const sharepoint_token = await staffModel.sharepoint_token();
    
     if (!user) {
       return {status:false,message:"User not exist."}
@@ -116,7 +123,7 @@ const loginWithAzure = async (credentials) => {
           ip: credentials.ip
       }
   );
-    return {status:true, token:token , staffDetails:user};
+    return {status:true, token:token , staffDetails:user ,sharepoint_token:sharepoint_token};
 };
 
 const isLogOut = async(credentials) => {

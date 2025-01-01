@@ -78,7 +78,7 @@ const Setting = () => {
       name: "Sub Source Type",
       selector: (row) => row.name,
       sortable: true,
-      width: "85%",
+      width: "75%",
     },
     {
       name: "Actions",
@@ -255,11 +255,11 @@ const Setting = () => {
             <h4 className="card-title">Sub Source Type</h4>
           </div>
           <div className="card-body">
-            <div className="d-flex justify-content-end align-items-center">
+            <div className="d-lg-flex justify-content-end align-items-center">
               <div>
                 <button
                   type="button"
-                  className="btn btn-info text-white float-end"
+                  className="btn btn-info text-white float-lg-end"
                   onClick={(e) => handleAdd(e, "1")}
                 >
                   {" "}
@@ -267,7 +267,7 @@ const Setting = () => {
                 </button>
               </div>
             </div>
-            <div className="datatable-wrapper mt-minus">
+            <div className="datatable-wrapper mt-minus mt-minus-lg">
               <Datatable
                 filter={true}
                 columns={columnJobType}

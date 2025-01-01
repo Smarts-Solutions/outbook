@@ -619,7 +619,6 @@ const getClientTypeChecklist = async (checklist) => {
 
 const getByServiceWithJobType = async (checklist) => {
   const {  service_id, job_type_id, clientId } = checklist;
-
     let customer_id = (checklist.customer_id).toString()
     const query = `SELECT 
     checklists.id AS checklists_id,
@@ -659,8 +658,9 @@ const getByServiceWithJobType = async (checklist) => {
     GROUP BY  checklist_tasks.task_id
     ORDER BY checklists.id DESC;`
   try {
-  
+    // console.log("query",query)
     const [result] = await pool.execute(query);
+    //console.log("result",result)
     return {
       status: true,
       message: "checklist get successfully.",

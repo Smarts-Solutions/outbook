@@ -15,14 +15,19 @@ const createClient = async (client) => {
   const {
     client_type,
     customer_id,
-    trading_name,
     trading_address,
     vat_registered,
     vat_number,
     website,
     StaffUserId
   } = client;
+  
+  let trading_name = client.trading_name;
+  let notes = client.notes;
 
+  if(client_type == "2"){
+    trading_name = trading_name +'_'+ client_code;
+  }
 
   const checkQuery = `SELECT 1 FROM clients WHERE trading_name = ?`;
 
@@ -38,8 +43,8 @@ const createClient = async (client) => {
 
   if (client_type != "4") {
     const query = `
-INSERT INTO clients (client_type,customer_id,staff_created_id,client_industry_id,trading_name,client_code,trading_address,vat_registered,vat_number,website)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO clients (client_type,customer_id,staff_created_id,client_industry_id,trading_name,client_code,trading_address,vat_registered,vat_number,website,notes)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `;
 
     try {
@@ -54,6 +59,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         vat_registered,
         vat_number,
         website,
+        notes,
       ]);
       client_id = result.insertId;
       const currentDate = new Date();
@@ -75,8 +81,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     }
   } else {
     const query = `
-    INSERT INTO clients (client_type,customer_id,staff_created_id,client_industry_id,trading_name,client_code)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO clients (client_type,customer_id,staff_created_id,client_industry_id,trading_name,client_code,notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
     try {
@@ -87,6 +93,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         client_industry_id,
         trading_name,
         client_code,
+        notes,
       ]);
       client_id = result.insertId;
       const currentDate = new Date();
@@ -374,7 +381,7 @@ const getClient = async (client) => {
         LEFT JOIN 
           staffs ON customers.staff_id = staffs.id   
         WHERE 
-          (jobs.allocated_to = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?)
+          (jobs.allocated_to = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?) OR clients.customer_id = ?
         GROUP BY 
         CASE 
             WHEN jobs.allocated_to = ? THEN jobs.client_id
@@ -383,11 +390,11 @@ const getClient = async (client) => {
         ORDER BY 
         clients.id DESC
             `;
-          const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId,StaffUserId,StaffUserId,StaffUserId,StaffUserId]);
+          const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId,StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId]);
           if(resultAllocated.length == 0){
             return { status: true, message: "success.", data: resultAllocated };
           }
-          const filteredData = resultAllocated.filter(item => item.customer_id === customer_id);
+          const filteredData = resultAllocated.filter(item => parseInt(item.customer_id) === parseInt(customer_id));
 
           const uniqueData = filteredData.filter((value, index, self) =>
             index === self.findIndex((t) => t.id === value.id)
@@ -434,7 +441,7 @@ const getClient = async (client) => {
         LEFT JOIN 
           customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id   
           WHERE 
-          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
+          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?  OR clients.staff_created_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR clients.customer_id = ?
         ORDER BY 
         clients.id DESC
             `;
@@ -443,12 +450,12 @@ const getClient = async (client) => {
           // (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
 
 
-          const [resultAccounrManage] = await pool.execute(query, [StaffUserId,StaffUserId,customer_id,StaffUserId]);
+          const [resultAccounrManage] = await pool.execute(query, [StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId,customer_id]);
           if(resultAccounrManage.length == 0){
             return { status: true, message: "success.", data: resultAccounrManage };
           }
 
-          const filteredData = resultAccounrManage.filter(item => item.customer_id === customer_id);
+          const filteredData = resultAccounrManage.filter(item => parseInt(item.customer_id) === parseInt(customer_id));
 
           const uniqueData = filteredData.filter((value, index, self) =>
             index === self.findIndex((t) => t.id === value.id)
@@ -458,8 +465,6 @@ const getClient = async (client) => {
         }
         // Reviewer
         else if (rows[0].role_id == 6) {
-       console.log('Reviewer')
-
           const query = `
            SELECT  
           clients.customer_id AS customer_id,
@@ -493,7 +498,7 @@ const getClient = async (client) => {
         LEFT JOIN 
           staffs ON customers.staff_id = staffs.id
         WHERE 
-          (jobs.reviewer = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?)
+          (jobs.reviewer = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id = ?
         GROUP BY
         CASE 
             WHEN jobs.reviewer = ? THEN jobs.client_id 
@@ -503,14 +508,19 @@ const getClient = async (client) => {
         clients.id DESC
             `;
 
-   
-            const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id,StaffUserId, StaffUserId,StaffUserId,StaffUserId,StaffUserId]);
-
+            try {
+              const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id,StaffUserId, StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId]);
+            console.log('resultReviewer', resultReviewer)
+            } catch (error) {
+              console.log('error', error)
+              
+            }
+            
             if(resultReviewer.length == 0){
               return { status: true, message: "success.", data: resultReviewer };
             }
            
-            const filteredData = resultReviewer.filter(item => item.customer_id === customer_id);
+            const filteredData = resultReviewer.filter(item => parseInt(item.customer_id) === parseInt(customer_id));
 
             const uniqueData = filteredData.filter((value, index, self) =>
               index === self.findIndex((t) => t.id === value.id)
@@ -555,41 +565,6 @@ const getClient = async (client) => {
 
       }
 
-      ///////////////////////////////////////
-     
-//       const query = `
-//     SELECT  
-//         clients.id AS id,
-//         clients.trading_name AS client_name,
-//         clients.status AS status,
-//         client_types.type AS client_type_name,
-//         client_contact_details.email AS email,
-//         client_contact_details.phone_code AS phone_code,
-//         client_contact_details.phone AS phone,
-//         CONCAT(
-//             'cli_', 
-//             SUBSTRING(customers.trading_name, 1, 3), '_',
-//             SUBSTRING(clients.trading_name, 1, 3), '_',
-//             SUBSTRING(clients.client_code, 1, 15)
-//             ) AS client_code
-//     FROM 
-//         clients
-//     JOIN 
-//        customers ON customers.id = clients.customer_id    
-//     JOIN 
-//         client_types ON client_types.id = clients.client_type
-//     LEFT JOIN 
-//         client_contact_details ON client_contact_details.id = (
-//             SELECT MIN(cd.id)
-//             FROM client_contact_details cd
-//             WHERE cd.client_id = clients.id
-//         )
-//     WHERE clients.customer_id = ? OR clients.staff_created_id = ?
-//  ORDER BY 
-//     clients.id DESC;
-//       `;
-//       const [result] = await pool.execute(query, [customer_id, StaffUserId]);
-//       return { status: true, message: "success.", data: result };
 
     } else {
 
@@ -632,7 +607,7 @@ const getClient = async (client) => {
         LEFT JOIN 
           staffs ON customers.staff_id = staffs.id   
         WHERE 
-          (jobs.allocated_to = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?)
+          (jobs.allocated_to = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.allocated_to = ? OR clients.staff_created_id = ?) OR clients.customer_id = ?
         GROUP BY 
         CASE 
             WHEN jobs.allocated_to = ? THEN jobs.client_id
@@ -641,11 +616,11 @@ const getClient = async (client) => {
         ORDER BY 
         clients.id DESC
             `;
-          const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId,StaffUserId,StaffUserId,StaffUserId,StaffUserId]);
+          const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId,StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId]);
           if(resultAllocated.length == 0){
             return { status: true, message: "success.", data: resultAllocated };
           }
-          const filteredData = resultAllocated.filter(item => item.customer_id === customer_id);
+          const filteredData = resultAllocated.filter(item => parseInt(item.customer_id) === parseInt(customer_id));
 
           const uniqueData = filteredData.filter((value, index, self) =>
             index === self.findIndex((t) => t.id === value.id)
@@ -692,7 +667,7 @@ const getClient = async (client) => {
         LEFT JOIN 
           customer_service_account_managers ON customer_service_account_managers.customer_service_id  = customer_services.id   
           WHERE 
-          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
+          (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ? OR clients.staff_created_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? ) OR clients.customer_id = ?
         ORDER BY 
         clients.id DESC
             `;
@@ -701,12 +676,12 @@ const getClient = async (client) => {
           // (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
 
 
-          const [resultAccounrManage] = await pool.execute(query, [StaffUserId,StaffUserId,customer_id,StaffUserId]);
+          const [resultAccounrManage] = await pool.execute(query, [StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId,customer_id]);
           if(resultAccounrManage.length == 0){
             return { status: true, message: "success.", data: resultAccounrManage };
           }
 
-          const filteredData = resultAccounrManage.filter(item => item.customer_id === customer_id);
+          const filteredData = resultAccounrManage.filter(item => parseInt(item.customer_id) === parseInt(customer_id));
 
           const uniqueData = filteredData.filter((value, index, self) =>
             index === self.findIndex((t) => t.id === value.id)
@@ -716,8 +691,6 @@ const getClient = async (client) => {
         }
         // Reviewer
         else if (rows[0].role_id == 6) {
-       console.log('Reviewer')
-
           const query = `
            SELECT  
           clients.customer_id AS customer_id,
@@ -751,7 +724,7 @@ const getClient = async (client) => {
         LEFT JOIN 
           staffs ON customers.staff_id = staffs.id
         WHERE 
-          (jobs.reviewer = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?)
+          (jobs.reviewer = ? OR clients.customer_id = ?  OR clients.staff_created_id = ?) AND (jobs.client_id = clients.id OR clients.staff_created_id = ?) AND (jobs.reviewer = ? OR clients.staff_created_id = ?) OR clients.customer_id = ?
         GROUP BY
         CASE 
             WHEN jobs.reviewer = ? THEN jobs.client_id 
@@ -762,14 +735,13 @@ const getClient = async (client) => {
             `;
 
    
-            const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id,StaffUserId, StaffUserId,StaffUserId,StaffUserId,StaffUserId]);
+            const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id,StaffUserId, StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId]);
 
             if(resultReviewer.length == 0){
               return { status: true, message: "success.", data: resultReviewer };
             }
            
-            const filteredData = resultReviewer.filter(item => item.customer_id === customer_id);
-
+            const filteredData = resultReviewer.filter(item => parseInt(item.customer_id) === parseInt(customer_id));
             const uniqueData = filteredData.filter((value, index, self) =>
               index === self.findIndex((t) => t.id === value.id)
             );
@@ -812,6 +784,7 @@ const getByidClient = async (client) => {
     clients.vat_registered AS vat_registered, 
     clients.vat_number AS vat_number, 
     clients.website AS website, 
+    clients.notes AS notes, 
     clients.status AS status, 
     client_contact_details.id AS contact_id,
     client_contact_details.first_name AS first_name,
@@ -853,6 +826,7 @@ WHERE
         vat_registered: rows[0].vat_registered,
         vat_number: rows[0].vat_number,
         website: rows[0].website,
+        notes: rows[0].notes,
         status: rows[0].status,
       };
 
@@ -891,7 +865,8 @@ WHERE
     clients.trading_address AS trading_address, 
     clients.vat_registered AS vat_registered, 
     clients.vat_number AS vat_number, 
-    clients.website AS website, 
+    clients.website AS website,
+    clients.notes AS notes,
     clients.status AS status, 
     client_contact_details.id AS contact_id,
     client_contact_details.first_name AS first_name,
@@ -936,6 +911,7 @@ WHERE
         vat_registered: rows[0].vat_registered,
         vat_number: rows[0].vat_number,
         website: rows[0].website,
+        notes: rows[0].notes,
         status: rows[0].status,
       };
 
@@ -984,7 +960,8 @@ WHERE
     clients.trading_address AS trading_address, 
     clients.vat_registered AS vat_registered, 
     clients.vat_number AS vat_number, 
-    clients.website AS website, 
+    clients.website AS website,
+    clients.notes AS notes,
     clients.status AS status, 
     client_contact_details.id AS contact_id,
     client_contact_details.first_name AS first_name,
@@ -1029,6 +1006,7 @@ WHERE
         vat_registered: rows[0].vat_registered,
         vat_number: rows[0].vat_number,
         website: rows[0].website,
+        notes: rows[0].notes,
         status: rows[0].status,
       };
 
@@ -1066,7 +1044,8 @@ WHERE
     clients.client_type AS client_type, 
     clients.customer_id AS customer_id,  
     clients.trading_name AS trading_name,
-    clients.status AS status, 
+    clients.status AS status,
+    clients.notes AS notes,
     client_contact_details.id AS contact_id,
     client_contact_details.first_name AS first_name,
     client_contact_details.last_name AS last_name,
@@ -1103,6 +1082,7 @@ WHERE
 
         trading_name: rows[0].trading_name,
         client_code: rows[0].client_code,
+        notes: rows[0].notes,
 
         status: rows[0].status,
       };
@@ -1287,6 +1267,8 @@ const clientUpdate = async (client) => {
     website,
   } = client;
 
+  let notes = client.notes == undefined ? "" : client.notes;
+
 
   const checkQuery = `SELECT 1 FROM clients WHERE trading_name = ? AND id != ?`;
 
@@ -1318,7 +1300,8 @@ const clientUpdate = async (client) => {
              trading_address = ?,
              vat_registered = ?,
              vat_number = ?,
-             website = ?
+             website = ?,
+             notes = ?
          WHERE
              id = ?
       `;
@@ -1330,6 +1313,7 @@ const clientUpdate = async (client) => {
         vat_registered,
         vat_number,
         website,
+        notes,
         client_id,
       ]);
       if (result.changedRows > 0) {
@@ -1344,7 +1328,8 @@ const clientUpdate = async (client) => {
          UPDATE clients
          SET 
              client_type = ?,
-             trading_name = ?
+             trading_name = ?,
+             notes = ?
          
          WHERE
              id = ?
@@ -1352,6 +1337,7 @@ const clientUpdate = async (client) => {
       const [result] = await pool.execute(query, [
         client_type,
         trading_name,
+        notes,
         client_id
       ]);
       if (result.changedRows > 0) {

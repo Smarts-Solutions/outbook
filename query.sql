@@ -795,6 +795,18 @@ CREATE TABLE timesheet (
 
 
 
+CREATE TABLE sharepoint_token (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    access_token LONGTEXT NULL,
+    refresh_token LONGTEXT NULL,
+    client_id TEXT NULL,
+    client_secret TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+
     
 
 

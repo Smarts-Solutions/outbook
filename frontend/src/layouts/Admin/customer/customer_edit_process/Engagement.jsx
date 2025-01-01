@@ -1158,7 +1158,7 @@ const Engagement = () => {
                                   </div>
 
                                   {jobEntries.length > 1 && (
-                                    <div className="col-lg-1 text-center mt-4">
+                                    <div className="col-lg-1 text-center mt-0 mt-md-4 mb-md-0 mb-5">
                                       <button
                                         className="delete-icon "
                                         onClick={(e) => handleRemoveJob(index)}
@@ -1210,7 +1210,7 @@ const Engagement = () => {
 
                 <div className="row">
                   {/* Customer Joining Date */}
-                  <div className="col-lg-4">
+                  <div className="col-lg-4 mb-3">
                     <label className="form-label">
                       Customer Joining Date
                     </label>
@@ -1232,7 +1232,7 @@ const Engagement = () => {
                   </div>
 
                   {/* Select Customer Source */}
-                  <div className="col-lg-4">
+                  <div className="col-lg-4 mb-3">
                     <label className="form-label">
                       Select Customer Source
                     </label>
@@ -1258,7 +1258,7 @@ const Engagement = () => {
                   </div>
 
                   {/* Select Customer Sub-Source */}
-                  <div className="col-lg-4">
+                  <div className="col-lg-4 mb-3">
                     <label className="form-label">
                       Select Customer Sub-Source
                     </label>

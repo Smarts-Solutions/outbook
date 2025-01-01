@@ -6,10 +6,15 @@ const addCustomer = async (customer) => {
 };
 
 const customerAction = async (customer) => {
+  
   const {action} = customer
   if(action === "get"){
     return customerModel.getCustomer(customer);
-  }else if(action === "delete"){
+  }
+  else if(action === "get_dropdown"){
+    return customerModel.getCustomer_dropdown(customer);
+  }
+  else if(action === "delete"){
     return customerModel.deleteCustomer(customer);
   }else{
    return

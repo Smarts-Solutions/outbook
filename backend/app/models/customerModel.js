@@ -3,6 +3,7 @@ const deleteUploadFile = require('../../app/middlewares/deleteUploadFile');
 const { SatffLogUpdateOperation, generateNextUniqueCode } = require('../../app/utils/helper');
 
 const createCustomer = async (customer) => {
+  
     // Customer Code(cust+CustName+UniqueNo)
     const { customer_id } = customer;
 
@@ -15,7 +16,9 @@ const createCustomer = async (customer) => {
         const customer_code = await generateNextUniqueCode(data);
 
         if (customer.CustomerType == "1") {
-            const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, First_Name, Last_Name, Phone, Email, Residential_Address } = customer;
+            const { CustomerType, staff_id, account_manager_id, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, First_Name, Last_Name, Phone, Email, Residential_Address ,notes } = customer;
+
+            const Trading_Name  = customer.Trading_Name;
 
             const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
 
@@ -26,12 +29,12 @@ const createCustomer = async (customer) => {
 
 
             const query = `
-    INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process,notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?)
     `;
 
             try {
-                const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, customer_code, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus]);
+                const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, customer_code, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus , notes]);
                 const customer_id = result.insertId;
                 const currentDate = new Date();
                 await SatffLogUpdateOperation(
@@ -60,10 +63,11 @@ const createCustomer = async (customer) => {
                 throw err;
             }
         }
-
         else if (customer.CustomerType == "2") {
 
-            const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, company_name, entity_type, company_status, company_number, Registered_Office_Addres, Incorporation_Date, Incorporation_in, contactDetails } = customer;
+            const { CustomerType, staff_id, account_manager_id, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, company_name, entity_type, company_status, company_number, Registered_Office_Addres, Incorporation_Date, Incorporation_in, contactDetails,notes} = customer;
+
+            const Trading_Name  = customer.Trading_Name+'_'+customer_code;
 
             const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
 
@@ -74,12 +78,12 @@ const createCustomer = async (customer) => {
 
 
             const query = `
-    INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process,notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
             try {
-                const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, customer_code, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus]);
+                const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, customer_code, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, notes]);
                 const customer_id = result.insertId;
                 const currentDate = new Date();
                 await SatffLogUpdateOperation(
@@ -125,13 +129,12 @@ const createCustomer = async (customer) => {
                 throw err;
             }
         }
-
         else if (customer.CustomerType == "3") {
 
 
-            const { CustomerType, staff_id, account_manager_id, Trading_Name, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, contactDetails } = customer;
-
-
+            const { CustomerType, staff_id, account_manager_id, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, contactDetails ,notes } = customer;
+            
+            const Trading_Name  = customer.Trading_Name;
 
             const checkQuery = `SELECT 1 FROM customers WHERE trading_name = ?`;
 
@@ -143,12 +146,12 @@ const createCustomer = async (customer) => {
 
 
             const query = `
-    INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO customers (customer_type,staff_id,account_manager_id,trading_name,customer_code,trading_address,vat_registered,vat_number,website,form_process,notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
             try {
-                const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, customer_code, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus]);
+                const [result] = await pool.execute(query, [CustomerType, staff_id, account_manager_id, Trading_Name, customer_code, Trading_Address, VAT_Registered, VAT_Number, Website, PageStatus, notes]);
                 const customer_id = result.insertId;
                 const currentDate = new Date();
                 await SatffLogUpdateOperation(
@@ -344,7 +347,7 @@ const createCustomer = async (customer) => {
                     let email = detail.email;
                     let phone_code = detail.phone_code == undefined ? "" : detail.phone_code;
                     let phone = detail.phone;
-                   
+
                     let authorised_signatory_status = detail.authorised_signatory_status;
 
 
@@ -389,7 +392,10 @@ const createCustomer = async (customer) => {
 
 const getCustomer = async (customer) => {
     const { staff_id } = customer;
-
+    const page = parseInt(customer.page) || 1; // Default to page 1
+    const limit = parseInt(customer.limit) || 10; // Default to 10 items per page
+    const offset = (page - 1) * limit;
+    const search = customer.search || "";
 
     const QueryRole = `
   SELECT
@@ -407,6 +413,11 @@ const getCustomer = async (customer) => {
     const [rows] = await pool.execute(QueryRole);
     // Condition with Admin And SuperAdmin
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+
+        const countQuery = `SELECT COUNT(*) AS total FROM customers WHERE trading_name LIKE ?`;
+
+        const [[{ total }]] = await pool.execute(countQuery, [`%${search}%`]);
+
         const query = `
     SELECT  
     customers.id AS id,
@@ -440,121 +451,166 @@ JOIN
 JOIN 
     staffs AS staff2 ON customers.account_manager_id = staff2.id
 LEFT JOIN 
-    customer_company_information ON customers.id = customer_company_information.customer_id   
-ORDER BY 
-    customers.id DESC;
-    `;
-        const [result] = await pool.execute(query);
-        return { status: true, message: 'Success..', data: result };
-    }
-    let result = []
-    if (rows.length > 0) {
-        // Allocated to
-        if (rows[0].role_id == 3) {
-            const query = `
-           SELECT  
-    customers.id AS id,
-    customers.customer_type AS customer_type,
-    customers.staff_id AS staff_id,
-    customers.account_manager_id AS account_manager_id,
-    customers.trading_name AS trading_name,
-    customers.trading_address AS trading_address,
-    customers.vat_registered AS vat_registered,
-    customers.vat_number AS vat_number,
-    customers.website AS website,
-    customers.form_process AS form_process,
-    customers.created_at AS created_at,
-    customers.updated_at AS updated_at,
-    customers.status AS status,
-    staff1.first_name AS staff_firstname, 
-    staff1.last_name AS staff_lastname,
-    staff2.first_name AS account_manager_firstname, 
-    staff2.last_name AS account_manager_lastname,
-    customer_company_information.company_name AS company_name,
-    customer_company_information.company_number AS company_number,
-    CONCAT(
-        'cust_', 
-        SUBSTRING(customers.trading_name, 1, 3), '_',
-        SUBSTRING(customers.customer_code, 1, 15)
-    ) AS customer_code
-FROM 
-    customers
-LEFT JOIN
-    jobs ON jobs.customer_id = customers.id   
-JOIN 
-    staffs AS staff1 ON customers.staff_id = staff1.id
-JOIN 
-    staffs AS staff2 ON customers.account_manager_id = staff2.id
-LEFT JOIN
     customer_company_information ON customers.id = customer_company_information.customer_id
-WHERE 
-    jobs.allocated_to = ? OR customers.staff_id = ?
-GROUP BY 
-    CASE 
-        WHEN jobs.allocated_to = ? THEN jobs.customer_id
-        ELSE customers.id
-    END
+ WHERE 
+    customers.trading_name LIKE ?
 ORDER BY 
     customers.id DESC
-            `;
-            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
+LIMIT ? OFFSET ?
+    ;
+    `;
+
+        const searchQuery = `%${search}%`;
+        const [result] = await pool.execute(query, [searchQuery, limit, offset]);
+
+        return {
+            status: true,
+            message: 'Success..',
+            data: {
+                data: result, pagination: {
+                    totalItems: total,
+                    totalPages: Math.ceil(total / limit),
+                    currentPage: page,
+                    limit
+                }
+            },
+
+        };
+
+        // return { status: true, message: 'Success..', data: result };
+    }
+    let result = []
+    let total = 0;
+    if (rows.length > 0) {
+
+        // Allocated to
+        if (rows[0].role_id == 3) {
+            const countQuery = `SELECT COUNT(*) AS total_count
+                FROM (
+                    SELECT  
+                        customers.id AS id
+                    FROM 
+                        customers
+                    LEFT JOIN
+                        jobs ON jobs.customer_id = customers.id   
+                    JOIN 
+                        staffs AS staff1 ON customers.staff_id = staff1.id
+                    JOIN 
+                        staffs AS staff2 ON customers.account_manager_id = staff2.id
+                    LEFT JOIN
+                        customer_company_information ON customers.id = customer_company_information.customer_id
+                    WHERE 
+                    ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.allocated_to = ? OR customers.staff_id = ?)` : 'jobs.allocated_to = ? OR customers.staff_id = ?'}
+                    GROUP BY 
+                        CASE 
+                            WHEN jobs.allocated_to = ? THEN jobs.customer_id
+                            ELSE customers.id
+                        END
+                ) AS result;
+          `;
+
+            let queryDataCount = [staff_id, staff_id, staff_id];
+            if (search) {
+                queryDataCount = [staff_id, staff_id, staff_id];
+            }
+
+            const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
+
+            const query = `
+            SELECT  
+                customers.id AS id,
+                customers.customer_type AS customer_type,
+                customers.staff_id AS staff_id,
+                customers.account_manager_id AS account_manager_id,
+                customers.trading_name AS trading_name,
+                customers.trading_address AS trading_address,
+                customers.vat_registered AS vat_registered,
+                customers.vat_number AS vat_number,
+                customers.website AS website,
+                customers.form_process AS form_process,
+                customers.created_at AS created_at,
+                customers.updated_at AS updated_at,
+                customers.status AS status,
+                staff1.first_name AS staff_firstname, 
+                staff1.last_name AS staff_lastname,
+                staff2.first_name AS account_manager_firstname, 
+                staff2.last_name AS account_manager_lastname,
+                customer_company_information.company_name AS company_name,
+                customer_company_information.company_number AS company_number,
+                CONCAT(
+                    'cust_', 
+                    SUBSTRING(customers.trading_name, 1, 3), '_',
+                    SUBSTRING(customers.customer_code, 1, 15)
+                ) AS customer_code
+            FROM 
+                customers
+            LEFT JOIN
+                jobs ON jobs.customer_id = customers.id   
+            JOIN 
+                staffs AS staff1 ON customers.staff_id = staff1.id
+            JOIN 
+                staffs AS staff2 ON customers.account_manager_id = staff2.id
+            LEFT JOIN
+                customer_company_information ON customers.id = customer_company_information.customer_id
+            WHERE 
+                ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.allocated_to = ? OR customers.staff_id = ?)` : 'jobs.allocated_to = ? OR customers.staff_id = ?'}
+            GROUP BY 
+                CASE 
+                    WHEN jobs.allocated_to = ? THEN jobs.customer_id
+                    ELSE customers.id
+                END
+            ORDER BY 
+                customers.id DESC
+            LIMIT ? OFFSET ?
+        `;
+            let queryData = [staff_id, staff_id, staff_id, limit, offset];
+            if (search) {
+                queryData = [staff_id, staff_id, staff_id, limit, offset];
+            }
+
+            const [resultAllocated] = await pool.execute(query, queryData);
+
             result = resultAllocated
+            total = total_count;
 
         }
         // Account Manger
         else if (rows[0].role_id == 4) {
+            const countQuery = `SELECT COUNT(*) AS total_count
+            FROM (
+                SELECT 
+                    customers.id
+                FROM 
+                    customers
+                LEFT JOIN 
+                    customer_services ON customer_services.customer_id = customers.id
+                LEFT JOIN 
+                    customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+                LEFT JOIN 
+                    staffs AS staff1 ON customers.staff_id = staff1.id
+                LEFT JOIN 
+                    staffs AS staff2 ON customers.account_manager_id = staff2.id
+                LEFT JOIN 
+                    customer_company_information ON customers.id = customer_company_information.customer_id
+                WHERE 
+         ${search ? `customers.trading_name LIKE '%${search}%' AND (customer_service_account_managers.account_manager_id = ?
+                OR customers.account_manager_id = ?
+                OR customers.staff_id = ?)` :
+                    `customer_service_account_managers.account_manager_id = ?
+            OR customers.account_manager_id = ?
+            OR customers.staff_id = ?`}
+            GROUP BY 
+                customers.id
+        ) AS result`;
+
+            let queryDataCount = [staff_id, staff_id, staff_id];
+            if (search) {
+                queryDataCount = [staff_id, staff_id, staff_id];
+            }
+            const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
 
 
             const query = `
-            SELECT  
-            customers.id AS id,
-            customers.customer_type AS customer_type,
-            customers.staff_id AS staff_id,
-            customers.account_manager_id AS account_manager_id,
-            customers.trading_name AS trading_name,
-            customers.trading_address AS trading_address,
-            customers.vat_registered AS vat_registered,
-            customers.vat_number AS vat_number,
-            customers.website AS website,
-            customers.form_process AS form_process,
-            customers.created_at AS created_at,
-            customers.updated_at AS updated_at,
-            customers.status AS status,
-            staff1.first_name AS staff_firstname, 
-            staff1.last_name AS staff_lastname,
-            staff2.first_name AS account_manager_firstname, 
-            staff2.last_name AS account_manager_lastname,
-            customer_company_information.company_name AS company_name,
-            customer_company_information.company_number AS company_number,
-            CONCAT(
-            'cust_', 
-            SUBSTRING(customers.trading_name, 1, 3), '_',
-            SUBSTRING(customers.customer_code, 1, 15)
-            ) AS customer_code
-        FROM 
-            customers
-        LEFT JOIN 
-            jobs ON jobs.customer_id = customers.id   
-        JOIN 
-            staffs AS staff1 ON customers.staff_id = staff1.id
-        JOIN 
-            staffs AS staff2 ON customers.account_manager_id = staff2.id
-        LEFT JOIN 
-            customer_company_information ON customers.id = customer_company_information.customer_id
-        WHERE jobs.account_manager_id = ? OR customers.staff_id = ?
-        GROUP BY 
-    CASE 
-        WHEN jobs.account_manager_id = ? THEN jobs.customer_id
-        ELSE customers.id
-    END
-        ORDER BY 
-            customers.id DESC;
-            `;
-            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
-            result = resultAllocated;
-
-            if (resultAllocated.length > 0) {
-                const query = `
             SELECT  
             customers.id AS id,
             customers.customer_type AS customer_type,
@@ -583,80 +639,73 @@ ORDER BY
             ) AS customer_code
         FROM 
             customers
-        JOIN 
+        LEFT JOIN 
             customer_services ON customer_services.customer_id = customers.id
-        JOIN 
+        LEFT JOIN 
             customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
-        JOIN 
+        LEFT JOIN 
             staffs AS staff1 ON customers.staff_id = staff1.id
-        JOIN 
+        LEFT JOIN 
             staffs AS staff2 ON customers.account_manager_id = staff2.id
         LEFT JOIN 
             customer_company_information ON customers.id = customer_company_information.customer_id
-        WHERE customer_service_account_managers.account_manager_id = ? OR customers.staff_id= ?
+        WHERE 
+            ${search ? `customers.trading_name LIKE '%${search}%' AND (customer_service_account_managers.account_manager_id = ?
+                OR customers.account_manager_id = ?
+                OR customers.staff_id = ?)` :
+                    `customer_service_account_managers.account_manager_id = ?
+            OR customers.account_manager_id = ?
+            OR customers.staff_id = ?`}
+
         GROUP BY 
         customers.id
         ORDER BY 
-        customers.id DESC;
+        customers.id DESC
+        LIMIT ? OFFSET ?
+           ;
             `;
-                const [resultAllocated2] = await pool.execute(query, [staff_id, staff_id]);
-                result = resultAllocated2;
-            } else {
 
-                const query = `
-                SELECT  
-                customers.id AS id,
-                customers.customer_type AS customer_type,
-                customers.staff_id AS staff_id,
-                customers.account_manager_id AS account_manager_id,
-                customers.trading_name AS trading_name,
-                customers.customer_code AS customer_code,
-                customers.trading_address AS trading_address,
-                customers.vat_registered AS vat_registered,
-                customers.vat_number AS vat_number,
-                customers.website AS website,
-                customers.form_process AS form_process,
-                customers.created_at AS created_at,
-                customers.updated_at AS updated_at,
-                customers.status AS status,
-                staff1.first_name AS staff_firstname, 
-                staff1.last_name AS staff_lastname,
-                staff2.first_name AS account_manager_firstname, 
-                staff2.last_name AS account_manager_lastname,
-                customer_company_information.company_name AS company_name,
-                customer_company_information.company_number AS company_number,
-                CONCAT(
-                'cust_', 
-                SUBSTRING(customers.trading_name, 1, 3), '_',
-                SUBSTRING(customers.customer_code, 1, 15)
-                ) AS customer_code
-            FROM 
-                customers
-            JOIN 
-                customer_services ON customer_services.customer_id = customers.id
-            JOIN 
-                customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id   
-            JOIN 
-                staffs AS staff1 ON customers.staff_id = staff1.id
-            JOIN 
-                staffs AS staff2 ON customers.account_manager_id = staff2.id
-            LEFT JOIN 
-                customer_company_information ON customers.id = customer_company_information.customer_id
-            WHERE customer_service_account_managers.account_manager_id = ? OR customers.staff_id= ?
-            GROUP BY 
-            customers.id
-            ORDER BY 
-            customers.id DESC;
-                `;
-                const [resultAllocated3] = await pool.execute(query, [staff_id, staff_id]);
-                result = resultAllocated3;
-
+            let queryData = [staff_id, staff_id, staff_id, limit, offset];
+            if (search) {
+                queryData = [staff_id, staff_id, staff_id, limit, offset];
             }
-
+            const [resultAllocated] = await pool.execute(query, queryData);
+            result = resultAllocated;
+            total = total_count;
         }
         // Reviewer
         else if (rows[0].role_id == 6) {
+            const countQuery = `
+            SELECT COUNT(*) AS total_count
+            FROM (
+                SELECT  
+                    customers.id AS id
+                FROM 
+                    customers
+                LEFT JOIN 
+                    jobs ON jobs.customer_id = customers.id   
+                JOIN 
+                    staffs AS staff1 ON customers.staff_id = staff1.id
+                JOIN 
+                    staffs AS staff2 ON customers.account_manager_id = staff2.id
+                LEFT JOIN 
+                    customer_company_information ON customers.id = customer_company_information.customer_id
+                WHERE 
+                    ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ?)` : 'jobs.reviewer = ? OR customers.staff_id = ?'}
+                GROUP BY 
+                    CASE 
+                        WHEN jobs.reviewer = ? THEN jobs.customer_id
+                        ELSE customers.id
+                    END
+            ) AS result;
+`;
 
+            let queryDataCount = [staff_id, staff_id, staff_id];
+            if (search) {
+                queryDataCount = [staff_id, staff_id, staff_id];
+            }
+
+            const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
             const query = `
             SELECT  
             customers.id AS id,
@@ -693,20 +742,50 @@ ORDER BY
             staffs AS staff2 ON customers.account_manager_id = staff2.id
         LEFT JOIN 
             customer_company_information ON customers.id = customer_company_information.customer_id
-        WHERE jobs.reviewer = ? OR customers.staff_id = ?  
+        WHERE  ${search ? `customers.trading_name LIKE '%${search}%' AND (jobs.reviewer = ? OR customers.staff_id = ?)` : 'jobs.reviewer = ? OR customers.staff_id = ?'} 
          GROUP BY 
     CASE 
         WHEN jobs.reviewer = ? THEN jobs.customer_id
         ELSE customers.id
     END
         ORDER BY 
-            customers.id DESC;
+            customers.id DESC
+             LIMIT ? OFFSET ?;
             `;
-            const [resultAllocated] = await pool.execute(query, [staff_id, staff_id, staff_id]);
+
+            let queryData = [staff_id, staff_id, staff_id, limit, offset];
+            if (search) {
+                queryData = [staff_id, staff_id, staff_id, limit, offset];
+            }
+
+            const [resultAllocated] = await pool.execute(query, queryData);
             result = resultAllocated
+            total = total_count;
 
         }
         else {
+            const countQuery = `
+            SELECT COUNT(*) AS total_count
+            FROM (
+                SELECT
+                    customers.id AS id
+                FROM
+                    customers
+                JOIN
+                    staffs AS staff1 ON customers.staff_id = staff1.id
+                JOIN
+                    staffs AS staff2 ON customers.account_manager_id = staff2.id
+                LEFT JOIN
+                    customer_company_information ON customers.id = customer_company_information.customer_id
+                WHERE 
+                    ${search ? `customers.trading_name LIKE '%${search}%' AND customers.staff_id = ?` : 'customers.staff_id = ?'}    
+            ) AS result;`;
+
+            let queryDataCount = [staff_id];
+            if (search) {
+                queryDataCount = [staff_id];
+            }
+            const [[{ total_count }]] = await pool.execute(countQuery, queryDataCount);
             const query = `
             SELECT  
             customers.id AS id,
@@ -741,25 +820,206 @@ ORDER BY
             staffs AS staff2 ON customers.account_manager_id = staff2.id
         LEFT JOIN 
             customer_company_information ON customers.id = customer_company_information.customer_id
-        WHERE staff1.id = ?   
+        WHERE 
+            ${search ? `customers.trading_name LIKE '%${search}%' AND customers.staff_id = ?` : 'customers.staff_id = ?'}    
         ORDER BY 
-            customers.id DESC;
+            customers.id DESC
+            LIMIT ? OFFSET ?;
             `;
-            const [result1] = await pool.execute(query, [staff_id]);
+
+            let queryData = [staff_id, limit, offset];
+            if (search) {
+                queryData = [staff_id, limit, offset];
+                }
+            const [result1] = await pool.execute(query, queryData);
             result = result1
+            total = total_count;
         }
     }
-
     try {
+        return {
+            status: true,
+            message: 'Success..',
+            data: {
+                data: result, pagination: {
+                    totalItems: total,
+                    totalPages: Math.ceil(total / limit),
+                    currentPage: page,
+                    limit
+                }
+            },
 
-        return { status: true, message: 'Success..', data: result };
+        };
+        // return { status: true, message: 'Success..', data: result };
 
     } catch (err) {
-
+        console.error('Error selecting data:', err);
         return { status: true, message: 'Error selecting data', data: err };
     }
 
 }
+
+const getCustomer_dropdown = async (customer) => {
+    const { StaffUserId } = customer;
+    const QueryRole = `
+  SELECT
+    staffs.id AS id,
+    staffs.role_id AS role_id,
+    roles.role AS role_name
+  FROM
+    staffs
+  JOIN
+    roles ON roles.id = staffs.role_id
+  WHERE
+    staffs.id = ${StaffUserId}
+  LIMIT 1
+  `
+    const [rows] = await pool.execute(QueryRole);
+    // Condition with Admin And SuperAdmin
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || rows[0].role_name == "ADMIN")) {
+        const query = `
+    SELECT  
+    customers.id AS id,
+    customers.trading_name AS trading_name,
+    CONCAT(
+    'cust_', 
+    SUBSTRING(customers.trading_name, 1, 3), '_',
+    SUBSTRING(customers.customer_code, 1, 15)
+    ) AS customer_code
+FROM 
+    customers
+ORDER BY 
+id DESC;`;
+
+        const [result] = await pool.execute(query);
+        console.log("result",result)
+
+        return { status: true, message: 'Success..', data: result };
+    }
+    let result = []
+
+    if (rows.length > 0) {
+        // Allocated to
+        if (rows[0].role_id == 3) {
+        
+            const query = `
+            SELECT  
+                customers.id AS id,
+                customers.trading_name AS trading_name,
+                CONCAT(
+                    'cust_', 
+                    SUBSTRING(customers.trading_name, 1, 3), '_',
+                    SUBSTRING(customers.customer_code, 1, 15)
+                ) AS customer_code
+            FROM 
+                customers
+            LEFT JOIN
+                jobs ON jobs.customer_id = customers.id
+            WHERE 
+                jobs.allocated_to = ? OR customers.staff_id = ?
+            GROUP BY 
+                CASE 
+                    WHEN jobs.allocated_to = ? THEN jobs.customer_id
+                    ELSE customers.id
+                END
+            ORDER BY 
+                customers.id DESC`;
+            const [resultAllocated] = await pool.execute(query, [StaffUserId, StaffUserId, StaffUserId]);
+            result = resultAllocated
+
+        }
+        // Account Manger
+        else if (rows[0].role_id == 4) {
+             console.log("modelll INSIDE...",customer)
+            const query = `
+            SELECT  
+            customers.id AS id,
+            customers.trading_name AS trading_name,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
+        FROM 
+            customers
+        LEFT JOIN 
+            customer_services ON customer_services.customer_id = customers.id
+        LEFT JOIN 
+            customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+        WHERE 
+            customer_service_account_managers.account_manager_id = ?
+            OR customers.account_manager_id = ?
+            OR customers.staff_id = ?
+
+        GROUP BY 
+        customers.id
+        ORDER BY 
+        customers.id DESC
+           ;
+            `;
+            const [resultAllocated] = await pool.execute(query, [StaffUserId, StaffUserId, StaffUserId]);
+            result = resultAllocated;
+           
+        }
+
+        // Reviewer
+        else if (rows[0].role_id == 6) {
+           
+            const query = `
+            SELECT  
+            customers.id AS id,
+            customers.trading_name AS trading_name,
+            CONCAT(
+            'cust_', 
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(customers.customer_code, 1, 15)
+            ) AS customer_code
+        FROM 
+            customers
+        LEFT JOIN 
+            jobs ON jobs.customer_id = customers.id
+        WHERE 
+         jobs.reviewer = ? OR customers.staff_id = ?
+         GROUP BY 
+    CASE 
+        WHEN jobs.reviewer = ? THEN jobs.customer_id
+        ELSE customers.id
+    END
+        ORDER BY 
+            customers.id DESC;
+            `;
+
+            const [resultAllocated] = await pool.execute(query, [StaffUserId, StaffUserId, StaffUserId]);
+            result = resultAllocated
+
+        }
+        else {
+            const query = `
+            SELECT  
+            id,
+            trading_name
+        FROM 
+            customers
+        WHERE 
+            staff_id = ? 
+        ORDER BY 
+            id DESC;
+            `;
+            const [result1] = await pool.execute(query, [StaffUserId]);
+            result = result1
+        }
+    }
+    try {
+       
+         return { status: true, message: 'Success..', data: result };
+
+    } catch (err) {
+        console.error('Error selecting getCustomer_dropdown  data:', err);
+        return { status: true, message: 'Error selecting getCustomer_dropdown data', data: err };
+    }
+
+}
+
 
 const deleteCustomer = async (customer) => {
     // if(parseInt(customer_id)  > 0){
@@ -1439,6 +1699,7 @@ const getSingleCustomer = async (customer) => {
         customers.vat_number AS vat_number,
         customers.website AS website,
         customers.form_process AS form_process,
+        customers.notes AS notes,
         customers.status AS status,
         customer_contact_details.id AS contact_id,
         customer_contact_details.first_name AS first_name,
@@ -1481,6 +1742,7 @@ const getSingleCustomer = async (customer) => {
                     website: rows[0].website,
                     form_process: rows[0].form_process,
                     status: rows[0].status,
+                    notes: rows[0].notes
 
 
                 };
@@ -1528,6 +1790,7 @@ const getSingleCustomer = async (customer) => {
             customers.vat_number AS vat_number,
             customers.website AS website,
             customers.form_process AS form_process,
+            customers.notes AS notes,
             customers.status AS status, 
             customer_contact_details.id AS contact_id,
             customer_contact_details.first_name AS first_name,
@@ -1573,6 +1836,7 @@ const getSingleCustomer = async (customer) => {
                     vat_number: rows[0].vat_number,
                     website: rows[0].website,
                     form_process: rows[0].form_process,
+                    notes: rows[0].notes,
                     status: rows[0].status,
                 };
 
@@ -1630,6 +1894,7 @@ const getSingleCustomer = async (customer) => {
             customers.vat_number AS vat_number,
             customers.website AS website,
             customers.form_process AS form_process,
+            customers.notes AS notes,
             customers.status AS status,
             customer_contact_details.id AS contact_id,
             customer_contact_details.first_name AS first_name,
@@ -1667,6 +1932,7 @@ const getSingleCustomer = async (customer) => {
                     vat_number: rows[0].vat_number,
                     website: rows[0].website,
                     form_process: rows[0].form_process,
+                    notes: rows[0].notes,
                     status: rows[0].status,
                 };
 
@@ -1746,6 +2012,7 @@ const getSingleCustomer = async (customer) => {
             customers.vat_number AS vat_number,
             customers.website AS website,
             customers.form_process AS form_process,
+            customers.notes AS notes,
             customers.status AS status,
             customer_services.id as customer_service_id,
             customer_services.service_id,
@@ -1777,6 +2044,7 @@ const getSingleCustomer = async (customer) => {
                 vat_number: rows[0].vat_number,
                 website: rows[0].website,
                 form_process: rows[0].form_process,
+                notes: rows[0].notes,
                 status: rows[0].status,
             };
 
@@ -1795,8 +2063,6 @@ const getSingleCustomer = async (customer) => {
                 customer: customerData,
                 services: services
             };
-
-            console.log("result ", result)
 
             return result;
         } else {
@@ -1822,6 +2088,7 @@ const getSingleCustomer = async (customer) => {
             customers.vat_number AS vat_number,
             customers.website AS website,
             customers.form_process AS form_process,
+            customers.notes AS notes,
             customers.status AS status,
 
             DATE_FORMAT(customers.customerJoiningDate, '%Y-%m-%d') AS customerJoiningDate,
@@ -1869,6 +2136,7 @@ const getSingleCustomer = async (customer) => {
                 vat_number: rows[0].vat_number,
                 website: rows[0].website,
                 form_process: rows[0].form_process,
+                notes: rows[0].notes,
                 status: rows[0].status,
                 customerJoiningDate: rows[0].customerJoiningDate,
                 customerSource: rows[0].customerSource,
@@ -1971,6 +2239,7 @@ const getSingleCustomer = async (customer) => {
             customers.vat_number AS vat_number,
             customers.website AS website,
             customers.form_process AS form_process,
+            customers.notes AS notes,
             customers.status AS status,
             customer_paper_work.id AS customer_paper_work_id,
             customer_paper_work.file_name AS file_name,
@@ -1999,6 +2268,7 @@ const getSingleCustomer = async (customer) => {
                 vat_number: rows[0].vat_number,
                 website: rows[0].website,
                 form_process: rows[0].form_process,
+                notes: rows[0].notes,
                 status: rows[0].status,
             };
 
@@ -2037,8 +2307,7 @@ const customerUpdate = async (customer) => {
     // Page Status 1 
     if (pageStatus === "1") {
 
-
-        const { customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website, contactDetails } = customer;
+        const { customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website, contactDetails ,notes } = customer;
 
 
         const firstThreeLetters = trading_name.substring(0, 3);
@@ -2053,11 +2322,11 @@ const customerUpdate = async (customer) => {
 
         const query = `
         UPDATE customers
-        SET customer_type = ?, staff_id = ?, account_manager_id = ?, trading_name = ?, trading_address = ?, vat_registered = ?, vat_number = ?, website = ?
+        SET customer_type = ?, staff_id = ?, account_manager_id = ?, trading_name = ?, trading_address = ?, vat_registered = ?, vat_number = ?, website = ? ,notes = ? 
         WHERE id = ?
         `;
 
-        const [result] = await pool.execute(query, [customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website, customer_id]);
+        const [result] = await pool.execute(query, [customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website,notes, customer_id]);
 
         let cust_type = 'sole trader'
         if (customer_type === '2') {
@@ -2361,11 +2630,6 @@ const customerUpdate = async (customer) => {
     //  Page Status 2 Service Part
     else if (pageStatus === "2") {
         const { services, Task } = customer;
-
-        console.log("services", services)
-        console.log("Task", Task)
-
-
         const [ExistServiceids] = await pool.execute('SELECT service_id  FROM `customer_services` WHERE customer_id =' + customer_id);
         const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
         var account_manager_id = ExistCustomer[0].account_manager_id;
@@ -2536,10 +2800,10 @@ WHERE service_id = ${service_id} AND customer_id = 0;
 
 
         if (Task.length > 0) {
+
             const checklistName = Task[0].checklistName;
             const JobTypeId = Task[0].JobTypeId;
             const serviceId = Task[0].serviceId;
-
             const client_type_id = customer_type
             const checkQueryChecklist = `
     SELECT id FROM checklists WHERE customer_id = ? AND service_id = ? AND job_type_id = ? AND client_type_id = ? AND check_list_name = ?
@@ -2553,10 +2817,10 @@ WHERE service_id = ${service_id} AND customer_id = 0;
                 const [result] = await pool.execute(insertChecklistQuery, [customer_id, serviceId, JobTypeId, client_type_id, checklistName]);
                 const checklist_id = result.insertId;
 
-                if (Task[0].Task.length > 0) {
-                    for (const tsk_name of Task[0].Task) {
-                        const TaskName = tsk_name.TaskName;
-                        const BudgetHour = tsk_name.BudgetHour;
+                if (Task.length > 0) {
+                    for (const tsk_name of Task) {
+                        const TaskName = tsk_name.Task[0].TaskName;
+                        const BudgetHour = tsk_name.Task[0].BudgetHour;
                         const checkQuery = `SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?`;
                         const [existing] = await pool.execute(checkQuery, [TaskName, serviceId, JobTypeId,
                         ]);
@@ -3186,6 +3450,7 @@ const getcustomerschecklist = async (customer) => {
 module.exports = {
     createCustomer,
     getCustomer,
+    getCustomer_dropdown,
     deleteCustomer,
     updateProcessCustomerServices,
     updateProcessCustomerEngagementModel,
@@ -3195,6 +3460,7 @@ module.exports = {
     getSingleCustomer,
     customerUpdate,
     customerStatusUpdate,
-    getcustomerschecklist
+    getcustomerschecklist,
+
 
 };

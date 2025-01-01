@@ -3,15 +3,48 @@ import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useNavigate, useLocation } from "react-router-dom";
-import { JobAction, Update_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { JobAction, Update_Status ,getAllCustomerDropDown } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
 
 
-const ClientList = () => {
+const ClientLists = () => {
   const navigate = useNavigate();
+  const customer_id_sidebar = sessionStorage.getItem('customer_id_sidebar');
+  const [CustomerData, setCustomerData] = useState([]);
+  const [customerId, setCustomerId] = useState(customer_id_sidebar || '');
+  const [customerName, setCustomerName] = useState('');
+
+  const GetAllCustomer = async () => {
+    const req = { action: "get_dropdown" };
+    const data = { req: req, authToken: token };
+    await dispatch(getAllCustomerDropDown(data)).unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setCustomerData(response.data);
+          if(response?.data[0]?.id != "" && response?.data[0]?.id != undefined) {
+            setCustomerId(customer_id_sidebar || response?.data[0]?.id);
+            GetAllClientData(customer_id_sidebar || response?.data[0]?.id);
+            setCustomerName(response?.data[0]?.trading_name);
+            setHararchyData({ customer: {id:customer_id_sidebar || response?.data[0]?.id,trading_name:response?.data[0]?.trading_name}});
+            setActiveTab("client");
+          }
+
+        } else {
+         setCustomerData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+  useEffect(() => {
+  GetAllCustomer();
+  }, []);
+
   const location = useLocation();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
@@ -19,7 +52,7 @@ const ClientList = () => {
   const [getJobDetails, setGetJobDetails] = useState([]);
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
-  const [hararchyData, setHararchyData] = useState({ customer: location.state });
+  const [hararchyData, setHararchyData] = useState({ customer: {id:customerId,trading_name:customerName}});
   const [searchQuery, setSearchQuery] = useState("");
   const [selectStatusIs, setStatusId] = useState('')
   const [statusDataAll, setStatusDataAll] = useState([])
@@ -39,8 +72,7 @@ const ClientList = () => {
   JSON.parse(localStorage.getItem("accessData") || "[]").find(
     (item) => item.permission_name === "customer"
   )?.items || [];
-
-
+  
   useEffect(() => {
     if (accessDataCustomer.length === 0) return;
     const updatedAccess = { insert: 0, update: 0, delete: 0, view: 0 };
@@ -74,9 +106,9 @@ const ClientList = () => {
 
 
   const initialTabs = [
-    { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
-    { id: "status", label: "Status", icon: "fa-solid fa-info-circle" },
-    { id: "checklist", label: "Checklist", icon: "fa-solid fa-check-square" },
+   // { id: "documents", label: "Documents", icon: "fa-solid fa-file" },
+   // { id: "status", label: "Status", icon: "fa-solid fa-info-circle" },
+    //{ id: "checklist", label: "Checklist", icon: "fa-solid fa-check-square" },
   ];
 
   const [tabs, setTabs] = useState(initialTabs);
@@ -126,10 +158,10 @@ const ClientList = () => {
         getCheckListData();
       }
       else if (activeTab === "client") {
-        GetAllClientData();
+        GetAllClientData(customerId);
       }
       else if (activeTab === "job") {
-        GetAllClientData();
+        GetAllClientData(customerId);
         JobDetails();
       }
     }
@@ -222,7 +254,7 @@ const ClientList = () => {
           {
             getAccessDataClient.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
               <button className="edit-icon" onClick={() =>
-                navigate("/admin/client/edit", { state: { row, id: location.state.id, activeTab: activeTab } })}>
+                navigate("/admin/client/edit", { state: { row, id: customerId, activeTab: activeTab } })}>
                 <i className="ti-pencil" />
               </button>
             ) : null
@@ -591,7 +623,7 @@ const ClientList = () => {
             (getAccessDataCustomer.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
               <button className="edit-icon" onClick={() =>
                 navigate("/admin/edit/checklist", {
-                  state: { id: location.state.id, checklist_id: row.checklists_id, activeTab: activeTab },
+                  state: { id: customerId, checklist_id: row.checklists_id, activeTab: activeTab },
                 })}>
                 <i className="ti-pencil" />
               </button> : null
@@ -650,7 +682,7 @@ const ClientList = () => {
   ];
 
   const JobDetails = async () => {
-    const req = { action: "getByCustomer", customer_id: location.state.id };
+    const req = { action: "getByCustomer", customer_id: customerId };
     const data = { req: req, authToken: token };
     await dispatch(JobAction(data))
       .unwrap()
@@ -666,8 +698,8 @@ const ClientList = () => {
       });
   };
 
-  const GetAllClientData = async () => {
-    const req = { action: "get", customer_id: location?.state?.id };
+  const GetAllClientData = async (id) => {
+    const req = { action: "get", customer_id: id };
     const data = { req: req, authToken: token };
     await dispatch(ClientAction(data))
       .unwrap()
@@ -684,7 +716,7 @@ const ClientList = () => {
   };
 
   const getCheckListData = async () => {
-    const req = { action: "get", customer_id: location.state.id };
+    const req = { action: "get", customer_id: customerId };
     const data = { req: req, authToken: token };
     await dispatch(getList(data))
       .unwrap()
@@ -788,7 +820,7 @@ const ClientList = () => {
                 timer: 1500,
               });
               JobDetails()
-              GetAllClientData();
+              GetAllClientData(customerId);
             } else {
               sweatalert.fire({
                 title: "Failed",
@@ -837,12 +869,56 @@ const ClientList = () => {
     });
   };
 
-
+ const selectCustomerId = (id , name) => {
+  if(id != "") {
+    sessionStorage.setItem('customer_id_sidebar', id);
+    setCustomerId(id);
+    GetAllClientData(id);
+    setCustomerName(name);
+    setHararchyData({ customer: {id:id,trading_name:name}});
+    setActiveTab("client");
+  }else {
+    setCustomerId('');
+    setClientData([]);
+    setHararchyData({ customer: {id:'',trading_name:''}});
+  }
+ }
+  
+ 
   return (
     <div className="container-fluid">
+      <div className="content-title">
       <div className="row ">
+        
         <div className="col-sm-12">
-          <div className="page-title-box">
+         <div className="form-group col-md-4 mb-0">
+                  <label className="form-label mb-2">Select Customer</label>
+                  <select
+                    name="staff_id"
+                    className="form-select"
+                    id="tabSelect"
+                    defaultValue={customerId}
+                    // onChange={(e) => selectCustomerId(e)}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      const selectedCustomer = CustomerData.find(customer => customer.id == selectedId);
+                      selectCustomerId(selectedId, selectedCustomer?.trading_name);
+                    }}
+                  >
+                    {CustomerData &&
+                      CustomerData.map((val, index) => (
+                        <option
+                          key={index}
+                          value={val.id}
+                          selected={customerId == val.id}
+                        >
+                          {val.trading_name}
+                        </option>
+                      ))}
+                  </select>
+         </div>
+
+          <div className="page-title-box pt-2">
             <div className="row align-items-start flex-md-row flex-column-reverse">
               <div className="col-md-6 col-lg-8">
                 <ul
@@ -877,19 +953,12 @@ const ClientList = () => {
                   activeTab === "" ||
                   activeTab === "job" ? (
                   <>
-                           <div
-                      className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
-                      onClick={() => {
-                        window.history.back();
-                      }}
-                    >
-                      <i className="fa fa-arrow-left pe-1" /> Back
-                    </div>
+                    
                     {
-                      (getAccessDataClient.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") && activeTab === "client" ? (
+                      (getAccessDataClient.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") && activeTab === "client" && customerId != "" ? (
                         <>
                           <div className="btn btn-info text-white mt-2 mt-sm-0  blue-btn"
-                            onClick={() => navigate("/admin/addclient", { state: { id: location.state.id, activeTab: activeTab } })} >
+                            onClick={() => navigate("/admin/addclient", { state: { id: customerId, activeTab: activeTab } })} >
                             <i className="fa fa-plus pe-1" /> Add Client
                           </div>
                         </>
@@ -898,7 +967,7 @@ const ClientList = () => {
 
                           <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={() =>
                             navigate("/admin/createjob", {
-                              state: { customer_id: location.state.id, goto: "Customer", activeTab: activeTab },
+                              state: { customer_id: customerId, goto: "Customer", activeTab: activeTab },
                             })
                           } >
                             <i className="fa fa-plus pe-1" /> Create Job
@@ -907,7 +976,7 @@ const ClientList = () => {
                       ) : (getAccessDataCustomer.insert === 1 || role === "ADMIN" || role === "SUPERADMIN") && activeTab === "checklist" ? (
                         <>
                           <div className="btn btn-info text-white  blue-btn mt-2 mt-sm-0" onClick={() =>
-                            navigate("/admin/create/checklist", { state: { id: location.state.id, activeTab: activeTab } })
+                            navigate("/admin/create/checklist", { state: { id: customerId, activeTab: activeTab } })
                           } >
                             <i className="fa fa-plus pe-1" /> Add Checklist
                           </div>
@@ -983,8 +1052,9 @@ const ClientList = () => {
 
         ))}
       </div>
+      </div>
     </div>
   );
 };
 
-export default ClientList;
+export default ClientLists;

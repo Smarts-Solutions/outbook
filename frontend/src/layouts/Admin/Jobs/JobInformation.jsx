@@ -69,6 +69,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
         InvoiceDate: "",
         InvoiceTime: "",
         InvoiceRemark: "",
+        notes: "",
 
     });
 
@@ -159,6 +160,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                         InvoiceDate: response.data.invoice_date,
                         InvoiceTime: response.data.invoice_hours,
                         InvoiceRemark: response.data.invoice_remark,
+                        notes: response.data.notes,
                     }));
                     setStatusId(response.data.status_type)
                 }
@@ -317,8 +319,6 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
         });
     };
 
-
-
     const RearrangeEngagementOptionArr = [];
     const filteredData = AllJobData.data?.engagement_model?.[0]
         ? Object.keys(AllJobData.data.engagement_model[0])
@@ -340,10 +340,11 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
             }, {})
         : {};
 
-        console.log("RearrangeEngagementOptionArr", RearrangeEngagementOptionArr)
-        console.log("JobInformationData", JobInformationData.EngagementModel)
-  
-  
+    //console.log("RearrangeEngagementOptionArr", RearrangeEngagementOptionArr)
+    // console.log("JobInformationData", JobInformationData.EngagementModel)
+    console.log("location.state - 1 ", location.state)
+
+
     return (
         <div>
             <div className='row mb-3'>
@@ -378,11 +379,15 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                     </button>
                                 )}
 
-                                {(getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
-                                    <button className='delete-icon' onClick={handleDelete}>
-                                        <i className="ti-trash text-danger" />
-                                    </button>
-                                )}
+                                {
+                                    location.state.timesheet_job_id == null ?
+                                        (getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN") && (
+                                            <button className='delete-icon' onClick={handleDelete}>
+                                                <i className="ti-trash text-danger" />
+                                            </button>
+                                        ) : ""
+
+                                }
                             </>
                         )}
                     </div>
@@ -426,7 +431,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                         />
                                     </div>
 
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                         <label className="form-label">Client<span className='text-danger'>*</span></label>
                                         <input
                                             type="text"
@@ -455,7 +460,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                         />
                                     </div>
 
-                                    <div className="col-lg-4">
+                                    <div className="col-lg-4 mb-3">
                                         <label className="form-label">Customer Account Manager(Officer)<span className='text-danger'>*</span></label>
                                         <select className="form-select"
                                             name="CustomerAccountManager"
@@ -754,52 +759,48 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                     <div className="col-lg-4">
                                         <div className="mb-3">
                                             <label className="form-label"> Total Time</label>
-                                            <div className="row">
-                                                <div className="col-md-6 pe-0">
-                                                    <div className="input-group">
-                                                        <div className='hours-div'>
-                                                            <input
-                                                                type="text"
-                                                                className="form-control"
-                                                                placeholder={10}
-                                                                aria-label="Recipient's username"
-                                                                aria-describedby="basic-addon2"
-                                                                disabled
-                                                                defaultValue=""
-                                                                onChange={(e) => setTotalTime({ ...Totaltime, hours: e.target.value })}
-                                                                value={Totaltime.hours}
 
-                                                            />
-                                                            <span className="input-group-text" id="basic-addon2">
-                                                                H
-                                                            </span>
-                                                        </div>
-                                                    </div>
+                                            <div className="input-group">
+                                                <div className='hours-div'>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder={10}
+                                                        aria-label="Recipient's username"
+                                                        aria-describedby="basic-addon2"
+                                                        disabled
+                                                        defaultValue=""
+                                                        onChange={(e) => setTotalTime({ ...Totaltime, hours: e.target.value })}
+                                                        value={Totaltime.hours}
+
+                                                    />
+                                                    <span className="input-group-text" id="basic-addon2">
+                                                        H
+                                                    </span>
                                                 </div>
-                                                <div className="col-md-6 ps-0">
-                                                    <div className="input-group">
-                                                        <div className='hours-div'>
-                                                            <input
-                                                                type="text"
-                                                                className="form-control"
-                                                                placeholder={10}
-                                                                aria-label="Recipient's username"
-                                                                aria-describedby="basic-addon2"
-                                                                defaultValue=""
-                                                                disabled
-                                                                onChange={(e) => setTotalTime({ ...Totaltime, minutes: e.target.value })}
-                                                                value={Totaltime.minutes}
-                                                            />
-                                                            <span className="input-group-text" id="basic-addon2">
-                                                                M
-                                                            </span>
-                                                        </div>
-                                                    </div>
+                                                <div className='hours-div'>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder={10}
+                                                        aria-label="Recipient's username"
+                                                        aria-describedby="basic-addon2"
+                                                        defaultValue=""
+                                                        disabled
+                                                        onChange={(e) => setTotalTime({ ...Totaltime, minutes: e.target.value })}
+                                                        value={Totaltime.minutes}
+                                                    />
+                                                    <span className="input-group-text" id="basic-addon2">
+                                                        M
+                                                    </span>
                                                 </div>
-
-
                                             </div>
                                         </div>
+
+
+
+
+
                                     </div>
 
                                     <div id="invoice_type" className="col-lg-4">
@@ -854,7 +855,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
 
                                             />
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                             <label className="form-label">Due On</label>
                                             <input
                                                 type="date"
@@ -867,7 +868,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                 value={JobInformationData.DueOn}
                                             />
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                             <label className="form-label">Submission Deadline</label>
                                             <input
                                                 type="date"
@@ -881,7 +882,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                 value={JobInformationData.SubmissionDeadline}
                                             />
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                             <label className="form-label">Customer Deadline Date</label>
                                             <input
                                                 type="date"
@@ -894,7 +895,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                 value={JobInformationData.CustomerDeadlineDate}
                                             />
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                             <label className="form-label">SLA Deadline Date</label>
                                             <input
                                                 type="date"
@@ -968,7 +969,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                 />
                                             </div>
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                             <label className="form-label">Filing with HMRC Required?</label>
                                             <select
                                                 className="form-select invoice_type_dropdown"
@@ -1057,7 +1058,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                 value={JobInformationData.NumberOfTransactions}
                                             />
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                             <label className="form-label">
                                                 Number of Trial Balance Items
                                             </label>
@@ -1072,7 +1073,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                 value={JobInformationData.NumberOfTrialBalanceItems}
                                             />
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                             <label className="form-label">Turnover</label>
                                             <input
                                                 type="text"
@@ -1099,7 +1100,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
 
                                             />
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                             <label className="form-label">VAT Reconciliation</label>
                                             <select
                                                 className="form-select invoice_type_dropdown"
@@ -1113,7 +1114,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                                 <option value={0}>No</option>
                                             </select>
                                         </div>
-                                        <div className="col-lg-4">
+                                        <div className="col-lg-4 mb-3">
                                             <label className="form-label">Bookkeeping?</label>
                                             <select
                                                 className="form-select invoice_type_dropdown"
@@ -1148,137 +1149,166 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                     </div>
 
                     {
-                        JobInformationData.EngagementModel == "fte_dedicated_staffing" ? "": 
-                        <div className="col-lg-12">
-                        <div className="col-lg-12">
-                            <div className="card card_shadow">
-                                <div className="card-header card-header-light-blue align-items-center d-flex">
-                                    <h4 className="card-title mb-0 flex-grow-1 fs-16">Invoice</h4>
-                                </div>
-                                <div className="card-body">
-                                    <div style={{ marginTop: 15 }}>
-                                        <div className="row">
-                                            <div className="col-lg-4 mb-3">
-                                                <label className="form-label">Invoiced</label>
-                                                <select
-                                                    className="invoiced_dropdown form-select"
-                                                    name="Invoiced"
-                                                    disabled
-                                                    onChange={(e) => setJobInformationData({ ...JobInformationData, Invoiced: e.target.value })}
-                                                    value={JobInformationData.Invoiced}
-                                                >
-                                                    <option value="">Please Select Invoiced</option>
-                                                    <option value={1}>Yes</option>
-                                                    <option value={0}>No</option>
-                                                </select>
-                                            </div>
-                                            <div className="col-lg-4">
-                                                <label className="form-label">Currency</label>
-                                                <select
-                                                    className="invoiced_dropdown form-select"
-                                                    name="Currency"
-                                                    disabled
-                                                    onChange={(e) => setJobInformationData({ ...JobInformationData, Currency: e.target.value })}
-                                                    value={JobInformationData.Currency}
-                                                >
-                                                    <option value="">Please Select Currency</option>
-                                                    <option>Rupee</option>
-                                                    <option>Dollar</option>
-                                                </select>
-                                            </div>
-                                            <div className="col-lg-4">
-                                                <label className="form-label"> Invoice Value </label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="Invoice Value"
-                                                    name="InvoiceValue"
-                                                    defaultValue=""
-                                                    disabled
+                        JobInformationData.EngagementModel == "fte_dedicated_staffing" ? "" :
+                            <div className="col-lg-12">
+                                <div className="col-lg-12">
+                                    <div className="card card_shadow">
+                                        <div className="card-header card-header-light-blue align-items-center d-flex">
+                                            <h4 className="card-title mb-0 flex-grow-1 fs-16">Invoice</h4>
+                                        </div>
+                                        <div className="card-body">
+                                            <div style={{ marginTop: 15 }}>
+                                                <div className="row">
+                                                    <div className="col-lg-4 mb-3">
+                                                        <label className="form-label">Invoiced</label>
+                                                        <select
+                                                            className="invoiced_dropdown form-select"
+                                                            name="Invoiced"
+                                                            disabled
+                                                            onChange={(e) => setJobInformationData({ ...JobInformationData, Invoiced: e.target.value })}
+                                                            value={JobInformationData.Invoiced}
+                                                        >
+                                                            <option value="">Please Select Invoiced</option>
+                                                            <option value={1}>Yes</option>
+                                                            <option value={0}>No</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className="col-lg-4 mb-3">
+                                                        <label className="form-label">Currency</label>
+                                                        <select
+                                                            className="invoiced_dropdown form-select"
+                                                            name="Currency"
+                                                            disabled
+                                                            onChange={(e) => setJobInformationData({ ...JobInformationData, Currency: e.target.value })}
+                                                            value={JobInformationData.Currency}
+                                                        >
+                                                            <option value="">Please Select Currency</option>
+                                                            <option>Rupee</option>
+                                                            <option>Dollar</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className="col-lg-4 mb-3">
+                                                        <label className="form-label"> Invoice Value </label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            placeholder="Invoice Value"
+                                                            name="InvoiceValue"
+                                                            defaultValue=""
+                                                            disabled
 
-                                                    onChange={(e) => setJobInformationData({ ...JobInformationData, InvoiceValue: e.target.value })}
-                                                    value={JobInformationData.InvoiceValue}
-                                                />
-                                            </div>
-                                            <div className="col-lg-4">
-                                                <label className="form-label">Invoice Date</label>
-                                                <input
-                                                    type="date"
-                                                    className="form-control"
-                                                    placeholder="DD-MM-YYYY"
-                                                    name="InvoiceDate"
-                                                    max="2024-08-27"
-                                                    defaultValue=""
-                                                    disabled
-                                                    onChange={(e) => setJobInformationData({ ...JobInformationData, InvoiceDate: e.target.value })}
-                                                    value={JobInformationData.InvoiceDate}
-                                                />
-                                            </div>
-                                            <div className="col-lg-4">
-                                                <div className="mb-3">
-                                                    <label className="form-label" >Invoice </label>
+                                                            onChange={(e) => setJobInformationData({ ...JobInformationData, InvoiceValue: e.target.value })}
+                                                            value={JobInformationData.InvoiceValue}
+                                                        />
+                                                    </div>
+                                                    <div className="col-lg-4 mb-3">
+                                                        <label className="form-label">Invoice Date</label>
+                                                        <input
+                                                            type="date"
+                                                            className="form-control"
+                                                            placeholder="DD-MM-YYYY"
+                                                            name="InvoiceDate"
+                                                            max="2024-08-27"
+                                                            defaultValue=""
+                                                            disabled
+                                                            onChange={(e) => setJobInformationData({ ...JobInformationData, InvoiceDate: e.target.value })}
+                                                            value={JobInformationData.InvoiceDate}
+                                                        />
+                                                    </div>
+                                                    <div className="col-lg-4">
+                                                        <div className="mb-3">
+                                                            <label className="form-label" >Invoice </label>
 
 
-                                                    <div className="input-group">
-                                                        <div className='hours-div'>
-                                                            <input
-                                                                type="text"
-                                                                className="form-control"
-                                                                placeholder="Hours"
-                                                                defaultValue=""
-                                                                disabled
-                                                                onChange={(e) => {
-                                                                    const value = e.target.value;
-                                                                    if (value === '' || (Number(value) >= 0 && Number(value) <= 23)) {
-                                                                        setInvoiceTime({
-                                                                            ...invoiceTime,
-                                                                            hours: value
-                                                                        });
-                                                                    }
-                                                                }}
-                                                                value={invoiceTime.hours}
-                                                            />
-                                                            <span className="input-group-text" id="basic-addon2">
-                                                                H
-                                                            </span>
-                                                        </div>
-                                                        <div className='hours-div'>
-                                                            <input
-                                                                type="text"
-                                                                className="form-control"
-                                                                placeholder="Minutes"
-                                                                defaultValue=""
-                                                                disabled
-                                                                onChange={(e) => {
-                                                                    const value = e.target.value;
-                                                                    if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
-                                                                        setInvoiceTime({
-                                                                            ...invoiceTime,
-                                                                            minutes: value
-                                                                        });
-                                                                    }
-                                                                }}
-                                                                value={invoiceTime.minutes}
-                                                            />
-                                                            <span className="input-group-text" id="basic-addon2">
-                                                                M
-                                                            </span>
+                                                            <div className="input-group">
+                                                                <div className='hours-div'>
+                                                                    <input
+                                                                        type="text"
+                                                                        className="form-control"
+                                                                        placeholder="Hours"
+                                                                        defaultValue=""
+                                                                        disabled
+                                                                        onChange={(e) => {
+                                                                            const value = e.target.value;
+                                                                            if (value === '' || (Number(value) >= 0 && Number(value) <= 23)) {
+                                                                                setInvoiceTime({
+                                                                                    ...invoiceTime,
+                                                                                    hours: value
+                                                                                });
+                                                                            }
+                                                                        }}
+                                                                        value={invoiceTime.hours}
+                                                                    />
+                                                                    <span className="input-group-text" id="basic-addon2">
+                                                                        H
+                                                                    </span>
+                                                                </div>
+                                                                <div className='hours-div'>
+                                                                    <input
+                                                                        type="text"
+                                                                        className="form-control"
+                                                                        placeholder="Minutes"
+                                                                        defaultValue=""
+                                                                        disabled
+                                                                        onChange={(e) => {
+                                                                            const value = e.target.value;
+                                                                            if (value === '' || (Number(value) >= 0 && Number(value) <= 59)) {
+                                                                                setInvoiceTime({
+                                                                                    ...invoiceTime,
+                                                                                    minutes: value
+                                                                                });
+                                                                            }
+                                                                        }}
+                                                                        value={invoiceTime.minutes}
+                                                                    />
+                                                                    <span className="input-group-text" id="basic-addon2">
+                                                                        M
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+
                                                         </div>
                                                     </div>
-
+                                                    <div id="invoicedremark" className="col-lg-4">
+                                                        <label className="form-label" >Invoice Remark</label>
+                                                        <textarea
+                                                            className="form-control"
+                                                            placeholder="Invoice Remark"
+                                                            name="InvoiceRemark"
+                                                            defaultValue=""
+                                                            disabled
+                                                            onChange={(e) => setJobInformationData({ ...JobInformationData, InvoiceRemark: e.target.value })}
+                                                            value={JobInformationData.InvoiceRemark}
+                                                            maxLength={500}
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div id="invoicedremark" className="col-lg-4">
-                                                <label className="form-label" >Invoice Remark</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    }
+
+
+
+                    <div className="col-lg-12">
+                        <div className="card card_shadow">
+                            <div className="card-header card-header-light-blue align-items-center d-flex">
+                                <h4 className="card-title mb-0 flex-grow-1 fs-16">Notes</h4>
+                            </div>
+                            <div className="card-body">
+                                <div className="" style={{ marginTop: 15 }}>
+                                    <div className="row">
+                                        <div className="col-lg-12">
+                                            <div className="mb-3">
                                                 <textarea
+                                                    type="date"
                                                     className="form-control"
-                                                    placeholder="Invoice Remark"
-                                                    name="InvoiceRemark"
-                                                    defaultValue=""
+                                                    name="notes"
                                                     disabled
-                                                    onChange={(e) => setJobInformationData({ ...JobInformationData, InvoiceRemark: e.target.value })}
-                                                    value={JobInformationData.InvoiceRemark}
-                                                    maxLength={500}
+                                                    value={JobInformationData.notes}
+
                                                 />
                                             </div>
                                         </div>
@@ -1286,9 +1316,14 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    }
                     
+                    </div>
+
+
+
+
+
+
                 </div>
 
             </div>

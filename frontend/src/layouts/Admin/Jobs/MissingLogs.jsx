@@ -34,9 +34,11 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
     missing_log_reviewed_by: null,
     missing_log_reviewed_date: null,
     missing_log_document: null,
+    last_chaser: new Date().toISOString().substr(0, 10),
     status: "0",
     id: null
   });
+
 
   const resetForm = () => {
     setMissionAllInputLogData({
@@ -46,6 +48,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
       missing_log_prepared_date: null,
       missing_log_reviewed_date: null,
       missing_log_document: null,
+      last_chaser: new Date().toISOString().substr(0, 10),
       status: "0",
       id: null
     });
@@ -61,6 +64,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
         missing_log_reviewed_by: getProfileDetails?.first_name + " " + getProfileDetails?.last_name,
         missing_log_reviewed_date: getEditData.missing_log_reviewed_date,
         missing_log_document: getEditData.missing_log_document,
+        last_chaser: getEditData.last_chaser,
         status: getEditData.status,
         id: getEditData.id
       });
@@ -173,8 +177,8 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
   }
 
   const handleSubmit = async (e) => {
+    
     const req = { action: "add", job_id: location.state.job_id, missionDetails: missionLogAllInputData }
-
     const data = { req: req, authToken: token }
     await dispatch(AddMissionLog(data))
       .unwrap()
@@ -251,6 +255,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
     { name: 'Missing Log Sent On', selector: row => convertDate(row.missing_log_sent_on),reorder: false, sortable: true },
     { name: 'Missing Log Prepared Date', selector: row => convertDate(row.missing_log_prepared_date),reorder: false, sortable: true },
     { name: 'Missing Log Reviewed Date', selector: row => convertDate(row.missing_log_reviewed_date),reorder: false, sortable: true },
+    { name: 'Last Chaser', selector: row => convertDate(row.last_chaser),reorder: false, sortable: true },
     { name: 'status', selector: row => row.status == 1 ? "Completed" : "Incomplete",reorder: false, sortable: true },
     {
       name: "Actions",
@@ -456,6 +461,30 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
               )}
             </div>
           </div>
+
+          <div id="MissingLog9" className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+              Last Chaser
+              </label>
+              <input
+                type="date"
+                className={errors1["last_chaser"] ? "error-field form-control" : "form-control"}
+
+                placeholder=""
+                id="last_chaser"
+                name="last_chaser"
+                onChange={(e) => handleChange(e)}
+                value={missionLogAllInputData.last_chaser}
+              />
+              {errors1["last_chaser"] && (
+                <div className="error-text">
+                  {errors1["last_chaser"]}
+                </div>
+              )}
+            </div>
+          </div>
+
           <div id="MissingLog6" className="col-lg-6">
             <div className="mb-3">
               <label htmlFor="firstNameinput" className="form-label">
@@ -658,6 +687,32 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
               )}
             </div>
           </div>
+
+          <div  id="MissingLog9" className="col-lg-6">
+            <div className="mb-3">
+              <label htmlFor="firstNameinput" className="form-label">
+              Last Chaser
+              </label>
+              <input
+                type="date"
+                className={errors1["last_chaser"] ? "error-field form-control" : "form-control"}
+
+                placeholder=""
+                id="last_chaser"
+                name="last_chaser"
+                onChange={(e) => handleChange(e)}
+                value={missionLogAllInputData.last_chaser}
+              />
+              {errors1["last_chaser"] && (
+                <div className="error-text">
+                  {errors1["last_chaser"]}
+                </div>
+              )}
+            </div>
+          </div>
+
+
+
           <div id="MissingLog6" className="col-lg-6">
             <div className="mb-3">
               <label htmlFor="firstNameinput" className="form-label">

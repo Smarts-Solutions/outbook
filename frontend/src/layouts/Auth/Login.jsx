@@ -50,6 +50,7 @@ const Login = () => {
             JSON.stringify(response.data.staffDetails)
           );
           localStorage.setItem("token", JSON.stringify(response.data.token));
+          localStorage.setItem("sharepoint_token", JSON.stringify(response.data.sharepoint_token));
           localStorage.setItem(
             "role",
             JSON.stringify(response.data.staffDetails.role)
@@ -114,6 +115,7 @@ const Login = () => {
               JSON.stringify(response.data.staffDetails)
             );
             localStorage.setItem("token", JSON.stringify(response.data.token));
+            localStorage.setItem("sharepoint_token", JSON.stringify(response.data.sharepoint_token));
             localStorage.setItem(
               "role",
               JSON.stringify(response.data.staffDetails.role)
@@ -230,7 +232,7 @@ const Login = () => {
     <div className="account-body accountbg">
       <div className="container">
         <div className="row  d-flex justify-content-center vh-100">
-          <div className="col-8 col-md-9 align-self-center form-container">
+          <div className="col-10 col-md-12 col-lg-9 align-self-center form-container">
             <div className="row ">
               <div className="col-md-6 ps-0">
                 <div className="card-body p-0 auth-header-box h-100 d-flex align-items-center justify-content-center">

@@ -57,6 +57,7 @@ const Information = ({ id, pageStatus }) => {
     email: "",
     residentialAddress: "",
     phone_code: "",
+    notes: "",
   });
 
   const [getPartnershipDetails, setPartnershipDetails] = useState({
@@ -65,6 +66,7 @@ const Information = ({ id, pageStatus }) => {
     VATRegistered: 0,
     VATNumber: "",
     Website: "",
+    notes: "",
   });
 
   const [getCompanyDetails, setCompanyDetails] = useState({
@@ -81,6 +83,7 @@ const Information = ({ id, pageStatus }) => {
     Website: "",
     TradingName: "",
     TradingAddress: "",
+    notes: "",
   });
 
   const [contacts, setContacts] = useState([
@@ -160,6 +163,7 @@ const Information = ({ id, pageStatus }) => {
           vatNumber:
             customerDetails?.customer && customerDetails?.customer?.vat_number,
           website: customerDetails?.customer && customerDetails?.customer?.website,
+          notes: customerDetails?.customer && customerDetails?.customer?.notes,
           first_name:
             customerDetails?.contact_details &&
             customerDetails?.contact_details[0]?.first_name,
@@ -178,6 +182,7 @@ const Information = ({ id, pageStatus }) => {
           phone_code:
             customerDetails?.contact_details &&
             customerDetails?.contact_details[0]?.phone_code,
+
           contact_id:
             customerDetails?.contact_details &&
             customerDetails?.contact_details[0]?.contact_id,
@@ -217,6 +222,8 @@ const Information = ({ id, pageStatus }) => {
             customerDetails?.customer && customerDetails?.customer?.vat_number,
           Website: customerDetails?.customer && customerDetails?.customer?.website,
 
+          notes: customerDetails?.customer && customerDetails?.customer?.notes,
+
           TradingName:
             customerDetails?.customer && customerDetails?.customer?.trading_name,
           TradingAddress:
@@ -238,6 +245,7 @@ const Information = ({ id, pageStatus }) => {
           VATNumber:
             customerDetails?.customer && customerDetails?.customer?.vat_number,
           Website: customerDetails?.customer && customerDetails?.customer?.website,
+          notes: customerDetails?.customer && customerDetails?.customer?.notes,
         }));
         setContacts1(customerDetails && customerDetails?.contact_details);
 
@@ -468,6 +476,7 @@ const Information = ({ id, pageStatus }) => {
           vat_registered: getSoleTraderDetails?.vatRegistered,
           vat_number: getSoleTraderDetails?.vatNumber,
           website: getSoleTraderDetails?.website,
+          notes: getSoleTraderDetails?.notes,
           contactDetails: [
             {
               contact_id: getSoleTraderDetails?.contact_id,
@@ -552,6 +561,7 @@ const Information = ({ id, pageStatus }) => {
             vat_registered: getCompanyDetails?.VATRegistered,
             vat_number: getCompanyDetails?.VATNumber,
             website: getCompanyDetails?.Website,
+            notes: getCompanyDetails?.notes,
             trading_name: getCompanyDetails?.TradingName,
             trading_address: getCompanyDetails?.TradingAddress,
             contactDetails: contacts,
@@ -625,6 +635,7 @@ const Information = ({ id, pageStatus }) => {
             vat_registered: getPartnershipDetails?.VATRegistered,
             vat_number: getPartnershipDetails?.VATNumber,
             website: getPartnershipDetails?.Website,
+            notes: getPartnershipDetails?.notes,
             contactDetails: contacts1,
           };
 
@@ -1160,7 +1171,7 @@ const Information = ({ id, pageStatus }) => {
                         </div>
                       </div>
                     </div>
-                    <div className="card">
+                     <div className="card">
                       <div className="card-header card-header-light-blue step-card-header mb-3 ">
                         <h4
                           className="card-title mb-0 flex-grow-1"
@@ -1220,7 +1231,7 @@ const Information = ({ id, pageStatus }) => {
                             <div className="mb-3">
                               <label className="form-label">Phone</label>
                               <div className="row">
-                                <div className="col-md-4 pe-1">
+                                <div className="col-md-4 col-4">
                                   <select
                                     className="form-select"
                                     onChange={(e) => handleChange1(e)}
@@ -1239,7 +1250,7 @@ const Information = ({ id, pageStatus }) => {
                                       ))}
                                   </select>
                                 </div>
-                                <div className="mb-3 col-md-8 ps-0">
+                                <div className="col-8 col-md-8 ps-1">
                                   <input
                                     type="text"
                                     className={errors1["phone"] ? "error-field form-control" : "form-control"}
@@ -1309,6 +1320,42 @@ const Information = ({ id, pageStatus }) => {
                         </div>
                       </div>
                     </div>
+
+                    <div className="card">
+                      <div className="card-header card-header-light-blue step-card-header mb-3 ">
+                        <h4
+                          className="card-title mb-0 flex-grow-1"
+                          style={{ marginBottom: "15px !important" }}
+                        >
+                          Notes
+                        </h4>
+                      </div>
+                      <div className="card-body">
+                        <div className="row">
+                          <div className="col-lg-12">
+                            <div className="mb-3">
+    
+                              <textarea
+                                type="text"
+                                className={errors1["notes"] && errors1["notes"] ? "error-field form-control" : "form-control"}
+                                placeholder="Enter Notes"
+                                name="notes"
+                                id="notes"
+                                value={getSoleTraderDetails?.notes}
+                                onChange={(e) => handleChange1(e)}
+                              />
+                              {errors1["notes"] && (
+                                <div className="error-text">
+                                  {errors1["notes"]}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
               ) : customerType == 2 ? (
@@ -1840,7 +1887,7 @@ const Information = ({ id, pageStatus }) => {
                                               Phone
                                             </label>
                                             <div className="row">
-                                              <div className="col-md-4">
+                                              <div className="col-md-4 col-4 ">
                                                 <select
                                                   className="form-select"
                                                   onChange={(e) =>
@@ -1866,7 +1913,7 @@ const Information = ({ id, pageStatus }) => {
                                                     )}
                                                 </select>
                                               </div>
-                                              <div className="mb-3 col-md-8">
+                                              <div className="col-md-8 col-8 ps-1">
                                                 <input
                                                   type="text"
                                                   className="form-control"
@@ -1953,6 +2000,37 @@ const Information = ({ id, pageStatus }) => {
                       </div>
                     </div>{" "}
                     {/* end col */}
+
+                    <div className="col-lg-12">
+                    <div className="card card_shadow ">
+                      <div className="card-header step-card-header card-header-light-blue ">
+                        <h4 className="card-title">Notes</h4>
+                      </div>
+                      {/* end card header */}
+                      <div className="card-body">
+                        <div className="row">
+                          <div className="col-lg-12">
+                            <div className="mb-3">
+                              <textarea
+                                type="text"
+                                className={errors2["notes"] ? "error-field form-control" : "form-control"}
+                                placeholder="Enter Notes"
+                                name="notes"
+                                id="notes"
+                                onChange={(e) => handleChange2(e)}
+                                value={getCompanyDetails?.notes}
+                              />
+                              {errors2["notes"] && (
+                                <div className="error-text">
+                                  {errors2["notes"]}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                  
                 </div>
               ) : customerType == 3 ? (
@@ -2266,7 +2344,7 @@ const Information = ({ id, pageStatus }) => {
                                             Phone
                                           </label>
                                           <div className="row">
-                                            <div className="col-md-4">
+                                            <div className="col-md-4 col-4">
                                               <select
                                                 className="form-select"
                                                 onChange={(e) =>
@@ -2291,7 +2369,7 @@ const Information = ({ id, pageStatus }) => {
                                                   ))}
                                               </select>
                                             </div>
-                                            <div className="mb-3 col-md-8">
+                                            <div className="col-md-8 col-8 ps-1">
                                               <input
                                                 type="text"
                                                 className="form-control"
@@ -2376,6 +2454,40 @@ const Information = ({ id, pageStatus }) => {
                         </div>
                       </div>
                     </div>
+
+                    <div className="col-lg-12">
+                    <div className="card card_shadow ">
+                      <div className=" card-header card-header-light-blue step-card-header align-items-center d-flex">
+                        <h4 className="card-title mb-0 flex-grow-1">
+                          Notes
+                        </h4>
+                      </div>
+                      <div className="card-body">
+                        <div className="row">
+                          <div className="col-lg-12">
+                            <div className="mb-3">
+                              <textarea
+                                type="text"
+                                className={errors3["notes"] ? "error-field form-control" : "form-control"}
+
+                                placeholder="Enter Notes"
+                                name="notes"
+                                id="notes"
+                                value={getPartnershipDetails?.notes}
+                                onChange={(e) => handleChange3(e)}
+                                ref={(el) => (refs.current["notes"] = el)}
+                              />
+                              {errors3["notes"] && (
+                                <div className="error-text">
+                                  {errors3["notes"]}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   </div>
                
               ) : (
