@@ -50,6 +50,7 @@ const Login = () => {
             JSON.stringify(response.data.staffDetails)
           );
           localStorage.setItem("token", JSON.stringify(response.data.token));
+          localStorage.setItem("sharepoint_token", JSON.stringify(response.data.sharepoint_token));
           localStorage.setItem(
             "role",
             JSON.stringify(response.data.staffDetails.role)
@@ -114,6 +115,7 @@ const Login = () => {
               JSON.stringify(response.data.staffDetails)
             );
             localStorage.setItem("token", JSON.stringify(response.data.token));
+            localStorage.setItem("sharepoint_token", JSON.stringify(response.data.sharepoint_token));
             localStorage.setItem(
               "role",
               JSON.stringify(response.data.staffDetails.role)

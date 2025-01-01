@@ -1,8 +1,10 @@
 const pool = require("../../app/config/database");
 const { SatffLogUpdateOperation } = require("../../app/utils/helper");
+const axios = require('axios');
+const qs = require('qs');
 
 const createStaff = async (staff) => {
-  console.log(staff);
+  // console.log(staff);
   const {
     role_id,
     first_name,
@@ -16,10 +18,10 @@ const createStaff = async (staff) => {
     StaffUserId,
     ip,
   } = staff;
- 
+
   const checkQuery = `SELECT 1 FROM staffs WHERE email = ?`;
   const [check] = await pool.execute(checkQuery, [email]);
- 
+
   if (check.length > 0) {
     return { status: false, message: 'Email Already Exists.' };
   }
@@ -96,11 +98,9 @@ const deleteStaff = async (staffId) => {
 
 const updateStaff = async (staff) => {
 
-  console.log("staff",staff);
-
   const { id, ...fields } = staff;
   let email = fields.email;
-   
+
   const checkQuery = `SELECT 1 FROM staffs WHERE email = ? AND id != ?`;
   const [check] = await pool.execute(checkQuery, [email, id]);
   if (check.length > 0) {
@@ -209,7 +209,7 @@ const updateStaffwithLogin = async (staff) => {
     }
   } catch (err) {
     console.log("Error updating staff:", err);
-    return 
+    return
   }
 };
 
@@ -320,19 +320,123 @@ const managePortfolio = async (staff_id) => {
 };
 
 const status = async (id) => {
- if(id != undefined){
-  const query = `SELECT status FROM staffs WHERE id = ?`;
-  try {
-    const [result] = await pool.execute(query, [id]);
-    return result;
-  } catch (err) {
-    console.log("Error updating data:", err);
-    throw err;
+  if (id != undefined) {
+    const query = `SELECT status FROM staffs WHERE id = ?`;
+    try {
+      const [result] = await pool.execute(query, [id]);
+      return result;
+    } catch (err) {
+      console.log("Error updating data:", err);
+      throw err;
+    }
+  } else {
+    return
   }
-}else{
-  return 
-}
 };
+
+const sharepoint_token = async () => {
+  const query = `SELECT access_token, refresh_token ,client_id,client_secret FROM sharepoint_token`;
+  try {
+    const [[result]] = await pool.execute(query);
+    //console.log("result", result);
+    if (result != undefined && result != null) {
+      if (result.access_token != null && result.access_token != "" && result.access_token != undefined) {
+        const TokenExpiry = await CheckExpirySharePointToken(result.access_token);
+        if (TokenExpiry) {
+          const genrateAccessToken = await genrateSharePointAccessToken(result.refresh_token, result.client_id, result.client_secret);
+          if(genrateAccessToken == "error"){
+            return "sharepoint_token_not_found";
+          }else{
+          return genrateAccessToken;
+          }
+        } else {
+          return result.access_token;
+        }
+
+      } else {
+        return "sharepoint_token_not_found";
+      }
+
+    } else {
+      console.log(" sharepoint record not found:");
+      return "sharepoint_token_not_found";
+    }
+
+  } catch (err) {
+    console.log("Error sharepoint token data:", err);
+    return "sharepoint_token_not_found";
+
+  }
+};
+
+
+const CheckExpirySharePointToken = async (token) => {
+  // console.log("token", token);
+  if (token && token.trim() !== "") {
+    try {
+      // Split the token into its parts
+      const base64Payload = token.split(".")[1];
+      if (!base64Payload) {
+        console.log("Invalid token format");
+        return true; // Treat invalid token as expired
+      }
+
+      // Decode the Base64URL encoded payload
+      const decodedPayload = JSON.parse(Buffer.from(base64Payload, "base64url").toString("utf-8"));
+
+      const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+      if (decodedPayload.exp && decodedPayload.exp < currentTime) {
+        // console.log("Token Expired");
+        return true;
+      } else {
+        // console.log("Token Not Expired");
+        return false;
+      }
+    } catch (error) {
+      console.log("Error decoding token:", error);
+      return true;
+    }
+  } else {
+    console.log("Invalid token");
+    return true;
+  }
+};
+
+const genrateSharePointAccessToken = async (refresh_token, client_id, client_secret) => {
+
+  let token
+  const data = qs.stringify({
+    'grant_type': 'refresh_token',
+    'client_id': client_id,
+    'client_secret': client_secret,
+    'refresh_token': refresh_token
+  });
+
+  let config = {
+    method: 'post',
+    maxBodyLength: Infinity,
+    url: 'https://login.microsoftonline.com/332dcd89-cd37-40a0-bba2-a2b91abd434a/oauth2/v2.0/token',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    data: data
+  };
+
+  await axios.request(config)
+    .then((response) => {
+      if(response.data.access_token != undefined){
+        token = response.data.access_token;
+      }else{
+        token = "error";
+      }
+    })
+    .catch((error) => {
+      token = "error";
+    });
+
+    return token;
+}
+
 
 module.exports = {
   createStaff,
@@ -348,4 +452,5 @@ module.exports = {
   profile,
   managePortfolio,
   status,
+  sharepoint_token,
 };

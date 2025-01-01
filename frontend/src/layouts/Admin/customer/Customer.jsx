@@ -361,15 +361,14 @@ const Customer = () => {
 
     try {
       const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
-
       if (response.status) {
-        const filteredData = response.data.data.filter((item) => {
-          const itemDate = new Date(item.created_at);
-          const { startDate, endDate } = getDateRange(selectedTab);
-          return itemDate >= startDate && itemDate <= endDate;
-        });
-
-        setFilteredData(filteredData);
+        // const filteredData = response.data.data.filter((item) => {
+        //   const itemDate = new Date(item.created_at);
+        //   const { startDate, endDate } = getDateRange(selectedTab);
+        //   return itemDate >= startDate && itemDate <= endDate;
+        // });
+    
+        setFilteredData(response.data.data);
         setTotalRecords(response.data.pagination.totalItems);
         // setCustomerData(response.data.pagination.totalItems);
 
