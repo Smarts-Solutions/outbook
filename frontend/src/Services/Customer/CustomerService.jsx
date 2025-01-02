@@ -82,18 +82,18 @@ export async function ADD_SERVICES(data, token) {
 // Get All Customer Services
 export async function ADD_PEPPER_WORK(data, token) {
   try {
-    const formData = new FormData();
+    
+    // console.log("data--",data); 
+    // const formData = new FormData();
+    // data.fileData.forEach((file, index) => {
+    //   formData.append("files[]", file);
+    // });
 
-
-    data.fileData.forEach((file, index) => {
-      formData.append("files[]", file);
-    });
-
-    for (const key in data) {
-      if (key !== "fileData" && data[key] !== undefined) {
-        formData.append(key, data[key]);
-      }
-    }
+    // for (const key in data) {
+    //   if (key !== "fileData" && data[key] !== undefined) {
+    //     formData.append(key, data[key]);
+    //   }
+    // }
 
     let config = {
       method: "post",
@@ -101,13 +101,14 @@ export async function ADD_PEPPER_WORK(data, token) {
       url: `${Config.base_url}updateProcessCustomerFile`,
       headers: {
         Authorization: token,
-        "Content-Type": "multipart/form-data",
+        // "Content-Type": "multipart/form-data",
       },
-      data: formData,
+      data: data,
     };
-
+console.log("config",config); 
     const res = await axios.request(config);
     return res?.data;
+
   } catch (err) {
     return err;
   }

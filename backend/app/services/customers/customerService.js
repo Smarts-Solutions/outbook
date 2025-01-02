@@ -44,8 +44,8 @@ const updateProcessCustomer = async (customerProcessData) => {
 
 };
 
-const updateProcessCustomerFile = async (customerProcessDataFiles , customer_id) => {
-  return customerModel.updateProcessCustomerFile(customerProcessDataFiles , customer_id);
+const updateProcessCustomerFile = async (customerProcessDataFiles , customer_id ,uploadedFiles) => {
+  return customerModel.updateProcessCustomerFile(customerProcessDataFiles , customer_id ,uploadedFiles);
 };
 
 const updateProcessCustomerFileAction = async (customerProcessData) => {

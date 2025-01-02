@@ -127,6 +127,7 @@ export const ADD_PEPPER_WORKS = createAsyncThunk(
         ...req,
         ip: IP_Data,
         customer_id: req.customer_id,
+        uploadedFiles: req.uploadedFiles,
         StaffUserId: StaffUserId.id,
       };
       const res = await ADD_PEPPER_WORK(updatedReq, req.authToken);

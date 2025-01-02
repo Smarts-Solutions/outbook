@@ -1,5 +1,6 @@
 import axios from "axios";
-import { GetSharePointToken } from  "../ReduxStore/Slice/Auth/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { SignIn,GetSharePointToken } from  "../ReduxStore/Slice/Auth/authSlice";
 
 
 export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
@@ -44,8 +45,8 @@ export const fetchSiteAndDriveInfo = async (siteUrl, accessToken) => {
       }
     }
   } catch (err) {
-    console.log("Error fetching site and drive info:", err);
-    return ""
+    console.error("Error fetching site and drive info:", err);
+    throw err;
   }
 };
 
@@ -85,14 +86,16 @@ export const createFolderIfNotExists = async (site_ID, drive_ID, parentFolderId,
     );
     return existingFolder.id;
   } catch (err) {
-    console.log("Error creating folder:", err);
-    return ""
+    console.error("Error creating folder:", err);
+    throw err;
   }
 };
 
-export const uploadFileToFolder = async (site_ID, drive_ID, folder_ID,file, accessToken) => {
+export const uploadFileToFolder = async (site_ID, drive_ID, folder_ID,folder_path , file, accessToken) => {
   try {
     const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${file.name}:/content`;
+
+    // const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${folder_path}/${file.name}:/content`;
 
     const response = await axios.put(uploadUrl, file, {
       headers: {
@@ -103,15 +106,25 @@ export const uploadFileToFolder = async (site_ID, drive_ID, folder_ID,file, acce
     //  console.log("response",response);
     return response.data.webUrl;
   } catch (err) {
-    console.log("Error uploading file:", err);
-    return ""
+    console.error("Error uploading file:", err);
+    throw err;
   }
 };
 
-export const deleteFileFromFolder = async (site_ID, drive_ID, folder_ID, fileName, accessToken) => {
+export const deleteFileFromFolder = async (site_ID, drive_ID, folder_ID, folder_path, fileName, accessToken) => {
   try {
 
-  const filePath = `${fileName}`; 
+    console.log("site_ID",site_ID);
+    console.log("drive_ID",drive_ID);
+    console.log("folder_ID",folder_ID);
+    console.log("folder_path",folder_path);
+    console.log("fileName",fileName);
+    console.log("accessToken",accessToken);
+    // const deleteUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${folder_path}/${fileName}`;
+    // Construct the file path
+  //  const filePath = `${folder_path}/${fileName}`; 
+    const filePath = `${fileName}`; 
+
   const deleteUrl = `https://graph.microsoft.com/v1.0/sites/${site_ID}/drives/${drive_ID}/items/${folder_ID}:/${filePath}`;
 
     // Make the DELETE request
@@ -123,8 +136,8 @@ export const deleteFileFromFolder = async (site_ID, drive_ID, folder_ID, fileNam
 
     return response.data;
   } catch (err) {
-    console.log("Error deleting file:", err);
-    return ""
+    console.error("Error deleting file:", err);
+    throw err;
   }
 };
 

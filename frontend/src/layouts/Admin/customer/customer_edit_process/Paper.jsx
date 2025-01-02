@@ -5,36 +5,43 @@ import MultiStepFormContext from "./MultiStepFormContext";
 import { useDispatch } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import sweatalert from "sweetalert2";
-import {  ADD_PEPPER_WORKS,  GET_CUSTOMER_DATA,   DELETE_CUSTOMER_FILE} from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { ADD_PEPPER_WORKS, GET_CUSTOMER_DATA, DELETE_CUSTOMER_FILE } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
-import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder ,SiteUrlFolderPath  } from "../../../../Utils/graphAPI";
+import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../../Utils/graphAPI";
 
 const Paper = () => {
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
   const fileInputRef = useRef(null);
   const location = useLocation();
   const token = JSON.parse(localStorage.getItem("token"));
- // const sharepoint_token = JSON.parse(localStorage.getItem("sharepoint_token"));
+  // const sharepoint_token = JSON.parse(localStorage.getItem("sharepoint_token"));
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [customerDetails, setCustomerDetails] = useState({
     loading: true,
     data: [],
   });
+
+
   const [fileState, setFileState] = useState([]);
   const [newFiles, setNewFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [siteUrl, setSiteUrl] = useState("");
-  const [folderPath, setFolderPath] = useState("");
   const [sharepoint_token, setSharepoint_token] = useState("");
-  
+  const [folderPath, setFolderPath] = useState("");
+
 
   //console.log("sharepoint_token", sharepoint_token);
 
   const handleFileChange = async (event) => {
+    //  let customer_name = "DEMO"
+    //  if(customerDetails.data.customer != undefined){
+    //    customer_name = customerDetails.data.customer.trading_name;
+    //  }
     const files = event.currentTarget.files;
     var fileArray;
-   
+
     if (files && typeof files[Symbol.iterator] === "function") {
       fileArray = Array.from(files);
     } else {
@@ -50,7 +57,7 @@ const Paper = () => {
       "image/jpeg",
     ];
 
-  
+
 
     const validFiles = fileArray.filter((file) =>
       allowedTypes.includes(file.type)
@@ -66,10 +73,11 @@ const Paper = () => {
       fileInputRef.current.value = "";
       return;
     }
- 
 
-  const existingFileNames = new Set(newFiles.map(file => file.name));
-  const uniqueValidFiles = validFiles.filter(file => !existingFileNames.has(file.name));
+
+
+    const existingFileNames = new Set(newFiles.map(file => file.name));
+    const uniqueValidFiles = validFiles.filter(file => !existingFileNames.has(file.name));
 
     if (uniqueValidFiles.length === 0) {
       Swal.fire({
@@ -79,11 +87,9 @@ const Paper = () => {
       });
       return;
     }
-
-    // setNewFiles(validFiles);
-
     const updatedNewFiles = [...newFiles, ...uniqueValidFiles];
     setNewFiles(updatedNewFiles);
+
 
     const previewArray = updatedNewFiles.map((file) => {
       const reader = new FileReader();
@@ -92,24 +98,37 @@ const Paper = () => {
         reader.onload = () => resolve(reader.result);
       });
     });
-    
+
     Promise.all(previewArray).then((previewData) => {
-     setPreviews(previewData);
+      setPreviews(previewData);
       //setPreviews((prevPreviews) => [...prevPreviews, ...previewData]);
     });
 
-    
+
+
     // const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
-    // const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, "JohnDoe", sharepoint_token);
-    // console.log("folderId", folderId);
+    // const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID,customer_name, sharepoint_token);
 
     // for (const file of uniqueValidFiles) {
-    //   const uplaodDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
-    //   console.log(`Uploaded file: ${file.name}`);
-    //   console.log(`uplaodDataUrl: ${uplaodDataUrl}`);
+
+    //   console.log("file", file);
+    //   const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
+    //   // console.log(`Uploaded file: ${file.name}`);
+    //   // console.log(`uploadDataUrl: ${uploadDataUrl}`);
+    //   // file.webUrl = uploadDataUrl;
+    //   setUploadedFiles(prevUploadedFiles => [
+    //     ...prevUploadedFiles, 
+    //     {
+    //       ...file, 
+    //       web_url: uploadDataUrl,
+    //       filename: file.lastModified+'-'+file.name,
+    //       originalname: file.name,
+    //       mimetype: file.type,
+    //       size: file.size
+    //     }
+    //   ]);
     // }
 
-      
 
   };
 
@@ -120,8 +139,10 @@ const Paper = () => {
     await dispatch(GET_CUSTOMER_DATA(data1))
       .unwrap()
       .then((response) => {
+        console.log("response", response);
         if (response.status) {
           const existingFiles = response.data.customer_paper_work || [];
+          console.log("existingFiles", existingFiles);
           setCustomerDetails({
             loading: false,
             data: response.data,
@@ -142,7 +163,7 @@ const Paper = () => {
 
 
   const fetchSiteDetails = async () => {
-    const { siteUrl, folderPath ,sharepoint_token} = await SiteUrlFolderPath();
+    const { siteUrl, folderPath, sharepoint_token } = await SiteUrlFolderPath();
     setSiteUrl(siteUrl);
     setFolderPath(folderPath);
     setSharepoint_token(sharepoint_token);
@@ -155,8 +176,30 @@ const Paper = () => {
 
   const handleSubmit = async (values) => {
 
+    let customer_name = "DEMO"
+    if (customerDetails.data.customer != undefined) {
+      customer_name = customerDetails.data.customer.trading_name;
+    }
+
+
+    const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+    const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
+
+    const uploadedFilesArray = [];
+    for (const file of newFiles) {
+      const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
+      const uploadedFileInfo = {
+        web_url: uploadDataUrl,
+        filename: file.lastModified + '-' + file.name,
+        originalname: file.name,
+        mimetype: file.type,
+        size: file.size
+      };
+      uploadedFilesArray.push(uploadedFileInfo);
+    }
+
     const data1 = {
-      req: { fileData: newFiles, customer_id: address, authToken: token },
+      req: { fileData: newFiles, customer_id: address, authToken: token, uploadedFiles: uploadedFilesArray },
     };
 
     await dispatch(ADD_PEPPER_WORKS(data1))
@@ -175,63 +218,82 @@ const Paper = () => {
         }
       })
       .catch((error) => {
-          console.log(error)
+        console.log(error)
         return;
       });
   };
 
-  const removeItem = async (file) => {
-    
-    console.log("file", file.name);
+  const removeItem = async (file, type) => {
+    if(type == 1){
+      return;
+    }
+    let customer_name = "DEMO"
+    if (customerDetails.data.customer != undefined) {
+      customer_name = customerDetails.data.customer.trading_name;
+    }
+    let fileName = file.name;
+    if (type == 2) {
+      fileName = file.original_name;
+    }
+    console.log("fileName", fileName);
 
 
+    if (fileName != undefined) {
 
-    const req = {
-      action: "delete",
-      customer_id: location.state.id,
-      id: file.customer_paper_work_id,
-      file_name: file.file_name,
-    };
-    const data = { req: req, authToken: token };
-  
-    sweatalert
-      .fire({
-        title: "Are you sure?",
-        text: "You won't be able to revert this!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it!",
-      })
-      .then(async (result) => {
-        if (result.isConfirmed) {
-          try {
-            const response = await dispatch(DELETE_CUSTOMER_FILE(data)).unwrap();
-            if (response.status) {
-              sweatalert.fire({
-                title: "Deleted!",
-                text: "Your file has been deleted.",
-                icon: "success",
-              });
-  
-            
-              setFileState((prevFiles) =>
-                prevFiles.filter((data) => data.customer_paper_work_id !== file.customer_paper_work_id)
-              );
+      const req = {
+        action: "delete",
+        customer_id: location.state.id,
+        id: file.customer_paper_work_id,
+        file_name: file.file_name,
+      };
+      const data = { req: req, authToken: token };
+
+      sweatalert
+        .fire({
+          title: "Are you sure?",
+          text: "You won't be able to revert this!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes, delete it!",
+        })
+        .then(async (result) => {
+          if (result.isConfirmed) {
+            try {
+              const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+              const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
+              const deleteFile = await deleteFileFromFolder(site_ID, drive_ID, folderId, fileName, sharepoint_token);
+
+
+              const response = await dispatch(DELETE_CUSTOMER_FILE(data)).unwrap();
+              if (response.status) {
+                sweatalert.fire({
+                  title: "Deleted!",
+                  text: "Your file has been deleted.",
+                  icon: "success",
+                });
+                setFileState((prevFiles) =>
+                  prevFiles.filter((data) => data.customer_paper_work_id !== file.customer_paper_work_id)
+                );
+                return;
+
+              }
+            } catch (error) {
+              return;
             }
-          } catch (error) {
-            return;
           }
-        }
-      });
+        });
+    } else {
+      return;
+    }
   };
-  
+
 
   return (
     <Formik
       initialValues={{ files: [...fileState, ...newFiles] }}
-      onSubmit={handleSubmit}
+      onSubmit={()=>handleSubmit}
     >
       {({ setFieldValue, values }) => (
         <Form className={"details__wrapper"}>
@@ -247,34 +309,34 @@ const Paper = () => {
                   <div className="card mb-0">
                     <div className="card-header card-header-light-blue">
                       <h4 className="card-title fs-16">
-                      Upload Customer Specific Paperwork
+                        Upload Customer Specific Paperwork
                       </h4>
                     </div>
                     <div className="card-body">
-                    <div className="input-group">
-                    <div className="custom-file w-100">
-                      <input
-                        type="file"
-                        ref={fileInputRef}
-                        multiple
-                        onChange={(event) => {
-                          handleFileChange(event);
-                          setFieldValue("files", [...fileState, ...newFiles]);
-                        }}
-                        className="custom-file-input form-control"
-                        id="inputGroupFile04"
-                      />
+                      <div className="input-group">
+                        <div className="custom-file w-100">
+                          <input
+                            type="file"
+                            ref={fileInputRef}
+                            multiple
+                            onChange={(event) => {
+                              handleFileChange(event);
+                              setFieldValue("files", [...fileState, ...newFiles]);
+                            }}
+                            className="custom-file-input form-control"
+                            id="inputGroupFile04"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                    </div>
-                  </div>
-                  
+
 
                   <div className="container-fluid page-title-box">
                     <div className="row">
                       <div className="col-lg-12">
                         <div className="">
-                        {/* <div className="card-header card-header-light-blue">
+                          {/* <div className="card-header card-header-light-blue">
                                 <h4 className="card-title fs-16">
                                   Preview Paperwork
                                 </h4>
@@ -287,7 +349,7 @@ const Paper = () => {
                                 </div>
                               </div>
                               <div className="table-responsive table-card mb-1">
-                                
+
                                 {newFiles.length > 0 && (
                                   <table
                                     className="table align-middle table-nowrap"
@@ -295,7 +357,7 @@ const Paper = () => {
                                   >
                                     <thead className="table-light table-head-blue">
                                       <tr>
-                                      <th className="" data-sort="file_name">
+                                        <th className="" data-sort="file_name">
                                           File Image
                                         </th>
                                         <th className="" data-sort="file_name">
@@ -317,18 +379,18 @@ const Paper = () => {
                                         Array.from(newFiles).map(
                                           (file, index) => (
                                             <tr key={`new-${index}`}>
-                                              <td>        <img
-                                                  src={previews[index]}
-                                                  alt="preview"
+                                              <td> <img
+                                                src={previews[index]}
+                                                alt="preview"
 
-                                                  style={{
-                                                    width: "50px",
-                                                    height: "50px",
-                                                  }}
-                                                /></td>
+                                                style={{
+                                                  width: "50px",
+                                                  height: "50px",
+                                                }}
+                                              /></td>
                                               <td className="file_name">
-                                              
-                                        
+
+
                                                 {file.name}
                                               </td>
 
@@ -338,19 +400,19 @@ const Paper = () => {
                                               <td className="size">
                                                 {file.size < 1024 * 1024
                                                   ? `${(
-                                                      file.size / 1024
-                                                    ).toFixed(2)} KB`
+                                                    file.size / 1024
+                                                  ).toFixed(2)} KB`
                                                   : `${(
-                                                      file.size /
-                                                      (1024 * 1024)
-                                                    ).toFixed(2)} MB`}
+                                                    file.size /
+                                                    (1024 * 1024)
+                                                  ).toFixed(2)} MB`}
                                               </td>
 
                                               <td className="action">
                                                 <div className="">
                                                   <div className="remove">
                                                     <button
-                                                    className="delete-icon"
+                                                      className="delete-icon"
                                                       onClick={() => {
                                                         fileInputRef.current.value = "";
                                                         const updatedFiles =
@@ -371,7 +433,7 @@ const Paper = () => {
                                                               idx !== index
                                                           )
                                                         );
-                                                        removeItem(file);
+                                                        removeItem(file, 1);
                                                       }}
                                                     >
                                                       <i className="ti-trash text-danger" />
@@ -385,25 +447,25 @@ const Paper = () => {
                                     </tbody>
                                   </table>
                                 )}
-                               </div>
+                              </div>
                             </div>
                           </div>
                         </div>
                         <div className="card">
-                                <div className="card-header card-header-light-blue">
-                                <h4 className="card-title fs-16">
-                                  Uploaded Paperworks
-                                </h4>
-                                </div>
-                                <div className="card-body">
-                               <div className="table-responsive table-card mb-1">
-                                <table
-                                  className="table align-middle table-nowrap"
-                                  id="customerTable"
-                                >
-                                  <thead className="table-light table-head-blue">
-                                    <tr>
-                                      <th scope="col" style={{ width: 50 }}>
+                          <div className="card-header card-header-light-blue">
+                            <h4 className="card-title fs-16">
+                              Uploaded Paperworks
+                            </h4>
+                          </div>
+                          <div className="card-body">
+                            <div className="table-responsive table-card mb-1">
+                              <table
+                                className="table align-middle table-nowrap"
+                                id="customerTable"
+                              >
+                                <thead className="table-light table-head-blue">
+                                  <tr>
+                                    {/* <th scope="col" style={{ width: 50 }}>
                                         <div className="form-check">
                                           <input
                                             className="form-check-input new_input"
@@ -412,27 +474,30 @@ const Paper = () => {
                                             defaultValue="option"
                                           />
                                         </div>
-                                      </th>
-                                      <th className="" data-sort="file_name">
-                                        File Name
-                                      </th>
-                                      <th className="" data-sort="file_type">
-                                        File Type
-                                      </th>
-                                      <th className="" data-sort="size">
-                                        Size
-                                      </th>
-                                      <th className="" data-sort="action">
-                                        Action
-                                      </th>
-                                    </tr>
-                                  </thead>
-                                  <tbody className="list form-check-all">
-                                    {fileState && fileState.length > 0 ? (
-                                      Array.from(fileState).map(
-                                        (file, index) => (
-                                          <tr key={index}>
-                                            <th scope="row">
+                                      </th> */}
+                                    <th className="" data-sort="file_name">
+                                      File Image
+                                    </th>
+                                    <th className="" data-sort="file_name">
+                                      File Name
+                                    </th>
+                                    <th className="" data-sort="file_type">
+                                      File Type
+                                    </th>
+                                    <th className="" data-sort="size">
+                                      Size
+                                    </th>
+                                    <th className="" data-sort="action">
+                                      Action
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody className="list form-check-all">
+                                  {fileState && fileState.length > 0 ? (
+                                    Array.from(fileState).map(
+                                      (file, index) => (
+                                        <tr key={index}>
+                                          {/* <th scope="row">
                                               <div className="form-check">
                                                 <input
                                                   className="form-check-input new_input"
@@ -443,64 +508,74 @@ const Paper = () => {
                                                   }`}
                                                 />
                                               </div>
-                                            </th>
-                                            <td className="file_name">
-                                              {file.file_name}
-                                            </td>
-                                            <td className="file_type">
-                                              {file.file_type}
-                                            </td>
-                                            <td className="size">
-                                              {file.file_size < 1024 * 1024
-                                                ? `${(
-                                                    file.file_size / 1024
-                                                  ).toFixed(2)} KB`
-                                                : `${(
-                                                    file.file_size /
-                                                    (1024 * 1024)
-                                                  ).toFixed(2)} MB`}
-                                            </td>
+                                            </th> */}
+                                          <td> <img
+                                            src={file.web_url}
+                                            alt="preview"
 
-                                            <td className="action">
-                                              <div className="d-flex gap-2">
-                                                <div className="remove">
-                                                  <button
+                                            style={{
+                                              width: "50px",
+                                              height: "50px",
+                                            }}
+                                          /></td>
+
+                                          <td className="file_name">
+                                            {file.original_name}
+                                          </td>
+                                          <td className="file_type">
+                                            {file.file_type}
+                                          </td>
+                                          <td className="size">
+                                            {file.file_size < 1024 * 1024
+                                              ? `${(
+                                                file.file_size / 1024
+                                              ).toFixed(2)} KB`
+                                              : `${(
+                                                file.file_size /
+                                                (1024 * 1024)
+                                              ).toFixed(2)} MB`}
+                                          </td>
+
+                                          <td className="action">
+                                            <div className="d-flex gap-2">
+                                              <div className="remove">
+                                                <button
                                                   className="delete-icon"
-                                                    onClick={(e) =>
-                                                      removeItem(file)
-                                                    }
-                                                  >
-                                                    <i className="ti-trash text-danger" />
-                                                  </button>
-                                                </div>
+                                                  onClick={(e) =>
+                                                    removeItem(file, 2)
+                                                  }
+                                                >
+                                                  <i className="ti-trash text-danger" />
+                                                </button>
                                               </div>
-                                            </td>
-                                          </tr>
-                                        )
+                                            </div>
+                                          </td>
+                                        </tr>
                                       )
-                                    ) : (
-                                      <tr>
-                                        <td colSpan="5" className="text-center">
-                                          No files selected
-                                        </td>
-                                      </tr>
-                                    )}
-                                  </tbody>
-                                </table>
-                              </div>
-                              </div>
-
+                                    )
+                                  ) : (
+                                    <tr>
+                                      <td colSpan="5" className="text-center">
+                                        No files selected
+                                      </td>
+                                    </tr>
+                                  )}
+                                </tbody>
+                              </table>
                             </div>
+                          </div>
+
+                        </div>
                         <div className="d-flex align-items-start gap-3 mt-4 justify-content-between">
                           <button
                             type="button"
                             className="btn btn-info text-decoration-none previestab"
                             onClick={prev}
                           >
-                          <i className="pe-2 fa-regular fa-arrow-left-long"></i>  Previous
+                            <i className="pe-2 fa-regular fa-arrow-left-long"></i>  Previous
                           </button>
                           <Button
-                          style={{height:'41px'}}
+                            style={{ height: '41px' }}
                             className=" py-3 btn btn-outline-success  text-center d-flex align-items-center float-end"
                             type="submit"
                             onClick={(e) => handleSubmit(e)}
