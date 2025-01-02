@@ -8,6 +8,7 @@ import { Update_Customer_Status } from "../../../ReduxStore/Slice/Customer/Custo
 import { getDateRange } from "../../../Utils/Comman_function";
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
+import { use } from "react";
 
 const Customer = () => {
   const navigate = useNavigate();
@@ -18,8 +19,9 @@ const Customer = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [activeTab, setActiveTab] = useState("this-year");
   const role = JSON.parse(localStorage.getItem("role"));
-
+  const [filteredData1, setFilteredData1] = useState([])
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [getAccessData, setAccessData] = useState({
     insert: 0,
     update: 0,
@@ -28,6 +30,7 @@ const Customer = () => {
   });
 
 
+  console.log("statusFilter", statusFilter);
   const accessData =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
       (item) => item.permission_name === "customer"
@@ -367,7 +370,8 @@ const Customer = () => {
         //   const { startDate, endDate } = getDateRange(selectedTab);
         //   return itemDate >= startDate && itemDate <= endDate;
         // });
-    
+
+
         setFilteredData(response.data.data);
         setTotalRecords(response.data.pagination.totalItems);
         // setCustomerData(response.data.pagination.totalItems);
@@ -379,6 +383,13 @@ const Customer = () => {
       console.error('Error fetching customer data:', error);
     }
   };
+
+  
+  useEffect(() => {
+    const StatusfilterData= filteredData.filter((item) =>  (item.status == statusFilter || statusFilter == "") )
+    setFilteredData1(StatusfilterData);
+
+  }, [filteredData, statusFilter]);
 
 
   const handleSearch = (event) => {
@@ -460,8 +471,6 @@ const Customer = () => {
               </div>
 
               <div className="col-12">
-
-
                 {/* Tab content */}
                 <div className="tab-content mt-minus-60" id="pills-tabContent">
                   <div className="card-datatable">
@@ -477,9 +486,20 @@ const Customer = () => {
                             onChange={(e) => handleSearchChange(e.target.value)}
                           />
                         </div>
+                        <div className="col-md-2">
+                          <select className="form-select form-control" onChange={(e) => setStatusFilter(e.target.value)} >
+                            <option value="">All</option>
+                            <option value="1">Active</option>
+                            <option value="0">Inactive</option>
+                          </select>
+
+
+                        </div>
                       </div>
 
-                      <Datatable columns={columns} data={filteredData} />
+
+
+                      <Datatable columns={columns} data={filteredData1} />
 
                       {/* Pagination Controls */}
                       <ReactPaginate
