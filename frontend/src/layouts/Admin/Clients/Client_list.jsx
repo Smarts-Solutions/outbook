@@ -3,11 +3,12 @@ import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useNavigate, useLocation } from "react-router-dom";
-import { JobAction, Update_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { JobAction, Update_Status, GET_CUSTOMER_DATA, DELETE_CUSTOMER_FILE } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import sweatalert from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../Utils/graphAPI";
 
 
 const ClientList = () => {
@@ -23,6 +24,14 @@ const ClientList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectStatusIs, setStatusId] = useState('')
   const [statusDataAll, setStatusDataAll] = useState([])
+  const [fileState, setFileState] = useState([]);
+  const [siteUrl, setSiteUrl] = useState("");
+  const [sharepoint_token, setSharepoint_token] = useState("");
+  const [folderPath, setFolderPath] = useState("");
+  const [customerDetails, setCustomerDetails] = useState({
+    loading: true,
+    data: [],
+  });
   const [getAccessDataClient, setAccessDataClient] = useState({ insert: 0, update: 0, delete: 0, client: 0, });
   const [getAccessDataJob, setAccessDataJob] = useState({ insert: 0, update: 0, delete: 0, job: 0, });
   const [activeTab, setActiveTab] = useState('');
@@ -36,9 +45,9 @@ const ClientList = () => {
   });
 
   const accessDataCustomer =
-  JSON.parse(localStorage.getItem("accessData") || "[]").find(
-    (item) => item.permission_name === "customer"
-  )?.items || [];
+    JSON.parse(localStorage.getItem("accessData") || "[]").find(
+      (item) => item.permission_name === "customer"
+    )?.items || [];
 
 
   useEffect(() => {
@@ -51,6 +60,8 @@ const ClientList = () => {
       if (item.type === "view") updatedAccess.view = item.is_assigned;
     });
     setAccessDataCustomer(updatedAccess);
+
+    GetCustomerData();
   }, []);
 
 
@@ -186,9 +197,9 @@ const ClientList = () => {
       name: "Client Code",
       cell: (row) => (
         <div title={row.client_code || "-"}>
-         {row.client_code || "-"}
+          {row.client_code || "-"}
         </div>
-   ),
+      ),
       selector: (row) => row.client_code || "-",
       sortable: true,
       reorder: false,
@@ -269,11 +280,11 @@ const ClientList = () => {
       name: "Client Name",
       cell: (row) => (
         <div
-        title={row.client_trading_name || "-"}
+          title={row.client_trading_name || "-"}
         >
-         {row.client_trading_name || "-"}
+          {row.client_trading_name || "-"}
         </div>
-   ),
+      ),
       selector: (row) => row.client_trading_name || "-",
       sortable: true,
       reorder: false,
@@ -282,11 +293,11 @@ const ClientList = () => {
       name: "Job Type",
       cell: (row) => (
         <div
-        title={row.job_type_name || "-"}
+          title={row.job_type_name || "-"}
         >
-         {row.job_type_name || "-"}
+          {row.job_type_name || "-"}
         </div>
-   ),
+      ),
       selector: (row) => row.job_type_name || "-",
       sortable: true,
       reorder: false,
@@ -300,7 +311,7 @@ const ClientList = () => {
               className="form-select form-control"
               value={row.status_type}
               onChange={(e) => handleStatusChange(e, row)}
-              disabled={ getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? false : true}
+              disabled={getAccessDataJob.update === 1 || role === "ADMIN" || role === "SUPERADMIN" ? false : true}
             >
               {statusDataAll.map((status) => (
                 <option key={status.id} value={status.id}>
@@ -320,15 +331,15 @@ const ClientList = () => {
 
       cell: (row) => (
         <div
-        title={ row.account_manager_officer_first_name +
-          " " +
-          row.account_manager_officer_last_name || "-"}
+          title={row.account_manager_officer_first_name +
+            " " +
+            row.account_manager_officer_last_name || "-"}
         >
-         { row.account_manager_officer_first_name +
-        " " +
-        row.account_manager_officer_last_name || "-"}
+          {row.account_manager_officer_first_name +
+            " " +
+            row.account_manager_officer_last_name || "-"}
         </div>
-   ),
+      ),
       selector: (row) =>
         row.account_manager_officer_first_name +
         " " +
@@ -340,11 +351,11 @@ const ClientList = () => {
       name: "Client Job Code",
       cell: (row) => (
         <div
-        title={row.client_job_code || "-"}
+          title={row.client_job_code || "-"}
         >
-         {row.client_job_code || "-"}
+          {row.client_job_code || "-"}
         </div>
-   ),
+      ),
       selector: (row) => row.client_job_code || "-",
       sortable: true,
       reorder: false,
@@ -353,15 +364,15 @@ const ClientList = () => {
       name: "Outbook Account Manager",
       cell: (row) => (
         <div
-        title={ row.outbooks_acount_manager_first_name +
-          " " +
-          row.outbooks_acount_manager_last_name || "-"}
+          title={row.outbooks_acount_manager_first_name +
+            " " +
+            row.outbooks_acount_manager_last_name || "-"}
         >
-         { row.outbooks_acount_manager_first_name +
-        " " +
-        row.outbooks_acount_manager_last_name || "-"}
+          {row.outbooks_acount_manager_first_name +
+            " " +
+            row.outbooks_acount_manager_last_name || "-"}
         </div>
-   ),
+      ),
       selector: (row) =>
         row.outbooks_acount_manager_first_name +
         " " +
@@ -370,27 +381,27 @@ const ClientList = () => {
       reorder: false,
     },
 
-  {
-    name: "Allocated To",
-    selector: (row) =>
-      row.allocated_id != null
-        ? row.allocated_first_name + " " + row.allocated_last_name
-        : "",
-    sortable: true,
-  },
+    {
+      name: "Allocated To",
+      selector: (row) =>
+        row.allocated_id != null
+          ? row.allocated_first_name + " " + row.allocated_last_name
+          : "",
+      sortable: true,
+    },
     {
       name: "Timesheet",
       cell: (row) => (
         <div
-        title={row.total_hours_status == "1" && row.total_hours != null ?
-          row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
-          : "-"}
+          title={row.total_hours_status == "1" && row.total_hours != null ?
+            row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
+            : "-"}
         >
-         {row.total_hours_status == "1" && row.total_hours != null ?
-          row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
-          : "-"}
+          {row.total_hours_status == "1" && row.total_hours != null ?
+            row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
+            : "-"}
         </div>
-   ),
+      ),
       selector: (row) =>
         row.total_hours_status == "1" && row.total_hours != null ?
           row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m"
@@ -419,12 +430,12 @@ const ClientList = () => {
             ) : null
           }
           {
-            row.timesheet_job_id ==null ?
-            getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
-              <button className="delete-icon" onClick={() => handleDelete(row, "job")}>
-                <i className="ti-trash text-danger" />
-              </button>
-            ) : null :""
+            row.timesheet_job_id == null ?
+              getAccessDataJob.delete === 1 || role === "ADMIN" || role === "SUPERADMIN" ? (
+                <button className="delete-icon" onClick={() => handleDelete(row, "job")}>
+                  <i className="ti-trash text-danger" />
+                </button>
+              ) : null : ""
           }
 
         </div>
@@ -435,6 +446,155 @@ const ClientList = () => {
       reorder: false,
     },
   ];
+  const DocumentListColumns = [
+    {
+      name: "File Image",
+      cell: (row) => (
+        <div>
+          <img src={row.web_url} alt="preview" style={{ width: "50px", height: "50px" }} />
+        </div>
+      ),
+      selector: (row) => row.web_url,
+      sortable: true,
+      reorder: false,
+    },
+
+    {
+      name: "File Name",
+      cell: (row) => (
+        <div title={row.original_name || "-"}>
+          {row.original_name || "-"}
+        </div>
+      ),
+      selector: (row) => row.original_name || "-",
+      sortable: true,
+      reorder: false,
+    },
+
+    {
+      name: "File Type",
+      cell: (row) => (
+        <div title={row.file_type || "-"}>
+          {row.file_type || "-"}
+        </div>
+      ),
+      selector: (row) => row.file_type || "-",
+      sortable: true,
+      reorder: false,
+    },
+
+    {
+      name: "File Size",
+      cell: (row) => (
+        <div title={row.file_size || "-"}>
+          {row.file_size < 1024 * 1024
+            ? `${(
+              row.file_size / 1024
+            ).toFixed(2)} KB`
+            : `${(
+              row.file_size /
+              (1024 * 1024)
+            ).toFixed(2)} MB` || "-"}
+        </div>
+      ),
+      selector: (row) => row.file_size || "-",
+      sortable: true,
+      reorder: false,
+    },
+
+    {
+      name: "Actions",
+      cell: (row) => (
+        <div className="d-flex">
+          <button className="delete-icon" onClick={() => removeItem(row, 2)}>
+            <i className="ti-trash text-danger" />
+          </button>
+
+        </div>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+      reorder: false,
+    },
+
+
+  ];
+
+  const removeItem = async (file, type) => {
+    console.log("removeItem", file, type);
+
+    if (type == 1) {
+      return;
+    }
+    let customer_name = "DEMO"
+    if (customerDetails.data.customer != undefined) {
+      customer_name = customerDetails.data.customer.trading_name;
+    }
+    let fileName = file.name;
+    if (type == 2) {
+      fileName = file.original_name;
+    }
+    console.log("fileName", fileName);
+
+
+    if (fileName != undefined) {
+
+      const req = {
+        action: "delete",
+        customer_id: location.state.id,
+        id: file.customer_paper_work_id,
+        file_name: file.file_name,
+      };
+      const data = { req: req, authToken: token };
+
+      sweatalert
+        .fire({
+          title: "Are you sure?",
+          text: "You won't be able to revert this!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes, delete it!",
+        })
+        .then(async (result) => {
+          if (result.isConfirmed) {
+            try {
+              console.log("siteUrl",siteUrl);
+              console.log("sharepoint_token",sharepoint_token);
+              const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+              console.log("site_ID", site_ID, drive_ID, folder_ID);
+              console.log("customer_name",customer_name);
+              const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
+              console.log("folderId", folderId);
+              const deleteFile = await deleteFileFromFolder(site_ID, drive_ID, folderId, fileName, sharepoint_token);
+
+
+              const response = await dispatch(DELETE_CUSTOMER_FILE(data)).unwrap();
+              if (response.status) {
+                sweatalert.fire({
+                  title: "Deleted!",
+                  text: "Your file has been deleted.",
+                  icon: "success",
+                });
+                setFileState((prevFiles) =>
+                  prevFiles.filter((data) => data.customer_paper_work_id !== file.customer_paper_work_id)
+                );
+                return;
+
+              }
+            } catch (error) {
+              return;
+            }
+          }
+        });
+    } else {
+      return;
+    }
+  };
+
+
 
   const handleStatusChange = (e, row) => {
     const Id = e.target.value;
@@ -526,7 +686,7 @@ const ClientList = () => {
       cell: (row) => (
         <div>
           <a
-           title={row.check_list_name}
+            title={row.check_list_name}
           // onClick={() => HandleClientView(row)}
           // style={{ cursor: "pointer", color: "#26bdf0" }}
           >
@@ -542,11 +702,11 @@ const ClientList = () => {
       name: "Service Type",
       cell: (row) => (
         <div
-        title={row.service_name}
+          title={row.service_name}
         >
-         {row.service_name}
+          {row.service_name}
         </div>
-   ),
+      ),
       selector: (row) => row.service_name,
       sortable: true,
     },
@@ -554,11 +714,11 @@ const ClientList = () => {
       name: "Job Type",
       cell: (row) => (
         <div
-        title={row.job_type_type}
+          title={row.job_type_type}
         >
-         {row.job_type_type}
+          {row.job_type_type}
         </div>
-   ),
+      ),
       selector: (row) => row.job_type_type, sortable: true,
       width: "200px"
     }
@@ -567,11 +727,11 @@ const ClientList = () => {
       name: "Client Type",
       cell: (row) => (
         <div
-        title={row.client_type_type}
+          title={row.client_type_type}
         >
-         {row.client_type_type}
+          {row.client_type_type}
         </div>
-   ),
+      ),
       selector: (row) => row.client_type_type,
       sortable: true,
       width: "200px",
@@ -586,7 +746,7 @@ const ClientList = () => {
     {
       name: "Actions",
       cell: (row) => (
-        <div className="d-flex"> 
+        <div className="d-flex">
           {
             (getAccessDataCustomer.update === 1 || role === "ADMIN" || role === "SUPERADMIN") ?
               <button className="edit-icon" onClick={() =>
@@ -630,8 +790,8 @@ const ClientList = () => {
       key: "documents",
       title: "Documents",
       placeholder: null,
-      data: [],
-      columns: ClientListColumns,
+      data: fileState,
+      columns: DocumentListColumns,
     },
     {
       key: "status",
@@ -659,6 +819,35 @@ const ClientList = () => {
           setGetJobDetails(response.data);
         } else {
           setGetJobDetails([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+  const GetCustomerData = async () => {
+    const req = { customer_id: location?.state?.id, pageStatus: "4" };
+    const data1 = { req: req, authToken: token };
+
+    await dispatch(GET_CUSTOMER_DATA(data1))
+      .unwrap()
+      .then((response) => {
+        console.log("response", response);
+        if (response.status) {
+          const existingFiles = response.data.customer_paper_work || [];
+          setCustomerDetails({
+            loading: false,
+            data: response.data,
+          });
+          setFileState(existingFiles);
+        } else {
+          setFileState([]);
+          setCustomerDetails({
+            loading: true,
+            data: [],
+          });
+
         }
       })
       .catch((error) => {
@@ -832,7 +1021,7 @@ const ClientList = () => {
         ...prevState,
         job: row
       };
-      navigate("/admin/job/logs", { state: { job_id: row.job_id,timesheet_job_id:row?.timesheet_job_id, goto: "Customer", data: updatedData, activeTab: activeTab } });
+      navigate("/admin/job/logs", { state: { job_id: row.job_id, timesheet_job_id: row?.timesheet_job_id, goto: "Customer", data: updatedData, activeTab: activeTab } });
       return updatedData;
     });
   };
@@ -877,7 +1066,7 @@ const ClientList = () => {
                   activeTab === "" ||
                   activeTab === "job" ? (
                   <>
-                           <div
+                    <div
                       className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
                       onClick={() => {
                         window.history.back();
@@ -915,7 +1104,7 @@ const ClientList = () => {
                       ) : (
                         null
                       )}
-                  
+
                   </>
                 ) : null}
               </div>
@@ -924,7 +1113,7 @@ const ClientList = () => {
         </div>
       </div>
 
-     <Hierarchy show={["Customer", activeTab]} active={1} data={hararchyData} NumberOfActive={activeTab == 'client' ? ClientData?.length : activeTab == 'job' ? getJobDetails?.length : ""} />
+      <Hierarchy show={["Customer", activeTab]} active={1} data={hararchyData} NumberOfActive={activeTab == 'client' ? ClientData?.length : activeTab == 'job' ? getJobDetails?.length : ""} />
 
       <div className="tab-content" id="pills-tabContent">
         {tabs1.map((tab) => (
