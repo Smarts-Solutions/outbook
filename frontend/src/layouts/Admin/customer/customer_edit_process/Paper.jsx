@@ -99,15 +99,15 @@ const Paper = () => {
     });
 
     
-    const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
-    const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, "JohnDoe", sharepoint_token);
-    console.log("folderId", folderId);
+    // const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+    // const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, "JohnDoe", sharepoint_token);
+    // console.log("folderId", folderId);
 
-    for (const file of uniqueValidFiles) {
-      const uplaodDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
-      console.log(`Uploaded file: ${file.name}`);
-      console.log(`uplaodDataUrl: ${uplaodDataUrl}`);
-    }
+    // for (const file of uniqueValidFiles) {
+    //   const uplaodDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
+    //   console.log(`Uploaded file: ${file.name}`);
+    //   console.log(`uplaodDataUrl: ${uplaodDataUrl}`);
+    // }
 
       
 
@@ -181,6 +181,11 @@ const Paper = () => {
   };
 
   const removeItem = async (file) => {
+    
+    console.log("file", file.name);
+
+
+
     const req = {
       action: "delete",
       customer_id: location.state.id,
@@ -366,6 +371,7 @@ const Paper = () => {
                                                               idx !== index
                                                           )
                                                         );
+                                                        removeItem(file);
                                                       }}
                                                     >
                                                       <i className="ti-trash text-danger" />
