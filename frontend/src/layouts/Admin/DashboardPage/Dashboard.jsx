@@ -477,9 +477,9 @@ const deleteImage = async () => {
       const currentTime = Math.floor(Date.now() / 1000);
 
       if (decodedToken.exp && decodedToken.exp < currentTime) {
-       console.log("Token Expired");
+       //console.log("Token Expired");
       }else{
-       console.log("Token Not Expired");
+       //console.log("Token Not Expired");
       }
 
     }else{
@@ -551,10 +551,8 @@ const deleteImage = async () => {
 
 
 
-                <div className="col-lg-4 col-md-6 col-sm-6">
+                {/* <div className="col-lg-4 col-md-6 col-sm-6">
                   <div className="form-group">
-
-                    {/* <button className="form-control" onClick={refreshToken}>Refresh Token</button> */}
                     <button className="form-control" onClick={fetchData}>Refresh Token</button>
                     {newAccessToken && <p>New Access Token: {newAccessToken}</p>}
                     {error && <p style={{ color: "red" }}>{error}</p>}
@@ -569,7 +567,7 @@ const deleteImage = async () => {
                   <button className="form-control" onClick={deleteImage} > Delete Image</button>
                  
                   </div>
-                </div>
+                </div> */}
 
               </div>
               <div className="tab-content mt-5">
