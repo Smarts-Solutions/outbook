@@ -21,12 +21,12 @@ const createClient = async (client) => {
     website,
     StaffUserId
   } = client;
-  
+
   let trading_name = client.trading_name;
   let notes = client.notes;
 
-  if(client_type == "2"){
-    trading_name = trading_name +'_'+ client_code;
+  if (client_type == "2") {
+    trading_name = trading_name + '_' + client_code;
   }
 
   const checkQuery = `SELECT 1 FROM clients WHERE trading_name = ?`;
@@ -342,7 +342,7 @@ const getClient = async (client) => {
     const [existStaffbyCustomer] = await pool.execute('SELECT id  FROM customers WHERE id = "' + customer_id + '" AND staff_id = "' + StaffUserId + '" LIMIT 1');
 
     if (existStaffbyCustomer.length > 0) {
-      
+
       const [rows] = await pool.execute('SELECT id , role_id  FROM staffs WHERE id = "' + StaffUserId + '" LIMIT 1');
 
       if (rows.length > 0) {
@@ -390,8 +390,8 @@ const getClient = async (client) => {
         ORDER BY 
         clients.id DESC
             `;
-          const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId,StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId]);
-          if(resultAllocated.length == 0){
+          const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, StaffUserId]);
+          if (resultAllocated.length == 0) {
             return { status: true, message: "success.", data: resultAllocated };
           }
           const filteredData = resultAllocated.filter(item => parseInt(item.customer_id) === parseInt(customer_id));
@@ -450,8 +450,8 @@ const getClient = async (client) => {
           // (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
 
 
-          const [resultAccounrManage] = await pool.execute(query, [StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId,customer_id]);
-          if(resultAccounrManage.length == 0){
+          const [resultAccounrManage] = await pool.execute(query, [StaffUserId, StaffUserId, StaffUserId, customer_id, StaffUserId, customer_id]);
+          if (resultAccounrManage.length == 0) {
             return { status: true, message: "success.", data: resultAccounrManage };
           }
 
@@ -508,26 +508,26 @@ const getClient = async (client) => {
         clients.id DESC
             `;
 
-            try {
-              const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id,StaffUserId, StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId]);
+          try {
+            const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, StaffUserId]);
             console.log('resultReviewer', resultReviewer)
-            } catch (error) {
-              console.log('error', error)
-              
-            }
-            
-            if(resultReviewer.length == 0){
-              return { status: true, message: "success.", data: resultReviewer };
-            }
-           
-            const filteredData = resultReviewer.filter(item => parseInt(item.customer_id) === parseInt(customer_id));
+          } catch (error) {
+            console.log('error', error)
 
-            const uniqueData = filteredData.filter((value, index, self) =>
-              index === self.findIndex((t) => t.id === value.id)
-            );
+          }
+
+          if (resultReviewer.length == 0) {
+            return { status: true, message: "success.", data: resultReviewer };
+          }
+
+          const filteredData = resultReviewer.filter(item => parseInt(item.customer_id) === parseInt(customer_id));
+
+          const uniqueData = filteredData.filter((value, index, self) =>
+            index === self.findIndex((t) => t.id === value.id)
+          );
           return { status: true, message: "success.", data: uniqueData };
 
-        }else{
+        } else {
           const query = `
           SELECT  
               clients.id AS id,
@@ -559,8 +559,8 @@ const getClient = async (client) => {
        ORDER BY 
           clients.id DESC;
             `;
-            const [result] = await pool.execute(query, [customer_id]);
-            return { status: true, message: "success.", data: result };
+          const [result] = await pool.execute(query, [customer_id]);
+          return { status: true, message: "success.", data: result };
         }
 
       }
@@ -616,8 +616,8 @@ const getClient = async (client) => {
         ORDER BY 
         clients.id DESC
             `;
-          const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId,StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId]);
-          if(resultAllocated.length == 0){
+          const [resultAllocated] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, StaffUserId]);
+          if (resultAllocated.length == 0) {
             return { status: true, message: "success.", data: resultAllocated };
           }
           const filteredData = resultAllocated.filter(item => parseInt(item.customer_id) === parseInt(customer_id));
@@ -676,8 +676,8 @@ const getClient = async (client) => {
           // (jobs.account_manager_id = ? OR customer_service_account_managers.account_manager_id = ?) AND (clients.customer_id = ? OR jobs.client_id = clients.id OR clients.staff_created_id = ? )
 
 
-          const [resultAccounrManage] = await pool.execute(query, [StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId,customer_id]);
-          if(resultAccounrManage.length == 0){
+          const [resultAccounrManage] = await pool.execute(query, [StaffUserId, StaffUserId, StaffUserId, customer_id, StaffUserId, customer_id]);
+          if (resultAccounrManage.length == 0) {
             return { status: true, message: "success.", data: resultAccounrManage };
           }
 
@@ -734,17 +734,17 @@ const getClient = async (client) => {
         clients.id DESC
             `;
 
-   
-            const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id,StaffUserId, StaffUserId,StaffUserId,StaffUserId,customer_id,StaffUserId]);
 
-            if(resultReviewer.length == 0){
-              return { status: true, message: "success.", data: resultReviewer };
-            }
-           
-            const filteredData = resultReviewer.filter(item => parseInt(item.customer_id) === parseInt(customer_id));
-            const uniqueData = filteredData.filter((value, index, self) =>
-              index === self.findIndex((t) => t.id === value.id)
-            );
+          const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, StaffUserId]);
+
+          if (resultReviewer.length == 0) {
+            return { status: true, message: "success.", data: resultReviewer };
+          }
+
+          const filteredData = resultReviewer.filter(item => parseInt(item.customer_id) === parseInt(customer_id));
+          const uniqueData = filteredData.filter((value, index, self) =>
+            index === self.findIndex((t) => t.id === value.id)
+          );
           return { status: true, message: "success.", data: uniqueData };
 
         }
@@ -795,6 +795,12 @@ const getByidClient = async (client) => {
     client_contact_details.residential_address AS residential_address,
     customer_contact_person_role.name AS customer_role_contact_name,
     customer_contact_person_role.id AS customer_role_contact_id,
+    client_documents.id AS client_documents_id,
+    client_documents.file_name AS file_name,
+    client_documents.original_name AS original_name,
+    client_documents.file_type AS file_type,
+    client_documents.file_size AS file_size,
+    client_documents.web_url AS web_url,
     CONCAT(
             'cli_', 
             SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -808,12 +814,17 @@ JOIN
 LEFT JOIN 
     client_contact_details ON clients.id = client_contact_details.client_id
 LEFT JOIN 
-    customer_contact_person_role ON customer_contact_person_role.id = client_contact_details.role 
+    customer_contact_person_role ON customer_contact_person_role.id = client_contact_details.role
+LEFT JOIN 
+    client_documents ON client_documents.client_id = clients.id 
 WHERE 
     clients.id = ?
 `;
 
     const [rows] = await pool.execute(query, [client_id]);
+
+    // console.log('rows', rows)
+    // return
     if (rows.length > 0) {
       const clientData = {
         id: rows[0].client_id,
@@ -830,22 +841,50 @@ WHERE
         status: rows[0].status,
       };
 
-      const contactDetails = rows.map((row) => ({
-        contact_id: row.contact_id,
-        customer_contact_person_role_id: row.customer_role_contact_id,
-        customer_contact_person_role_name: row.customer_role_contact_name,
-        first_name: row.first_name,
-        last_name: row.last_name,
-        email: row.email,
-        phone_code: row.phone_code,
-        phone: row.phone,
-        residential_address: row.residential_address,
-        // Add other contact detail fields as needed
-      }));
+      // const contactDetails = rows.map((row) => ({
+      //   contact_id: row.contact_id,
+      //   customer_contact_person_role_id: row.customer_role_contact_id,
+      //   customer_contact_person_role_name: row.customer_role_contact_name,
+      //   first_name: row.first_name,
+      //   last_name: row.last_name,
+      //   email: row.email,
+      //   phone_code: row.phone_code,
+      //   phone: row.phone,
+      //   residential_address: row.residential_address,
+      //   // Add other contact detail fields as needed
+      // }));
+
+
+      const contactDetails = rows
+        .filter(row => row.contact_id !== null) // Filter out rows with file_name as null
+        .map(row => ({
+          customer_contact_person_role_id: row.customer_role_contact_id,
+          customer_contact_person_role_name: row.customer_role_contact_name,
+          first_name: row.first_name,
+          last_name: row.last_name,
+          email: row.email,
+          phone_code: row.phone_code,
+          phone: row.phone,
+          residential_address: row.residential_address,
+        }));
+
+
+
+      const clientDocuments = rows
+        .filter(row => row.original_name !== null) // Filter out rows with file_name as null
+        .map(row => ({
+          client_documents_id: row.client_documents_id,
+          file_name: row.file_name,
+          original_name: row.original_name,
+          file_type: row.file_type,
+          file_size: row.file_size,
+          web_url: row.web_url
+        }));
 
       const result = {
         client: clientData,
         contact_details: contactDetails,
+        client_documents: clientDocuments
       };
 
       return { status: true, message: "success.", data: result };

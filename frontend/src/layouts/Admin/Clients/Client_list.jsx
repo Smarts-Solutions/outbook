@@ -49,6 +49,12 @@ const ClientList = () => {
       (item) => item.permission_name === "customer"
     )?.items || [];
 
+  const fetchSiteDetails = async () => {
+    const { siteUrl, folderPath, sharepoint_token } = await SiteUrlFolderPath();
+    setSiteUrl(siteUrl);
+    setFolderPath(folderPath);
+    setSharepoint_token(sharepoint_token);
+  };
 
   useEffect(() => {
     if (accessDataCustomer.length === 0) return;
@@ -62,8 +68,8 @@ const ClientList = () => {
     setAccessDataCustomer(updatedAccess);
 
     GetCustomerData();
+    fetchSiteDetails();
   }, []);
-
 
   useEffect(() => {
     const retrievedData = sessionStorage.getItem('activeTab');
@@ -446,6 +452,7 @@ const ClientList = () => {
       reorder: false,
     },
   ];
+  
   const DocumentListColumns = [
     {
       name: "File Image",
@@ -522,21 +529,18 @@ const ClientList = () => {
   ];
 
   const removeItem = async (file, type) => {
-    console.log("removeItem", file, type);
-
     if (type == 1) {
       return;
     }
     let customer_name = "DEMO"
     if (customerDetails.data.customer != undefined) {
-      customer_name = customerDetails.data.customer.trading_name;
+      // customer_name = customerDetails.data.customer.trading_name;
+      customer_name =  'CUST'+customerDetails.data.customer.customer_id;
     }
     let fileName = file.name;
     if (type == 2) {
       fileName = file.original_name;
     }
-    console.log("fileName", fileName);
-
 
     if (fileName != undefined) {
 
@@ -561,16 +565,6 @@ const ClientList = () => {
         .then(async (result) => {
           if (result.isConfirmed) {
             try {
-              console.log("siteUrl",siteUrl);
-              console.log("sharepoint_token",sharepoint_token);
-              const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
-              console.log("site_ID", site_ID, drive_ID, folder_ID);
-              console.log("customer_name",customer_name);
-              const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
-              console.log("folderId", folderId);
-              const deleteFile = await deleteFileFromFolder(site_ID, drive_ID, folderId, fileName, sharepoint_token);
-
-
               const response = await dispatch(DELETE_CUSTOMER_FILE(data)).unwrap();
               if (response.status) {
                 sweatalert.fire({
@@ -581,6 +575,9 @@ const ClientList = () => {
                 setFileState((prevFiles) =>
                   prevFiles.filter((data) => data.customer_paper_work_id !== file.customer_paper_work_id)
                 );
+                const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+                const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
+                const deleteFile = await deleteFileFromFolder(site_ID, drive_ID, folderId, fileName, sharepoint_token);
                 return;
 
               }
@@ -593,8 +590,6 @@ const ClientList = () => {
       return;
     }
   };
-
-
 
   const handleStatusChange = (e, row) => {
     const Id = e.target.value;
@@ -773,7 +768,6 @@ const ClientList = () => {
   const tabs1 = [
     {
       key: "client",
-
       title: "Clients",
       placeholder: "Search clients...",
       data: ClientData,

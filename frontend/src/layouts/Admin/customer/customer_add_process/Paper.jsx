@@ -1,25 +1,34 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useRef, useState, useEffect } from "react";
 import { Formik, Field, Form } from "formik";
 import { Button } from "antd";
 import MultiStepFormContext from "./MultiStepFormContext";
-import { ADD_PEPPER_WORKS } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { ADD_PEPPER_WORKS, GET_CUSTOMER_DATA, DELETE_CUSTOMER_FILE } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import sweatalert from "sweetalert2";
+import Swal from "sweetalert2";
+import { fetchSiteAndDriveInfo, createFolderIfNotExists, uploadFileToFolder, SiteUrlFolderPath, deleteFileFromFolder } from "../../../../Utils/graphAPI";
 
 const Paper = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const { address, setAddress, next, prev } = useContext(MultiStepFormContext);
   const fileInputRef = useRef(null);
   const token = JSON.parse(localStorage.getItem("token"));
-  const sharepoint_token = JSON.parse(localStorage.getItem("sharepoint_token"));
+  // const sharepoint_token = JSON.parse(localStorage.getItem("sharepoint_token"));
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  console.log("sharepoint_token ",sharepoint_token);
+  const [customerDetails, setCustomerDetails] = useState({
+    loading: true,
+    data: [],
+  });
 
   const [fileState, setFileState] = useState([]);
   const [newFiles, setNewFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
+  const [siteUrl, setSiteUrl] = useState("");
+  const [sharepoint_token, setSharepoint_token] = useState("");
+  const [folderPath, setFolderPath] = useState("");
 
   const handleFileChange = (event) => {
     const files = event.currentTarget.files;
@@ -45,7 +54,7 @@ const Paper = () => {
     );
 
     if (validFiles.length !== fileArray.length) {
-     
+
       sweatalert.fire({
         icon: "error",
         title: "Oops...",
@@ -55,9 +64,22 @@ const Paper = () => {
       return;
     }
 
-    setNewFiles(validFiles);
+    //setNewFiles(validFiles);
+    const existingFileNames = new Set(newFiles.map(file => file.name));
+    const uniqueValidFiles = validFiles.filter(file => !existingFileNames.has(file.name));
 
-    const previewArray = validFiles.map((file) => {
+    if (uniqueValidFiles.length === 0) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Files with the same name already exist.",
+      });
+      return;
+    }
+    const updatedNewFiles = [...newFiles, ...uniqueValidFiles];
+    setNewFiles(updatedNewFiles);
+
+    const previewArray = updatedNewFiles.map((file) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       return new Promise((resolve) => {
@@ -70,10 +92,77 @@ const Paper = () => {
     });
   };
 
+  const GetCustomerData = async () => {
+    const req = { customer_id: address, pageStatus: "4" };
+    const data1 = { req: req, authToken: token };
+
+    await dispatch(GET_CUSTOMER_DATA(data1))
+      .unwrap()
+      .then((response) => {
+
+        if (response.status) {
+          const existingFiles = response.data.customer_paper_work || [];
+          console.log("existingFiles", existingFiles);
+          setCustomerDetails({
+            loading: false,
+            data: response.data,
+          });
+          setFileState(existingFiles);
+        } else {
+          setCustomerDetails({
+            loading: false,
+            data: [],
+          });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+  const fetchSiteDetails = async () => {
+    const { siteUrl, folderPath, sharepoint_token } = await SiteUrlFolderPath();
+    setSiteUrl(siteUrl);
+    setFolderPath(folderPath);
+    setSharepoint_token(sharepoint_token);
+  };
+
+  useEffect(() => {
+    GetCustomerData();
+    fetchSiteDetails();
+  }, []);
+
+
   const handleSubmit = async (values) => {
+    let customer_name = "DEMO"
+    if (customerDetails.data.customer != undefined) {
+      // customer_name = customerDetails.data.customer.trading_name;
+      customer_name =  'CUST'+customerDetails.data.customer.customer_id;
+    }
+
+    
+
+    const uploadedFilesArray = [];
+    if(newFiles.length > 0) {
+      setIsLoading(true);
+      const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+      const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
+
+    for (const file of newFiles) {
+      const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
+      const uploadedFileInfo = {
+        web_url: uploadDataUrl,
+        filename: file.lastModified + '-' + file.name,
+        originalname: file.name,
+        mimetype: file.type,
+        size: file.size
+      };
+      uploadedFilesArray.push(uploadedFileInfo);
+    }
+
+  }
 
     const data1 = {
-      req: { fileData: newFiles, customer_id: address, authToken: token },
+      req: { fileData: newFiles, customer_id: address, authToken: token ,uploadedFiles: uploadedFilesArray },
     };
 
     await dispatch(ADD_PEPPER_WORKS(data1))
@@ -89,14 +178,24 @@ const Paper = () => {
             .then(() => {
               navigate("/admin/customer");
             });
+            setIsLoading(false);
         }
       })
       .catch((error) => {
+        setIsLoading(false);
         return;
       });
   };
 
   return (
+    <div className={isLoading ? "blur-container" : ""}>
+      {isLoading && (
+        <div className="loader-overlay">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      )}
     <Formik
       initialValues={{ ...address, files: [] }}
       onSubmit={(values) => {
@@ -149,7 +248,7 @@ const Paper = () => {
                                 >
                                   <thead className="table-light table-head-blue">
                                     <tr>
-                                    <th className="" data-sort="file_name">
+                                      <th className="" data-sort="file_name">
                                         File Image
                                       </th>
                                       <th className="" data-sort="file_name">
@@ -191,19 +290,19 @@ const Paper = () => {
                                             <td className="size">
                                               {file.size < 1024 * 1024
                                                 ? `${(file.size / 1024).toFixed(
-                                                    2
-                                                  )} KB`
+                                                  2
+                                                )} KB`
                                                 : `${(
-                                                    file.size /
-                                                    (1024 * 1024)
-                                                  ).toFixed(2)} MB`}
+                                                  file.size /
+                                                  (1024 * 1024)
+                                                ).toFixed(2)} MB`}
                                             </td>
 
                                             <td className="action">
                                               <div className="d-flex gap-2">
                                                 <div className="remove">
                                                   <button
-                                                  className="delete-icon"
+                                                    className="delete-icon"
 
                                                     onClick={() => {
                                                       fileInputRef.current.value = "";
@@ -246,7 +345,7 @@ const Paper = () => {
                                   Previous
                                 </button>
 
-                            <Button style={{height:'40px'}}
+                                <Button style={{ height: '40px' }}
                                   className="btn btn-outline-success text-center  d-flex align-items-center"
                                   type="submit"
                                   onClick={(e) => handleSubmit(e)}
@@ -268,6 +367,7 @@ const Paper = () => {
         </Form>
       )}
     </Formik>
+    </div>
   );
 };
 

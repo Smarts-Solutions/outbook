@@ -2313,7 +2313,7 @@ const getSingleCustomer = async (customer) => {
             //     file_type: row.file_type,
             //     file_size: row.file_size
             // }));
-            const customer_paper_work = rows
+             const customer_paper_work = rows
                 .filter(row => row.file_name !== null) // Filter out rows with file_name as null
                 .map(row => ({
                     customer_paper_work_id: row.customer_paper_work_id,

@@ -27,8 +27,6 @@ export async function GET_CLIENT_INDUSTRY(data ,token) {
 // Get All Client List
 export async function CLIENT_ACTION(data) {
   const token =  JSON.parse(localStorage.getItem("token"));
-   
-   
   try {
     const res = await axios.post(`${Config.base_url}clientAction`, data, {
       headers: header(token),
