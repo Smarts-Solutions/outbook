@@ -2290,6 +2290,7 @@ const getSingleCustomer = async (customer) => {
             customer_paper_work ON customers.id = customer_paper_work.customer_id
         WHERE 
             customers.id = ?
+        ORDER BY customer_paper_work.id DESC    
         `;
 
 

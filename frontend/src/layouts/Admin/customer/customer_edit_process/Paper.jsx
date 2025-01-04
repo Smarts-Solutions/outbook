@@ -176,32 +176,32 @@ const Paper = () => {
     let customer_name = "DEMO"
     if (customerDetails.data.customer != undefined) {
       //customer_name = customerDetails.data.customer.trading_name;
-       customer_name =  'CUST'+customerDetails.data.customer.customer_id;
+      customer_name = 'CUST' + customerDetails.data.customer.customer_id;
     }
 
     const uploadedFilesArray = [];
-    if(newFiles.length > 0){
-    setIsLoading(true);
-    const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
-    const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
-    for (const file of newFiles) {
-      const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
-      const uploadedFileInfo = {
-        web_url: uploadDataUrl,
-        filename: file.lastModified + '-' + file.name,
-        originalname: file.name,
-        mimetype: file.type,
-        size: file.size
-      };
-      uploadedFilesArray.push(uploadedFileInfo);
-    }
+    if (newFiles.length > 0) {
+      setIsLoading(true);
+      const { site_ID, drive_ID, folder_ID } = await fetchSiteAndDriveInfo(siteUrl, sharepoint_token);
+      const folderId = await createFolderIfNotExists(site_ID, drive_ID, folder_ID, customer_name, sharepoint_token);
+      for (const file of newFiles) {
+        const uploadDataUrl = await uploadFileToFolder(site_ID, drive_ID, folderId, file, sharepoint_token);
+        const uploadedFileInfo = {
+          web_url: uploadDataUrl,
+          filename: file.lastModified + '-' + file.name,
+          originalname: file.name,
+          mimetype: file.type,
+          size: file.size
+        };
+        uploadedFilesArray.push(uploadedFileInfo);
+      }
 
-   }
+    }
 
     const data1 = {
       req: { fileData: newFiles, customer_id: address, authToken: token, uploadedFiles: uploadedFilesArray },
     };
- 
+
     await dispatch(ADD_PEPPER_WORKS(data1))
       .unwrap()
       .then(async (response) => {
@@ -232,7 +232,7 @@ const Paper = () => {
     let customer_name = "DEMO"
     if (customerDetails.data.customer != undefined) {
       // customer_name = customerDetails.data.customer.trading_name;
-      customer_name =  'CUST'+customerDetails.data.customer.customer_id;
+      customer_name = 'CUST' + customerDetails.data.customer.customer_id;
     }
     let fileName = file.name;
     if (type == 2) {
@@ -390,7 +390,7 @@ const Paper = () => {
                                           Array.from(newFiles).map(
                                             (file, index) => (
                                               <tr key={`new-${index}`}>
-                                                <td> <img
+                                                {/* <td> <img
                                                   src={previews[index]}
                                                   alt="preview"
 
@@ -398,7 +398,39 @@ const Paper = () => {
                                                     width: "50px",
                                                     height: "50px",
                                                   }}
-                                                /></td>
+                                                /></td> */}
+                                                <td>
+                                                  {file.type.startsWith("image/") ? (
+
+                                                    <img
+                                                      src={previews[index]}
+                                                      alt="preview"
+                                                      style={{
+                                                        width: "50px",
+                                                        height: "50px",
+                                                      }}
+                                                    />
+                                                  ) : file.type === "application/pdf" ? (
+
+                                                    <i
+                                                      className="fa fa-file-pdf"
+                                                      style={{
+                                                        fontSize: "24px",
+                                                        color: "#FF0000",
+                                                      }}
+                                                    ></i>
+                                                  ) : (
+
+                                                    <i
+                                                      className="fa fa-file"
+                                                      style={{
+                                                        fontSize: "24px",
+                                                        color: "#000",
+                                                      }}
+                                                    ></i>
+                                                  )}
+                                                </td>
+
                                                 <td className="file_name">
 
 
@@ -520,7 +552,7 @@ const Paper = () => {
                                                 />
                                               </div>
                                             </th> */}
-                                            <td> <img
+                                            {/* <td> <img
                                               src={file.web_url}
                                               alt="preview"
 
@@ -528,7 +560,40 @@ const Paper = () => {
                                                 width: "50px",
                                                 height: "50px",
                                               }}
-                                            /></td>
+                                            /></td> */}
+
+                                            <td>
+                                              {file.file_type.startsWith("image/") ? (
+                                              
+                                                <img
+                                                  src={file.web_url}
+                                                  alt="preview"
+                                                  style={{
+                                                    width: "50px",
+                                                    height: "50px",
+                                                  }}
+                                                />
+                                              ) : file.file_type === "application/pdf" ? (
+                                             
+                                                <i
+                                                  className="fa fa-file-pdf"
+                                                  style={{
+                                                    fontSize: "24px",
+                                                    color: "#FF0000",
+                                                  }}
+                                                ></i>
+                                              ) : (
+                                               
+                                                <i
+                                                  className="fa fa-file"
+                                                  style={{
+                                                    fontSize: "24px",
+                                                    color: "#000",
+                                                  }}
+                                                ></i>
+                                              )}
+                                            </td>
+
 
                                             <td className="file_name">
                                               {file.original_name}

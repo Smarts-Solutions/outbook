@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { JobAction, Update_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ClientAction, addClientDocument ,deleteClientFile} from "../../../ReduxStore/Slice/Client/ClientSlice";
+import { ClientAction, addClientDocument, deleteClientFile } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import sweatalert from "sweetalert2";
 import Swal from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
@@ -405,7 +405,7 @@ const ClientList = () => {
 
   const resetFileInput = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.value = ""; 
+      fileInputRef.current.value = "";
     }
     setFileState([]);
     setNewFiles([]);
@@ -485,7 +485,29 @@ const ClientList = () => {
       name: "File Image",
       cell: (row) => (
         <div>
-          <img src={row.web_url} alt="preview" style={{ width: "50px", height: "50px" }} />
+          {row.file_type.startsWith("image/") ? (
+            <img
+              src={row.web_url}
+              alt={row.original_name}
+              style={{ width: "50px", height: "50px" }}
+            />
+          ) : row.file_type === "application/pdf" ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <i
+                className="fa fa-file-pdf"
+                style={{ fontSize: "24px", color: "#FF0000" }}
+              ></i>
+              <span>PDF</span>
+            </div>
+          ) : (
+            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <i
+                className="fa fa-file"
+                style={{ fontSize: "24px", color: "#000" }}
+              ></i>
+              <span>{row.file_type}</span>
+            </div>
+          )}
         </div>
       ),
       selector: (row) => row.web_url,
@@ -1125,7 +1147,7 @@ const ClientList = () => {
                                       onChange={(event) => {
                                         handleFileChange(event);
                                         setFieldValue("files", [...fileState, ...newFiles]);
-                                        
+
                                       }}
                                       className="custom-file-input form-control"
                                       id="inputGroupFile04"
@@ -1174,7 +1196,7 @@ const ClientList = () => {
                                                     Array.from(newFiles).map(
                                                       (file, index) => (
                                                         <tr key={`new-${index}`}>
-                                                          <td className="file_name">
+                                                          {/* <td className="file_name">
                                                             {" "}
                                                             <img
                                                               src={previews[index]}
@@ -1184,6 +1206,37 @@ const ClientList = () => {
                                                                 height: "50px",
                                                               }}
                                                             />{" "}
+                                                          </td> */}
+                                                          <td>
+                                                            {file.type.startsWith("image/") ? (
+
+                                                              <img
+                                                                src={previews[index]}
+                                                                alt="preview"
+                                                                style={{
+                                                                  width: "50px",
+                                                                  height: "50px",
+                                                                }}
+                                                              />
+                                                            ) : file.type === "application/pdf" ? (
+
+                                                              <i
+                                                                className="fa fa-file-pdf"
+                                                                style={{
+                                                                  fontSize: "24px",
+                                                                  color: "#FF0000",
+                                                                }}
+                                                              ></i>
+                                                            ) : (
+
+                                                              <i
+                                                                className="fa fa-file"
+                                                                style={{
+                                                                  fontSize: "24px",
+                                                                  color: "#000",
+                                                                }}
+                                                              ></i>
+                                                            )}
                                                           </td>
                                                           <td className="file_name">
                                                             {file.name}

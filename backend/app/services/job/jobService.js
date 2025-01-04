@@ -140,6 +140,9 @@ const jobDocumentAction = async (jobDocument) => {
   else if(action === "delete"){
     return taskTimeSheetModel.deleteJobDocument(jobDocument);
   }
+  else if(action === "add"){
+    return taskTimeSheetModel.addedJobDocument(jobDocument);
+  }
   else{
     return { status: false, message: 'Error getting Job Document.' };
   }

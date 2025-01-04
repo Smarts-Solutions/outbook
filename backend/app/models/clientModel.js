@@ -1871,10 +1871,7 @@ const addClientDocument = async (client) => {
   }
   } catch (error) {
     return { status: false, message: "Error inserting file - 2" };
-  }
-
-
-  
+  } 
 }
 
 const deleteClientFile = async (client) => {

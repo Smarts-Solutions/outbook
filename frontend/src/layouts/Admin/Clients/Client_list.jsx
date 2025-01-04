@@ -458,7 +458,29 @@ const ClientList = () => {
       name: "File Image",
       cell: (row) => (
         <div>
-          <img src={row.web_url} alt="preview" style={{ width: "50px", height: "50px" }} />
+          {row.file_type.startsWith("image/") ? (
+            <img
+              src={row.web_url}
+              alt={row.original_name}
+              style={{ width: "50px", height: "50px" }}
+            />
+          ) : row.file_type === "application/pdf" ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <i
+                className="fa fa-file-pdf"
+                style={{ fontSize: "24px", color: "#FF0000" }}
+              ></i>
+              <span>PDF</span>
+            </div>
+          ) : (
+            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <i
+                className="fa fa-file"
+                style={{ fontSize: "24px", color: "#000" }}
+              ></i>
+              <span>{row.file_type}</span>
+            </div>
+          )}
         </div>
       ),
       selector: (row) => row.web_url,
