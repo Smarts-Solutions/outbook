@@ -1604,7 +1604,7 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
     return customer_id;
 }
 
-const updateProcessCustomerFile = async (customerProcessDataFiles, customer_id ,uploadedFiles) => {
+const updateProcessCustomerFile = async (customerProcessDataFiles, customer_id, uploadedFiles) => {
 
     if (uploadedFiles && uploadedFiles.length > 0) {
 
@@ -1614,7 +1614,13 @@ const updateProcessCustomerFile = async (customerProcessDataFiles, customer_id ,
             const file_type = file.mimetype;
             const file_size = file.size;
             const web_url = file.web_url;
-            
+
+            const checkQuery = `SELECT id FROM customer_paper_work WHERE customer_id = ? AND original_name = ?`;
+            const [rows] = await pool.execute(checkQuery, [customer_id, original_name]);
+            if (rows.length > 0) {
+                continue;
+            }
+
             const insertQuery = `
                 INSERT INTO customer_paper_work (
                     customer_id, file_name, original_name, file_type, file_size , web_url
@@ -1638,7 +1644,7 @@ const updateProcessCustomerFile = async (customerProcessDataFiles, customer_id ,
     }
 
 
- 
+
     // if (customerProcessDataFiles && customerProcessDataFiles.length > 0) {
 
     //     for (let file of customerProcessDataFiles) {
@@ -2313,7 +2319,7 @@ const getSingleCustomer = async (customer) => {
             //     file_type: row.file_type,
             //     file_size: row.file_size
             // }));
-             const customer_paper_work = rows
+            const customer_paper_work = rows
                 .filter(row => row.file_name !== null) // Filter out rows with file_name as null
                 .map(row => ({
                     customer_paper_work_id: row.customer_paper_work_id,
@@ -2340,7 +2346,7 @@ const getSingleCustomer = async (customer) => {
 }
 
 const customerUpdate = async (customer) => {
-   
+
     const { customer_id, pageStatus } = customer;
     const [ExistCustomer] = await pool.execute('SELECT customer_type , customer_code , account_manager_id  FROM `customers` WHERE id =' + customer_id);
     var account_manager_id = ExistCustomer[0].account_manager_id;

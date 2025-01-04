@@ -1826,6 +1826,72 @@ const clientUpdate = async (client) => {
   };
 };
 
+const addClientDocument = async (client) => {
+  const { client_id, uploadedFiles , StaffUserId } = client;
+  try {
+    if (uploadedFiles && uploadedFiles.length > 0) {
+
+      for (let file of uploadedFiles) {
+          const file_name = file.filename;
+          const original_name = file.originalname;
+          const file_type = file.mimetype;
+          const file_size = file.size;
+          const web_url = file.web_url;
+         
+          const checkQuery = `SELECT id FROM client_documents WHERE client_id = ? AND original_name = ?`;
+          const [rows] = await pool.execute(checkQuery, [client_id, original_name]);
+          if (rows.length > 0) {
+            continue;
+          }
+          
+          const insertQuery = `
+              INSERT INTO client_documents (
+                  client_id, file_name, original_name, file_type, file_size , web_url
+              ) VALUES (?, ?, ?, ?, ?, ?)
+          `;
+
+          try {
+              const [result] = await pool.execute(insertQuery, [
+                  client_id,
+                  file_name,
+                  original_name,
+                  file_type,
+                  file_size,
+                  web_url
+              ]);
+
+          } catch (error) {
+              console.log('Error inserting file:', error);
+              return { status: false, message: "Error inserting file - 1" };
+          }
+      }
+      return { status: true, message: "client document uploaded successfully.", data: client_id };
+  }else{
+      return { status: true, message: "client document uploaded successfully.", data: client_id };
+  }
+  } catch (error) {
+    return { status: false, message: "Error inserting file - 2" };
+  }
+
+
+  
+}
+
+const deleteClientFile = async (client) => {
+  const {client_id, id, file_name } = client;
+    const query = `
+    DELETE FROM client_documents WHERE id = ?`;
+    try {
+        await pool.execute(query, [id]);
+        deleteUploadFile(file_name)
+        return { status: true, message: 'File deleted successfully.' };
+    } catch (err) {
+        return { status: false, message: 'Err file Delete' };
+    }
+
+
+};
+
 module.exports = {
   createClient,
   getClient,
@@ -1833,4 +1899,6 @@ module.exports = {
   getCustomerId,
   deleteClient,
   clientUpdate,
+  addClientDocument,
+  deleteClientFile
 };
