@@ -841,23 +841,11 @@ WHERE
         status: rows[0].status,
       };
 
-      // const contactDetails = rows.map((row) => ({
-      //   contact_id: row.contact_id,
-      //   customer_contact_person_role_id: row.customer_role_contact_id,
-      //   customer_contact_person_role_name: row.customer_role_contact_name,
-      //   first_name: row.first_name,
-      //   last_name: row.last_name,
-      //   email: row.email,
-      //   phone_code: row.phone_code,
-      //   phone: row.phone,
-      //   residential_address: row.residential_address,
-      //   // Add other contact detail fields as needed
-      // }));
-
-
+     
       const contactDetails = rows
         .filter(row => row.contact_id !== null) // Filter out rows with file_name as null
         .map(row => ({
+          contact_id: row.contact_id,
           customer_contact_person_role_id: row.customer_role_contact_id,
           customer_contact_person_role_name: row.customer_role_contact_name,
           first_name: row.first_name,
@@ -917,6 +905,11 @@ WHERE
     customer_contact_person_role.name AS customer_role_contact_name,
     customer_contact_person_role.id AS customer_role_contact_id,
     client_company_information.*,
+    client_documents.file_name AS file_name,
+    client_documents.original_name AS original_name,
+    client_documents.file_type AS file_type,
+    client_documents.file_size AS file_size,
+    client_documents.web_url AS web_url,
     CONCAT(
             'cli_', 
             SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -933,6 +926,8 @@ LEFT JOIN
     customer_contact_person_role ON customer_contact_person_role.id = client_contact_details.role 
 LEFT JOIN 
    client_company_information ON clients.id = client_company_information.client_id
+LEFT JOIN
+  client_documents ON clients.id = client_documents.client_id
 WHERE 
     clients.id = ?
 `;
@@ -964,7 +959,9 @@ WHERE
         incorporation_in: rows[0].incorporation_in,
       };
 
-      const contactDetails = rows.map((row) => ({
+      const contactDetails = rows
+        .filter(row => row.contact_id !== null) // Filter out rows with file_name as null
+        .map(row => ({
         contact_id: row.contact_id,
         customer_contact_person_role_id: row.customer_role_contact_id,
         customer_contact_person_role_name: row.customer_role_contact_name,
@@ -974,13 +971,25 @@ WHERE
         phone_code: row.phone_code,
         phone: row.phone,
         residential_address: row.residential_address,
-        // Add other contact detail fields as needed
-      }));
+        }));
+
+
+      const clientDocuments = rows
+        .filter(row => row.original_name !== null) // Filter out rows with file_name as null
+        .map(row => ({
+          client_documents_id: row.client_documents_id,
+          file_name: row.file_name,
+          original_name: row.original_name,
+          file_type: row.file_type,
+          file_size: row.file_size,
+          web_url: row.web_url
+        }));
 
       const result = {
         client: clientData,
         company_details: companyData,
         contact_details: contactDetails,
+        client_documents: clientDocuments
       };
 
       return { status: true, message: "success.", data: result };
@@ -1014,6 +1023,11 @@ WHERE
     client_contact_details.authorised_signatory_status AS authorised_signatory_status,
     customer_contact_person_role.name AS customer_role_contact_name,
     customer_contact_person_role.id AS customer_role_contact_id,
+    client_documents.file_name AS file_name,
+    client_documents.original_name AS original_name,
+    client_documents.file_type AS file_type,
+    client_documents.file_size AS file_size,
+    client_documents.web_url AS web_url,
     CONCAT(
             'cli_', 
             SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -1027,7 +1041,9 @@ JOIN
 LEFT JOIN 
     client_contact_details ON clients.id = client_contact_details.client_id
 LEFT JOIN 
-    customer_contact_person_role ON customer_contact_person_role.id = client_contact_details.role 
+    customer_contact_person_role ON customer_contact_person_role.id = client_contact_details.role
+    LEFT JOIN
+    client_documents ON clients.id = client_documents.client_id
 WHERE 
     clients.id = ?
 `;
@@ -1049,7 +1065,9 @@ WHERE
         status: rows[0].status,
       };
 
-      const contactDetails = rows.map((row) => ({
+      const contactDetails = rows
+        .filter(row => row.contact_id !== null) // Filter out rows with file_name as null
+        .map(row => ({
         contact_id: row.contact_id,
         customer_contact_person_role_id: row.customer_role_contact_id,
         customer_contact_person_role_name: row.customer_role_contact_name,
@@ -1062,13 +1080,25 @@ WHERE
         alternate_phone_code: row.alternate_phone_code,
         alternate_phone: row.alternate_phone,
         authorised_signatory_status:
-          row.authorised_signatory_status == "1" ? true : false,
-        // Add other contact detail fields as needed
-      }));
+        row.authorised_signatory_status == "1" ? true : false,
+        }));
+
+
+        const clientDocuments = rows
+        .filter(row => row.original_name !== null) // Filter out rows with file_name as null
+        .map(row => ({
+          client_documents_id: row.client_documents_id,
+          file_name: row.file_name,
+          original_name: row.original_name,
+          file_type: row.file_type,
+          file_size: row.file_size,
+          web_url: row.web_url
+        }));
 
       const result = {
         client: clientData,
         contact_details: contactDetails,
+        client_documents: clientDocuments
       };
 
       return { status: true, message: "success.", data: result };
@@ -1094,6 +1124,11 @@ WHERE
     client_contact_details.residential_address AS residential_address,
     customer_contact_person_role.name AS customer_role_contact_name,
     customer_contact_person_role.id AS customer_role_contact_id,
+    client_documents.file_name AS file_name,
+    client_documents.original_name AS original_name,
+    client_documents.file_type AS file_type,
+    client_documents.file_size AS file_size,
+    client_documents.web_url AS web_url,
     CONCAT(
             'cli_', 
             SUBSTRING(customers.trading_name, 1, 3), '_',
@@ -1107,7 +1142,9 @@ JOIN
 LEFT JOIN 
     client_contact_details ON clients.id = client_contact_details.client_id
 LEFT JOIN 
-    customer_contact_person_role ON customer_contact_person_role.id = client_contact_details.role 
+    customer_contact_person_role ON customer_contact_person_role.id = client_contact_details.role
+    LEFT JOIN
+    client_documents ON client_documents.client_id = clients.id
 WHERE 
     clients.id = ?
 `;
@@ -1118,30 +1155,43 @@ WHERE
         id: rows[0].client_id,
         client_type: rows[0].client_type,
         customer_id: rows[0].customer_id,
-
         trading_name: rows[0].trading_name,
         client_code: rows[0].client_code,
         notes: rows[0].notes,
-
         status: rows[0].status,
       };
 
-      const contactDetails = rows.map((row) => ({
-        contact_id: row.contact_id,
-        customer_contact_person_role_id: row.customer_role_contact_id,
-        customer_contact_person_role_name: row.customer_role_contact_name,
-        first_name: row.first_name,
-        last_name: row.last_name,
-        email: row.email,
-        phone_code: row.phone_code,
-        phone: row.phone,
-        residential_address: row.residential_address,
-        // Add other contact detail fields as needed
-      }));
+
+      const contactDetails = rows
+        .filter(row => row.contact_id !== null) // Filter out rows with file_name as null
+        .map(row => ({
+          contact_id: row.contact_id,
+          customer_contact_person_role_id: row.customer_role_contact_id,
+          customer_contact_person_role_name: row.customer_role_contact_name,
+          first_name: row.first_name,
+          last_name: row.last_name,
+          email: row.email,
+          phone_code: row.phone_code,
+          phone: row.phone,
+          residential_address: row.residential_address,
+        }));
+
+
+        const clientDocuments = rows
+        .filter(row => row.original_name !== null) // Filter out rows with file_name as null
+        .map(row => ({
+          client_documents_id: row.client_documents_id,
+          file_name: row.file_name,
+          original_name: row.original_name,
+          file_type: row.file_type,
+          file_size: row.file_size,
+          web_url: row.web_url
+        }));
 
       const result = {
         client: clientData,
         contact_details: contactDetails,
+        client_documents: clientDocuments
       };
 
       return { status: true, message: "success.", data: result };
