@@ -89,7 +89,6 @@ const getDashboardData = async (dashboard) => {
 
     }
     else if ([3, 4, 6].includes(rowRoles[0].role_id)) {
-   console.log("staff_id 11111", staff_id, "date_filter 111 ", date_filter);
       const checkViewQuery = `
   SELECT table_name 
   FROM information_schema.views 
@@ -329,9 +328,6 @@ LEFT JOIN
 
 const getDashboardActivityLog = async (dashboard) => {
   const { staff_id, type } = dashboard;
-
-  console.log("staff_id ", staff_id)
-  console.log("type ", type)
   const QueryRole = `
   SELECT
     staffs.id AS id,

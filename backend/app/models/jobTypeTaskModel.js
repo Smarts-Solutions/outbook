@@ -10,11 +10,8 @@ const createJobType = async (JobType) => {
     `;
 
   try {
-    console.log("service_id",service_id)
-    console.log("type",type)
-    
+   
     const [check] = await pool.query(checkQuery, [type]);
-    console.log("check",check)
     if (check.length > 0) {
       return { status: false, message: "Job Type already exists." };
     }
