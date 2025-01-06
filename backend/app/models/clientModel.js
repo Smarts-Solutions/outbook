@@ -510,7 +510,7 @@ const getClient = async (client) => {
 
           try {
             const [resultReviewer] = await pool.execute(query, [StaffUserId, customer_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, customer_id, StaffUserId]);
-            console.log('resultReviewer', resultReviewer)
+          
           } catch (error) {
             console.log('error', error)
 
@@ -1567,7 +1567,6 @@ const clientUpdate = async (client) => {
     `;
       if (contactDetails.length > 0) {
         for (const detail of contactDetails) {
-          console.log("detail", detail.customer_contact_person_role_id)
           let {
             first_name,
             last_name,

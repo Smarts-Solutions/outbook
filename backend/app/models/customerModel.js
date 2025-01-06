@@ -892,7 +892,6 @@ ORDER BY
 id DESC;`;
 
         const [result] = await pool.execute(query);
-        console.log("result", result)
 
         return { status: true, message: 'Success..', data: result };
     }
@@ -930,7 +929,6 @@ id DESC;`;
         }
         // Account Manger
         else if (rows[0].role_id == 4) {
-            console.log("modelll INSIDE...", customer)
             const query = `
             SELECT  
             customers.id AS id,
@@ -1050,9 +1048,6 @@ const updateProcessCustomerServices = async (customerProcessData) => {
         let service_id = serVal.service_id;
         let account_manager_id = serVal.account_manager_id;
         let customer_service_task = serVal.customer_service_task;
-
-        console.log("service_id", service_id);
-        console.log("account_manager_id", account_manager_id);
 
         //checklist submit customer
         const QueryCustomerAssign = `
@@ -1283,8 +1278,6 @@ const updateProcessCustomerEngagementModel = async (customerProcessData) => {
     if (fte_dedicated_staffing === "1") {
 
         const { customer_id, fte_dedicated_staffing, number_of_accountants, fee_per_accountant, number_of_bookkeepers, fee_per_bookkeeper, number_of_payroll_experts, fee_per_payroll_expert, number_of_tax_experts, fee_per_tax_expert, number_of_admin_staff, fee_per_admin_staff } = customerProcessData;
-
-        console.log("fee_per_accountant", fee_per_accountant);
 
         const checkQuery1 = `SELECT id FROM customer_engagement_fte WHERE customer_engagement_model_id  = ?`;
         const [exist1] = await pool.execute(checkQuery1, [customer_engagement_model_id]);
@@ -2547,16 +2540,12 @@ const customerUpdate = async (customer) => {
                         }
                     );
                 }
-
-
                 return { status: true, message: 'Customer updated successfully.', data: customer_id };
 
             } catch (err) {
                 console.log(err);
                 return { status: false, message: 'Update Error Customer Type 2' };
             }
-
-
         }
 
         // Partnership Details
@@ -3431,7 +3420,6 @@ WHERE service_id = ${service_id} AND customer_id = 0;
 
 const customerStatusUpdate = async (customer) => {
     const { customer_id, status } = customer;
-    console.log("status ", typeof status)
     const query = `UPDATE customers SET status = ? WHERE id = ?`;
     const [result] = await pool.execute(query, [status, customer_id]);
 
